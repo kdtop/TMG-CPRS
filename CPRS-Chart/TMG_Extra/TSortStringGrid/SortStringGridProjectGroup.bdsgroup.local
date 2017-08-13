@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2012/07/29 15:29:21.046.bdsgroup,C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\ProjectGroup1.bdsgroup=C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\TSortStringGrid\SortStringGridProjectGroup.bdsgroup</Transaction>
+  </Transactions>
+	<Default.Personality>
+		<Projects ActiveProject="dclTSortStringGrid100.bpl"/>
+	</Default.Personality>
+</BorlandProject>

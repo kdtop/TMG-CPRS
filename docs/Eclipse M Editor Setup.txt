@@ -1,0 +1,29 @@
+All necessary files are located at: \\isl-pickeringm\Shared\ForMEditor
+
+1. Install Eclipse
+	A. Unzip eclipse-SDK-3.1.2-win32.zip to a directory (I chose c:\program files\)
+	B. Create a shortcut to the eclipse.exe in your eclipse directory that was created in step A.
+	C. Test Run Eclipse
+	D. Close Eclipse
+
+2. Extract the following zip files to \eclipse\plugins directory:
+	VistaConnectionPlugin.zip - Vista Link
+	org.apache.log4j_1.2.8.zip - Log4J
+	nsfp4eclipse-perforce.zip - Perforce
+	MEditorPlugin.zip - M Editor
+	com.rational.clearcase.win32-20060127.zip - ClearCase, only install if you have ClearCase installed
+
+3. Extract the JarFiles.zip into the \eclipse\plugins\gov.va.med.iss.connection_0.9.0 directory
+
+4. Run eclipse, you should notice a Vista Menu
+
+5. Put in your server and Port (Vista Link Port) in Window | Preferences | Vista | Connection
+	Note: The server must have Vista Link Running and the Patches XT*7.3*81 and XT*7.3*101 installed.
+
+6. Select Menu Item Vista | Connect To Vista
+
+7. Then try out the different Vista Menu options. (Routine Directory, Load M Routine, etc..)
+
+8. Read “M-Editor plug-in for Eclipse (and VistaLink plug-in).ppt” & “Joel Ivey Email Install Instructions.rtf” for more information.
+	
+	

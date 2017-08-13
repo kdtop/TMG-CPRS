@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{B0E787A5-B3BE-4351-A176-88952D3FC4F4}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  <Projects>
+      <Projects Name="TSortStringGrid100.bpl">TSortStringGrid.bdsproj</Projects>
+      <Projects Name="dclTSortStringGrid100.bpl">dclTSortStringGrid.bdsproj</Projects>
+      <Projects Name="Targets">TSortStringGrid100.bpl dclTSortStringGrid100.bpl</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

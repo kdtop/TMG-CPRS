@@ -1,0 +1,202 @@
+
+ Start         Length     Name                   Class
+ 0001:00401000 00000BD4H .text                   CODE
+ 0002:00402000 00000104H .itext                  ICODE
+ 0003:00403000 0000002CH .data                   DATA
+ 0004:00404000 00000018H .bss                    BSS
+ 0005:00000000 00000000H .tls                    TLS
+
+
+Detailed map of segments
+
+ 0001:00000000 0000008E C=CODE     S=.text    G=(none)   M=System   ACBP=A9
+ 0001:00000090 000001C3 C=CODE     S=.text    G=(none)   M=SysInit  ACBP=A9
+ 0001:00000254 0000004C C=CODE     S=.text    G=(none)   M=Windows  ACBP=A9
+ 0001:000002A0 00000006 C=CODE     S=.text    G=(none)   M=SysUtils ACBP=A9
+ 0001:000002A8 00000046 C=CODE     S=.text    G=(none)   M=Classes  ACBP=A9
+ 0001:000002F0 00000006 C=CODE     S=.text    G=(none)   M=TypInfo  ACBP=A9
+ 0001:000002F8 00000006 C=CODE     S=.text    G=(none)   M=Variants ACBP=A9
+ 0001:00000300 00000006 C=CODE     S=.text    G=(none)   M=VarUtils ACBP=A9
+ 0001:00000308 00000006 C=CODE     S=.text    G=(none)   M=Graphics ACBP=A9
+ 0001:00000310 00000006 C=CODE     S=.text    G=(none)   M=Registry ACBP=A9
+ 0001:00000318 00000006 C=CODE     S=.text    G=(none)   M=IniFiles ACBP=A9
+ 0001:00000320 0000014E C=CODE     S=.text    G=(none)   M=Controls ACBP=A9
+ 0001:00000470 00000006 C=CODE     S=.text    G=(none)   M=ActnList ACBP=A9
+ 0001:00000478 00000006 C=CODE     S=.text    G=(none)   M=Forms    ACBP=A9
+ 0001:00000480 00000006 C=CODE     S=.text    G=(none)   M=HelpIntfs ACBP=A9
+ 0001:00000488 00000006 C=CODE     S=.text    G=(none)   M=MultiMon ACBP=A9
+ 0001:00000490 00000016 C=CODE     S=.text    G=(none)   M=Menus    ACBP=A9
+ 0001:000004A8 00000006 C=CODE     S=.text    G=(none)   M=UxTheme  ACBP=A9
+ 0001:000004B0 00000006 C=CODE     S=.text    G=(none)   M=Themes   ACBP=A9
+ 0001:000004B8 00000006 C=CODE     S=.text    G=(none)   M=Dialogs  ACBP=A9
+ 0001:000004C0 00000006 C=CODE     S=.text    G=(none)   M=Printers ACBP=A9
+ 0001:000004C8 00000006 C=CODE     S=.text    G=(none)   M=ExtCtrls ACBP=A9
+ 0001:000004D0 00000006 C=CODE     S=.text    G=(none)   M=GraphUtil ACBP=A9
+ 0001:000004D8 00000006 C=CODE     S=.text    G=(none)   M=Clipbrd  ACBP=A9
+ 0001:000004E0 00000006 C=CODE     S=.text    G=(none)   M=FlatSB   ACBP=A9
+ 0001:000004E8 0000000E C=CODE     S=.text    G=(none)   M=ToolWin  ACBP=A9
+ 0001:000004F8 000000C6 C=CODE     S=.text    G=(none)   M=ComCtrls ACBP=A9
+ 0001:000005C0 00000006 C=CODE     S=.text    G=(none)   M=ExtActns ACBP=A9
+ 0001:000005C8 00000006 C=CODE     S=.text    G=(none)   M=ExtDlgs  ACBP=A9
+ 0001:000005D0 00000006 C=CODE     S=.text    G=(none)   M=Buttons  ACBP=A9
+ 0001:000005D8 00000006 C=CODE     S=.text    G=(none)   M=Mapi     ACBP=A9
+ 0001:000005E0 000003EA C=CODE     S=.text    G=(none)   M=MenuBar  ACBP=A9
+ 0001:000009CC 00000207 C=CODE     S=.text    G=(none)   M=.Borland2006 ACBP=A9
+ 0002:00000000 00000006 C=ICODE    S=.itext   G=(none)   M=System   ACBP=A9
+ 0002:00000008 00000011 C=ICODE    S=.itext   G=(none)   M=Windows  ACBP=A9
+ 0002:0000001C 00000006 C=ICODE    S=.itext   G=(none)   M=SysUtils ACBP=A9
+ 0002:00000024 00000006 C=ICODE    S=.itext   G=(none)   M=Classes  ACBP=A9
+ 0002:0000002C 00000006 C=ICODE    S=.itext   G=(none)   M=TypInfo  ACBP=A9
+ 0002:00000034 00000006 C=ICODE    S=.itext   G=(none)   M=Variants ACBP=A9
+ 0002:0000003C 00000006 C=ICODE    S=.itext   G=(none)   M=VarUtils ACBP=A9
+ 0002:00000044 00000006 C=ICODE    S=.itext   G=(none)   M=Graphics ACBP=A9
+ 0002:0000004C 00000006 C=ICODE    S=.itext   G=(none)   M=Registry ACBP=A9
+ 0002:00000054 00000006 C=ICODE    S=.itext   G=(none)   M=IniFiles ACBP=A9
+ 0002:0000005C 00000006 C=ICODE    S=.itext   G=(none)   M=Controls ACBP=A9
+ 0002:00000064 00000006 C=ICODE    S=.itext   G=(none)   M=ActnList ACBP=A9
+ 0002:0000006C 00000006 C=ICODE    S=.itext   G=(none)   M=Forms    ACBP=A9
+ 0002:00000074 00000006 C=ICODE    S=.itext   G=(none)   M=HelpIntfs ACBP=A9
+ 0002:0000007C 00000006 C=ICODE    S=.itext   G=(none)   M=MultiMon ACBP=A9
+ 0002:00000084 00000006 C=ICODE    S=.itext   G=(none)   M=Menus    ACBP=A9
+ 0002:0000008C 00000006 C=ICODE    S=.itext   G=(none)   M=UxTheme  ACBP=A9
+ 0002:00000094 00000006 C=ICODE    S=.itext   G=(none)   M=Themes   ACBP=A9
+ 0002:0000009C 00000006 C=ICODE    S=.itext   G=(none)   M=Dialogs  ACBP=A9
+ 0002:000000A4 00000006 C=ICODE    S=.itext   G=(none)   M=Printers ACBP=A9
+ 0002:000000AC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtCtrls ACBP=A9
+ 0002:000000B4 00000006 C=ICODE    S=.itext   G=(none)   M=GraphUtil ACBP=A9
+ 0002:000000BC 00000006 C=ICODE    S=.itext   G=(none)   M=Clipbrd  ACBP=A9
+ 0002:000000C4 00000006 C=ICODE    S=.itext   G=(none)   M=FlatSB   ACBP=A9
+ 0002:000000CC 00000006 C=ICODE    S=.itext   G=(none)   M=ComCtrls ACBP=A9
+ 0002:000000D4 00000006 C=ICODE    S=.itext   G=(none)   M=ExtActns ACBP=A9
+ 0002:000000DC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtDlgs  ACBP=A9
+ 0002:000000E4 00000006 C=ICODE    S=.itext   G=(none)   M=Buttons  ACBP=A9
+ 0002:000000EC 00000006 C=ICODE    S=.itext   G=(none)   M=Mapi     ACBP=A9
+ 0002:000000F4 00000008 C=ICODE    S=.itext   G=(none)   M=MenuBar  ACBP=A9
+ 0002:000000FC 00000005 C=ICODE    S=.itext   G=(none)   M=.Borland2006 ACBP=A9
+ 0003:00000000 0000002C C=DATA     S=.data    G=DGROUP   M=SysInit  ACBP=A9
+ 0004:00000000 0000000C C=BSS      S=.bss     G=DGROUP   M=SysInit  ACBP=A9
+ 0004:0000000C 00000008 C=BSS      S=.bss     G=DGROUP   M=Windows  ACBP=A9
+ 0004:00000014 00000004 C=BSS      S=.bss     G=DGROUP   M=MenuBar  ACBP=A9
+
+
+  Address             Publics by Name
+
+ 0002:000000FC       .Borland2006..Borland2006
+ 0001:00000BB4       .Borland2006.@GetPackageInfoTable
+ 0001:00000BBC       .Borland2006.@PackageLoad
+ 0001:00000BC8       .Borland2006.@PackageUnload
+ 0004:00000014       MenuBar..2
+ 0001:000005E0       MenuBar..TMenuBar
+ 0001:0000099C       MenuBar.Finalization
+ 0002:000000F4       MenuBar.MenuBar
+ 0001:000007A0       MenuBar.Register
+ 0001:000007D0       MenuBar.TMenuBar.Create
+ 0001:0000083C       MenuBar.TMenuBar.GetChildren
+ 0001:00000844       MenuBar.TMenuBar.SetMenu
+ 0001:000001D8       SysInit.@InitPkg
+ 0001:0000023C       SysInit.@PackageLoad
+ 0001:00000248       SysInit.@PackageUnload
+ 0001:000000C8       SysInit.AllocTlsBuffer
+ 0001:00000184       SysInit.ExitProcessTLS
+ 0001:0000014C       SysInit.ExitThreadTLS
+ 0001:00000090       SysInit.FreeLibrary
+ 0001:000000D4       SysInit.GetTlsSize
+ 0004:00000004       SysInit.HInstance
+ 0001:000001A8       SysInit.InitializeModule
+ 0001:00000120       SysInit.InitProcessTLS
+ 0001:000000DC       SysInit.InitThreadTLS
+ 0001:00000098       SysInit.LocalAlloc
+ 0001:000000A0       SysInit.LocalFree
+ 0003:00000004       SysInit.Module
+ 0004:00000000       SysInit.ModuleIsLib
+ 0004:00000001       SysInit.ModuleIsPackage
+ 0001:000000A8       SysInit.TlsAlloc
+ 0004:00000008       SysInit.tlsBuffer
+ 0001:000000B0       SysInit.TlsFree
+ 0001:000000B8       SysInit.TlsGetValue
+ 0003:00000000       SysInit.TlsIndex
+ 0005:00000000       SysInit.TlsLast
+ 0003:0000001C       SysInit.TlsProc
+ 0001:000000C0       SysInit.TlsSetValue
+ 0001:000001B4       SysInit.UninitializeModule
+ 0004:0000000C       Windows..3
+ 0001:0000025C       Windows.Finalization
+ 0001:00000254       Windows.FreeLibrary
+ 0004:00000010       Windows.HtmlHelpModule
+ 0002:00000008       Windows.Windows
+
+
+  Address             Publics by Value
+
+ 0001:00000090       SysInit.FreeLibrary
+ 0001:00000098       SysInit.LocalAlloc
+ 0001:000000A0       SysInit.LocalFree
+ 0001:000000A8       SysInit.TlsAlloc
+ 0001:000000B0       SysInit.TlsFree
+ 0001:000000B8       SysInit.TlsGetValue
+ 0001:000000C0       SysInit.TlsSetValue
+ 0001:000000C8       SysInit.AllocTlsBuffer
+ 0001:000000D4       SysInit.GetTlsSize
+ 0001:000000DC       SysInit.InitThreadTLS
+ 0001:00000120       SysInit.InitProcessTLS
+ 0001:0000014C       SysInit.ExitThreadTLS
+ 0001:00000184       SysInit.ExitProcessTLS
+ 0001:000001A8       SysInit.InitializeModule
+ 0001:000001B4       SysInit.UninitializeModule
+ 0001:000001D8       SysInit.@InitPkg
+ 0001:0000023C       SysInit.@PackageLoad
+ 0001:00000248       SysInit.@PackageUnload
+ 0001:00000254       Windows.FreeLibrary
+ 0001:0000025C       Windows.Finalization
+ 0001:000005E0       MenuBar..TMenuBar
+ 0001:000007A0       MenuBar.Register
+ 0001:000007D0       MenuBar.TMenuBar.Create
+ 0001:0000083C       MenuBar.TMenuBar.GetChildren
+ 0001:00000844       MenuBar.TMenuBar.SetMenu
+ 0001:0000099C       MenuBar.Finalization
+ 0001:00000BB4       .Borland2006.@GetPackageInfoTable
+ 0001:00000BBC       .Borland2006.@PackageLoad
+ 0001:00000BC8       .Borland2006.@PackageUnload
+ 0002:00000008       Windows.Windows
+ 0002:000000F4       MenuBar.MenuBar
+ 0002:000000FC       .Borland2006..Borland2006
+ 0003:00000000       SysInit.TlsIndex
+ 0003:00000004       SysInit.Module
+ 0003:0000001C       SysInit.TlsProc
+ 0004:00000000       SysInit.ModuleIsLib
+ 0004:00000001       SysInit.ModuleIsPackage
+ 0004:00000004       SysInit.HInstance
+ 0004:00000008       SysInit.tlsBuffer
+ 0004:0000000C       Windows..3
+ 0004:00000010       Windows.HtmlHelpModule
+ 0004:00000014       MenuBar..2
+ 0005:00000000       SysInit.TlsLast
+
+
+Line numbers for MenuBar(Menubar.pas) segment .text
+
+    39 0001:000007A0    40 0001:000007A4    41 0001:000007BB    46 0001:000007D0
+    47 0001:000007E5    48 0001:000007EE    49 0001:000007F7    50 0001:00000800
+    51 0001:0000080E    53 0001:00000816    56 0001:0000083C    57 0001:0000083F
+    63 0001:00000844    64 0001:0000084F    65 0001:0000085D    66 0001:00000861
+    67 0001:00000879    66 0001:00000888    68 0001:0000088D    69 0001:00000895
+    70 0001:0000089D    72 0001:000008C9    73 0001:000008DA    74 0001:000008E8
+    75 0001:000008F2    76 0001:000008FC    77 0001:00000906    79 0001:00000935
+    80 0001:0000093D    82 0001:00000947    70 0001:00000948    84 0001:0000094F
+    85 0001:00000970    84 0001:00000991    86 0001:00000994
+
+Line numbers for MenuBar(Menubar.pas) segment .itext
+
+    88 0002:000000F4
+
+Line numbers for .Borland2006(C:\cprs\Current\CPRS-Lib\Borland2006.dpk) segment .itext
+
+    35 0002:000000FC
+
+Bound resource files
+
+Borland2006.res
+Borland2006.drf
+
+
+Program entry point at 0002:000000FC

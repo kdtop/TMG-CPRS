@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/09/19 14:16:30.508.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtHTMLDemopas.pas=</Transaction>
+    <Transaction>2015/09/19 14:16:30.508.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtHTMLDemopas.dfm=</Transaction>
+    <Transaction>2015/09/25 07:35:14.165.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fToolWin.pas</Transaction>
+    <Transaction>2015/09/25 07:35:14.165.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fToolWin.dfm</Transaction>
+    <Transaction>2015/09/25 17:37:29.957.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fToolWin.pas=</Transaction>
+    <Transaction>2015/09/25 17:37:29.957.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fToolWin.dfm=</Transaction>
+    <Transaction>2015/10/07 21:55:31.532.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fESEdit.pas</Transaction>
+    <Transaction>2015/10/07 21:55:31.532.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fESEdit.dfm</Transaction>
+    <Transaction>2015/11/08 09:38:11.578.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uSavedSignature.pas</Transaction>
+    <Transaction>2015/12/06 13:22:45.379.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTest_RW_HTML.pas</Transaction>
+    <Transaction>2015/12/06 13:22:45.379.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTest_RW_HTML.dfm</Transaction>
+    <Transaction>2015/12/07 07:11:37.284.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlgAssemble.pas</Transaction>
+    <Transaction>2015/12/07 07:12:01.452.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlgParse.pas</Transaction>
+    <Transaction>2015/12/19 14:30:22.917.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlgUtil.pas</Transaction>
+    <Transaction>2015/12/19 14:36:46.944.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlgUtil.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlgObjs.pas</Transaction>
+    <Transaction>2015/12/21 08:31:11.124.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlgAssemble.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLDlg.pas</Transaction>
+    <Transaction>2016/01/03 13:48:23.532.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\TMGDataHTML.pas</Transaction>
+    <Transaction>2016/01/09 13:59:39.205.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Monkey_Bundle_a_JS_U.pas</Transaction>
+    <Transaction>2016/01/09 14:00:13.377.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Monkey_Bundle_b_JS_U.pas</Transaction>
+    <Transaction>2016/01/09 14:01:57.886.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit3.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Monkey_Bundle_c_JS_U.pas</Transaction>
+    <Transaction>2016/01/09 17:06:29.096.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Monkey_Datepicker.pas</Transaction>
+    <Transaction>2016/01/15 08:03:48.754.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\TMGInlineHTMLDatePicker.pas</Transaction>
+    <Transaction>2016/02/24 15:08:32.707.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLTemplateDlgMgr.pas</Transaction>
+    <Transaction>2016/02/24 15:18:59.460.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMTemplateFields.pas</Transaction>
+    <Transaction>2016/02/24 17:19:47.106.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLTemplateDlgMgr.pas=</Transaction>
+    <Transaction>2016/06/12 16:24:54.798.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDiscreteData.pas</Transaction>
+    <Transaction>2016/06/12 16:24:54.798.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDiscreteData.dfm</Transaction>
+    <Transaction>2016/07/31 18:42:20.919.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.pas</Transaction>
+    <Transaction>2016/07/31 18:48:57.129.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.pas=</Transaction>
+    <Transaction>2016/07/31 18:49:13.596.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.pas</Transaction>
+    <Transaction>2016/07/31 18:49:13.596.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.dfm</Transaction>
+    <Transaction>2017/01/10 16:31:21.252.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSMSLabText.pas</Transaction>
+    <Transaction>2017/01/10 16:31:21.252.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSMSLabText.dfm</Transaction>
+    <Transaction>2017/02/02 16:01:23.931.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSingleNote.pas</Transaction>
+    <Transaction>2017/02/02 16:01:23.931.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSingleNote.dfm</Transaction>
+    <Transaction>2017/02/20 07:44:44.154.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabPicker.pas</Transaction>
+    <Transaction>2017/02/20 07:44:44.154.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabPicker.dfm</Transaction>
+    <Transaction>2017/08/04 08:37:08.988.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\UTMGWebDriver.pas</Transaction>
+    <Transaction>2017/08/04 08:37:51.705.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\UTMGWebDriver.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMGWebDriver.pas</Transaction>
+    <Transaction>2017/08/04 15:33:06.277.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMGAllscriptsDriver.pas</Transaction>
+  </Transactions>
+</BorlandProject>

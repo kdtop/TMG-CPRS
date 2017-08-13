@@ -1,0 +1,46 @@
+package DHMLEditor;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vcl,
+  vclx,
+  vclie;
+
+contains
+  UEditHost in 'UEditHost.pas',
+  EmbeddedED in 'EmbeddedED.pas',
+  EmbedEDconst in 'EmbedEDconst.pas',
+  Ieconst in 'Ieconst.pas',
+  IEDispConst in 'IEdispConst.pas',
+  KS_lib in 'KS_Lib.pas',
+  KS_Procs2 in 'KS_procs2.pas',
+  KS_Procs in 'KS_procs.pas',
+  RegFuncs in 'regfuncs.pas',
+  MSHTML_EWB in 'Mshtml_Ewb.pas',
+  MSHTMLEvents in 'MSHTMLEvents.pas';
+
+end.

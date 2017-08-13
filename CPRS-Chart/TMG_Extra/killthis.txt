@@ -1,0 +1,749 @@
+<HEAD></HEAD>
+<BODY contentEditable=false><PRE> LOCAL TITLE: ACUTE MEDICAL ISSUE VISIT                          
+STANDARD TITLE: E &amp; M CLINICAL NOTE
+DATE OF NOTE: MAY 10,2016@18:08      ENTRY DATE: MAY 10,2016@18:08:19
+      AUTHOR: TOPPENBERG,KEVIN S (MD)
+     URGENCY:                            STATUS: UNSIGNED
+
+</PRE>
+<HR>
+
+<P>
+<META content="MSHTML 6.00.6000.17107" name=GENERATOR>
+<STYLE>.tmgembeddeddlg
+  {       BORDER-RIGHT: gray 1px solid; BORDER-TOP: gray 1px solid; BORDER-LEFT:
+gray   1px solid; BORDER-BOTTOM: gray 1px solid  }  .tmgembeddeddlg_result   {
+    BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none;
+  BORDER-BOTTOM-STYLE: none  }  .tmghidden {      DISPLAY: none  }  </STYLE>
+05/10/16&nbsp;&nbsp;
+<P>
+<SPAN contentEditable=false>
+<SPAN class="tmgembeddeddlg tmghidden" id=TMGDlg1 contentEditable=false IEN="16426">
+<SPAN
+  id=ctrl1_TMGDlg1
+  fmdtvalue="3160000"
+  value="2016"
+  DateMode="0"
+  DTMode="0"
+  onchange="handleOnChange_TMGDlg1(this)"
+  tmgtype="date"
+  dtformat="mmm d, yyyy">
+<SPAN id=ctrl1_TMGDlg1-label><B>Date: 2016 </B></SPAN>
+  <SELECT id=ctrl1_TMGDlg1-month>
+    <OPTION value=0 selected>-month-</OPTION>
+    <OPTION value=1>January</OPTION>
+    <OPTION value=2>February</OPTION>
+    <OPTION value=3>March</OPTION>
+    <OPTION value=4>April</OPTION>
+    <OPTION value=5>May</OPTION>
+    <OPTION value=6>June</OPTION>
+    <OPTION value=7>July</OPTION>
+    <OPTION value=8>August</OPTION>
+    <OPTION value=9>September</OPTION>
+    <OPTION value=10>October</OPTION>
+    <OPTION value=11>November</OPTION>
+    <OPTION value=12>December</OPTION></SELECT>
+  <SELECT id=ctrl1_TMGDlg1-day disabled>
+    <OPTION value=0>-day-</OPTION>
+    <OPTION value=1>1</OPTION>
+    <OPTION value=2>2</OPTION>
+    <OPTION value=3>3</OPTION>
+    <OPTION value=4>4</OPTION>
+    <OPTION value=5>5</OPTION>
+    <OPTION value=6>6</OPTION>
+    <OPTION value=7>7</OPTION>
+    <OPTION value=8>8</OPTION>
+    <OPTION value=9>9</OPTION>
+    <OPTION value=10>10</OPTION>
+    <OPTION value=11>11</OPTION>
+    <OPTION value=12>12</OPTION>
+    <OPTION value=13>13</OPTION>
+    <OPTION value=14>14</OPTION>
+    <OPTION value=15>15</OPTION>
+    <OPTION value=16>16</OPTION>
+    <OPTION value=17>17</OPTION>
+    <OPTION value=18>18</OPTION>
+    <OPTION value=19>19</OPTION>
+    <OPTION value=20>20</OPTION>
+    <OPTION value=21>21</OPTION>
+    <OPTION value=22>22</OPTION>
+    <OPTION value=23>23</OPTION>
+    <OPTION value=24>24</OPTION>
+    <OPTION value=25>25</OPTION>
+    <OPTION value=26>26</OPTION>
+    <OPTION value=27>27</OPTION>
+    <OPTION value=28>28</OPTION>
+    <OPTION value=29>29</OPTION>
+    <OPTION value=30>30</OPTION>
+    <OPTION value=31>31</OPTION>
+  </SELECT>
+<INPUT
+  id=ctrl1_TMGDlg1-yr
+  size=5
+  value=2016
+  tmgtype="number"
+  step="1"
+  tmgvalue="2015">
+<BUTTON id=ctrl1_TMGDlg1-UpBtn>&#8593;</BUTTON>
+<BUTTON id=ctrl1_TMGDlg1-DnBtn>&#8595;</BUTTON>
+<BUTTON id=ctrl1_TMGDlg1-ClrBtn>Clear</BUTTON>
+</SPAN><BR>TEXT:
+<INPUT
+  id=ctrl2_TMGDlg1
+  onchange=handleOnChange_TMGDlg1(this)
+  size=40
+  value=2016
+  tmgtype="editbox"> <BR><BR></SPAN>
+<SPAN
+  class=tmgembeddeddlg_result
+  id=TMGDlg1_result
+  IEN="16426">
+Oct 1, 2015<BR>TEXT: 10/1/2015<BR><BR></SPAN>
+<SPAN class="tmgembeddeddlg_storage tmghidden" id=TMGDlg1_storage></SPAN>
+<
+SPAN class="tmgembeddeddlg_source tmghidden" id=TMGDlg1_source>{HTML_CTRL:ctrl1_TMGDlg1^TMG TEST DATE}<BR>TEXT: {HTML_CTRL:ctrl2_TMGDlg1^TMG TEXT}<BR><BR></SPAN></SPAN></P>
+<SCRIPT>
+function isType(obj,typeName) {
+  if ((typeName == null) || (typeof(typeName) !== "string")) return false;
+  return ((obj !== null) && (typeof(obj) == typeName));
+ }
+function isObj(obj) {return isType(obj,"object");
+}
+function isStr(s) {return isType(s,"string");
+}
+function getCtrlNum(elem) { var id=getAttrib(elem,"id");
+ if (id.indexOf("_TMGDlg") == -1) return 0;
+  return parseInt(id.split("_")[0].split("ctrl")[1]);
+}
+function ensureStr(s) {if (s == null) return "";
+ return s.toString();
+}
+function ensureNum(n,DefValue) { if (DefValue == null) DefValue=0;
+ if (n == null) return DefValue;
+  var result = parseInt(n);
+ if (isNaN(result)) result=DefValue;
+ return result;
+}
+function getAttrib(e,name) {if (e==null) return "";
+ return ensureStr(e.getAttribute(ensureStr(name)));
+}
+function getNumAttrib(e,name,DefValue) {return ensureNum(e.getAttribute(name),
+DefValue);
+}
+function fireOnChange(elem,attribName) { if (!isObj(elem)) return;
+  attribName = ensureStr(attribName);
+ if (attribName == "") attribName="onchange";
+  try {if (!elem.hasAttribute(attribName)) return;
+} catch(err) {}
+  var HandleChange = elem.onchange;
+ if (HandleChange == null) return;
+  if (typeof(HandleChange) == "function") { HandleChange = 
+HandleChange.toString();
+    if (HandleChange.indexOf("{") > -1) HandleChange = HandleChange.split("{")
+[1].split("}")[0];
+ }
+  if (HandleChange == "") return;
+  if (HandleChange.indexOf("(") > -1) HandleChange = HandleChange.split("(")[0];
+  eval(HandleChange+"(elem)");
+}
+function indexOf(Arr, Match) { var Result = -1;
+  for (var i=0;
+ i < Arr.length;
+ i++) {if (Arr[i] != Match) continue;
+ Result = i;
+ break;
+ }
+  return Result;
+ }
+function trimStr(x) {return x.replace(/^\s+|\s+$/gm,'');
+}
+function subtractString(S, RemovePartsArr) {var Arr = S.split(" "), Result = "";
+  for (var i=0;
+ i < Arr.length;
+ i++) {if (indexOf(RemovePartsArr, Arr[i]) != -1) continue;
+    Result = Result + Arr[i] + " ";
+ }
+  return trimStr(Result);
+ }
+function ensureString(S, AddPart) {if (indexOf(S.split(" "), AddPart) == -1) S = 
+S + " " + AddPart;
+  return trimStr(S);
+ }
+function hasClass(elem, ClassName) {return (indexOf(elem.className.split(" "), 
+ClassName)!=-1);
+}
+function ValGet_date(elem) {
+  if (elem == null) return "";
+  return getAttrib(elem, "value");
+}
+function ValSet_date(elem, textVal) {
+  if (!isObj(elem)) return;
+  textVal = ensureStr(textVal);
+  SetDateTime(elem.id,textVal);
+  return;
+}
+function altNumValue(id, delta) 
+{
+  var elem=document.getElementById(id);
+  if (!isObj(elem)) return;
+  if (elem.getAttribute("tmgtype") !== "number") return;
+  var value=ensureNum(elem.value,0);
+  var increment = getNumAttrib(elem,"step",1);
+  if (ensureStr(delta)=="-") increment = -increment;
+  value += increment;
+  elem.value = value.toString();
+  elem.setAttribute("tmgvalue", value.toString());
+  ValidateNumValue(elem);
+  fireOnChange(elem);
+}
+function ValidateNumValue(elem) {
+  if (!isObj(elem)) return;
+  var min=getNumAttrib(elem,"min",0);
+  var max=getNumAttrib(elem,"max",99999);
+  var value=elem.value;
+  var newValue=ensureNum(value.replace(/[^\d-]/g,''),0);
+  if (newValue>max) newValue=max;
+  if (newValue<min) newValue=min;
+  if (newValue == value) return;
+  elem.value=newValue.toString();
+  elem.setAttribute("tmgvalue", newValue.toString());
+}
+function handleNumKeyup(elem) {ValidateNumValue(elem);
+}
+function checkKey(elem) {
+  if (!isObj(elem)) return;
+  var e = elem || window.event;
+  if (e.keyCode == "38") {altNumValue(elem.id, "+");
+ e.keyCode="";
+ return;
+}
+  if (e.keyCode == "40") {altNumValue(elem.id, "-");
+ e.keyCode="";
+ return;
+}
+}
+function GetDateElems(IDs) {
+  IDs.e = {};
+  IDs.e.M = document.getElementById(IDs.M);
+  IDs.e.D = document.getElementById(IDs.D);
+  IDs.e.Y = document.getElementById(IDs.Y);
+  IDs.e.Label = document.getElementById(IDs.Label);
+  IDs.e.ClrBtn = document.getElementById(IDs.ClrBtn);
+  IDs.e.UpBtn = document.getElementById(IDs.UpBtn);
+  IDs.e.DnBtn = document.getElementById(IDs.DnBtn);
+  IDs.e.Parent = document.getElementById(IDs.Parent);
+  IDs.e.Hr = document.getElementById(IDs.Hr);
+  IDs.e.Min = document.getElementById(IDs.Min);
+  IDs.e.AMPM = document.getElementById(IDs.AMPM);
+  IDs.e.Colon = document.getElementById(IDs.Colon);
+  IDs.e.At = document.getElementById(IDs.At);
+  return IDs;
+}
+function GetIDs(AGroupId) {
+  var Obj = {};
+  var ParentId=AGroupId.split("-")[0];
+  Obj.Parent = ParentId;
+  Obj.M = ParentId+"-month";
+  Obj.D = ParentId+"-day";
+  Obj.Y = ParentId+"-yr";
+  Obj.Label = ParentId+"-label";
+  Obj.ClrBtn = ParentId+"-ClrBtn";
+  Obj.UpBtn = ParentId+"-UpBtn";
+  Obj.DnBtn = ParentId+"-DnBtn";
+  Obj.Hr = ParentId+"-Hr";
+  Obj.Min = ParentId+"-Min";
+  Obj.AMPM = ParentId+"-AMPM";
+  Obj.AMPM = ParentId+"-Colon";
+  Obj.At = ParentId+"-At";
+  return Obj;
+}
+function ValidObj(o) {
+  return ((o !== undefined) && (o !== null));
+}
+function GetNumVal(e) {
+  var result = 0;
+  if (ValidObj(e)) {
+    result = parseInt(e.value) || 0;
+  }
+  return result;
+}
+function DT2Obj(FMDT) {
+  var DateObj;
+  DateObj.Y = ensureNum(FMDT.substring(0,2))+1700;
+  DateObj.M = ensureNum(FMDT.substring(3,4));
+  DateObj.D = ensureNum(FMDT.substring(5,6));
+  DateObj.Hr24 = ensureNum(FMDT.substring(8,9));
+  DateObj.Min = ensureNum(FMDT.substring(10,11));
+  return DateObj;
+}
+function Obj2FMDT(DateObj) {
+  var DTStr=ZeroPad(DateObj.Y-1700,3) +
+    ZeroPad(DateObj.M,2) +
+    ZeroPad(DateObj.D,2);
+  var TimeStr = "";
+  if ((DateObj.Hr24 > 0) || (DateObj.Min > 0)) {
+    TimeStr = "." + ZeroPad(DateObj.Hr24, 2) + ZeroPad(DateObj.Min, 2);
+ }
+  return DTStr+TimeStr;
+}
+function Obj2Ext(DateObj,Format) {
+  var Result = Format;
+  var Yr=ensureStr(DateObj.Y), shortYr=Yr.substring(2,3);
+  if (Format.indexOf("{yy}")>-1) Result = Result.replace(/{yy}/g, shortYr);
+  if (Format.indexOf("{yyyy}")>-1) Result=Result.replace(/{yyyy}/g, 
+ensureStr(DateObj.Y));
+  if (Format.indexOf("{m}")>-1) Result=Result.replace(/{m}/g, 
+ensureStr(DateObj.M));
+  if (Format.indexOf("{mm}")>-1) Result=Result.replace(/{mm}/g, 
+ZeroPad(DateObj.M,2));
+  if (Format.indexOf("{mmm}")>-1) Result=Result.replace(/{mmm}/g, 
+DateObj.MonthsArr[DateObj.M]);
+  if (Format.indexOf("{mmmm}")>-1) Result=Result.replace(/{mmmm}/g, 
+DateObj.ShortMonthsArr[DateObj.M]);
+  if (Format.indexOf("{d}")>-1) Result=Result.replace(/{d}/g, 
+ensureStr(DateObj.D));
+  if (Format.indexOf("{dd}")>-1) Result=Result.replace(/{dd}/g, 
+ZeroPad(DateObj.D,2));
+  var Hr24 = DateObj.Hr24, Hr = Hr24;
+ if (Hr>12) Hr=Hr-12;
+  var ampm = (Hr24<=12)?"am":"pm"
+  if (Format.indexOf("{h}")>-1) Result=Result.replace(/{h}/g, ensureStr(Hr));
+  if (Format.indexOf("{hh}")>-1) Result=Result.replace(/{hh}/g, ZeroPad(Hr,2));
+  if (Format.indexOf("{h24}")>-1) Result=Result.replace(/{h24}/g, ensureStr(Hr24)
+);
+  if (Format.indexOf("{hh24}")>-1) Result=Result.replace(/{hh24}/g, ZeroPad(Hr24,
+2));
+  if (Format.indexOf("{n}")>-1) Result=Result.replace(/{h}/g, 
+ensureStr(DateObj.Min));
+  if (Format.indexOf("{nn}")>-1) Result=Result.replace(/{hh}/g, 
+ZeroPad(DateObj.Min,2));
+  if (Format.indexOf("{ampm}")>-1) Result=Result.replace(/{ampm}/g, ampm);
+  return Result;
+}
+function FMDT2Ext(FMDT,Format) {
+  var DateObj = DT2Obj(FMDT);
+  return Obj2Ext(DateObj,Format);
+}
+function GetDateObj(e) {
+  var IDs = GetIDs(e.id);
+  var DateObj = GetDateElems(IDs)
+  DateObj.M = GetNumVal(DateObj.e.M);
+  DateObj.D = GetNumVal(DateObj.e.D);
+  DateObj.Y = GetNumVal(DateObj.e.Y);
+  DateObj.Hr24 = 0;
+  DateObj.Min = 0;
+  if ((ElemVisible(DateObj.e.Hr)) && DaySelected(DateObj)) {
+    var AMPMAdd = GetNumVal(DateObj.e.AMPM) * 12;
+    var Hr = GetNumVal(DateObj.e.Hr);
+    DateObj.Hr24 = ZeroPad(Hr+AMPMAdd,2);
+    DateObj.Min = ZeroPad(DateObj.e.Min.value, 2);
+  }
+  DateObj.FMDT = Obj2FMDT(DateObj);
+  DateObj.MonthsArr = MonthsArr();
+  DateObj.ShortMonthsArr = ShortMonthsArr();
+  return DateObj;
+}
+function GetFormatStr(DateObj) {
+  var Format = getAttrib(DateObj.e.Parent, "format");
+  if (Format=="") {
+    if (DateObj.M > 0) {
+      Format = "{m}/"
+      if (DateObj.D > 0) Format = Format + "{d}/"
+    }
+    Format = Format + "{yyyy}" + (((DateObj.Hr24>0)&&(DateObj.Min>0))
+?" @ {h}:{n} {ampm}":"");
+  }
+  return Format;
+}
+function RefreshDate(e) {
+  var DateObj = GetDateObj(e);
+  DateObj.ExternalStr = Obj2Ext(DateObj, GetFormatStr(DateObj));
+  DateObj.e.Parent.setAttribute("value",DateObj.ExternalStr);
+  DateObj.e.Parent.setAttribute("fmdtvalue",DateObj.FMDT);
+  DateObj.e.Label.innerHTML = "<B>Date: " + DateObj.ExternalStr + " </b>";
+  fireOnChange(DateObj.e.Parent);
+  return DateObj;
+}
+function IsLeapYear(year) {
+  return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+}
+function PopulateDays(Month, IsLeapYr) {
+  var LenOfMonth = [31,28,31,30,31,30,31,31,30,31,31,31];
+  var Len = 0;
+  if ((Month >= 1) && (Month <= 12)) {
+    Len = LenOfMonth[Month-1];
+    if ((Month == 2) && (IsLeapYr)) Len++;
+  }
+  var Options = [];
+  for (var i=0;
+ i <= Len;
+ i++) {
+    if (i==0) {Options.push("-day-");
+ } else {Options.push(i);
+ }
+  }
+  return Options;
+}
+function SetElemVisibility(e, Visible) {
+  if (ValidObj(e)) {
+    if (Visible) {
+      e.style.visibility = "visible";
+    } else {
+      e.style.visibility = "hidden";
+    }
+  }
+}
+function ElemVisible(e) {
+  result = false;
+  if (ValidObj(e)) result = (e.style.visibility !== "hidden")
+  return result;
+}
+function SetTimeVisibility(DateObj, Visible) {
+  SetElemVisibility(DateObj.e.At, Visible);
+  SetElemVisibility(DateObj.e.Hr, Visible);
+  SetElemVisibility(DateObj.e.AMPM, Visible);
+  SetElemVisibility(DateObj.e.Colon, Visible);
+  SetElemVisibility(DateObj.e.Min, Visible);
+}
+function ValidateTimeVisibility(DateObj) {
+  var Mode = DateObj.e.Parent.DateMode;
+  if ((Mode == 1) || (Mode == 2)) {
+    SetTimeVisibility(DateObj, DaySelected(DateObj));
+  }
+}
+function SetDayVisibility(DateObj, Visible) {
+  if (Visible) {
+    if (DateObj.e.D.disabled) {
+      DateObj.e.D.removeAttribute("disabled");
+      DateObj.e.D.selectedIndex = 0;
+    }
+  } else {
+    DateObj.e.D.disabled = true;
+    DateObj.e.D.selectedIndex = -1;
+  }
+}
+function ValidateDayVisibility(DateObj) {SetDayVisibility(DateObj, 
+MonthSelected(DateObj));
+}
+function ValidateVisibility(DateObj) {
+  ValidateTimeVisibility(DateObj);
+  ValidateDayVisibility(DateObj);
+}
+function ZeroPad(n, digits) {
+  var s = n.toString();
+  s = ("00000" + s).slice(-digits);
+  return s;
+}
+function SelectText(Select) {
+  var result = "";
+  if (ValidObj(Select)) {
+    var Item = Select.options[Select.selectedIndex];
+    if (ValidObj(Item)) {
+      result = Item.text;
+    }
+  }
+  return result;
+}
+function FillSelect(Select,OptionsArr)
+{
+  Select.innerHTML = "";
+  var i;
+  for(i=0;
+ i < OptionsArr.length;
+ i++) {
+    var newOptionEl = document.createElement("option");
+    newOptionEl.value = i;
+    var OptionText = OptionsArr[i];
+    newOptionEl.text = OptionText;
+    Select.add(newOptionEl);
+        }
+}
+function DaySelected(DateObj) {
+  return (GetNumVal(DateObj.e.D) > 0);
+}
+function MonthSelected(DateObj) {
+  return (GetNumVal(DateObj.e.M) > 0);
+}
+function SetupDaySel(DateObj) {
+  var Month = GetNumVal(DateObj.e.M);
+  if ((Month > 0) && ValidObj(DateObj.e.D)) {
+    var DaySel = DateObj.e.D;
+    var Index = DaySel.selectedIndex;
+    var Yr = GetNumVal(DateObj.e.Y);
+    var DayOptions = PopulateDays(Month, IsLeapYear(Yr))
+    FillSelect(DaySel, DayOptions)
+    if (Index == -1) Index = 0;
+    if (Index < DayOptions.length) DaySel.selectedIndex = Index;
+    DaySel.removeAttribute("disabled");
+  }
+}
+function handleMonthChange(e) {
+  var DateObj = RefreshDate(e);
+  SetupDaySel(DateObj)
+  ValidateVisibility(DateObj);
+}
+function handleDayChange(e) {
+  var DateObj = RefreshDate(e);
+  ValidateTimeVisibility(DateObj);
+}
+function handleYrChange(e) {
+  var IDs = GetIDs(e.id);
+  var DateObj = GetDateElems(IDs)
+  SetupDaySel(DateObj)
+  var DateObj = RefreshDate(e);
+  ValidateVisibility(DateObj);
+}
+function handleHourChange(e) {
+  var DateObj = RefreshDate(e);
+}
+function handleAMPMChange(e) {
+  var DateObj = RefreshDate(e);
+}
+function handleMinChange(e) {
+  var DateObj = RefreshDate(e);
+}
+function ResetDate(e) {
+  var IDs = GetIDs(e.id);
+  var DateObj = GetDateElems(IDs)
+  var d = new Date();
+  var YrStr = d.getFullYear();
+  DateObj.e.Y.value = YrStr;
+  if (ValidObj(DateObj.e.M)) DateObj.e.M.selectedIndex = 0;
+  if (ValidObj(DateObj.e.D)) {
+    DateObj.e.D.selectedIndex = 0;
+    DateObj.e.D.innerHTML = "";
+    DateObj.e.D.disabled = true;
+  }
+  if (ValidObj(DateObj.e.Hr)) DateObj.e.Hr.selectedIndex = -1;
+  if (ValidObj(DateObj.e.AMPM)) DateObj.e.AMPM.selectedIndex = -1;
+  if (ValidObj(DateObj.e.Min)) DateObj.e.Min.selectedIndex = -1;
+  SetTimeVisibility(DateObj, false);
+  RefreshDate(e);
+}
+function SetDateTime(Id, DTString) {
+  var IDs = GetIDs(Id);
+  var DateObj = GetDateElems(IDs);
+  var DTArr = DTString.split("@");
+  var TimeStr = "";
+  if (DTArr.length >= 2) TimeStr = DTArr[1];
+  var Hr = -1;
+  var Min = 0;
+var AMPM = 0;
+  if (TimeStr !== "") {
+    var TimeArr = TimeStr.split(":");
+    if (TimeArr.length == 2) {
+      Hr = parseInt(TimeArr[0]);
+      if (Hr >= 12) AMPM=1;
+      if (Hr == 0) {Hr = 12;
+}
+      if (Hr > 12) Hr = Hr - 12;
+      Min = parseInt(TimeArr[1]);
+    }
+  }
+  DTArr = DTArr[0].split("/");
+  var Month = 0;
+  var Day = 0;
+  var Year = 0;
+  if (DTArr.length == 3) {
+    Month = parseInt(DTArr[0]);
+    Day = parseInt(DTArr[1]);
+    Year = parseInt(DTArr[2]);
+if (Year < 1000) Year = 0;
+  }
+ if (Year > 0) {
+   DateObj.e.Y.value = Year.toString();
+   if ((Month > 0) && (ValidObj(DateObj.e.M))) {
+     DateObj.e.M.selectedIndex = Month;
+     SetupDaySel(DateObj)
+     if ((Day > 0) && (ValidObj(DateObj.e.D))) {
+       DateObj.e.D.selectedIndex = Day;
+       ValidateVisibility(DateObj);
+       if ((Hr > -1) && (ValidObj(DateObj.e.Hr))) {
+         DateObj.e.Hr.selectedIndex = Hr-1;
+         DateObj.e.Min.selectedIndex = Min;
+         DateObj.e.AMPM.selectedIndex = AMPM;
+       }
+     }
+   }
+ }
+ RefreshDate(DateObj.e.Y);
+}
+function EnsureDTElem(Parent, ID, Type) {
+  var Elem = document.getElementById(ID);
+  if (!isObj(Elem)) {
+    Elem  = document.createElement(Type);
+    Elem.id = ID;
+    Parent.appendChild(Elem);
+  }
+  return Elem;
+}
+function MonthsArr() {
+  return ["-month-","January","February","March","April","May",
+          "June","July","August","September","October",
+          "November","December"];
+}
+function ShortMonthsArr() {
+  return ["-month-","Jan","Feb","Mar","Apr","May",
+          "June","July","Aug","Sept","Oct",
+          "Nov","Dec"];
+}
+function AddComboDateBlock(ParentID,Mode,InitialDate)
+{
+  var Months = MonthsArr();
+  var Hours = [];
+ for (var i=1;
+ i <= 12;
+ i++) {
+    var s= ZeroPad(i, 2);
+    Hours.push(s);
+  }
+  var Mins = [];
+ for (var i=0;
+ i <= 59;
+ i++) {
+    var s= ZeroPad(i, 2);
+    Mins.push(s);
+  }
+  var AMPM = ["AM","PM"];
+  var IDs = GetIDs(ParentID);
+  var Parent = document.getElementById(ParentID);
+  if (!isObj(Parent)) {alert("Can't find parent element with id="+ParentID);
+ return;
+}
+  Parent.DateMode=Mode;
+  var LabelSpan = EnsureDTElem(Parent, IDs.Label, "span");
+  if (Mode != 4) {
+    var MonthSelect = EnsureDTElem(Parent, IDs.M, "select");
+    MonthSelect.onchange=function(){handleMonthChange(MonthSelect);
+};
+    FillSelect(MonthSelect,Months);
+  }
+  if (Mode < 4) {
+    var DaySelect = EnsureDTElem(Parent, IDs.D, "select");
+    DaySelect.disabled = true;
+    DaySelect.selectedIndex = -1;
+    DaySelect.onchange=function(){handleDayChange(DaySelect);
+};
+  }
+  var YrSelect = EnsureDTElem(Parent, IDs.Y, "input");
+  YrSelect.size="5"
+  YrSelect.setAttribute("tmgtype","number");
+  YrSelect.value="2016"
+  YrSelect.id = IDs.Y;
+  YrSelect.step = "1";
+  YrSelect.onchange=function(){handleYrChange(YrSelect);
+};
+  YrSelect.onkeyup=function(){handleNumKeyup(YrSelect);
+};
+  YrSelect.onkeydown=function(){checkKey(YrSelect);
+};
+  var UpBtn = EnsureDTElem(Parent, IDs.UpBtn, "button");
+  UpBtn.id = IDs.UpBtn;
+  UpBtn.innerHTML = "&uarr;";
+  UpBtn.onclick=function(){
+    altNumValue(IDs.Y, "+");
+    handleYrChange(YrSelect);
+  };
+  var DnBtn = EnsureDTElem(Parent, IDs.DnBtn, "button");
+  DnBtn.id = IDs.DnBtn;
+  DnBtn.innerHTML = "&darr;";
+  DnBtn.onclick=function(){
+    altNumValue(IDs.Y, "-");
+    handleYrChange(YrSelect);
+  };
+  if ((Mode == 1) || (Mode == 2)) {
+    var SpanAt = EnsureDTElem(Parent, IDs.At, "span");
+    var HrSelect = EnsureDTElem(Parent, IDs.Hr, "select");
+    HrSelect.onchange=function(){handleHourChange(HrSelect);
+};
+    FillSelect(HrSelect,Hours);
+    var SpanColon = EnsureDTElem(Parent, IDs.Colon, "span");
+    SpanColon.innerHTML = ":"
+    var MinSelect = EnsureDTElem(Parent, IDs.Min, "select");
+    MinSelect.onchange=function(){handleMinChange(MinSelect);
+};
+    FillSelect(MinSelect,Mins);
+    var AMPMSelect = EnsureDTElem(Parent, IDs.AMPM, "select");
+    AMPMSelect.onchange=function(){handleAMPMChange(HrSelect);
+};
+    FillSelect(AMPMSelect,AMPM);
+    var DateObj = GetDateElems(IDs);
+    SetTimeVisibility(DateObj, false)
+  }
+  var ClearBtn  = EnsureDTElem(Parent, IDs.ClrBtn, "button");
+  ClearBtn.innerHTML = "Clear";
+  ClearBtn.onclick=function(){ResetDate(ClearBtn);
+};
+  if (InitialDate !=="") {
+    SetDateTime(ParentID, InitialDate);
+  } else {
+    RefreshDate(YrSelect);
+  }
+}
+AddComboDateBlock("ctrl1_TMGDlg1",0, "");
+function ValGet_editbox(elem) {
+  if (!isObj(elem)) return "";
+  return ensureStr(elem.value);
+}
+function ValSet_editbox(elem, textVal) {
+  if (!isObj(elem)) return;
+  textVal = ensureStr(textVal);
+  elem.value = textVal;
+  return;
+}
+function getCtrlElem(dlgHandle, CtrlNum) {
+  var result = null;
+  if (!isStr(dlgHandle)) return result;
+  var id = "ctrl"+ensureStr(CtrlNum)+"_"+dlgHandle;
+  result = document.getElementById(id);
+  return result;
+}
+function getCtrlVal(dlgHandle, CtrlNum) {
+  var elem = getCtrlElem(dlgHandle, CtrlNum);
+  if (!isObj(elem)) return "";
+  var valType = getAttrib(elem, "tmgtype");
+  if (valType =="") return "";
+  var result;
+  var expr = "result = ValGet_"+valType+"(elem);"
+  eval(expr);
+  return ensureStr(result);
+}
+function setCtrlVal(dlgHandle, CtrlNum, newValue) {
+  if (typeof(newValue) == "undefined") return "";
+  var elem = getCtrlElem(dlgHandle, CtrlNum);
+  if (!isObj(elem)) return "";
+  var valType = getAttrib(elem, "tmgtype");
+  if (valType =="") return "";
+  var result;
+  var expr = "result = ValSet_"+valType+"(elem, newValue);"
+  eval(expr);
+  return result;
+}
+function getDlgHandle(elem) {
+  var result = "?";
+  if (!isObj(elem)) return result;
+  var id = elem.id;
+  if (id.indexOf("_") == -1) return result;
+  var arr=id.split("_");
+  if (arr.length < 2) return result;
+  result=arr[1];
+  return result;
+}
+ 
+function handleOnChange_TMGDlg1(elem) {
+  var dlgHandle = getDlgHandle(elem);
+  var CtrlNum = getCtrlNum(elem);
+  if (CtrlNum == 1) {
+    var DateVal = getCtrlVal(dlgHandle, 1);
+    setCtrlVal(dlgHandle, 2, DateVal);
+  } else if (CtrlNum == 2) {
+    var newVal = getCtrlVal(dlgHandle, 2);
+    setCtrlVal(dlgHandle, 1, newVal);
+  }
+}
+</SCRIPT>
+<PRE> 
+
+
+
+</PRE></BODY>

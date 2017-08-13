@@ -1,0 +1,1302 @@
+
+ Start         Length     Name                   Class
+ 0001:00401000 00013FD0H .text                   CODE
+ 0002:00415000 0000020CH .itext                  ICODE
+ 0003:00416000 00000284H .data                   DATA
+ 0004:00417000 000000B4H .bss                    BSS
+ 0005:00000000 00000000H .tls                    TLS
+
+
+Detailed map of segments
+
+ 0001:00000000 000001D6 C=CODE     S=.text    G=(none)   M=System   ACBP=A9
+ 0001:000001D8 00000016 C=CODE     S=.text    G=(none)   M=TypInfo  ACBP=A9
+ 0001:000001F0 0000006E C=CODE     S=.text    G=(none)   M=SysUtils ACBP=A9
+ 0001:00000260 0000025C C=CODE     S=.text    G=(none)   M=Windows  ACBP=A9
+ 0001:000004BC 00000036 C=CODE     S=.text    G=(none)   M=Variants ACBP=A9
+ 0001:000004F4 00000006 C=CODE     S=.text    G=(none)   M=VarUtils ACBP=A9
+ 0001:000004FC 00000196 C=CODE     S=.text    G=(none)   M=Classes  ACBP=A9
+ 0001:00000694 0000048E C=CODE     S=.text    G=(none)   M=Controls ACBP=A9
+ 0001:00000B24 00000006 C=CODE     S=.text    G=(none)   M=ActnList ACBP=A9
+ 0001:00000B2C 0000001E C=CODE     S=.text    G=(none)   M=ImgList  ACBP=A9
+ 0001:00000B4C 0000002F C=CODE     S=.text    G=(none)   M=CommCtrl ACBP=A9
+ 0001:00000B7C 00000086 C=CODE     S=.text    G=(none)   M=Graphics ACBP=A9
+ 0001:00000C04 00000006 C=CODE     S=.text    G=(none)   M=Registry ACBP=A9
+ 0001:00000C0C 00000006 C=CODE     S=.text    G=(none)   M=IniFiles ACBP=A9
+ 0001:00000C14 00000016 C=CODE     S=.text    G=(none)   M=Forms    ACBP=A9
+ 0001:00000C2C 00000006 C=CODE     S=.text    G=(none)   M=HelpIntfs ACBP=A9
+ 0001:00000C34 00000006 C=CODE     S=.text    G=(none)   M=MultiMon ACBP=A9
+ 0001:00000C3C 000000AE C=CODE     S=.text    G=(none)   M=Menus    ACBP=A9
+ 0001:00000CEC 00000006 C=CODE     S=.text    G=(none)   M=UxTheme  ACBP=A9
+ 0001:00000CF4 00000006 C=CODE     S=.text    G=(none)   M=Themes   ACBP=A9
+ 0001:00000CFC 00000006 C=CODE     S=.text    G=(none)   M=Dialogs  ACBP=A9
+ 0001:00000D04 00000386 C=CODE     S=.text    G=(none)   M=StdCtrls ACBP=A9
+ 0001:0000108C 00000006 C=CODE     S=.text    G=(none)   M=Printers ACBP=A9
+ 0001:00001094 00000086 C=CODE     S=.text    G=(none)   M=ExtCtrls ACBP=A9
+ 0001:0000111C 00000006 C=CODE     S=.text    G=(none)   M=GraphUtil ACBP=A9
+ 0001:00001124 00000006 C=CODE     S=.text    G=(none)   M=Clipbrd  ACBP=A9
+ 0001:0000112C 00000006 C=CODE     S=.text    G=(none)   M=FlatSB   ACBP=A9
+ 0001:00001134 00000046 C=CODE     S=.text    G=(none)   M=CheckLst ACBP=A9
+ 0001:0000117C 0000005E C=CODE     S=.text    G=(none)   M=Grids    ACBP=A9
+ 0001:000011DC 0000004E C=CODE     S=.text    G=(none)   M=Buttons  ACBP=A9
+ 0001:0000122C 0000032E C=CODE     S=.text    G=(none)   M=ComCtrls ACBP=A9
+ 0001:0000155C 00000006 C=CODE     S=.text    G=(none)   M=ExtActns ACBP=A9
+ 0001:00001564 00000006 C=CODE     S=.text    G=(none)   M=ExtDlgs  ACBP=A9
+ 0001:0000156C 00000006 C=CODE     S=.text    G=(none)   M=Mapi     ACBP=A9
+ 0001:00001574 00000006 C=CODE     S=.text    G=(none)   M=VAUtils  ACBP=A9
+ 0001:0000157C 00000006 C=CODE     S=.text    G=(none)   M=ComObj   ACBP=A9
+ 0001:00001584 000000B6 C=CODE     S=.text    G=(none)   M=DesignEditors ACBP=A9
+ 0001:0000163C 00000006 C=CODE     S=.text    G=(none)   M=DesignIntf ACBP=A9
+ 0001:00001644 00000006 C=CODE     S=.text    G=(none)   M=ToolsAPI ACBP=A9
+ 0001:0000164C 00000006 C=CODE     S=.text    G=(none)   M=XMLIntf  ACBP=A9
+ 0001:00001654 00000006 C=CODE     S=.text    G=(none)   M=xmldom   ACBP=A9
+ 0001:0000165C 00000006 C=CODE     S=.text    G=(none)   M=msxmldom ACBP=A9
+ 0001:00001664 00000006 C=CODE     S=.text    G=(none)   M=DockForm ACBP=A9
+ 0001:0000166C 00000006 C=CODE     S=.text    G=(none)   M=IDEMessages ACBP=A9
+ 0001:00001674 00000006 C=CODE     S=.text    G=(none)   M=DeskForm ACBP=A9
+ 0001:0000167C 00000006 C=CODE     S=.text    G=(none)   M=BaseDock ACBP=A9
+ 0001:00001684 00000006 C=CODE     S=.text    G=(none)   M=PercentageDockTree ACBP=A9
+ 0001:0000168C 00000006 C=CODE     S=.text    G=(none)   M=CaptionedDockTree ACBP=A9
+ 0001:00001694 00000006 C=CODE     S=.text    G=(none)   M=DockTabSet ACBP=A9
+ 0001:0000169C 00000006 C=CODE     S=.text    G=(none)   M=Tabs     ACBP=A9
+ 0001:000016A4 00000006 C=CODE     S=.text    G=(none)   M=DeskUtil ACBP=A9
+ 0001:000016AC 00000006 C=CODE     S=.text    G=(none)   M=ActnMan  ACBP=A9
+ 0001:000016B4 00000006 C=CODE     S=.text    G=(none)   M=ActnMenus ACBP=A9
+ 0001:000016BC 00000006 C=CODE     S=.text    G=(none)   M=XPStyleActnCtrls ACBP=A9
+ 0001:000016C4 00000006 C=CODE     S=.text    G=(none)   M=Proxies  ACBP=A9
+ 0001:000016CC 000001C3 C=CODE     S=.text    G=(none)   M=SysInit  ACBP=A9
+ 0001:00001890 00011CCB C=CODE     S=.text    G=(none)   M=ORCtrls  ACBP=A9
+ 0001:0001355C 000006E2 C=CODE     S=.text    G=(none)   M=ORCtrlsDsgn ACBP=A9
+ 0001:00013C40 0000038F C=CODE     S=.text    G=(none)   M=.ORCtrlLib2006 ACBP=A9
+ 0002:00000000 00000006 C=ICODE    S=.itext   G=(none)   M=System   ACBP=A9
+ 0002:00000008 00000006 C=ICODE    S=.itext   G=(none)   M=TypInfo  ACBP=A9
+ 0002:00000010 00000006 C=ICODE    S=.itext   G=(none)   M=SysUtils ACBP=A9
+ 0002:00000018 00000011 C=ICODE    S=.itext   G=(none)   M=Windows  ACBP=A9
+ 0002:0000002C 00000006 C=ICODE    S=.itext   G=(none)   M=Variants ACBP=A9
+ 0002:00000034 00000006 C=ICODE    S=.itext   G=(none)   M=VarUtils ACBP=A9
+ 0002:0000003C 00000006 C=ICODE    S=.itext   G=(none)   M=Classes  ACBP=A9
+ 0002:00000044 00000006 C=ICODE    S=.itext   G=(none)   M=Controls ACBP=A9
+ 0002:0000004C 00000006 C=ICODE    S=.itext   G=(none)   M=ActnList ACBP=A9
+ 0002:00000054 00000006 C=ICODE    S=.itext   G=(none)   M=Graphics ACBP=A9
+ 0002:0000005C 00000006 C=ICODE    S=.itext   G=(none)   M=Registry ACBP=A9
+ 0002:00000064 00000006 C=ICODE    S=.itext   G=(none)   M=IniFiles ACBP=A9
+ 0002:0000006C 00000006 C=ICODE    S=.itext   G=(none)   M=Forms    ACBP=A9
+ 0002:00000074 00000006 C=ICODE    S=.itext   G=(none)   M=HelpIntfs ACBP=A9
+ 0002:0000007C 00000006 C=ICODE    S=.itext   G=(none)   M=MultiMon ACBP=A9
+ 0002:00000084 00000006 C=ICODE    S=.itext   G=(none)   M=Menus    ACBP=A9
+ 0002:0000008C 00000006 C=ICODE    S=.itext   G=(none)   M=UxTheme  ACBP=A9
+ 0002:00000094 00000006 C=ICODE    S=.itext   G=(none)   M=Themes   ACBP=A9
+ 0002:0000009C 00000006 C=ICODE    S=.itext   G=(none)   M=Dialogs  ACBP=A9
+ 0002:000000A4 00000006 C=ICODE    S=.itext   G=(none)   M=Printers ACBP=A9
+ 0002:000000AC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtCtrls ACBP=A9
+ 0002:000000B4 00000006 C=ICODE    S=.itext   G=(none)   M=GraphUtil ACBP=A9
+ 0002:000000BC 00000006 C=ICODE    S=.itext   G=(none)   M=Clipbrd  ACBP=A9
+ 0002:000000C4 00000006 C=ICODE    S=.itext   G=(none)   M=FlatSB   ACBP=A9
+ 0002:000000CC 00000006 C=ICODE    S=.itext   G=(none)   M=CheckLst ACBP=A9
+ 0002:000000D4 00000006 C=ICODE    S=.itext   G=(none)   M=Buttons  ACBP=A9
+ 0002:000000DC 00000006 C=ICODE    S=.itext   G=(none)   M=ComCtrls ACBP=A9
+ 0002:000000E4 00000006 C=ICODE    S=.itext   G=(none)   M=ExtActns ACBP=A9
+ 0002:000000EC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtDlgs  ACBP=A9
+ 0002:000000F4 00000006 C=ICODE    S=.itext   G=(none)   M=Mapi     ACBP=A9
+ 0002:000000FC 00000006 C=ICODE    S=.itext   G=(none)   M=VAUtils  ACBP=A9
+ 0002:00000104 00000006 C=ICODE    S=.itext   G=(none)   M=ComObj   ACBP=A9
+ 0002:0000010C 00000006 C=ICODE    S=.itext   G=(none)   M=DesignEditors ACBP=A9
+ 0002:00000114 00000006 C=ICODE    S=.itext   G=(none)   M=ToolsAPI ACBP=A9
+ 0002:0000011C 00000006 C=ICODE    S=.itext   G=(none)   M=XMLIntf  ACBP=A9
+ 0002:00000124 00000006 C=ICODE    S=.itext   G=(none)   M=xmldom   ACBP=A9
+ 0002:0000012C 00000006 C=ICODE    S=.itext   G=(none)   M=msxmldom ACBP=A9
+ 0002:00000134 00000006 C=ICODE    S=.itext   G=(none)   M=DockForm ACBP=A9
+ 0002:0000013C 00000006 C=ICODE    S=.itext   G=(none)   M=IDEMessages ACBP=A9
+ 0002:00000144 00000006 C=ICODE    S=.itext   G=(none)   M=DeskForm ACBP=A9
+ 0002:0000014C 00000006 C=ICODE    S=.itext   G=(none)   M=BaseDock ACBP=A9
+ 0002:00000154 00000006 C=ICODE    S=.itext   G=(none)   M=PercentageDockTree ACBP=A9
+ 0002:0000015C 00000006 C=ICODE    S=.itext   G=(none)   M=CaptionedDockTree ACBP=A9
+ 0002:00000164 00000006 C=ICODE    S=.itext   G=(none)   M=DockTabSet ACBP=A9
+ 0002:0000016C 00000006 C=ICODE    S=.itext   G=(none)   M=Tabs     ACBP=A9
+ 0002:00000174 00000006 C=ICODE    S=.itext   G=(none)   M=DeskUtil ACBP=A9
+ 0002:0000017C 00000006 C=ICODE    S=.itext   G=(none)   M=ActnMan  ACBP=A9
+ 0002:00000184 00000006 C=ICODE    S=.itext   G=(none)   M=ActnMenus ACBP=A9
+ 0002:0000018C 00000006 C=ICODE    S=.itext   G=(none)   M=XPStyleActnCtrls ACBP=A9
+ 0002:00000194 00000006 C=ICODE    S=.itext   G=(none)   M=Proxies  ACBP=A9
+ 0002:0000019C 0000005E C=ICODE    S=.itext   G=(none)   M=ORCtrls  ACBP=A9
+ 0002:000001FC 00000008 C=ICODE    S=.itext   G=(none)   M=ORCtrlsDsgn ACBP=A9
+ 0002:00000204 00000005 C=ICODE    S=.itext   G=(none)   M=.ORCtrlLib2006 ACBP=A9
+ 0003:00000000 00000030 C=DATA     S=.data    G=DGROUP   M=SysInit  ACBP=A9
+ 0003:00000030 00000248 C=DATA     S=.data    G=DGROUP   M=ORCtrls  ACBP=A9
+ 0004:00000000 00000008 C=BSS      S=.bss     G=DGROUP   M=Windows  ACBP=A9
+ 0004:00000008 0000000C C=BSS      S=.bss     G=DGROUP   M=SysInit  ACBP=A9
+ 0004:00000014 00000099 C=BSS      S=.bss     G=DGROUP   M=ORCtrls  ACBP=A9
+ 0004:000000B0 00000004 C=BSS      S=.bss     G=DGROUP   M=ORCtrlsDsgn ACBP=A9
+
+
+  Address             Publics by Name
+
+ 0002:00000204       .ORCtrlLib2006..ORCtrlLib2006
+ 0001:00013FB0       .ORCtrlLib2006.@GetPackageInfoTable
+ 0001:00013FB8       .ORCtrlLib2006.@PackageLoad
+ 0001:00013FC4       .ORCtrlLib2006.@PackageUnload
+ 0001:00000B4C       CommCtrl.TreeView_GetItem
+ 0001:00000B64       CommCtrl.TreeView_SetItem
+ 0004:00000014       ORCtrls..03
+ 0001:000053E4       ORCtrls..TCaptionCheckListBox
+ 0001:00005CFC       ORCtrls..TCaptionComboBox
+ 0001:0000586C       ORCtrls..TCaptionEdit
+ 0001:00005140       ORCtrls..TCaptionListBox
+ 0001:00005F50       ORCtrls..TCaptionListView
+ 0001:00005650       ORCtrls..TCaptionMemo
+ 0001:00005AA0       ORCtrls..TCaptionRichEdit
+ 0001:000061B0       ORCtrls..TCaptionStringGrid
+ 0001:00003E54       ORCtrls..TCaptionTreeView
+ 0001:00006398       ORCtrls..TItemTip
+ 0001:00004DE0       ORCtrls..TKeyClickPanel
+ 0001:00004F48       ORCtrls..TKeyClickRadioGroup
+ 0001:00003894       ORCtrls..TORAlignButton
+ 0001:00003BE8       ORCtrls..TORAlignEdit
+ 0001:00003A84       ORCtrls..TORAlignSpeedButton
+ 0001:000032A4       ORCtrls..TORAutoPanel
+ 0001:00004414       ORCtrls..TORCBImageIndexes
+ 0001:000046A4       ORCtrls..TORCheckBox
+ 0001:00002834       ORCtrls..TORComboBox
+ 0001:000025D4       ORCtrls..TORComboEdit
+ 0001:0000246C       ORCtrls..TORComboPanelEdit
+ 0001:000022C0       ORCtrls..TORDropPanel
+ 0001:00001D20       ORCtrls..TORListBox
+ 0001:00004A5C       ORCtrls..TORListView
+ 0001:00004D04       ORCtrls..TORMenuItem
+ 0001:0000340C       ORCtrls..TOROffsetLabel
+ 0001:00004C2C       ORCtrls..TORPopupMenu
+ 0001:00001908       ORCtrls..TORStrings
+ 0001:00004030       ORCtrls..TORTreeNode
+ 0001:00004124       ORCtrls..TORTreeView
+ 0001:000064F0       ORCtrls..TSizeRatio
+ 0001:00006B70       ORCtrls.AddItemTipRef
+ 0003:00000030       ORCtrls.ALPHA_DISTRIBUTION
+ 0003:00000204       ORCtrls.BlackCheckBoxImageResNames
+ 0003:00000250       ORCtrls.BlackComboBoxImages
+ 0003:00000258       ORCtrls.ButtonAlignment
+ 0003:0000026C       ORCtrls.ButtonLayout
+ 0003:00000264       ORCtrls.ButtonWordWrap
+ 0001:00010248       ORCtrls.CalcShortName
+ 0003:000001C4       ORCtrls.CheckBoxImageResNames
+ 0001:0000B82C       ORCtrls.ClearLong
+ 0001:0000656C       ORCtrls.ClientWidthOfList
+ 0003:00000248       ORCtrls.ComboBoxImages
+ 0001:000075A4       ORCtrls.DestroyORCBBitmaps
+ 0001:0000CB40       ORCtrls.DropDownPanelClosed
+ 0001:0000CB14       ORCtrls.DropDownPanelOpened
+ 0001:00012278       ORCtrls.EnableCtrl
+ 0001:000134EC       ORCtrls.Finalization
+ 0001:000066B4       ORCtrls.FontHeightPixel
+ 0001:000065B0       ORCtrls.FontWidthPixel
+ 0001:000074E0       ORCtrls.GetORCBBitmap
+ 0001:00013124       ORCtrls.GoodNotifyWinEvent
+ 0001:000066F8       ORCtrls.HigherOf
+ 0004:00000028       ORCtrls.HintArray
+ 0001:000068C8       ORCtrls.IntArrayToString
+ 0001:0001328C       ORCtrls.IsAMouseButtonDown
+ 0001:00006B3C       ORCtrls.ItemTipKeyHook
+ 0001:00006704       ORCtrls.LowerOf
+ 0004:0000002C       ORCtrls.ORCBImages
+ 0002:0000019C       ORCtrls.ORCtrls
+ 0001:00006710       ORCtrls.Piece
+ 0001:00006BA8       ORCtrls.RemoveItemTipRef
+ 0001:00010D8C       ORCtrls.RStr
+ 0001:000067A0       ORCtrls.SetPiece
+ 0001:00006B04       ORCtrls.StringBetween
+ 0001:00006998       ORCtrls.StringToIntArray
+ 0001:00012C38       ORCtrls.TCaptionCheckListBox.GetCaption
+ 0001:00012C64       ORCtrls.TCaptionCheckListBox.GetDynamicProperty
+ 0001:00012C88       ORCtrls.TCaptionCheckListBox.SetCaption
+ 0001:00012D0C       ORCtrls.TCaptionCheckListBox.SupportsDynamicProperty
+ 0001:00012FD0       ORCtrls.TCaptionComboBox.GetCaption
+ 0001:00012FFC       ORCtrls.TCaptionComboBox.GetDynamicProperty
+ 0001:00013020       ORCtrls.TCaptionComboBox.SetCaption
+ 0001:000130A4       ORCtrls.TCaptionComboBox.SupportsDynamicProperty
+ 0001:00012DF0       ORCtrls.TCaptionEdit.GetCaption
+ 0001:00012E1C       ORCtrls.TCaptionEdit.GetDynamicProperty
+ 0001:00012E40       ORCtrls.TCaptionEdit.SetCaption
+ 0001:00012EC4       ORCtrls.TCaptionEdit.SupportsDynamicProperty
+ 0001:00012808       ORCtrls.TCaptionListBox.DoEnter
+ 0001:0001282C       ORCtrls.TCaptionListBox.GetCaption
+ 0001:00012858       ORCtrls.TCaptionListBox.GetDynamicProperty
+ 0001:000128B8       ORCtrls.TCaptionListBox.MoveFocusDown
+ 0001:0001287C       ORCtrls.TCaptionListBox.MoveFocusUp
+ 0001:0001290C       ORCtrls.TCaptionListBox.SetCaption
+ 0001:00012990       ORCtrls.TCaptionListBox.SupportsDynamicProperty
+ 0001:00012998       ORCtrls.TCaptionListBox.WMKeyDown
+ 0001:00012A44       ORCtrls.TCaptionListBox.WMMouseMove
+ 0001:00012B04       ORCtrls.TCaptionListBox.WMRButtonUp
+ 0001:000134C0       ORCtrls.TCaptionListView.GetDynamicProperty
+ 0001:000134E4       ORCtrls.TCaptionListView.SupportsDynamicProperty
+ 0001:00012D14       ORCtrls.TCaptionMemo.GetCaption
+ 0001:00012D40       ORCtrls.TCaptionMemo.GetDynamicProperty
+ 0001:00012D64       ORCtrls.TCaptionMemo.SetCaption
+ 0001:00012DE8       ORCtrls.TCaptionMemo.SupportsDynamicProperty
+ 0001:00012ECC       ORCtrls.TCaptionRichEdit.GetDynamicProperty
+ 0001:00012EF4       ORCtrls.TCaptionRichEdit.SupportsDynamicProperty
+ 0001:0001312C       ORCtrls.TCaptionStringGrid.ColRowToIndex
+ 0001:0001317C       ORCtrls.TCaptionStringGrid.GetDynamicProperty
+ 0001:000131A4       ORCtrls.TCaptionStringGrid.IndexToColRow
+ 0001:00013208       ORCtrls.TCaptionStringGrid.KeyUp
+ 0001:00013284       ORCtrls.TCaptionStringGrid.SupportsDynamicProperty
+ 0001:00012EFC       ORCtrls.TCaptionTreeView.GetCaption
+ 0001:00012F14       ORCtrls.TCaptionTreeView.GetDynamicProperty
+ 0001:00012F38       ORCtrls.TCaptionTreeView.SetCaption
+ 0001:00012FC8       ORCtrls.TCaptionTreeView.SupportsDynamicProperty
+ 0001:00006BD8       ORCtrls.TItemTip.Create
+ 0001:00006C68       ORCtrls.TItemTip.CreateParams
+ 0001:00006C2C       ORCtrls.TItemTip.Destroy
+ 0001:00006DC0       ORCtrls.TItemTip.GetTabSettings
+ 0001:00006D7C       ORCtrls.TItemTip.Hide
+ 0001:00006C94       ORCtrls.TItemTip.Paint
+ 0001:00007194       ORCtrls.TItemTip.Show
+ 0001:00006EEC       ORCtrls.TItemTip.UpdateText
+ 0001:000126DC       ORCtrls.TKeyClickPanel.KeyDown
+ 0001:00012700       ORCtrls.TKeyClickRadioGroup.Click
+ 0001:00012738       ORCtrls.TKeyClickRadioGroup.Create
+ 0001:00012798       ORCtrls.TKeyClickRadioGroup.KeyDown
+ 0001:0000FE5C       ORCtrls.TORAlignButton.Create
+ 0001:0000FEAC       ORCtrls.TORAlignButton.CreateParams
+ 0001:0000FEF4       ORCtrls.TORAlignButton.SetAlignment
+ 0001:0000FF0C       ORCtrls.TORAlignButton.SetLayout
+ 0001:0000FF24       ORCtrls.TORAlignButton.SetWordWrap
+ 0001:000130AC       ORCtrls.TORAlignSpeedButton.Paint
+ 0001:0000F868       ORCtrls.TORAutoPanel.BuildSizes
+ 0001:0000F7F0       ORCtrls.TORAutoPanel.Destroy
+ 0001:0000F994       ORCtrls.TORAutoPanel.DoResize
+ 0001:0000F960       ORCtrls.TORAutoPanel.Loaded
+ 0001:0000FB3C       ORCtrls.TORAutoPanel.Resize
+ 0001:00010C94       ORCtrls.TORCBImageIndexes.Create
+ 0001:00010D18       ORCtrls.TORCBImageIndexes.Destroy
+ 0001:00010DC8       ORCtrls.TORCBImageIndexes.IdxString
+ 0001:0001100C       ORCtrls.TORCBImageIndexes.ImageListChanged
+ 0001:00011040       ORCtrls.TORCBImageIndexes.Notification
+ 0001:00011070       ORCtrls.TORCBImageIndexes.SetCheckedDisabledIndex
+ 0001:00011084       ORCtrls.TORCBImageIndexes.SetCheckedEnabledIndex
+ 0001:00011098       ORCtrls.TORCBImageIndexes.SetGrayedDisabledIndex
+ 0001:000110AC       ORCtrls.TORCBImageIndexes.SetGrayedEnabledIndex
+ 0001:00010EAC       ORCtrls.TORCBImageIndexes.SetIdxString
+ 0001:00010D4C       ORCtrls.TORCBImageIndexes.SetImages
+ 0001:000110C0       ORCtrls.TORCBImageIndexes.SetUncheckedDisabledIndex
+ 0001:000110D4       ORCtrls.TORCBImageIndexes.SetUncheckedEnabledIndex
+ 0001:00011EF8       ORCtrls.TORCheckBox.AutoAdjustSize
+ 0001:0001237C       ORCtrls.TORCheckBox.BMGetCheck
+ 0001:000123A8       ORCtrls.TORCheckBox.BMGetState
+ 0001:00011D84       ORCtrls.TORCheckBox.BMSetCheck
+ 0001:000112FC       ORCtrls.TORCheckBox.CMEnabledChanged
+ 0001:00011318       ORCtrls.TORCheckBox.CMFontChanged
+ 0001:00011334       ORCtrls.TORCheckBox.CNDrawItem
+ 0001:00011350       ORCtrls.TORCheckBox.CNMeasureItem
+ 0001:000110E8       ORCtrls.TORCheckBox.Create
+ 0001:00011190       ORCtrls.TORCheckBox.CreateCommon
+ 0001:000112E0       ORCtrls.TORCheckBox.CreateParams
+ 0001:000111C0       ORCtrls.TORCheckBox.Destroy
+ 0001:0001192C       ORCtrls.TORCheckBox.DrawItem
+ 0001:000120CC       ORCtrls.TORCheckBox.GetCaption
+ 0001:00011374       ORCtrls.TORCheckBox.GetDrawData
+ 0001:00011208       ORCtrls.TORCheckBox.GetImageIndexes
+ 0001:00011224       ORCtrls.TORCheckBox.GetImageList
+ 0001:00011144       ORCtrls.TORCheckBox.ListViewCreate
+ 0001:00012334       ORCtrls.TORCheckBox.Notification
+ 0001:00012150       ORCtrls.TORCheckBox.SetAllowAllUnchecked
+ 0001:0001223C       ORCtrls.TORCheckBox.SetAssociate
+ 0001:00011EB4       ORCtrls.TORCheckBox.SetAutoSize
+ 0001:00011EDC       ORCtrls.TORCheckBox.SetBlackColorMode
+ 0001:000120E4       ORCtrls.TORCheckBox.SetCaption
+ 0001:00012368       ORCtrls.TORCheckBox.SetFocusOnBox
+ 0001:00011D20       ORCtrls.TORCheckBox.SetGrayedStyle
+ 0001:00012160       ORCtrls.TORCheckBox.SetGroupIndex
+ 0001:00011230       ORCtrls.TORCheckBox.SetImageIndexes
+ 0001:00011240       ORCtrls.TORCheckBox.SetImageList
+ 0001:00012210       ORCtrls.TORCheckBox.SetParent
+ 0001:00012228       ORCtrls.TORCheckBox.SetRadioStyle
+ 0001:00011E8C       ORCtrls.TORCheckBox.SetWordWrap
+ 0001:00012190       ORCtrls.TORCheckBox.SyncAllowAllUnchecked
+ 0001:00011250       ORCtrls.TORCheckBox.Toggle
+ 0001:00012314       ORCtrls.TORCheckBox.UpdateAssociate
+ 0001:00011D44       ORCtrls.TORCheckBox.WMLButtonDblClk
+ 0001:00011D5C       ORCtrls.TORCheckBox.WMSize
+ 0001:0000E9C8       ORCtrls.TORComboBox.AddReference
+ 0001:0000D3A4       ORCtrls.TORComboBox.AdjustSizeOfSelf
+ 0001:0000F6D0       ORCtrls.TORComboBox.CheckBoxSelected
+ 0001:0000EA2C       ORCtrls.TORComboBox.Clear
+ 0001:0000D664       ORCtrls.TORComboBox.ClearDropDownStatus
+ 0001:0000EA54       ORCtrls.TORComboBox.ClearTop
+ 0001:0000D2E4       ORCtrls.TORComboBox.CMFontChanged
+ 0001:0000D110       ORCtrls.TORComboBox.Create
+ 0001:0000D67C       ORCtrls.TORComboBox.Destroy
+ 0001:0000D6AC       ORCtrls.TORComboBox.DoEnter
+ 0001:0000D704       ORCtrls.TORComboBox.DoExit
+ 0001:0000D524       ORCtrls.TORComboBox.DropButtonDown
+ 0001:0000D554       ORCtrls.TORComboBox.DropButtonUp
+ 0001:0000D584       ORCtrls.TORComboBox.DropDownStatusChanged
+ 0001:0000F328       ORCtrls.TORComboBox.DropPanelBtnPressed
+ 0001:0000D390       ORCtrls.TORComboBox.EditControl
+ 0001:0000EA64       ORCtrls.TORComboBox.ForDataUse
+ 0001:0000D800       ORCtrls.TORComboBox.FwdChange
+ 0001:0000D834       ORCtrls.TORComboBox.FwdChangeDelayed
+ 0001:0000DB44       ORCtrls.TORComboBox.FwdClick
+ 0001:0000DC98       ORCtrls.TORComboBox.FwdDblClick
+ 0001:0000DCBC       ORCtrls.TORComboBox.FwdKeyDown
+ 0001:0000E098       ORCtrls.TORComboBox.FwdKeyPress
+ 0001:0000E108       ORCtrls.TORComboBox.FwdKeyUp
+ 0001:0000E174       ORCtrls.TORComboBox.FwdMouseUp
+ 0001:0000E198       ORCtrls.TORComboBox.FwdNeedData
+ 0001:0000EC00       ORCtrls.TORComboBox.GetAutoSelect
+ 0001:0000F71C       ORCtrls.TORComboBox.GetCaption
+ 0001:0000F738       ORCtrls.TORComboBox.GetCaseChanged
+ 0001:0000F09C       ORCtrls.TORComboBox.GetCheckBoxes
+ 0001:0000F0AC       ORCtrls.TORComboBox.GetChecked
+ 0001:0000F390       ORCtrls.TORComboBox.GetCheckedString
+ 0001:0000F0BC       ORCtrls.TORComboBox.GetCheckEntireLine
+ 0001:0000EC10       ORCtrls.TORComboBox.GetColor
+ 0001:0000EC1C       ORCtrls.TORComboBox.GetDelimiter
+ 0001:0000EC2C       ORCtrls.TORComboBox.GetDisplayText
+ 0001:0000EC4C       ORCtrls.TORComboBox.GetDynamicProperty
+ 0001:0000F540       ORCtrls.TORComboBox.GetEditBoxText
+ 0001:0000F4F8       ORCtrls.TORComboBox.GetEnabled
+ 0001:0000F0CC       ORCtrls.TORComboBox.GetFlatCheckBoxes
+ 0001:0000EDDC       ORCtrls.TORComboBox.GetHideSynonyms
+ 0001:0000EC80       ORCtrls.TORComboBox.GetIEN
+ 0001:0000EC70       ORCtrls.TORComboBox.GetItemHeight
+ 0001:0000ECA4       ORCtrls.TORComboBox.GetItemID
+ 0001:0000ECC0       ORCtrls.TORComboBox.GetItemIEN
+ 0001:0000ECE4       ORCtrls.TORComboBox.GetItemIndex
+ 0001:0000ED08       ORCtrls.TORComboBox.GetItemTipColor
+ 0001:0000ECF8       ORCtrls.TORComboBox.GetItemTipEnable
+ 0001:0000ED18       ORCtrls.TORComboBox.GetLongList
+ 0001:0000F758       ORCtrls.TORComboBox.GetLookupPiece
+ 0001:0000ED28       ORCtrls.TORComboBox.GetMaxLength
+ 0001:0000F704       ORCtrls.TORComboBox.GetMItems
+ 0001:0000F4C0       ORCtrls.TORComboBox.GetOnSynonymCheck
+ 0001:0000ED38       ORCtrls.TORComboBox.GetPieces
+ 0001:0000ED54       ORCtrls.TORComboBox.GetReference
+ 0001:0000ED74       ORCtrls.TORComboBox.GetSelLength
+ 0001:0000ED88       ORCtrls.TORComboBox.GetSelStart
+ 0001:0000ED9C       ORCtrls.TORComboBox.GetSelText
+ 0001:0000EDBC       ORCtrls.TORComboBox.GetShortCount
+ 0001:0000EDCC       ORCtrls.TORComboBox.GetSorted
+ 0001:0000EDEC       ORCtrls.TORComboBox.GetSynonymChars
+ 0001:0000EE88       ORCtrls.TORComboBox.GetTabPosInPixels
+ 0001:0000EE6C       ORCtrls.TORComboBox.GetTabPositions
+ 0001:0000EE98       ORCtrls.TORComboBox.GetText
+ 0001:0000EAC4       ORCtrls.TORComboBox.IndexOfReference
+ 0001:0000EA74       ORCtrls.TORComboBox.InitLongList
+ 0001:0000EB24       ORCtrls.TORComboBox.InsertReference
+ 0001:0000EB8C       ORCtrls.TORComboBox.InsertSeparator
+ 0001:0000EB9C       ORCtrls.TORComboBox.Invalidate
+ 0001:0000D74C       ORCtrls.TORComboBox.LoadComboBoxImage
+ 0001:0000D7E4       ORCtrls.TORComboBox.Loaded
+ 0001:0000EEB4       ORCtrls.TORComboBox.SelectAll
+ 0001:0000E704       ORCtrls.TORComboBox.SelectByID
+ 0001:0000E6D8       ORCtrls.TORComboBox.SelectByIEN
+ 0001:0000EEC4       ORCtrls.TORComboBox.SetAutoSelect
+ 0001:0000EED4       ORCtrls.TORComboBox.SetBlackColorMode
+ 0001:0000F70C       ORCtrls.TORComboBox.SetCaption
+ 0001:0000F748       ORCtrls.TORComboBox.SetCaseChanged
+ 0001:0000F3BC       ORCtrls.TORComboBox.SetCheckBoxEditColor
+ 0001:0000F0DC       ORCtrls.TORComboBox.SetCheckBoxes
+ 0001:0000F2D0       ORCtrls.TORComboBox.SetChecked
+ 0001:0000F3AC       ORCtrls.TORComboBox.SetCheckedString
+ 0001:0000F308       ORCtrls.TORComboBox.SetCheckEntireLine
+ 0001:0000EF00       ORCtrls.TORComboBox.SetColor
+ 0001:0000EF38       ORCtrls.TORComboBox.SetDelimiter
+ 0001:0000E210       ORCtrls.TORComboBox.SetDropDownCount
+ 0001:0000E21C       ORCtrls.TORComboBox.SetDroppedDown
+ 0001:0000E480       ORCtrls.TORComboBox.SetEditRect
+ 0001:0000E550       ORCtrls.TORComboBox.SetEditText
+ 0001:0000F504       ORCtrls.TORComboBox.SetEnabled
+ 0001:0000E728       ORCtrls.TORComboBox.SetExactByIEN
+ 0001:0000F318       ORCtrls.TORComboBox.SetFlatCheckBoxes
+ 0001:0000EE0C       ORCtrls.TORComboBox.SetHideSynonyms
+ 0001:0000EF48       ORCtrls.TORComboBox.SetItemHeight
+ 0001:0000E5F4       ORCtrls.TORComboBox.SetItemIndex
+ 0001:0000F088       ORCtrls.TORComboBox.SetItems
+ 0001:0000EF68       ORCtrls.TORComboBox.SetItemTipColor
+ 0001:0000EF58       ORCtrls.TORComboBox.SetItemTipEnable
+ 0001:0000F3F0       ORCtrls.TORComboBox.SetListItemsOnly
+ 0001:0000EF78       ORCtrls.TORComboBox.SetLongList
+ 0001:0000F768       ORCtrls.TORComboBox.SetLookupPiece
+ 0001:0000EF88       ORCtrls.TORComboBox.SetMaxLength
+ 0001:000132C4       ORCtrls.TORComboBox.SetNumForMatch
+ 0001:0000F410       ORCtrls.TORComboBox.SetOnCheckedText
+ 0001:0000F4D8       ORCtrls.TORComboBox.SetOnSynonymCheck
+ 0001:0000EF98       ORCtrls.TORComboBox.SetPieces
+ 0001:0000EFA8       ORCtrls.TORComboBox.SetReference
+ 0001:0000F008       ORCtrls.TORComboBox.SetSelLength
+ 0001:0000F020       ORCtrls.TORComboBox.SetSelStart
+ 0001:0000F038       ORCtrls.TORComboBox.SetSelText
+ 0001:0000F048       ORCtrls.TORComboBox.SetSorted
+ 0001:0000E754       ORCtrls.TORComboBox.SetStyle
+ 0001:0000EE1C       ORCtrls.TORComboBox.SetSynonymChars
+ 0001:0000F068       ORCtrls.TORComboBox.SetTabPosInPixels
+ 0001:0000F058       ORCtrls.TORComboBox.SetTabPositions
+ 0001:0000F478       ORCtrls.TORComboBox.SetTemplateField
+ 0001:0000F078       ORCtrls.TORComboBox.SetText
+ 0001:00013444       ORCtrls.TORComboBox.SetTextAutoComplete
+ 0001:000132EC       ORCtrls.TORComboBox.SetUniqueAutoComplete
+ 0001:0000E924       ORCtrls.TORComboBox.StartKeyTimer
+ 0001:0000E994       ORCtrls.TORComboBox.StopKeyTimer
+ 0001:0000E9C0       ORCtrls.TORComboBox.SupportsDynamicProperty
+ 0001:0000D6D4       ORCtrls.TORComboBox.UMGotFocus
+ 0001:0000F650       ORCtrls.TORComboBox.UpdateCheckEditBoxText
+ 0001:0000D2B4       ORCtrls.TORComboBox.WMDestroy
+ 0001:0000D2FC       ORCtrls.TORComboBox.WMMove
+ 0001:0000D318       ORCtrls.TORComboBox.WMSize
+ 0001:0000D330       ORCtrls.TORComboBox.WMTimer
+ 0001:0000D000       ORCtrls.TORComboEdit.CreateParams
+ 0001:0000D038       ORCtrls.TORComboEdit.WMKillFocus
+ 0001:0000D0B4       ORCtrls.TORComboEdit.WMSetFocus
+ 0001:000125DC       ORCtrls.TORComboPanelEdit.Destroy
+ 0001:00012614       ORCtrls.TORComboPanelEdit.Paint
+ 0001:0000CB70       ORCtrls.TORDropPanel.BtnClicked
+ 0001:0000CBA8       ORCtrls.TORDropPanel.Create
+ 0001:0000CC20       ORCtrls.TORDropPanel.CreateParams
+ 0001:0000CC60       ORCtrls.TORDropPanel.GetButton
+ 0001:0000CD10       ORCtrls.TORDropPanel.ResetButtons
+ 0001:0000CD44       ORCtrls.TORDropPanel.Resize
+ 0001:0000CDDC       ORCtrls.TORDropPanel.UpdateButtons
+ 0001:0000CF60       ORCtrls.TORDropPanel.WMActivateApp
+ 0001:0000A800       ORCtrls.TORListBox.AddReference
+ 0001:0000B164       ORCtrls.TORListBox.AdjustScrollBar
+ 0001:0000CA34       ORCtrls.TORListBox.Clear
+ 0001:0000B7C8       ORCtrls.TORListBox.ClearTop
+ 0001:0000902C       ORCtrls.TORListBox.Click
+ 0001:00008744       ORCtrls.TORListBox.CMFontChanged
+ 0001:00008FCC       ORCtrls.TORListBox.CMHintShow
+ 0001:00009938       ORCtrls.TORListBox.CNDrawItem
+ 0001:00007D58       ORCtrls.TORListBox.Create
+ 0001:00007EAC       ORCtrls.TORListBox.CreateParams
+ 0001:0000B200       ORCtrls.TORListBox.CreateScrollBar
+ 0001:00007EC4       ORCtrls.TORListBox.CreateWnd
+ 0001:00007E58       ORCtrls.TORListBox.Destroy
+ 0001:00009140       ORCtrls.TORListBox.DestroyItems
+ 0001:00007F50       ORCtrls.TORListBox.DestroyWnd
+ 0001:00009048       ORCtrls.TORListBox.DoChange
+ 0001:000090B4       ORCtrls.TORListBox.DoEnter
+ 0001:000090F4       ORCtrls.TORListBox.DoExit
+ 0001:0000995C       ORCtrls.TORListBox.DrawItem
+ 0001:0000B2D4       ORCtrls.TORListBox.ForDataUse
+ 0001:0000B2B0       ORCtrls.TORListBox.FreeScrollBar
+ 0001:0000CAF8       ORCtrls.TORListBox.GetCaption
+ 0001:0000C6A8       ORCtrls.TORListBox.GetChecked
+ 0001:0000C784       ORCtrls.TORListBox.GetCheckedState
+ 0001:0000C874       ORCtrls.TORListBox.GetCheckedString
+ 0001:00008160       ORCtrls.TORListBox.GetDisplayText
+ 0001:000081BC       ORCtrls.TORListBox.GetDynamicProperty
+ 0001:0000A26C       ORCtrls.TORListBox.GetIEN
+ 0001:00009DC8       ORCtrls.TORListBox.GetIndexFromY
+ 0001:0000A530       ORCtrls.TORListBox.GetItemID
+ 0001:0000A31C       ORCtrls.TORListBox.GetItemIEN
+ 0001:0000C9B8       ORCtrls.TORListBox.GetMItems
+ 0001:0000C848       ORCtrls.TORListBox.GetMultiSelect
+ 0001:0000AED0       ORCtrls.TORListBox.GetPieces
+ 0001:0000A690       ORCtrls.TORListBox.GetReference
+ 0001:0000C1F0       ORCtrls.TORListBox.GetStringIndex
+ 0001:0000AE84       ORCtrls.TORListBox.GetStyle
+ 0001:0000A994       ORCtrls.TORListBox.GetTabPositions
+ 0001:0000A8E4       ORCtrls.TORListBox.IndexOfReference
+ 0001:0000B58C       ORCtrls.TORListBox.InitLongList
+ 0001:0000A870       ORCtrls.TORListBox.InsertReference
+ 0001:0000B720       ORCtrls.TORListBox.InsertSeparator
+ 0001:0000806C       ORCtrls.TORListBox.IsSynonym
+ 0001:000092AC       ORCtrls.TORListBox.KeyPress
+ 0001:00008410       ORCtrls.TORListBox.LBAddString
+ 0001:00008608       ORCtrls.TORListBox.LBDeleteString
+ 0001:000081E0       ORCtrls.TORListBox.LBGetItemData
+ 0001:000082A0       ORCtrls.TORListBox.LBGetText
+ 0001:0000836C       ORCtrls.TORListBox.LBGetTextLen
+ 0001:000084FC       ORCtrls.TORListBox.LBInsertString
+ 0001:0000868C       ORCtrls.TORListBox.LBResetContent
+ 0001:00008728       ORCtrls.TORListBox.LBSetCurSel
+ 0001:00008214       ORCtrls.TORListBox.LBSetItemData
+ 0001:00007F1C       ORCtrls.TORListBox.Loaded
+ 0001:00009868       ORCtrls.TORListBox.MeasureItem
+ 0001:000092E0       ORCtrls.TORListBox.MouseDown
+ 0001:0000964C       ORCtrls.TORListBox.MouseMove
+ 0001:0000B91C       ORCtrls.TORListBox.NeedData
+ 0001:0000BC38       ORCtrls.TORListBox.PositionThumb
+ 0001:0000AF14       ORCtrls.TORListBox.ResetItems
+ 0001:0000BCE8       ORCtrls.TORListBox.ScrollTo
+ 0001:0000A5CC       ORCtrls.TORListBox.SelectByID
+ 0001:0000A3CC       ORCtrls.TORListBox.SelectByIEN
+ 0001:0000C338       ORCtrls.TORListBox.SelectString
+ 0001:0000CA50       ORCtrls.TORListBox.SetBlackColorMode
+ 0001:0000CA58       ORCtrls.TORListBox.SetCaption
+ 0001:0000C63C       ORCtrls.TORListBox.SetCheckBoxes
+ 0001:0000C6F0       ORCtrls.TORListBox.SetChecked
+ 0001:0000C7C0       ORCtrls.TORListBox.SetCheckedState
+ 0001:0000C91C       ORCtrls.TORListBox.SetCheckedString
+ 0001:0000AEC0       ORCtrls.TORListBox.SetDelimiter
+ 0001:0000A430       ORCtrls.TORListBox.SetExactByIEN
+ 0001:0000C68C       ORCtrls.TORListBox.SetFlatCheckBoxes
+ 0001:00009E5C       ORCtrls.TORListBox.SetFocusIndex
+ 0001:0000AD2C       ORCtrls.TORListBox.SetHideSynonyms
+ 0001:00009364       ORCtrls.TORListBox.SetHintProperties
+ 0001:0000B12C       ORCtrls.TORListBox.SetLongList
+ 0001:0000C9F0       ORCtrls.TORListBox.SetMItems
+ 0001:0000C850       ORCtrls.TORListBox.SetMultiSelect
+ 0001:0000AEF0       ORCtrls.TORListBox.SetPieces
+ 0001:0000A72C       ORCtrls.TORListBox.SetReference
+ 0001:0000AE8C       ORCtrls.TORListBox.SetStyle
+ 0001:0000ADF0       ORCtrls.TORListBox.SetSynonymChars
+ 0001:0000AB7C       ORCtrls.TORListBox.SetTabPosInPixels
+ 0001:0000A9D0       ORCtrls.TORListBox.SetTabPositions
+ 0001:0000AB94       ORCtrls.TORListBox.SetTabStops
+ 0001:0000AD24       ORCtrls.TORListBox.SupportsDynamicProperty
+ 0001:00007F70       ORCtrls.TORListBox.TextToShow
+ 0001:000091B8       ORCtrls.TORListBox.ToggleCheckBox
+ 0001:0000A134       ORCtrls.TORListBox.UMShowTip
+ 0001:000132F4       ORCtrls.TORListBox.VerifyUnique
+ 0001:00008F0C       ORCtrls.TORListBox.WMCancelMode
+ 0001:0000990C       ORCtrls.TORListBox.WMDestroy
+ 0001:0000877C       ORCtrls.TORListBox.WMKeyDown
+ 0001:00008D44       ORCtrls.TORListBox.WMLButtonDblClk
+ 0001:00008998       ORCtrls.TORListBox.WMLButtonDown
+ 0001:00008C4C       ORCtrls.TORListBox.WMLButtonUp
+ 0001:00008F40       ORCtrls.TORListBox.WMMove
+ 0001:00008C94       ORCtrls.TORListBox.WMRButtonUp
+ 0001:00008F60       ORCtrls.TORListBox.WMSize
+ 0001:00008FA8       ORCtrls.TORListBox.WMVScroll
+ 0001:00012474       ORCtrls.TORListView.LVMSetColumn
+ 0001:00012528       ORCtrls.TORListView.LVMSetColumnWidth
+ 0001:000123AC       ORCtrls.TORListView.WMNotify
+ 0001:0000FBF8       ORCtrls.TOROffsetLabel.AdjustSizeOfSelf
+ 0001:0000FBE0       ORCtrls.TOROffsetLabel.CMFontChanged
+ 0001:0000FBC8       ORCtrls.TOROffsetLabel.CMTextChanged
+ 0001:0000FB68       ORCtrls.TOROffsetLabel.Create
+ 0001:0000FC98       ORCtrls.TOROffsetLabel.DoDrawText
+ 0001:0000FDD4       ORCtrls.TOROffsetLabel.GetTransparent
+ 0001:0000FD38       ORCtrls.TOROffsetLabel.Paint
+ 0001:0000FE34       ORCtrls.TOROffsetLabel.SetHorzOffset
+ 0001:0000FDE0       ORCtrls.TOROffsetLabel.SetTransparent
+ 0001:0000FE24       ORCtrls.TOROffsetLabel.SetVertOffset
+ 0001:0000FE44       ORCtrls.TOROffsetLabel.SetWordWrap
+ 0001:000075D8       ORCtrls.TORStrings.Add
+ 0001:00007658       ORCtrls.TORStrings.Clear
+ 0001:00007688       ORCtrls.TORStrings.Create
+ 0001:000076E0       ORCtrls.TORStrings.Delete
+ 0001:00007718       ORCtrls.TORStrings.Destroy
+ 0001:0000774C       ORCtrls.TORStrings.Get
+ 0001:00007774       ORCtrls.TORStrings.GetCount
+ 0001:0000778C       ORCtrls.TORStrings.GetObject
+ 0001:000077AC       ORCtrls.TORStrings.IndexOf
+ 0001:000077CC       ORCtrls.TORStrings.Insert
+ 0001:00007854       ORCtrls.TORStrings.Put
+ 0001:000078D4       ORCtrls.TORStrings.PutObject
+ 0001:000078F0       ORCtrls.TORStrings.SetUpdateState
+ 0001:0000790C       ORCtrls.TORStrings.Verify
+ 0001:0000FF3C       ORCtrls.TORTreeNode.EnsureVisible
+ 0001:0000FFEC       ORCtrls.TORTreeNode.GetBold
+ 0001:00010028       ORCtrls.TORTreeNode.GetORTreeView
+ 0001:00010044       ORCtrls.TORTreeNode.GetParent
+ 0001:00010060       ORCtrls.TORTreeNode.GetText
+ 0001:00010078       ORCtrls.TORTreeNode.SetBold
+ 0001:00010474       ORCtrls.TORTreeNode.SetCaption
+ 0001:000100BC       ORCtrls.TORTreeNode.SetPiece
+ 0001:00010100       ORCtrls.TORTreeNode.SetStringData
+ 0001:000101AC       ORCtrls.TORTreeNode.SetText
+ 0001:000101B8       ORCtrls.TORTreeNode.UpdateText
+ 0001:00010524       ORCtrls.TORTreeView.CNNotify
+ 0001:000105B0       ORCtrls.TORTreeView.Create
+ 0001:000105F0       ORCtrls.TORTreeView.CreateNode
+ 0001:0001068C       ORCtrls.TORTreeView.FindPieceNode
+ 0001:0001062C       ORCtrls.TORTreeView.FindPieceNode
+ 0001:00010774       ORCtrls.TORTreeView.GetExpandedIDStr
+ 0001:00010A00       ORCtrls.TORTreeView.GetHorzScrollPos
+ 0001:00010B98       ORCtrls.TORTreeView.GetNodeID
+ 0001:00010BC0       ORCtrls.TORTreeView.GetNodeID
+ 0001:00010A18       ORCtrls.TORTreeView.GetVertScrollPos
+ 0001:00010A30       ORCtrls.TORTreeView.RenameNodes
+ 0001:00010880       ORCtrls.TORTreeView.SetExpandedIDStr
+ 0001:00010870       ORCtrls.TORTreeView.SetExpandedIDStr
+ 0001:00010B08       ORCtrls.TORTreeView.SetHorzScrollPos
+ 0001:00010AF0       ORCtrls.TORTreeView.SetNodeDelim
+ 0001:00010B44       ORCtrls.TORTreeView.SetNodePiece
+ 0001:00010C84       ORCtrls.TORTreeView.SetShortNodeCaptions
+ 0001:00010B5C       ORCtrls.TORTreeView.SetVertScrollPos
+ 0001:0000F778       ORCtrls.TSizeRatio.Create
+ 0003:00000244       ORCtrls.uDropPanelOpenCount
+ 0004:0000001C       ORCtrls.uItemTip
+ 0004:00000020       ORCtrls.uItemTipCount
+ 0004:00000018       ORCtrls.uKeyHookHandle
+ 0004:00000024       ORCtrls.uNewStyle
+ 0004:000000AC       ORCtrls.uOldShowHintsSetting
+ 0004:000000B0       ORCtrlsDsgn..3
+ 0001:0001364C       ORCtrlsDsgn..TORImageIndexesElementPropertyEditor
+ 0001:0001355C       ORCtrlsDsgn..TORImageIndexesPropertyEditor
+ 0001:00013C10       ORCtrlsDsgn.Finalization
+ 0002:000001FC       ORCtrlsDsgn.ORCtrlsDsgn
+ 0001:00013B08       ORCtrlsDsgn.Register
+ 0001:000137BC       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.Create
+ 0001:00013844       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.GetAttributes
+ 0001:00013850       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.GetName
+ 0001:0001398C       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.GetValue
+ 0001:00013808       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.ParentImgIdx
+ 0001:00013A54       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.SetValue
+ 0001:00013758       ORCtrlsDsgn.TORImageIndexesPropertyEditor.GetAttributes
+ 0001:00013764       ORCtrlsDsgn.TORImageIndexesPropertyEditor.GetProperties
+ 0001:00013798       ORCtrlsDsgn.TORImageIndexesPropertyEditor.GetValue
+ 0001:0001374C       ORCtrlsDsgn.TORImageIndexesPropertyEditor.Modified
+ 0001:000137B0       ORCtrlsDsgn.TORImageIndexesPropertyEditor.SetValue
+ 0001:00001814       SysInit.@InitPkg
+ 0001:00001878       SysInit.@PackageLoad
+ 0001:00001884       SysInit.@PackageUnload
+ 0001:00001704       SysInit.AllocTlsBuffer
+ 0001:000017C0       SysInit.ExitProcessTLS
+ 0001:00001788       SysInit.ExitThreadTLS
+ 0001:000016CC       SysInit.FreeLibrary
+ 0001:00001710       SysInit.GetTlsSize
+ 0004:0000000C       SysInit.HInstance
+ 0001:000017E4       SysInit.InitializeModule
+ 0001:0000175C       SysInit.InitProcessTLS
+ 0001:00001718       SysInit.InitThreadTLS
+ 0001:000016D4       SysInit.LocalAlloc
+ 0001:000016DC       SysInit.LocalFree
+ 0003:00000008       SysInit.Module
+ 0004:00000008       SysInit.ModuleIsLib
+ 0004:00000009       SysInit.ModuleIsPackage
+ 0003:00000004       SysInit.PtrToNil
+ 0001:000016E4       SysInit.TlsAlloc
+ 0004:00000010       SysInit.tlsBuffer
+ 0001:000016EC       SysInit.TlsFree
+ 0001:000016F4       SysInit.TlsGetValue
+ 0003:00000000       SysInit.TlsIndex
+ 0005:00000000       SysInit.TlsLast
+ 0003:00000020       SysInit.TlsProc
+ 0001:000016FC       SysInit.TlsSetValue
+ 0001:000017F0       SysInit.UninitializeModule
+ 0004:00000000       Windows..3
+ 0001:00000364       Windows.CallNextHookEx
+ 0001:0000036C       Windows.DrawText
+ 0001:00000478       Windows.Finalization
+ 0001:0000032C       Windows.FreeLibrary
+ 0001:00000334       Windows.GetCurrentThreadId
+ 0001:00000374       Windows.GetCursorPos
+ 0001:0000037C       Windows.GetDC
+ 0001:00000384       Windows.GetDesktopWindow
+ 0001:0000038C       Windows.GetKeyState
+ 0001:00000394       Windows.GetScrollPos
+ 0001:0000039C       Windows.GetSystemMetrics
+ 0001:000003A4       Windows.GetTabbedTextExtent
+ 0001:00000344       Windows.GetTextExtentPoint32
+ 0001:0000034C       Windows.GetTextMetrics
+ 0001:0000033C       Windows.GetVersion
+ 0001:000003AC       Windows.GetWindowDC
+ 0001:000003B4       Windows.HideCaret
+ 0004:00000004       Windows.HtmlHelpModule
+ 0001:000003BC       Windows.InflateRect
+ 0001:000003C4       Windows.IntersectRect
+ 0001:000003CC       Windows.InvalidateRect
+ 0001:000003D4       Windows.KillTimer
+ 0001:0000043C       Windows.MakeLong
+ 0001:0000046C       Windows.MakeLParam
+ 0001:00000460       Windows.MakeWParam
+ 0001:000003DC       Windows.OffsetRect
+ 0001:00000448       Windows.PointToSmallPoint
+ 0001:000003E4       Windows.PostMessage
+ 0001:000003EC       Windows.PtInRect
+ 0001:000003F4       Windows.ReleaseDC
+ 0001:00000354       Windows.SelectObject
+ 0001:000003FC       Windows.SendMessage
+ 0001:0000035C       Windows.SetBkMode
+ 0001:00000404       Windows.SetTimer
+ 0001:0000040C       Windows.SetWindowPos
+ 0001:00000414       Windows.SetWindowsHookEx
+ 0001:0000041C       Windows.ShowWindow
+ 0001:00000424       Windows.SystemParametersInfo
+ 0001:0000042C       Windows.TabbedTextOut
+ 0001:00000434       Windows.UnhookWindowsHookEx
+ 0002:00000018       Windows.Windows
+
+
+  Address             Publics by Value
+
+ 0001:0000032C       Windows.FreeLibrary
+ 0001:00000334       Windows.GetCurrentThreadId
+ 0001:0000033C       Windows.GetVersion
+ 0001:00000344       Windows.GetTextExtentPoint32
+ 0001:0000034C       Windows.GetTextMetrics
+ 0001:00000354       Windows.SelectObject
+ 0001:0000035C       Windows.SetBkMode
+ 0001:00000364       Windows.CallNextHookEx
+ 0001:0000036C       Windows.DrawText
+ 0001:00000374       Windows.GetCursorPos
+ 0001:0000037C       Windows.GetDC
+ 0001:00000384       Windows.GetDesktopWindow
+ 0001:0000038C       Windows.GetKeyState
+ 0001:00000394       Windows.GetScrollPos
+ 0001:0000039C       Windows.GetSystemMetrics
+ 0001:000003A4       Windows.GetTabbedTextExtent
+ 0001:000003AC       Windows.GetWindowDC
+ 0001:000003B4       Windows.HideCaret
+ 0001:000003BC       Windows.InflateRect
+ 0001:000003C4       Windows.IntersectRect
+ 0001:000003CC       Windows.InvalidateRect
+ 0001:000003D4       Windows.KillTimer
+ 0001:000003DC       Windows.OffsetRect
+ 0001:000003E4       Windows.PostMessage
+ 0001:000003EC       Windows.PtInRect
+ 0001:000003F4       Windows.ReleaseDC
+ 0001:000003FC       Windows.SendMessage
+ 0001:00000404       Windows.SetTimer
+ 0001:0000040C       Windows.SetWindowPos
+ 0001:00000414       Windows.SetWindowsHookEx
+ 0001:0000041C       Windows.ShowWindow
+ 0001:00000424       Windows.SystemParametersInfo
+ 0001:0000042C       Windows.TabbedTextOut
+ 0001:00000434       Windows.UnhookWindowsHookEx
+ 0001:0000043C       Windows.MakeLong
+ 0001:00000448       Windows.PointToSmallPoint
+ 0001:00000460       Windows.MakeWParam
+ 0001:0000046C       Windows.MakeLParam
+ 0001:00000478       Windows.Finalization
+ 0001:00000B4C       CommCtrl.TreeView_GetItem
+ 0001:00000B64       CommCtrl.TreeView_SetItem
+ 0001:000016CC       SysInit.FreeLibrary
+ 0001:000016D4       SysInit.LocalAlloc
+ 0001:000016DC       SysInit.LocalFree
+ 0001:000016E4       SysInit.TlsAlloc
+ 0001:000016EC       SysInit.TlsFree
+ 0001:000016F4       SysInit.TlsGetValue
+ 0001:000016FC       SysInit.TlsSetValue
+ 0001:00001704       SysInit.AllocTlsBuffer
+ 0001:00001710       SysInit.GetTlsSize
+ 0001:00001718       SysInit.InitThreadTLS
+ 0001:0000175C       SysInit.InitProcessTLS
+ 0001:00001788       SysInit.ExitThreadTLS
+ 0001:000017C0       SysInit.ExitProcessTLS
+ 0001:000017E4       SysInit.InitializeModule
+ 0001:000017F0       SysInit.UninitializeModule
+ 0001:00001814       SysInit.@InitPkg
+ 0001:00001878       SysInit.@PackageLoad
+ 0001:00001884       SysInit.@PackageUnload
+ 0001:00001908       ORCtrls..TORStrings
+ 0001:00001D20       ORCtrls..TORListBox
+ 0001:000022C0       ORCtrls..TORDropPanel
+ 0001:0000246C       ORCtrls..TORComboPanelEdit
+ 0001:000025D4       ORCtrls..TORComboEdit
+ 0001:00002834       ORCtrls..TORComboBox
+ 0001:000032A4       ORCtrls..TORAutoPanel
+ 0001:0000340C       ORCtrls..TOROffsetLabel
+ 0001:00003894       ORCtrls..TORAlignButton
+ 0001:00003A84       ORCtrls..TORAlignSpeedButton
+ 0001:00003BE8       ORCtrls..TORAlignEdit
+ 0001:00003E54       ORCtrls..TCaptionTreeView
+ 0001:00004030       ORCtrls..TORTreeNode
+ 0001:00004124       ORCtrls..TORTreeView
+ 0001:00004414       ORCtrls..TORCBImageIndexes
+ 0001:000046A4       ORCtrls..TORCheckBox
+ 0001:00004A5C       ORCtrls..TORListView
+ 0001:00004C2C       ORCtrls..TORPopupMenu
+ 0001:00004D04       ORCtrls..TORMenuItem
+ 0001:00004DE0       ORCtrls..TKeyClickPanel
+ 0001:00004F48       ORCtrls..TKeyClickRadioGroup
+ 0001:00005140       ORCtrls..TCaptionListBox
+ 0001:000053E4       ORCtrls..TCaptionCheckListBox
+ 0001:00005650       ORCtrls..TCaptionMemo
+ 0001:0000586C       ORCtrls..TCaptionEdit
+ 0001:00005AA0       ORCtrls..TCaptionRichEdit
+ 0001:00005CFC       ORCtrls..TCaptionComboBox
+ 0001:00005F50       ORCtrls..TCaptionListView
+ 0001:000061B0       ORCtrls..TCaptionStringGrid
+ 0001:00006398       ORCtrls..TItemTip
+ 0001:000064F0       ORCtrls..TSizeRatio
+ 0001:0000656C       ORCtrls.ClientWidthOfList
+ 0001:000065B0       ORCtrls.FontWidthPixel
+ 0001:000066B4       ORCtrls.FontHeightPixel
+ 0001:000066F8       ORCtrls.HigherOf
+ 0001:00006704       ORCtrls.LowerOf
+ 0001:00006710       ORCtrls.Piece
+ 0001:000067A0       ORCtrls.SetPiece
+ 0001:000068C8       ORCtrls.IntArrayToString
+ 0001:00006998       ORCtrls.StringToIntArray
+ 0001:00006B04       ORCtrls.StringBetween
+ 0001:00006B3C       ORCtrls.ItemTipKeyHook
+ 0001:00006B70       ORCtrls.AddItemTipRef
+ 0001:00006BA8       ORCtrls.RemoveItemTipRef
+ 0001:00006BD8       ORCtrls.TItemTip.Create
+ 0001:00006C2C       ORCtrls.TItemTip.Destroy
+ 0001:00006C68       ORCtrls.TItemTip.CreateParams
+ 0001:00006C94       ORCtrls.TItemTip.Paint
+ 0001:00006D7C       ORCtrls.TItemTip.Hide
+ 0001:00006DC0       ORCtrls.TItemTip.GetTabSettings
+ 0001:00006EEC       ORCtrls.TItemTip.UpdateText
+ 0001:00007194       ORCtrls.TItemTip.Show
+ 0001:000074E0       ORCtrls.GetORCBBitmap
+ 0001:000075A4       ORCtrls.DestroyORCBBitmaps
+ 0001:000075D8       ORCtrls.TORStrings.Add
+ 0001:00007658       ORCtrls.TORStrings.Clear
+ 0001:00007688       ORCtrls.TORStrings.Create
+ 0001:000076E0       ORCtrls.TORStrings.Delete
+ 0001:00007718       ORCtrls.TORStrings.Destroy
+ 0001:0000774C       ORCtrls.TORStrings.Get
+ 0001:00007774       ORCtrls.TORStrings.GetCount
+ 0001:0000778C       ORCtrls.TORStrings.GetObject
+ 0001:000077AC       ORCtrls.TORStrings.IndexOf
+ 0001:000077CC       ORCtrls.TORStrings.Insert
+ 0001:00007854       ORCtrls.TORStrings.Put
+ 0001:000078D4       ORCtrls.TORStrings.PutObject
+ 0001:000078F0       ORCtrls.TORStrings.SetUpdateState
+ 0001:0000790C       ORCtrls.TORStrings.Verify
+ 0001:00007D58       ORCtrls.TORListBox.Create
+ 0001:00007E58       ORCtrls.TORListBox.Destroy
+ 0001:00007EAC       ORCtrls.TORListBox.CreateParams
+ 0001:00007EC4       ORCtrls.TORListBox.CreateWnd
+ 0001:00007F1C       ORCtrls.TORListBox.Loaded
+ 0001:00007F50       ORCtrls.TORListBox.DestroyWnd
+ 0001:00007F70       ORCtrls.TORListBox.TextToShow
+ 0001:0000806C       ORCtrls.TORListBox.IsSynonym
+ 0001:00008160       ORCtrls.TORListBox.GetDisplayText
+ 0001:000081BC       ORCtrls.TORListBox.GetDynamicProperty
+ 0001:000081E0       ORCtrls.TORListBox.LBGetItemData
+ 0001:00008214       ORCtrls.TORListBox.LBSetItemData
+ 0001:000082A0       ORCtrls.TORListBox.LBGetText
+ 0001:0000836C       ORCtrls.TORListBox.LBGetTextLen
+ 0001:00008410       ORCtrls.TORListBox.LBAddString
+ 0001:000084FC       ORCtrls.TORListBox.LBInsertString
+ 0001:00008608       ORCtrls.TORListBox.LBDeleteString
+ 0001:0000868C       ORCtrls.TORListBox.LBResetContent
+ 0001:00008728       ORCtrls.TORListBox.LBSetCurSel
+ 0001:00008744       ORCtrls.TORListBox.CMFontChanged
+ 0001:0000877C       ORCtrls.TORListBox.WMKeyDown
+ 0001:00008998       ORCtrls.TORListBox.WMLButtonDown
+ 0001:00008C4C       ORCtrls.TORListBox.WMLButtonUp
+ 0001:00008C94       ORCtrls.TORListBox.WMRButtonUp
+ 0001:00008D44       ORCtrls.TORListBox.WMLButtonDblClk
+ 0001:00008F0C       ORCtrls.TORListBox.WMCancelMode
+ 0001:00008F40       ORCtrls.TORListBox.WMMove
+ 0001:00008F60       ORCtrls.TORListBox.WMSize
+ 0001:00008FA8       ORCtrls.TORListBox.WMVScroll
+ 0001:00008FCC       ORCtrls.TORListBox.CMHintShow
+ 0001:0000902C       ORCtrls.TORListBox.Click
+ 0001:00009048       ORCtrls.TORListBox.DoChange
+ 0001:000090B4       ORCtrls.TORListBox.DoEnter
+ 0001:000090F4       ORCtrls.TORListBox.DoExit
+ 0001:00009140       ORCtrls.TORListBox.DestroyItems
+ 0001:000091B8       ORCtrls.TORListBox.ToggleCheckBox
+ 0001:000092AC       ORCtrls.TORListBox.KeyPress
+ 0001:000092E0       ORCtrls.TORListBox.MouseDown
+ 0001:00009364       ORCtrls.TORListBox.SetHintProperties
+ 0001:0000964C       ORCtrls.TORListBox.MouseMove
+ 0001:00009868       ORCtrls.TORListBox.MeasureItem
+ 0001:0000990C       ORCtrls.TORListBox.WMDestroy
+ 0001:00009938       ORCtrls.TORListBox.CNDrawItem
+ 0001:0000995C       ORCtrls.TORListBox.DrawItem
+ 0001:00009DC8       ORCtrls.TORListBox.GetIndexFromY
+ 0001:00009E5C       ORCtrls.TORListBox.SetFocusIndex
+ 0001:0000A134       ORCtrls.TORListBox.UMShowTip
+ 0001:0000A26C       ORCtrls.TORListBox.GetIEN
+ 0001:0000A31C       ORCtrls.TORListBox.GetItemIEN
+ 0001:0000A3CC       ORCtrls.TORListBox.SelectByIEN
+ 0001:0000A430       ORCtrls.TORListBox.SetExactByIEN
+ 0001:0000A530       ORCtrls.TORListBox.GetItemID
+ 0001:0000A5CC       ORCtrls.TORListBox.SelectByID
+ 0001:0000A690       ORCtrls.TORListBox.GetReference
+ 0001:0000A72C       ORCtrls.TORListBox.SetReference
+ 0001:0000A800       ORCtrls.TORListBox.AddReference
+ 0001:0000A870       ORCtrls.TORListBox.InsertReference
+ 0001:0000A8E4       ORCtrls.TORListBox.IndexOfReference
+ 0001:0000A994       ORCtrls.TORListBox.GetTabPositions
+ 0001:0000A9D0       ORCtrls.TORListBox.SetTabPositions
+ 0001:0000AB7C       ORCtrls.TORListBox.SetTabPosInPixels
+ 0001:0000AB94       ORCtrls.TORListBox.SetTabStops
+ 0001:0000AD24       ORCtrls.TORListBox.SupportsDynamicProperty
+ 0001:0000AD2C       ORCtrls.TORListBox.SetHideSynonyms
+ 0001:0000ADF0       ORCtrls.TORListBox.SetSynonymChars
+ 0001:0000AE84       ORCtrls.TORListBox.GetStyle
+ 0001:0000AE8C       ORCtrls.TORListBox.SetStyle
+ 0001:0000AEC0       ORCtrls.TORListBox.SetDelimiter
+ 0001:0000AED0       ORCtrls.TORListBox.GetPieces
+ 0001:0000AEF0       ORCtrls.TORListBox.SetPieces
+ 0001:0000AF14       ORCtrls.TORListBox.ResetItems
+ 0001:0000B12C       ORCtrls.TORListBox.SetLongList
+ 0001:0000B164       ORCtrls.TORListBox.AdjustScrollBar
+ 0001:0000B200       ORCtrls.TORListBox.CreateScrollBar
+ 0001:0000B2B0       ORCtrls.TORListBox.FreeScrollBar
+ 0001:0000B2D4       ORCtrls.TORListBox.ForDataUse
+ 0001:0000B58C       ORCtrls.TORListBox.InitLongList
+ 0001:0000B720       ORCtrls.TORListBox.InsertSeparator
+ 0001:0000B7C8       ORCtrls.TORListBox.ClearTop
+ 0001:0000B82C       ORCtrls.ClearLong
+ 0001:0000B91C       ORCtrls.TORListBox.NeedData
+ 0001:0000BC38       ORCtrls.TORListBox.PositionThumb
+ 0001:0000BCE8       ORCtrls.TORListBox.ScrollTo
+ 0001:0000C1F0       ORCtrls.TORListBox.GetStringIndex
+ 0001:0000C338       ORCtrls.TORListBox.SelectString
+ 0001:0000C63C       ORCtrls.TORListBox.SetCheckBoxes
+ 0001:0000C68C       ORCtrls.TORListBox.SetFlatCheckBoxes
+ 0001:0000C6A8       ORCtrls.TORListBox.GetChecked
+ 0001:0000C6F0       ORCtrls.TORListBox.SetChecked
+ 0001:0000C784       ORCtrls.TORListBox.GetCheckedState
+ 0001:0000C7C0       ORCtrls.TORListBox.SetCheckedState
+ 0001:0000C848       ORCtrls.TORListBox.GetMultiSelect
+ 0001:0000C850       ORCtrls.TORListBox.SetMultiSelect
+ 0001:0000C874       ORCtrls.TORListBox.GetCheckedString
+ 0001:0000C91C       ORCtrls.TORListBox.SetCheckedString
+ 0001:0000C9B8       ORCtrls.TORListBox.GetMItems
+ 0001:0000C9F0       ORCtrls.TORListBox.SetMItems
+ 0001:0000CA34       ORCtrls.TORListBox.Clear
+ 0001:0000CA50       ORCtrls.TORListBox.SetBlackColorMode
+ 0001:0000CA58       ORCtrls.TORListBox.SetCaption
+ 0001:0000CAF8       ORCtrls.TORListBox.GetCaption
+ 0001:0000CB14       ORCtrls.DropDownPanelOpened
+ 0001:0000CB40       ORCtrls.DropDownPanelClosed
+ 0001:0000CB70       ORCtrls.TORDropPanel.BtnClicked
+ 0001:0000CBA8       ORCtrls.TORDropPanel.Create
+ 0001:0000CC20       ORCtrls.TORDropPanel.CreateParams
+ 0001:0000CC60       ORCtrls.TORDropPanel.GetButton
+ 0001:0000CD10       ORCtrls.TORDropPanel.ResetButtons
+ 0001:0000CD44       ORCtrls.TORDropPanel.Resize
+ 0001:0000CDDC       ORCtrls.TORDropPanel.UpdateButtons
+ 0001:0000CF60       ORCtrls.TORDropPanel.WMActivateApp
+ 0001:0000D000       ORCtrls.TORComboEdit.CreateParams
+ 0001:0000D038       ORCtrls.TORComboEdit.WMKillFocus
+ 0001:0000D0B4       ORCtrls.TORComboEdit.WMSetFocus
+ 0001:0000D110       ORCtrls.TORComboBox.Create
+ 0001:0000D2B4       ORCtrls.TORComboBox.WMDestroy
+ 0001:0000D2E4       ORCtrls.TORComboBox.CMFontChanged
+ 0001:0000D2FC       ORCtrls.TORComboBox.WMMove
+ 0001:0000D318       ORCtrls.TORComboBox.WMSize
+ 0001:0000D330       ORCtrls.TORComboBox.WMTimer
+ 0001:0000D390       ORCtrls.TORComboBox.EditControl
+ 0001:0000D3A4       ORCtrls.TORComboBox.AdjustSizeOfSelf
+ 0001:0000D524       ORCtrls.TORComboBox.DropButtonDown
+ 0001:0000D554       ORCtrls.TORComboBox.DropButtonUp
+ 0001:0000D584       ORCtrls.TORComboBox.DropDownStatusChanged
+ 0001:0000D664       ORCtrls.TORComboBox.ClearDropDownStatus
+ 0001:0000D67C       ORCtrls.TORComboBox.Destroy
+ 0001:0000D6AC       ORCtrls.TORComboBox.DoEnter
+ 0001:0000D6D4       ORCtrls.TORComboBox.UMGotFocus
+ 0001:0000D704       ORCtrls.TORComboBox.DoExit
+ 0001:0000D74C       ORCtrls.TORComboBox.LoadComboBoxImage
+ 0001:0000D7E4       ORCtrls.TORComboBox.Loaded
+ 0001:0000D800       ORCtrls.TORComboBox.FwdChange
+ 0001:0000D834       ORCtrls.TORComboBox.FwdChangeDelayed
+ 0001:0000DB44       ORCtrls.TORComboBox.FwdClick
+ 0001:0000DC98       ORCtrls.TORComboBox.FwdDblClick
+ 0001:0000DCBC       ORCtrls.TORComboBox.FwdKeyDown
+ 0001:0000E098       ORCtrls.TORComboBox.FwdKeyPress
+ 0001:0000E108       ORCtrls.TORComboBox.FwdKeyUp
+ 0001:0000E174       ORCtrls.TORComboBox.FwdMouseUp
+ 0001:0000E198       ORCtrls.TORComboBox.FwdNeedData
+ 0001:0000E210       ORCtrls.TORComboBox.SetDropDownCount
+ 0001:0000E21C       ORCtrls.TORComboBox.SetDroppedDown
+ 0001:0000E480       ORCtrls.TORComboBox.SetEditRect
+ 0001:0000E550       ORCtrls.TORComboBox.SetEditText
+ 0001:0000E5F4       ORCtrls.TORComboBox.SetItemIndex
+ 0001:0000E6D8       ORCtrls.TORComboBox.SelectByIEN
+ 0001:0000E704       ORCtrls.TORComboBox.SelectByID
+ 0001:0000E728       ORCtrls.TORComboBox.SetExactByIEN
+ 0001:0000E754       ORCtrls.TORComboBox.SetStyle
+ 0001:0000E924       ORCtrls.TORComboBox.StartKeyTimer
+ 0001:0000E994       ORCtrls.TORComboBox.StopKeyTimer
+ 0001:0000E9C0       ORCtrls.TORComboBox.SupportsDynamicProperty
+ 0001:0000E9C8       ORCtrls.TORComboBox.AddReference
+ 0001:0000EA2C       ORCtrls.TORComboBox.Clear
+ 0001:0000EA54       ORCtrls.TORComboBox.ClearTop
+ 0001:0000EA64       ORCtrls.TORComboBox.ForDataUse
+ 0001:0000EA74       ORCtrls.TORComboBox.InitLongList
+ 0001:0000EAC4       ORCtrls.TORComboBox.IndexOfReference
+ 0001:0000EB24       ORCtrls.TORComboBox.InsertReference
+ 0001:0000EB8C       ORCtrls.TORComboBox.InsertSeparator
+ 0001:0000EB9C       ORCtrls.TORComboBox.Invalidate
+ 0001:0000EC00       ORCtrls.TORComboBox.GetAutoSelect
+ 0001:0000EC10       ORCtrls.TORComboBox.GetColor
+ 0001:0000EC1C       ORCtrls.TORComboBox.GetDelimiter
+ 0001:0000EC2C       ORCtrls.TORComboBox.GetDisplayText
+ 0001:0000EC4C       ORCtrls.TORComboBox.GetDynamicProperty
+ 0001:0000EC70       ORCtrls.TORComboBox.GetItemHeight
+ 0001:0000EC80       ORCtrls.TORComboBox.GetIEN
+ 0001:0000ECA4       ORCtrls.TORComboBox.GetItemID
+ 0001:0000ECC0       ORCtrls.TORComboBox.GetItemIEN
+ 0001:0000ECE4       ORCtrls.TORComboBox.GetItemIndex
+ 0001:0000ECF8       ORCtrls.TORComboBox.GetItemTipEnable
+ 0001:0000ED08       ORCtrls.TORComboBox.GetItemTipColor
+ 0001:0000ED18       ORCtrls.TORComboBox.GetLongList
+ 0001:0000ED28       ORCtrls.TORComboBox.GetMaxLength
+ 0001:0000ED38       ORCtrls.TORComboBox.GetPieces
+ 0001:0000ED54       ORCtrls.TORComboBox.GetReference
+ 0001:0000ED74       ORCtrls.TORComboBox.GetSelLength
+ 0001:0000ED88       ORCtrls.TORComboBox.GetSelStart
+ 0001:0000ED9C       ORCtrls.TORComboBox.GetSelText
+ 0001:0000EDBC       ORCtrls.TORComboBox.GetShortCount
+ 0001:0000EDCC       ORCtrls.TORComboBox.GetSorted
+ 0001:0000EDDC       ORCtrls.TORComboBox.GetHideSynonyms
+ 0001:0000EDEC       ORCtrls.TORComboBox.GetSynonymChars
+ 0001:0000EE0C       ORCtrls.TORComboBox.SetHideSynonyms
+ 0001:0000EE1C       ORCtrls.TORComboBox.SetSynonymChars
+ 0001:0000EE6C       ORCtrls.TORComboBox.GetTabPositions
+ 0001:0000EE88       ORCtrls.TORComboBox.GetTabPosInPixels
+ 0001:0000EE98       ORCtrls.TORComboBox.GetText
+ 0001:0000EEB4       ORCtrls.TORComboBox.SelectAll
+ 0001:0000EEC4       ORCtrls.TORComboBox.SetAutoSelect
+ 0001:0000EED4       ORCtrls.TORComboBox.SetBlackColorMode
+ 0001:0000EF00       ORCtrls.TORComboBox.SetColor
+ 0001:0000EF38       ORCtrls.TORComboBox.SetDelimiter
+ 0001:0000EF48       ORCtrls.TORComboBox.SetItemHeight
+ 0001:0000EF58       ORCtrls.TORComboBox.SetItemTipEnable
+ 0001:0000EF68       ORCtrls.TORComboBox.SetItemTipColor
+ 0001:0000EF78       ORCtrls.TORComboBox.SetLongList
+ 0001:0000EF88       ORCtrls.TORComboBox.SetMaxLength
+ 0001:0000EF98       ORCtrls.TORComboBox.SetPieces
+ 0001:0000EFA8       ORCtrls.TORComboBox.SetReference
+ 0001:0000F008       ORCtrls.TORComboBox.SetSelLength
+ 0001:0000F020       ORCtrls.TORComboBox.SetSelStart
+ 0001:0000F038       ORCtrls.TORComboBox.SetSelText
+ 0001:0000F048       ORCtrls.TORComboBox.SetSorted
+ 0001:0000F058       ORCtrls.TORComboBox.SetTabPositions
+ 0001:0000F068       ORCtrls.TORComboBox.SetTabPosInPixels
+ 0001:0000F078       ORCtrls.TORComboBox.SetText
+ 0001:0000F088       ORCtrls.TORComboBox.SetItems
+ 0001:0000F09C       ORCtrls.TORComboBox.GetCheckBoxes
+ 0001:0000F0AC       ORCtrls.TORComboBox.GetChecked
+ 0001:0000F0BC       ORCtrls.TORComboBox.GetCheckEntireLine
+ 0001:0000F0CC       ORCtrls.TORComboBox.GetFlatCheckBoxes
+ 0001:0000F0DC       ORCtrls.TORComboBox.SetCheckBoxes
+ 0001:0000F2D0       ORCtrls.TORComboBox.SetChecked
+ 0001:0000F308       ORCtrls.TORComboBox.SetCheckEntireLine
+ 0001:0000F318       ORCtrls.TORComboBox.SetFlatCheckBoxes
+ 0001:0000F328       ORCtrls.TORComboBox.DropPanelBtnPressed
+ 0001:0000F390       ORCtrls.TORComboBox.GetCheckedString
+ 0001:0000F3AC       ORCtrls.TORComboBox.SetCheckedString
+ 0001:0000F3BC       ORCtrls.TORComboBox.SetCheckBoxEditColor
+ 0001:0000F3F0       ORCtrls.TORComboBox.SetListItemsOnly
+ 0001:0000F410       ORCtrls.TORComboBox.SetOnCheckedText
+ 0001:0000F478       ORCtrls.TORComboBox.SetTemplateField
+ 0001:0000F4C0       ORCtrls.TORComboBox.GetOnSynonymCheck
+ 0001:0000F4D8       ORCtrls.TORComboBox.SetOnSynonymCheck
+ 0001:0000F4F8       ORCtrls.TORComboBox.GetEnabled
+ 0001:0000F504       ORCtrls.TORComboBox.SetEnabled
+ 0001:0000F540       ORCtrls.TORComboBox.GetEditBoxText
+ 0001:0000F650       ORCtrls.TORComboBox.UpdateCheckEditBoxText
+ 0001:0000F6D0       ORCtrls.TORComboBox.CheckBoxSelected
+ 0001:0000F704       ORCtrls.TORComboBox.GetMItems
+ 0001:0000F70C       ORCtrls.TORComboBox.SetCaption
+ 0001:0000F71C       ORCtrls.TORComboBox.GetCaption
+ 0001:0000F738       ORCtrls.TORComboBox.GetCaseChanged
+ 0001:0000F748       ORCtrls.TORComboBox.SetCaseChanged
+ 0001:0000F758       ORCtrls.TORComboBox.GetLookupPiece
+ 0001:0000F768       ORCtrls.TORComboBox.SetLookupPiece
+ 0001:0000F778       ORCtrls.TSizeRatio.Create
+ 0001:0000F7F0       ORCtrls.TORAutoPanel.Destroy
+ 0001:0000F868       ORCtrls.TORAutoPanel.BuildSizes
+ 0001:0000F960       ORCtrls.TORAutoPanel.Loaded
+ 0001:0000F994       ORCtrls.TORAutoPanel.DoResize
+ 0001:0000FB3C       ORCtrls.TORAutoPanel.Resize
+ 0001:0000FB68       ORCtrls.TOROffsetLabel.Create
+ 0001:0000FBC8       ORCtrls.TOROffsetLabel.CMTextChanged
+ 0001:0000FBE0       ORCtrls.TOROffsetLabel.CMFontChanged
+ 0001:0000FBF8       ORCtrls.TOROffsetLabel.AdjustSizeOfSelf
+ 0001:0000FC98       ORCtrls.TOROffsetLabel.DoDrawText
+ 0001:0000FD38       ORCtrls.TOROffsetLabel.Paint
+ 0001:0000FDD4       ORCtrls.TOROffsetLabel.GetTransparent
+ 0001:0000FDE0       ORCtrls.TOROffsetLabel.SetTransparent
+ 0001:0000FE24       ORCtrls.TOROffsetLabel.SetVertOffset
+ 0001:0000FE34       ORCtrls.TOROffsetLabel.SetHorzOffset
+ 0001:0000FE44       ORCtrls.TOROffsetLabel.SetWordWrap
+ 0001:0000FE5C       ORCtrls.TORAlignButton.Create
+ 0001:0000FEAC       ORCtrls.TORAlignButton.CreateParams
+ 0001:0000FEF4       ORCtrls.TORAlignButton.SetAlignment
+ 0001:0000FF0C       ORCtrls.TORAlignButton.SetLayout
+ 0001:0000FF24       ORCtrls.TORAlignButton.SetWordWrap
+ 0001:0000FF3C       ORCtrls.TORTreeNode.EnsureVisible
+ 0001:0000FFEC       ORCtrls.TORTreeNode.GetBold
+ 0001:00010028       ORCtrls.TORTreeNode.GetORTreeView
+ 0001:00010044       ORCtrls.TORTreeNode.GetParent
+ 0001:00010060       ORCtrls.TORTreeNode.GetText
+ 0001:00010078       ORCtrls.TORTreeNode.SetBold
+ 0001:000100BC       ORCtrls.TORTreeNode.SetPiece
+ 0001:00010100       ORCtrls.TORTreeNode.SetStringData
+ 0001:000101AC       ORCtrls.TORTreeNode.SetText
+ 0001:000101B8       ORCtrls.TORTreeNode.UpdateText
+ 0001:00010248       ORCtrls.CalcShortName
+ 0001:00010474       ORCtrls.TORTreeNode.SetCaption
+ 0001:00010524       ORCtrls.TORTreeView.CNNotify
+ 0001:000105B0       ORCtrls.TORTreeView.Create
+ 0001:000105F0       ORCtrls.TORTreeView.CreateNode
+ 0001:0001062C       ORCtrls.TORTreeView.FindPieceNode
+ 0001:0001068C       ORCtrls.TORTreeView.FindPieceNode
+ 0001:00010774       ORCtrls.TORTreeView.GetExpandedIDStr
+ 0001:00010870       ORCtrls.TORTreeView.SetExpandedIDStr
+ 0001:00010880       ORCtrls.TORTreeView.SetExpandedIDStr
+ 0001:00010A00       ORCtrls.TORTreeView.GetHorzScrollPos
+ 0001:00010A18       ORCtrls.TORTreeView.GetVertScrollPos
+ 0001:00010A30       ORCtrls.TORTreeView.RenameNodes
+ 0001:00010AF0       ORCtrls.TORTreeView.SetNodeDelim
+ 0001:00010B08       ORCtrls.TORTreeView.SetHorzScrollPos
+ 0001:00010B44       ORCtrls.TORTreeView.SetNodePiece
+ 0001:00010B5C       ORCtrls.TORTreeView.SetVertScrollPos
+ 0001:00010B98       ORCtrls.TORTreeView.GetNodeID
+ 0001:00010BC0       ORCtrls.TORTreeView.GetNodeID
+ 0001:00010C84       ORCtrls.TORTreeView.SetShortNodeCaptions
+ 0001:00010C94       ORCtrls.TORCBImageIndexes.Create
+ 0001:00010D18       ORCtrls.TORCBImageIndexes.Destroy
+ 0001:00010D4C       ORCtrls.TORCBImageIndexes.SetImages
+ 0001:00010D8C       ORCtrls.RStr
+ 0001:00010DC8       ORCtrls.TORCBImageIndexes.IdxString
+ 0001:00010EAC       ORCtrls.TORCBImageIndexes.SetIdxString
+ 0001:0001100C       ORCtrls.TORCBImageIndexes.ImageListChanged
+ 0001:00011040       ORCtrls.TORCBImageIndexes.Notification
+ 0001:00011070       ORCtrls.TORCBImageIndexes.SetCheckedDisabledIndex
+ 0001:00011084       ORCtrls.TORCBImageIndexes.SetCheckedEnabledIndex
+ 0001:00011098       ORCtrls.TORCBImageIndexes.SetGrayedDisabledIndex
+ 0001:000110AC       ORCtrls.TORCBImageIndexes.SetGrayedEnabledIndex
+ 0001:000110C0       ORCtrls.TORCBImageIndexes.SetUncheckedDisabledIndex
+ 0001:000110D4       ORCtrls.TORCBImageIndexes.SetUncheckedEnabledIndex
+ 0001:000110E8       ORCtrls.TORCheckBox.Create
+ 0001:00011144       ORCtrls.TORCheckBox.ListViewCreate
+ 0001:00011190       ORCtrls.TORCheckBox.CreateCommon
+ 0001:000111C0       ORCtrls.TORCheckBox.Destroy
+ 0001:00011208       ORCtrls.TORCheckBox.GetImageIndexes
+ 0001:00011224       ORCtrls.TORCheckBox.GetImageList
+ 0001:00011230       ORCtrls.TORCheckBox.SetImageIndexes
+ 0001:00011240       ORCtrls.TORCheckBox.SetImageList
+ 0001:00011250       ORCtrls.TORCheckBox.Toggle
+ 0001:000112E0       ORCtrls.TORCheckBox.CreateParams
+ 0001:000112FC       ORCtrls.TORCheckBox.CMEnabledChanged
+ 0001:00011318       ORCtrls.TORCheckBox.CMFontChanged
+ 0001:00011334       ORCtrls.TORCheckBox.CNDrawItem
+ 0001:00011350       ORCtrls.TORCheckBox.CNMeasureItem
+ 0001:00011374       ORCtrls.TORCheckBox.GetDrawData
+ 0001:0001192C       ORCtrls.TORCheckBox.DrawItem
+ 0001:00011D20       ORCtrls.TORCheckBox.SetGrayedStyle
+ 0001:00011D44       ORCtrls.TORCheckBox.WMLButtonDblClk
+ 0001:00011D5C       ORCtrls.TORCheckBox.WMSize
+ 0001:00011D84       ORCtrls.TORCheckBox.BMSetCheck
+ 0001:00011E8C       ORCtrls.TORCheckBox.SetWordWrap
+ 0001:00011EB4       ORCtrls.TORCheckBox.SetAutoSize
+ 0001:00011EDC       ORCtrls.TORCheckBox.SetBlackColorMode
+ 0001:00011EF8       ORCtrls.TORCheckBox.AutoAdjustSize
+ 0001:000120CC       ORCtrls.TORCheckBox.GetCaption
+ 0001:000120E4       ORCtrls.TORCheckBox.SetCaption
+ 0001:00012150       ORCtrls.TORCheckBox.SetAllowAllUnchecked
+ 0001:00012160       ORCtrls.TORCheckBox.SetGroupIndex
+ 0001:00012190       ORCtrls.TORCheckBox.SyncAllowAllUnchecked
+ 0001:00012210       ORCtrls.TORCheckBox.SetParent
+ 0001:00012228       ORCtrls.TORCheckBox.SetRadioStyle
+ 0001:0001223C       ORCtrls.TORCheckBox.SetAssociate
+ 0001:00012278       ORCtrls.EnableCtrl
+ 0001:00012314       ORCtrls.TORCheckBox.UpdateAssociate
+ 0001:00012334       ORCtrls.TORCheckBox.Notification
+ 0001:00012368       ORCtrls.TORCheckBox.SetFocusOnBox
+ 0001:0001237C       ORCtrls.TORCheckBox.BMGetCheck
+ 0001:000123A8       ORCtrls.TORCheckBox.BMGetState
+ 0001:000123AC       ORCtrls.TORListView.WMNotify
+ 0001:00012474       ORCtrls.TORListView.LVMSetColumn
+ 0001:00012528       ORCtrls.TORListView.LVMSetColumnWidth
+ 0001:000125DC       ORCtrls.TORComboPanelEdit.Destroy
+ 0001:00012614       ORCtrls.TORComboPanelEdit.Paint
+ 0001:000126DC       ORCtrls.TKeyClickPanel.KeyDown
+ 0001:00012700       ORCtrls.TKeyClickRadioGroup.Click
+ 0001:00012738       ORCtrls.TKeyClickRadioGroup.Create
+ 0001:00012798       ORCtrls.TKeyClickRadioGroup.KeyDown
+ 0001:00012808       ORCtrls.TCaptionListBox.DoEnter
+ 0001:0001282C       ORCtrls.TCaptionListBox.GetCaption
+ 0001:00012858       ORCtrls.TCaptionListBox.GetDynamicProperty
+ 0001:0001287C       ORCtrls.TCaptionListBox.MoveFocusUp
+ 0001:000128B8       ORCtrls.TCaptionListBox.MoveFocusDown
+ 0001:0001290C       ORCtrls.TCaptionListBox.SetCaption
+ 0001:00012990       ORCtrls.TCaptionListBox.SupportsDynamicProperty
+ 0001:00012998       ORCtrls.TCaptionListBox.WMKeyDown
+ 0001:00012A44       ORCtrls.TCaptionListBox.WMMouseMove
+ 0001:00012B04       ORCtrls.TCaptionListBox.WMRButtonUp
+ 0001:00012C38       ORCtrls.TCaptionCheckListBox.GetCaption
+ 0001:00012C64       ORCtrls.TCaptionCheckListBox.GetDynamicProperty
+ 0001:00012C88       ORCtrls.TCaptionCheckListBox.SetCaption
+ 0001:00012D0C       ORCtrls.TCaptionCheckListBox.SupportsDynamicProperty
+ 0001:00012D14       ORCtrls.TCaptionMemo.GetCaption
+ 0001:00012D40       ORCtrls.TCaptionMemo.GetDynamicProperty
+ 0001:00012D64       ORCtrls.TCaptionMemo.SetCaption
+ 0001:00012DE8       ORCtrls.TCaptionMemo.SupportsDynamicProperty
+ 0001:00012DF0       ORCtrls.TCaptionEdit.GetCaption
+ 0001:00012E1C       ORCtrls.TCaptionEdit.GetDynamicProperty
+ 0001:00012E40       ORCtrls.TCaptionEdit.SetCaption
+ 0001:00012EC4       ORCtrls.TCaptionEdit.SupportsDynamicProperty
+ 0001:00012ECC       ORCtrls.TCaptionRichEdit.GetDynamicProperty
+ 0001:00012EF4       ORCtrls.TCaptionRichEdit.SupportsDynamicProperty
+ 0001:00012EFC       ORCtrls.TCaptionTreeView.GetCaption
+ 0001:00012F14       ORCtrls.TCaptionTreeView.GetDynamicProperty
+ 0001:00012F38       ORCtrls.TCaptionTreeView.SetCaption
+ 0001:00012FC8       ORCtrls.TCaptionTreeView.SupportsDynamicProperty
+ 0001:00012FD0       ORCtrls.TCaptionComboBox.GetCaption
+ 0001:00012FFC       ORCtrls.TCaptionComboBox.GetDynamicProperty
+ 0001:00013020       ORCtrls.TCaptionComboBox.SetCaption
+ 0001:000130A4       ORCtrls.TCaptionComboBox.SupportsDynamicProperty
+ 0001:000130AC       ORCtrls.TORAlignSpeedButton.Paint
+ 0001:00013124       ORCtrls.GoodNotifyWinEvent
+ 0001:0001312C       ORCtrls.TCaptionStringGrid.ColRowToIndex
+ 0001:0001317C       ORCtrls.TCaptionStringGrid.GetDynamicProperty
+ 0001:000131A4       ORCtrls.TCaptionStringGrid.IndexToColRow
+ 0001:00013208       ORCtrls.TCaptionStringGrid.KeyUp
+ 0001:00013284       ORCtrls.TCaptionStringGrid.SupportsDynamicProperty
+ 0001:0001328C       ORCtrls.IsAMouseButtonDown
+ 0001:000132C4       ORCtrls.TORComboBox.SetNumForMatch
+ 0001:000132EC       ORCtrls.TORComboBox.SetUniqueAutoComplete
+ 0001:000132F4       ORCtrls.TORListBox.VerifyUnique
+ 0001:00013444       ORCtrls.TORComboBox.SetTextAutoComplete
+ 0001:000134C0       ORCtrls.TCaptionListView.GetDynamicProperty
+ 0001:000134E4       ORCtrls.TCaptionListView.SupportsDynamicProperty
+ 0001:000134EC       ORCtrls.Finalization
+ 0001:0001355C       ORCtrlsDsgn..TORImageIndexesPropertyEditor
+ 0001:0001364C       ORCtrlsDsgn..TORImageIndexesElementPropertyEditor
+ 0001:0001374C       ORCtrlsDsgn.TORImageIndexesPropertyEditor.Modified
+ 0001:00013758       ORCtrlsDsgn.TORImageIndexesPropertyEditor.GetAttributes
+ 0001:00013764       ORCtrlsDsgn.TORImageIndexesPropertyEditor.GetProperties
+ 0001:00013798       ORCtrlsDsgn.TORImageIndexesPropertyEditor.GetValue
+ 0001:000137B0       ORCtrlsDsgn.TORImageIndexesPropertyEditor.SetValue
+ 0001:000137BC       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.Create
+ 0001:00013808       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.ParentImgIdx
+ 0001:00013844       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.GetAttributes
+ 0001:00013850       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.GetName
+ 0001:0001398C       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.GetValue
+ 0001:00013A54       ORCtrlsDsgn.TORImageIndexesElementPropertyEditor.SetValue
+ 0001:00013B08       ORCtrlsDsgn.Register
+ 0001:00013C10       ORCtrlsDsgn.Finalization
+ 0001:00013FB0       .ORCtrlLib2006.@GetPackageInfoTable
+ 0001:00013FB8       .ORCtrlLib2006.@PackageLoad
+ 0001:00013FC4       .ORCtrlLib2006.@PackageUnload
+ 0002:00000018       Windows.Windows
+ 0002:0000019C       ORCtrls.ORCtrls
+ 0002:000001FC       ORCtrlsDsgn.ORCtrlsDsgn
+ 0002:00000204       .ORCtrlLib2006..ORCtrlLib2006
+ 0003:00000000       SysInit.TlsIndex
+ 0003:00000004       SysInit.PtrToNil
+ 0003:00000008       SysInit.Module
+ 0003:00000020       SysInit.TlsProc
+ 0003:00000030       ORCtrls.ALPHA_DISTRIBUTION
+ 0003:000001C4       ORCtrls.CheckBoxImageResNames
+ 0003:00000204       ORCtrls.BlackCheckBoxImageResNames
+ 0003:00000244       ORCtrls.uDropPanelOpenCount
+ 0003:00000248       ORCtrls.ComboBoxImages
+ 0003:00000250       ORCtrls.BlackComboBoxImages
+ 0003:00000258       ORCtrls.ButtonAlignment
+ 0003:00000264       ORCtrls.ButtonWordWrap
+ 0003:0000026C       ORCtrls.ButtonLayout
+ 0004:00000000       Windows..3
+ 0004:00000004       Windows.HtmlHelpModule
+ 0004:00000008       SysInit.ModuleIsLib
+ 0004:00000009       SysInit.ModuleIsPackage
+ 0004:0000000C       SysInit.HInstance
+ 0004:00000010       SysInit.tlsBuffer
+ 0004:00000014       ORCtrls..03
+ 0004:00000018       ORCtrls.uKeyHookHandle
+ 0004:0000001C       ORCtrls.uItemTip
+ 0004:00000020       ORCtrls.uItemTipCount
+ 0004:00000024       ORCtrls.uNewStyle
+ 0004:00000028       ORCtrls.HintArray
+ 0004:0000002C       ORCtrls.ORCBImages
+ 0004:000000AC       ORCtrls.uOldShowHintsSetting
+ 0004:000000B0       ORCtrlsDsgn..3
+ 0005:00000000       SysInit.TlsLast
+
+
+Bound resource files
+
+ORCTRLS.RES
+ORCtrlLib2006.res
+ORCtrlsDsgn.dcr
+ORCtrlLib2006.drf
+
+
+Program entry point at 0002:00000204

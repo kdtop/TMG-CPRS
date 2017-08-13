@@ -1,0 +1,2121 @@
+
+ Start         Length     Name                   Class
+ 0001:00000000 00013550H .text                   CODE
+ 0002:00000000 00000264H .data                   DATA
+ 0002:00000264 000000B9H .bss                    BSS
+
+
+Detailed map of segments
+
+ 0001:00000000 000001FE C=CODE     S=.text    G=(none)   M=System   ACBP=A9
+ 0001:00000200 000001EC C=CODE     S=.text    G=(none)   M=SysInit  ACBP=A9
+ 0001:000003EC 0000018C C=CODE     S=.text    G=(none)   M=Windows  ACBP=A9
+ 0001:00000578 0000000E C=CODE     S=.text    G=(none)   M=Types    ACBP=A9
+ 0001:00000588 0000000E C=CODE     S=.text    G=(none)   M=ActiveX  ACBP=A9
+ 0001:00000598 00000038 C=CODE     S=.text    G=(none)   M=Messages ACBP=A9
+ 0001:000005D0 0000017E C=CODE     S=.text    G=(none)   M=Classes  ACBP=A9
+ 0001:00000750 0000000E C=CODE     S=.text    G=(none)   M=TypInfo  ACBP=A9
+ 0001:00000760 00000076 C=CODE     S=.text    G=(none)   M=SysUtils ACBP=A9
+ 0001:000007D8 0000000E C=CODE     S=.text    G=(none)   M=SysConst ACBP=A9
+ 0001:000007E8 00000016 C=CODE     S=.text    G=(none)   M=Variants ACBP=A9
+ 0001:00000800 0000000E C=CODE     S=.text    G=(none)   M=VarUtils ACBP=A9
+ 0001:00000810 0000000E C=CODE     S=.text    G=(none)   M=RTLConsts ACBP=A9
+ 0001:00000820 0000008E C=CODE     S=.text    G=(none)   M=Graphics ACBP=A9
+ 0001:000008B0 0000000E C=CODE     S=.text    G=(none)   M=Consts   ACBP=A9
+ 0001:000008C0 0000000E C=CODE     S=.text    G=(none)   M=StdVCL   ACBP=A9
+ 0001:000008D0 0000000E C=CODE     S=.text    G=(none)   M=ComObj   ACBP=A9
+ 0001:000008E0 0000000E C=CODE     S=.text    G=(none)   M=ComConst ACBP=A9
+ 0001:000008F0 000000F8 C=CODE     S=.text    G=(none)   M=Accessibility_TLB ACBP=A9
+ 0001:000009E8 0000045E C=CODE     S=.text    G=(none)   M=Controls ACBP=A9
+ 0001:00000E48 0000000E C=CODE     S=.text    G=(none)   M=ActnList ACBP=A9
+ 0001:00000E58 0000000E C=CODE     S=.text    G=(none)   M=Contnrs  ACBP=A9
+ 0001:00000E68 0000000E C=CODE     S=.text    G=(none)   M=Math     ACBP=A9
+ 0001:00000E78 0000002E C=CODE     S=.text    G=(none)   M=ImgList  ACBP=A9
+ 0001:00000EA8 00000068 C=CODE     S=.text    G=(none)   M=CommCtrl ACBP=A9
+ 0001:00000F10 00000016 C=CODE     S=.text    G=(none)   M=Forms    ACBP=A9
+ 0001:00000F28 0000000E C=CODE     S=.text    G=(none)   M=HelpIntfs ACBP=A9
+ 0001:00000F38 0000000E C=CODE     S=.text    G=(none)   M=MultiMon ACBP=A9
+ 0001:00000F48 00000038 C=CODE     S=.text    G=(none)   M=Imm      ACBP=A9
+ 0001:00000F80 000000B6 C=CODE     S=.text    G=(none)   M=Menus    ACBP=A9
+ 0001:00001038 0000000E C=CODE     S=.text    G=(none)   M=WinHelpViewer ACBP=A9
+ 0001:00001048 0000000E C=CODE     S=.text    G=(none)   M=StdActns ACBP=A9
+ 0001:00001058 0000000E C=CODE     S=.text    G=(none)   M=Dialogs  ACBP=A9
+ 0001:00001068 00000038 C=CODE     S=.text    G=(none)   M=ShlObj   ACBP=A9
+ 0001:000010A0 00000038 C=CODE     S=.text    G=(none)   M=UrlMon   ACBP=A9
+ 0001:000010D8 00000038 C=CODE     S=.text    G=(none)   M=WinInet  ACBP=A9
+ 0001:00001110 00000038 C=CODE     S=.text    G=(none)   M=RegStr   ACBP=A9
+ 0001:00001148 00000038 C=CODE     S=.text    G=(none)   M=ShellAPI ACBP=A9
+ 0001:00001180 0000000E C=CODE     S=.text    G=(none)   M=Printers ACBP=A9
+ 0001:00001190 00000038 C=CODE     S=.text    G=(none)   M=WinSpool ACBP=A9
+ 0001:000011C8 0000039E C=CODE     S=.text    G=(none)   M=StdCtrls ACBP=A9
+ 0001:00001568 00000038 C=CODE     S=.text    G=(none)   M=CommDlg  ACBP=A9
+ 0001:000015A0 00000038 C=CODE     S=.text    G=(none)   M=Dlgs     ACBP=A9
+ 0001:000015D8 00000086 C=CODE     S=.text    G=(none)   M=ExtCtrls ACBP=A9
+ 0001:00001660 0000000E C=CODE     S=.text    G=(none)   M=StrUtils ACBP=A9
+ 0001:00001670 0000000E C=CODE     S=.text    G=(none)   M=Clipbrd  ACBP=A9
+ 0001:00001680 0000000E C=CODE     S=.text    G=(none)   M=FlatSB   ACBP=A9
+ 0001:00001690 00000336 C=CODE     S=.text    G=(none)   M=ComCtrls ACBP=A9
+ 0001:000019C8 0000000E C=CODE     S=.text    G=(none)   M=ListActns ACBP=A9
+ 0001:000019D8 0000000E C=CODE     S=.text    G=(none)   M=ToolWin  ACBP=A9
+ 0001:000019E8 00000038 C=CODE     S=.text    G=(none)   M=RichEdit ACBP=A9
+ 0001:00001A20 0000000E C=CODE     S=.text    G=(none)   M=ExtActns ACBP=A9
+ 0001:00001A30 0000000E C=CODE     S=.text    G=(none)   M=Registry ACBP=A9
+ 0001:00001A40 0000000E C=CODE     S=.text    G=(none)   M=IniFiles ACBP=A9
+ 0001:00001A50 0000000E C=CODE     S=.text    G=(none)   M=ExtDlgs  ACBP=A9
+ 0001:00001A60 00000056 C=CODE     S=.text    G=(none)   M=Buttons  ACBP=A9
+ 0001:00001AB8 0000000E C=CODE     S=.text    G=(none)   M=Mapi     ACBP=A9
+ 0001:00001AC8 0000000E C=CODE     S=.text    G=(none)   M=ComStrs  ACBP=A9
+ 0001:00001AD8 000001D0 C=CODE     S=.text    G=(none)   M=uAccessAPI ACBP=A9
+ 0001:00001CA8 0000006E C=CODE     S=.text    G=(none)   M=Grids    ACBP=A9
+ 0001:00001D18 0000000E C=CODE     S=.text    G=(none)   M=Mask     ACBP=A9
+ 0001:00001D28 0000000E C=CODE     S=.text    G=(none)   M=MaskUtils ACBP=A9
+ 0001:00001D38 0000003E C=CODE     S=.text    G=(none)   M=CheckLst ACBP=A9
+ 0001:00001D78 00010DA3 C=CODE     S=.text    G=(none)   M=ORCtrls  ACBP=A9
+ 0001:00012B1C 00000016 C=CODE     S=.text    G=(none)   M=DesignIntf ACBP=A9
+ 0001:00012B34 0000000E C=CODE     S=.text    G=(none)   M=DesignMenus ACBP=A9
+ 0001:00012B44 000000A6 C=CODE     S=.text    G=(none)   M=DesignEditors ACBP=A9
+ 0001:00012BEC 0000000E C=CODE     S=.text    G=(none)   M=Proxies  ACBP=A9
+ 0001:00012BFC 0000000E C=CODE     S=.text    G=(none)   M=DesignConst ACBP=A9
+ 0001:00012C0C 000006DC C=CODE     S=.text    G=(none)   M=ORCtrlsDsgn ACBP=A9
+ 0001:000132E8 00000265 C=CODE     S=.text    G=(none)   M=ORCtrlLib60 ACBP=A9
+ 0002:00000000 00000028 C=DATA     S=.data    G=DGROUP   M=SysInit  ACBP=A9
+ 0002:00000028 00000030 C=DATA     S=.data    G=DGROUP   M=Accessibility_TLB ACBP=A9
+ 0002:00000058 000001FC C=DATA     S=.data    G=DGROUP   M=ORCtrls  ACBP=A9
+ 0002:00001000 00000018 C=BSS      S=.bss     G=DGROUP   M=SysInit  ACBP=A9
+ 0002:00001018 00000004 C=BSS      S=.bss     G=DGROUP   M=Windows  ACBP=A9
+ 0002:0000101C 00000004 C=BSS      S=.bss     G=DGROUP   M=Messages ACBP=A9
+ 0002:00001020 00000004 C=BSS      S=.bss     G=DGROUP   M=Accessibility_TLB ACBP=A9
+ 0002:00001024 00000004 C=BSS      S=.bss     G=DGROUP   M=CommCtrl ACBP=A9
+ 0002:00001028 00000004 C=BSS      S=.bss     G=DGROUP   M=Imm      ACBP=A9
+ 0002:0000102C 00000004 C=BSS      S=.bss     G=DGROUP   M=ShlObj   ACBP=A9
+ 0002:00001030 00000004 C=BSS      S=.bss     G=DGROUP   M=UrlMon   ACBP=A9
+ 0002:00001034 00000004 C=BSS      S=.bss     G=DGROUP   M=WinInet  ACBP=A9
+ 0002:00001038 00000004 C=BSS      S=.bss     G=DGROUP   M=RegStr   ACBP=A9
+ 0002:0000103C 00000004 C=BSS      S=.bss     G=DGROUP   M=ShellAPI ACBP=A9
+ 0002:00001040 00000004 C=BSS      S=.bss     G=DGROUP   M=WinSpool ACBP=A9
+ 0002:00001044 00000004 C=BSS      S=.bss     G=DGROUP   M=CommDlg  ACBP=A9
+ 0002:00001048 00000004 C=BSS      S=.bss     G=DGROUP   M=Dlgs     ACBP=A9
+ 0002:0000104C 00000004 C=BSS      S=.bss     G=DGROUP   M=RichEdit ACBP=A9
+ 0002:00001050 00000010 C=BSS      S=.bss     G=DGROUP   M=uAccessAPI ACBP=A9
+ 0002:00001060 00000054 C=BSS      S=.bss     G=DGROUP   M=ORCtrls  ACBP=A9
+ 0002:000010B4 00000004 C=BSS      S=.bss     G=DGROUP   M=ORCtrlsDsgn ACBP=A9
+
+
+  Address         Publics by Name
+
+ 0002:0000103C       .1
+ 0002:00001024       .1
+ 0002:0000104C       .1
+ 0002:00001028       .1
+ 0002:00001020       .1
+ 0002:0000102C       .1
+ 0002:00001034       .1
+ 0002:00001038       .1
+ 0002:00001030       .1
+ 0002:00001044       .1
+ 0002:00001010       .1
+ 0002:00001048       .1
+ 0002:00001050       .1
+ 0002:0000101C       .1
+ 0002:00001060       .13
+ 0002:000010B4       .3
+ 0002:00001018       .3
+ 0002:00001040       .3
+ 0001:00013528       @GetPackageInfoTable
+ 0001:00000338       @InitPkg
+ 0001:0000039C       @PackageLoad
+ 0001:00013530       @PackageLoad
+ 0001:000003A8       @PackageUnload
+ 0001:0001353C       @PackageUnload
+ 0001:000009E0       Accessibility_TLB
+ 0001:000068E0       AddItemTipRef
+ 0001:00000238       AllocTlsBuffer
+ 0002:00000058       ALPHA_DISTRIBUTION
+ 0002:00000234       ButtonAlignment
+ 0002:00000248       ButtonLayout
+ 0002:00000240       ButtonWordWrap
+ 0001:0000F784       CalcShortName
+ 0001:00000434       CallNextHookEx
+ 0002:000001EC       CheckBoxImageResNames
+ 0001:0000AF4C       ClearLong
+ 0001:000062E0       ClientWidthOfList
+ 0002:0000022C       ComboBoxImages
+ 0001:00000F08       CommCtrl
+ 0001:00001598       CommDlg
+ 0002:00001054       CreateStdAccessibleObject
+ 0001:0000715C       DestroyORCBBitmaps
+ 0001:000015D0       Dlgs
+ 0001:0000043C       DrawText
+ 0001:00011850       EnableCtrl
+ 0001:000002E4       ExitProcessTLS
+ 0001:000002BC       ExitThreadTLS
+ 0001:000019E8       Finalization
+ 0001:000015A0       Finalization
+ 0001:00000540       Finalization
+ 0001:00000598       Finalization
+ 0001:000009B0       Finalization
+ 0001:00000ED8       Finalization
+ 0001:00000F48       Finalization
+ 0001:00001068       Finalization
+ 0001:000010A0       Finalization
+ 0001:000003B4       Finalization
+ 0001:000010D8       Finalization
+ 0001:00001110       Finalization
+ 0001:00001BC8       Finalization
+ 0001:00012A94       Finalization
+ 0001:000132B0       Finalization
+ 0001:00001148       Finalization
+ 0001:00001190       Finalization
+ 0001:00001568       Finalization
+ 0001:00006430       FontHeightPixel
+ 0001:00006324       FontWidthPixel
+ 0001:00000200       FreeLibrary
+ 0001:000003EC       FreeLibrary
+ 0001:000003F4       GetCurrentThreadId
+ 0001:00000444       GetCursorPos
+ 0001:0000044C       GetDC
+ 0001:00001B1C       GetDefaultObject
+ 0001:00001AD8       GetDefaultObject
+ 0001:00000454       GetDesktopWindow
+ 0001:0000045C       GetKeyState
+ 0001:00001B60       GetLResult
+ 0001:000070D0       GetORCBBitmap
+ 0001:000003FC       GetProcAddress
+ 0001:00000464       GetScrollPos
+ 0001:0000046C       GetSystemMetrics
+ 0001:00000474       GetTabbedTextExtent
+ 0001:00000414       GetTextExtentPoint32
+ 0001:0000041C       GetTextMetrics
+ 0001:00000244       GetTlsSize
+ 0001:00000404       GetVersion
+ 0001:0000047C       GetWindowDC
+ 0001:00012684       GoodNotifyWinEvent
+ 0001:00000484       HideCaret
+ 0001:00006474       HigherOf
+ 0002:0000100C       HInstance
+ 0002:00000038       IID_IAccessible
+ 0002:00000048       IID_IAccessibleHandler
+ 0001:00000F78       Imm
+ 0001:0000048C       InflateRect
+ 0001:00000308       InitializeModule
+ 0001:00000290       InitProcessTLS
+ 0001:0000024C       InitThreadTLS
+ 0001:00006630       IntArrayToString
+ 0001:00000494       IntersectRect
+ 0001:0000049C       InvalidateRect
+ 0001:000128B4       IsAMouseButtonDown
+ 0001:000068AC       ItemTipKeyHook
+ 0001:000004A4       KillTimer
+ 0002:00000028       LIBID_Accessibility
+ 0001:0000040C       LoadLibrary
+ 0001:00000208       LocalAlloc
+ 0001:00000210       LocalFree
+ 0001:00006480       LowerOf
+ 0002:00001058       LresultFromObject
+ 0001:0000050C       MakeLong
+ 0001:00000538       MakeLParam
+ 0001:00000530       MakeWParam
+ 0001:000005C8       Messages
+ 0002:00000000       Module
+ 0002:00001000       ModuleIsLib
+ 0002:00001001       ModuleIsPackage
+ 0001:000004AC       OffsetRect
+ 0002:0000105C       OleAccHandle
+ 0002:00001074       ORCBImages
+ 0001:00013548       ORCtrlLib60
+ 0001:00012AE0       ORCtrls
+ 0001:000132E0       ORCtrlsDsgn
+ 0001:0000648C       Piece
+ 0001:00000518       PointToSmallPoint
+ 0001:000004B4       PostMessage
+ 0001:000004BC       PtInRect
+ 0001:000131A0       Register
+ 0001:00001140       RegStr
+ 0001:000004C4       ReleaseDC
+ 0001:00006918       RemoveItemTipRef
+ 0001:00001A18       RichEdit
+ 0001:000103B8       RStr
+ 0001:00000424       SelectObject
+ 0001:000004CC       SendMessage
+ 0001:0000042C       SetBkMode
+ 0001:0000650C       SetPiece
+ 0001:000004D4       SetTimer
+ 0001:000004DC       SetWindowPos
+ 0001:000004E4       SetWindowsHookEx
+ 0001:00001178       ShellAPI
+ 0001:00001098       ShlObj
+ 0001:000004EC       ShowWindow
+ 0001:00006874       StringBetween
+ 0001:00006700       StringToIntArray
+ 0001:000003E4       SysInit
+ 0001:000004F4       SystemParametersInfo
+ 0001:000004FC       TabbedTextOut
+ 0001:000121A8       TCaptionCheckListBox.GetCaption
+ 0001:000121D4       TCaptionCheckListBox.SetCaption
+ 0001:0001255C       TCaptionComboBox.GetCaption
+ 0001:00012588       TCaptionComboBox.SetCaption
+ 0001:00012308       TCaptionEdit.GetCaption
+ 0001:00012334       TCaptionEdit.SetCaption
+ 0001:00011DE0       TCaptionListBox.DoEnter
+ 0001:00011E04       TCaptionListBox.GetCaption
+ 0001:00011E30       TCaptionListBox.MakeAccessible
+ 0001:00011EF8       TCaptionListBox.SetCaption
+ 0001:00011F7C       TCaptionListBox.WMGetObject
+ 0001:00011FB4       TCaptionListBox.WMMouseMove
+ 0001:00012074       TCaptionListBox.WMRButtonUp
+ 0001:00012258       TCaptionMemo.GetCaption
+ 0001:00012284       TCaptionMemo.SetCaption
+ 0001:000123B8       TCaptionRichEdit.MakeAccessible
+ 0001:0001247C       TCaptionRichEdit.WMGetObject
+ 0001:0001268C       TCaptionStringGrid.ColRowToIndex
+ 0001:000126DC       TCaptionStringGrid.IndexToColRow
+ 0001:00012740       TCaptionStringGrid.KeyUp
+ 0001:000127B8       TCaptionStringGrid.MakeAccessible
+ 0001:0001287C       TCaptionStringGrid.WMGetObject
+ 0001:000124B4       TCaptionTreeView.GetCaption
+ 0001:000124CC       TCaptionTreeView.SetCaption
+ 0001:00006948       TItemTip.Create
+ 0001:000069D8       TItemTip.CreateParams
+ 0001:0000699C       TItemTip.Destroy
+ 0001:00006B30       TItemTip.GetTabSettings
+ 0001:00006AEC       TItemTip.Hide
+ 0001:00006A04       TItemTip.Paint
+ 0001:00006F00       TItemTip.Show
+ 0001:00006C5C       TItemTip.UpdateText
+ 0001:00011CB0       TKeyClickPanel.KeyDown
+ 0001:00011CD8       TKeyClickRadioGroup.Click
+ 0001:00011D10       TKeyClickRadioGroup.Create
+ 0001:00011D70       TKeyClickRadioGroup.KeyDown
+ 0001:00000218       TlsAlloc
+ 0002:00001014       tlsBuffer
+ 0001:00000220       TlsFree
+ 0001:00000228       TlsGetValue
+ 0002:00001004       TlsIndex
+ 0002:FFBEB000       TlsLast
+ 0002:00000018       TlsProc
+ 0001:00000230       TlsSetValue
+ 0001:0000F29C       TORAlignButton.Create
+ 0001:0000F2EC       TORAlignButton.CreateParams
+ 0001:0000F338       TORAlignButton.SetAlignment
+ 0001:0000F350       TORAlignButton.SetLayout
+ 0001:0000F368       TORAlignButton.SetWordWrap
+ 0001:0001260C       TORAlignSpeedButton.Paint
+ 0001:0000ECA8       TORAutoPanel.BuildSizes
+ 0001:0000EC30       TORAutoPanel.Destroy
+ 0001:0000EDD4       TORAutoPanel.DoResize
+ 0001:0000EDA0       TORAutoPanel.Loaded
+ 0001:0000EF7C       TORAutoPanel.Resize
+ 0001:000102C0       TORCBImageIndexes.Create
+ 0001:00010344       TORCBImageIndexes.Destroy
+ 0001:000103F4       TORCBImageIndexes.IdxString
+ 0001:00010638       TORCBImageIndexes.ImageListChanged
+ 0001:0001066C       TORCBImageIndexes.Notification
+ 0001:0001069C       TORCBImageIndexes.SetCheckedDisabledIndex
+ 0001:000106B0       TORCBImageIndexes.SetCheckedEnabledIndex
+ 0001:000106C4       TORCBImageIndexes.SetGrayedDisabledIndex
+ 0001:000106D8       TORCBImageIndexes.SetGrayedEnabledIndex
+ 0001:000104D8       TORCBImageIndexes.SetIdxString
+ 0001:00010378       TORCBImageIndexes.SetImages
+ 0001:000106EC       TORCBImageIndexes.SetUncheckedDisabledIndex
+ 0001:00010700       TORCBImageIndexes.SetUncheckedEnabledIndex
+ 0001:000114DC       TORCheckBox.AutoAdjustSize
+ 0001:00011950       TORCheckBox.BMGetCheck
+ 0001:0001197C       TORCheckBox.BMGetState
+ 0001:00011388       TORCheckBox.BMSetCheck
+ 0001:00010924       TORCheckBox.CMEnabledChanged
+ 0001:0001093C       TORCheckBox.CMFontChanged
+ 0001:00010954       TORCheckBox.CNDrawItem
+ 0001:00010970       TORCheckBox.CNMeasureItem
+ 0001:00010714       TORCheckBox.Create
+ 0001:000107BC       TORCheckBox.CreateCommon
+ 0001:00010908       TORCheckBox.CreateParams
+ 0001:000107EC       TORCheckBox.Destroy
+ 0001:00010F3C       TORCheckBox.DrawItem
+ 0001:000116B0       TORCheckBox.GetCaption
+ 0001:00010994       TORCheckBox.GetDrawData
+ 0001:00010834       TORCheckBox.GetImageIndexes
+ 0001:00010850       TORCheckBox.GetImageList
+ 0001:00010770       TORCheckBox.ListViewCreate
+ 0001:0001190C       TORCheckBox.Notification
+ 0001:00011730       TORCheckBox.SetAllowAllUnchecked
+ 0001:00011814       TORCheckBox.SetAssociate
+ 0001:000114B4       TORCheckBox.SetAutoSize
+ 0001:000116C8       TORCheckBox.SetCaption
+ 0001:00011940       TORCheckBox.SetFocusOnBox
+ 0001:00011324       TORCheckBox.SetGrayedStyle
+ 0001:00011740       TORCheckBox.SetGroupIndex
+ 0001:0001085C       TORCheckBox.SetImageIndexes
+ 0001:0001086C       TORCheckBox.SetImageList
+ 0001:000117EC       TORCheckBox.SetParent
+ 0001:00011804       TORCheckBox.SetRadioStyle
+ 0001:0001148C       TORCheckBox.SetWordWrap
+ 0001:00011770       TORCheckBox.SyncAllowAllUnchecked
+ 0001:0001087C       TORCheckBox.Toggle
+ 0001:000118EC       TORCheckBox.UpdateAssociate
+ 0001:00011348       TORCheckBox.WMLButtonDblClk
+ 0001:00011360       TORCheckBox.WMSize
+ 0001:0000DE54       TORComboBox.AddReference
+ 0001:0000CA2C       TORComboBox.AdjustSizeOfSelf
+ 0001:0000EAB8       TORComboBox.CheckBoxSelected
+ 0001:0000DEB8       TORComboBox.Clear
+ 0001:0000DEE0       TORComboBox.ClearTop
+ 0001:0000C96C       TORComboBox.CMFontChanged
+ 0001:0000C79C       TORComboBox.Create
+ 0001:0000CC0C       TORComboBox.DoEnter
+ 0001:0000CC64       TORComboBox.DoExit
+ 0001:0000CBAC       TORComboBox.DropButtonDown
+ 0001:0000CBDC       TORComboBox.DropButtonUp
+ 0001:0000E700       TORComboBox.DropPanelBtnPressed
+ 0001:0000CA18       TORComboBox.EditControl
+ 0001:0000DEF0       TORComboBox.ForDataUse
+ 0001:0000CCC8       TORComboBox.FwdChange
+ 0001:0000CCFC       TORComboBox.FwdChangeDelayed
+ 0001:0000D00C       TORComboBox.FwdClick
+ 0001:0000D160       TORComboBox.FwdDblClick
+ 0001:0000D184       TORComboBox.FwdKeyDown
+ 0001:0000D55C       TORComboBox.FwdKeyPress
+ 0001:0000D5A4       TORComboBox.FwdKeyUp
+ 0001:0000D610       TORComboBox.FwdMouseUp
+ 0001:0000D634       TORComboBox.FwdNeedData
+ 0001:0000E028       TORComboBox.GetAutoSelect
+ 0001:0000EB04       TORComboBox.GetCaption
+ 0001:0000EB78       TORComboBox.GetCaseChanged
+ 0001:0000E474       TORComboBox.GetCheckBoxes
+ 0001:0000E484       TORComboBox.GetChecked
+ 0001:0000E768       TORComboBox.GetCheckedString
+ 0001:0000E494       TORComboBox.GetCheckEntireLine
+ 0001:0000E038       TORComboBox.GetColor
+ 0001:0000E044       TORComboBox.GetDelimiter
+ 0001:0000E054       TORComboBox.GetDisplayText
+ 0001:0000E928       TORComboBox.GetEditBoxText
+ 0001:0000E8D0       TORComboBox.GetEnabled
+ 0001:0000E4A4       TORComboBox.GetFlatCheckBoxes
+ 0001:0000E1E0       TORComboBox.GetHideSynonyms
+ 0001:0000E084       TORComboBox.GetIEN
+ 0001:0000E074       TORComboBox.GetItemHeight
+ 0001:0000E0A8       TORComboBox.GetItemID
+ 0001:0000E0C4       TORComboBox.GetItemIEN
+ 0001:0000E0E8       TORComboBox.GetItemIndex
+ 0001:0000E10C       TORComboBox.GetItemTipColor
+ 0001:0000E0FC       TORComboBox.GetItemTipEnable
+ 0001:0000E11C       TORComboBox.GetLongList
+ 0001:0000EB98       TORComboBox.GetLookupPiece
+ 0001:0000E12C       TORComboBox.GetMaxLength
+ 0001:0000EAEC       TORComboBox.GetMItems
+ 0001:0000E898       TORComboBox.GetOnSynonymCheck
+ 0001:0000E13C       TORComboBox.GetPieces
+ 0001:0000E158       TORComboBox.GetReference
+ 0001:0000E178       TORComboBox.GetSelLength
+ 0001:0000E18C       TORComboBox.GetSelStart
+ 0001:0000E1A0       TORComboBox.GetSelText
+ 0001:0000E1C0       TORComboBox.GetShortCount
+ 0001:0000E1D0       TORComboBox.GetSorted
+ 0001:0000E1F0       TORComboBox.GetSynonymChars
+ 0001:0000E28C       TORComboBox.GetTabPosInPixels
+ 0001:0000E270       TORComboBox.GetTabPositions
+ 0001:0000E29C       TORComboBox.GetText
+ 0001:0000DF50       TORComboBox.IndexOfReference
+ 0001:0000DF00       TORComboBox.InitLongList
+ 0001:0000DFB0       TORComboBox.InsertReference
+ 0001:0000E018       TORComboBox.InsertSeparator
+ 0001:0000CCAC       TORComboBox.Loaded
+ 0001:0000EB20       TORComboBox.MakeAccessible
+ 0001:0000E2B8       TORComboBox.SelectAll
+ 0001:0000DB88       TORComboBox.SelectByID
+ 0001:0000DB5C       TORComboBox.SelectByIEN
+ 0001:0000E2C8       TORComboBox.SetAutoSelect
+ 0001:0000EAF4       TORComboBox.SetCaption
+ 0001:0000EB88       TORComboBox.SetCaseChanged
+ 0001:0000E794       TORComboBox.SetCheckBoxEditColor
+ 0001:0000E4B4       TORComboBox.SetCheckBoxes
+ 0001:0000E6A8       TORComboBox.SetChecked
+ 0001:0000E784       TORComboBox.SetCheckedString
+ 0001:0000E6E0       TORComboBox.SetCheckEntireLine
+ 0001:0000E2D8       TORComboBox.SetColor
+ 0001:0000E310       TORComboBox.SetDelimiter
+ 0001:0000D6AC       TORComboBox.SetDropDownCount
+ 0001:0000D6B8       TORComboBox.SetDroppedDown
+ 0001:0000D904       TORComboBox.SetEditRect
+ 0001:0000D9D4       TORComboBox.SetEditText
+ 0001:0000E8DC       TORComboBox.SetEnabled
+ 0001:0000DBAC       TORComboBox.SetExactByIEN
+ 0001:0000E6F0       TORComboBox.SetFlatCheckBoxes
+ 0001:0000E210       TORComboBox.SetHideSynonyms
+ 0001:0000E320       TORComboBox.SetItemHeight
+ 0001:0000DA78       TORComboBox.SetItemIndex
+ 0001:0000E460       TORComboBox.SetItems
+ 0001:0000E340       TORComboBox.SetItemTipColor
+ 0001:0000E330       TORComboBox.SetItemTipEnable
+ 0001:0000E7C8       TORComboBox.SetListItemsOnly
+ 0001:0000E350       TORComboBox.SetLongList
+ 0001:0000EBA8       TORComboBox.SetLookupPiece
+ 0001:0000E360       TORComboBox.SetMaxLength
+ 0001:000128EC       TORComboBox.SetNumForMatch
+ 0001:0000E7E8       TORComboBox.SetOnCheckedText
+ 0001:0000E8B0       TORComboBox.SetOnSynonymCheck
+ 0001:0000E370       TORComboBox.SetPieces
+ 0001:0000E380       TORComboBox.SetReference
+ 0001:0000E3E0       TORComboBox.SetSelLength
+ 0001:0000E3F8       TORComboBox.SetSelStart
+ 0001:0000E410       TORComboBox.SetSelText
+ 0001:0000E420       TORComboBox.SetSorted
+ 0001:0000DBD8       TORComboBox.SetStyle
+ 0001:0000E220       TORComboBox.SetSynonymChars
+ 0001:0000E440       TORComboBox.SetTabPosInPixels
+ 0001:0000E430       TORComboBox.SetTabPositions
+ 0001:0000E850       TORComboBox.SetTemplateField
+ 0001:0000E450       TORComboBox.SetText
+ 0001:00012A18       TORComboBox.SetTextAutoComplete
+ 0001:00012914       TORComboBox.SetUniqueAutoComplete
+ 0001:0000DDB8       TORComboBox.StartKeyTimer
+ 0001:0000DE28       TORComboBox.StopKeyTimer
+ 0001:0000CC34       TORComboBox.UMGotFocus
+ 0001:0000EA38       TORComboBox.UpdateCheckEditBoxText
+ 0001:0000C93C       TORComboBox.WMDestroy
+ 0001:0000C984       TORComboBox.WMMove
+ 0001:0000C9A0       TORComboBox.WMSize
+ 0001:0000C9B8       TORComboBox.WMTimer
+ 0001:0000C6A8       TORComboEdit.CreateParams
+ 0001:0000C6C8       TORComboEdit.WMKillFocus
+ 0001:0000C740       TORComboEdit.WMSetFocus
+ 0001:00011BB0       TORComboPanelEdit.Destroy
+ 0001:00011BE8       TORComboPanelEdit.Paint
+ 0001:0000C258       TORDropPanel.BtnClicked
+ 0001:0000C290       TORDropPanel.Create
+ 0001:0000C308       TORDropPanel.CreateParams
+ 0001:0000C348       TORDropPanel.GetButton
+ 0001:0000C3F8       TORDropPanel.ResetButtons
+ 0001:0000C42C       TORDropPanel.Resize
+ 0001:0000C4C4       TORDropPanel.UpdateButtons
+ 0001:0000C648       TORDropPanel.WMActivateApp
+ 0001:00012E54       TORImageIndexesElementPropertyEditor.Create
+ 0001:00012EDC       TORImageIndexesElementPropertyEditor.GetAttributes
+ 0001:00012EE8       TORImageIndexesElementPropertyEditor.GetName
+ 0001:00013024       TORImageIndexesElementPropertyEditor.GetValue
+ 0001:00012EA0       TORImageIndexesElementPropertyEditor.ParentImgIdx
+ 0001:000130EC       TORImageIndexesElementPropertyEditor.SetValue
+ 0001:00012DF0       TORImageIndexesPropertyEditor.GetAttributes
+ 0001:00012DFC       TORImageIndexesPropertyEditor.GetProperties
+ 0001:00012E30       TORImageIndexesPropertyEditor.GetValue
+ 0001:00012DE4       TORImageIndexesPropertyEditor.Modified
+ 0001:00012E48       TORImageIndexesPropertyEditor.SetValue
+ 0001:00009F64       TORListBox.AddReference
+ 0001:0000A888       TORListBox.AdjustScrollBar
+ 0001:0000C080       TORListBox.Clear
+ 0001:0000AEE8       TORListBox.ClearTop
+ 0001:00008BB0       TORListBox.Click
+ 0001:00008300       TORListBox.CMFontChanged
+ 0001:00008B54       TORListBox.CMHintShow
+ 0001:000090E8       TORListBox.CNDrawItem
+ 0001:00007940       TORListBox.Create
+ 0001:00007A8C       TORListBox.CreateParams
+ 0001:0000A918       TORListBox.CreateScrollBar
+ 0001:00007AA4       TORListBox.CreateWnd
+ 0001:00007A38       TORListBox.Destroy
+ 0001:00008C40       TORListBox.DestroyItems
+ 0001:00007B30       TORListBox.DestroyWnd
+ 0001:00008BCC       TORListBox.DoChange
+ 0001:00008C10       TORListBox.DoEnter
+ 0001:00008C1C       TORListBox.DoExit
+ 0001:0000910C       TORListBox.DrawItem
+ 0001:0000A9EC       TORListBox.ForDataUse
+ 0001:0000A9C8       TORListBox.FreeScrollBar
+ 0001:0000C13C       TORListBox.GetCaption
+ 0001:0000BCF8       TORListBox.GetChecked
+ 0001:0000BDD4       TORListBox.GetCheckedState
+ 0001:0000BEC0       TORListBox.GetCheckedString
+ 0001:00007D3C       TORListBox.GetDisplayText
+ 0001:000099D0       TORListBox.GetIEN
+ 0001:00009544       TORListBox.GetIndexFromY
+ 0001:00009C94       TORListBox.GetItemID
+ 0001:00009A80       TORListBox.GetItemIEN
+ 0001:0000C004       TORListBox.GetMItems
+ 0001:0000BE94       TORListBox.GetMultiSelect
+ 0001:0000A630       TORListBox.GetPieces
+ 0001:00009DF4       TORListBox.GetReference
+ 0001:0000B844       TORListBox.GetStringIndex
+ 0001:0000A5E4       TORListBox.GetStyle
+ 0001:0000A0FC       TORListBox.GetTabPositions
+ 0001:0000A048       TORListBox.IndexOfReference
+ 0001:0000ACA4       TORListBox.InitLongList
+ 0001:00009FD4       TORListBox.InsertReference
+ 0001:0000AE40       TORListBox.InsertSeparator
+ 0001:00007C4C       TORListBox.IsSynonym
+ 0001:00008DA8       TORListBox.KeyPress
+ 0001:00007FC8       TORListBox.LBAddString
+ 0001:000081C4       TORListBox.LBDeleteString
+ 0001:00007D98       TORListBox.LBGetItemData
+ 0001:00007E58       TORListBox.LBGetText
+ 0001:00007F24       TORListBox.LBGetTextLen
+ 0001:000080B4       TORListBox.LBInsertString
+ 0001:00008248       TORListBox.LBResetContent
+ 0001:000082E4       TORListBox.LBSetCurSel
+ 0001:00007DCC       TORListBox.LBSetItemData
+ 0001:00007AFC       TORListBox.Loaded
+ 0001:0000C158       TORListBox.MakeAccessible
+ 0001:00009018       TORListBox.MeasureItem
+ 0001:00008DD8       TORListBox.MouseDown
+ 0001:00008E58       TORListBox.MouseMove
+ 0001:0000B03C       TORListBox.NeedData
+ 0001:0000B354       TORListBox.PositionThumb
+ 0001:0000A674       TORListBox.ResetItems
+ 0001:0000B404       TORListBox.ScrollTo
+ 0001:00009D30       TORListBox.SelectByID
+ 0001:00009B30       TORListBox.SelectByIEN
+ 0001:0000B98C       TORListBox.SelectString
+ 0001:0000C09C       TORListBox.SetCaption
+ 0001:0000BC94       TORListBox.SetCheckBoxes
+ 0001:0000BD40       TORListBox.SetChecked
+ 0001:0000BE10       TORListBox.SetCheckedState
+ 0001:0000BF68       TORListBox.SetCheckedString
+ 0001:0000A620       TORListBox.SetDelimiter
+ 0001:00009B94       TORListBox.SetExactByIEN
+ 0001:0000BCE0       TORListBox.SetFlatCheckBoxes
+ 0001:000095D8       TORListBox.SetFocusIndex
+ 0001:0000A48C       TORListBox.SetHideSynonyms
+ 0001:0000A850       TORListBox.SetLongList
+ 0001:0000C03C       TORListBox.SetMItems
+ 0001:0000BE9C       TORListBox.SetMultiSelect
+ 0001:0000A650       TORListBox.SetPieces
+ 0001:00009E90       TORListBox.SetReference
+ 0001:0000A5EC       TORListBox.SetStyle
+ 0001:0000A550       TORListBox.SetSynonymChars
+ 0001:0000A2E4       TORListBox.SetTabPosInPixels
+ 0001:0000A138       TORListBox.SetTabPositions
+ 0001:0000A2FC       TORListBox.SetTabStops
+ 0001:00007B50       TORListBox.TextToShow
+ 0001:00008CB8       TORListBox.ToggleCheckBox
+ 0001:00009898       TORListBox.UMShowTip
+ 0001:0001291C       TORListBox.VerifyUnique
+ 0001:00008A94       TORListBox.WMCancelMode
+ 0001:000090BC       TORListBox.WMDestroy
+ 0001:0000C220       TORListBox.WMGetObject
+ 0001:00008338       TORListBox.WMKeyDown
+ 0001:000088CC       TORListBox.WMLButtonDblClk
+ 0001:00008520       TORListBox.WMLButtonDown
+ 0001:000087D4       TORListBox.WMLButtonUp
+ 0001:00008AC8       TORListBox.WMMove
+ 0001:0000881C       TORListBox.WMRButtonUp
+ 0001:00008AE8       TORListBox.WMSize
+ 0001:00008B30       TORListBox.WMVScroll
+ 0001:00011A48       TORListView.LVMSetColumn
+ 0001:00011AFC       TORListView.LVMSetColumnWidth
+ 0001:00011980       TORListView.WMNotify
+ 0001:0000F038       TOROffsetLabel.AdjustSizeOfSelf
+ 0001:0000F020       TOROffsetLabel.CMFontChanged
+ 0001:0000F008       TOROffsetLabel.CMTextChanged
+ 0001:0000EFA8       TOROffsetLabel.Create
+ 0001:0000F0D8       TOROffsetLabel.DoDrawText
+ 0001:0000F214       TOROffsetLabel.GetTransparent
+ 0001:0000F178       TOROffsetLabel.Paint
+ 0001:0000F274       TOROffsetLabel.SetHorzOffset
+ 0001:0000F220       TOROffsetLabel.SetTransparent
+ 0001:0000F264       TOROffsetLabel.SetVertOffset
+ 0001:0000F284       TOROffsetLabel.SetWordWrap
+ 0001:00007180       TORStaticText.DoEnter
+ 0001:000071A8       TORStaticText.DoExit
+ 0001:000071D0       TORStrings.Add
+ 0001:0000724C       TORStrings.Clear
+ 0001:00007278       TORStrings.Create
+ 0001:000072D0       TORStrings.Delete
+ 0001:00007304       TORStrings.Destroy
+ 0001:00007338       TORStrings.Get
+ 0001:00007360       TORStrings.GetCount
+ 0001:00007378       TORStrings.GetObject
+ 0001:00007398       TORStrings.IndexOf
+ 0001:000073B8       TORStrings.Insert
+ 0001:0000743C       TORStrings.Put
+ 0001:000074BC       TORStrings.PutObject
+ 0001:000074D8       TORStrings.SetUpdateState
+ 0001:000074F4       TORStrings.Verify
+ 0001:0000F380       TORTreeNode.EnsureVisible
+ 0001:0000F430       TORTreeNode.GetBold
+ 0001:0000F46C       TORTreeNode.GetORTreeView
+ 0001:0000F488       TORTreeNode.GetParent
+ 0001:0000F4A4       TORTreeNode.GetText
+ 0001:0000F68C       TORTreeNode.MakeAccessible
+ 0001:0000F4BC       TORTreeNode.SetBold
+ 0001:0000F9B0       TORTreeNode.SetCaption
+ 0001:0000F500       TORTreeNode.SetPiece
+ 0001:0000F544       TORTreeNode.SetStringData
+ 0001:0000F5F0       TORTreeNode.SetText
+ 0001:0000F5FC       TORTreeNode.UpdateText
+ 0001:0000F750       TORTreeNode.WMGetObject
+ 0001:0000FA60       TORTreeView.CNNotify
+ 0001:0000FAEC       TORTreeView.Create
+ 0001:0000FB2C       TORTreeView.CreateNode
+ 0001:0000FBC8       TORTreeView.FindPieceNode
+ 0001:0000FB68       TORTreeView.FindPieceNode
+ 0001:0000FCB0       TORTreeView.GetExpandedIDStr
+ 0001:0000FF30       TORTreeView.GetHorzScrollPos
+ 0001:000100EC       TORTreeView.GetNodeID
+ 0001:000100C4       TORTreeView.GetNodeID
+ 0001:0000FF48       TORTreeView.GetVertScrollPos
+ 0001:000101B0       TORTreeView.MakeAccessible
+ 0001:0000FF60       TORTreeView.RenameNodes
+ 0001:0000FDBC       TORTreeView.SetExpandedIDStr
+ 0001:0000FDAC       TORTreeView.SetExpandedIDStr
+ 0001:00010034       TORTreeView.SetHorzScrollPos
+ 0001:0001001C       TORTreeView.SetNodeDelim
+ 0001:00010070       TORTreeView.SetNodePiece
+ 0001:000102B0       TORTreeView.SetShortNodeCaptions
+ 0001:00010088       TORTreeView.SetVertScrollPos
+ 0001:00010278       TORTreeView.WMGetObject
+ 0001:00000EA8       TreeView_GetItem
+ 0001:00000EC0       TreeView_SetItem
+ 0001:0000EBB8       TSizeRatio.Create
+ 0001:00001C0C       uAccessAPI
+ 0002:00001068       uItemTip
+ 0002:0000106C       uItemTipCount
+ 0002:00001064       uKeyHookHandle
+ 0002:00001070       uNewStyle
+ 0001:00000504       UnhookWindowsHookEx
+ 0001:00000314       UninitializeModule
+ 0001:000010D0       UrlMon
+ 0001:00000570       Windows
+ 0001:00001108       WinInet
+ 0001:000011C0       WinSpool
+
+
+  Address         Publics by Value
+
+ 0002:FFBEB000       TlsLast
+ 0001:00000200       FreeLibrary
+ 0001:00000208       LocalAlloc
+ 0001:00000210       LocalFree
+ 0001:00000218       TlsAlloc
+ 0001:00000220       TlsFree
+ 0001:00000228       TlsGetValue
+ 0001:00000230       TlsSetValue
+ 0001:00000238       AllocTlsBuffer
+ 0001:00000244       GetTlsSize
+ 0001:0000024C       InitThreadTLS
+ 0001:00000290       InitProcessTLS
+ 0001:000002BC       ExitThreadTLS
+ 0001:000002E4       ExitProcessTLS
+ 0001:00000308       InitializeModule
+ 0001:00000314       UninitializeModule
+ 0001:00000338       @InitPkg
+ 0001:0000039C       @PackageLoad
+ 0001:000003A8       @PackageUnload
+ 0001:000003B4       Finalization
+ 0001:000003E4       SysInit
+ 0001:000003EC       FreeLibrary
+ 0001:000003F4       GetCurrentThreadId
+ 0001:000003FC       GetProcAddress
+ 0001:00000404       GetVersion
+ 0001:0000040C       LoadLibrary
+ 0001:00000414       GetTextExtentPoint32
+ 0001:0000041C       GetTextMetrics
+ 0001:00000424       SelectObject
+ 0001:0000042C       SetBkMode
+ 0001:00000434       CallNextHookEx
+ 0001:0000043C       DrawText
+ 0001:00000444       GetCursorPos
+ 0001:0000044C       GetDC
+ 0001:00000454       GetDesktopWindow
+ 0001:0000045C       GetKeyState
+ 0001:00000464       GetScrollPos
+ 0001:0000046C       GetSystemMetrics
+ 0001:00000474       GetTabbedTextExtent
+ 0001:0000047C       GetWindowDC
+ 0001:00000484       HideCaret
+ 0001:0000048C       InflateRect
+ 0001:00000494       IntersectRect
+ 0001:0000049C       InvalidateRect
+ 0001:000004A4       KillTimer
+ 0001:000004AC       OffsetRect
+ 0001:000004B4       PostMessage
+ 0001:000004BC       PtInRect
+ 0001:000004C4       ReleaseDC
+ 0001:000004CC       SendMessage
+ 0001:000004D4       SetTimer
+ 0001:000004DC       SetWindowPos
+ 0001:000004E4       SetWindowsHookEx
+ 0001:000004EC       ShowWindow
+ 0001:000004F4       SystemParametersInfo
+ 0001:000004FC       TabbedTextOut
+ 0001:00000504       UnhookWindowsHookEx
+ 0001:0000050C       MakeLong
+ 0001:00000518       PointToSmallPoint
+ 0001:00000530       MakeWParam
+ 0001:00000538       MakeLParam
+ 0001:00000540       Finalization
+ 0001:00000570       Windows
+ 0001:00000598       Finalization
+ 0001:000005C8       Messages
+ 0001:000009B0       Finalization
+ 0001:000009E0       Accessibility_TLB
+ 0001:00000EA8       TreeView_GetItem
+ 0001:00000EC0       TreeView_SetItem
+ 0001:00000ED8       Finalization
+ 0001:00000F08       CommCtrl
+ 0001:00000F48       Finalization
+ 0001:00000F78       Imm
+ 0001:00001068       Finalization
+ 0001:00001098       ShlObj
+ 0001:000010A0       Finalization
+ 0001:000010D0       UrlMon
+ 0001:000010D8       Finalization
+ 0001:00001108       WinInet
+ 0001:00001110       Finalization
+ 0001:00001140       RegStr
+ 0001:00001148       Finalization
+ 0001:00001178       ShellAPI
+ 0001:00001190       Finalization
+ 0001:000011C0       WinSpool
+ 0001:00001568       Finalization
+ 0001:00001598       CommDlg
+ 0001:000015A0       Finalization
+ 0001:000015D0       Dlgs
+ 0001:000019E8       Finalization
+ 0001:00001A18       RichEdit
+ 0001:00001AD8       GetDefaultObject
+ 0001:00001B1C       GetDefaultObject
+ 0001:00001B60       GetLResult
+ 0001:00001BC8       Finalization
+ 0001:00001C0C       uAccessAPI
+ 0001:000062E0       ClientWidthOfList
+ 0001:00006324       FontWidthPixel
+ 0001:00006430       FontHeightPixel
+ 0001:00006474       HigherOf
+ 0001:00006480       LowerOf
+ 0001:0000648C       Piece
+ 0001:0000650C       SetPiece
+ 0001:00006630       IntArrayToString
+ 0001:00006700       StringToIntArray
+ 0001:00006874       StringBetween
+ 0001:000068AC       ItemTipKeyHook
+ 0001:000068E0       AddItemTipRef
+ 0001:00006918       RemoveItemTipRef
+ 0001:00006948       TItemTip.Create
+ 0001:0000699C       TItemTip.Destroy
+ 0001:000069D8       TItemTip.CreateParams
+ 0001:00006A04       TItemTip.Paint
+ 0001:00006AEC       TItemTip.Hide
+ 0001:00006B30       TItemTip.GetTabSettings
+ 0001:00006C5C       TItemTip.UpdateText
+ 0001:00006F00       TItemTip.Show
+ 0001:000070D0       GetORCBBitmap
+ 0001:0000715C       DestroyORCBBitmaps
+ 0001:00007180       TORStaticText.DoEnter
+ 0001:000071A8       TORStaticText.DoExit
+ 0001:000071D0       TORStrings.Add
+ 0001:0000724C       TORStrings.Clear
+ 0001:00007278       TORStrings.Create
+ 0001:000072D0       TORStrings.Delete
+ 0001:00007304       TORStrings.Destroy
+ 0001:00007338       TORStrings.Get
+ 0001:00007360       TORStrings.GetCount
+ 0001:00007378       TORStrings.GetObject
+ 0001:00007398       TORStrings.IndexOf
+ 0001:000073B8       TORStrings.Insert
+ 0001:0000743C       TORStrings.Put
+ 0001:000074BC       TORStrings.PutObject
+ 0001:000074D8       TORStrings.SetUpdateState
+ 0001:000074F4       TORStrings.Verify
+ 0001:00007940       TORListBox.Create
+ 0001:00007A38       TORListBox.Destroy
+ 0001:00007A8C       TORListBox.CreateParams
+ 0001:00007AA4       TORListBox.CreateWnd
+ 0001:00007AFC       TORListBox.Loaded
+ 0001:00007B30       TORListBox.DestroyWnd
+ 0001:00007B50       TORListBox.TextToShow
+ 0001:00007C4C       TORListBox.IsSynonym
+ 0001:00007D3C       TORListBox.GetDisplayText
+ 0001:00007D98       TORListBox.LBGetItemData
+ 0001:00007DCC       TORListBox.LBSetItemData
+ 0001:00007E58       TORListBox.LBGetText
+ 0001:00007F24       TORListBox.LBGetTextLen
+ 0001:00007FC8       TORListBox.LBAddString
+ 0001:000080B4       TORListBox.LBInsertString
+ 0001:000081C4       TORListBox.LBDeleteString
+ 0001:00008248       TORListBox.LBResetContent
+ 0001:000082E4       TORListBox.LBSetCurSel
+ 0001:00008300       TORListBox.CMFontChanged
+ 0001:00008338       TORListBox.WMKeyDown
+ 0001:00008520       TORListBox.WMLButtonDown
+ 0001:000087D4       TORListBox.WMLButtonUp
+ 0001:0000881C       TORListBox.WMRButtonUp
+ 0001:000088CC       TORListBox.WMLButtonDblClk
+ 0001:00008A94       TORListBox.WMCancelMode
+ 0001:00008AC8       TORListBox.WMMove
+ 0001:00008AE8       TORListBox.WMSize
+ 0001:00008B30       TORListBox.WMVScroll
+ 0001:00008B54       TORListBox.CMHintShow
+ 0001:00008BB0       TORListBox.Click
+ 0001:00008BCC       TORListBox.DoChange
+ 0001:00008C10       TORListBox.DoEnter
+ 0001:00008C1C       TORListBox.DoExit
+ 0001:00008C40       TORListBox.DestroyItems
+ 0001:00008CB8       TORListBox.ToggleCheckBox
+ 0001:00008DA8       TORListBox.KeyPress
+ 0001:00008DD8       TORListBox.MouseDown
+ 0001:00008E58       TORListBox.MouseMove
+ 0001:00009018       TORListBox.MeasureItem
+ 0001:000090BC       TORListBox.WMDestroy
+ 0001:000090E8       TORListBox.CNDrawItem
+ 0001:0000910C       TORListBox.DrawItem
+ 0001:00009544       TORListBox.GetIndexFromY
+ 0001:000095D8       TORListBox.SetFocusIndex
+ 0001:00009898       TORListBox.UMShowTip
+ 0001:000099D0       TORListBox.GetIEN
+ 0001:00009A80       TORListBox.GetItemIEN
+ 0001:00009B30       TORListBox.SelectByIEN
+ 0001:00009B94       TORListBox.SetExactByIEN
+ 0001:00009C94       TORListBox.GetItemID
+ 0001:00009D30       TORListBox.SelectByID
+ 0001:00009DF4       TORListBox.GetReference
+ 0001:00009E90       TORListBox.SetReference
+ 0001:00009F64       TORListBox.AddReference
+ 0001:00009FD4       TORListBox.InsertReference
+ 0001:0000A048       TORListBox.IndexOfReference
+ 0001:0000A0FC       TORListBox.GetTabPositions
+ 0001:0000A138       TORListBox.SetTabPositions
+ 0001:0000A2E4       TORListBox.SetTabPosInPixels
+ 0001:0000A2FC       TORListBox.SetTabStops
+ 0001:0000A48C       TORListBox.SetHideSynonyms
+ 0001:0000A550       TORListBox.SetSynonymChars
+ 0001:0000A5E4       TORListBox.GetStyle
+ 0001:0000A5EC       TORListBox.SetStyle
+ 0001:0000A620       TORListBox.SetDelimiter
+ 0001:0000A630       TORListBox.GetPieces
+ 0001:0000A650       TORListBox.SetPieces
+ 0001:0000A674       TORListBox.ResetItems
+ 0001:0000A850       TORListBox.SetLongList
+ 0001:0000A888       TORListBox.AdjustScrollBar
+ 0001:0000A918       TORListBox.CreateScrollBar
+ 0001:0000A9C8       TORListBox.FreeScrollBar
+ 0001:0000A9EC       TORListBox.ForDataUse
+ 0001:0000ACA4       TORListBox.InitLongList
+ 0001:0000AE40       TORListBox.InsertSeparator
+ 0001:0000AEE8       TORListBox.ClearTop
+ 0001:0000AF4C       ClearLong
+ 0001:0000B03C       TORListBox.NeedData
+ 0001:0000B354       TORListBox.PositionThumb
+ 0001:0000B404       TORListBox.ScrollTo
+ 0001:0000B844       TORListBox.GetStringIndex
+ 0001:0000B98C       TORListBox.SelectString
+ 0001:0000BC94       TORListBox.SetCheckBoxes
+ 0001:0000BCE0       TORListBox.SetFlatCheckBoxes
+ 0001:0000BCF8       TORListBox.GetChecked
+ 0001:0000BD40       TORListBox.SetChecked
+ 0001:0000BDD4       TORListBox.GetCheckedState
+ 0001:0000BE10       TORListBox.SetCheckedState
+ 0001:0000BE94       TORListBox.GetMultiSelect
+ 0001:0000BE9C       TORListBox.SetMultiSelect
+ 0001:0000BEC0       TORListBox.GetCheckedString
+ 0001:0000BF68       TORListBox.SetCheckedString
+ 0001:0000C004       TORListBox.GetMItems
+ 0001:0000C03C       TORListBox.SetMItems
+ 0001:0000C080       TORListBox.Clear
+ 0001:0000C09C       TORListBox.SetCaption
+ 0001:0000C13C       TORListBox.GetCaption
+ 0001:0000C158       TORListBox.MakeAccessible
+ 0001:0000C220       TORListBox.WMGetObject
+ 0001:0000C258       TORDropPanel.BtnClicked
+ 0001:0000C290       TORDropPanel.Create
+ 0001:0000C308       TORDropPanel.CreateParams
+ 0001:0000C348       TORDropPanel.GetButton
+ 0001:0000C3F8       TORDropPanel.ResetButtons
+ 0001:0000C42C       TORDropPanel.Resize
+ 0001:0000C4C4       TORDropPanel.UpdateButtons
+ 0001:0000C648       TORDropPanel.WMActivateApp
+ 0001:0000C6A8       TORComboEdit.CreateParams
+ 0001:0000C6C8       TORComboEdit.WMKillFocus
+ 0001:0000C740       TORComboEdit.WMSetFocus
+ 0001:0000C79C       TORComboBox.Create
+ 0001:0000C93C       TORComboBox.WMDestroy
+ 0001:0000C96C       TORComboBox.CMFontChanged
+ 0001:0000C984       TORComboBox.WMMove
+ 0001:0000C9A0       TORComboBox.WMSize
+ 0001:0000C9B8       TORComboBox.WMTimer
+ 0001:0000CA18       TORComboBox.EditControl
+ 0001:0000CA2C       TORComboBox.AdjustSizeOfSelf
+ 0001:0000CBAC       TORComboBox.DropButtonDown
+ 0001:0000CBDC       TORComboBox.DropButtonUp
+ 0001:0000CC0C       TORComboBox.DoEnter
+ 0001:0000CC34       TORComboBox.UMGotFocus
+ 0001:0000CC64       TORComboBox.DoExit
+ 0001:0000CCAC       TORComboBox.Loaded
+ 0001:0000CCC8       TORComboBox.FwdChange
+ 0001:0000CCFC       TORComboBox.FwdChangeDelayed
+ 0001:0000D00C       TORComboBox.FwdClick
+ 0001:0000D160       TORComboBox.FwdDblClick
+ 0001:0000D184       TORComboBox.FwdKeyDown
+ 0001:0000D55C       TORComboBox.FwdKeyPress
+ 0001:0000D5A4       TORComboBox.FwdKeyUp
+ 0001:0000D610       TORComboBox.FwdMouseUp
+ 0001:0000D634       TORComboBox.FwdNeedData
+ 0001:0000D6AC       TORComboBox.SetDropDownCount
+ 0001:0000D6B8       TORComboBox.SetDroppedDown
+ 0001:0000D904       TORComboBox.SetEditRect
+ 0001:0000D9D4       TORComboBox.SetEditText
+ 0001:0000DA78       TORComboBox.SetItemIndex
+ 0001:0000DB5C       TORComboBox.SelectByIEN
+ 0001:0000DB88       TORComboBox.SelectByID
+ 0001:0000DBAC       TORComboBox.SetExactByIEN
+ 0001:0000DBD8       TORComboBox.SetStyle
+ 0001:0000DDB8       TORComboBox.StartKeyTimer
+ 0001:0000DE28       TORComboBox.StopKeyTimer
+ 0001:0000DE54       TORComboBox.AddReference
+ 0001:0000DEB8       TORComboBox.Clear
+ 0001:0000DEE0       TORComboBox.ClearTop
+ 0001:0000DEF0       TORComboBox.ForDataUse
+ 0001:0000DF00       TORComboBox.InitLongList
+ 0001:0000DF50       TORComboBox.IndexOfReference
+ 0001:0000DFB0       TORComboBox.InsertReference
+ 0001:0000E018       TORComboBox.InsertSeparator
+ 0001:0000E028       TORComboBox.GetAutoSelect
+ 0001:0000E038       TORComboBox.GetColor
+ 0001:0000E044       TORComboBox.GetDelimiter
+ 0001:0000E054       TORComboBox.GetDisplayText
+ 0001:0000E074       TORComboBox.GetItemHeight
+ 0001:0000E084       TORComboBox.GetIEN
+ 0001:0000E0A8       TORComboBox.GetItemID
+ 0001:0000E0C4       TORComboBox.GetItemIEN
+ 0001:0000E0E8       TORComboBox.GetItemIndex
+ 0001:0000E0FC       TORComboBox.GetItemTipEnable
+ 0001:0000E10C       TORComboBox.GetItemTipColor
+ 0001:0000E11C       TORComboBox.GetLongList
+ 0001:0000E12C       TORComboBox.GetMaxLength
+ 0001:0000E13C       TORComboBox.GetPieces
+ 0001:0000E158       TORComboBox.GetReference
+ 0001:0000E178       TORComboBox.GetSelLength
+ 0001:0000E18C       TORComboBox.GetSelStart
+ 0001:0000E1A0       TORComboBox.GetSelText
+ 0001:0000E1C0       TORComboBox.GetShortCount
+ 0001:0000E1D0       TORComboBox.GetSorted
+ 0001:0000E1E0       TORComboBox.GetHideSynonyms
+ 0001:0000E1F0       TORComboBox.GetSynonymChars
+ 0001:0000E210       TORComboBox.SetHideSynonyms
+ 0001:0000E220       TORComboBox.SetSynonymChars
+ 0001:0000E270       TORComboBox.GetTabPositions
+ 0001:0000E28C       TORComboBox.GetTabPosInPixels
+ 0001:0000E29C       TORComboBox.GetText
+ 0001:0000E2B8       TORComboBox.SelectAll
+ 0001:0000E2C8       TORComboBox.SetAutoSelect
+ 0001:0000E2D8       TORComboBox.SetColor
+ 0001:0000E310       TORComboBox.SetDelimiter
+ 0001:0000E320       TORComboBox.SetItemHeight
+ 0001:0000E330       TORComboBox.SetItemTipEnable
+ 0001:0000E340       TORComboBox.SetItemTipColor
+ 0001:0000E350       TORComboBox.SetLongList
+ 0001:0000E360       TORComboBox.SetMaxLength
+ 0001:0000E370       TORComboBox.SetPieces
+ 0001:0000E380       TORComboBox.SetReference
+ 0001:0000E3E0       TORComboBox.SetSelLength
+ 0001:0000E3F8       TORComboBox.SetSelStart
+ 0001:0000E410       TORComboBox.SetSelText
+ 0001:0000E420       TORComboBox.SetSorted
+ 0001:0000E430       TORComboBox.SetTabPositions
+ 0001:0000E440       TORComboBox.SetTabPosInPixels
+ 0001:0000E450       TORComboBox.SetText
+ 0001:0000E460       TORComboBox.SetItems
+ 0001:0000E474       TORComboBox.GetCheckBoxes
+ 0001:0000E484       TORComboBox.GetChecked
+ 0001:0000E494       TORComboBox.GetCheckEntireLine
+ 0001:0000E4A4       TORComboBox.GetFlatCheckBoxes
+ 0001:0000E4B4       TORComboBox.SetCheckBoxes
+ 0001:0000E6A8       TORComboBox.SetChecked
+ 0001:0000E6E0       TORComboBox.SetCheckEntireLine
+ 0001:0000E6F0       TORComboBox.SetFlatCheckBoxes
+ 0001:0000E700       TORComboBox.DropPanelBtnPressed
+ 0001:0000E768       TORComboBox.GetCheckedString
+ 0001:0000E784       TORComboBox.SetCheckedString
+ 0001:0000E794       TORComboBox.SetCheckBoxEditColor
+ 0001:0000E7C8       TORComboBox.SetListItemsOnly
+ 0001:0000E7E8       TORComboBox.SetOnCheckedText
+ 0001:0000E850       TORComboBox.SetTemplateField
+ 0001:0000E898       TORComboBox.GetOnSynonymCheck
+ 0001:0000E8B0       TORComboBox.SetOnSynonymCheck
+ 0001:0000E8D0       TORComboBox.GetEnabled
+ 0001:0000E8DC       TORComboBox.SetEnabled
+ 0001:0000E928       TORComboBox.GetEditBoxText
+ 0001:0000EA38       TORComboBox.UpdateCheckEditBoxText
+ 0001:0000EAB8       TORComboBox.CheckBoxSelected
+ 0001:0000EAEC       TORComboBox.GetMItems
+ 0001:0000EAF4       TORComboBox.SetCaption
+ 0001:0000EB04       TORComboBox.GetCaption
+ 0001:0000EB20       TORComboBox.MakeAccessible
+ 0001:0000EB78       TORComboBox.GetCaseChanged
+ 0001:0000EB88       TORComboBox.SetCaseChanged
+ 0001:0000EB98       TORComboBox.GetLookupPiece
+ 0001:0000EBA8       TORComboBox.SetLookupPiece
+ 0001:0000EBB8       TSizeRatio.Create
+ 0001:0000EC30       TORAutoPanel.Destroy
+ 0001:0000ECA8       TORAutoPanel.BuildSizes
+ 0001:0000EDA0       TORAutoPanel.Loaded
+ 0001:0000EDD4       TORAutoPanel.DoResize
+ 0001:0000EF7C       TORAutoPanel.Resize
+ 0001:0000EFA8       TOROffsetLabel.Create
+ 0001:0000F008       TOROffsetLabel.CMTextChanged
+ 0001:0000F020       TOROffsetLabel.CMFontChanged
+ 0001:0000F038       TOROffsetLabel.AdjustSizeOfSelf
+ 0001:0000F0D8       TOROffsetLabel.DoDrawText
+ 0001:0000F178       TOROffsetLabel.Paint
+ 0001:0000F214       TOROffsetLabel.GetTransparent
+ 0001:0000F220       TOROffsetLabel.SetTransparent
+ 0001:0000F264       TOROffsetLabel.SetVertOffset
+ 0001:0000F274       TOROffsetLabel.SetHorzOffset
+ 0001:0000F284       TOROffsetLabel.SetWordWrap
+ 0001:0000F29C       TORAlignButton.Create
+ 0001:0000F2EC       TORAlignButton.CreateParams
+ 0001:0000F338       TORAlignButton.SetAlignment
+ 0001:0000F350       TORAlignButton.SetLayout
+ 0001:0000F368       TORAlignButton.SetWordWrap
+ 0001:0000F380       TORTreeNode.EnsureVisible
+ 0001:0000F430       TORTreeNode.GetBold
+ 0001:0000F46C       TORTreeNode.GetORTreeView
+ 0001:0000F488       TORTreeNode.GetParent
+ 0001:0000F4A4       TORTreeNode.GetText
+ 0001:0000F4BC       TORTreeNode.SetBold
+ 0001:0000F500       TORTreeNode.SetPiece
+ 0001:0000F544       TORTreeNode.SetStringData
+ 0001:0000F5F0       TORTreeNode.SetText
+ 0001:0000F5FC       TORTreeNode.UpdateText
+ 0001:0000F68C       TORTreeNode.MakeAccessible
+ 0001:0000F750       TORTreeNode.WMGetObject
+ 0001:0000F784       CalcShortName
+ 0001:0000F9B0       TORTreeNode.SetCaption
+ 0001:0000FA60       TORTreeView.CNNotify
+ 0001:0000FAEC       TORTreeView.Create
+ 0001:0000FB2C       TORTreeView.CreateNode
+ 0001:0000FB68       TORTreeView.FindPieceNode
+ 0001:0000FBC8       TORTreeView.FindPieceNode
+ 0001:0000FCB0       TORTreeView.GetExpandedIDStr
+ 0001:0000FDAC       TORTreeView.SetExpandedIDStr
+ 0001:0000FDBC       TORTreeView.SetExpandedIDStr
+ 0001:0000FF30       TORTreeView.GetHorzScrollPos
+ 0001:0000FF48       TORTreeView.GetVertScrollPos
+ 0001:0000FF60       TORTreeView.RenameNodes
+ 0001:0001001C       TORTreeView.SetNodeDelim
+ 0001:00010034       TORTreeView.SetHorzScrollPos
+ 0001:00010070       TORTreeView.SetNodePiece
+ 0001:00010088       TORTreeView.SetVertScrollPos
+ 0001:000100C4       TORTreeView.GetNodeID
+ 0001:000100EC       TORTreeView.GetNodeID
+ 0001:000101B0       TORTreeView.MakeAccessible
+ 0001:00010278       TORTreeView.WMGetObject
+ 0001:000102B0       TORTreeView.SetShortNodeCaptions
+ 0001:000102C0       TORCBImageIndexes.Create
+ 0001:00010344       TORCBImageIndexes.Destroy
+ 0001:00010378       TORCBImageIndexes.SetImages
+ 0001:000103B8       RStr
+ 0001:000103F4       TORCBImageIndexes.IdxString
+ 0001:000104D8       TORCBImageIndexes.SetIdxString
+ 0001:00010638       TORCBImageIndexes.ImageListChanged
+ 0001:0001066C       TORCBImageIndexes.Notification
+ 0001:0001069C       TORCBImageIndexes.SetCheckedDisabledIndex
+ 0001:000106B0       TORCBImageIndexes.SetCheckedEnabledIndex
+ 0001:000106C4       TORCBImageIndexes.SetGrayedDisabledIndex
+ 0001:000106D8       TORCBImageIndexes.SetGrayedEnabledIndex
+ 0001:000106EC       TORCBImageIndexes.SetUncheckedDisabledIndex
+ 0001:00010700       TORCBImageIndexes.SetUncheckedEnabledIndex
+ 0001:00010714       TORCheckBox.Create
+ 0001:00010770       TORCheckBox.ListViewCreate
+ 0001:000107BC       TORCheckBox.CreateCommon
+ 0001:000107EC       TORCheckBox.Destroy
+ 0001:00010834       TORCheckBox.GetImageIndexes
+ 0001:00010850       TORCheckBox.GetImageList
+ 0001:0001085C       TORCheckBox.SetImageIndexes
+ 0001:0001086C       TORCheckBox.SetImageList
+ 0001:0001087C       TORCheckBox.Toggle
+ 0001:00010908       TORCheckBox.CreateParams
+ 0001:00010924       TORCheckBox.CMEnabledChanged
+ 0001:0001093C       TORCheckBox.CMFontChanged
+ 0001:00010954       TORCheckBox.CNDrawItem
+ 0001:00010970       TORCheckBox.CNMeasureItem
+ 0001:00010994       TORCheckBox.GetDrawData
+ 0001:00010F3C       TORCheckBox.DrawItem
+ 0001:00011324       TORCheckBox.SetGrayedStyle
+ 0001:00011348       TORCheckBox.WMLButtonDblClk
+ 0001:00011360       TORCheckBox.WMSize
+ 0001:00011388       TORCheckBox.BMSetCheck
+ 0001:0001148C       TORCheckBox.SetWordWrap
+ 0001:000114B4       TORCheckBox.SetAutoSize
+ 0001:000114DC       TORCheckBox.AutoAdjustSize
+ 0001:000116B0       TORCheckBox.GetCaption
+ 0001:000116C8       TORCheckBox.SetCaption
+ 0001:00011730       TORCheckBox.SetAllowAllUnchecked
+ 0001:00011740       TORCheckBox.SetGroupIndex
+ 0001:00011770       TORCheckBox.SyncAllowAllUnchecked
+ 0001:000117EC       TORCheckBox.SetParent
+ 0001:00011804       TORCheckBox.SetRadioStyle
+ 0001:00011814       TORCheckBox.SetAssociate
+ 0001:00011850       EnableCtrl
+ 0001:000118EC       TORCheckBox.UpdateAssociate
+ 0001:0001190C       TORCheckBox.Notification
+ 0001:00011940       TORCheckBox.SetFocusOnBox
+ 0001:00011950       TORCheckBox.BMGetCheck
+ 0001:0001197C       TORCheckBox.BMGetState
+ 0001:00011980       TORListView.WMNotify
+ 0001:00011A48       TORListView.LVMSetColumn
+ 0001:00011AFC       TORListView.LVMSetColumnWidth
+ 0001:00011BB0       TORComboPanelEdit.Destroy
+ 0001:00011BE8       TORComboPanelEdit.Paint
+ 0001:00011CB0       TKeyClickPanel.KeyDown
+ 0001:00011CD8       TKeyClickRadioGroup.Click
+ 0001:00011D10       TKeyClickRadioGroup.Create
+ 0001:00011D70       TKeyClickRadioGroup.KeyDown
+ 0001:00011DE0       TCaptionListBox.DoEnter
+ 0001:00011E04       TCaptionListBox.GetCaption
+ 0001:00011E30       TCaptionListBox.MakeAccessible
+ 0001:00011EF8       TCaptionListBox.SetCaption
+ 0001:00011F7C       TCaptionListBox.WMGetObject
+ 0001:00011FB4       TCaptionListBox.WMMouseMove
+ 0001:00012074       TCaptionListBox.WMRButtonUp
+ 0001:000121A8       TCaptionCheckListBox.GetCaption
+ 0001:000121D4       TCaptionCheckListBox.SetCaption
+ 0001:00012258       TCaptionMemo.GetCaption
+ 0001:00012284       TCaptionMemo.SetCaption
+ 0001:00012308       TCaptionEdit.GetCaption
+ 0001:00012334       TCaptionEdit.SetCaption
+ 0001:000123B8       TCaptionRichEdit.MakeAccessible
+ 0001:0001247C       TCaptionRichEdit.WMGetObject
+ 0001:000124B4       TCaptionTreeView.GetCaption
+ 0001:000124CC       TCaptionTreeView.SetCaption
+ 0001:0001255C       TCaptionComboBox.GetCaption
+ 0001:00012588       TCaptionComboBox.SetCaption
+ 0001:0001260C       TORAlignSpeedButton.Paint
+ 0001:00012684       GoodNotifyWinEvent
+ 0001:0001268C       TCaptionStringGrid.ColRowToIndex
+ 0001:000126DC       TCaptionStringGrid.IndexToColRow
+ 0001:00012740       TCaptionStringGrid.KeyUp
+ 0001:000127B8       TCaptionStringGrid.MakeAccessible
+ 0001:0001287C       TCaptionStringGrid.WMGetObject
+ 0001:000128B4       IsAMouseButtonDown
+ 0001:000128EC       TORComboBox.SetNumForMatch
+ 0001:00012914       TORComboBox.SetUniqueAutoComplete
+ 0001:0001291C       TORListBox.VerifyUnique
+ 0001:00012A18       TORComboBox.SetTextAutoComplete
+ 0001:00012A94       Finalization
+ 0001:00012AE0       ORCtrls
+ 0001:00012DE4       TORImageIndexesPropertyEditor.Modified
+ 0001:00012DF0       TORImageIndexesPropertyEditor.GetAttributes
+ 0001:00012DFC       TORImageIndexesPropertyEditor.GetProperties
+ 0001:00012E30       TORImageIndexesPropertyEditor.GetValue
+ 0001:00012E48       TORImageIndexesPropertyEditor.SetValue
+ 0001:00012E54       TORImageIndexesElementPropertyEditor.Create
+ 0001:00012EA0       TORImageIndexesElementPropertyEditor.ParentImgIdx
+ 0001:00012EDC       TORImageIndexesElementPropertyEditor.GetAttributes
+ 0001:00012EE8       TORImageIndexesElementPropertyEditor.GetName
+ 0001:00013024       TORImageIndexesElementPropertyEditor.GetValue
+ 0001:000130EC       TORImageIndexesElementPropertyEditor.SetValue
+ 0001:000131A0       Register
+ 0001:000132B0       Finalization
+ 0001:000132E0       ORCtrlsDsgn
+ 0001:00013528       @GetPackageInfoTable
+ 0001:00013530       @PackageLoad
+ 0001:0001353C       @PackageUnload
+ 0001:00013548       ORCtrlLib60
+ 0002:00000000       Module
+ 0002:00000018       TlsProc
+ 0002:00000028       LIBID_Accessibility
+ 0002:00000038       IID_IAccessible
+ 0002:00000048       IID_IAccessibleHandler
+ 0002:00000058       ALPHA_DISTRIBUTION
+ 0002:000001EC       CheckBoxImageResNames
+ 0002:0000022C       ComboBoxImages
+ 0002:00000234       ButtonAlignment
+ 0002:00000240       ButtonWordWrap
+ 0002:00000248       ButtonLayout
+ 0002:00001000       ModuleIsLib
+ 0002:00001001       ModuleIsPackage
+ 0002:00001004       TlsIndex
+ 0002:0000100C       HInstance
+ 0002:00001010       .1
+ 0002:00001014       tlsBuffer
+ 0002:00001018       .3
+ 0002:0000101C       .1
+ 0002:00001020       .1
+ 0002:00001024       .1
+ 0002:00001028       .1
+ 0002:0000102C       .1
+ 0002:00001030       .1
+ 0002:00001034       .1
+ 0002:00001038       .1
+ 0002:0000103C       .1
+ 0002:00001040       .3
+ 0002:00001044       .1
+ 0002:00001048       .1
+ 0002:0000104C       .1
+ 0002:00001050       .1
+ 0002:00001054       CreateStdAccessibleObject
+ 0002:00001058       LresultFromObject
+ 0002:0000105C       OleAccHandle
+ 0002:00001060       .13
+ 0002:00001064       uKeyHookHandle
+ 0002:00001068       uItemTip
+ 0002:0000106C       uItemTipCount
+ 0002:00001070       uNewStyle
+ 0002:00001074       ORCBImages
+ 0002:000010B4       .3
+
+
+Line numbers for Accessibility_TLB(..\CPRS-Chart\Accessibility_TLB.pas) segment .text
+
+   149 0001:000009E0   149 0001:000009E7
+
+Line numbers for uAccessAPI(uAccessAPI.pas) segment .text
+
+   115 0001:00001AD8   116 0001:00001AE1   118 0001:00001AEA   119 0001:00001B05
+   122 0001:00001B0E   123 0001:00001B15   126 0001:00001B1C   127 0001:00001B25
+   129 0001:00001B2E   130 0001:00001B49   133 0001:00001B52   134 0001:00001B59
+   137 0001:00001B60   138 0001:00001B80   140 0001:00001B89   143 0001:00001BA0
+   144 0001:00001BC4   161 0001:00001BC8   162 0001:00001BEA   164 0001:00001C0A
+   147 0001:00001C0C   148 0001:00001C18   149 0001:00001C27   151 0001:00001C30
+   152 0001:00001C45   156 0001:00001C5C   157 0001:00001C63   160 0001:00001C6A
+
+Line numbers for ORCtrls(ORCtrls.pas) segment .text
+
+  1086 0001:000062E0  1089 0001:000062E4  1090 0001:000062E7  1092 0001:000062F0
+  1093 0001:000062FA  1096 0001:0000630D  1097 0001:0000631F  1105 0001:00006324
+  1106 0001:0000632D  1107 0001:00006337  1108 0001:00006345  1109 0001:00006352
+  1110 0001:00006360  1111 0001:00006374  1113 0001:000063AC  1116 0001:000063CE
+  1118 0001:000063E4  1126 0001:00006430  1127 0001:0000643B  1128 0001:00006444
+  1129 0001:0000644D  1130 0001:00006457  1131 0001:0000645A  1132 0001:00006461
+  1133 0001:0000646B  1138 0001:00006474  1139 0001:00006476  1140 0001:0000647E
+  1145 0001:00006480  1146 0001:00006482  1147 0001:0000648A  1154 0001:0000648C
+  1155 0001:0000649A  1156 0001:0000649F  1157 0001:000064A8  1160 0001:000064B3
+  1161 0001:000064BD  1162 0001:000064C2  1158 0001:000064CB  1164 0001:000064D4
+  1165 0001:000064DF  1166 0001:00006503  1173 0001:0000650C  1174 0001:00006537
+  1175 0001:0000653C  1176 0001:00006548  1179 0001:00006556  1180 0001:00006560
+  1181 0001:00006565  1177 0001:00006571  1183 0001:0000657A  1184 0001:00006587
+  1185 0001:0000658C  1186 0001:000065BD  1187 0001:00006627  1193 0001:00006630
+  1194 0001:00006654  1195 0001:0000665B  1196 0001:000066B0  1197 0001:000066ED
+  1204 0001:00006700  1205 0001:00006728  1207 0001:00006747  1209 0001:00006758
+  1210 0001:00006782  1213 0001:000067A0  1214 0001:000067AB  1216 0001:000067BB
+  1217 0001:000067D0  1219 0001:000067DE  1220 0001:000067F8  1222 0001:0000681A
+  1223 0001:00006860  1227 0001:00006874  1228 0001:00006882  1229 0001:00006884
+  1230 0001:000068A3  1236 0001:000068AC  1237 0001:000068B3  1238 0001:000068C4
+  1239 0001:000068D8  1244 0001:000068E0  1245 0001:000068E3  1246 0001:00006905
+  1247 0001:00006913  1250 0001:00006918  1251 0001:0000691B  1252 0001:00006929
+  1253 0001:00006945  1257 0001:00006948  1258 0001:0000695D  1259 0001:00006966
+  1260 0001:00006996  1264 0001:0000699C  1265 0001:000069AA  1266 0001:000069B5
+  1267 0001:000069C1  1268 0001:000069D3  1272 0001:000069D8  1273 0001:000069DE
+  1274 0001:000069E5  1275 0001:000069EC  1276 0001:000069FC  1277 0001:00006A00
+  1285 0001:00006A04  1286 0001:00006A22  1287 0001:00006A2C  1289 0001:00006A32
+  1290 0001:00006A41  1291 0001:00006A55  1295 0001:00006A99  1297 0001:00006AE3
+  1301 0001:00006AEC  1302 0001:00006AF2  1306 0001:00006AFB  1307 0001:00006B10
+  1308 0001:00006B17  1309 0001:00006B26  1311 0001:00006B2D  1317 0001:00006B30
+  1318 0001:00006B3B  1319 0001:00006B47  1320 0001:00006B51  1322 0001:00006B56
+  1323 0001:00006B65  1327 0001:00006B7C  1328 0001:00006B9C  1329 0001:00006BB3
+  1330 0001:00006BE0  1332 0001:00006BF5  1334 0001:00006BFA  1335 0001:00006BFE
+  1338 0001:00006C32  1339 0001:00006C43  1341 0001:00006C4D  1332 0001:00006C4E
+  1342 0001:00006C53  1349 0001:00006C5C  1350 0001:00006C82  1351 0001:00006C93
+  1352 0001:00006CA7  1354 0001:00006CB0  1355 0001:00006CC3  1358 0001:00006CD8
+  1359 0001:00006CF2  1361 0001:00006D05  1362 0001:00006D33  1364 0001:00006D6E
+  1366 0001:00006D75  1369 0001:00006DBA  1370 0001:00006DC9  1371 0001:00006DD0
+  1372 0001:00006DD5  1373 0001:00006DDB  1375 0001:00006DEA  1376 0001:00006DF4
+  1378 0001:00006DFE  1379 0001:00006E02  1381 0001:00006E0E  1382 0001:00006E10
+  1384 0001:00006E23  1386 0001:00006E38  1387 0001:00006E47  1390 0001:00006E54
+  1392 0001:00006E56  1393 0001:00006E5D  1394 0001:00006E79  1396 0001:00006E9F
+  1397 0001:00006ED5  1402 0001:00006F00  1403 0001:00006F13  1404 0001:00006F19
+  1405 0001:00006F1F  1406 0001:00006F25  1407 0001:00006F37  1408 0001:00006F5A
+  1409 0001:00006F64  1430 0001:000070D0  1431 0001:000070E7  1433 0001:000070F6
+  1434 0001:00007109  1436 0001:00007131  1437 0001:00007157  1443 0001:0000715C
+  1444 0001:00007161  1446 0001:00007168  1447 0001:0000716E  1448 0001:00007173
+  1444 0001:00007176  1449 0001:0000717A  1454 0001:00007180  1455 0001:00007186
+  1456 0001:0000718D  1457 0001:00007197  1458 0001:000071A5  1461 0001:000071A8
+  1462 0001:000071AE  1463 0001:000071B5  1464 0001:000071BF  1465 0001:000071CD
+  1472 0001:000071D0  1473 0001:000071EF  1474 0001:000071F5  1475 0001:000071F9
+  1476 0001:00007212  1477 0001:00007218  1478 0001:00007245  1483 0001:0000724C
+  1484 0001:00007253  1485 0001:0000725A  1486 0001:00007262  1487 0001:00007265
+  1488 0001:00007269  1489 0001:00007271  1490 0001:00007274  1493 0001:00007278
+  1494 0001:00007290  1495 0001:0000729F  1496 0001:000072A2  1497 0001:000072AE
+  1498 0001:000072C9  1503 0001:000072D0  1504 0001:000072DA  1505 0001:000072E1
+  1506 0001:000072EB  1507 0001:000072EE  1508 0001:000072F2  1509 0001:000072FC
+  1510 0001:000072FF  1513 0001:00007304  1514 0001:00007312  1515 0001:0000731A
+  1516 0001:00007331  1519 0001:00007338  1520 0001:00007345  1521 0001:0000734C
+  1522 0001:00007359  1525 0001:00007360  1526 0001:00007366  1527 0001:0000736D
+  1528 0001:00007375  1531 0001:00007378  1532 0001:00007381  1533 0001:00007388
+  1534 0001:00007392  1537 0001:00007398  1538 0001:000073A1  1539 0001:000073A8
+  1540 0001:000073B2  1545 0001:000073B8  1546 0001:000073DB  1547 0001:000073E2
+  1548 0001:000073EF  1549 0001:000073F5  1550 0001:000073F9  1551 0001:00007412
+  1552 0001:00007435  1558 0001:0000743C  1559 0001:0000745F  1560 0001:0000746C
+  1561 0001:00007472  1562 0001:00007476  1563 0001:0000748F  1564 0001:000074B2
+  1567 0001:000074BC  1568 0001:000074C6  1569 0001:000074D0  1572 0001:000074D8
+  1573 0001:000074DB  1574 0001:000074DF  1576 0001:000074E9  1577 0001:000074F1
+  1586 0001:000074F4  1587 0001:00007517  1588 0001:00007521  1589 0001:00007527
+  1590 0001:0000753D  1591 0001:00007544  1592 0001:0000755A  1593 0001:00007569
+  1594 0001:00007577  1595 0001:00007581  1596 0001:00007597  1597 0001:000075C2
+  1598 0001:000075ED  1599 0001:000075F9  1601 0001:00007603  1602 0001:0000761B
+  1603 0001:00007627  1604 0001:0000766B  1605 0001:00007677  1607 0001:000076C7
+  1608 0001:000076E0  1609 0001:000076ED  1610 0001:000076FE  1612 0001:00007723
+  1616 0001:00007732  1617 0001:00007764  1621 0001:00007796  1601 0001:00007797
+  1622 0001:000077A0  1623 0001:000077AC  1624 0001:000077BB  1627 0001:000077E7
+  1630 0001:00007826  1636 0001:00007940  1637 0001:00007955  1638 0001:0000795E
+  1639 0001:00007963  1640 0001:0000796D  1641 0001:00007977  1642 0001:0000797E
+  1643 0001:00007988  1644 0001:0000798F  1645 0001:00007996  1646 0001:0000799D
+  1647 0001:000079A4  1648 0001:000079AB  1649 0001:000079B2  1650 0001:000079BC
+  1651 0001:000079C6  1652 0001:000079CF  1653 0001:000079D6  1654 0001:000079E6
+  1655 0001:000079ED  1656 0001:000079F4  1657 0001:000079FB  1658 0001:00007A02
+  1659 0001:00007A09  1660 0001:00007A28  1664 0001:00007A38  1665 0001:00007A46
+  1666 0001:00007A51  1667 0001:00007A64  1668 0001:00007A6B  1669 0001:00007A70
+  1670 0001:00007A87  1674 0001:00007A8C  1675 0001:00007A92  1676 0001:00007A99
+  1677 0001:00007AA0  1685 0001:00007AA4  1686 0001:00007AAB  1687 0001:00007AB2
+  1688 0001:00007AB4  1690 0001:00007ABE  1691 0001:00007AC1  1693 0001:00007AC5
+  1694 0001:00007ACC  1696 0001:00007AD6  1697 0001:00007AD9  1699 0001:00007ADE
+  1700 0001:00007AE5  1701 0001:00007AF5  1705 0001:00007AFC  1706 0001:00007B02
+  1707 0001:00007B09  1708 0001:00007B24  1709 0001:00007B2B  1714 0001:00007B30
+  1715 0001:00007B36  1716 0001:00007B3D  1717 0001:00007B44  1718 0001:00007B4B
+  1724 0001:00007B50  1725 0001:00007B7D  1727 0001:00007B87  1728 0001:00007B8E
+  1729 0001:00007B99  1728 0001:00007BE4  1730 0001:00007BE7  1734 0001:00007BFD
+  1736 0001:00007C42  1742 0001:00007C4C  1743 0001:00007C6D  1744 0001:00007C71
+  1746 0001:00007C8B  1747 0001:00007C99  1748 0001:00007C9E  1749 0001:00007CAA
+  1748 0001:00007CE7  1750 0001:00007CEA  1751 0001:00007CF6  1752 0001:00007D00
+  1754 0001:00007D35  1761 0001:00007D3C  1762 0001:00007D4F  1763 0001:00007D56
+  1764 0001:00007D5D  1765 0001:00007D77  1766 0001:00007D7E  1768 0001:00007D82
+  1770 0001:00007D90  1784 0001:00007D98  1785 0001:00007DA1  1786 0001:00007DAA
+  1788 0001:00007DB3  1789 0001:00007DB6  1790 0001:00007DBA  1792 0001:00007DC2
+  1794 0001:00007DC7  1800 0001:00007DCC  1801 0001:00007DD5  1803 0001:00007DDE
+  1804 0001:00007DE5  1805 0001:00007DFD  1806 0001:00007E04  1807 0001:00007E08
+  1808 0001:00007E0E  1809 0001:00007E11  1810 0001:00007E3C  1812 0001:00007E48
+  1813 0001:00007E51  1820 0001:00007E58  1821 0001:00007E72  1822 0001:00007E7B
+  1824 0001:00007E8A  1825 0001:00007E91  1826 0001:00007EA9  1827 0001:00007EB0
+  1829 0001:00007EB4  1830 0001:00007EBB  1831 0001:00007ECC  1832 0001:00007EDE
+  1833 0001:00007EE9  1837 0001:00007EF2  1838 0001:00007EFC  1841 0001:00007F1E
+  1847 0001:00007F24  1848 0001:00007F3E  1849 0001:00007F47  1851 0001:00007F56
+  1852 0001:00007F5D  1853 0001:00007F75  1854 0001:00007F79  1856 0001:00007F97
+  1857 0001:00007F9C  1859 0001:00007FC0  1866 0001:00007FC8  1867 0001:00007FD2
+  1869 0001:00007FDF  1871 0001:00007FE8  1873 0001:00007FFA  1874 0001:00008003
+  1875 0001:00008018  1878 0001:0000801D  1879 0001:0000802F  1881 0001:00008031
+  1882 0001:00008036  1883 0001:0000803A  1885 0001:00008048  1886 0001:0000804F
+  1887 0001:00008058  1889 0001:0000805F  1890 0001:00008069  1892 0001:0000806F
+  1893 0001:00008076  1894 0001:0000808D  1896 0001:00008096  1898 0001:000080A5
+  1899 0001:000080AE  1905 0001:000080B4  1906 0001:000080BE  1908 0001:000080CB
+  1910 0001:000080D4  1912 0001:000080DD  1913 0001:000080E4  1917 0001:000080F4
+  1919 0001:000080FF  1920 0001:00008116  1922 0001:0000811F  1925 0001:0000812D
+  1926 0001:0000813F  1928 0001:00008141  1929 0001:00008146  1930 0001:0000814A
+  1932 0001:00008158  1933 0001:0000815F  1934 0001:00008168  1935 0001:0000816F
+  1936 0001:00008179  1938 0001:0000817F  1939 0001:00008186  1940 0001:0000819D
+  1942 0001:000081A6  1944 0001:000081B5  1945 0001:000081BE  1951 0001:000081C4
+  1954 0001:000081CD  1955 0001:000081D4  1956 0001:000081EC  1957 0001:000081F3
+  1959 0001:000081F7  1960 0001:00008209  1961 0001:00008217  1964 0001:00008222
+  1965 0001:00008229  1966 0001:00008232  1967 0001:00008239  1968 0001:00008243
+  1975 0001:00008248  1976 0001:00008254  1978 0001:0000825D  1979 0001:0000826D
+  1981 0001:00008280  1982 0001:00008287  1983 0001:0000829C  1984 0001:000082A3
+  1985 0001:000082AE  1979 0001:000082AF  1986 0001:000082B2  1989 0001:000082C2
+  1990 0001:000082CB  1991 0001:000082D3  1992 0001:000082DD  1996 0001:000082E4
+  1997 0001:000082EA  1998 0001:000082F1  1999 0001:000082FB  2003 0001:00008300
+  2004 0001:00008306  2005 0001:0000830D  2006 0001:0000832E  2007 0001:00008335
+  2014 0001:00008338  2016 0001:00008341  2018 0001:000083A4  2020 0001:000083B1
+  2022 0001:000083BC  2023 0001:000083D0  2025 0001:000083F1  2033 0001:00008405
+  2034 0001:0000840E  2036 0001:0000844A  2038 0001:00008486  2039 0001:000084A2
+  2040 0001:000084BE  2041 0001:000084CC  2042 0001:000084DA  2043 0001:000084F3
+  2044 0001:0000850C  2046 0001:00008515  2047 0001:0000851A  2057 0001:00008520
+  2058 0001:0000852D  2060 0001:0000853A  2061 0001:00008541  2062 0001:0000854B
+  2064 0001:00008568  2066 0001:0000858B  2067 0001:00008598  2068 0001:000085B4
+  2069 0001:000085C1  2074 0001:000085C8  2075 0001:000085F2  2077 0001:00008619
+  2079 0001:00008626  2081 0001:0000865F  2082 0001:00008668  2084 0001:000086A9
+  2087 0001:000086B7  2088 0001:000086DF  2089 0001:000086E8  2091 0001:00008723
+  2095 0001:00008731  2097 0001:0000873E  2098 0001:0000874A  2099 0001:00008750
+  2100 0001:00008760  2101 0001:0000876B  2103 0001:0000878E  2104 0001:000087AC
+  2108 0001:000087C3  2109 0001:000087CC  2114 0001:000087D4  2115 0001:000087DD
+  2116 0001:00008805  2117 0001:0000880C  2118 0001:00008815  2126 0001:0000881C
+  2127 0001:00008829  2129 0001:0000883F  2130 0001:00008849  2132 0001:00008866
+  2134 0001:00008889  2135 0001:00008896  2138 0001:000088AB  2139 0001:000088AE
+  2141 0001:000088BA  2142 0001:000088C3  2149 0001:000088CC  2150 0001:000088D8
+  2152 0001:000088E5  2156 0001:000088F5  2157 0001:00008929  2159 0001:00008974
+  2161 0001:00008981  2163 0001:000089BA  2164 0001:000089C3  2166 0001:00008A04
+  2169 0001:00008A0F  2170 0001:00008A37  2171 0001:00008A40  2173 0001:00008A7B
+  2177 0001:00008A84  2178 0001:00008A8D  2183 0001:00008A94  2184 0001:00008A9D
+  2185 0001:00008AA7  2186 0001:00008AB8  2187 0001:00008AC1  2191 0001:00008AC8
+  2192 0001:00008ACE  2193 0001:00008AD5  2194 0001:00008AE5  2199 0001:00008AE8
+  2200 0001:00008AF1  2201 0001:00008AFA  2202 0001:00008B1C  2203 0001:00008B2C
+  2209 0001:00008B30  2210 0001:00008B36  2211 0001:00008B3D  2212 0001:00008B4E
+  2218 0001:00008B54  2219 0001:00008B5D  2220 0001:00008B64  2221 0001:00008B6B
+  2222 0001:00008B74  2223 0001:00008B8D  2224 0001:00008BA5  2227 0001:00008BB0
+  2228 0001:00008BB6  2229 0001:00008BBD  2230 0001:00008BC7  2234 0001:00008BCC
+  2235 0001:00008BD2  2237 0001:00008BE4  2238 0001:00008BF4  2240 0001:00008C0C
+  2244 0001:00008C10  2250 0001:00008C13  2251 0001:00008C18  2255 0001:00008C1C
+  2256 0001:00008C22  2257 0001:00008C2C  2258 0001:00008C33  2259 0001:00008C3A
+  2266 0001:00008C40  2267 0001:00008C48  2269 0001:00008C51  2270 0001:00008C61
+  2272 0001:00008C74  2273 0001:00008C7B  2274 0001:00008C90  2275 0001:00008C97
+  2276 0001:00008C9B  2277 0001:00008CA6  2270 0001:00008CA7  2278 0001:00008CAA
+  2281 0001:00008CB1  2289 0001:00008CB8  2290 0001:00008CC4  2291 0001:00008CED
+  2292 0001:00008CF6  2293 0001:00008CFD  2294 0001:00008D12  2295 0001:00008D1B
+  2297 0001:00008D1F  2299 0001:00008D28  2300 0001:00008D38  2301 0001:00008D3E
+  2302 0001:00008D44  2307 0001:00008D4A  2308 0001:00008D50  2310 0001:00008D56
+  2313 0001:00008D5A  2314 0001:00008D66  2315 0001:00008D79  2316 0001:00008D83
+  2317 0001:00008D93  2318 0001:00008D9D  2319 0001:00008DA2  2322 0001:00008DA8
+  2323 0001:00008DB1  2324 0001:00008DBA  2325 0001:00008DD2  2332 0001:00008DD8
+  2333 0001:00008DED  2334 0001:00008DF7  2335 0001:00008E06  2337 0001:00008E21
+  2338 0001:00008E2A  2340 0001:00008E2E  2341 0001:00008E37  2343 0001:00008E42
+  2346 0001:00008E50  2356 0001:00008E58  2357 0001:00008E6B  2358 0001:00008E78
+  2362 0001:00008E99  2363 0001:00008EB6  2364 0001:00008EBC  2366 0001:00008EC2
+  2368 0001:00008EEB  2369 0001:00008EF5  2370 0001:00008EFC  2371 0001:00008F06
+  2374 0001:00008F0B  2376 0001:00008F21  2377 0001:00008F2C  2378 0001:00008F50
+  2380 0001:00008F5C  2382 0001:00008FA4  2383 0001:00008FDE  2384 0001:00008FF2
+  2387 0001:00008FFA  2388 0001:00009004  2391 0001:0000900E  2397 0001:00009018
+  2398 0001:0000903B  2400 0001:0000904D  2401 0001:00009056  2403 0001:00009066
+  2404 0001:00009077  2406 0001:0000908C  2407 0001:000090B5  2410 0001:000090BC
+  2411 0001:000090C5  2412 0001:000090D2  2413 0001:000090D9  2414 0001:000090E2
+  2417 0001:000090E8  2418 0001:000090EB  2419 0001:000090F4  2420 0001:000090F7
+  2421 0001:00009102  2422 0001:00009107  2434 0001:0000910C  2435 0001:00009135
+  2436 0001:0000913F  2437 0001:00009158  2440 0001:00009180  2441 0001:0000918E
+  2443 0001:000091A2  2444 0001:000091B1  2445 0001:000091C0  2447 0001:000091CD
+  2448 0001:000091D8  2449 0001:000091E1  2450 0001:000091E8  2451 0001:000091FD
+  2453 0001:00009206  2455 0001:00009213  2457 0001:00009217  2460 0001:00009222
+  2461 0001:0000922B  2463 0001:00009236  2467 0001:00009241  2468 0001:0000924A
+  2470 0001:00009255  2474 0001:00009260  2475 0001:00009269  2477 0001:00009274
+  2483 0001:0000927F  2484 0001:00009288  2486 0001:00009293  2488 0001:0000929C
+  2489 0001:000092AA  2490 0001:000092B0  2491 0001:000092BB  2492 0001:000092E1
+  2495 0001:000092FC  2496 0001:00009305  2498 0001:00009324  2499 0001:00009330
+  2501 0001:0000934C  2503 0001:0000935F  2504 0001:00009374  2505 0001:000093A3
+  2506 0001:000093C8  2507 0001:000093EE  2501 0001:000093EF  2508 0001:000093F6
+  2510 0001:0000943B  2512 0001:0000944E  2513 0001:00009463  2514 0001:00009492
+  2515 0001:000094B7  2516 0001:000094DD  2510 0001:000094DE  2519 0001:000094E7
+  2522 0001:00009538  2525 0001:00009544  2526 0001:0000954E  2528 0001:00009557
+  2530 0001:0000956A  2531 0001:00009574  2532 0001:00009588  2533 0001:00009598
+  2536 0001:000095AE  2537 0001:000095D2  2547 0001:000095D8  2548 0001:000095E5
+  2550 0001:000095F2  2552 0001:00009602  2553 0001:00009618  2554 0001:00009627
+  2555 0001:00009635  2558 0001:0000965E  2559 0001:00009668  2560 0001:00009677
+  2561 0001:0000967E  2563 0001:00009684  2564 0001:000096A9  2565 0001:000096D0
+  2566 0001:000096DE  2568 0001:000096F7  2570 0001:00009702  2571 0001:00009722
+  2572 0001:00009746  2574 0001:00009754  2578 0001:0000975F  2579 0001:00009767
+  2581 0001:00009773  2576 0001:0000977D  2586 0001:000097A5  2587 0001:000097B3
+  2588 0001:000097E3  2589 0001:000097E9  2590 0001:000097F5  2595 0001:00009816
+  2596 0001:00009825  2597 0001:00009834  2598 0001:00009852  2605 0001:00009871
+  2606 0001:0000987A  2607 0001:0000988F  2617 0001:00009898  2619 0001:000098A6
+  2622 0001:000098D3  2624 0001:000098EA  2625 0001:00009907  2627 0001:00009910
+  2628 0001:00009919  2631 0001:00009924  2632 0001:00009938  2633 0001:00009942
+  2629 0001:0000994C  2637 0001:00009966  2638 0001:0000996C  2640 0001:000099A6
+  2641 0001:000099C7  2645 0001:000099D0  2646 0001:000099F2  2647 0001:00009A07
+  2648 0001:00009A43  2649 0001:00009A79  2653 0001:00009A80  2654 0001:00009AA0
+  2655 0001:00009AAD  2656 0001:00009AF3  2657 0001:00009B29  2663 0001:00009B30
+  2664 0001:00009B39  2665 0001:00009B40  2666 0001:00009B5F  2668 0001:00009B72
+  2669 0001:00009B7E  2670 0001:00009B81  2671 0001:00009B83  2665 0001:00009B84
+  2672 0001:00009B8A  2679 0001:00009B94  2680 0001:00009BB5  2681 0001:00009BB9
+  2682 0001:00009BC0  2683 0001:00009BF1  2685 0001:00009C26  2686 0001:00009C32
+  2687 0001:00009C35  2688 0001:00009C39  2689 0001:00009C3B  2683 0001:00009C3C
+  2690 0001:00009C3F  2692 0001:00009C4E  2693 0001:00009C58  2695 0001:00009C88
+  2699 0001:00009C94  2700 0001:00009CB0  2701 0001:00009D26  2707 0001:00009D30
+  2708 0001:00009D54  2709 0001:00009D5B  2710 0001:00009D7B  2712 0001:00009DB0
+  2713 0001:00009DBC  2714 0001:00009DBF  2715 0001:00009DC1  2709 0001:00009DC2
+  2716 0001:00009DEC  2722 0001:00009DF4  2723 0001:00009E00  2724 0001:00009E14
+  2725 0001:00009E2A  2726 0001:00009E31  2727 0001:00009E48  2728 0001:00009E4F
+  2729 0001:00009E53  2731 0001:00009E5E  2732 0001:00009E65  2738 0001:00009E90
+  2739 0001:00009EBC  2740 0001:00009ED0  2741 0001:00009EE6  2742 0001:00009EED
+  2743 0001:00009F04  2744 0001:00009F0B  2745 0001:00009F0F  2746 0001:00009F36
+  2750 0001:00009F64  2751 0001:00009F90  2752 0001:00009FA0  2753 0001:00009FCB
+  2757 0001:00009FD4  2758 0001:0000A003  2759 0001:0000A013  2760 0001:0000A03C
+  2766 0001:0000A048  2767 0001:0000A080  2768 0001:0000A087  2769 0001:0000A0A6
+  2771 0001:0000A0BF  2772 0001:0000A0C2  2773 0001:0000A0C4  2768 0001:0000A0C5
+  2774 0001:0000A0F3  2778 0001:0000A0FC  2779 0001:0000A105  2780 0001:0000A10E
+  2782 0001:0000A122  2783 0001:0000A134  2790 0001:0000A138  2791 0001:0000A149
+  2792 0001:0000A15E  2793 0001:0000A173  2795 0001:0000A1EF  2792 0001:0000A206
+  2796 0001:0000A20D  2798 0001:0000A216  2802 0001:0000A24D  2804 0001:0000A282
+  2805 0001:0000A289  2806 0001:0000A2A2  2807 0001:0000A2A9  2810 0001:0000A2E4
+  2811 0001:0000A2E7  2813 0001:0000A2EF  2814 0001:0000A2F5  2816 0001:0000A2FA
+  2823 0001:0000A2FC  2824 0001:0000A30A  2825 0001:0000A31C  2826 0001:0000A32C
+  2828 0001:0000A339  2829 0001:0000A34B  2830 0001:0000A357  2832 0001:0000A36A
+  2833 0001:0000A392  2834 0001:0000A3C0  2830 0001:0000A3C1  2838 0001:0000A3C9
+  2839 0001:0000A3DB  2840 0001:0000A3E7  2843 0001:0000A3F6  2844 0001:0000A422
+  2845 0001:0000A459  2840 0001:0000A45A  2847 0001:0000A45D  2848 0001:0000A469
+  2849 0001:0000A47E  2850 0001:0000A485  2856 0001:0000A48C  2857 0001:0000A493
+  2859 0001:0000A49B  2860 0001:0000A4A8  2861 0001:0000A4BE  2862 0001:0000A4C6
+  2864 0001:0000A4CA  2868 0001:0000A4D5  2869 0001:0000A4DE  2870 0001:0000A4EE
+  2871 0001:0000A4F7  2872 0001:0000A500  2875 0001:0000A509  2878 0001:0000A550
+  2879 0001:0000A570  2881 0001:0000A580  2882 0001:0000A58E  2883 0001:0000A59D
+  2884 0001:0000A5A6  2886 0001:0000A5AF  2887 0001:0000A5B8  2890 0001:0000A5DE
+  2894 0001:0000A5E4  2895 0001:0000A5EA  2898 0001:0000A5EC  2899 0001:0000A5EF
+  2900 0001:0000A5FD  2901 0001:0000A604  2902 0001:0000A611  2903 0001:0000A618
+  2904 0001:0000A61D  2908 0001:0000A620  2909 0001:0000A623  2910 0001:0000A629
+  2911 0001:0000A62E  2915 0001:0000A630  2916 0001:0000A639  2917 0001:0000A64B
+  2921 0001:0000A650  2922 0001:0000A656  2923 0001:0000A669  2924 0001:0000A670
+  2935 0001:0000A674  2936 0001:0000A693  2937 0001:0000A697  2938 0001:0000A69C
+  2939 0001:0000A6A1  2940 0001:0000A6AF  2941 0001:0000A6BD  2942 0001:0000A6C9
+  2943 0001:0000A6D1  2944 0001:0000A6DD  2945 0001:0000A6EC  2946 0001:0000A6FB
+  2947 0001:0000A705  2948 0001:0000A70F  2950 0001:0000A734  2951 0001:0000A74F
+  2952 0001:0000A759  2948 0001:0000A75C  2953 0001:0000A75F  2954 0001:0000A771
+  2955 0001:0000A77E  2956 0001:0000A788  2958 0001:0000A7A4  2959 0001:0000A7B1
+  2961 0001:0000A7B5  2962 0001:0000A7D8  2964 0001:0000A7E4  2956 0001:0000A7E7
+  2966 0001:0000A7F7  2967 0001:0000A7FF  2968 0001:0000A807  2969 0001:0000A815
+  2971 0001:0000A846  2975 0001:0000A850  2976 0001:0000A856  2978 0001:0000A85E
+  2979 0001:0000A863  2982 0001:0000A86C  2983 0001:0000A873  2984 0001:0000A87C
+  2987 0001:0000A885  2993 0001:0000A888  2994 0001:0000A893  2995 0001:0000A8A8
+  2996 0001:0000A8AC  2997 0001:0000A8B3  2998 0001:0000A8D5  2999 0001:0000A8DF
+  3000 0001:0000A8EE  3001 0001:0000A906  3002 0001:0000A911  3006 0001:0000A918
+  3007 0001:0000A920  3008 0001:0000A927  3009 0001:0000A93E  3010 0001:0000A954
+  3011 0001:0000A95D  3012 0001:0000A96A  3013 0001:0000A97D  3014 0001:0000A984
+  3015 0001:0000A99A  3016 0001:0000A9A4  3017 0001:0000A9B0  3018 0001:0000A9BD
+  3022 0001:0000A9C8  3023 0001:0000A9CE  3024 0001:0000A9D5  3025 0001:0000A9E0
+  3026 0001:0000A9E8  3034 0001:0000A9EC  3035 0001:0000AA11  3040 0001:0000AA20
+  3043 0001:0000AA84  3044 0001:0000AA9D  3045 0001:0000AAC7  3046 0001:0000AACB
+  3047 0001:0000AADD  3048 0001:0000AAF2  3050 0001:0000AB05  3051 0001:0000AB17
+  3052 0001:0000AB2C  3053 0001:0000AB7B  3055 0001:0000ABC4  3056 0001:0000ABD9
+  3057 0001:0000AC27  3060 0001:0000AC9C  3066 0001:0000ACA4  3067 0001:0000ACCB
+  3069 0001:0000ACD8  3071 0001:0000ACE1  3072 0001:0000ACED  3073 0001:0000ACF2
+  3075 0001:0000AD1B  3076 0001:0000AD24  3078 0001:0000AD3A  3079 0001:0000ADCB
+  3080 0001:0000ADD7  3081 0001:0000ADF5  3083 0001:0000AE2B  3086 0001:0000AE40
+  3087 0001:0000AE47  3089 0001:0000AE50  3090 0001:0000AE67  3092 0001:0000AE7E
+  3098 0001:0000AEE8  3099 0001:0000AEEF  3100 0001:0000AF02  3101 0001:0000AF2B
+  3102 0001:0000AF3E  3103 0001:0000AF45  3114 0001:0000AF4C  3115 0001:0000AF58
+  3117 0001:0000AF74  3116 0001:0000AFC6  3118 0001:0000AFCB  3119 0001:0000B004
+  3121 0001:0000B035  3123 0001:0000B03C  3124 0001:0000B069  3125 0001:0000B073
+  3126 0001:0000B07D  3127 0001:0000B087  3128 0001:0000B090  3129 0001:0000B0A4
+  3130 0001:0000B0BF  3131 0001:0000B0D8  3133 0001:0000B10D  3134 0001:0000B114
+  3136 0001:0000B123  3137 0001:0000B130  3139 0001:0000B13A  3141 0001:0000B149
+  3142 0001:0000B172  3144 0001:0000B196  3146 0001:0000B1A2  3147 0001:0000B1AF
+  3148 0001:0000B1B4  3150 0001:0000B1E4  3151 0001:0000B1F0  3152 0001:0000B206
+  3153 0001:0000B21C  3154 0001:0000B21E  3156 0001:0000B24D  3157 0001:0000B24F
+  3158 0001:0000B251  3154 0001:0000B252  3159 0001:0000B255  3160 0001:0000B276
+  3161 0001:0000B2AC  3162 0001:0000B2F8  3163 0001:0000B30C  3164 0001:0000B316
+  3165 0001:0000B340  3171 0001:0000B354  3172 0001:0000B36D  3173 0001:0000B372
+  3174 0001:0000B385  3175 0001:0000B39D  3177 0001:0000B3A1  3176 0001:0000B3AB
+  3178 0001:0000B3FC  3186 0001:0000B404  3187 0001:0000B427  3188 0001:0000B431
+  3189 0001:0000B43E  3191 0001:0000B447  3192 0001:0000B46E  3193 0001:0000B47E
+  3194 0001:0000B489  3195 0001:0000B498  3197 0001:0000B4C1  3200 0001:0000B4D3
+  3202 0001:0000B4E0  3203 0001:0000B4E5  3204 0001:0000B4F9  3205 0001:0000B509
+  3206 0001:0000B519  3207 0001:0000B52B  3212 0001:0000B53B  3213 0001:0000B53D
+  3215 0001:0000B547  3216 0001:0000B57C  3217 0001:0000B58A  3219 0001:0000B5A8
+  3220 0001:0000B5C4  3225 0001:0000B5C8  3226 0001:0000B5EF  3228 0001:0000B5F8
+  3229 0001:0000B600  3232 0001:0000B602  3234 0001:0000B606  3235 0001:0000B616
+  3237 0001:0000B62E  3238 0001:0000B639  3241 0001:0000B642  3242 0001:0000B64A
+  3246 0001:0000B65C  3248 0001:0000B678  3249 0001:0000B69F  3252 0001:0000B6C4
+  3253 0001:0000B6F9  3254 0001:0000B707  3257 0001:0000B742  3258 0001:0000B769
+  3261 0001:0000B78E  3262 0001:0000B7C3  3263 0001:0000B7D1  3267 0001:0000B80A
+  3268 0001:0000B83A  3274 0001:0000B844  3275 0001:0000B867  3276 0001:0000B86A
+  3278 0001:0000B879  3280 0001:0000B882  3281 0001:0000B8A0  3284 0001:0000B8B1
+  3286 0001:0000B8DF  3288 0001:0000B916  3289 0001:0000B919  3291 0001:0000B91B
+  3284 0001:0000B91E  3292 0001:0000B923  3294 0001:0000B927  3295 0001:0000B954
+  3299 0001:0000B983  3307 0001:0000B98C  3308 0001:0000B9B1  3309 0001:0000B9B4
+  3311 0001:0000B9C4  3313 0001:0000B9CD  3314 0001:0000B9EC  3316 0001:0000B9F4
+  3319 0001:0000B9FF  3321 0001:0000BA28  3323 0001:0000BA60  3324 0001:0000BA62
+  3326 0001:0000BA64  3319 0001:0000BA65  3327 0001:0000BA6A  3329 0001:0000BAB4
+  3330 0001:0000BABF  3332 0001:0000BAC8  3333 0001:0000BAD5  3334 0001:0000BADB
+  3336 0001:0000BB05  3337 0001:0000BB0E  3339 0001:0000BB24  3340 0001:0000BBB5
+  3342 0001:0000BBC1  3344 0001:0000BBC5  3345 0001:0000BBF3  3346 0001:0000BC00
+  3347 0001:0000BC0D  3351 0001:0000BC17  3352 0001:0000BC23  3353 0001:0000BC29
+  3354 0001:0000BC37  3355 0001:0000BC80  3358 0001:0000BC94  3359 0001:0000BC9A
+  3361 0001:0000BCA2  3362 0001:0000BCA8  3364 0001:0000BCAC  3365 0001:0000BCB7
+  3366 0001:0000BCC0  3367 0001:0000BCC9  3369 0001:0000BCD5  3371 0001:0000BCDC
+  3374 0001:0000BCE0  3375 0001:0000BCE3  3377 0001:0000BCEB  3378 0001:0000BCF1
+  3380 0001:0000BCF6  3386 0001:0000BCF8  3387 0001:0000BD01  3388 0001:0000BD03
+  3389 0001:0000BD07  3390 0001:0000BD0E  3391 0001:0000BD23  3392 0001:0000BD2A
+  3393 0001:0000BD2E  3395 0001:0000BD37  3396 0001:0000BD39  3403 0001:0000BD40
+  3404 0001:0000BD4F  3405 0001:0000BD56  3406 0001:0000BD6B  3407 0001:0000BD72
+  3409 0001:0000BD82  3410 0001:0000BD88  3412 0001:0000BD8E  3413 0001:0000BD92
+  3414 0001:0000BD9E  3415 0001:0000BDB1  3416 0001:0000BDBB  3418 0001:0000BDCB
+  3424 0001:0000BDD4  3425 0001:0000BDDD  3426 0001:0000BDE4  3427 0001:0000BDF9
+  3428 0001:0000BE00  3429 0001:0000BE04  3431 0001:0000BE09  3432 0001:0000BE0B
+  3440 0001:0000BE10  3441 0001:0000BE1F  3442 0001:0000BE26  3443 0001:0000BE3B
+  3444 0001:0000BE42  3446 0001:0000BE4E  3447 0001:0000BE54  3448 0001:0000BE60
+  3449 0001:0000BE73  3450 0001:0000BE7D  3452 0001:0000BE8D  3456 0001:0000BE94
+  3457 0001:0000BE9A  3460 0001:0000BE9C  3461 0001:0000BEA5  3462 0001:0000BEAE
+  3463 0001:0000BEBB  3469 0001:0000BEC0  3470 0001:0000BEE0  3471 0001:0000BEE7
+  3473 0001:0000BEF0  3474 0001:0000BF14  3473 0001:0000BF41  3476 0001:0000BF61
+  3482 0001:0000BF68  3483 0001:0000BF89  3484 0001:0000BFA8  3483 0001:0000BFDB
+  3485 0001:0000BFFB  3488 0001:0000C004  3489 0001:0000C00A  3490 0001:0000C013
+  3491 0001:0000C031  3492 0001:0000C037  3495 0001:0000C03C  3496 0001:0000C045
+  3497 0001:0000C04E  3498 0001:0000C06C  3499 0001:0000C079  3502 0001:0000C080
+  3503 0001:0000C086  3504 0001:0000C092  3505 0001:0000C099  3508 0001:0000C09C
+  3509 0001:0000C0A6  3510 0001:0000C0AF  3511 0001:0000C0C5  3512 0001:0000C0CE
+  3513 0001:0000C0DB  3514 0001:0000C0E8  3515 0001:0000C0F5  3516 0001:0000C0FF
+  3518 0001:0000C10E  3519 0001:0000C11C  3521 0001:0000C127  3522 0001:0000C134
+  3525 0001:0000C13C  3526 0001:0000C145  3527 0001:0000C152  3530 0001:0000C158
+  3531 0001:0000C17F  3532 0001:0000C18E  3534 0001:0000C1BB  3535 0001:0000C1EE
+  3538 0001:0000C220  3539 0001:0000C229  3540 0001:0000C238  3542 0001:0000C24B
+  3543 0001:0000C254  3551 0001:0000C258  3552 0001:0000C261  3553 0001:0000C28C
+  3560 0001:0000C290  3561 0001:0000C2A5  3562 0001:0000C2AE  3563 0001:0000C2B7
+  3564 0001:0000C2C0  3565 0001:0000C2C9  3566 0001:0000C2D2  3567 0001:0000C2DB
+  3568 0001:0000C2E4  3569 0001:0000C302  3573 0001:0000C308  3574 0001:0000C311
+  3575 0001:0000C31A  3577 0001:0000C320  3578 0001:0000C330  3579 0001:0000C334
+  3580 0001:0000C33B  3582 0001:0000C343  3588 0001:0000C348  3589 0001:0000C356
+  3590 0001:0000C35B  3592 0001:0000C368  3593 0001:0000C382  3595 0001:0000C39A
+  3598 0001:0000C3DA  3599 0001:0000C3E6  3601 0001:0000C3E8  3592 0001:0000C3E9
+  3603 0001:0000C3EF  3609 0001:0000C3F8  3610 0001:0000C3FE  3611 0001:0000C407
+  3612 0001:0000C412  3613 0001:0000C41B  3614 0001:0000C426  3621 0001:0000C42C
+  3622 0001:0000C434  3623 0001:0000C43B  3625 0001:0000C444  3626 0001:0000C44F
+  3628 0001:0000C453  3629 0001:0000C45D  3630 0001:0000C466  3631 0001:0000C46F
+  3632 0001:0000C483  3633 0001:0000C48E  3634 0001:0000C497  3635 0001:0000C4AA
+  3638 0001:0000C4BE  3646 0001:0000C4C4  3647 0001:0000C4CB  3648 0001:0000C4D9
+  3650 0001:0000C4EC  3652 0001:0000C4F9  3653 0001:0000C509  3654 0001:0000C512
+  3655 0001:0000C51E  3656 0001:0000C52A  3657 0001:0000C531  3658 0001:0000C53A
+  3659 0001:0000C546  3660 0001:0000C556  3661 0001:0000C566  3662 0001:0000C56F
+  3663 0001:0000C57B  3664 0001:0000C587  3665 0001:0000C58E  3666 0001:0000C597
+  3667 0001:0000C5A3  3668 0001:0000C5B3  3669 0001:0000C5BA  3673 0001:0000C5C7
+  3675 0001:0000C5D0  3676 0001:0000C5E8  3677 0001:0000C600  3675 0001:0000C60F
+  3678 0001:0000C614  3679 0001:0000C61B  3681 0001:0000C626  3685 0001:0000C648
+  3686 0001:0000C64E  3687 0001:0000C66E  3695 0001:0000C6A8  3696 0001:0000C6AE
+  3697 0001:0000C6B5  3698 0001:0000C6C3  3701 0001:0000C6C8  3702 0001:0000C6D2
+  3703 0001:0000C6DB  3705 0001:0000C6EB  3709 0001:0000C728  3710 0001:0000C735
+  3713 0001:0000C73A  3716 0001:0000C740  3717 0001:0000C747  3718 0001:0000C74E
+  3720 0001:0000C75E  3722 0001:0000C776  3723 0001:0000C783  3724 0001:0000C790
+  3727 0001:0000C795  3733 0001:0000C79C  3734 0001:0000C7B3  3735 0001:0000C7BC
+  3736 0001:0000C7C8  3737 0001:0000C7D4  3738 0001:0000C7DF  3739 0001:0000C7E9
+  3740 0001:0000C7F0  3741 0001:0000C7FA  3742 0001:0000C810  3743 0001:0000C819
+  3744 0001:0000C826  3745 0001:0000C83C  3746 0001:0000C84C  3747 0001:0000C85C
+  3748 0001:0000C86C  3749 0001:0000C87C  3750 0001:0000C883  3751 0001:0000C894
+  3752 0001:0000C8A5  3753 0001:0000C8BB  3754 0001:0000C8C4  3755 0001:0000C8DA
+  3756 0001:0000C8EA  3757 0001:0000C8FA  3758 0001:0000C90A  3759 0001:0000C911
+  3760 0001:0000C934  3763 0001:0000C93C  3764 0001:0000C945  3765 0001:0000C952
+  3766 0001:0000C95D  3767 0001:0000C966  3771 0001:0000C96C  3772 0001:0000C972
+  3773 0001:0000C979  3774 0001:0000C980  3778 0001:0000C984  3779 0001:0000C98A
+  3780 0001:0000C991  3781 0001:0000C99A  3785 0001:0000C9A0  3786 0001:0000C9A6
+  3787 0001:0000C9AD  3788 0001:0000C9B4  3791 0001:0000C9B8  3792 0001:0000C9C1
+  3793 0001:0000C9CA  3795 0001:0000C9D3  3796 0001:0000C9DA  3797 0001:0000C9F9
+  3799 0001:0000CA11  3803 0001:0000CA18  3804 0001:0000CA22  3806 0001:0000CA25
+  3807 0001:0000CA2B  3816 0001:0000CA2C  3817 0001:0000CA37  3818 0001:0000CA40
+  3819 0001:0000CA4F  3821 0001:0000CA58  3822 0001:0000CA5D  3823 0001:0000CA64
+  3827 0001:0000CA6D  3828 0001:0000CA74  3829 0001:0000CA7B  3831 0001:0000CA82
+  3832 0001:0000CA9F  3833 0001:0000CAC3  3834 0001:0000CACD  3835 0001:0000CB01
+  3837 0001:0000CB0A  3838 0001:0000CB1D  3842 0001:0000CB64  3845 0001:0000CB9B
+  3846 0001:0000CBA2  3851 0001:0000CBAC  3852 0001:0000CBB2  3854 0001:0000CBB6
+  3855 0001:0000CBBD  3856 0001:0000CBCD  3858 0001:0000CBD4  3863 0001:0000CBDC
+  3864 0001:0000CBE2  3865 0001:0000CBF8  3866 0001:0000CC06  3872 0001:0000CC0C
+  3884 0001:0000CC12  3885 0001:0000CC19  3886 0001:0000CC2F  3889 0001:0000CC34
+  3890 0001:0000CC3A  3891 0001:0000CC48  3892 0001:0000CC5E  3896 0001:0000CC64
+  3897 0001:0000CC6A  3898 0001:0000CC73  3900 0001:0000CC7C  3901 0001:0000CC83
+  3903 0001:0000CCA2  3904 0001:0000CCA9  3908 0001:0000CCAC  3909 0001:0000CCB2
+  3910 0001:0000CCB9  3911 0001:0000CCC4  3915 0001:0000CCC8  3916 0001:0000CCCB
+  3917 0001:0000CCD4  3918 0001:0000CCDB  3919 0001:0000CCF3  3920 0001:0000CCF8
+  3927 0001:0000CCFC  3928 0001:0000CD1B  3929 0001:0000CD22  3930 0001:0000CD5B
+  3931 0001:0000CD88  3932 0001:0000CD96  3933 0001:0000CD99  3934 0001:0000CDA9
+  3935 0001:0000CDB9  3936 0001:0000CDDA  3937 0001:0000CDEA  3938 0001:0000CDF3
+  3939 0001:0000CE05  3941 0001:0000CE24  3942 0001:0000CE2B  3943 0001:0000CE39
+  3944 0001:0000CE49  3945 0001:0000CE63  3946 0001:0000CE72  3947 0001:0000CEA8
+  3948 0001:0000CEAF  3950 0001:0000CEB4  3951 0001:0000CEBB  3953 0001:0000CEC0
+  3954 0001:0000CEDA  3955 0001:0000CEE8  3956 0001:0000CEFB  3959 0001:0000CF33
+  3960 0001:0000CF42  3962 0001:0000CF5E  3963 0001:0000CF6C  3965 0001:0000CF84
+  3966 0001:0000CF8B  3967 0001:0000CF9A  3968 0001:0000D004  4001 0001:0000D00C
+  4002 0001:0000D027  4004 0001:0000D03C  4005 0001:0000D043  4006 0001:0000D05D
+  4007 0001:0000D081  4008 0001:0000D09D  4011 0001:0000D0A4  4012 0001:0000D0B3
+  4013 0001:0000D0E2  4015 0001:0000D0F0  4016 0001:0000D108  4017 0001:0000D117
+  4018 0001:0000D159  4022 0001:0000D160  4023 0001:0000D164  4024 0001:0000D17E
+  4031 0001:0000D184  4033 0001:0000D1A8  4034 0001:0000D1CD  4035 0001:0000D1D4
+  4036 0001:0000D1F2  4038 0001:0000D20E  4040 0001:0000D229  4042 0001:0000D23E
+  4044 0001:0000D24E  4046 0001:0000D25B  4047 0001:0000D285  4048 0001:0000D2A6
+  4049 0001:0000D2AE  4051 0001:0000D2B3  4052 0001:0000D2C9  4056 0001:0000D2DE
+  4058 0001:0000D2F3  4060 0001:0000D317  4061 0001:0000D32E  4062 0001:0000D335
+  4064 0001:0000D346  4065 0001:0000D36E  4067 0001:0000D38A  4070 0001:0000D391
+  4071 0001:0000D3BF  4073 0001:0000D3C9  4074 0001:0000D3D0  4075 0001:0000D3DE
+  4076 0001:0000D3EE  4077 0001:0000D40C  4078 0001:0000D41B  4080 0001:0000D43E
+  4081 0001:0000D44C  4082 0001:0000D45A  4083 0001:0000D46A  4085 0001:0000D471
+  4087 0001:0000D490  4088 0001:0000D4B6  4090 0001:0000D4CF  4092 0001:0000D4E7
+  4093 0001:0000D4F8  4096 0001:0000D509  4097 0001:0000D552  4101 0001:0000D55C
+  4103 0001:0000D560  4105 0001:0000D580  4106 0001:0000D583  4108 0001:0000D586
+  4109 0001:0000D5A0  4113 0001:0000D5A4  4114 0001:0000D5AD  4116 0001:0000D5B4
+  4117 0001:0000D5E2  4118 0001:0000D600  4119 0001:0000D607  4123 0001:0000D610
+  4124 0001:0000D614  4125 0001:0000D62E  4130 0001:0000D634  4131 0001:0000D64D
+  4132 0001:0000D6A2  4137 0001:0000D6AC  4138 0001:0000D6B6  4148 0001:0000D6B8
+  4149 0001:0000D6D9  4150 0001:0000D6F2  4151 0001:0000D6FA  4153 0001:0000D702
+  4154 0001:0000D71A  4155 0001:0000D729  4156 0001:0000D73D  4157 0001:0000D758
+  4159 0001:0000D78B  4161 0001:0000D7AC  4162 0001:0000D7B5  4163 0001:0000D7BE
+  4164 0001:0000D7C8  4165 0001:0000D7E1  4167 0001:0000D7F0  4168 0001:0000D7FB
+  4170 0001:0000D817  4171 0001:0000D824  4172 0001:0000D82F  4173 0001:0000D844
+  4176 0001:0000D860  4177 0001:0000D878  4178 0001:0000D885  4179 0001:0000D88F
+  4180 0001:0000D89A  4182 0001:0000D8CD  4184 0001:0000D8FD  4190 0001:0000D904
+  4191 0001:0000D90D  4192 0001:0000D929  4193 0001:0000D93D  4195 0001:0000D946
+  4196 0001:0000D96A  4197 0001:0000D973  4200 0001:0000D980  4201 0001:0000D994
+  4202 0001:0000D999  4203 0001:0000D9A2  4205 0001:0000D9AB  4206 0001:0000D9B0
+  4207 0001:0000D9CC  4211 0001:0000D9D4  4212 0001:0000D9EC  4213 0001:0000D9F3
+  4214 0001:0000D9FE  4215 0001:0000DA1A  4216 0001:0000DA21  4217 0001:0000DA72
+  4221 0001:0000DA78  4222 0001:0000DA94  4224 0001:0000DA9A  4227 0001:0000DAA6
+  4228 0001:0000DAC0  4229 0001:0000DACA  4230 0001:0000DAD9  4233 0001:0000DAFB
+  4236 0001:0000DB55  4239 0001:0000DB5C  4240 0001:0000DB63  4241 0001:0000DB76
+  4242 0001:0000DB81  4245 0001:0000DB88  4246 0001:0000DB8F  4247 0001:0000DB9C
+  4248 0001:0000DBA7  4251 0001:0000DBAC  4252 0001:0000DBB3  4253 0001:0000DBC6
+  4254 0001:0000DBD1  4260 0001:0000DBD8  4261 0001:0000DBDF  4263 0001:0000DBEB
+  4264 0001:0000DBF3  4266 0001:0000DBF7  4267 0001:0000DC06  4268 0001:0000DC15
+  4269 0001:0000DC1D  4270 0001:0000DC25  4271 0001:0000DC33  4272 0001:0000DC3A
+  4273 0001:0000DC51  4276 0001:0000DC63  4277 0001:0000DC77  4278 0001:0000DC87
+  4279 0001:0000DC93  4280 0001:0000DCA4  4281 0001:0000DCB4  4282 0001:0000DCC1
+  4283 0001:0000DCEA  4284 0001:0000DD00  4285 0001:0000DD10  4286 0001:0000DD17
+  4287 0001:0000DD24  4288 0001:0000DD2F  4290 0001:0000DD35  4291 0001:0000DD4B
+  4292 0001:0000DD54  4293 0001:0000DD60  4294 0001:0000DD6B  4297 0001:0000DD88
+  4299 0001:0000DD95  4301 0001:0000DDA6  4303 0001:0000DDAD  4309 0001:0000DDB8
+  4310 0001:0000DDBE  4312 0001:0000DDD7  4313 0001:0000DDDE  4314 0001:0000DE00
+  4316 0001:0000DE0B  4318 0001:0000DE22  4322 0001:0000DE28  4323 0001:0000DE2E
+  4325 0001:0000DE37  4326 0001:0000DE49  4328 0001:0000DE50  4335 0001:0000DE54
+  4336 0001:0000DE80  4337 0001:0000DEB1  4340 0001:0000DEB8  4341 0001:0000DEBE
+  4342 0001:0000DECC  4343 0001:0000DEDA  4346 0001:0000DEE0  4347 0001:0000DEE3
+  4348 0001:0000DEEE  4351 0001:0000DEF0  4352 0001:0000DEF3  4353 0001:0000DEFE
+  4356 0001:0000DF00  4357 0001:0000DF20  4358 0001:0000DF4B  4361 0001:0000DF50
+  4362 0001:0000DF7A  4363 0001:0000DFA9  4366 0001:0000DFB0  4367 0001:0000DFDF
+  4368 0001:0000E00F  4371 0001:0000E018  4372 0001:0000E01B  4373 0001:0000E026
+  4377 0001:0000E028  4378 0001:0000E034  4382 0001:0000E038  4383 0001:0000E041
+  4387 0001:0000E044  4388 0001:0000E050  4391 0001:0000E054  4392 0001:0000E060
+  4393 0001:0000E06F  4396 0001:0000E074  4397 0001:0000E077  4398 0001:0000E082
+  4401 0001:0000E084  4402 0001:0000E08A  4403 0001:0000E0A1  4406 0001:0000E0A8
+  4407 0001:0000E0B1  4408 0001:0000E0BE  4411 0001:0000E0C4  4412 0001:0000E0CA
+  4413 0001:0000E0E1  4416 0001:0000E0E8  4417 0001:0000E0EB  4418 0001:0000E0F9
+  4422 0001:0000E0FC  4423 0001:0000E108  4427 0001:0000E10C  4428 0001:0000E118
+  4432 0001:0000E11C  4433 0001:0000E128  4437 0001:0000E12C  4438 0001:0000E138
+  4441 0001:0000E13C  4442 0001:0000E145  4443 0001:0000E152  4446 0001:0000E158
+  4447 0001:0000E164  4448 0001:0000E173  4451 0001:0000E178  4452 0001:0000E17B
+  4453 0001:0000E189  4456 0001:0000E18C  4457 0001:0000E18F  4458 0001:0000E19D
+  4461 0001:0000E1A0  4462 0001:0000E1A9  4463 0001:0000E1B9  4467 0001:0000E1C0
+  4468 0001:0000E1CC  4472 0001:0000E1D0  4473 0001:0000E1DC  4477 0001:0000E1E0
+  4478 0001:0000E1EC  4481 0001:0000E1F0  4482 0001:0000E1F9  4483 0001:0000E20C
+  4486 0001:0000E210  4487 0001:0000E213  4488 0001:0000E21E  4491 0001:0000E220
+  4492 0001:0000E240  4493 0001:0000E26B  4496 0001:0000E270  4497 0001:0000E279
+  4498 0001:0000E286  4502 0001:0000E28C  4503 0001:0000E298  4506 0001:0000E29C
+  4507 0001:0000E2A5  4508 0001:0000E2B2  4511 0001:0000E2B8  4512 0001:0000E2BB
+  4513 0001:0000E2C6  4517 0001:0000E2C8  4518 0001:0000E2D4  4521 0001:0000E2D8
+  4522 0001:0000E2E1  4523 0001:0000E2F0  4524 0001:0000E2FD  4525 0001:0000E30A
+  4528 0001:0000E310  4529 0001:0000E313  4530 0001:0000E31E  4533 0001:0000E320
+  4534 0001:0000E323  4535 0001:0000E32E  4539 0001:0000E330  4540 0001:0000E33C
+  4544 0001:0000E340  4545 0001:0000E34C  4548 0001:0000E350  4549 0001:0000E353
+  4550 0001:0000E35E  4553 0001:0000E360  4554 0001:0000E363  4555 0001:0000E36E
+  4558 0001:0000E370  4559 0001:0000E373  4560 0001:0000E37E  4563 0001:0000E380
+  4564 0001:0000E3AC  4565 0001:0000E3D9  4568 0001:0000E3E0  4569 0001:0000E3E6
+  4570 0001:0000E3F4  4573 0001:0000E3F8  4574 0001:0000E3FE  4575 0001:0000E40C
+  4578 0001:0000E410  4579 0001:0000E413  4580 0001:0000E41E  4583 0001:0000E420
+  4584 0001:0000E423  4585 0001:0000E42E  4588 0001:0000E430  4589 0001:0000E433
+  4590 0001:0000E43E  4593 0001:0000E440  4594 0001:0000E443  4595 0001:0000E44E
+  4598 0001:0000E450  4599 0001:0000E453  4600 0001:0000E45E  4603 0001:0000E460
+  4604 0001:0000E466  4605 0001:0000E471  4609 0001:0000E474  4610 0001:0000E480
+  4613 0001:0000E484  4614 0001:0000E487  4615 0001:0000E492  4619 0001:0000E494
+  4620 0001:0000E4A0  4624 0001:0000E4A4  4625 0001:0000E4B0  4628 0001:0000E4B4
+  4629 0001:0000E4D3  4631 0001:0000E4E8  4632 0001:0000E4EF  4633 0001:0000E4FC
+  4634 0001:0000E501  4635 0001:0000E511  4636 0001:0000E51F  4638 0001:0000E527
+  4639 0001:0000E531  4640 0001:0000E53B  4641 0001:0000E552  4642 0001:0000E571
+  4643 0001:0000E581  4644 0001:0000E59B  4645 0001:0000E5A5  4646 0001:0000E5B5
+  4647 0001:0000E5C8  4648 0001:0000E5DF  4649 0001:0000E5E8  4653 0001:0000E600
+  4654 0001:0000E611  4655 0001:0000E62B  4656 0001:0000E63B  4657 0001:0000E649
+  4660 0001:0000E661  4662 0001:0000E679  4664 0001:0000E69E  4667 0001:0000E6A8
+  4668 0001:0000E6B1  4669 0001:0000E6BE  4670 0001:0000E6C8  4671 0001:0000E6CD
+  4672 0001:0000E6D1  4673 0001:0000E6DA  4677 0001:0000E6E0  4678 0001:0000E6EC
+  4681 0001:0000E6F0  4682 0001:0000E6F3  4683 0001:0000E6FE  4689 0001:0000E700
+  4690 0001:0000E70D  4692 0001:0000E717  4693 0001:0000E71E  4694 0001:0000E722
+  4696 0001:0000E729  4697 0001:0000E73E  4699 0001:0000E744  4700 0001:0000E751
+  4702 0001:0000E75A  4703 0001:0000E761  4706 0001:0000E768  4707 0001:0000E771
+  4708 0001:0000E77E  4711 0001:0000E784  4712 0001:0000E787  4713 0001:0000E792
+  4716 0001:0000E794  4717 0001:0000E797  4719 0001:0000E79F  4720 0001:0000E7A7
+  4721 0001:0000E7B6  4723 0001:0000E7C3  4726 0001:0000E7C8  4727 0001:0000E7CB
+  4729 0001:0000E7D3  4730 0001:0000E7D9  4731 0001:0000E7DD  4733 0001:0000E7E4
+  4736 0001:0000E7E8  4737 0001:0000E7FE  4738 0001:0000E810  4739 0001:0000E848
+  4742 0001:0000E850  4743 0001:0000E856  4745 0001:0000E85E  4746 0001:0000E864
+  4748 0001:0000E868  4749 0001:0000E871  4752 0001:0000E880  4753 0001:0000E88D
+  4755 0001:0000E894  4759 0001:0000E898  4760 0001:0000E8AF  4763 0001:0000E8B0
+  4764 0001:0000E8B3  4765 0001:0000E8CB  4768 0001:0000E8D0  4769 0001:0000E8D3
+  4770 0001:0000E8D8  4773 0001:0000E8DC  4774 0001:0000E8E6  4776 0001:0000E8F1
+  4777 0001:0000E8FA  4778 0001:0000E904  4780 0001:0000E921  4786 0001:0000E928
+  4787 0001:0000E94B  4789 0001:0000E95E  4790 0001:0000E965  4791 0001:0000E96A
+  4793 0001:0000E98A  4795 0001:0000E99B  4796 0001:0000E9A6  4797 0001:0000E9AB
+  4798 0001:0000E9B7  4800 0001:0000E9D1  4791 0001:0000E9D2  4801 0001:0000E9D7
+  4802 0001:0000E9E1  4805 0001:0000E9F9  4806 0001:0000EA22  4809 0001:0000EA38
+  4810 0001:0000EA4E  4812 0001:0000EA5D  4813 0001:0000EA64  4814 0001:0000EA7F
+  4815 0001:0000EA8F  4817 0001:0000EAB3  4820 0001:0000EAB8  4821 0001:0000EABE
+  4822 0001:0000EAC5  4823 0001:0000EAD8  4824 0001:0000EAE6  4828 0001:0000EAEC
+  4829 0001:0000EAF2  4832 0001:0000EAF4  4833 0001:0000EAF7  4834 0001:0000EB02
+  4837 0001:0000EB04  4838 0001:0000EB0D  4839 0001:0000EB1A  4842 0001:0000EB20
+  4843 0001:0000EB40  4844 0001:0000EB4E  4845 0001:0000EB73  4849 0001:0000EB78
+  4850 0001:0000EB84  4854 0001:0000EB88  4855 0001:0000EB94  4859 0001:0000EB98
+  4860 0001:0000EBA4  4864 0001:0000EBA8  4865 0001:0000EBB4  4871 0001:0000EBB8
+  4872 0001:0000EBC7  4873 0001:0000EC2A  4882 0001:0000EC30  4883 0001:0000EC43
+  4885 0001:0000EC67  4886 0001:0000EC71  4887 0001:0000EC76  4883 0001:0000EC77
+  4888 0001:0000EC7A  4889 0001:0000EC85  4890 0001:0000EC9F  4897 0001:0000ECA8
+  4898 0001:0000ECB7  4899 0001:0000ECC1  4900 0001:0000ECCB  4901 0001:0000ECDB
+  4903 0001:0000ED00  4904 0001:0000ED0D  4906 0001:0000ED61  4909 0001:0000ED70
+  4910 0001:0000ED81  4911 0001:0000ED8B  4901 0001:0000ED8E  4912 0001:0000ED97
+  4916 0001:0000EDA0  4917 0001:0000EDA6  4918 0001:0000EDAD  4919 0001:0000EDB3
+  4920 0001:0000EDC5  4921 0001:0000EDCE  4928 0001:0000EDD4  4929 0001:0000EDE5
+  4930 0001:0000EDF0  4931 0001:0000EDFB  4933 0001:0000EE20  4934 0001:0000EE2D
+  4936 0001:0000EE44  4937 0001:0000EE52  4939 0001:0000EE5F  4940 0001:0000EE81
+  4942 0001:0000EECF  4944 0001:0000EF4B  4945 0001:0000EF5C  4946 0001:0000EF69
+  4931 0001:0000EF6C  4947 0001:0000EF75  4953 0001:0000EF7C  4954 0001:0000EF83
+  4955 0001:0000EF8A  4956 0001:0000EF90  4957 0001:0000EF95  4958 0001:0000EFA1
+  4964 0001:0000EFA8  4965 0001:0000EFBD  4966 0001:0000EFC6  4967 0001:0000EFD2
+  4968 0001:0000EFDC  4969 0001:0000EFFD  4973 0001:0000F008  4974 0001:0000F00E
+  4975 0001:0000F015  4976 0001:0000F01C  4980 0001:0000F020  4981 0001:0000F026
+  4982 0001:0000F02D  4983 0001:0000F034  4991 0001:0000F038  4992 0001:0000F042
+  4994 0001:0000F04C  4995 0001:0000F055  4996 0001:0000F062  4997 0001:0000F06C
+  4998 0001:0000F070  4999 0001:0000F07D  5000 0001:0000F089  5001 0001:0000F096
+  5003 0001:0000F09E  5005 0001:0000F0D0  5011 0001:0000F0D8  5012 0001:0000F0F4
+  5013 0001:0000F0FE  5014 0001:0000F10C  5015 0001:0000F12A  5016 0001:0000F16F
+  5023 0001:0000F178  5024 0001:0000F182  5026 0001:0000F188  5028 0001:0000F193
+  5029 0001:0000F19E  5030 0001:0000F1A8  5032 0001:0000F1BC  5033 0001:0000F1C6
+  5034 0001:0000F1D0  5035 0001:0000F1E0  5036 0001:0000F1F0  5037 0001:0000F1F4
+  5038 0001:0000F201  5040 0001:0000F20D  5045 0001:0000F214  5046 0001:0000F21F
+  5050 0001:0000F220  5051 0001:0000F229  5053 0001:0000F234  5054 0001:0000F238
+  5055 0001:0000F247  5056 0001:0000F252  5058 0001:0000F259  5062 0001:0000F264
+  5063 0001:0000F267  5064 0001:0000F26D  5065 0001:0000F272  5069 0001:0000F274
+  5070 0001:0000F277  5071 0001:0000F27D  5072 0001:0000F282  5076 0001:0000F284
+  5077 0001:0000F287  5079 0001:0000F28F  5080 0001:0000F295  5082 0001:0000F29A
+  5111 0001:0000F29C  5112 0001:0000F2B1  5113 0001:0000F2BA  5114 0001:0000F2C1
+  5115 0001:0000F2C8  5116 0001:0000F2E6  5123 0001:0000F2EC  5124 0001:0000F2F5
+  5125 0001:0000F2FE  5128 0001:0000F331  5131 0001:0000F338  5132 0001:0000F33B
+  5134 0001:0000F343  5135 0001:0000F349  5137 0001:0000F34E  5140 0001:0000F350
+  5141 0001:0000F353  5143 0001:0000F35B  5144 0001:0000F361  5146 0001:0000F366
+  5149 0001:0000F368  5150 0001:0000F36B  5152 0001:0000F373  5153 0001:0000F379
+  5155 0001:0000F37E  5164 0001:0000F380  5165 0001:0000F38B  5166 0001:0000F392
+  5167 0001:0000F39E  5168 0001:0000F3A4  5170 0001:0000F3B4  5172 0001:0000F3C7
+  5173 0001:0000F3DF  5174 0001:0000F3F5  5175 0001:0000F406  5177 0001:0000F429
+  5182 0001:0000F430  5183 0001:0000F43A  5186 0001:0000F43C  5187 0001:0000F443
+  5188 0001:0000F449  5189 0001:0000F45C  5191 0001:0000F465  5194 0001:0000F46C
+  5195 0001:0000F472  5196 0001:0000F484  5199 0001:0000F488  5200 0001:0000F48E
+  5201 0001:0000F4A0  5204 0001:0000F4A4  5205 0001:0000F4AD  5206 0001:0000F4B7
+  5213 0001:0000F4BC  5214 0001:0000F4C5  5215 0001:0000F4CE  5218 0001:0000F4D0
+  5219 0001:0000F4D7  5220 0001:0000F4DD  5221 0001:0000F4E5  5223 0001:0000F4EA
+  5224 0001:0000F4F9  5227 0001:0000F500  5228 0001:0000F50E  5230 0001:0000F517
+  5231 0001:0000F52B  5232 0001:0000F533  5234 0001:0000F53D  5237 0001:0000F544
+  5238 0001:0000F560  5240 0001:0000F56C  5241 0001:0000F576  5242 0001:0000F57F
+  5243 0001:0000F592  5245 0001:0000F5B0  5246 0001:0000F5E6  5249 0001:0000F5F0
+  5250 0001:0000F5F3  5251 0001:0000F5FA  5254 0001:0000F5FC  5255 0001:0000F618
+  5256 0001:0000F621  5257 0001:0000F635  5258 0001:0000F639  5260 0001:0000F640
+  5261 0001:0000F653  5263 0001:0000F683  5266 0001:0000F68C  5267 0001:0000F6B3
+  5268 0001:0000F6BF  5271 0001:0000F6EC  5273 0001:0000F71C  5276 0001:0000F750
+  5277 0001:0000F759  5278 0001:0000F765  5280 0001:0000F775  5281 0001:0000F77E
+  5287 0001:0000F784  5288 0001:0000F7BF  5289 0001:0000F7C4  5291 0001:0000F7DB
+  5293 0001:0000F868  5294 0001:0000F86A  5296 0001:0000F8A6  5289 0001:0000F8A7
+  5297 0001:0000F8AE  5298 0001:0000F8B3  5299 0001:0000F8C3  5300 0001:0000F8CF
+  5302 0001:0000F8EB  5303 0001:0000F977  5308 0001:0000F9B0  5309 0001:0000F9CB
+  5310 0001:0000F9D5  5312 0001:0000F9DE  5313 0001:0000F9E8  5314 0001:0000F9F9
+  5315 0001:0000FA0D  5317 0001:0000FA2D  5318 0001:0000FA5A  5327 0001:0000FA60
+  5328 0001:0000FA6C  5329 0001:0000FA70  5333 0001:0000FA7A  5336 0001:0000FA88
+  5338 0001:0000FA8B  5339 0001:0000FA99  5341 0001:0000FAAA  5342 0001:0000FABF
+  5344 0001:0000FAC5  5345 0001:0000FACC  5351 0001:0000FAD6  5352 0001:0000FAE5
+  5355 0001:0000FAEC  5356 0001:0000FB01  5357 0001:0000FB0A  5358 0001:0000FB28
+  5361 0001:0000FB2C  5362 0001:0000FB33  5363 0001:0000FB47  5364 0001:0000FB51
+  5365 0001:0000FB63  5369 0001:0000FB68  5370 0001:0000FB8B  5371 0001:0000FBC1
+  5379 0001:0000FBC8  5380 0001:0000FBF7  5381 0001:0000FBFB  5383 0001:0000FC10
+  5384 0001:0000FC12  5385 0001:0000FC17  5387 0001:0000FC36  5388 0001:0000FC51
+  5390 0001:0000FC72  5391 0001:0000FC75  5393 0001:0000FC77  5385 0001:0000FC7A
+  5394 0001:0000FCA5  5400 0001:0000FCB0  5401 0001:0000FCD7  5402 0001:0000FCDF
+  5404 0001:0000FD01  5406 0001:0000FD1C  5408 0001:0000FD28  5409 0001:0000FD30
+  5410 0001:0000FD4C  5413 0001:0000FD7B  5402 0001:0000FD7C  5414 0001:0000FDA1
+  5417 0001:0000FDAC  5418 0001:0000FDAF  5419 0001:0000FDB7  5430 0001:0000FDBC
+  5431 0001:0000FDE5  5432 0001:0000FDF3  5433 0001:0000FE01  5434 0001:0000FE0C
+  5435 0001:0000FE17  5436 0001:0000FE1F  5437 0001:0000FE2A  5439 0001:0000FE35
+  5440 0001:0000FE53  5441 0001:0000FE6B  5442 0001:0000FE88  5443 0001:0000FE9B
+  5444 0001:0000FE9F  5445 0001:0000FEA6  5446 0001:0000FEC3  5447 0001:0000FECD
+  5448 0001:0000FED8  5450 0001:0000FEF0  5452 0001:0000FF28  5455 0001:0000FF30
+  5456 0001:0000FF36  5457 0001:0000FF45  5460 0001:0000FF48  5461 0001:0000FF4E
+  5462 0001:0000FF5D  5468 0001:0000FF60  5469 0001:0000FF7E  5471 0001:0000FF90
+  5472 0001:0000FFB3  5473 0001:0000FFCE  5471 0001:0000FFF5  5475 0001:00010015
+  5478 0001:0001001C  5479 0001:0001001F  5481 0001:00010027  5482 0001:0001002D
+  5484 0001:00010032  5487 0001:00010034  5488 0001:0001003D  5489 0001:00010043
+  5490 0001:0001006B  5493 0001:00010070  5494 0001:00010073  5496 0001:0001007B
+  5497 0001:00010081  5499 0001:00010086  5502 0001:00010088  5503 0001:00010091
+  5504 0001:00010097  5505 0001:000100BF  5509 0001:000100C4  5510 0001:000100D0
+  5511 0001:000100E4  5515 0001:000100EC  5516 0001:00010110  5518 0001:00010114
+  5519 0001:00010129  5520 0001:00010140  5523 0001:0001017C  5524 0001:000101A6
+  5527 0001:000101B0  5528 0001:000101D7  5529 0001:000101E6  5532 0001:00010213
+  5534 0001:00010246  5537 0001:00010278  5538 0001:00010281  5539 0001:00010290
+  5541 0001:000102A3  5542 0001:000102AC  5545 0001:000102B0  5546 0001:000102B3
+  5547 0001:000102B9  5548 0001:000102BE  5553 0001:000102C0  5554 0001:000102D7
+  5555 0001:000102E0  5556 0001:000102E7  5557 0001:000102EE  5558 0001:000102F5
+  5559 0001:000102FC  5560 0001:00010303  5561 0001:0001030A  5562 0001:0001031B
+  5563 0001:0001033E  5566 0001:00010344  5567 0001:00010352  5568 0001:0001035A
+  5569 0001:00010371  5572 0001:00010378  5573 0001:00010381  5574 0001:00010390
+  5575 0001:00010395  5577 0001:00010399  5578 0001:000103A1  5580 0001:000103AB
+  5581 0001:000103B4  5585 0001:000103B8  5586 0001:000103C1  5587 0001:000103C6
+  5589 0001:000103D1  5590 0001:000103D8  5591 0001:000103E4  5593 0001:000103F4
+  5594 0001:00010413  5600 0001:00010473  5601 0001:00010488  5602 0001:000104BF
+  5609 0001:000104D8  5610 0001:000104FF  5612 0001:00010505  5613 0001:0001050C
+  5614 0001:00010513  5615 0001:0001051A  5616 0001:00010521  5617 0001:00010528
+  5621 0001:00010534  5622 0001:00010536  5624 0001:00010541  5625 0001:00010550
+  5626 0001:00010568  5627 0001:00010590  5628 0001:000105B6  5629 0001:000105BB
+  5630 0001:000105C0  5631 0001:000105C5  5632 0001:000105CA  5633 0001:000105CF
+  5635 0001:000105D2  5636 0001:000105DC  5637 0001:000105F9  5639 0001:00010625
+  5642 0001:00010638  5643 0001:0001063F  5644 0001:00010653  5645 0001:00010665
+  5648 0001:0001066C  5649 0001:00010678  5650 0001:00010683  5651 0001:00010696
+  5654 0001:0001069C  5655 0001:0001069F  5657 0001:000106A4  5658 0001:000106A7
+  5660 0001:000106AE  5663 0001:000106B0  5664 0001:000106B3  5666 0001:000106B8
+  5667 0001:000106BB  5669 0001:000106C2  5672 0001:000106C4  5673 0001:000106C7
+  5675 0001:000106CC  5676 0001:000106CF  5678 0001:000106D6  5681 0001:000106D8
+  5682 0001:000106DB  5684 0001:000106E0  5685 0001:000106E3  5687 0001:000106EA
+  5690 0001:000106EC  5691 0001:000106EF  5693 0001:000106F4  5694 0001:000106F7
+  5696 0001:000106FE  5699 0001:00010700  5700 0001:00010703  5702 0001:00010708
+  5703 0001:0001070B  5705 0001:00010712  5710 0001:00010714  5711 0001:00010729
+  5712 0001:00010732  5713 0001:00010746  5714 0001:0001074D  5715 0001:0001076B
+  5718 0001:00010770  5719 0001:00010785  5720 0001:0001078E  5721 0001:00010797
+  5722 0001:000107B5  5725 0001:000107BC  5726 0001:000107C2  5727 0001:000107CD
+  5728 0001:000107D4  5729 0001:000107E6  5732 0001:000107EC  5733 0001:000107FA
+  5734 0001:0001080E  5735 0001:00010819  5736 0001:00010830  5740 0001:00010834
+  5741 0001:0001083D  5742 0001:0001084A  5746 0001:00010850  5747 0001:00010859
+  5750 0001:0001085C  5751 0001:0001085F  5752 0001:0001086A  5755 0001:0001086C
+  5756 0001:0001086F  5757 0001:0001087A  5760 0001:0001087C  5761 0001:0001087F
+  5763 0001:00010888  5765 0001:0001089B  5766 0001:000108B6  5767 0001:000108BF
+  5772 0001:000108C8  5773 0001:000108DB  5774 0001:000108E4  5775 0001:000108FF
+  5778 0001:00010906  5781 0001:00010908  5782 0001:0001090E  5783 0001:00010915
+  5784 0001:00010921  5787 0001:00010924  5788 0001:0001092A  5789 0001:00010931
+  5790 0001:00010938  5793 0001:0001093C  5794 0001:00010942  5795 0001:00010949
+  5796 0001:00010950  5799 0001:00010954  5800 0001:0001095A  5801 0001:0001096A
+  5805 0001:00010970  5807 0001:00010973  5808 0001:00010982  5810 0001:00010991
+  5821 0001:00010994  5822 0001:000109D7  5823 0001:000109DE  5824 0001:000109E4
+  5825 0001:000109EB  5827 0001:000109F5  5829 0001:00010A02  5831 0001:00010A0B
+  5832 0001:00010A1C  5833 0001:00010A2A  5834 0001:00010A40  5836 0001:00010A49
+  5837 0001:00010A50  5839 0001:00010A5A  5841 0001:00010A6C  5842 0001:00010A81
+  5843 0001:00010A89  5844 0001:00010A91  5849 0001:00010A99  5850 0001:00010AAE
+  5851 0001:00010AB6  5852 0001:00010ABE  5855 0001:00010AC4  5856 0001:00010AD7
+  5858 0001:00010ADE  5860 0001:00010AE8  5861 0001:00010AEC  5863 0001:00010AFE
+  5865 0001:00010B0A  5866 0001:00010B16  5868 0001:00010B1F  5872 0001:00010B28
+  5873 0001:00010B40  5874 0001:00010B49  5877 0001:00010B52  5878 0001:00010B67
+  5879 0001:00010B6D  5880 0001:00010B73  5888 0001:00010B79  5890 0001:00010B85
+  5891 0001:00010B91  5893 0001:00010B97  5897 0001:00010B9D  5898 0001:00010BB2
+  5899 0001:00010BB8  5902 0001:00010BBE  5903 0001:00010BCA  5905 0001:00010BD0
+  5910 0001:00010BD4  5914 0001:00010BE3  5915 0001:00010BF4  5916 0001:00010C04
+  5918 0001:00010C0A  5919 0001:00010C14  5921 0001:00010C21  5922 0001:00010C2D
+  5924 0001:00010C35  5926 0001:00010C4B  5927 0001:00010C58  5929 0001:00010C60
+  5931 0001:00010C70  5933 0001:00010C78  5934 0001:00010C84  5936 0001:00010CAC
+  5937 0001:00010CB5  5938 0001:00010CBC  5939 0001:00010CCF  5940 0001:00010CDA
+  5941 0001:00010CE7  5943 0001:00010D2D  5944 0001:00010D50  5945 0001:00010D67
+  5949 0001:00010D77  5951 0001:00010D8F  5952 0001:00010D91  5953 0001:00010DA7
+  5954 0001:00010DB6  5956 0001:00010DBB  5959 0001:00010DC5  5960 0001:00010E1F
+  5954 0001:00010E2C  5962 0001:00010E31  5963 0001:00010E40  5964 0001:00010E57
+  5965 0001:00010E65  5966 0001:00010E71  5967 0001:00010EA3  5968 0001:00010EB9
+  5972 0001:00010EDF  5976 0001:00010F19  5986 0001:00010F3C  5987 0001:00010F6C
+  5989 0001:00010F79  5990 0001:00010F9A  5991 0001:00010FA8  5992 0001:00010FBC
+  5993 0001:00010FCA  5995 0001:00010FD6  5996 0001:00010FE7  5997 0001:00010FF4
+  5998 0001:00011001  5999 0001:0001100C  6001 0001:00011019  6002 0001:00011026
+  6004 0001:00011034  6006 0001:00011049  6010 0001:0001108C  6011 0001:00011098
+  6012 0001:000110A6  6014 0001:000110B2  6015 0001:000110BF  6016 0001:000110CF
+  6017 0001:0001110D  6019 0001:0001111A  6020 0001:0001112A  6022 0001:00011175
+  6025 0001:0001118B  6026 0001:0001119C  6029 0001:000111A9  6031 0001:000111B2
+  6032 0001:000111BF  6034 0001:000111CB  6036 0001:000111E1  6039 0001:000111EB
+  6040 0001:000111FB  6041 0001:0001120B  6042 0001:00011216  6045 0001:00011223
+  6046 0001:0001122F  6048 0001:0001124F  6049 0001:00011254  6050 0001:00011260
+  6052 0001:00011268  6054 0001:000112A1  6057 0001:000112C0  6060 0001:000112E5
+  6061 0001:000112EB  6064 0001:0001131D  6067 0001:00011324  6068 0001:00011327
+  6070 0001:0001132F  6071 0001:00011335  6073 0001:00011343  6076 0001:00011348
+  6077 0001:0001134B  6078 0001:0001135C  6081 0001:00011360  6082 0001:00011366
+  6083 0001:0001136D  6084 0001:0001137C  6085 0001:00011383  6093 0001:00011388
+  6094 0001:00011393  6096 0001:00011398  6098 0001:000113AF  6099 0001:000113BC
+  6101 0001:000113CF  6102 0001:000113D4  6104 0001:000113EF  6106 0001:00011408
+  6107 0001:00011415  6109 0001:0001141A  6111 0001:0001143A  6112 0001:00011440
+  6114 0001:0001144F  6118 0001:0001145A  6102 0001:0001145B  6119 0001:0001145E
+  6120 0001:0001146A  6123 0001:00011476  6124 0001:0001147D  6125 0001:00011484
+  6128 0001:0001148C  6129 0001:00011492  6131 0001:0001149A  6132 0001:000114A0
+  6133 0001:000114A7  6135 0001:000114AE  6138 0001:000114B4  6139 0001:000114BA
+  6141 0001:000114C2  6142 0001:000114C8  6143 0001:000114CF  6145 0001:000114D6
+  6156 0001:000114DC  6157 0001:000114E7  6159 0001:00011515  6160 0001:0001151F
+  6161 0001:00011529  6162 0001:00011537  6163 0001:0001154F  6164 0001:0001155D
+  6166 0001:00011588  6169 0001:000115AA  6171 0001:000115BD  6178 0001:00011607
+  6179 0001:00011611  6181 0001:0001161D  6182 0001:00011628  6185 0001:00011646
+  6186 0001:00011662  6187 0001:00011681  6190 0001:000116A0  6193 0001:000116B0
+  6194 0001:000116B9  6195 0001:000116C2  6198 0001:000116C8  6199 0001:000116E1
+  6201 0001:000116F7  6202 0001:00011700  6203 0001:00011707  6205 0001:0001172B
+  6208 0001:00011730  6209 0001:00011733  6210 0001:00011739  6211 0001:0001173E
+  6214 0001:00011740  6215 0001:00011746  6216 0001:0001174C  6217 0001:0001175C
+  6218 0001:00011765  6219 0001:0001176C  6226 0001:00011770  6227 0001:00011778
+  6229 0001:00011788  6231 0001:000117A2  6233 0001:000117BB  6234 0001:000117C5
+  6235 0001:000117D7  6237 0001:000117E3  6229 0001:000117E4  6239 0001:000117E7
+  6242 0001:000117EC  6243 0001:000117F2  6244 0001:000117F9  6245 0001:00011800
+  6248 0001:00011804  6249 0001:00011807  6250 0001:0001180D  6251 0001:00011812
+  6254 0001:00011814  6255 0001:0001181D  6257 0001:00011827  6258 0001:0001182B
+  6259 0001:00011832  6260 0001:0001183A  6262 0001:0001183E  6263 0001:00011845
+  6266 0001:0001184C  6275 0001:00011850  6276 0001:0001185E  6277 0001:00011864
+  6278 0001:0001187C  6280 0001:0001188E  6282 0001:000118A9  6283 0001:000118AF
+  6285 0001:000118B3  6286 0001:000118C8  6287 0001:000118CC  6288 0001:000118E2
+  6280 0001:000118E3  6290 0001:000118E6  6292 0001:000118EC  6293 0001:000118F3
+  6294 0001:00011900  6295 0001:00011909  6299 0001:0001190C  6300 0001:00011918
+  6301 0001:00011923  6302 0001:00011930  6303 0001:00011938  6306 0001:00011940
+  6307 0001:00011943  6308 0001:00011949  6309 0001:0001194E  6312 0001:00011950
+  6318 0001:00011959  6319 0001:00011967  6321 0001:00011970  6322 0001:00011975
+  6332 0001:0001197C  6337 0001:00011980  6338 0001:0001198A  6339 0001:00011993
+  6340 0001:00011998  6342 0001:000119A9  6343 0001:000119AE  6345 0001:000119B7
+  6346 0001:000119D9  6347 0001:000119E9  6348 0001:00011A0B  6349 0001:00011A1B
+  6352 0001:00011A40  6359 0001:00011A48  6360 0001:00011A55  6361 0001:00011A57
+  6362 0001:00011A5C  6363 0001:00011A61  6365 0001:00011A67  6367 0001:00011A7C
+  6368 0001:00011A8C  6369 0001:00011A8E  6371 0001:00011A94  6373 0001:00011AA9
+  6374 0001:00011AB9  6375 0001:00011ABB  6378 0001:00011AC1  6379 0001:00011ACA
+  6380 0001:00011ACE  6381 0001:00011AF3  6388 0001:00011AFC  6389 0001:00011B09
+  6390 0001:00011B0B  6391 0001:00011B10  6394 0001:00011B15  6396 0001:00011B27
+  6397 0001:00011B37  6398 0001:00011B39  6399 0001:00011B3F  6401 0001:00011B45
+  6403 0001:00011B57  6404 0001:00011B67  6405 0001:00011B69  6406 0001:00011B6F
+  6409 0001:00011B75  6410 0001:00011B7E  6411 0001:00011B82  6412 0001:00011BA7
+  6417 0001:00011BB0  6418 0001:00011BBE  6419 0001:00011BC8  6420 0001:00011BCD
+  6421 0001:00011BE4  6428 0001:00011BE8  6429 0001:00011BF1  6430 0001:00011BF9
+  6432 0001:00011C09  6433 0001:00011C15  6434 0001:00011C2A  6435 0001:00011C3B
+  6436 0001:00011C49  6437 0001:00011C5A  6438 0001:00011C65  6439 0001:00011C72
+  6441 0001:00011C90  6444 0001:00011CAA  6448 0001:00011CB0  6449 0001:00011CB6
+  6451 0001:00011CCA  6453 0001:00011CD5  6458 0001:00011CD8  6459 0001:00011CDE
+  6460 0001:00011CE5  6461 0001:00011D0C  6464 0001:00011D10  6465 0001:00011D25
+  6466 0001:00011D2E  6467 0001:00011D6C  6470 0001:00011D70  6471 0001:00011D7E
+  6472 0001:00011D8A  6474 0001:00011D99  6475 0001:00011DA2  6476 0001:00011DAB
+  6477 0001:00011DB6  6478 0001:00011DC1  6480 0001:00011DD2  6483 0001:00011DD7
+  6488 0001:00011DE0  6489 0001:00011DE6  6490 0001:00011DED  6491 0001:00011DF6
+  6492 0001:00011E00  6495 0001:00011E04  6496 0001:00011E0E  6497 0001:00011E18
+  6499 0001:00011E21  6500 0001:00011E2A  6503 0001:00011E30  6504 0001:00011E57
+  6505 0001:00011E66  6507 0001:00011E93  6508 0001:00011EC6  6511 0001:00011EF8
+  6512 0001:00011F02  6513 0001:00011F0B  6514 0001:00011F21  6515 0001:00011F2A
+  6516 0001:00011F37  6517 0001:00011F44  6518 0001:00011F51  6519 0001:00011F5F
+  6521 0001:00011F6A  6522 0001:00011F77  6525 0001:00011F7C  6526 0001:00011F85
+  6527 0001:00011F94  6529 0001:00011FA7  6530 0001:00011FB0  6535 0001:00011FB4
+  6536 0001:00011FD4  6539 0001:00011FDD  6541 0001:00011FE6  6542 0001:00012004
+  6543 0001:0001200C  6544 0001:00012018  6545 0001:0001201D  6547 0001:0001202A
+  6548 0001:00012048  6550 0001:0001206B  6557 0001:00012074  6558 0001:00012082
+  6560 0001:00012092  6562 0001:000120A8  6564 0001:000120CA  6566 0001:000120E4
+  6568 0001:000120F6  6569 0001:00012104  6570 0001:00012112  6571 0001:0001212B
+  6572 0001:0001214C  6571 0001:00012159  6573 0001:0001215C  6575 0001:00012180
+  6580 0001:00012196  6581 0001:000121A1  6586 0001:000121A8  6587 0001:000121B2
+  6588 0001:000121BC  6590 0001:000121C5  6591 0001:000121CE  6594 0001:000121D4
+  6595 0001:000121DE  6596 0001:000121E7  6597 0001:000121FD  6598 0001:00012206
+  6599 0001:00012213  6600 0001:00012220  6601 0001:0001222D  6602 0001:0001223B
+  6604 0001:00012246  6605 0001:00012253  6610 0001:00012258  6611 0001:00012262
+  6612 0001:0001226C  6614 0001:00012275  6615 0001:0001227E  6618 0001:00012284
+  6619 0001:0001228E  6620 0001:00012297  6621 0001:000122AD  6622 0001:000122B6
+  6623 0001:000122C3  6624 0001:000122D0  6625 0001:000122DD  6626 0001:000122EB
+  6628 0001:000122F6  6629 0001:00012303  6634 0001:00012308  6635 0001:00012312
+  6636 0001:0001231C  6638 0001:00012325  6639 0001:0001232E  6642 0001:00012334
+  6643 0001:0001233E  6644 0001:00012347  6645 0001:0001235D  6646 0001:00012366
+  6647 0001:00012373  6648 0001:00012380  6649 0001:0001238D  6650 0001:0001239B
+  6652 0001:000123A6  6653 0001:000123B3  6658 0001:000123B8  6659 0001:000123DF
+  6660 0001:000123EE  6662 0001:00012417  6663 0001:0001244A  6666 0001:0001247C
+  6667 0001:00012485  6668 0001:00012494  6670 0001:000124A7  6671 0001:000124B0
+  6676 0001:000124B4  6677 0001:000124BD  6678 0001:000124C6  6681 0001:000124CC
+  6682 0001:000124D6  6683 0001:000124DF  6684 0001:000124F5  6685 0001:000124FE
+  6686 0001:0001250B  6687 0001:00012518  6688 0001:00012525  6689 0001:00012533
+  6691 0001:0001253E  6692 0001:0001254B  6693 0001:00012554  6698 0001:0001255C
+  6699 0001:00012566  6700 0001:00012570  6702 0001:00012579  6703 0001:00012582
+  6706 0001:00012588  6707 0001:00012592  6708 0001:0001259B  6709 0001:000125B1
+  6710 0001:000125BA  6711 0001:000125C7  6712 0001:000125D4  6713 0001:000125E1
+  6714 0001:000125EF  6716 0001:000125FA  6717 0001:00012607  6724 0001:0001260C
+  6725 0001:00012617  6726 0001:0001261E  6728 0001:00012645  6729 0001:0001264F
+  6730 0001:0001265C  6731 0001:0001266D  6733 0001:0001267B  6738 0001:00012684
+  6741 0001:0001268C  6742 0001:0001268E  6744 0001:000126D8  6748 0001:000126DC
+  6749 0001:000126EA  6750 0001:00012720  6751 0001:00012737  6754 0001:00012740
+  6755 0001:0001274D  6757 0001:00012759  6759 0001:00012781  6761 0001:000127A9
+  6764 0001:000127B8  6765 0001:000127DF  6766 0001:000127EE  6768 0001:00012817
+  6769 0001:0001284A  6772 0001:0001287C  6773 0001:00012885  6774 0001:00012894
+  6776 0001:000128A7  6777 0001:000128B0  6780 0001:000128B4  6781 0001:000128B7
+  6784 0001:000128E4  6786 0001:000128E8  6787 0001:000128EA  6791 0001:000128EC
+  6792 0001:000128F1  6793 0001:000128FC  6794 0001:00012901  6796 0001:0001290D
+  6797 0001:00012913  6801 0001:00012914  6802 0001:0001291A  6808 0001:0001291C
+  6809 0001:0001294A  6810 0001:0001294D  6818 0001:00012956  6819 0001:0001295B
+  6820 0001:0001297A  6821 0001:000129B2  6819 0001:000129BE  6822 0001:000129C1
+  6823 0001:000129C7  6825 0001:000129CE  6826 0001:000129D7  6827 0001:00012A11
+  6832 0001:00012A18  6833 0001:00012A3F  6834 0001:00012A49  6835 0001:00012A64
+  6836 0001:00012A8D  6846 0001:00012A94  6848 0001:00012ADC  6838 0001:00012AE0
+  6840 0001:00012AEC  6841 0001:00012AF3  6842 0001:00012B08  6844 0001:00012B19
+
+Line numbers for ORCtrlsDsgn(ORCtrlsDsgn.pas) segment .text
+
+    46 0001:00012DE4    47 0001:00012DE7    48 0001:00012DEC    52 0001:00012DF0
+    53 0001:00012DF6    59 0001:00012DFC    60 0001:00012E03    61 0001:00012E05
+    60 0001:00012E24    62 0001:00012E29    65 0001:00012E30    66 0001:00012E39
+    67 0001:00012E42    70 0001:00012E48    71 0001:00012E4B    72 0001:00012E50
+    77 0001:00012E54    78 0001:00012E6C    79 0001:00012E77    80 0001:00012E7D
+    81 0001:00012E97    84 0001:00012EA0    85 0001:00012EA9    86 0001:00012EC2
+    91 0001:00012ED4    92 0001:00012ED6    96 0001:00012EDC    97 0001:00012EE2
+   100 0001:00012EE8   101 0001:00012EEE   102 0001:00012F15   103 0001:00012F24
+   104 0001:00012F33   105 0001:00012F42   106 0001:00012F51   107 0001:00012F60
+   109 0001:00012F6C   115 0001:00013024   116 0001:00013032   118 0001:0001304A
+   119 0001:00013056   120 0001:0001307D   121 0001:0001308D   122 0001:0001309D
+   123 0001:000130AD   124 0001:000130BD   125 0001:000130CD   127 0001:000130DB
+   116 0001:000130DC   128 0001:000130E3   134 0001:000130EC   135 0001:000130F5
+   136 0001:00013102   138 0001:00013116   139 0001:0001311F   140 0001:00013146
+   141 0001:00013150   142 0001:0001315A   143 0001:00013164   144 0001:0001316E
+   145 0001:00013178   147 0001:00013180   136 0001:00013181   148 0001:00013184
+   149 0001:00013197   153 0001:000131A0   154 0001:000131A6   160 0001:00013268
+   162 0001:00013283   164 0001:000132E0   164 0001:000132E7
+
+Line numbers for ORCtrlLib60(C:\perforce\cprs\OR_3_215V26\CPRS-Lib\ORCtrlLib60.dpk) segment .text
+
+    42 0001:00013548
+
+Bound resource files
+
+ORCTRLS.RES
+ORCtrlLib60.res
+..\CPRS-Chart\Accessibility_TLB.dcr
+ORCtrlsDsgn.dcr
+ORCtrlLib60.drf
+
+
+Program entry point at 0001:00013548

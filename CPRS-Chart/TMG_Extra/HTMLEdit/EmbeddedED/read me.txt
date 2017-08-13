@@ -1,0 +1,63 @@
+Open source project MSHTML Editor OSPv3r00 16-01-2004
+
+  This editor is build from a DHTML edit OSP from 16-05-1999 found at:
+  delphi-dhtmledit@yahoogroups.com
+  http://groups.yahoo.com/group/delphi-dhtmledit/files/DHTMLEdit/DHTML.zip
+  (look in the file section)
+
+
+
+How to install the editorcomponent (EmbeddedED) into Delphi:
+  - Just install EmbeddedED.pas into a package of your own choice.
+
+
+About the demo:
+
+
+  This update editor is created by Kurt Senfer
+  "Copyright (C) 2002-2004  Kurt Senfer <Support@ks.helpware.net>"
+
+
+  I have often, in various mails on the delphi-dhtmledit list, pointed out that
+  The DHTMLEdit component is just a wrapper around the MSHTML engine - the
+  Wrapper contains coding that enables additional features like:
+     Table operations (insert row, insert column, merge cells, and so on).
+     Absolute drop mode.
+     Source code white space and formatting preservation.
+     Custom Editing Glyphs.
+     ........
+
+
+  Replacing DHTMLEdit with the MSHTML engine (or as in this case with the
+  EmbeddedED component) means that you need to code a lot of features, like
+  tablehandling and so on, witch is build in fearture in DHTMLEdit, yourself.
+
+  I chosed to create a VCL wrapper around MSHTML and named it:
+  TEmbeddedED~ Embedded EDitor
+  TEmbeddedED implements most of the code you need to replace the DHTML Component
+  (if you only need a basic editor) and it offers a lot of features never
+  found in DHTML Edit. The main reason for encapsulating all that code in a
+  component is that its easy to update existing editor projects with
+  new features (in new versions of TEmbeddedED).
+
+
+  This is a short listing of the main things you have to do in order to skip
+  DHTMLEdit in favour of the HMHTML engine in your own DHTMLEdit project.
+
+  - Replace TDHTMLEdit with MSHTML
+  - Call the existing DHTMLEditDisplayChanged from a new "OnUpdateUI function"
+  - Implement Custom Editing Glyphs
+  - Implement IHTMLEditDesigner
+  - Implement IHTMLEditHost
+  - Implemet code to handle the table stuff
+  - Implemet code to handle the position stuff
+
+
+I've build the demo with D5 and D6 and belive it should also compile on D7.
+ 
+
+Kurt Senfer
+
+
+
+

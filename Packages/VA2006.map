@@ -1,0 +1,205 @@
+
+ Start         Length     Name                   Class
+ 0001:00401000 00000FB8H .text                   CODE
+ 0002:00402000 000000DCH .itext                  ICODE
+ 0003:00403000 0000002CH .data                   DATA
+ 0004:00404000 00000018H .bss                    BSS
+ 0005:00000000 00000000H .tls                    TLS
+
+
+Detailed map of segments
+
+ 0001:00000000 000000E6 C=CODE     S=.text    G=(none)   M=System   ACBP=A9
+ 0001:000000E8 000001C3 C=CODE     S=.text    G=(none)   M=SysInit  ACBP=A9
+ 0001:000002AC 00000016 C=CODE     S=.text    G=(none)   M=SysUtils ACBP=A9
+ 0001:000002C4 00000054 C=CODE     S=.text    G=(none)   M=Windows  ACBP=A9
+ 0001:00000318 00000046 C=CODE     S=.text    G=(none)   M=Classes  ACBP=A9
+ 0001:00000360 00000006 C=CODE     S=.text    G=(none)   M=TypInfo  ACBP=A9
+ 0001:00000368 00000006 C=CODE     S=.text    G=(none)   M=Variants ACBP=A9
+ 0001:00000370 00000006 C=CODE     S=.text    G=(none)   M=VarUtils ACBP=A9
+ 0001:00000378 00000036 C=CODE     S=.text    G=(none)   M=Graphics ACBP=A9
+ 0001:000003B0 00000006 C=CODE     S=.text    G=(none)   M=Registry ACBP=A9
+ 0001:000003B8 00000006 C=CODE     S=.text    G=(none)   M=IniFiles ACBP=A9
+ 0001:000003C0 0000017E C=CODE     S=.text    G=(none)   M=Controls ACBP=A9
+ 0001:00000540 00000006 C=CODE     S=.text    G=(none)   M=ActnList ACBP=A9
+ 0001:00000548 00000006 C=CODE     S=.text    G=(none)   M=Forms    ACBP=A9
+ 0001:00000550 00000006 C=CODE     S=.text    G=(none)   M=HelpIntfs ACBP=A9
+ 0001:00000558 00000006 C=CODE     S=.text    G=(none)   M=MultiMon ACBP=A9
+ 0001:00000560 00000006 C=CODE     S=.text    G=(none)   M=Menus    ACBP=A9
+ 0001:00000568 00000006 C=CODE     S=.text    G=(none)   M=UxTheme  ACBP=A9
+ 0001:00000570 00000006 C=CODE     S=.text    G=(none)   M=Themes   ACBP=A9
+ 0001:00000578 00000006 C=CODE     S=.text    G=(none)   M=Dialogs  ACBP=A9
+ 0001:00000580 00000006 C=CODE     S=.text    G=(none)   M=Printers ACBP=A9
+ 0001:00000588 00000006 C=CODE     S=.text    G=(none)   M=ExtCtrls ACBP=A9
+ 0001:00000590 00000006 C=CODE     S=.text    G=(none)   M=GraphUtil ACBP=A9
+ 0001:00000598 00000006 C=CODE     S=.text    G=(none)   M=Clipbrd  ACBP=A9
+ 0001:000005A0 00000006 C=CODE     S=.text    G=(none)   M=FlatSB   ACBP=A9
+ 0001:000005A8 00000086 C=CODE     S=.text    G=(none)   M=Grids    ACBP=A9
+ 0001:00000630 000007AE C=CODE     S=.text    G=(none)   M=Vawrgrid ACBP=A9
+ 0001:00000DE0 000001D7 C=CODE     S=.text    G=(none)   M=.VA2006  ACBP=A9
+ 0002:00000000 00000006 C=ICODE    S=.itext   G=(none)   M=System   ACBP=A9
+ 0002:00000008 00000006 C=ICODE    S=.itext   G=(none)   M=SysUtils ACBP=A9
+ 0002:00000010 00000011 C=ICODE    S=.itext   G=(none)   M=Windows  ACBP=A9
+ 0002:00000024 00000006 C=ICODE    S=.itext   G=(none)   M=Classes  ACBP=A9
+ 0002:0000002C 00000006 C=ICODE    S=.itext   G=(none)   M=TypInfo  ACBP=A9
+ 0002:00000034 00000006 C=ICODE    S=.itext   G=(none)   M=Variants ACBP=A9
+ 0002:0000003C 00000006 C=ICODE    S=.itext   G=(none)   M=VarUtils ACBP=A9
+ 0002:00000044 00000006 C=ICODE    S=.itext   G=(none)   M=Graphics ACBP=A9
+ 0002:0000004C 00000006 C=ICODE    S=.itext   G=(none)   M=Registry ACBP=A9
+ 0002:00000054 00000006 C=ICODE    S=.itext   G=(none)   M=IniFiles ACBP=A9
+ 0002:0000005C 00000006 C=ICODE    S=.itext   G=(none)   M=Controls ACBP=A9
+ 0002:00000064 00000006 C=ICODE    S=.itext   G=(none)   M=ActnList ACBP=A9
+ 0002:0000006C 00000006 C=ICODE    S=.itext   G=(none)   M=Forms    ACBP=A9
+ 0002:00000074 00000006 C=ICODE    S=.itext   G=(none)   M=HelpIntfs ACBP=A9
+ 0002:0000007C 00000006 C=ICODE    S=.itext   G=(none)   M=MultiMon ACBP=A9
+ 0002:00000084 00000006 C=ICODE    S=.itext   G=(none)   M=Menus    ACBP=A9
+ 0002:0000008C 00000006 C=ICODE    S=.itext   G=(none)   M=UxTheme  ACBP=A9
+ 0002:00000094 00000006 C=ICODE    S=.itext   G=(none)   M=Themes   ACBP=A9
+ 0002:0000009C 00000006 C=ICODE    S=.itext   G=(none)   M=Dialogs  ACBP=A9
+ 0002:000000A4 00000006 C=ICODE    S=.itext   G=(none)   M=Printers ACBP=A9
+ 0002:000000AC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtCtrls ACBP=A9
+ 0002:000000B4 00000006 C=ICODE    S=.itext   G=(none)   M=GraphUtil ACBP=A9
+ 0002:000000BC 00000006 C=ICODE    S=.itext   G=(none)   M=Clipbrd  ACBP=A9
+ 0002:000000C4 00000006 C=ICODE    S=.itext   G=(none)   M=FlatSB   ACBP=A9
+ 0002:000000CC 00000008 C=ICODE    S=.itext   G=(none)   M=Vawrgrid ACBP=A9
+ 0002:000000D4 00000005 C=ICODE    S=.itext   G=(none)   M=.VA2006  ACBP=A9
+ 0003:00000000 0000002C C=DATA     S=.data    G=DGROUP   M=SysInit  ACBP=A9
+ 0004:00000000 0000000C C=BSS      S=.bss     G=DGROUP   M=SysInit  ACBP=A9
+ 0004:0000000C 00000008 C=BSS      S=.bss     G=DGROUP   M=Windows  ACBP=A9
+ 0004:00000014 00000004 C=BSS      S=.bss     G=DGROUP   M=Vawrgrid ACBP=A9
+
+
+  Address             Publics by Name
+
+ 0002:000000D4       .VA2006..VA2006
+ 0001:00000F98       .VA2006.@GetPackageInfoTable
+ 0001:00000FA0       .VA2006.@PackageLoad
+ 0001:00000FAC       .VA2006.@PackageUnload
+ 0001:00000230       SysInit.@InitPkg
+ 0001:00000294       SysInit.@PackageLoad
+ 0001:000002A0       SysInit.@PackageUnload
+ 0001:00000120       SysInit.AllocTlsBuffer
+ 0001:000001DC       SysInit.ExitProcessTLS
+ 0001:000001A4       SysInit.ExitThreadTLS
+ 0001:000000E8       SysInit.FreeLibrary
+ 0001:0000012C       SysInit.GetTlsSize
+ 0004:00000004       SysInit.HInstance
+ 0001:00000200       SysInit.InitializeModule
+ 0001:00000178       SysInit.InitProcessTLS
+ 0001:00000134       SysInit.InitThreadTLS
+ 0001:000000F0       SysInit.LocalAlloc
+ 0001:000000F8       SysInit.LocalFree
+ 0003:00000004       SysInit.Module
+ 0004:00000000       SysInit.ModuleIsLib
+ 0004:00000001       SysInit.ModuleIsPackage
+ 0001:00000100       SysInit.TlsAlloc
+ 0004:00000008       SysInit.tlsBuffer
+ 0001:00000108       SysInit.TlsFree
+ 0001:00000110       SysInit.TlsGetValue
+ 0003:00000000       SysInit.TlsIndex
+ 0005:00000000       SysInit.TlsLast
+ 0003:0000001C       SysInit.TlsProc
+ 0001:00000118       SysInit.TlsSetValue
+ 0001:0000020C       SysInit.UninitializeModule
+ 0004:00000014       Vawrgrid..2
+ 0001:00000630       Vawrgrid..TVAWrapGrid
+ 0001:00000DB0       Vawrgrid.Finalization
+ 0001:00000D80       Vawrgrid.Register
+ 0001:0000082C       Vawrgrid.SetCol
+ 0001:000007E0       Vawrgrid.TVAWrapGrid.Create
+ 0001:00000ABC       Vawrgrid.TVAWrapGrid.DrawCell
+ 0001:000008A0       Vawrgrid.TVAWrapGrid.SetHiddenCols
+ 0002:000000CC       Vawrgrid.Vawrgrid
+ 0004:0000000C       Windows..3
+ 0001:000002CC       Windows.DrawText
+ 0001:000002D4       Windows.Finalization
+ 0001:000002C4       Windows.FreeLibrary
+ 0004:00000010       Windows.HtmlHelpModule
+ 0002:00000010       Windows.Windows
+
+
+  Address             Publics by Value
+
+ 0001:000000E8       SysInit.FreeLibrary
+ 0001:000000F0       SysInit.LocalAlloc
+ 0001:000000F8       SysInit.LocalFree
+ 0001:00000100       SysInit.TlsAlloc
+ 0001:00000108       SysInit.TlsFree
+ 0001:00000110       SysInit.TlsGetValue
+ 0001:00000118       SysInit.TlsSetValue
+ 0001:00000120       SysInit.AllocTlsBuffer
+ 0001:0000012C       SysInit.GetTlsSize
+ 0001:00000134       SysInit.InitThreadTLS
+ 0001:00000178       SysInit.InitProcessTLS
+ 0001:000001A4       SysInit.ExitThreadTLS
+ 0001:000001DC       SysInit.ExitProcessTLS
+ 0001:00000200       SysInit.InitializeModule
+ 0001:0000020C       SysInit.UninitializeModule
+ 0001:00000230       SysInit.@InitPkg
+ 0001:00000294       SysInit.@PackageLoad
+ 0001:000002A0       SysInit.@PackageUnload
+ 0001:000002C4       Windows.FreeLibrary
+ 0001:000002CC       Windows.DrawText
+ 0001:000002D4       Windows.Finalization
+ 0001:00000630       Vawrgrid..TVAWrapGrid
+ 0001:000007E0       Vawrgrid.TVAWrapGrid.Create
+ 0001:0000082C       Vawrgrid.SetCol
+ 0001:000008A0       Vawrgrid.TVAWrapGrid.SetHiddenCols
+ 0001:00000ABC       Vawrgrid.TVAWrapGrid.DrawCell
+ 0001:00000D80       Vawrgrid.Register
+ 0001:00000DB0       Vawrgrid.Finalization
+ 0001:00000F98       .VA2006.@GetPackageInfoTable
+ 0001:00000FA0       .VA2006.@PackageLoad
+ 0001:00000FAC       .VA2006.@PackageUnload
+ 0002:00000010       Windows.Windows
+ 0002:000000CC       Vawrgrid.Vawrgrid
+ 0002:000000D4       .VA2006..VA2006
+ 0003:00000000       SysInit.TlsIndex
+ 0003:00000004       SysInit.Module
+ 0003:0000001C       SysInit.TlsProc
+ 0004:00000000       SysInit.ModuleIsLib
+ 0004:00000001       SysInit.ModuleIsPackage
+ 0004:00000004       SysInit.HInstance
+ 0004:00000008       SysInit.tlsBuffer
+ 0004:0000000C       Windows..3
+ 0004:00000010       Windows.HtmlHelpModule
+ 0004:00000014       Vawrgrid..2
+ 0005:00000000       SysInit.TlsLast
+
+
+Line numbers for Vawrgrid(Vawrgrid.pas) segment .text
+
+    34 0001:000007E0    36 0001:000007F5    37 0001:000007FE    39 0001:00000807
+    40 0001:0000080E    50 0001:0000082C    51 0001:00000849    52 0001:0000085B
+    53 0001:00000880    54 0001:000008A0    55 0001:000008CD    56 0001:000008DD
+    57 0001:000008EC    58 0001:000008F5    59 0001:000008FA    58 0001:0000092B
+    62 0001:00000930    63 0001:0000095A    64 0001:00000964    60 0001:00000980
+    66 0001:00000991    68 0001:00000997    69 0001:000009A1    70 0001:000009A9
+    72 0001:000009B3    73 0001:000009BD    75 0001:000009EA    76 0001:000009F9
+    78 0001:000009FD    79 0001:00000A16    80 0001:00000A3D    81 0001:00000A5A
+    76 0001:00000A69    84 0001:00000A6D    92 0001:00000ABC    94 0001:00000AEF
+    95 0001:00000B00    98 0001:00000B29    99 0001:00000B47   101 0001:00000B4C
+   103 0001:00000B52   105 0001:00000B70   106 0001:00000B7E   108 0001:00000B92
+   110 0001:00000B98   111 0001:00000BA6   112 0001:00000BB4   115 0001:00000BC4
+   119 0001:00000BEA   120 0001:00000BF7   125 0001:00000C06   126 0001:00000C11
+   127 0001:00000C1C   130 0001:00000C2A   133 0001:00000C34   134 0001:00000C4E
+   137 0001:00000C61   140 0001:00000C80   143 0001:00000C9F   144 0001:00000CA8
+   145 0001:00000CB4   147 0001:00000CC9   149 0001:00000CCF   150 0001:00000CDE
+   152 0001:00000D28   154 0001:00000D30   145 0001:00000D31   156 0001:00000D36
+   158 0001:00000D4A   161 0001:00000D80   164 0001:00000D84   165 0001:00000D9B
+
+Line numbers for Vawrgrid(Vawrgrid.pas) segment .itext
+
+   167 0002:000000CC
+
+Line numbers for .VA2006(C:\cprs\Current\CPRS-Lib\VA2006.dpk) segment .itext
+
+    35 0002:000000D4
+
+Bound resource files
+
+VA2006.res
+VA2006.drf
+
+
+Program entry point at 0002:000000D4

@@ -1,0 +1,75 @@
+
+The following are instructions for installing the BDK32_P50T4 update for the RPC Broker BDK: XWB1_1P50.
+
+This update has been provided to address the following problems:
+ 1. Fix some problems with CCOW when running multiple versions/instances of CPRS.
+ 2. Fix compatibility issues with the Mental Health and Vitals DLL's called from within CPRS.
+ 3. Fix the problem of creating a new Verify Code when previous code had expired.
+
+If you haven't installed the initial version of XWB1_P50 patch, do so before proceeding with these steps, using the instructions found in:
+..\cprs\main\BDK50\Perforce Installation of RPCBroker test patch 50 BDK.txt
+
+1.  Synch up to Perforce ...\main\BDK50\ to get these instructions and the BDK32_P50T4.zip file.
+
+2.  Unzip the BDK32_P50T4.zip file to C:\Package Files\Vista\
+
+3.  This will create a new folder that has all the necessary files for this version of the Broker:
+    C:\Package Files\Vista\BDK32_P50T4
+
+4.  In Delphi2006, select the menu Component|Install Packages.  Use REMOVE button to remove:
+
+ - Components downloaded from Borland's Web Page
+ - CPRS Custom Controls                                
+ - CPRS Date/Time Dialogs                              
+ - VA Section 508 Accessibility                        
+ - VA Shared Units (no components)                      
+ - VistA RPC Broker
+ - Wrap Grid
+
+5.  Open Delphi 2006 and select the menu Tools|Options, then Environment Options|Delphi Options|Library-Win32.  
+
+6.  In the Library Path click on the ellipsis (...) at the right end and insure that all paths to other instances of the Broker package are removed (or inactivated by adding _x to the end of them), then add:
+    C:Program Files\Vista\BDK32_P50T4\D2006
+    C:Program Files\Vista\BDK32_P50T4\Source
+ 
+7.  In Browsing Path click on the ellipsis (...) at the right end and insure that all paths to other instances of the Broker are removed (or inactivated by adding _x to the end of them), then add C:Program Files\Vista\BDK32_P50T4\Source.
+
+8.  Close Delphi and synch to the MAIN branch.  The following will occur:
+
+ - The following Delphi 2006 Broker packages will be updated to the MAIN\PACKAGES directory:
+
+         XWB_D2006.DCP
+         XWB_D2006.BPL
+         XWB_R2006.DCP
+         XWB_R2006.BPL         
+       
+ - The following CPRS packages will be updated in the MAIN\PACKAGES and MAIN\CPRS-Lib directories:
+
+         Borland2006.*
+         ORCtrlLib2006.*
+         ORDateLib2006.*
+         VA2006.*
+         VA508Access2006.*
+         VAShared2006.*
+
+9.   Start Delphi.
+
+10.  Select the menu Component|Install Packages. Add, in this order, from the MAIN\PACKAGES directory:
+
+  - XWB_D2006.bpl
+  - Borland2006.bpl
+  - VAShared2006.bpl
+  - ORCtrlLib2006.bpl
+  - ORDateLib2006.bpl
+  - VA508Access2006.bpl
+  - VA2006.bpl
+       
+11.  The Delphi 2006 RPCBroker is now installed and ready for use.  Test your installation as follows:
+
+   - Open the CPRSChart project.
+   - Open file fNoteBD.pas.  The form should correctly display the CPRS date components without any error occurring.
+   - Build the project.  Only the usual hints and warnings should appear, and no errors.
+   - To further test this patch, make sure that CCOW is running and startup multiple instances of CPRS. These can be different versions of CPRS and a combination of running cprs.exe and directly from Delphi.  You should be able to log on to each instance without getting any errors.  
+   - Test the Vitals DLL by running Vitals from the Coversheet.
+   - Test the Mental Health DLL on the Notes Tab by running an appropriate Reminders Dialog.
+   - Test the expired Verify code problem by expiring your Verify Code and run CPRS GUI to reset to a new Verify code.

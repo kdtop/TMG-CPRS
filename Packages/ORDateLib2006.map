@@ -1,0 +1,890 @@
+
+ Start         Length     Name                   Class
+ 0001:00401000 0000F0D8H .text                   CODE
+ 0002:00411000 000002D4H .itext                  ICODE
+ 0003:00412000 00000594H .data                   DATA
+ 0004:00413000 00000058H .bss                    BSS
+ 0005:00000000 00000000H .tls                    TLS
+
+
+Detailed map of segments
+
+ 0001:00000000 00000216 C=CODE     S=.text    G=(none)   M=System   ACBP=A9
+ 0001:00000218 00000006 C=CODE     S=.text    G=(none)   M=TypInfo  ACBP=A9
+ 0001:00000220 0000010E C=CODE     S=.text    G=(none)   M=SysUtils ACBP=A9
+ 0001:00000330 000000DC C=CODE     S=.text    G=(none)   M=Windows  ACBP=A9
+ 0001:0000040C 00000006 C=CODE     S=.text    G=(none)   M=Variants ACBP=A9
+ 0001:00000414 00000006 C=CODE     S=.text    G=(none)   M=VarUtils ACBP=A9
+ 0001:0000041C 000000BE C=CODE     S=.text    G=(none)   M=Classes  ACBP=A9
+ 0001:000004DC 000002BE C=CODE     S=.text    G=(none)   M=Controls ACBP=A9
+ 0001:0000079C 00000006 C=CODE     S=.text    G=(none)   M=ActnList ACBP=A9
+ 0001:000007A4 000000B6 C=CODE     S=.text    G=(none)   M=Graphics ACBP=A9
+ 0001:0000085C 00000006 C=CODE     S=.text    G=(none)   M=Registry ACBP=A9
+ 0001:00000864 00000006 C=CODE     S=.text    G=(none)   M=IniFiles ACBP=A9
+ 0001:0000086C 00000186 C=CODE     S=.text    G=(none)   M=Forms    ACBP=A9
+ 0001:000009F4 00000006 C=CODE     S=.text    G=(none)   M=HelpIntfs ACBP=A9
+ 0001:000009FC 00000006 C=CODE     S=.text    G=(none)   M=MultiMon ACBP=A9
+ 0001:00000A04 0000001E C=CODE     S=.text    G=(none)   M=Menus    ACBP=A9
+ 0001:00000A24 00000006 C=CODE     S=.text    G=(none)   M=UxTheme  ACBP=A9
+ 0001:00000A2C 00000006 C=CODE     S=.text    G=(none)   M=Themes   ACBP=A9
+ 0001:00000A34 00000006 C=CODE     S=.text    G=(none)   M=Dialogs  ACBP=A9
+ 0001:00000A3C 000000E6 C=CODE     S=.text    G=(none)   M=StdCtrls ACBP=A9
+ 0001:00000B24 00000006 C=CODE     S=.text    G=(none)   M=Printers ACBP=A9
+ 0001:00000B2C 0000005E C=CODE     S=.text    G=(none)   M=ExtCtrls ACBP=A9
+ 0001:00000B8C 00000006 C=CODE     S=.text    G=(none)   M=GraphUtil ACBP=A9
+ 0001:00000B94 00000006 C=CODE     S=.text    G=(none)   M=Clipbrd  ACBP=A9
+ 0001:00000B9C 00000006 C=CODE     S=.text    G=(none)   M=FlatSB   ACBP=A9
+ 0001:00000BA4 00000006 C=CODE     S=.text    G=(none)   M=CheckLst ACBP=A9
+ 0001:00000BAC 00000056 C=CODE     S=.text    G=(none)   M=Grids    ACBP=A9
+ 0001:00000C04 0000004E C=CODE     S=.text    G=(none)   M=Mask     ACBP=A9
+ 0001:00000C54 00000036 C=CODE     S=.text    G=(none)   M=Buttons  ACBP=A9
+ 0001:00000C8C 0000008E C=CODE     S=.text    G=(none)   M=ComCtrls ACBP=A9
+ 0001:00000D1C 00000006 C=CODE     S=.text    G=(none)   M=ExtActns ACBP=A9
+ 0001:00000D24 00000006 C=CODE     S=.text    G=(none)   M=ExtDlgs  ACBP=A9
+ 0001:00000D2C 00000006 C=CODE     S=.text    G=(none)   M=Mapi     ACBP=A9
+ 0001:00000D34 00000016 C=CODE     S=.text    G=(none)   M=VAUtils  ACBP=A9
+ 0001:00000D4C 00000006 C=CODE     S=.text    G=(none)   M=ComObj   ACBP=A9
+ 0001:00000D54 000001C3 C=CODE     S=.text    G=(none)   M=SysInit  ACBP=A9
+ 0001:00000F18 00000056 C=CODE     S=.text    G=(none)   M=Calendar ACBP=A9
+ 0001:00000F70 000003EA C=CODE     S=.text    G=(none)   M=ORDtTmCal ACBP=A9
+ 0001:0000135C 0000006E C=CODE     S=.text    G=(none)   M=ORCtrls  ACBP=A9
+ 0001:000013CC 00000226 C=CODE     S=.text    G=(none)   M=OR2006Compatibility ACBP=A9
+ 0001:000015F4 0000000E C=CODE     S=.text    G=(none)   M=Rpcconf1 ACBP=A9
+ 0001:00001604 00000006 C=CODE     S=.text    G=(none)   M=MFunStr  ACBP=A9
+ 0001:0000160C 00000006 C=CODE     S=.text    G=(none)   M=RpcNet   ACBP=A9
+ 0001:00001614 00000016 C=CODE     S=.text    G=(none)   M=WinSock  ACBP=A9
+ 0001:0000162C 00000046 C=CODE     S=.text    G=(none)   M=Trpcb    ACBP=A9
+ 0001:00001674 00000006 C=CODE     S=.text    G=(none)   M=OleCtrls ACBP=A9
+ 0001:0000167C 00000006 C=CODE     S=.text    G=(none)   M=AxCtrls  ACBP=A9
+ 0001:00001684 00000006 C=CODE     S=.text    G=(none)   M=OleServer ACBP=A9
+ 0001:0000168C 00000006 C=CODE     S=.text    G=(none)   M=Hash     ACBP=A9
+ 0001:00001694 00000006 C=CODE     S=.text    G=(none)   M=SelDiv   ACBP=A9
+ 0001:0000169C 00000006 C=CODE     S=.text    G=(none)   M=XWBRich20 ACBP=A9
+ 0001:000016A4 00000006 C=CODE     S=.text    G=(none)   M=Sgnoncnf ACBP=A9
+ 0001:000016AC 00000016 C=CODE     S=.text    G=(none)   M=TeEngine ACBP=A9
+ 0001:000016C4 00000006 C=CODE     S=.text    G=(none)   M=TeeProcs ACBP=A9
+ 0001:000016CC 00000006 C=CODE     S=.text    G=(none)   M=Chart    ACBP=A9
+ 0001:000016D4 00006770 C=CODE     S=.text    G=(none)   M=ORFn     ACBP=A9
+ 0001:00007E44 0000147D C=CODE     S=.text    G=(none)   M=ORNet    ACBP=A9
+ 0001:000092C4 00004E42 C=CODE     S=.text    G=(none)   M=ORDtTm   ACBP=A9
+ 0001:0000E108 00000C1E C=CODE     S=.text    G=(none)   M=ORDtTmRng ACBP=A9
+ 0001:0000ED28 000003AF C=CODE     S=.text    G=(none)   M=.ORDateLib2006 ACBP=A9
+ 0002:00000000 00000006 C=ICODE    S=.itext   G=(none)   M=System   ACBP=A9
+ 0002:00000008 00000006 C=ICODE    S=.itext   G=(none)   M=TypInfo  ACBP=A9
+ 0002:00000010 00000006 C=ICODE    S=.itext   G=(none)   M=SysUtils ACBP=A9
+ 0002:00000018 00000011 C=ICODE    S=.itext   G=(none)   M=Windows  ACBP=A9
+ 0002:0000002C 00000006 C=ICODE    S=.itext   G=(none)   M=Variants ACBP=A9
+ 0002:00000034 00000006 C=ICODE    S=.itext   G=(none)   M=VarUtils ACBP=A9
+ 0002:0000003C 00000006 C=ICODE    S=.itext   G=(none)   M=Classes  ACBP=A9
+ 0002:00000044 00000006 C=ICODE    S=.itext   G=(none)   M=Controls ACBP=A9
+ 0002:0000004C 00000006 C=ICODE    S=.itext   G=(none)   M=ActnList ACBP=A9
+ 0002:00000054 00000006 C=ICODE    S=.itext   G=(none)   M=Graphics ACBP=A9
+ 0002:0000005C 00000006 C=ICODE    S=.itext   G=(none)   M=Registry ACBP=A9
+ 0002:00000064 00000006 C=ICODE    S=.itext   G=(none)   M=IniFiles ACBP=A9
+ 0002:0000006C 00000006 C=ICODE    S=.itext   G=(none)   M=Forms    ACBP=A9
+ 0002:00000074 00000006 C=ICODE    S=.itext   G=(none)   M=HelpIntfs ACBP=A9
+ 0002:0000007C 00000006 C=ICODE    S=.itext   G=(none)   M=MultiMon ACBP=A9
+ 0002:00000084 00000006 C=ICODE    S=.itext   G=(none)   M=Menus    ACBP=A9
+ 0002:0000008C 00000006 C=ICODE    S=.itext   G=(none)   M=UxTheme  ACBP=A9
+ 0002:00000094 00000006 C=ICODE    S=.itext   G=(none)   M=Themes   ACBP=A9
+ 0002:0000009C 00000006 C=ICODE    S=.itext   G=(none)   M=Dialogs  ACBP=A9
+ 0002:000000A4 00000006 C=ICODE    S=.itext   G=(none)   M=Printers ACBP=A9
+ 0002:000000AC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtCtrls ACBP=A9
+ 0002:000000B4 00000006 C=ICODE    S=.itext   G=(none)   M=GraphUtil ACBP=A9
+ 0002:000000BC 00000006 C=ICODE    S=.itext   G=(none)   M=Clipbrd  ACBP=A9
+ 0002:000000C4 00000006 C=ICODE    S=.itext   G=(none)   M=FlatSB   ACBP=A9
+ 0002:000000CC 00000006 C=ICODE    S=.itext   G=(none)   M=CheckLst ACBP=A9
+ 0002:000000D4 00000006 C=ICODE    S=.itext   G=(none)   M=Buttons  ACBP=A9
+ 0002:000000DC 00000006 C=ICODE    S=.itext   G=(none)   M=ComCtrls ACBP=A9
+ 0002:000000E4 00000006 C=ICODE    S=.itext   G=(none)   M=ExtActns ACBP=A9
+ 0002:000000EC 00000006 C=ICODE    S=.itext   G=(none)   M=ExtDlgs  ACBP=A9
+ 0002:000000F4 00000006 C=ICODE    S=.itext   G=(none)   M=Mapi     ACBP=A9
+ 0002:000000FC 00000006 C=ICODE    S=.itext   G=(none)   M=VAUtils  ACBP=A9
+ 0002:00000104 00000006 C=ICODE    S=.itext   G=(none)   M=ComObj   ACBP=A9
+ 0002:0000010C 00000008 C=ICODE    S=.itext   G=(none)   M=ORDtTmCal ACBP=A9
+ 0002:00000114 00000006 C=ICODE    S=.itext   G=(none)   M=ORCtrls  ACBP=A9
+ 0002:0000011C 00000008 C=ICODE    S=.itext   G=(none)   M=OR2006Compatibility ACBP=A9
+ 0002:00000124 00000006 C=ICODE    S=.itext   G=(none)   M=Rpcconf1 ACBP=A9
+ 0002:0000012C 00000006 C=ICODE    S=.itext   G=(none)   M=MFunStr  ACBP=A9
+ 0002:00000134 00000006 C=ICODE    S=.itext   G=(none)   M=RpcNet   ACBP=A9
+ 0002:0000013C 00000006 C=ICODE    S=.itext   G=(none)   M=Trpcb    ACBP=A9
+ 0002:00000144 00000006 C=ICODE    S=.itext   G=(none)   M=OleCtrls ACBP=A9
+ 0002:0000014C 00000006 C=ICODE    S=.itext   G=(none)   M=AxCtrls  ACBP=A9
+ 0002:00000154 00000006 C=ICODE    S=.itext   G=(none)   M=OleServer ACBP=A9
+ 0002:0000015C 00000006 C=ICODE    S=.itext   G=(none)   M=Hash     ACBP=A9
+ 0002:00000164 00000006 C=ICODE    S=.itext   G=(none)   M=SelDiv   ACBP=A9
+ 0002:0000016C 00000006 C=ICODE    S=.itext   G=(none)   M=XWBRich20 ACBP=A9
+ 0002:00000174 00000006 C=ICODE    S=.itext   G=(none)   M=Sgnoncnf ACBP=A9
+ 0002:0000017C 00000006 C=ICODE    S=.itext   G=(none)   M=TeEngine ACBP=A9
+ 0002:00000184 00000006 C=ICODE    S=.itext   G=(none)   M=TeeProcs ACBP=A9
+ 0002:0000018C 00000006 C=ICODE    S=.itext   G=(none)   M=Chart    ACBP=A9
+ 0002:00000194 00000090 C=ICODE    S=.itext   G=(none)   M=ORFn     ACBP=A9
+ 0002:00000224 00000084 C=ICODE    S=.itext   G=(none)   M=ORNet    ACBP=A9
+ 0002:000002A8 0000001C C=ICODE    S=.itext   G=(none)   M=ORDtTm   ACBP=A9
+ 0002:000002C4 00000008 C=ICODE    S=.itext   G=(none)   M=ORDtTmRng ACBP=A9
+ 0002:000002CC 00000005 C=ICODE    S=.itext   G=(none)   M=.ORDateLib2006 ACBP=A9
+ 0003:00000000 0000002C C=DATA     S=.data    G=DGROUP   M=SysInit  ACBP=A9
+ 0003:0000002C 00000510 C=DATA     S=.data    G=DGROUP   M=ORFn     ACBP=A9
+ 0003:0000053C 0000000E C=DATA     S=.data    G=DGROUP   M=ORNet    ACBP=A9
+ 0003:0000054C 00000030 C=DATA     S=.data    G=DGROUP   M=ORDtTm   ACBP=A9
+ 0004:00000000 00000008 C=BSS      S=.bss     G=DGROUP   M=Windows  ACBP=A9
+ 0004:00000008 0000000C C=BSS      S=.bss     G=DGROUP   M=SysInit  ACBP=A9
+ 0004:00000014 00000004 C=BSS      S=.bss     G=DGROUP   M=ORDtTmCal ACBP=A9
+ 0004:00000018 00000008 C=BSS      S=.bss     G=DGROUP   M=OR2006Compatibility ACBP=A9
+ 0004:00000020 00000010 C=BSS      S=.bss     G=DGROUP   M=ORFn     ACBP=A9
+ 0004:00000030 00000015 C=BSS      S=.bss     G=DGROUP   M=ORNet    ACBP=A9
+ 0004:00000048 0000000C C=BSS      S=.bss     G=DGROUP   M=ORDtTm   ACBP=A9
+ 0004:00000054 00000004 C=BSS      S=.bss     G=DGROUP   M=ORDtTmRng ACBP=A9
+
+
+  Address             Publics by Name
+
+ 0002:000002CC       .ORDateLib2006..ORDateLib2006
+ 0001:0000F0B8       .ORDateLib2006.@GetPackageInfoTable
+ 0001:0000F0C0       .ORDateLib2006.@PackageLoad
+ 0001:0000F0CC       .ORDateLib2006.@PackageUnload
+ 0004:0000001C       OR2006Compatibility..2
+ 0001:000013CC       OR2006Compatibility..Tfrm2006Compatibility
+ 0001:000015C4       OR2006Compatibility.Finalization
+ 0004:00000018       OR2006Compatibility.frm2006Compatibility
+ 0002:0000011C       OR2006Compatibility.OR2006Compatibility
+ 0001:00001570       OR2006Compatibility.Tfrm2006Compatibility.CreateNew
+ 0004:00000048       ORDtTm..01
+ 0001:00009BB8       ORDtTm..TORDateBox
+ 0001:00009804       ORDtTm..TORDateButton
+ 0001:0000A2B0       ORDtTm..TORDateCombo
+ 0001:0000996C       ORDtTm..TORDateEdit
+ 0001:000096CC       ORDtTm..TORDateTimeDlg
+ 0001:00009E10       ORDtTm..TORDayCombo
+ 0001:000092C4       ORDtTm..TORfrmDtTm
+ 0001:00009F64       ORDtTm..TORMonthCombo
+ 0001:0000A0C0       ORDtTm..TORYearEdit
+ 0001:0000A650       ORDtTm.ActiveBroker
+ 0003:0000054C       ORDtTm.DaysInMonth
+ 0001:0000C2FC       ORDtTm.DaysPerMonth
+ 0001:0000E0D8       ORDtTm.Finalization
+ 0001:0000C2B0       ORDtTm.IsLeapYear
+ 0001:0000A9D4       ORDtTm.LoadEllipsis
+ 0002:000002A8       ORDtTm.ORDtTm
+ 0001:0000E05C       ORDtTm.Register
+ 0001:0000A850       ORDtTm.RelativeDateTime
+ 0001:0000A67C       ORDtTm.ServerFMNow
+ 0001:0000A720       ORDtTm.ServerNow
+ 0001:0000A7A8       ORDtTm.ServerParseFMDate
+ 0001:0000A758       ORDtTm.ServerToday
+ 0001:0000B898       ORDtTm.TORDateBox.ButtonClick
+ 0001:0000BA30       ORDtTm.TORDateBox.Change
+ 0001:0000B5EC       ORDtTm.TORDateBox.Create
+ 0001:0000C25C       ORDtTm.TORDateBox.GetCaption
+ 0001:0000C280       ORDtTm.TORDateBox.GetDynamicProperty
+ 0001:0000BA94       ORDtTm.TORDateBox.GetFMDateTime
+ 0001:0000BB28       ORDtTm.TORDateBox.GetRelativeTime
+ 0001:0000C0B8       ORDtTm.TORDateBox.IsValid
+ 0001:0000BA4C       ORDtTm.TORDateBox.KeyDown
+ 0001:0000C140       ORDtTm.TORDateBox.SetBlackColorMode
+ 0001:0000C188       ORDtTm.TORDateBox.SetCaption
+ 0001:0000BC4C       ORDtTm.TORDateBox.SetDateOnly
+ 0001:0000BDB4       ORDtTm.TORDateBox.SetEditRect
+ 0001:0000C230       ORDtTm.TORDateBox.SetEnabled
+ 0001:0000BCFC       ORDtTm.TORDateBox.SetFMDateTime
+ 0001:0000BD28       ORDtTm.TORDateBox.SetRequireTime
+ 0001:0000B7AC       ORDtTm.TORDateBox.SetTemplateField
+ 0001:0000B87C       ORDtTm.TORDateBox.SupportsDynamicProperty
+ 0001:0000BE2C       ORDtTm.TORDateBox.UpdateText
+ 0001:0000BF44       ORDtTm.TORDateBox.Validate
+ 0001:0000B70C       ORDtTm.TORDateBox.WMSize
+ 0001:0000D700       ORDtTm.TORDateCombo.BtnClicked
+ 0001:0000D5C4       ORDtTm.TORDateCombo.CheckDays
+ 0001:0000DE78       ORDtTm.TORDateCombo.CMFontChanged
+ 0001:0000C3A0       ORDtTm.TORDateCombo.Create
+ 0001:0000DCE4       ORDtTm.TORDateCombo.DateText
+ 0001:0000D3D0       ORDtTm.TORDateCombo.DayChanged
+ 0001:0000C44C       ORDtTm.TORDateCombo.Destroy
+ 0001:0000DE30       ORDtTm.TORDateCombo.DoChange
+ 0001:0000DB58       ORDtTm.TORDateCombo.GetFMDate
+ 0001:0000C4C8       ORDtTm.TORDateCombo.GetYearSize
+ 0001:0000C50C       ORDtTm.TORDateCombo.InitDays
+ 0001:0000C6C8       ORDtTm.TORDateCombo.InitMonths
+ 0001:0000D6A8       ORDtTm.TORDateCombo.Loaded
+ 0001:0000D420       ORDtTm.TORDateCombo.MonthChanged
+ 0001:0000D6D4       ORDtTm.TORDateCombo.Paint
+ 0001:0000C830       ORDtTm.TORDateCombo.Rebuild
+ 0001:0000DE5C       ORDtTm.TORDateCombo.Resized
+ 0001:0000CF64       ORDtTm.TORDateCombo.SetBlackColorMode
+ 0001:0000CFB8       ORDtTm.TORDateCombo.SetDay
+ 0001:0000DBD8       ORDtTm.TORDateCombo.SetFMDate
+ 0001:0000D074       ORDtTm.TORDateCombo.SetIncludeBtn
+ 0001:0000D0AC       ORDtTm.TORDateCombo.SetIncludeDay
+ 0001:0000D108       ORDtTm.TORDateCombo.SetIncludeMonth
+ 0001:0000D1EC       ORDtTm.TORDateCombo.SetLongMonths
+ 0001:0000D164       ORDtTm.TORDateCombo.SetMonth
+ 0001:0000E0A0       ORDtTm.TORDateCombo.SetTemplateField
+ 0001:0000D224       ORDtTm.TORDateCombo.SetYear
+ 0001:0000DEA0       ORDtTm.TORDateCombo.Text
+ 0001:0000D478       ORDtTm.TORDateCombo.YearChanged
+ 0001:0000DA68       ORDtTm.TORDateCombo.YearKeyPress
+ 0001:0000D8BC       ORDtTm.TORDateCombo.YearUDChange
+ 0001:0000B5BC       ORDtTm.TORDateEdit.CreateParams
+ 0001:0000B180       ORDtTm.TORDateTimeDlg.Create
+ 0001:0000B1EC       ORDtTm.TORDateTimeDlg.Execute
+ 0001:0000B4F4       ORDtTm.TORDateTimeDlg.GetFMDateTime
+ 0001:0000B518       ORDtTm.TORDateTimeDlg.SetDateOnly
+ 0001:0000B55C       ORDtTm.TORDateTimeDlg.SetFMDateTime
+ 0001:0000B590       ORDtTm.TORDateTimeDlg.SetRequireTime
+ 0001:0000AABC       ORDtTm.TORfrmDtTm.calSelectChange
+ 0001:0000B144       ORDtTm.TORfrmDtTm.cmdCancelClick
+ 0001:0000AF40       ORDtTm.TORfrmDtTm.cmdMidnightClick
+ 0001:0000AEA0       ORDtTm.TORfrmDtTm.cmdNowClick
+ 0001:0000AF74       ORDtTm.TORfrmDtTm.cmdOKClick
+ 0001:0000AC34       ORDtTm.TORfrmDtTm.cmdTodayClick
+ 0001:0000AA7C       ORDtTm.TORfrmDtTm.FormCreate
+ 0001:0000ABC4       ORDtTm.TORfrmDtTm.imgNextMonthClick
+ 0001:0000AB7C       ORDtTm.TORfrmDtTm.imgNextMonthMouseDown
+ 0001:0000AC0C       ORDtTm.TORfrmDtTm.imgNextMonthMouseUp
+ 0001:0000ABA4       ORDtTm.TORfrmDtTm.imgPrevMonthClick
+ 0001:0000AB54       ORDtTm.TORfrmDtTm.imgPrevMonthMouseDown
+ 0001:0000ABE4       ORDtTm.TORfrmDtTm.imgPrevMonthMouseUp
+ 0001:0000B164       ORDtTm.TORfrmDtTm.Loaded
+ 0001:0000ACE8       ORDtTm.TORfrmDtTm.lstHourClick
+ 0001:0000AD9C       ORDtTm.TORfrmDtTm.lstMinuteClick
+ 0001:0000AC98       ORDtTm.TORfrmDtTm.txtTimeChange
+ 0001:0000C358       ORDtTm.TORYearEdit.SetTemplateField
+ 0004:0000004C       ORDtTm.uServerToday
+ 0004:00000014       ORDtTmCal..2
+ 0001:00000F70       ORDtTmCal..TORCalendar
+ 0001:0000132C       ORDtTmCal.Finalization
+ 0002:0000010C       ORDtTmCal.ORDtTmCal
+ 0001:000012FC       ORDtTmCal.Register
+ 0001:00001100       ORDtTmCal.TORCalendar.DrawCell
+ 0001:00001288       ORDtTmCal.TORCalendar.KeyDown
+ 0004:00000054       ORDtTmRng..3
+ 0001:0000E33C       ORDtTmRng..TORDateRangeDlg
+ 0001:0000E108       ORDtTmRng..TORfrmDateRange
+ 0001:0000ECF8       ORDtTmRng.Finalization
+ 0002:000002C4       ORDtTmRng.ORDtTmRng
+ 0001:0000EBDC       ORDtTmRng.Register
+ 0001:0000E5B0       ORDtTmRng.TORDateRangeDlg.Create
+ 0001:0000E680       ORDtTmRng.TORDateRangeDlg.Execute
+ 0001:0000E900       ORDtTmRng.TORDateRangeDlg.SetDateOnly
+ 0001:0000E9FC       ORDtTmRng.TORDateRangeDlg.SetFMDateStart
+ 0001:0000EA60       ORDtTmRng.TORDateRangeDlg.SetFMDateStop
+ 0001:0000E998       ORDtTmRng.TORDateRangeDlg.SetRequireTime
+ 0001:0000EAC4       ORDtTmRng.TORDateRangeDlg.SetTextOfStart
+ 0001:0000EAE4       ORDtTmRng.TORDateRangeDlg.SetTextOfStop
+ 0001:0000EBD0       ORDtTmRng.TORfrmDateRange.cmdCancelClick
+ 0001:0000EB04       ORDtTmRng.TORfrmDateRange.cmdOKClick
+ 0001:0000EC0C       ORDtTmRng.TORfrmDateRange.FormCreate
+ 0001:0000ECBC       ORDtTmRng.TORfrmDateRange.FormDestroy
+ 0001:0000ECDC       ORDtTmRng.TORfrmDateRange.Loaded
+ 0004:00000020       ORFn..1
+ 0001:000017CC       ORFn..EFMDateTimeError
+ 0001:00004488       ORFn..QuickAddError
+ 0001:00003FB0       ORFn..QuickCopyError
+ 0001:000076A0       ORFn..TIdleCaller
+ 0001:000062E0       ORFn.AdjustForWindowsXPStyleTitleBar
+ 0004:00000028       ORFn.AlignList
+ 0004:0000002C       ORFn.AnchorList
+ 0001:00005CAC       ORFn.AnchorsToStr
+ 0001:00004F10       ORFn.BaseFont
+ 0001:00006D98       ORFn.BlackColorScheme
+ 0001:00006E70       ORFn.BlackColorSchemeUpdate
+ 0003:0000002C       ORFn.BOOLCHAR
+ 0001:000079FC       ORFn.CallWhenIdle
+ 0001:00007A6C       ORFn.CallWhenIdleNotifyWhenDone
+ 0001:00002594       ORFn.CharAt
+ 0001:00006C5C       ORFn.CheckColorScheme
+ 0001:000038A8       ORFn.ComparePieces
+ 0001:00007000       ORFn.ComponentUpdateColorsFor508Compliance
+ 0001:000025D8       ORFn.ContainsAlpha
+ 0001:00002690       ORFn.ContainsUpCarretChar
+ 0001:00002638       ORFn.ContainsVisibleChar
+ 0001:000026E8       ORFn.ConvertSpecialStrings
+ 0001:000074AC       ORFn.CPRSInstances
+ 0003:0000011C       ORFn.CRC32_TABLE
+ 0001:0000280C       ORFn.CRCForFile
+ 0001:000028BC       ORFn.CRCForStrings
+ 0001:0000182C       ORFn.DateTimeToFMDateTime
+ 0001:00003EE0       ORFn.DelimCount
+ 0001:00007C40       ORFn.EnterIsPressed
+ 0001:00002BD4       ORFn.ExpandTabsFilter
+ 0001:00003024       ORFn.ExtractDefault
+ 0001:00002F1C       ORFn.ExtractFloat
+ 0001:00002E20       ORFn.ExtractInteger
+ 0001:000031CC       ORFn.ExtractItems
+ 0001:00003368       ORFn.ExtractText
+ 0001:00004A4C       ORFn.FastAddStrings
+ 0001:00004914       ORFn.FastAssign
+ 0004:00000024       ORFn.FBaseFont
+ 0001:000029C0       ORFn.FilteredString
+ 0001:00007DC0       ORFn.Finalization
+ 0001:00001B98       ORFn.FMDateTimeOffsetBy
+ 0001:00001908       ORFn.FMDateTimeToDateTime
+ 0001:00004FE8       ORFn.FontWidthPixel
+ 0001:00004F70       ORFn.FontWidthSubPixel
+ 0001:00005B90       ORFn.ForceInsideWorkArea
+ 0001:00001C3C       ORFn.FormatFMDateTime
+ 0001:0000223C       ORFn.FormatFMDateTimeStr
+ 0001:00006DD8       ORFn.Get508CompliantColor
+ 0001:000044E4       ORFn.GetStrings
+ 0001:0000400C       ORFn.GetStrings
+ 0001:000024BC       ORFn.HigherOf
+ 0003:00000538       ORFn.IdleCaller
+ 0001:00004D54       ORFn.InfoBox
+ 0001:00003504       ORFn.InvertStringList
+ 0001:00002284       ORFn.IsFMDateTime
+ 0001:000075AC       ORFn.KillObj
+ 0001:00004D98       ORFn.LimitEditWidth
+ 0001:00004B90       ORFn.LimitStringLength
+ 0001:000071F0       ORFn.ListGridDrawCell
+ 0001:000072E0       ORFn.ListGridDrawLines
+ 0001:00007428       ORFn.ListGridRowHeight
+ 0001:000024E4       ORFn.LowerOf
+ 0001:00004F24       ORFn.MainFont
+ 0001:00005038       ORFn.MainFontHeight
+ 0001:00004F58       ORFn.MainFontSize
+ 0001:00005020       ORFn.MainFontWidth
+ 0001:0000236C       ORFn.MakeFMDateTime
+ 0001:00007AE0       ORFn.menuHideAllBut
+ 0001:0000356C       ORFn.MixedCase
+ 0001:00003788       ORFn.MixedCaseByPiece
+ 0001:000036F0       ORFn.MixedCaseList
+ 0003:00000064       ORFn.MONTH_NAMES_LONG
+ 0003:00000034       ORFn.MONTH_NAMES_SHORT
+ 0001:00006DB8       ORFn.NormalColorScheme
+ 0001:00006870       ORFn.NumCharsFitInWidth
+ 0002:00000194       ORFn.ORFn
+ 0001:00003854       ORFn.Piece
+ 0001:0000387C       ORFn.Pieces
+ 0001:00003A28       ORFn.PiecesToList
+ 0001:000069C4       ORFn.PopupComponent
+ 0003:00000530       ORFn.PURE_BLACK
+ 0001:00004844       ORFn.QuickAdd
+ 0001:00004370       ORFn.QuickCopy
+ 0001:00002548       ORFn.RectContains
+ 0001:00005078       ORFn.RedrawActivate
+ 0001:0000505C       ORFn.RedrawSuspend
+ 0001:00006A18       ORFn.ReformatMemoParagraph
+ 0003:000000FC       ORFn.ReplaceChars
+ 0001:000050A0       ORFn.ResetSelectedForList
+ 0001:0000615C       ORFn.ResizeAnchoredFormToFont
+ 0001:00005814       ORFn.ResizeChartFonts
+ 0001:000053C4       ORFn.ResizeCheckListBox
+ 0001:00005358       ORFn.ResizeComboBox
+ 0001:000053F8       ORFn.ResizeDescendants
+ 0001:00005A00       ORFn.ResizeFontsInDescendants
+ 0001:00005FBC       ORFn.ResizeFormToFont
+ 0001:00005240       ORFn.ResizeHeaderControl
+ 0001:00005140       ORFn.ResizeHeight
+ 0001:00005390       ORFn.ResizeListBox
+ 0001:000052BC       ORFn.ResizeListView
+ 0001:000051C0       ORFn.ResizeToFont
+ 0001:000050EC       ORFn.ResizeWidth
+ 0001:00005ED0       ORFn.RestoreAlign
+ 0001:00003AD4       ORFn.ReverseStr
+ 0001:0000709C       ORFn.ScanAllComponents
+ 0003:00000030       ORFn.ScrollBarHeight
+ 0001:00007D00       ORFn.ScrollControl
+ 0003:000000DC       ORFn.SearchChars
+ 0001:00007C58       ORFn.SendMoveMessage
+ 0001:000063EC       ORFn.SetEqualTabStops
+ 0001:000023AC       ORFn.SetListFMDateTime
+ 0001:00003B64       ORFn.SetPiece
+ 0001:00003CA0       ORFn.SetPieces
+ 0001:00007BF0       ORFn.ShiftTabIsPressed
+ 0001:00006548       ORFn.ShowMsgOn
+ 0001:00003D74       ORFn.SortByPiece
+ 0001:000064F8       ORFn.StatusText
+ 0001:00005D20       ORFn.StrToAnchors
+ 0001:0000250C       ORFn.StrToFloatDef
+ 0001:00005DE8       ORFn.SuspendAlign
+ 0001:00007BA0       ORFn.TabIsPressed
+ 0001:00006628       ORFn.TextHeightByFont
+ 0001:00006578       ORFn.TextWidthByFont
+ 0001:000078C0       ORFn.TIdleCaller.Add
+ 0001:00007864       ORFn.TIdleCaller.AppIdle
+ 0001:000076F8       ORFn.TIdleCaller.Create
+ 0001:000077E0       ORFn.TIdleCaller.Destroy
+ 0001:0000792C       ORFn.TIdleCaller.TimerDone
+ 0001:00001BD0       ORFn.TrimFormatCount
+ 0003:00000520       ORFn.uBlackColorScheme
+ 0003:00000534       ORFn.uBorderlessWindowColorWhenBlack
+ 0003:0000052C       ORFn.uCheckColorScheme
+ 0003:00000528       ORFn.uMaroonColorWhenBlack
+ 0003:0000051C       ORFn.uNormalColorScheme
+ 0001:00007164       ORFn.UpdateColorsFor508Compliance
+ 0001:00002784       ORFn.UpdateCrc32
+ 0001:00007194       ORFn.UpdateReadOnlyColorScheme
+ 0003:00000524       ORFn.uWhiteColorScheme
+ 0001:00004B0C       ORFn.ValidFileName
+ 0001:000066E8       ORFn.WrappedTextHeightByFont
+ 0004:00000038       ORNet..1
+ 0003:0000053C       ORNet.AppStartedCursorForm
+ 0001:00008BD4       ORNet.AuthorizedOption
+ 0003:00000548       ORNet.BoolChar
+ 0001:00008B58       ORNet.CallBroker
+ 0001:00008570       ORNet.CallBrokerInContext
+ 0001:000091E4       ORNet.CallRPCWhenIdle
+ 0001:00008F70       ORNet.CallV
+ 0001:00008C1C       ORNet.ConnectToServer
+ 0001:0000913C       ORNet.DottedIPStr
+ 0001:00007E44       ORNet.EnsureBroker
+ 0001:00009244       ORNet.Finalization
+ 0001:00008F14       ORNet.GetRPCCursor
+ 0001:00009104       ORNet.GetRPCMax
+ 0001:00008548       ORNet.IsBaseContext
+ 0001:0000910C       ORNet.LoadRPCData
+ 0001:00008EB8       ORNet.MRef
+ 0002:00000224       ORNet.ORNet
+ 0001:000090EC       ORNet.RetainedRPCCount
+ 0004:00000030       ORNet.RPCBrokerV
+ 0001:000091B0       ORNet.RPCIdleCallDone
+ 0004:00000034       ORNet.RPCLastCall
+ 0001:00008FC4       ORNet.sCallV
+ 0001:00008B6C       ORNet.SetBrokerServer
+ 0001:00007EB0       ORNet.SetList
+ 0001:00007F68       ORNet.SetParams
+ 0001:000090F8       ORNet.SetRetainedRPCMax
+ 0001:00009234       ORNet.ShowRPCList
+ 0001:00009050       ORNet.tCallV
+ 0003:00000540       ORNet.uBaseContext
+ 0004:0000003C       ORNet.uCallList
+ 0003:00000544       ORNet.uCurrentContext
+ 0004:00000040       ORNet.uMaxCalls
+ 0001:00008490       ORNet.UpdateContext
+ 0004:00000044       ORNet.uShowRPCs
+ 0001:00000E9C       SysInit.@InitPkg
+ 0001:00000F00       SysInit.@PackageLoad
+ 0001:00000F0C       SysInit.@PackageUnload
+ 0001:00000D8C       SysInit.AllocTlsBuffer
+ 0001:00000E48       SysInit.ExitProcessTLS
+ 0001:00000E10       SysInit.ExitThreadTLS
+ 0001:00000D54       SysInit.FreeLibrary
+ 0001:00000D98       SysInit.GetTlsSize
+ 0004:0000000C       SysInit.HInstance
+ 0001:00000E6C       SysInit.InitializeModule
+ 0001:00000DE4       SysInit.InitProcessTLS
+ 0001:00000DA0       SysInit.InitThreadTLS
+ 0001:00000D5C       SysInit.LocalAlloc
+ 0001:00000D64       SysInit.LocalFree
+ 0003:00000004       SysInit.Module
+ 0004:00000008       SysInit.ModuleIsLib
+ 0004:00000009       SysInit.ModuleIsPackage
+ 0001:00000D6C       SysInit.TlsAlloc
+ 0004:00000010       SysInit.tlsBuffer
+ 0001:00000D74       SysInit.TlsFree
+ 0001:00000D7C       SysInit.TlsGetValue
+ 0003:00000000       SysInit.TlsIndex
+ 0005:00000000       SysInit.TlsLast
+ 0003:0000001C       SysInit.TlsProc
+ 0001:00000D84       SysInit.TlsSetValue
+ 0001:00000E78       SysInit.UninitializeModule
+ 0004:00000000       Windows..3
+ 0001:00000338       Windows.CreateFont
+ 0001:00000340       Windows.DeleteObject
+ 0001:00000370       Windows.DrawText
+ 0001:000003C8       Windows.Finalization
+ 0001:00000378       Windows.FindWindow
+ 0001:00000330       Windows.FreeLibrary
+ 0001:00000380       Windows.GetDC
+ 0001:00000348       Windows.GetDeviceCaps
+ 0001:00000388       Windows.GetKeyState
+ 0001:00000390       Windows.GetSystemMetrics
+ 0001:00000350       Windows.GetTextExtentPoint32
+ 0001:00000358       Windows.GetTextFace
+ 0001:00000360       Windows.GetTextMetrics
+ 0001:00000398       Windows.GetWindow
+ 0001:000003A0       Windows.GetWindowText
+ 0004:00000004       Windows.HtmlHelpModule
+ 0001:000003A8       Windows.InvalidateRect
+ 0001:000003B0       Windows.PtInRect
+ 0001:000003B8       Windows.ReleaseDC
+ 0001:00000368       Windows.SelectObject
+ 0001:000003C0       Windows.SendMessage
+ 0002:00000018       Windows.Windows
+ 0001:0000161C       WinSock.gethostbyname
+ 0001:00001624       WinSock.gethostname
+ 0001:00001614       WinSock.inet_ntoa
+
+
+  Address             Publics by Value
+
+ 0001:00000330       Windows.FreeLibrary
+ 0001:00000338       Windows.CreateFont
+ 0001:00000340       Windows.DeleteObject
+ 0001:00000348       Windows.GetDeviceCaps
+ 0001:00000350       Windows.GetTextExtentPoint32
+ 0001:00000358       Windows.GetTextFace
+ 0001:00000360       Windows.GetTextMetrics
+ 0001:00000368       Windows.SelectObject
+ 0001:00000370       Windows.DrawText
+ 0001:00000378       Windows.FindWindow
+ 0001:00000380       Windows.GetDC
+ 0001:00000388       Windows.GetKeyState
+ 0001:00000390       Windows.GetSystemMetrics
+ 0001:00000398       Windows.GetWindow
+ 0001:000003A0       Windows.GetWindowText
+ 0001:000003A8       Windows.InvalidateRect
+ 0001:000003B0       Windows.PtInRect
+ 0001:000003B8       Windows.ReleaseDC
+ 0001:000003C0       Windows.SendMessage
+ 0001:000003C8       Windows.Finalization
+ 0001:00000D54       SysInit.FreeLibrary
+ 0001:00000D5C       SysInit.LocalAlloc
+ 0001:00000D64       SysInit.LocalFree
+ 0001:00000D6C       SysInit.TlsAlloc
+ 0001:00000D74       SysInit.TlsFree
+ 0001:00000D7C       SysInit.TlsGetValue
+ 0001:00000D84       SysInit.TlsSetValue
+ 0001:00000D8C       SysInit.AllocTlsBuffer
+ 0001:00000D98       SysInit.GetTlsSize
+ 0001:00000DA0       SysInit.InitThreadTLS
+ 0001:00000DE4       SysInit.InitProcessTLS
+ 0001:00000E10       SysInit.ExitThreadTLS
+ 0001:00000E48       SysInit.ExitProcessTLS
+ 0001:00000E6C       SysInit.InitializeModule
+ 0001:00000E78       SysInit.UninitializeModule
+ 0001:00000E9C       SysInit.@InitPkg
+ 0001:00000F00       SysInit.@PackageLoad
+ 0001:00000F0C       SysInit.@PackageUnload
+ 0001:00000F70       ORDtTmCal..TORCalendar
+ 0001:00001100       ORDtTmCal.TORCalendar.DrawCell
+ 0001:00001288       ORDtTmCal.TORCalendar.KeyDown
+ 0001:000012FC       ORDtTmCal.Register
+ 0001:0000132C       ORDtTmCal.Finalization
+ 0001:000013CC       OR2006Compatibility..Tfrm2006Compatibility
+ 0001:00001570       OR2006Compatibility.Tfrm2006Compatibility.CreateNew
+ 0001:000015C4       OR2006Compatibility.Finalization
+ 0001:00001614       WinSock.inet_ntoa
+ 0001:0000161C       WinSock.gethostbyname
+ 0001:00001624       WinSock.gethostname
+ 0001:000017CC       ORFn..EFMDateTimeError
+ 0001:0000182C       ORFn.DateTimeToFMDateTime
+ 0001:00001908       ORFn.FMDateTimeToDateTime
+ 0001:00001B98       ORFn.FMDateTimeOffsetBy
+ 0001:00001BD0       ORFn.TrimFormatCount
+ 0001:00001C3C       ORFn.FormatFMDateTime
+ 0001:0000223C       ORFn.FormatFMDateTimeStr
+ 0001:00002284       ORFn.IsFMDateTime
+ 0001:0000236C       ORFn.MakeFMDateTime
+ 0001:000023AC       ORFn.SetListFMDateTime
+ 0001:000024BC       ORFn.HigherOf
+ 0001:000024E4       ORFn.LowerOf
+ 0001:0000250C       ORFn.StrToFloatDef
+ 0001:00002548       ORFn.RectContains
+ 0001:00002594       ORFn.CharAt
+ 0001:000025D8       ORFn.ContainsAlpha
+ 0001:00002638       ORFn.ContainsVisibleChar
+ 0001:00002690       ORFn.ContainsUpCarretChar
+ 0001:000026E8       ORFn.ConvertSpecialStrings
+ 0001:00002784       ORFn.UpdateCrc32
+ 0001:0000280C       ORFn.CRCForFile
+ 0001:000028BC       ORFn.CRCForStrings
+ 0001:000029C0       ORFn.FilteredString
+ 0001:00002BD4       ORFn.ExpandTabsFilter
+ 0001:00002E20       ORFn.ExtractInteger
+ 0001:00002F1C       ORFn.ExtractFloat
+ 0001:00003024       ORFn.ExtractDefault
+ 0001:000031CC       ORFn.ExtractItems
+ 0001:00003368       ORFn.ExtractText
+ 0001:00003504       ORFn.InvertStringList
+ 0001:0000356C       ORFn.MixedCase
+ 0001:000036F0       ORFn.MixedCaseList
+ 0001:00003788       ORFn.MixedCaseByPiece
+ 0001:00003854       ORFn.Piece
+ 0001:0000387C       ORFn.Pieces
+ 0001:000038A8       ORFn.ComparePieces
+ 0001:00003A28       ORFn.PiecesToList
+ 0001:00003AD4       ORFn.ReverseStr
+ 0001:00003B64       ORFn.SetPiece
+ 0001:00003CA0       ORFn.SetPieces
+ 0001:00003D74       ORFn.SortByPiece
+ 0001:00003EE0       ORFn.DelimCount
+ 0001:00003FB0       ORFn..QuickCopyError
+ 0001:0000400C       ORFn.GetStrings
+ 0001:00004370       ORFn.QuickCopy
+ 0001:00004488       ORFn..QuickAddError
+ 0001:000044E4       ORFn.GetStrings
+ 0001:00004844       ORFn.QuickAdd
+ 0001:00004914       ORFn.FastAssign
+ 0001:00004A4C       ORFn.FastAddStrings
+ 0001:00004B0C       ORFn.ValidFileName
+ 0001:00004B90       ORFn.LimitStringLength
+ 0001:00004D54       ORFn.InfoBox
+ 0001:00004D98       ORFn.LimitEditWidth
+ 0001:00004F10       ORFn.BaseFont
+ 0001:00004F24       ORFn.MainFont
+ 0001:00004F58       ORFn.MainFontSize
+ 0001:00004F70       ORFn.FontWidthSubPixel
+ 0001:00004FE8       ORFn.FontWidthPixel
+ 0001:00005020       ORFn.MainFontWidth
+ 0001:00005038       ORFn.MainFontHeight
+ 0001:0000505C       ORFn.RedrawSuspend
+ 0001:00005078       ORFn.RedrawActivate
+ 0001:000050A0       ORFn.ResetSelectedForList
+ 0001:000050EC       ORFn.ResizeWidth
+ 0001:00005140       ORFn.ResizeHeight
+ 0001:000051C0       ORFn.ResizeToFont
+ 0001:00005240       ORFn.ResizeHeaderControl
+ 0001:000052BC       ORFn.ResizeListView
+ 0001:00005358       ORFn.ResizeComboBox
+ 0001:00005390       ORFn.ResizeListBox
+ 0001:000053C4       ORFn.ResizeCheckListBox
+ 0001:000053F8       ORFn.ResizeDescendants
+ 0001:00005814       ORFn.ResizeChartFonts
+ 0001:00005A00       ORFn.ResizeFontsInDescendants
+ 0001:00005B90       ORFn.ForceInsideWorkArea
+ 0001:00005CAC       ORFn.AnchorsToStr
+ 0001:00005D20       ORFn.StrToAnchors
+ 0001:00005DE8       ORFn.SuspendAlign
+ 0001:00005ED0       ORFn.RestoreAlign
+ 0001:00005FBC       ORFn.ResizeFormToFont
+ 0001:0000615C       ORFn.ResizeAnchoredFormToFont
+ 0001:000062E0       ORFn.AdjustForWindowsXPStyleTitleBar
+ 0001:000063EC       ORFn.SetEqualTabStops
+ 0001:000064F8       ORFn.StatusText
+ 0001:00006548       ORFn.ShowMsgOn
+ 0001:00006578       ORFn.TextWidthByFont
+ 0001:00006628       ORFn.TextHeightByFont
+ 0001:000066E8       ORFn.WrappedTextHeightByFont
+ 0001:00006870       ORFn.NumCharsFitInWidth
+ 0001:000069C4       ORFn.PopupComponent
+ 0001:00006A18       ORFn.ReformatMemoParagraph
+ 0001:00006C5C       ORFn.CheckColorScheme
+ 0001:00006D98       ORFn.BlackColorScheme
+ 0001:00006DB8       ORFn.NormalColorScheme
+ 0001:00006DD8       ORFn.Get508CompliantColor
+ 0001:00006E70       ORFn.BlackColorSchemeUpdate
+ 0001:00007000       ORFn.ComponentUpdateColorsFor508Compliance
+ 0001:0000709C       ORFn.ScanAllComponents
+ 0001:00007164       ORFn.UpdateColorsFor508Compliance
+ 0001:00007194       ORFn.UpdateReadOnlyColorScheme
+ 0001:000071F0       ORFn.ListGridDrawCell
+ 0001:000072E0       ORFn.ListGridDrawLines
+ 0001:00007428       ORFn.ListGridRowHeight
+ 0001:000074AC       ORFn.CPRSInstances
+ 0001:000075AC       ORFn.KillObj
+ 0001:000076A0       ORFn..TIdleCaller
+ 0001:000076F8       ORFn.TIdleCaller.Create
+ 0001:000077E0       ORFn.TIdleCaller.Destroy
+ 0001:00007864       ORFn.TIdleCaller.AppIdle
+ 0001:000078C0       ORFn.TIdleCaller.Add
+ 0001:0000792C       ORFn.TIdleCaller.TimerDone
+ 0001:000079FC       ORFn.CallWhenIdle
+ 0001:00007A6C       ORFn.CallWhenIdleNotifyWhenDone
+ 0001:00007AE0       ORFn.menuHideAllBut
+ 0001:00007BA0       ORFn.TabIsPressed
+ 0001:00007BF0       ORFn.ShiftTabIsPressed
+ 0001:00007C40       ORFn.EnterIsPressed
+ 0001:00007C58       ORFn.SendMoveMessage
+ 0001:00007D00       ORFn.ScrollControl
+ 0001:00007DC0       ORFn.Finalization
+ 0001:00007E44       ORNet.EnsureBroker
+ 0001:00007EB0       ORNet.SetList
+ 0001:00007F68       ORNet.SetParams
+ 0001:00008490       ORNet.UpdateContext
+ 0001:00008548       ORNet.IsBaseContext
+ 0001:00008570       ORNet.CallBrokerInContext
+ 0001:00008B58       ORNet.CallBroker
+ 0001:00008B6C       ORNet.SetBrokerServer
+ 0001:00008BD4       ORNet.AuthorizedOption
+ 0001:00008C1C       ORNet.ConnectToServer
+ 0001:00008EB8       ORNet.MRef
+ 0001:00008F14       ORNet.GetRPCCursor
+ 0001:00008F70       ORNet.CallV
+ 0001:00008FC4       ORNet.sCallV
+ 0001:00009050       ORNet.tCallV
+ 0001:000090EC       ORNet.RetainedRPCCount
+ 0001:000090F8       ORNet.SetRetainedRPCMax
+ 0001:00009104       ORNet.GetRPCMax
+ 0001:0000910C       ORNet.LoadRPCData
+ 0001:0000913C       ORNet.DottedIPStr
+ 0001:000091B0       ORNet.RPCIdleCallDone
+ 0001:000091E4       ORNet.CallRPCWhenIdle
+ 0001:00009234       ORNet.ShowRPCList
+ 0001:00009244       ORNet.Finalization
+ 0001:000092C4       ORDtTm..TORfrmDtTm
+ 0001:000096CC       ORDtTm..TORDateTimeDlg
+ 0001:00009804       ORDtTm..TORDateButton
+ 0001:0000996C       ORDtTm..TORDateEdit
+ 0001:00009BB8       ORDtTm..TORDateBox
+ 0001:00009E10       ORDtTm..TORDayCombo
+ 0001:00009F64       ORDtTm..TORMonthCombo
+ 0001:0000A0C0       ORDtTm..TORYearEdit
+ 0001:0000A2B0       ORDtTm..TORDateCombo
+ 0001:0000A650       ORDtTm.ActiveBroker
+ 0001:0000A67C       ORDtTm.ServerFMNow
+ 0001:0000A720       ORDtTm.ServerNow
+ 0001:0000A758       ORDtTm.ServerToday
+ 0001:0000A7A8       ORDtTm.ServerParseFMDate
+ 0001:0000A850       ORDtTm.RelativeDateTime
+ 0001:0000A9D4       ORDtTm.LoadEllipsis
+ 0001:0000AA7C       ORDtTm.TORfrmDtTm.FormCreate
+ 0001:0000AABC       ORDtTm.TORfrmDtTm.calSelectChange
+ 0001:0000AB54       ORDtTm.TORfrmDtTm.imgPrevMonthMouseDown
+ 0001:0000AB7C       ORDtTm.TORfrmDtTm.imgNextMonthMouseDown
+ 0001:0000ABA4       ORDtTm.TORfrmDtTm.imgPrevMonthClick
+ 0001:0000ABC4       ORDtTm.TORfrmDtTm.imgNextMonthClick
+ 0001:0000ABE4       ORDtTm.TORfrmDtTm.imgPrevMonthMouseUp
+ 0001:0000AC0C       ORDtTm.TORfrmDtTm.imgNextMonthMouseUp
+ 0001:0000AC34       ORDtTm.TORfrmDtTm.cmdTodayClick
+ 0001:0000AC98       ORDtTm.TORfrmDtTm.txtTimeChange
+ 0001:0000ACE8       ORDtTm.TORfrmDtTm.lstHourClick
+ 0001:0000AD9C       ORDtTm.TORfrmDtTm.lstMinuteClick
+ 0001:0000AEA0       ORDtTm.TORfrmDtTm.cmdNowClick
+ 0001:0000AF40       ORDtTm.TORfrmDtTm.cmdMidnightClick
+ 0001:0000AF74       ORDtTm.TORfrmDtTm.cmdOKClick
+ 0001:0000B144       ORDtTm.TORfrmDtTm.cmdCancelClick
+ 0001:0000B164       ORDtTm.TORfrmDtTm.Loaded
+ 0001:0000B180       ORDtTm.TORDateTimeDlg.Create
+ 0001:0000B1EC       ORDtTm.TORDateTimeDlg.Execute
+ 0001:0000B4F4       ORDtTm.TORDateTimeDlg.GetFMDateTime
+ 0001:0000B518       ORDtTm.TORDateTimeDlg.SetDateOnly
+ 0001:0000B55C       ORDtTm.TORDateTimeDlg.SetFMDateTime
+ 0001:0000B590       ORDtTm.TORDateTimeDlg.SetRequireTime
+ 0001:0000B5BC       ORDtTm.TORDateEdit.CreateParams
+ 0001:0000B5EC       ORDtTm.TORDateBox.Create
+ 0001:0000B70C       ORDtTm.TORDateBox.WMSize
+ 0001:0000B7AC       ORDtTm.TORDateBox.SetTemplateField
+ 0001:0000B87C       ORDtTm.TORDateBox.SupportsDynamicProperty
+ 0001:0000B898       ORDtTm.TORDateBox.ButtonClick
+ 0001:0000BA30       ORDtTm.TORDateBox.Change
+ 0001:0000BA4C       ORDtTm.TORDateBox.KeyDown
+ 0001:0000BA94       ORDtTm.TORDateBox.GetFMDateTime
+ 0001:0000BB28       ORDtTm.TORDateBox.GetRelativeTime
+ 0001:0000BC4C       ORDtTm.TORDateBox.SetDateOnly
+ 0001:0000BCFC       ORDtTm.TORDateBox.SetFMDateTime
+ 0001:0000BD28       ORDtTm.TORDateBox.SetRequireTime
+ 0001:0000BDB4       ORDtTm.TORDateBox.SetEditRect
+ 0001:0000BE2C       ORDtTm.TORDateBox.UpdateText
+ 0001:0000BF44       ORDtTm.TORDateBox.Validate
+ 0001:0000C0B8       ORDtTm.TORDateBox.IsValid
+ 0001:0000C140       ORDtTm.TORDateBox.SetBlackColorMode
+ 0001:0000C188       ORDtTm.TORDateBox.SetCaption
+ 0001:0000C230       ORDtTm.TORDateBox.SetEnabled
+ 0001:0000C25C       ORDtTm.TORDateBox.GetCaption
+ 0001:0000C280       ORDtTm.TORDateBox.GetDynamicProperty
+ 0001:0000C2B0       ORDtTm.IsLeapYear
+ 0001:0000C2FC       ORDtTm.DaysPerMonth
+ 0001:0000C358       ORDtTm.TORYearEdit.SetTemplateField
+ 0001:0000C3A0       ORDtTm.TORDateCombo.Create
+ 0001:0000C44C       ORDtTm.TORDateCombo.Destroy
+ 0001:0000C4C8       ORDtTm.TORDateCombo.GetYearSize
+ 0001:0000C50C       ORDtTm.TORDateCombo.InitDays
+ 0001:0000C6C8       ORDtTm.TORDateCombo.InitMonths
+ 0001:0000C830       ORDtTm.TORDateCombo.Rebuild
+ 0001:0000CF64       ORDtTm.TORDateCombo.SetBlackColorMode
+ 0001:0000CFB8       ORDtTm.TORDateCombo.SetDay
+ 0001:0000D074       ORDtTm.TORDateCombo.SetIncludeBtn
+ 0001:0000D0AC       ORDtTm.TORDateCombo.SetIncludeDay
+ 0001:0000D108       ORDtTm.TORDateCombo.SetIncludeMonth
+ 0001:0000D164       ORDtTm.TORDateCombo.SetMonth
+ 0001:0000D1EC       ORDtTm.TORDateCombo.SetLongMonths
+ 0001:0000D224       ORDtTm.TORDateCombo.SetYear
+ 0001:0000D3D0       ORDtTm.TORDateCombo.DayChanged
+ 0001:0000D420       ORDtTm.TORDateCombo.MonthChanged
+ 0001:0000D478       ORDtTm.TORDateCombo.YearChanged
+ 0001:0000D5C4       ORDtTm.TORDateCombo.CheckDays
+ 0001:0000D6A8       ORDtTm.TORDateCombo.Loaded
+ 0001:0000D6D4       ORDtTm.TORDateCombo.Paint
+ 0001:0000D700       ORDtTm.TORDateCombo.BtnClicked
+ 0001:0000D8BC       ORDtTm.TORDateCombo.YearUDChange
+ 0001:0000DA68       ORDtTm.TORDateCombo.YearKeyPress
+ 0001:0000DB58       ORDtTm.TORDateCombo.GetFMDate
+ 0001:0000DBD8       ORDtTm.TORDateCombo.SetFMDate
+ 0001:0000DCE4       ORDtTm.TORDateCombo.DateText
+ 0001:0000DE30       ORDtTm.TORDateCombo.DoChange
+ 0001:0000DE5C       ORDtTm.TORDateCombo.Resized
+ 0001:0000DE78       ORDtTm.TORDateCombo.CMFontChanged
+ 0001:0000DEA0       ORDtTm.TORDateCombo.Text
+ 0001:0000E05C       ORDtTm.Register
+ 0001:0000E0A0       ORDtTm.TORDateCombo.SetTemplateField
+ 0001:0000E0D8       ORDtTm.Finalization
+ 0001:0000E108       ORDtTmRng..TORfrmDateRange
+ 0001:0000E33C       ORDtTmRng..TORDateRangeDlg
+ 0001:0000E5B0       ORDtTmRng.TORDateRangeDlg.Create
+ 0001:0000E680       ORDtTmRng.TORDateRangeDlg.Execute
+ 0001:0000E900       ORDtTmRng.TORDateRangeDlg.SetDateOnly
+ 0001:0000E998       ORDtTmRng.TORDateRangeDlg.SetRequireTime
+ 0001:0000E9FC       ORDtTmRng.TORDateRangeDlg.SetFMDateStart
+ 0001:0000EA60       ORDtTmRng.TORDateRangeDlg.SetFMDateStop
+ 0001:0000EAC4       ORDtTmRng.TORDateRangeDlg.SetTextOfStart
+ 0001:0000EAE4       ORDtTmRng.TORDateRangeDlg.SetTextOfStop
+ 0001:0000EB04       ORDtTmRng.TORfrmDateRange.cmdOKClick
+ 0001:0000EBD0       ORDtTmRng.TORfrmDateRange.cmdCancelClick
+ 0001:0000EBDC       ORDtTmRng.Register
+ 0001:0000EC0C       ORDtTmRng.TORfrmDateRange.FormCreate
+ 0001:0000ECBC       ORDtTmRng.TORfrmDateRange.FormDestroy
+ 0001:0000ECDC       ORDtTmRng.TORfrmDateRange.Loaded
+ 0001:0000ECF8       ORDtTmRng.Finalization
+ 0001:0000F0B8       .ORDateLib2006.@GetPackageInfoTable
+ 0001:0000F0C0       .ORDateLib2006.@PackageLoad
+ 0001:0000F0CC       .ORDateLib2006.@PackageUnload
+ 0002:00000018       Windows.Windows
+ 0002:0000010C       ORDtTmCal.ORDtTmCal
+ 0002:0000011C       OR2006Compatibility.OR2006Compatibility
+ 0002:00000194       ORFn.ORFn
+ 0002:00000224       ORNet.ORNet
+ 0002:000002A8       ORDtTm.ORDtTm
+ 0002:000002C4       ORDtTmRng.ORDtTmRng
+ 0002:000002CC       .ORDateLib2006..ORDateLib2006
+ 0003:00000000       SysInit.TlsIndex
+ 0003:00000004       SysInit.Module
+ 0003:0000001C       SysInit.TlsProc
+ 0003:0000002C       ORFn.BOOLCHAR
+ 0003:00000030       ORFn.ScrollBarHeight
+ 0003:00000034       ORFn.MONTH_NAMES_SHORT
+ 0003:00000064       ORFn.MONTH_NAMES_LONG
+ 0003:000000DC       ORFn.SearchChars
+ 0003:000000FC       ORFn.ReplaceChars
+ 0003:0000011C       ORFn.CRC32_TABLE
+ 0003:0000051C       ORFn.uNormalColorScheme
+ 0003:00000520       ORFn.uBlackColorScheme
+ 0003:00000524       ORFn.uWhiteColorScheme
+ 0003:00000528       ORFn.uMaroonColorWhenBlack
+ 0003:0000052C       ORFn.uCheckColorScheme
+ 0003:00000530       ORFn.PURE_BLACK
+ 0003:00000534       ORFn.uBorderlessWindowColorWhenBlack
+ 0003:00000538       ORFn.IdleCaller
+ 0003:0000053C       ORNet.AppStartedCursorForm
+ 0003:00000540       ORNet.uBaseContext
+ 0003:00000544       ORNet.uCurrentContext
+ 0003:00000548       ORNet.BoolChar
+ 0003:0000054C       ORDtTm.DaysInMonth
+ 0004:00000000       Windows..3
+ 0004:00000004       Windows.HtmlHelpModule
+ 0004:00000008       SysInit.ModuleIsLib
+ 0004:00000009       SysInit.ModuleIsPackage
+ 0004:0000000C       SysInit.HInstance
+ 0004:00000010       SysInit.tlsBuffer
+ 0004:00000014       ORDtTmCal..2
+ 0004:00000018       OR2006Compatibility.frm2006Compatibility
+ 0004:0000001C       OR2006Compatibility..2
+ 0004:00000020       ORFn..1
+ 0004:00000024       ORFn.FBaseFont
+ 0004:00000028       ORFn.AlignList
+ 0004:0000002C       ORFn.AnchorList
+ 0004:00000030       ORNet.RPCBrokerV
+ 0004:00000034       ORNet.RPCLastCall
+ 0004:00000038       ORNet..1
+ 0004:0000003C       ORNet.uCallList
+ 0004:00000040       ORNet.uMaxCalls
+ 0004:00000044       ORNet.uShowRPCs
+ 0004:00000048       ORDtTm..01
+ 0004:0000004C       ORDtTm.uServerToday
+ 0004:00000054       ORDtTmRng..3
+ 0005:00000000       SysInit.TlsLast
+
+
+Bound resource files
+
+OR2006Compatibility.dfm
+ORDtTm.DFM
+ORDtTm.RES
+ORDtTmRng.DFM
+ORDateLib2006.res
+ORDtTm.dcr
+ORDtTmRng.dcr
+ORDateLib2006.drf
+
+
+Program entry point at 0002:000002CC

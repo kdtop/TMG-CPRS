@@ -1,0 +1,897 @@
+
+ Start         Length     Name                   Class
+ 0001:00401000 00005790H .text                   CODE
+ 0002:00407000 00000134H .itext                  ICODE
+ 0003:00408000 000008C8H .data                   DATA
+ 0004:00409000 000000A0H .bss                    BSS
+ 0005:00000000 00000000H .tls                    TLS
+
+
+Detailed map of segments
+
+ 0001:00000000 0000018E C=CODE     S=.text    G=(none)   M=System   ACBP=A9
+ 0001:00000190 000001C3 C=CODE     S=.text    G=(none)   M=SysInit  ACBP=A9
+ 0001:00000354 0000000E C=CODE     S=.text    G=(none)   M=ComObj   ACBP=A9
+ 0001:00000364 00000056 C=CODE     S=.text    G=(none)   M=SysUtils ACBP=A9
+ 0001:000003BC 000000B4 C=CODE     S=.text    G=(none)   M=Windows  ACBP=A9
+ 0001:00000470 0000003E C=CODE     S=.text    G=(none)   M=Variants ACBP=A9
+ 0001:000004B0 00000006 C=CODE     S=.text    G=(none)   M=VarUtils ACBP=A9
+ 0001:000004B8 0000041D C=CODE     S=.text    G=(none)   M=PsAPI    ACBP=A9
+ 0001:000008D8 00000006 C=CODE     S=.text    G=(none)   M=ShlObj   ACBP=A9
+ 0001:000008E0 0000001E C=CODE     S=.text    G=(none)   M=Forms    ACBP=A9
+ 0001:00000900 00000006 C=CODE     S=.text    G=(none)   M=HelpIntfs ACBP=A9
+ 0001:00000908 000000DE C=CODE     S=.text    G=(none)   M=Classes  ACBP=A9
+ 0001:000009E8 00000006 C=CODE     S=.text    G=(none)   M=TypInfo  ACBP=A9
+ 0001:000009F0 00000006 C=CODE     S=.text    G=(none)   M=MultiMon ACBP=A9
+ 0001:000009F8 00000006 C=CODE     S=.text    G=(none)   M=ActnList ACBP=A9
+ 0001:00000A00 0000000E C=CODE     S=.text    G=(none)   M=Graphics ACBP=A9
+ 0001:00000A10 00000006 C=CODE     S=.text    G=(none)   M=Registry ACBP=A9
+ 0001:00000A18 00000006 C=CODE     S=.text    G=(none)   M=IniFiles ACBP=A9
+ 0001:00000A20 00000006 C=CODE     S=.text    G=(none)   M=Controls ACBP=A9
+ 0001:00000A28 00000006 C=CODE     S=.text    G=(none)   M=Menus    ACBP=A9
+ 0001:00000A30 00000006 C=CODE     S=.text    G=(none)   M=UxTheme  ACBP=A9
+ 0001:00000A38 00000006 C=CODE     S=.text    G=(none)   M=Themes   ACBP=A9
+ 0001:00000A40 00000006 C=CODE     S=.text    G=(none)   M=Dialogs  ACBP=A9
+ 0001:00000A48 00000006 C=CODE     S=.text    G=(none)   M=Printers ACBP=A9
+ 0001:00000A50 00000006 C=CODE     S=.text    G=(none)   M=ExtCtrls ACBP=A9
+ 0001:00000A58 00000006 C=CODE     S=.text    G=(none)   M=GraphUtil ACBP=A9
+ 0001:00000A60 0000000E C=CODE     S=.text    G=(none)   M=StrUtils ACBP=A9
+ 0001:00000A70 00000006 C=CODE     S=.text    G=(none)   M=Clipbrd  ACBP=A9
+ 0001:00000A78 00000006 C=CODE     S=.text    G=(none)   M=FlatSB   ACBP=A9
+ 0001:00000A80 00000886 C=CODE     S=.text    G=(none)   M=VAClasses ACBP=A9
+ 0001:00001308 00002F17 C=CODE     S=.text    G=(none)   M=VAUtils  ACBP=A9
+ 0001:00004220 00000952 C=CODE     S=.text    G=(none)   M=HRBuffers ACBP=A9
+ 0001:00004B74 000005F6 C=CODE     S=.text    G=(none)   M=HRParser ACBP=A9
+ 0001:0000516C 00000422 C=CODE     S=.text    G=(none)   M=HRParserPas ACBP=A9
+ 0001:00005590 000001FF C=CODE     S=.text    G=(none)   M=.VAShared2006 ACBP=A9
+ 0002:00000000 00000006 C=ICODE    S=.itext   G=(none)   M=System   ACBP=A9
+ 0002:00000008 00000006 C=ICODE    S=.itext   G=(none)   M=ComObj   ACBP=A9
+ 0002:00000010 00000006 C=ICODE    S=.itext   G=(none)   M=SysUtils ACBP=A9
+ 0002:00000018 00000011 C=ICODE    S=.itext   G=(none)   M=Windows  ACBP=A9
+ 0002:0000002C 00000006 C=ICODE    S=.itext   G=(none)   M=Variants ACBP=A9
+ 0002:00000034 00000006 C=ICODE    S=.itext   G=(none)   M=VarUtils ACBP=A9
+ 0002:0000003C 00000006 C=ICODE    S=.itext   G=(none)   M=Forms    ACBP=A9
+ 0002:00000044 00000006 C=ICODE    S=.itext   G=(none)   M=HelpIntfs ACBP=A9
+ 0002:0000004C 00000006 C=ICODE    S=.itext   G=(none)   M=Classes  ACBP=A9
+ 0002:00000054 00000006 C=ICODE    S=.itext   G=(none)   M=TypInfo  ACBP=A9
+ 0002:0000005C 00000006 C=ICODE    S=.itext   G=(none)   M=MultiMon ACBP=A9
+ 0002:00000064 00000006 C=ICODE    S=.itext   G=(none)   M=ActnList ACBP=A9
+ 0002:0000006C 00000006 C=ICODE    S=.itext   G=(none)   M=Graphics ACBP=A9
+ 0002:00000074 00000006 C=ICODE    S=.itext   G=(none)   M=Registry ACBP=A9
+ 0002:0000007C 00000006 C=ICODE    S=.itext   G=(none)   M=IniFiles ACBP=A9
+ 0002:00000084 00000006 C=ICODE    S=.itext   G=(none)   M=Controls ACBP=A9
+ 0002:0000008C 00000006 C=ICODE    S=.itext   G=(none)   M=Menus    ACBP=A9
+ 0002:00000094 00000006 C=ICODE    S=.itext   G=(none)   M=UxTheme  ACBP=A9
+ 0002:0000009C 00000006 C=ICODE    S=.itext   G=(none)   M=Themes   ACBP=A9
+ 0002:000000A4 00000006 C=ICODE    S=.itext   G=(none)   M=Dialogs  ACBP=A9
+ 0002:000000AC 00000006 C=ICODE    S=.itext   G=(none)   M=Printers ACBP=A9
+ 0002:000000B4 00000006 C=ICODE    S=.itext   G=(none)   M=ExtCtrls ACBP=A9
+ 0002:000000BC 00000006 C=ICODE    S=.itext   G=(none)   M=GraphUtil ACBP=A9
+ 0002:000000C4 00000006 C=ICODE    S=.itext   G=(none)   M=Clipbrd  ACBP=A9
+ 0002:000000CC 00000006 C=ICODE    S=.itext   G=(none)   M=FlatSB   ACBP=A9
+ 0002:000000D4 00000008 C=ICODE    S=.itext   G=(none)   M=VAClasses ACBP=A9
+ 0002:000000DC 00000036 C=ICODE    S=.itext   G=(none)   M=VAUtils  ACBP=A9
+ 0002:00000114 00000008 C=ICODE    S=.itext   G=(none)   M=HRBuffers ACBP=A9
+ 0002:0000011C 00000008 C=ICODE    S=.itext   G=(none)   M=HRParser ACBP=A9
+ 0002:00000124 00000008 C=ICODE    S=.itext   G=(none)   M=HRParserPas ACBP=A9
+ 0002:0000012C 00000005 C=ICODE    S=.itext   G=(none)   M=.VAShared2006 ACBP=A9
+ 0003:00000000 0000002C C=DATA     S=.data    G=DGROUP   M=SysInit  ACBP=A9
+ 0003:0000002C 00000855 C=DATA     S=.data    G=DGROUP   M=VAUtils  ACBP=A9
+ 0003:00000884 00000040 C=DATA     S=.data    G=DGROUP   M=HRParserPas ACBP=A9
+ 0004:00000000 0000000C C=BSS      S=.bss     G=DGROUP   M=SysInit  ACBP=A9
+ 0004:0000000C 00000008 C=BSS      S=.bss     G=DGROUP   M=Windows  ACBP=A9
+ 0004:00000014 00000060 C=BSS      S=.bss     G=DGROUP   M=PsAPI    ACBP=A9
+ 0004:00000074 00000004 C=BSS      S=.bss     G=DGROUP   M=VAClasses ACBP=A9
+ 0004:00000078 0000001C C=BSS      S=.bss     G=DGROUP   M=VAUtils  ACBP=A9
+ 0004:00000094 00000004 C=BSS      S=.bss     G=DGROUP   M=HRBuffers ACBP=A9
+ 0004:00000098 00000004 C=BSS      S=.bss     G=DGROUP   M=HRParser ACBP=A9
+ 0004:0000009C 00000004 C=BSS      S=.bss     G=DGROUP   M=HRParserPas ACBP=A9
+
+
+  Address             Publics by Name
+
+ 0002:0000012C       .VAShared2006..VAShared2006
+ 0001:00005770       .VAShared2006.@GetPackageInfoTable
+ 0001:00005778       .VAShared2006.@PackageLoad
+ 0001:00005784       .VAShared2006.@PackageUnload
+ 0004:00000094       HRBuffers..6
+ 0001:00004220       HRBuffers..THRBuffer
+ 0001:00004340       HRBuffers..THRBufferChar
+ 0001:000042AC       HRBuffers..THRBufferEOB
+ 0001:00004470       HRBuffers..THRBufferList
+ 0001:000043D8       HRBuffers..THRBufferStream
+ 0001:00004B44       HRBuffers.Finalization
+ 0002:00000114       HRBuffers.HRBuffers
+ 0001:00004504       HRBuffers.THRBuffer.Create
+ 0001:00004584       HRBuffers.THRBuffer.CreateBuffer
+ 0001:00004530       HRBuffers.THRBuffer.Destroy
+ 0001:000045F8       HRBuffers.THRBuffer.FreeBuffer
+ 0001:0000457C       HRBuffers.THRBuffer.GetItems
+ 0001:000045AC       HRBuffers.THRBuffer.ResizeBuffer
+ 0001:00004580       HRBuffers.THRBuffer.SetItems
+ 0001:0000455C       HRBuffers.THRBuffer.SetSize
+ 0001:0000461C       HRBuffers.THRBufferChar.Create
+ 0001:00004658       HRBuffers.THRBufferChar.Destroy
+ 0001:00004764       HRBuffers.THRBufferChar.GetAsPChar
+ 0001:00004794       HRBuffers.THRBufferChar.GetAsString
+ 0001:00004680       HRBuffers.THRBufferChar.GetEOB
+ 0001:00004688       HRBuffers.THRBufferChar.GetItems
+ 0001:000046BC       HRBuffers.THRBufferChar.Read
+ 0001:00004768       HRBuffers.THRBufferChar.SetAsPChar
+ 0001:000047A0       HRBuffers.THRBufferChar.SetAsString
+ 0001:000046A4       HRBuffers.THRBufferChar.SetItems
+ 0001:000046E0       HRBuffers.THRBufferChar.Write
+ 0001:00004700       HRBuffers.THRBufferChar.WritePChar
+ 0001:00004730       HRBuffers.THRBufferChar.WriteString
+ 0001:00004618       HRBuffers.THRBufferEOB.GetEOB
+ 0001:00004AA0       HRBuffers.THRBufferList.Add
+ 0001:000048BC       HRBuffers.THRBufferList.Create
+ 0001:00004B40       HRBuffers.THRBufferList.Delete
+ 0001:00004904       HRBuffers.THRBufferList.Destroy
+ 0001:000049C0       HRBuffers.THRBufferList.GetCount
+ 0001:00004A88       HRBuffers.THRBufferList.GetItemBuffer
+ 0001:0000492C       HRBuffers.THRBufferList.GetItemPos
+ 0001:000049C8       HRBuffers.THRBufferList.GetItemSize
+ 0001:000049E0       HRBuffers.THRBufferList.SetItemSize
+ 0001:000047C8       HRBuffers.THRBufferStream.Create
+ 0001:0000480C       HRBuffers.THRBufferStream.Destroy
+ 0001:00004858       HRBuffers.THRBufferStream.GetEOB
+ 0001:00004860       HRBuffers.THRBufferStream.GetItems
+ 0001:000048B8       HRBuffers.THRBufferStream.SetItems
+ 0001:00004834       HRBuffers.THRBufferStream.SetStream
+ 0004:00000098       HRParser..3
+ 0001:00004B74       HRParser..THRParser
+ 0001:00004BF8       HRParser..THRParserText
+ 0001:0000513C       HRParser.Finalization
+ 0002:0000011C       HRParser.HRParser
+ 0001:00004C84       HRParser.THRParser.Create
+ 0001:00004CF4       HRParser.THRParser.Destroy
+ 0001:00004DFC       HRParser.THRParser.GetNextToken
+ 0001:00004D34       HRParser.THRParser.GetSource
+ 0001:00004D50       HRParser.THRParser.IncLine
+ 0001:00004E38       HRParser.THRParser.NextToken
+ 0001:00004D3C       HRParser.THRParser.SetSource
+ 0001:00004D48       HRParser.THRParser.SetSourcePos
+ 0001:00004DB4       HRParser.THRParser.SkipBlanks
+ 0001:00004D5C       HRParser.THRParser.SkipToSourcePos
+ 0001:00004E90       HRParser.THRParserText.Create
+ 0001:00004EC8       HRParser.THRParserText.Destroy
+ 0001:00004EF0       HRParser.THRParserText.GetNextToken
+ 0004:0000009C       HRParserPas..2
+ 0001:00005220       HRParserPas..THRParserPas
+ 0001:00005560       HRParserPas.Finalization
+ 0002:00000124       HRParserPas.HRParserPas
+ 0003:00000884       HRParserPas.HR_TOKEN_PAS_DESC
+ 0001:000052B0       HRParserPas.THRParserPas.Create
+ 0001:000052E8       HRParserPas.THRParserPas.Destroy
+ 0001:00005310       HRParserPas.THRParserPas.GetNextToken
+ 0001:000004B8       PsAPI.CheckPSAPILoaded
+ 0001:00000824       PsAPI.EnumProcesses
+ 0001:00000848       PsAPI.EnumProcessModules
+ 0001:00000878       PsAPI.GetModuleFileNameEx
+ 0001:000008A8       PsAPI.GetModuleInformation
+ 0004:00000014       PsAPI.hPSAPI
+ 0004:0000003C       PsAPI._EmptyWorkingSet
+ 0004:0000006C       PsAPI._EnumDeviceDrivers
+ 0004:00000018       PsAPI._EnumProcesses
+ 0004:0000001C       PsAPI._EnumProcessModules
+ 0004:0000004C       PsAPI._GetDeviceDriverBaseName
+ 0004:00000058       PsAPI._GetDeviceDriverBaseNameA
+ 0004:00000064       PsAPI._GetDeviceDriverBaseNameW
+ 0004:00000050       PsAPI._GetDeviceDriverFileName
+ 0004:0000005C       PsAPI._GetDeviceDriverFileNameA
+ 0004:00000068       PsAPI._GetDeviceDriverFileNameW
+ 0004:00000048       PsAPI._GetMappedFileName
+ 0004:00000054       PsAPI._GetMappedFileNameA
+ 0004:00000060       PsAPI._GetMappedFileNameW
+ 0004:00000020       PsAPI._GetModuleBaseName
+ 0004:00000028       PsAPI._GetModuleBaseNameA
+ 0004:00000030       PsAPI._GetModuleBaseNameW
+ 0004:00000024       PsAPI._GetModuleFileNameEx
+ 0004:0000002C       PsAPI._GetModuleFileNameExA
+ 0004:00000034       PsAPI._GetModuleFileNameExW
+ 0004:00000038       PsAPI._GetModuleInformation
+ 0004:00000070       PsAPI._GetProcessMemoryInfo
+ 0004:00000044       PsAPI._InitializeProcessForWsWatch
+ 0004:00000040       PsAPI._QueryWorkingSet
+ 0001:000008D8       ShlObj.SHGetSpecialFolderPath
+ 0001:000002D8       SysInit.@InitPkg
+ 0001:0000033C       SysInit.@PackageLoad
+ 0001:00000348       SysInit.@PackageUnload
+ 0001:000001C8       SysInit.AllocTlsBuffer
+ 0001:00000284       SysInit.ExitProcessTLS
+ 0001:0000024C       SysInit.ExitThreadTLS
+ 0001:00000190       SysInit.FreeLibrary
+ 0001:000001D4       SysInit.GetTlsSize
+ 0004:00000004       SysInit.HInstance
+ 0001:000002A8       SysInit.InitializeModule
+ 0001:00000220       SysInit.InitProcessTLS
+ 0001:000001DC       SysInit.InitThreadTLS
+ 0001:00000198       SysInit.LocalAlloc
+ 0001:000001A0       SysInit.LocalFree
+ 0003:00000004       SysInit.Module
+ 0004:00000000       SysInit.ModuleIsLib
+ 0004:00000001       SysInit.ModuleIsPackage
+ 0001:000001A8       SysInit.TlsAlloc
+ 0004:00000008       SysInit.tlsBuffer
+ 0001:000001B0       SysInit.TlsFree
+ 0001:000001B8       SysInit.TlsGetValue
+ 0003:00000000       SysInit.TlsIndex
+ 0005:00000000       SysInit.TlsLast
+ 0003:0000001C       SysInit.TlsProc
+ 0001:000001C0       SysInit.TlsSetValue
+ 0001:000002B4       SysInit.UninitializeModule
+ 0004:00000074       VAClasses..6
+ 0001:00000A80       VAClasses..TVABaseMethodList
+ 0001:00000BA0       VAClasses..TVALinkedMethodList
+ 0001:00000DB8       VAClasses..TVAList
+ 0001:00000B14       VAClasses..TVAMethodList
+ 0001:00000C80       VAClasses..TVANotificationEventComponent
+ 0001:000012D8       VAClasses.Finalization
+ 0001:00000EA0       VAClasses.TVABaseMethodList.Add
+ 0001:00000ECC       VAClasses.TVABaseMethodList.Clear
+ 0001:00000EE4       VAClasses.TVABaseMethodList.Count
+ 0001:00000EEC       VAClasses.TVABaseMethodList.Create
+ 0001:00000F38       VAClasses.TVABaseMethodList.Delete
+ 0001:00000F58       VAClasses.TVABaseMethodList.Destroy
+ 0001:00000F90       VAClasses.TVABaseMethodList.GetMethod
+ 0001:00000FB8       VAClasses.TVABaseMethodList.IndexOf
+ 0001:00001014       VAClasses.TVABaseMethodList.Remove
+ 0001:00001140       VAClasses.TVALinkedMethodList.Add
+ 0001:00001184       VAClasses.TVALinkedMethodList.Clear
+ 0001:000011A4       VAClasses.TVALinkedMethodList.Count
+ 0001:000011AC       VAClasses.TVALinkedMethodList.Create
+ 0001:000011F0       VAClasses.TVALinkedMethodList.Delete
+ 0001:00001218       VAClasses.TVALinkedMethodList.Destroy
+ 0001:00001248       VAClasses.TVALinkedMethodList.GetMethod
+ 0001:00001278       VAClasses.TVALinkedMethodList.IndexOf
+ 0001:0000128C       VAClasses.TVALinkedMethodList.Remove
+ 0001:000012A8       VAClasses.TVAList.Notify
+ 0001:0000103C       VAClasses.TVAMethodList.Add
+ 0001:00001044       VAClasses.TVAMethodList.Clear
+ 0001:0000104C       VAClasses.TVAMethodList.Count
+ 0001:00001054       VAClasses.TVAMethodList.Create
+ 0001:0000108C       VAClasses.TVAMethodList.Delete
+ 0001:00001094       VAClasses.TVAMethodList.Destroy
+ 0001:000010BC       VAClasses.TVAMethodList.IndexOf
+ 0001:000010C4       VAClasses.TVAMethodList.Remove
+ 0001:000010CC       VAClasses.TVANotificationEventComponent.Notification
+ 0001:000010F8       VAClasses.TVANotificationEventComponent.NotifyCreate
+ 0002:000000D4       VAClasses.VAClasses
+ 0004:00000078       VAUtils..3
+ 0001:00002EB4       VAUtils..TVACustomMessageEventInterceptor
+ 0001:00002F2C       VAUtils..TVAMessageEventHandler
+ 0001:00002F98       VAUtils..TVAWinProcMonitor
+ 0001:00003134       VAUtils.AddMessageHandler
+ 0001:000038F8       VAUtils.AnotherInstanceRunning
+ 0001:00002B34       VAUtils.AppendBackSlash
+ 0003:0000042C       VAUtils.BinChars
+ 0003:0000046C       VAUtils.CheckScreenReaderSupport
+ 0001:00003100       VAUtils.CleanupMessageHandlerSystem
+ 0001:000030C4       VAUtils.Clear
+ 0003:00000474       VAUtils.CRC32_TABLE
+ 0001:00002AB0       VAUtils.CRCForString
+ 0001:00003E48       VAUtils.ExecuteAndWait
+ 0001:000029E4       VAUtils.FastHexToBinary
+ 0001:000027C0       VAUtils.FastHexToByte
+ 0001:00002868       VAUtils.FastHexToInt
+ 0001:0000274C       VAUtils.FastIntToHex
+ 0001:00002794       VAUtils.FastWordToHex
+ 0001:00003A74       VAUtils.FileVersionValue
+ 0001:000041A0       VAUtils.Finalization
+ 0001:00002564       VAUtils.FreeAndNilTStringsAndObjects
+ 0001:00002D5C       VAUtils.GetAlternateProgramFilesPath
+ 0001:00004084       VAUtils.GetDLLFileName
+ 0001:000025F4       VAUtils.GetFileWithShortenedPath
+ 0001:000036A4       VAUtils.GetInstanceCount
+ 0001:000038AC       VAUtils.GetInstanceCount
+ 0001:0000394C       VAUtils.GetNum
+ 0001:00002D48       VAUtils.GetProgramFilesPath
+ 0001:00002BB0       VAUtils.GetSpecialFolderPath
+ 0001:00003C24       VAUtils.GetV
+ 0001:00002E70       VAUtils.GetWindowClassName
+ 0001:00002E2C       VAUtils.GetWindowTitle
+ 0003:0000002C       VAUtils.HexChars
+ 0001:00003054       VAUtils.InitializeMessageHandlerSystem
+ 0001:00003670       VAUtils.ListTooSmall
+ 0001:000032F8       VAUtils.MessageHandlerCount
+ 0004:00000088       VAUtils.ModuleHandles
+ 0001:00003D04       VAUtils.parse
+ 0004:0000007C       VAUtils.PIDList
+ 0001:000021BC       VAUtils.Piece
+ 0001:00002238       VAUtils.Pieces
+ 0001:0000326C       VAUtils.RemoveAllMessageHandlers
+ 0001:000031D0       VAUtils.RemoveMessageHandler
+ 0001:000025AC       VAUtils.ScreenReaderActive
+ 0001:000025D0       VAUtils.ScreenReaderSupportEnabled
+ 0001:0000230C       VAUtils.ShowMsg
+ 0001:00002440       VAUtils.ShowMsg
+ 0001:0000361C       VAUtils.TDataArray.Clear
+ 0001:00003638       VAUtils.TDataArray.SetCapacity
+ 0001:00003668       VAUtils.TDataArray.Size
+ 0001:000033CC       VAUtils.TVACustomMessageEventInterceptor.Create
+ 0001:00003470       VAUtils.TVACustomMessageEventInterceptor.Destroy
+ 0001:000034A4       VAUtils.TVACustomMessageEventInterceptor.NewMessageHandler
+ 0001:000034B0       VAUtils.TVAMessageEventHandler.AddMessageHandler
+ 0001:000034C4       VAUtils.TVAMessageEventHandler.Create
+ 0001:00003510       VAUtils.TVAMessageEventHandler.Destroy
+ 0001:00003540       VAUtils.TVAMessageEventHandler.DoMessageHandlers
+ 0001:00003598       VAUtils.TVAMessageEventHandler.HandlerCount
+ 0001:000035A4       VAUtils.TVAMessageEventHandler.NewMessageHandler
+ 0001:000035C8       VAUtils.TVAMessageEventHandler.RemoveMessageHandler
+ 0001:00003374       VAUtils.TVAWinProcMonitor.Notification
+ 0001:000033AC       VAUtils.TVAWinProcMonitor.RemoveFromList
+ 0003:00000874       VAUtils.uEventMessageHandlers
+ 0003:00000878       VAUtils.uHandlePointers
+ 0003:00000880       VAUtils.uMessageHandlerSystemRunning
+ 0003:00000470       VAUtils.uScreenReaderSupportEnabled
+ 0003:0000087C       VAUtils.uWinProcMonitor
+ 0002:000000DC       VAUtils.VAUtils
+ 0001:00003D80       VAUtils.VersionOK
+ 0001:00003920       VAUtils.VersionStringSplit
+ 0001:00003904       VAUtils.VersionStringSplit
+ 0001:00003934       VAUtils.VersionStringSplit
+ 0001:000039FC       VAUtils.VersionStringSplit
+ 0004:0000000C       Windows..3
+ 0001:000003BC       Windows.CloseHandle
+ 0001:0000042C       Windows.Finalization
+ 0001:000003C4       Windows.FreeLibrary
+ 0001:00000414       Windows.GetClassName
+ 0001:000003CC       Windows.GetCurrentProcess
+ 0001:000003FC       Windows.GetFileVersionInfo
+ 0001:00000404       Windows.GetFileVersionInfoSize
+ 0001:000003D4       Windows.GetModuleFileName
+ 0001:000003DC       Windows.GetProcAddress
+ 0001:0000041C       Windows.GetWindowText
+ 0004:00000010       Windows.HtmlHelpModule
+ 0001:000003E4       Windows.LoadLibrary
+ 0001:000003EC       Windows.OpenProcess
+ 0001:000003F4       Windows.Sleep
+ 0001:00000424       Windows.SystemParametersInfo
+ 0001:0000040C       Windows.VerQueryValue
+ 0002:00000018       Windows.Windows
+
+
+  Address             Publics by Value
+
+ 0001:00000190       SysInit.FreeLibrary
+ 0001:00000198       SysInit.LocalAlloc
+ 0001:000001A0       SysInit.LocalFree
+ 0001:000001A8       SysInit.TlsAlloc
+ 0001:000001B0       SysInit.TlsFree
+ 0001:000001B8       SysInit.TlsGetValue
+ 0001:000001C0       SysInit.TlsSetValue
+ 0001:000001C8       SysInit.AllocTlsBuffer
+ 0001:000001D4       SysInit.GetTlsSize
+ 0001:000001DC       SysInit.InitThreadTLS
+ 0001:00000220       SysInit.InitProcessTLS
+ 0001:0000024C       SysInit.ExitThreadTLS
+ 0001:00000284       SysInit.ExitProcessTLS
+ 0001:000002A8       SysInit.InitializeModule
+ 0001:000002B4       SysInit.UninitializeModule
+ 0001:000002D8       SysInit.@InitPkg
+ 0001:0000033C       SysInit.@PackageLoad
+ 0001:00000348       SysInit.@PackageUnload
+ 0001:000003BC       Windows.CloseHandle
+ 0001:000003C4       Windows.FreeLibrary
+ 0001:000003CC       Windows.GetCurrentProcess
+ 0001:000003D4       Windows.GetModuleFileName
+ 0001:000003DC       Windows.GetProcAddress
+ 0001:000003E4       Windows.LoadLibrary
+ 0001:000003EC       Windows.OpenProcess
+ 0001:000003F4       Windows.Sleep
+ 0001:000003FC       Windows.GetFileVersionInfo
+ 0001:00000404       Windows.GetFileVersionInfoSize
+ 0001:0000040C       Windows.VerQueryValue
+ 0001:00000414       Windows.GetClassName
+ 0001:0000041C       Windows.GetWindowText
+ 0001:00000424       Windows.SystemParametersInfo
+ 0001:0000042C       Windows.Finalization
+ 0001:000004B8       PsAPI.CheckPSAPILoaded
+ 0001:00000824       PsAPI.EnumProcesses
+ 0001:00000848       PsAPI.EnumProcessModules
+ 0001:00000878       PsAPI.GetModuleFileNameEx
+ 0001:000008A8       PsAPI.GetModuleInformation
+ 0001:000008D8       ShlObj.SHGetSpecialFolderPath
+ 0001:00000A80       VAClasses..TVABaseMethodList
+ 0001:00000B14       VAClasses..TVAMethodList
+ 0001:00000BA0       VAClasses..TVALinkedMethodList
+ 0001:00000C80       VAClasses..TVANotificationEventComponent
+ 0001:00000DB8       VAClasses..TVAList
+ 0001:00000EA0       VAClasses.TVABaseMethodList.Add
+ 0001:00000ECC       VAClasses.TVABaseMethodList.Clear
+ 0001:00000EE4       VAClasses.TVABaseMethodList.Count
+ 0001:00000EEC       VAClasses.TVABaseMethodList.Create
+ 0001:00000F38       VAClasses.TVABaseMethodList.Delete
+ 0001:00000F58       VAClasses.TVABaseMethodList.Destroy
+ 0001:00000F90       VAClasses.TVABaseMethodList.GetMethod
+ 0001:00000FB8       VAClasses.TVABaseMethodList.IndexOf
+ 0001:00001014       VAClasses.TVABaseMethodList.Remove
+ 0001:0000103C       VAClasses.TVAMethodList.Add
+ 0001:00001044       VAClasses.TVAMethodList.Clear
+ 0001:0000104C       VAClasses.TVAMethodList.Count
+ 0001:00001054       VAClasses.TVAMethodList.Create
+ 0001:0000108C       VAClasses.TVAMethodList.Delete
+ 0001:00001094       VAClasses.TVAMethodList.Destroy
+ 0001:000010BC       VAClasses.TVAMethodList.IndexOf
+ 0001:000010C4       VAClasses.TVAMethodList.Remove
+ 0001:000010CC       VAClasses.TVANotificationEventComponent.Notification
+ 0001:000010F8       VAClasses.TVANotificationEventComponent.NotifyCreate
+ 0001:00001140       VAClasses.TVALinkedMethodList.Add
+ 0001:00001184       VAClasses.TVALinkedMethodList.Clear
+ 0001:000011A4       VAClasses.TVALinkedMethodList.Count
+ 0001:000011AC       VAClasses.TVALinkedMethodList.Create
+ 0001:000011F0       VAClasses.TVALinkedMethodList.Delete
+ 0001:00001218       VAClasses.TVALinkedMethodList.Destroy
+ 0001:00001248       VAClasses.TVALinkedMethodList.GetMethod
+ 0001:00001278       VAClasses.TVALinkedMethodList.IndexOf
+ 0001:0000128C       VAClasses.TVALinkedMethodList.Remove
+ 0001:000012A8       VAClasses.TVAList.Notify
+ 0001:000012D8       VAClasses.Finalization
+ 0001:000021BC       VAUtils.Piece
+ 0001:00002238       VAUtils.Pieces
+ 0001:0000230C       VAUtils.ShowMsg
+ 0001:00002440       VAUtils.ShowMsg
+ 0001:00002564       VAUtils.FreeAndNilTStringsAndObjects
+ 0001:000025AC       VAUtils.ScreenReaderActive
+ 0001:000025D0       VAUtils.ScreenReaderSupportEnabled
+ 0001:000025F4       VAUtils.GetFileWithShortenedPath
+ 0001:0000274C       VAUtils.FastIntToHex
+ 0001:00002794       VAUtils.FastWordToHex
+ 0001:000027C0       VAUtils.FastHexToByte
+ 0001:00002868       VAUtils.FastHexToInt
+ 0001:000029E4       VAUtils.FastHexToBinary
+ 0001:00002AB0       VAUtils.CRCForString
+ 0001:00002B34       VAUtils.AppendBackSlash
+ 0001:00002BB0       VAUtils.GetSpecialFolderPath
+ 0001:00002D48       VAUtils.GetProgramFilesPath
+ 0001:00002D5C       VAUtils.GetAlternateProgramFilesPath
+ 0001:00002E2C       VAUtils.GetWindowTitle
+ 0001:00002E70       VAUtils.GetWindowClassName
+ 0001:00002EB4       VAUtils..TVACustomMessageEventInterceptor
+ 0001:00002F2C       VAUtils..TVAMessageEventHandler
+ 0001:00002F98       VAUtils..TVAWinProcMonitor
+ 0001:00003054       VAUtils.InitializeMessageHandlerSystem
+ 0001:000030C4       VAUtils.Clear
+ 0001:00003100       VAUtils.CleanupMessageHandlerSystem
+ 0001:00003134       VAUtils.AddMessageHandler
+ 0001:000031D0       VAUtils.RemoveMessageHandler
+ 0001:0000326C       VAUtils.RemoveAllMessageHandlers
+ 0001:000032F8       VAUtils.MessageHandlerCount
+ 0001:00003374       VAUtils.TVAWinProcMonitor.Notification
+ 0001:000033AC       VAUtils.TVAWinProcMonitor.RemoveFromList
+ 0001:000033CC       VAUtils.TVACustomMessageEventInterceptor.Create
+ 0001:00003470       VAUtils.TVACustomMessageEventInterceptor.Destroy
+ 0001:000034A4       VAUtils.TVACustomMessageEventInterceptor.NewMessageHandler
+ 0001:000034B0       VAUtils.TVAMessageEventHandler.AddMessageHandler
+ 0001:000034C4       VAUtils.TVAMessageEventHandler.Create
+ 0001:00003510       VAUtils.TVAMessageEventHandler.Destroy
+ 0001:00003540       VAUtils.TVAMessageEventHandler.DoMessageHandlers
+ 0001:00003598       VAUtils.TVAMessageEventHandler.HandlerCount
+ 0001:000035A4       VAUtils.TVAMessageEventHandler.NewMessageHandler
+ 0001:000035C8       VAUtils.TVAMessageEventHandler.RemoveMessageHandler
+ 0001:0000361C       VAUtils.TDataArray.Clear
+ 0001:00003638       VAUtils.TDataArray.SetCapacity
+ 0001:00003668       VAUtils.TDataArray.Size
+ 0001:00003670       VAUtils.ListTooSmall
+ 0001:000036A4       VAUtils.GetInstanceCount
+ 0001:000038AC       VAUtils.GetInstanceCount
+ 0001:000038F8       VAUtils.AnotherInstanceRunning
+ 0001:00003904       VAUtils.VersionStringSplit
+ 0001:00003920       VAUtils.VersionStringSplit
+ 0001:00003934       VAUtils.VersionStringSplit
+ 0001:0000394C       VAUtils.GetNum
+ 0001:000039FC       VAUtils.VersionStringSplit
+ 0001:00003A74       VAUtils.FileVersionValue
+ 0001:00003C24       VAUtils.GetV
+ 0001:00003D04       VAUtils.parse
+ 0001:00003D80       VAUtils.VersionOK
+ 0001:00003E48       VAUtils.ExecuteAndWait
+ 0001:00004084       VAUtils.GetDLLFileName
+ 0001:000041A0       VAUtils.Finalization
+ 0001:00004220       HRBuffers..THRBuffer
+ 0001:000042AC       HRBuffers..THRBufferEOB
+ 0001:00004340       HRBuffers..THRBufferChar
+ 0001:000043D8       HRBuffers..THRBufferStream
+ 0001:00004470       HRBuffers..THRBufferList
+ 0001:00004504       HRBuffers.THRBuffer.Create
+ 0001:00004530       HRBuffers.THRBuffer.Destroy
+ 0001:0000455C       HRBuffers.THRBuffer.SetSize
+ 0001:0000457C       HRBuffers.THRBuffer.GetItems
+ 0001:00004580       HRBuffers.THRBuffer.SetItems
+ 0001:00004584       HRBuffers.THRBuffer.CreateBuffer
+ 0001:000045AC       HRBuffers.THRBuffer.ResizeBuffer
+ 0001:000045F8       HRBuffers.THRBuffer.FreeBuffer
+ 0001:00004618       HRBuffers.THRBufferEOB.GetEOB
+ 0001:0000461C       HRBuffers.THRBufferChar.Create
+ 0001:00004658       HRBuffers.THRBufferChar.Destroy
+ 0001:00004680       HRBuffers.THRBufferChar.GetEOB
+ 0001:00004688       HRBuffers.THRBufferChar.GetItems
+ 0001:000046A4       HRBuffers.THRBufferChar.SetItems
+ 0001:000046BC       HRBuffers.THRBufferChar.Read
+ 0001:000046E0       HRBuffers.THRBufferChar.Write
+ 0001:00004700       HRBuffers.THRBufferChar.WritePChar
+ 0001:00004730       HRBuffers.THRBufferChar.WriteString
+ 0001:00004764       HRBuffers.THRBufferChar.GetAsPChar
+ 0001:00004768       HRBuffers.THRBufferChar.SetAsPChar
+ 0001:00004794       HRBuffers.THRBufferChar.GetAsString
+ 0001:000047A0       HRBuffers.THRBufferChar.SetAsString
+ 0001:000047C8       HRBuffers.THRBufferStream.Create
+ 0001:0000480C       HRBuffers.THRBufferStream.Destroy
+ 0001:00004834       HRBuffers.THRBufferStream.SetStream
+ 0001:00004858       HRBuffers.THRBufferStream.GetEOB
+ 0001:00004860       HRBuffers.THRBufferStream.GetItems
+ 0001:000048B8       HRBuffers.THRBufferStream.SetItems
+ 0001:000048BC       HRBuffers.THRBufferList.Create
+ 0001:00004904       HRBuffers.THRBufferList.Destroy
+ 0001:0000492C       HRBuffers.THRBufferList.GetItemPos
+ 0001:000049C0       HRBuffers.THRBufferList.GetCount
+ 0001:000049C8       HRBuffers.THRBufferList.GetItemSize
+ 0001:000049E0       HRBuffers.THRBufferList.SetItemSize
+ 0001:00004A88       HRBuffers.THRBufferList.GetItemBuffer
+ 0001:00004AA0       HRBuffers.THRBufferList.Add
+ 0001:00004B40       HRBuffers.THRBufferList.Delete
+ 0001:00004B44       HRBuffers.Finalization
+ 0001:00004B74       HRParser..THRParser
+ 0001:00004BF8       HRParser..THRParserText
+ 0001:00004C84       HRParser.THRParser.Create
+ 0001:00004CF4       HRParser.THRParser.Destroy
+ 0001:00004D34       HRParser.THRParser.GetSource
+ 0001:00004D3C       HRParser.THRParser.SetSource
+ 0001:00004D48       HRParser.THRParser.SetSourcePos
+ 0001:00004D50       HRParser.THRParser.IncLine
+ 0001:00004D5C       HRParser.THRParser.SkipToSourcePos
+ 0001:00004DB4       HRParser.THRParser.SkipBlanks
+ 0001:00004DFC       HRParser.THRParser.GetNextToken
+ 0001:00004E38       HRParser.THRParser.NextToken
+ 0001:00004E90       HRParser.THRParserText.Create
+ 0001:00004EC8       HRParser.THRParserText.Destroy
+ 0001:00004EF0       HRParser.THRParserText.GetNextToken
+ 0001:0000513C       HRParser.Finalization
+ 0001:00005220       HRParserPas..THRParserPas
+ 0001:000052B0       HRParserPas.THRParserPas.Create
+ 0001:000052E8       HRParserPas.THRParserPas.Destroy
+ 0001:00005310       HRParserPas.THRParserPas.GetNextToken
+ 0001:00005560       HRParserPas.Finalization
+ 0001:00005770       .VAShared2006.@GetPackageInfoTable
+ 0001:00005778       .VAShared2006.@PackageLoad
+ 0001:00005784       .VAShared2006.@PackageUnload
+ 0002:00000018       Windows.Windows
+ 0002:000000D4       VAClasses.VAClasses
+ 0002:000000DC       VAUtils.VAUtils
+ 0002:00000114       HRBuffers.HRBuffers
+ 0002:0000011C       HRParser.HRParser
+ 0002:00000124       HRParserPas.HRParserPas
+ 0002:0000012C       .VAShared2006..VAShared2006
+ 0003:00000000       SysInit.TlsIndex
+ 0003:00000004       SysInit.Module
+ 0003:0000001C       SysInit.TlsProc
+ 0003:0000002C       VAUtils.HexChars
+ 0003:0000042C       VAUtils.BinChars
+ 0003:0000046C       VAUtils.CheckScreenReaderSupport
+ 0003:00000470       VAUtils.uScreenReaderSupportEnabled
+ 0003:00000474       VAUtils.CRC32_TABLE
+ 0003:00000874       VAUtils.uEventMessageHandlers
+ 0003:00000878       VAUtils.uHandlePointers
+ 0003:0000087C       VAUtils.uWinProcMonitor
+ 0003:00000880       VAUtils.uMessageHandlerSystemRunning
+ 0003:00000884       HRParserPas.HR_TOKEN_PAS_DESC
+ 0004:00000000       SysInit.ModuleIsLib
+ 0004:00000001       SysInit.ModuleIsPackage
+ 0004:00000004       SysInit.HInstance
+ 0004:00000008       SysInit.tlsBuffer
+ 0004:0000000C       Windows..3
+ 0004:00000010       Windows.HtmlHelpModule
+ 0004:00000014       PsAPI.hPSAPI
+ 0004:00000018       PsAPI._EnumProcesses
+ 0004:0000001C       PsAPI._EnumProcessModules
+ 0004:00000020       PsAPI._GetModuleBaseName
+ 0004:00000024       PsAPI._GetModuleFileNameEx
+ 0004:00000028       PsAPI._GetModuleBaseNameA
+ 0004:0000002C       PsAPI._GetModuleFileNameExA
+ 0004:00000030       PsAPI._GetModuleBaseNameW
+ 0004:00000034       PsAPI._GetModuleFileNameExW
+ 0004:00000038       PsAPI._GetModuleInformation
+ 0004:0000003C       PsAPI._EmptyWorkingSet
+ 0004:00000040       PsAPI._QueryWorkingSet
+ 0004:00000044       PsAPI._InitializeProcessForWsWatch
+ 0004:00000048       PsAPI._GetMappedFileName
+ 0004:0000004C       PsAPI._GetDeviceDriverBaseName
+ 0004:00000050       PsAPI._GetDeviceDriverFileName
+ 0004:00000054       PsAPI._GetMappedFileNameA
+ 0004:00000058       PsAPI._GetDeviceDriverBaseNameA
+ 0004:0000005C       PsAPI._GetDeviceDriverFileNameA
+ 0004:00000060       PsAPI._GetMappedFileNameW
+ 0004:00000064       PsAPI._GetDeviceDriverBaseNameW
+ 0004:00000068       PsAPI._GetDeviceDriverFileNameW
+ 0004:0000006C       PsAPI._EnumDeviceDrivers
+ 0004:00000070       PsAPI._GetProcessMemoryInfo
+ 0004:00000074       VAClasses..6
+ 0004:00000078       VAUtils..3
+ 0004:0000007C       VAUtils.PIDList
+ 0004:00000088       VAUtils.ModuleHandles
+ 0004:00000094       HRBuffers..6
+ 0004:00000098       HRParser..3
+ 0004:0000009C       HRParserPas..2
+ 0005:00000000       SysInit.TlsLast
+
+
+Line numbers for VAClasses(..\VA\VAClasses.pas) segment .text
+
+    99 0001:00000EA0   100 0001:00000EA6   102 0001:00000EB3   103 0001:00000EBD
+   105 0001:00000EC8   108 0001:00000ECC   109 0001:00000ECF   110 0001:00000ED7
+   111 0001:00000EDF   115 0001:00000EE4   116 0001:00000EEA   119 0001:00000EEC
+   120 0001:00000EFE   121 0001:00000F0D   122 0001:00000F1C   125 0001:00000F38
+   126 0001:00000F3E   127 0001:00000F48   128 0001:00000F52   131 0001:00000F58
+   132 0001:00000F63   133 0001:00000F6B   134 0001:00000F73   135 0001:00000F7F
+   138 0001:00000F90   139 0001:00000F99   140 0001:00000FA5   141 0001:00000FB2
+   144 0001:00000FB8   145 0001:00000FBF   147 0001:00000FD3   149 0001:00000FD7
+   148 0001:00000FD8   150 0001:00000FFD   153 0001:0000100A   154 0001:0000100D
+   160 0001:00001014   161 0001:00001018   162 0001:00001021   164 0001:00001025
+   165 0001:0000102F   167 0001:00001039   173 0001:0000103C   174 0001:00001041
+   178 0001:00001044   179 0001:00001049   183 0001:0000104C   184 0001:00001051
+   187 0001:00001054   188 0001:00001066   189 0001:0000106F   193 0001:0000108C
+   194 0001:00001091   197 0001:00001094   198 0001:0000109F   199 0001:000010AB
+   203 0001:000010BC   204 0001:000010C1   208 0001:000010C4   209 0001:000010C9
+   215 0001:000010CC   216 0001:000010D5   217 0001:000010E6   218 0001:000010F1
+   222 0001:000010F8   223 0001:0000110D   224 0001:00001116   225 0001:00001122
+   230 0001:00001140   231 0001:00001149   233 0001:0000115F   234 0001:00001169
+   235 0001:00001173   237 0001:0000117E   240 0001:00001184   241 0001:00001187
+   242 0001:0000118F   243 0001:00001197   244 0001:0000119F   248 0001:000011A4
+   249 0001:000011AA   252 0001:000011AC   253 0001:000011BE   254 0001:000011C7
+   255 0001:000011D6   258 0001:000011F0   259 0001:000011F6   260 0001:00001200
+   261 0001:0000120A   262 0001:00001214   265 0001:00001218   266 0001:00001223
+   267 0001:0000122B   268 0001:00001237   273 0001:00001248   274 0001:0000124F
+   275 0001:00001258   277 0001:0000125C   278 0001:00001260   281 0001:00001267
+   282 0001:00001272   286 0001:00001278   287 0001:0000127C   289 0001:00001285
+   290 0001:00001288   295 0001:0000128C   296 0001:0000128F   297 0001:00001296
+   298 0001:0000129A   299 0001:000012A3   304 0001:000012A8   305 0001:000012A9
+   307 0001:000012B4   308 0001:000012B8   310 0001:000012C8   312 0001:000012D6
+
+Line numbers for VAClasses(..\VA\VAClasses.pas) segment .itext
+
+   314 0002:000000D4
+
+Line numbers for VAUtils(..\VA\VAUtils.pas) segment .text
+
+   207 0001:000021BC   208 0001:000021CD   209 0001:000021D2   210 0001:000021DB
+   213 0001:000021EA   214 0001:000021EB   215 0001:000021EE   211 0001:000021FB
+   217 0001:00002204   218 0001:00002211   219 0001:0000222E   225 0001:00002238
+   226 0001:00002261   227 0001:00002268   228 0001:000022A9   229 0001:000022DE
+   242 0001:0000230C   243 0001:00002326   244 0001:0000232B   245 0001:0000233D
+   246 0001:00002342   247 0001:00002347   248 0001:0000234C   250 0001:0000234F
+   251 0001:00002377   252 0001:0000237C   253 0001:00002381   254 0001:00002386
+   255 0001:0000238B   256 0001:00002390   258 0001:00002393   259 0001:0000239D
+   260 0001:000023A3   261 0001:000023B2   262 0001:000023D2   263 0001:000023FE
+   264 0001:00002402   265 0001:00002406   266 0001:0000240A   267 0001:0000240E
+   268 0001:00002412   269 0001:00002416   271 0001:00002418   277 0001:00002440
+   278 0001:00002460   279 0001:00002468   280 0001:0000247C   281 0001:0000248B
+   282 0001:0000249A   283 0001:000024A9   285 0001:000024B6   286 0001:000024D3
+   287 0001:000024E6   293 0001:00002564   294 0001:00002567   295 0001:0000256C
+   296 0001:0000257E   297 0001:0000258C   295 0001:0000259C   298 0001:0000259F
+   299 0001:000025A6   306 0001:000025AC   308 0001:000025AD   309 0001:000025BD
+   310 0001:000025C7   312 0001:000025CB   313 0001:000025CD   321 0001:000025D0
+   323 0001:000025D9   324 0001:000025E3   326 0001:000025EA   327 0001:000025F1
+   338 0001:000025F4   339 0001:00002627   340 0001:00002631   341 0001:00002633
+   342 0001:00002635   343 0001:0000263A   346 0001:0000263F   347 0001:00002650
+   348 0001:00002655   350 0001:0000265B   351 0001:0000265E   353 0001:00002664
+   356 0001:00002668   357 0001:00002675   359 0001:00002681   361 0001:00002686
+   362 0001:0000268B   363 0001:00002695   364 0001:000026D1   367 0001:000026DC
+   368 0001:000026EC   370 0001:000026ED   371 0001:000026FE   377 0001:0000274C
+   378 0001:00002750   379 0001:00002753   380 0001:0000278F   386 0001:00002794
+   387 0001:00002798   388 0001:0000279C   389 0001:000027BA   403 0001:000027C0
+   404 0001:000027E3   406 0001:00002823   410 0001:00002868   411 0001:00002892
+   419 0001:0000299E   426 0001:000029E4   427 0001:00002A0E   428 0001:00002A1C
+   429 0001:00002A24   431 0001:00002A2F   432 0001:00002A3F   433 0001:00002A4E
+   434 0001:00002A52   435 0001:00002A64   429 0001:00002A65   436 0001:00002A68
+   478 0001:00002AB0   479 0001:00002ACE   480 0001:00002AD1   481 0001:00002AE6
+   482 0001:00002B0A   480 0001:00002B0B   483 0001:00002B0E   486 0001:00002B34
+   487 0001:00002B4D   488 0001:00002B6B   489 0001:00002B77   490 0001:00002B80
+   497 0001:00002BB0   498 0001:00002BD4   499 0001:00002BE7   500 0001:00002BF8
+   501 0001:00002C0A   502 0001:00002C17   506 0001:00002D48   507 0001:00002D4B
+   508 0001:00002D57   518 0001:00002D5C   519 0001:00002D78   520 0001:00002D80
+   521 0001:00002D9A   522 0001:00002DA5   523 0001:00002DB2   524 0001:00002DD7
+   526 0001:00002DE0   527 0001:00002DEA   531 0001:00002E2C   532 0001:00002E34
+   533 0001:00002E40   534 0001:00002E69   537 0001:00002E70   538 0001:00002E78
+   539 0001:00002E84   540 0001:00002EAD   626 0001:00003054   631 0001:0000305D
+   632 0001:0000306E   633 0001:0000307A   634 0001:00003083   635 0001:00003094
+   636 0001:000030A0   637 0001:000030A9   638 0001:000030BC   640 0001:000030C3
+   647 0001:000030C4   648 0001:000030C9   650 0001:000030CE   652 0001:000030D2
+   653 0001:000030E3   652 0001:000030F2   655 0001:000030F5   657 0001:000030FC
+   661 0001:00003100   662 0001:0000310C   663 0001:00003118   664 0001:00003121
+   665 0001:0000312B   666 0001:00003132   696 0001:00003134   697 0001:0000314B
+   698 0001:00003150   699 0001:0000315A   700 0001:00003169   702 0001:0000316D
+   703 0001:0000317D   706 0001:0000318E   707 0001:0000319C   708 0001:000031A9
+   741 0001:000031D0   742 0001:000031E7   743 0001:000031F0   744 0001:000031FA
+   745 0001:00003209   747 0001:0000320D   748 0001:0000321B   749 0001:00003228
+   751 0001:00003233   752 0001:0000323A   755 0001:00003246   764 0001:0000326C
+   765 0001:00003283   766 0001:0000328C   779 0001:00003296   780 0001:000032A5
+   782 0001:000032A9   783 0001:000032B5   784 0001:000032BA   787 0001:000032C6
+   788 0001:000032D3   797 0001:000032F8   798 0001:0000330F   799 0001:00003311
+   801 0001:0000331A   812 0001:00003324   813 0001:00003333   815 0001:00003337
+   816 0001:00003345   818 0001:0000334E   898 0001:00003374   899 0001:0000337D
+   900 0001:00003388   901 0001:0000339E   902 0001:000033A7   905 0001:000033AC
+   906 0001:000033AF   907 0001:000033C0   908 0001:000033C7   914 0001:000033CC
+   915 0001:000033E2   916 0001:000033E6   917 0001:000033FC   918 0001:00003401
+   919 0001:0000340C   920 0001:0000341B   921 0001:00003429   924 0001:00003470
+   925 0001:0000347B   926 0001:0000348A   927 0001:00003496   931 0001:000034A4
+   932 0001:000034A5   933 0001:000034AD   997 0001:000034B0   998 0001:000034B3
+   999 0001:000034BE  1002 0001:000034C4  1003 0001:000034D9  1004 0001:000034E8
+  1005 0001:000034F3  1008 0001:00003510  1009 0001:0000351B  1010 0001:00003527
+  1011 0001:0000352F  1019 0001:00003540  1020 0001:0000354F  1021 0001:00003552
+  1023 0001:00003567  1024 0001:00003578  1025 0001:00003586  1027 0001:0000358B
+  1021 0001:0000358C  1028 0001:0000358F  1032 0001:00003598  1033 0001:000035A0
+  1039 0001:000035A4  1040 0001:000035AB  1041 0001:000035B6  1042 0001:000035BC
+  1043 0001:000035C4  1046 0001:000035C8  1047 0001:000035CB  1048 0001:000035D6
+  1068 0001:0000361C  1069 0001:0000361F  1070 0001:00003628  1071 0001:00003634
+  1074 0001:00003638  1075 0001:0000363E  1077 0001:00003642  1078 0001:00003644
+  1079 0001:0000365B  1080 0001:00003660  1082 0001:00003664  1087 0001:00003668
+  1088 0001:0000366E  1107 0001:00003670  1108 0001:00003675  1109 0001:0000367A
+  1110 0001:00003683  1111 0001:0000368A  1112 0001:0000368E  1114 0001:00003699
+  1115 0001:0000369C  1117 0001:000036A4  1118 0001:000036D0  1119 0001:000036D5
+  1120 0001:000036E0  1122 0001:000036EA  1123 0001:000036EC  1124 0001:00003707
+  1125 0001:0000371B  1126 0001:0000371D  1127 0001:00003725  1129 0001:0000372D
+  1131 0001:00003746  1132 0001:00003761  1134 0001:0000376B  1135 0001:00003779
+  1137 0001:00003783  1138 0001:00003785  1139 0001:000037A5  1140 0001:000037B9
+  1141 0001:000037BB  1142 0001:000037C3  1144 0001:000037C7  1146 0001:000037D5
+  1147 0001:000037E2  1148 0001:0000380B  1149 0001:00003821  1151 0001:0000382E
+  1152 0001:00003831  1154 0001:00003833  1144 0001:00003834  1157 0001:00003844
+  1160 0001:00003855  1129 0001:00003858  1162 0001:00003861  1163 0001:0000386D
+  1164 0001:00003879  1168 0001:000038AC  1169 0001:000038C0  1170 0001:000038D4
+  1174 0001:000038F8  1175 0001:00003901  1180 0001:00003904  1181 0001:00003907
+  1182 0001:0000391A  1187 0001:00003920  1188 0001:00003924  1189 0001:0000392F
+  1194 0001:00003934  1195 0001:00003939  1196 0001:00003946  1206 0001:0000394C
+  1207 0001:00003967  1208 0001:00003979  1209 0001:0000397E  1210 0001:00003996
+  1211 0001:000039B9  1212 0001:000039CB  1214 0001:000039FC  1215 0001:00003A18
+  1216 0001:00003A22  1217 0001:00003A2B  1218 0001:00003A34  1219 0001:00003A40
+  1220 0001:00003A4C  1237 0001:00003A74  1238 0001:00003AA0  1239 0001:00003AA7
+  1240 0001:00003ABA  1242 0001:00003AC2  1243 0001:00003ACC  1244 0001:00003ADA
+  1245 0001:00003AF0  1246 0001:00003B06  1249 0001:00003B51  1250 0001:00003B6B
+  1251 0001:00003B79  1252 0001:00003B83  1254 0001:00003B99  1257 0001:00003BA9
+  1269 0001:00003C24  1270 0001:00003C40  1271 0001:00003C50  1273 0001:00003C5F
+  1274 0001:00003C6C  1275 0001:00003C78  1276 0001:00003C7D  1277 0001:00003C91
+  1278 0001:00003CB0  1279 0001:00003CBE  1284 0001:00003D04  1285 0001:00003D20
+  1286 0001:00003D2A  1287 0001:00003D34  1288 0001:00003D3E  1289 0001:00003D4B
+  1290 0001:00003D58  1292 0001:00003D80  1293 0001:00003DAB  1294 0001:00003DC1
+  1295 0001:00003DD7  1296 0001:00003DD9  1297 0001:00003DE1  1298 0001:00003DE5
+  1300 0001:00003DED  1301 0001:00003DF5  1302 0001:00003DF9  1304 0001:00003E01
+  1305 0001:00003E09  1306 0001:00003E0D  1308 0001:00003E15  1309 0001:00003E1D
+  1313 0001:00003E1F  1320 0001:00003E48  1321 0001:00003E7C  1322 0001:00003EA1
+  1324 0001:00003EBD  1325 0001:00003EC8  1326 0001:00003ECE  1327 0001:00003EE6
+  1328 0001:00003EFE  1329 0001:00003F0C  1330 0001:00003F30  1332 0001:00003F40
+  1331 0001:00003F47  1333 0001:00003F77  1335 0001:00003FA4  1338 0001:00003FC1
+  1340 0001:00003FD1  1378 0001:00004084  1379 0001:00004096  1380 0001:0000409D
+  1381 0001:000040A4  1383 0001:000040BD  1384 0001:000040C9  1385 0001:000040D0
+  1386 0001:000040DB  1388 0001:000040EA  1390 0001:00004101  1392 0001:00004148
+  1393 0001:00004154  1394 0001:00004189  1397 0001:0000418B  1386 0001:0000418E
+  1399 0001:00004195  1405 0001:000041A0  1407 0001:000041BE
+
+Line numbers for VAUtils(..\VA\VAUtils.pas) segment .itext
+
+  1401 0002:000000DC  1402 0002:000000F6  1404 0002:000000FB
+
+Line numbers for HRBuffers(HRBuffers.pas) segment .text
+
+   137 0001:00004504   138 0001:00004510   139 0001:00004515   140 0001:0000451A
+   143 0001:00004530   144 0001:0000453B   145 0001:00004542   146 0001:0000454E
+   151 0001:0000455C   153 0001:00004562   155 0001:00004568   157 0001:0000456C
+   159 0001:00004573   160 0001:00004578   165 0001:0000457C   166 0001:0000457E
+   171 0001:00004580   175 0001:00004584   176 0001:00004589   179 0001:0000458F
+   180 0001:00004594   182 0001:000045A1   184 0001:000045A8   191 0001:000045AC
+   192 0001:000045B3   195 0001:000045B9   196 0001:000045C3   197 0001:000045CC
+   198 0001:000045D7   199 0001:000045E3   200 0001:000045E6   201 0001:000045EB
+   203 0001:000045F2   207 0001:000045F8   208 0001:000045FB   211 0001:00004602
+   212 0001:0000460B   213 0001:00004610   215 0001:00004615   222 0001:00004618
+   223 0001:0000461A   229 0001:0000461C   230 0001:0000462E   231 0001:00004637
+   232 0001:0000463B   236 0001:00004658   237 0001:00004663   238 0001:0000466F
+   243 0001:00004680   244 0001:00004684   249 0001:00004688   252 0001:0000468D
+   253 0001:00004694   257 0001:0000469B   258 0001:0000469D   260 0001:000046A1
+   264 0001:000046A4   265 0001:000046A5   268 0001:000046AA   269 0001:000046B0
+   273 0001:000046B6   275 0001:000046BA   280 0001:000046BC   283 0001:000046C4
+   284 0001:000046CB   285 0001:000046CE   289 0001:000046D5   290 0001:000046D7
+   292 0001:000046DB   296 0001:000046E0   297 0001:000046E1   300 0001:000046E9
+   301 0001:000046EF   302 0001:000046F2   306 0001:000046F8   308 0001:000046FC
+   314 0001:00004700   315 0001:00004708   316 0001:00004729   322 0001:00004730
+   323 0001:00004738   324 0001:0000475E   329 0001:00004764   330 0001:00004767
+   336 0001:00004768   337 0001:0000476E   338 0001:00004775   342 0001:0000477A
+   343 0001:00004786   347 0001:0000478D   349 0001:00004791   353 0001:00004794
+   354 0001:00004797   355 0001:0000479E   359 0001:000047A0   360 0001:000047B1
+   369 0001:000047C8   370 0001:000047DA   371 0001:000047E3   372 0001:000047E8
+   373 0001:000047EF   377 0001:0000480C   378 0001:00004817   379 0001:00004823
+   383 0001:00004834   384 0001:00004838   387 0001:0000483D   388 0001:00004842
+   389 0001:0000484B   391 0001:00004852   396 0001:00004858   397 0001:0000485C
+   401 0001:00004860   402 0001:00004867   405 0001:0000486C   411 0001:0000487F
+   412 0001:0000488C   413 0001:0000489A   416 0001:0000489D   417 0001:000048A7
+   422 0001:000048AD   423 0001:000048AF   425 0001:000048B3   430 0001:000048B8
+   440 0001:000048BC   441 0001:000048CE   443 0001:000048D7   444 0001:000048E3
+   445 0001:000048EA   449 0001:00004904   450 0001:0000490F   451 0001:0000491B
+   459 0001:0000492C   461 0001:00004933   463 0001:00004951   465 0001:00004956
+   466 0001:00004958   469 0001:0000495D   471 0001:00004964   472 0001:0000496A
+   466 0001:0000496B   475 0001:00004970   480 0001:000049C0   481 0001:000049C5
+   485 0001:000049C8   486 0001:000049CE   487 0001:000049DC   498 0001:000049E0
+   499 0001:000049F0   502 0001:000049FC   503 0001:00004A03   506 0001:00004A09
+   508 0001:00004A0D   513 0001:00004A11   514 0001:00004A16   515 0001:00004A1D
+   516 0001:00004A26   518 0001:00004A31   523 0001:00004A3F   525 0001:00004A46
+   527 0001:00004A51   528 0001:00004A5B   529 0001:00004A61   530 0001:00004A6B
+   534 0001:00004A76   535 0001:00004A7F   539 0001:00004A88   540 0001:00004A8E
+   541 0001:00004A9D   552 0001:00004AA0   554 0001:00004AAC   557 0001:00004AB1
+   561 0001:00004AB5   563 0001:00004ABC   564 0001:00004AC2   558 0001:00004AC3
+   568 0001:00004AD1   571 0001:00004AD5   573 0001:00004AE2   575 0001:00004AEB
+   577 0001:00004AF0   578 0001:00004AF3   568 0001:00004AF4   582 0001:00004AF8
+   583 0001:00004AFD   586 0001:00004B0C   589 0001:00004B16   590 0001:00004B1C
+   591 0001:00004B22   592 0001:00004B26   596 0001:00004B2D   598 0001:00004B35
+   599 0001:00004B3A   609 0001:00004B40
+
+Line numbers for HRBuffers(HRBuffers.pas) segment .itext
+
+   612 0002:00000114
+
+Line numbers for HRParser(HRParser.pas) segment .text
+
+   103 0001:00004C84   104 0001:00004C97   105 0001:00004CA8   106 0001:00004CB4
+   107 0001:00004CC5   108 0001:00004CD1   109 0001:00004CD6   113 0001:00004CF4
+   114 0001:00004CFF   115 0001:00004D07   116 0001:00004D0C   117 0001:00004D14
+   118 0001:00004D19   119 0001:00004D25   124 0001:00004D34   125 0001:00004D3A
+   130 0001:00004D3C   131 0001:00004D44   136 0001:00004D48   137 0001:00004D4D
+   142 0001:00004D50   143 0001:00004D53   144 0001:00004D59   148 0001:00004D5C
+   149 0001:00004D62   150 0001:00004D67   151 0001:00004D6C   152 0001:00004D71
+   155 0001:00004D7D   156 0001:00004D92   157 0001:00004D95   153 0001:00004D9F
+   159 0001:00004DB0   163 0001:00004DB4   164 0001:00004DB7   167 0001:00004DC3
+   168 0001:00004DD7   169 0001:00004DD9   171 0001:00004DE0   172 0001:00004DE3
+   165 0001:00004DED   174 0001:00004DF9   178 0001:00004DFC   179 0001:00004DFF
+   180 0001:00004E09   183 0001:00004E15   184 0001:00004E29   185 0001:00004E2C
+   190 0001:00004E32   192 0001:00004E36   197 0001:00004E38   198 0001:00004E3F
+   200 0001:00004E47   203 0001:00004E4E   205 0001:00004E51   206 0001:00004E57
+   207 0001:00004E5D   210 0001:00004E66   212 0001:00004E6C   213 0001:00004E76
+   214 0001:00004E7F   215 0001:00004E89   221 0001:00004E90   222 0001:00004EA2
+   223 0001:00004EAB   227 0001:00004EC8   228 0001:00004ED3   229 0001:00004EDF
+   233 0001:00004EF0   237 0001:00004EF3   239 0001:00004F01   240 0001:00004F15
+   243 0001:00004F1A   244 0001:00004F2E   241 0001:00004F31   246 0001:00004F3F
+   247 0001:00004F43   251 0001:00004F45   253 0001:00004F63   254 0001:00004F77
+   257 0001:00004F7A   261 0001:00004FBC   262 0001:00004FD0   267 0001:00004FD5
+   269 0001:00004FF6   270 0001:0000500A   273 0001:0000500D   278 0001:00005012
+   280 0001:00005033   281 0001:00005047   255 0001:0000504A   291 0001:0000504F
+   292 0001:00005053   296 0001:00005055   301 0001:00005090   302 0001:000050A4
+   305 0001:000050A9   306 0001:000050BD   307 0001:000050C0   303 0001:000050C4
+   314 0001:000050D6   315 0001:000050EA   316 0001:000050ED   311 0001:000050F1
+   319 0001:0000512E   322 0001:00005130   326 0001:00005137
+
+Line numbers for HRParser(HRParser.pas) segment .itext
+
+   329 0002:0000011C
+
+Line numbers for HRParserPas(HRParserPas.pas) segment .text
+
+    83 0001:000052B0    84 0001:000052C2    85 0001:000052CB    89 0001:000052E8
+    90 0001:000052F3    91 0001:000052FF    95 0001:00005310    99 0001:00005313
+   102 0001:00005321   105 0001:00005324   108 0001:00005338   109 0001:0000533C
+   113 0001:00005341   115 0001:00005345   116 0001:00005348   120 0001:0000534D
+   121 0001:00005361   122 0001:00005376   103 0001:00005379   130 0001:0000537B
+   133 0001:0000539C   136 0001:000053A0   138 0001:000053AE   139 0001:000053B2
+   141 0001:000053B7   143 0001:000053D4   145 0001:000053D8   146 0001:000053DC
+   148 0001:000053E1   149 0001:000053F5   150 0001:0000540A   134 0001:0000540D
+   156 0001:0000540F   159 0001:0000542C   160 0001:00005430   163 0001:00005436
+   164 0001:0000544A   165 0001:0000545F   161 0001:00005462   167 0001:00005470
+   171 0001:00005472   174 0001:00005480   177 0001:00005483   180 0001:0000549F
+   181 0001:000054A3   185 0001:000054A5   186 0001:000054A9   190 0001:000054AB
+   191 0001:000054BF   175 0001:000054C2   196 0001:000054C4   197 0001:000054C7
+   201 0001:000054C9   204 0001:000054D7   207 0001:000054DC   208 0001:000054F0
+   205 0001:000054F3   210 0001:00005503   211 0001:00005507   215 0001:00005509
+   218 0001:00005517   221 0001:0000551C   222 0001:00005530   219 0001:00005533
+   224 0001:0000554F   225 0001:00005553   228 0001:00005555   232 0001:0000555C
+
+Line numbers for HRParserPas(HRParserPas.pas) segment .itext
+
+   235 0002:00000124
+
+Line numbers for .VAShared2006(C:\CPRSDev\cprs\main\VA\VAShared2006.dpk) segment .itext
+
+    40 0002:0000012C
+
+Bound resource files
+
+VAShared2006.res
+VAShared2006.drf
+
+
+Program entry point at 0002:0000012C

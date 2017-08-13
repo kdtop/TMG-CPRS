@@ -1,0 +1,123 @@
+EXAMPLE script
+------------------------------------------------------
+Number 1:{FLD:NUM 0-10}
+Number 2:{FLD:NUM 0-10}
+Sum: {FLD:00 EDIT BOX 12}
+Mult: {FLD:00 EDIT BOX 12}
+
+<SCRIPT>
+function handleOnChange(elem) {
+  alert('here!');
+  var dlgHandle = getDlgHandle(elem);  //getDlgHandle(elem) is provided by CPRS
+  DoMath(dlgHandle);
+}
+
+function handleOnInsert(dlgHandle) {
+  alert('inserted!');
+}
+
+function DoMath(dlgHandle) {
+  var Ctrl1 = getCtrlVal(dlgHandle, 1); //get value of 1st control, getCtrlVal(elem) is provided by CPRS
+  var Ctrl2 = getCtrlVal(dlgHandle, 2); //get value of 2nd control, getCtrlVal(elem) is provided by CPRS
+  var N1 = parseInt(Ctrl1);
+  var N2 = parseInt(Ctrl2);
+  COMMON_DoSum(dlgHandle, N1, N2);
+  COMMON_DoMult(dlgHandle, N1, N2);
+}
+
+function COMMON_DoSum(dlgHandle, N1, N2) {  //Because of COMMON_ prefix, all instances of dlg will use this fn
+  var Result = N1+ N2;
+  setCtrlVal(dlgHandle, 3, Result);  //set value of 3rd control, setCtrlVal(elem) is provided by CPRS
+}
+
+function COMMON_DoMult(dlgHandle, N1, N2) {  //Because of COMMON_ prefix, all instances of dlg will use this fn
+  var Result = N1 * N2;
+  setCtrlVal(dlgHandle, 4, Result);  //set value of 4th control, setCtrlVal(elem) is provided by CPRS
+}
+</SCRIPT>
+
+------------------------------------------------------
+
+<SCRIPT> or {SCRIPT}  is starting mark
+</SCRIPT> or {/SCRIPT} is ending mark
+There should be only ONE such block.
+
+A user may insert many copies of the same template into a single document.
+This could lead to redundant code blocks being inserted, which could cause conflicts and
+make the document larger than is needed.  Below addresses ways to combat this.
+
+User function names will be changed via search-and-replace to namespaced versions.
+E.g. If user has a function called MyFn, then all instances of MyFn will be renamed
+  to pattern MyFn_TMGDlg1  (the number 1 will be different for each different dialog)
+
+If user function name starts with 'COMMON_' then the name will NOT be replaced as above.
+There will be just one copy of this function that would be common, and if there is more
+than one instance of the template added to the document, they would all use the same
+exact function.  In such cases, the user must write the function in a generic way such
+that all instances can share it.
+
+If user wants to have an event handler that will be called with any changes to controls,
+they should include a function named 'handleOnChange' (case sensitivity is important).
+NOTE: the onChange event only occurs after an HTML control loses focus, NOT immediately
+upon change.  This is a limitation of the version of Internet Explorer (6) used by CPRS.
+
+If user wants to have an event handler that will be called upon loading,
+they should include a function named 'handleOnInsert(dlgHandle)' (case sensitivity is important).
+NOTE: the event will fire after the dialog is inserted, but ALSO fires when the
+document is autosaved, and also when other dialogs are inserted.  That is to say
+that if a 2nd dialog is inserted, then the event is again fired for the 1st one
+as well as the 2nd one being called.  Each one does get the relevent dlgHandle
+for its respective dialog.
+                            
+------------------------------------------------------
+Provided functions -- user may depend on them to be present
+
+Overview:
+function getDlgHandle(elem)
+function getCtrlVal(dlgHandle, CtrlNum)
+function setCtrlVal(dlgHandle, CtrlNum, NewValue)
+function isType(obj,typeName)
+function isObj(obj)
+function isStr(s)
+function ensureStr(s)
+function ensureNum(n,DefValue)
+function getAttrib(e,name)
+function getNumAttrib(e,name,DefValue)
+function fireOnChange(elem)
+function indexOf(Arr, Match)
+function trimStr(x)
+function subtractString(S, RemovePartsArr)
+function hasClass(elem, ClassName)
+
+Users should NOT supply their own versions of these functions, or have a differently-purposed function with
+the same name
+
+Details
+-------
+function getDlgHandle(elem)
+  For event handlers, the HTML element generating the event will be passed as parameter "elem".
+  This should be used to retrieve the handle of the entire dialog group via getDlgHandle(elem),
+  which can then be used to access individual HTML controls.
+
+function getCtrlVal(dlgHandle, CtrlNum)
+  CtrlNum is the sequence number for the controls in the template.  The first one is 1, the second is 2, etc.
+  This will get the current value of a particular HTML control in an embedded template dialog.
+
+function setCtrlVal(dlgHandle, CtrlNum, NewValue)
+  CtrlNum is the sequence number for the controls in the template.  The first one is 1, the second is 2, etc.
+  This will set the value of a particular HTML control in an embedded template dialog.
+
+//to-do, finish documentation.
+function isType(obj,typeName)
+function isObj(obj) {return isType(obj,"object");}
+function isStr(s) {return isType(s,"string");}
+function EnsureStr(s) {if (s == null) return ""; return s.toString();}
+function ensureNum(n,DefValue) {
+function getAttrib(e,name) {if (e==null) return ""; return EnsureStr(e.getAttribute(EnsureStr(name)));}
+function getNumAttrib(e,name,DefValue) {return ensureNum(e.getAttribute(name),DefValue);}
+function fireOnChange(elem) {
+function indexOf(Arr, Match) {
+function trimStr(x) {return x.replace(/^\s+|\s+$/gm,'''');}
+function subtractString(S, RemovePartsArr) {
+function hasClass(elem, ClassName) {return (indexOf(elem.className.split(" "), ClassName)!=-1);}
+

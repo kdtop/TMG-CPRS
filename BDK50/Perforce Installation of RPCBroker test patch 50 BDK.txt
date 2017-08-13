@@ -1,0 +1,65 @@
+
+The following are instructions for installing the current test version of the Delphi 2006 RPC Broker BDK: XWB1_1P50.
+
+1.  In Delphi2006, select the menu Component|Install Packages.  Use REMOVE button to remove:
+
+ - Components downloaded from Borland's Web Page
+ - CPRS Custom Controls                                
+ - CPRS Date/Time Dialogs                              
+ - VA Section 508 Accessibility                        
+ - VA Shared Units (no components)                      
+ - VistA RPC Broker
+
+2.  Close Delphi and synch to the MAIN branch.  The following will occur:
+
+ - MAIN\BDK47 directory will be deleted.
+ - MAIN\BDK50 directory will be added.
+ - The following Delphi 2006 Broker packages will be added to the MAIN\PACKAGES directory:
+
+         XWB_D2006.DCP
+         XWB_D2006.BPL
+         XWB_R2006.DCP
+         XWB_R2006.BPL         
+
+ - The following Delphi 10 (2006) Broker packages will be removed from the MAIN\PACKAGES directory:
+
+         XWB_D10.DCP
+         XWB_D10.BPL
+         XWB_R10.DCP
+         XWB_R10.BPL
+         
+ - The following CPRS packages will be updated in the MAIN\PACKAGES and MAIN\CPRS-Lib directories:
+
+         Borland2006.*
+         ORCtrlLib2006.*
+         ORDateLib2006.*
+
+3.  Open the XWB1_1P50T1.zip file in the MAIN\BDK50 directory, and extract or copy the entire folder BDK32P50 to c:\program files\vista, at the same level as the existing BDK32 folder.
+
+4.  Open Delphi 2006 and select the menu Tools|Options, then Environment Options|Delphi Options|Library-Win32.  
+
+5.  In the Library Path click on the ellipsis (...) at the right end and insure that all paths to other instances of the Broker package are removed (or inactivated by adding _x to the end of them), then add:
+    C:Program Files\Vista\BDK32P50\D2006
+    C:Program Files\Vista\BDK32P50\Source
+ 
+6.  In Browsing Path click on the ellipsis (...) at the right end and insure that all paths to other instances of the Broker are removed (or inactivated by adding _x to the end of them), then add C:Program Files\Vista\BDK32P50\Source.
+
+7.  Once the new Library Paths have been entered, select the menu Component|Install Packages. Add, in this order, from the MAIN\PACKAGES directory:
+
+  - XWB_D2006.bpl
+  - Borland2006.bpl
+  - VAShared2006.bpl
+  - ORCtrlLib2006.bpl
+  - ORDateLib2006.bpl
+  - VA508Access2006.bpl
+       
+8.  The Delphi 2006 RPCBroker is now installed and ready for use.  Test your installation as follows:
+
+   - Open the CPRSChart project.
+   - Open file fNoteBD.pas.  The form should correctly display the CPRS date components without any error occurring.
+   - Build the project.  Only the usual hints and warnings should appear, and no errors.
+
+
+
+
+       

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2012/07/27 17:47:51.333.bdsproj,C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\Package1.bdsproj=C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\TSortStringGrid\TSortStringGrid.bdsproj</Transaction>
+    <Transaction>2012/07/27 17:55:21.865.dcp,designide.dcp=</Transaction>
+    <Transaction>2012/07/29 15:21:04.171.bdsproj,C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\TSortStringGrid\TSortStringGrid.bdsproj=C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\TSortStringGrid\TSortStringGridRuntime.bdsproj</Transaction>
+    <Transaction>2012/07/29 15:48:08.578.bdsproj,C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\TSortStringGrid\TSortStringGridRuntime.bdsproj=C:\Documents and Settings\kdtop\My Documents\Borland Studio Projects\TSortStringGrid\TSortStringGrid.bdsproj</Transaction>
+  </Transactions>
+</BorlandProject>

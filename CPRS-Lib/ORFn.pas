@@ -65,7 +65,10 @@ function CharInSet(AChar: Char; ASetOfChar: TCharacterSet) : Boolean;
 
 { Date/Time functions }
 function DateTimeToFMDateTime(ADateTime: TDateTime): TFMDateTime;
+function DateTimeToFMDTStr(ADateTime: TDateTime): string;
 function FMDateTimeToDateTime(ADateTime: TFMDateTime): TDateTime;
+function FMDTStrToDateTime(FMDTStr: String): TDateTime;
+function FMDTToStr(ADateTime: TFMDateTime): string;
 function FMDateTimeOffsetBy(ADateTime: TFMDateTime; DaysDiff: Integer): TFMDateTime;
 function FormatFMDateTime(AFormat: string; ADateTime: TFMDateTime): string;
 function FormatFMDateTimeStr(const AFormat, ADateTime: string): string;
@@ -285,6 +288,18 @@ begin
   Result :=  DatePart + (TimePart / 1000000);
 end;
 
+function DateTimeToFMDTStr(ADateTime: TDateTime): string;
+//kt added 2/18
+//Return string form of DateTime converted to FMDT, or '' if invalid date.
+begin
+  if ADateTime > 0 then begin
+    Result := FloatToStr(DateTimeToFMDateTime(ADateTime));
+  end else begin
+    Result := ''
+  end;
+end;
+
+
 function FMDateTimeToDateTime(ADateTime: TFMDateTime): TDateTime;
 { converts a Fileman date/time (type double) to a Delphi date/time }
 var
@@ -303,6 +318,29 @@ begin
                       StrToInt(Copy(TimePart, 5, 2)), 0);
   Result := ADate + ATime;
 end;
+
+function FMDTStrToDateTime(FMDTStr: String): TDateTime;
+//kt added 2/18
+var  FMDT : TFMDateTime;
+begin
+  if IsFMDateTime(FMDTStr) then begin
+    FMDT := StrToFloat(FMDTStr);
+    Result := FMDateTimeToDateTime(FMDT);
+  end else begin
+    Result := 0;
+  end;
+end;
+
+function FMDTToStr(ADateTime: TFMDateTime): string;
+//kt added 2/18
+begin
+  if ADateTime > 0 then begin
+    Result := FloatToStr(ADateTime);
+  end else begin
+    Result := '';
+  end;
+end;
+
 
 function FMDateTimeOffsetBy(ADateTime: TFMDateTime; DaysDiff: Integer): TFMDateTime;
 { adds / subtracts days from a Fileman date/time and returns the offset Fileman date/time }

@@ -312,6 +312,25 @@ implementation
     Result := IsFunction(FnName);
   end;
 
+  function IsText(S : string) : boolean;
+  //I will define as 'text' if leads with Alpha character (non-numeric)
+  //   'Happy'                      TRUE
+  //   'Happy & satisfied'          TRUE
+  //   'Bus Number 1234'            TRUE
+  //   '1 -- Yellow'                FALSE
+  //   '(Happy)'                    FALSE
+  var i : integer;
+  begin
+    Result := true; //default;
+    S := Trim(S);
+    if Length(S) = 0 then exit;  //i.e. '' is considered text
+    i := 1;
+    //'-543' is numberic, but '-Buy More Chips' is text.
+    //  so look at character after '-' when found.
+    if (S[i] = '-') and (length(s) > 1) then inc(i);
+    Result := not (S[i] in ['0'..'9','(','-']);
+  end;
+
   function JustNumbers(S : string) : string;
   //Returns just initial numeric part of string.
   //If result would be '', then '0' returned
@@ -336,7 +355,7 @@ implementation
     if (Result='') or (Result='.') then Result := '0';
   end;
 
-
+{
   function StrToReal(Num : string; var ErrStr : string) : real;
   //Will force non-numeric strings into numeric, or 0 if completely alpha
   begin
@@ -344,13 +363,31 @@ implementation
     Try
       Result := StrToFloat(Num);
     except
-      Num := JustNumbers(Num);
-      try
-        Result := StrToFloat(Num);
-      except
-        ErrStr := 'Error converting ''' + Num + ''' to a number.';
+      on E : Exception do begin
+        Num := JustNumbers(Num);
+        try
+          Result := StrToFloat(Num);
+        except
+          ErrStr := 'Error converting ''' + Num + ''' to a number.';
+        end;
       end;
     end;
+  end;
+
+}
+  function StrToReal(Num : string; var ErrStr : string) : real;
+  //Will force non-numeric strings into numeric, or 0 if completely alpha
+  const INVALID_NUM = -1234567.8901;
+        PRECISION = 0.00001;
+  begin
+    Result := 0;
+    Result := StrToFloatDef(Num, INVALID_NUM);
+    if Abs(Result - INVALID_NUM) > PRECISION then exit;
+    if FloatToStr(INVALID_NUM) = Num then exit; //input was same as INVALID_NUM
+    Num := JustNumbers(Num);
+    Result := StrToFloatDef(Num, INVALID_NUM);
+    if Result <> INVALID_NUM then exit;
+    ErrStr := 'Error converting ''' + Num + ''' to a number.';
   end;
 
 
@@ -567,7 +604,8 @@ implementation
   begin
     P1 := 1;
     FindPairedChars(Expr, ErrStr, P1,P2, OpenChar);
-    Result := MidStr(Expr,P1, P2);
+    //kt original, bad --> Result := MidStr(Expr,P1, P2);
+    Result := MidStr(Expr,P1, P2-P1+1); //kt 2/2018
     Expr := Trim(MidStr(Expr, P2+1,length(Expr)));
   end;
 
@@ -778,6 +816,7 @@ implementation
   end;
 
   procedure SplitBoolExpr(Expr : string; var BExpr1, BExpr2, Oper, ErrStr : string);
+  //kt Modified.  Several apparent bugs fixed  2/2018
 
     function GetWordOper(Name : string; var Expr : string;
                          var i : integer;
@@ -806,8 +845,16 @@ implementation
     while (i <= length(Expr)) do begin  //find first part of boolean expression
       if Expr[i] = '(' then begin
         SubExpr := GetPairedParentheses(Expr, ErrStr);   if ErrStr <> '' then exit;
+        i := 1; //Expr is remainder string, so need to start set i index back to beginning of shorter string.
         SubExpr := MidStr(SubExpr,2,length(SubExpr)-2);
-        BExpr1 := BExpr1 + EvalExpression (SubExpr, ErrStr);if ErrStr <> '' then exit;
+        //kt BExpr1 := BExpr1 + EvalExpression (SubExpr, ErrStr);if ErrStr <> '' then exit;
+        if UpperCase(BExpr1) <> 'TEXT' then begin
+          SubExpr := EvalExpression (SubExpr, ErrStr);
+          if ErrStr <> '' then exit;
+          BExpr1 := BExpr1 + '(' + SubExpr + ')';  //kt
+        end else begin
+          BExpr1 := SubExpr;  //kt
+        end;
       end else if Expr[i] in ['&','!','''','>','<','=','A','O','N'] then begin
         break;
       end else begin
@@ -815,13 +862,19 @@ implementation
         inc(i);
       end;
     end;
-    if BExpr1 = Expr then begin
+    //kt if BExpr1 = Expr then begin
+    if BExpr1 = SaveExpr then begin //kt
       ErrStr := '"' + Expr + '" is not a logical expression';
       exit;
     end;
-    if Trim(BExpr1) = '' then BExpr1 := '0';
-    if Pos('(',BExpr1)=0 then BExpr1 := JustNumbers(BExpr1);
-    BExpr1 := EvalExpression (BExpr1, ErrStr);if ErrStr <> '' then exit;
+    BExpr1 := Trim(BExpr1);
+    if not IsText(BExpr1) then begin
+      if Pos('(',BExpr1)=0 then BExpr1 := JustNumbers(BExpr1);
+      BExpr1 := EvalExpression (BExpr1, ErrStr);
+      if ErrStr <> '' then exit;
+    end else begin
+      if BExpr1 = '''''' then BExpr1 := '';
+    end;
     OperDone := false;
     while (i <= length(Expr)) and not OperDone do begin  //find boolean operator
       if Expr[i]='A' then begin
@@ -841,14 +894,23 @@ implementation
     end;
     //Now get second comparator of boolean expression
     SubExpr := Trim(MidStr(Expr,i,length(Expr)));
-    if SubExpr = '' then SubExpr := '0';
-    if SubExpr[1] = '(' then begin
+    if SubExpr = '''''' then SubExpr := '';
+    if (length(SubExpr)> 0) and (SubExpr[1] = '(') then begin
       SubExpr := GetPairedParentheses(SubExpr, ErrStr);   if ErrStr <> '' then exit;
       SubExpr := MidStr(SubExpr,2,length(SubExpr)-2);
+    end else if IsText(SubExpr) and IsText(BExpr1) then begin
+      //Do nothing, leave SubExpr as is.
+      BExpr2 := SubExpr;  //kt
+      exit;               //kt
     end else if Pos('(',SubExpr)=0 then begin
+      if SubExpr = '' then SubExpr := '0';
       SubExpr := JustNumbers(SubExpr);
     end;
+    if SubExpr = '' then SubExpr := '0';
     BExpr2 := EvalExpression (SubExpr, ErrStr);if ErrStr <> '' then exit;
+    //------------
+    if BExpr1 = '' then BExpr1 := '0';
+    if BExpr2 = '' then BExpr2 := '0';
   end;
 
 
@@ -1129,9 +1191,11 @@ implementation
   function FnBOOL(ParamSL : TStringList; var ErrStr : string) : string;
   //Assumptions: ParamSL defined, and has at least 1 parameter.
   //Returns numeric string (0 or 1)
+  //2/2018 modifying to allow boolean string comparison, e.g. 'Happy' <> 'Sad'
 
   var Val1S, Val2S : string;
-      Val1, Val2 : real;
+      //kt Val1, Val2 : real;
+      Val1, Val2 : variant; //kt
       Expr : string;
       Oper : string;
       B1,B2, ResultB : boolean;
@@ -1151,10 +1215,22 @@ implementation
       Expr := ParamSL.Strings[2];
       Val2S := EvalExpression (Expr, ErrStr);   if ErrStr <> '' then exit;
     end;
-    Val1 := StrToReal(Val1S, ErrStr);         if ErrStr <> '' then exit;
-    Val2 := StrToReal(Val2S, ErrStr);         if ErrStr <> '' then exit;
-    B1 := (Val1 <> 0);
-    B2 := (val2 <> 0);
+    if IsText(Val1S) then begin
+      Val1 := Val1S;  //Val1 is type variant
+      B1 := false;
+    end else begin
+      Val1 := StrToReal(Val1S, ErrStr);
+      if ErrStr <> '' then exit;
+      B1 := (Val1 <> 0);
+    end;
+    if IsText(Val2S) then begin
+      Val2 := Val2S;  //Val2 is type variant
+      B2 := false;
+    end else begin
+      Val2 := StrToReal(Val2S, ErrStr);
+      if ErrStr <> '' then exit;
+      B2 := (val2 <> 0);
+    end;
 
     if (Oper='&') or (Oper='AND') then       ResultB := B1 and B2
     else if (Oper='!') or (Oper='OR') then   ResultB := B1 or B2
@@ -1441,5 +1517,4 @@ implementation
 
 begin
 end.
-
 

@@ -36,6 +36,7 @@ implementation
 
 uses rCore;
 
+
 const
   TX_NO_TEXT = 'Some text must be entered.';
   TX_STARTDT = 'Unable to interpret start date.';
@@ -125,7 +126,8 @@ procedure TfrmODText.cmdAcceptClick(Sender: TObject);
 begin
   inherited;
   Application.ProcessMessages; //CQ 14670
-  memText.Lines.Text := Trim(memText.Lines.Text); //CQ 14670
+  //TMG added if below  original -> memText.Lines.Text := Trim(memText.Lines.Text); //CQ 14670
+  if assigned(memText) then memText.Lines.Text := Trim(memText.Lines.Text); //CQ 14670
 end;
 
 procedure TfrmODText.ControlChange(Sender: TObject);

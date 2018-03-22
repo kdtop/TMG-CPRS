@@ -9,8 +9,8 @@ inherited frmReports: TfrmReports
   Menu = mnuMainMenu
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 733
-  ExplicitHeight = 765
+  ExplicitWidth = 725
+  ExplicitHeight = 761
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -32,7 +32,7 @@ inherited frmReports: TfrmReports
     Width = 119
     Height = 697
     ExplicitWidth = 119
-    ExplicitHeight = 677
+    ExplicitHeight = 697
     object Splitter1: TSplitter
       Left = 0
       Top = 259
@@ -93,7 +93,6 @@ inherited frmReports: TfrmReports
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
-      ExplicitHeight = 312
       object lblQualifier: TOROffsetLabel
         Left = 0
         Top = 0
@@ -132,7 +131,6 @@ inherited frmReports: TfrmReports
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2'
-        ExplicitHeight = 286
       end
       object lstQualifier: TORListBox
         Left = 0
@@ -151,7 +149,6 @@ inherited frmReports: TfrmReports
         LongList = False
         Pieces = '2,3'
         TabPositions = '10'
-        ExplicitHeight = 286
       end
       object pnlViews: TORAutoPanel
         Left = 0
@@ -162,7 +159,6 @@ inherited frmReports: TfrmReports
         BevelOuter = bvNone
         TabOrder = 3
         Visible = False
-        ExplicitHeight = 286
         object pnlTopViews: TPanel
           Left = 0
           Top = 0
@@ -234,7 +230,6 @@ inherited frmReports: TfrmReports
           LongList = False
           Pieces = '2'
           TabPositions = '10'
-          ExplicitHeight = 206
         end
       end
     end
@@ -287,7 +282,7 @@ inherited frmReports: TfrmReports
     Height = 697
     ExplicitLeft = 123
     ExplicitWidth = 594
-    ExplicitHeight = 677
+    ExplicitHeight = 697
     object sptHorzRight: TSplitter
       Left = 0
       Top = 177
@@ -378,7 +373,6 @@ inherited frmReports: TfrmReports
       Height = 516
       Align = alClient
       TabOrder = 2
-      ExplicitHeight = 496
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 31
@@ -639,6 +633,11 @@ inherited frmReports: TfrmReports
       Caption = 'Select All From Table'
       ShortCut = 16449
       OnClick = SelectAll1Click
+    end
+    object mnuCopyResultsTable: TMenuItem
+      Caption = 'Copy Results Table'
+      ShortCut = 16468
+      OnClick = mnuCopyResultsTableClick
     end
   end
   object imgLblImages: TVA508ImageListLabeler

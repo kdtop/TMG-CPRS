@@ -15,6 +15,7 @@ inherited frmODBase: TfrmODBase
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
+  OnShow = FormShow
   ExplicitWidth = 528
   ExplicitHeight = 275
   PixelsPerInch = 96
@@ -91,6 +92,14 @@ inherited frmODBase: TfrmODBase
       OnMouseMove = pnlMessageMouseMove
     end
   end
+  object chkCopyWhenAccepted: TCheckBox [4]
+    Left = 8
+    Top = 153
+    Width = 153
+    Height = 17
+    Caption = 'Copy order when closed'
+    TabOrder = 5
+  end
   inherited amgrMain: TVA508AccessibilityManager
     Data = (
       (
@@ -110,6 +119,9 @@ inherited frmODBase: TfrmODBase
         'Status = stsDefault')
       (
         'Component = frmODBase'
+        'Status = stsDefault')
+      (
+        'Component = chkCopyWhenAccepted'
         'Status = stsDefault'))
   end
 end

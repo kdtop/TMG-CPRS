@@ -55,6 +55,7 @@ type
     DOB: String;
     Sex: String;
     SSNum: String;
+    SequelNum: string;
     PtType: String;
     Veteran: String;
     Address1: string;
@@ -113,6 +114,10 @@ type
     EMailEdit: TEdit;
     Label10: TLabel;
     SkypeEdit: TEdit;
+    SequelAcctEdit: TEdit;
+    Label12: TLabel;
+    procedure SequelAcctEditKeyPress(Sender: TObject; var Key: Char);
+    procedure SequelAcctEditChange(Sender: TObject);
     procedure Zip4EditChange(Sender: TObject);
     procedure StateComboBoxChange(Sender: TObject);
     procedure CityEditChange(Sender: TObject);
@@ -240,6 +245,7 @@ begin
   CityEdit.Color := clWindow;
   StateComboBox.Color := clWindow;
   Zip4Edit.Color := clWindow;
+  SequelAcctEdit.Color := clWindow;
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.ResetFields();
@@ -264,6 +270,7 @@ begin
   CellEdit.Text := '';
   EMailEdit.Text := '';
   SkypeEdit.Text := '';
+  SequelAcctEdit.Text := '';
 end;
 //------------------------------------------------------------------------
 
@@ -338,6 +345,19 @@ begin
   end;  
 end;
 //------------------------------------------------------------------------
+procedure TfrmPtAdd.SequelAcctEditChange(Sender: TObject);
+begin
+  ResetColors;
+  label1.Visible := False;
+  boolDirtyForm := True;
+  ThisPatientInfo.SequelNum := SequelAcctEdit.Text;
+end;
+
+procedure TfrmPtAdd.SequelAcctEditKeyPress(Sender: TObject; var Key: Char);
+begin
+  if not (Key in ['0'..'9']) then Key := #0;
+end;
+
 procedure TfrmPtAdd.SexComboBoxChange(Sender: TObject);
 begin
   ResetColors;
@@ -378,6 +398,12 @@ begin
     label1.Caption := label1.Caption + 'DOB,';
     boolErrorFound := True;
     DOBEdit.Color := clYellow;
+  end;
+
+  if SequelAcctEdit.Text = '' then begin
+    label1.Caption := label1.Caption + 'Sequel,';
+    boolErrorFound := True;
+    SequelAcctEdit.Color := clYellow;
   end;
 
   if SexComboBox.Text = '<Sex>' then begin
@@ -433,6 +459,7 @@ begin
   ThisPatientInfo.Cell := CellEdit.Text;
   ThisPatientInfo.EMail := EMailEdit.Text;
   ThisPatientInfo.Skype := SkypeEdit.Text;
+  ThisPatientInfo.SequelNum := SequelAcctEdit.Text;
 
   if Uppercase(SSNumEdit.Text) = 'P' then begin
     CreatePSSN;
@@ -465,6 +492,7 @@ begin
   Cell := '';
   EMail := '';
   Skype := '';
+  SequelNum := '';
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.SuffixEditChange(Sender: TObject);
@@ -648,6 +676,7 @@ begin
     CheckPost('DOB',DOB);
     CheckPost('SEX',Sex);
     CheckPost('SS_NUM',SSNum);
+    CheckPost('SEQUELNUM',SequelNum);
     CheckPost('ADDRESS1',Address1);
     CheckPost('ADDRESS2',Address2);
     CheckPost('CITY',City);

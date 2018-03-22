@@ -7,7 +7,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, fHSplit, StdCtrls,
   ExtCtrls, Menus, ORCtrls, ComCtrls, ORFn, rOrders, fODBase, uConst, uCore, uOrders,UBACore,
-  UBAGlobals, VA508AccessibilityManager, fBase508Form, Buttons;
+  UBAGlobals, VA508AccessibilityManager, fBase508Form, Buttons,
+  DateUtils;   //TMG   12/14/17
 
 type
   TfrmOrders = class(TfrmHSplit)
@@ -102,6 +103,8 @@ type
     mnuViewCompleted: TMenuItem;
     btnActiveLoad: TSpeedButton;
     btnCompletedLoad: TSpeedButton;
+    popOrderComplete: TMenuItem;
+    procedure popOrderCompleteClick(Sender: TObject);
     procedure btnActiveLoadClick(Sender: TObject);
     procedure btnCompletedLoadClick(Sender: TObject);
     procedure mnuViewCompletedClick(Sender: TObject);
@@ -192,6 +195,9 @@ type
     FDontCheck: boolean;
     FParentComplexOrderID: string;
     FHighContrast2Mode: boolean;
+    LastService: string;   //TMG  12/14/17
+    Color0to6,Color7to12,Color13: TColor;  //TMG 12/14/17
+    FontColor0to6,FontColor7to12,FontColor13: TColor;  //TMG 12/14/17
     function CanChangeOrderView: Boolean;
     function GetEvtIFN(AnIndex: integer): string;
     function DisplayDefaultDlgList(ADest: TORListBox; ADlgList: TStringList): boolean;
@@ -245,6 +251,7 @@ type
     procedure RequestPrint; override;
     procedure InitOrderSheets2(AnItem: string = '');
     procedure SetFontSize( FontSize: integer); override;
+    procedure TMGLoadColors;  //TMG  12/14/17
     property IsDefaultDlg: boolean      read FIsDefaultDlg       write FIsDefaultDlg;
     property SendDelayOrders: Boolean   read FSendDelayOrders    write FSendDelayOrders;
     property NewEvent: Boolean          read FNewEvent           write FNewEvent;
@@ -277,6 +284,7 @@ uses fFrame, fEncnt, fOrderVw, fRptBox, fLkUpLocation, fOrdersDC, fOrdersCV, fOr
      fOMNavA, rCore, fOCSession, fOrdersPrint, fOrdersTS, fEffectDate, fODActive, fODChild,
      fOrdersCopy, fOMVerify, fODAuto, rODBase, uODBase, rMeds,fODValidateAction, fMeds, uInit, fBALocalDiagnoses,
      fODConsult, fClinicWardMeds, fActivateDeactivate, VA2006Utils, rodMeds,
+     uTMGOptions,  //TMG 12/14/17
      VA508AccessibilityRouter, VAUtils;
 
 {$R *.DFM}
@@ -644,6 +652,7 @@ begin
   // 508 black color scheme that causes problems 
   FHighContrast2Mode := BlackColorScheme and (ColorToRGB(clInfoBk) <> ColorToRGB(clBlack));
   AddMessageHandler(lstOrders, RightClickMessageHandler);
+  TMGLoadColors;  //TMG  12/14/17
 end;
 
 procedure TfrmOrders.FormDestroy(Sender: TObject);
@@ -1438,6 +1447,9 @@ var
   ARect: TRect;
   AnOrder: TOrder;
   SaveColor: TColor;
+  Date,Service,Status: string;  //TMG  12/14/17
+  Months: integer;  //TMG 12/14/17
+  ThisDate:TDateTime;  //TMG 1/16/18
 begin
   inherited;
   with lstOrders do
@@ -1447,6 +1459,27 @@ begin
     begin
       Canvas.Brush.Color := clHighlight;
       Canvas.Font.Color := clHighlightText
+    end else begin   //TMG added else for date checking of nursing orders   12/14/17
+      Date := piece(piece2(GetOrderText(TOrder(Items.Objects[Index]), Index, 3),'Start: ',2),' ',1);
+      Service := GetOrderText(TOrder(Items.Objects[Index]), Index, 1);
+      Status := GetOrderText(TOrder(Items.Objects[Index]), Index, 8);
+      if Service<>'' then LastService:=Service;
+      if (LastService='Nursing') and (Status='active') then begin
+        if TryStrToDate(Date,ThisDate) then Months := MonthsBetween(Now,ThisDate)
+        else Months := 0;
+        //if Date<>'' then Months := MonthsBetween(Now,strToDateTime(Date))
+        //else Months := 0;
+        if Months<7 then begin
+          Canvas.Brush.Color := Color0to6;
+          Canvas.Font.Color := FontColor0to6;
+        end else if Months<13 then begin
+          Canvas.Brush.Color := Color7to12;
+          Canvas.Font.Color := FontColor7to12;
+        end else begin
+          Canvas.Brush.Color := Color13;
+          Canvas.Font.Color := FontColor13;
+        end;
+      end;
     end;
     Canvas.FillRect(ARect);
     Canvas.Pen.Color := Get508CompliantColor(clSilver);
@@ -2186,9 +2219,11 @@ var
   DestPtEvtName: string;
   DoesDestEvtOccur: boolean;
   TempEvent: TOrderDelayEvent;
+  SelectedList: TList;  //TMG added
 begin
   inherited;
   if not EncounterPresentEDO then Exit;
+  SelectedList := TList.Create;
   DestPtEvtID := 0;
   DestPtEvtName := '';
   DoesDestEvtOccur := False;
@@ -2201,10 +2236,12 @@ begin
     ValidateSelected(OA_COPY, TX_NO_COPY, TC_NO_COPY);
     if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then
       Exit;
-    with lstOrders do for i := 0 to Items.Count - 1 do
-      if Selected[i] then
+    with lstOrders do for i := 0 to Items.Count - 1 do begin
+      if Selected[i] then begin
+        SelectedList.Add(Items.Objects[i]);  //TMG  1/15/18
         CopyIFNList.Add(TOrder(Items.Objects[i]).ID);
-
+      end;
+    end;
     IsNewEvent := False;
     //if not ShowMsgOn(CopyIFNList.Count = 0, TX_NOSEL, TC_NOSEL) then
     if CopyIFNList.Count > 0 then
@@ -2262,6 +2299,11 @@ begin
       end;
    finally
     uAutoAC := False;
+    if SelectedList.Count>0 then begin
+      ExecuteCompleteOrders(SelectedList);
+      RefreshOrderList(FROM_SERVER);
+    end;
+    SelectedList.Free;
     CopyIFNList.Free;
   end;
 
@@ -3195,6 +3237,13 @@ begin
   btnDelayedOrder.Repaint;
 end;
 
+procedure TfrmOrders.popOrderCompleteClick(Sender: TObject);
+begin
+  inherited;
+  mnuActCompleteClick(Sender);
+  RefreshOrderList(FROM_SERVER);
+end;
+
 procedure TfrmOrders.popOrderPopup(Sender: TObject);
 begin
   inherited;
@@ -3507,6 +3556,17 @@ begin
   if self.sptVert.Top < self.lstSheets.Constraints.MinHeight then
      self.sptVert.Top := self.lstSheets.Constraints.MinHeight + 1;
   
+end;
+
+procedure TfrmOrders.TMGLoadColors;
+  //TMG entire procedure  12/14/17
+begin
+  Color0to6 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Color 0-6','$00FFFF')));
+  Color7to12 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Color 7-12','$FF00FF')));
+  Color13 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Color 13+','$0000FF')));
+  FontColor0to6 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Font Color 0-6','$000000')));
+  FontColor7to12 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Font Color 7-12','$000000')));
+  FontColor13 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Font Color 13+','$000000')));
 end;
 
 initialization

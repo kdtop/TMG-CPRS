@@ -3,7 +3,7 @@ inherited frmFrame: TfrmFrame
   Top = 119
   Caption = 'p'
   ClientHeight = 602
-  ClientWidth = 687
+  ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
   OldCreateOrder = True
@@ -14,14 +14,14 @@ inherited frmFrame: TfrmFrame
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  ExplicitWidth = 695
+  ExplicitWidth = 880
   ExplicitHeight = 656
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
-    Width = 687
+    Width = 872
     Height = 602
     Align = alClient
     Caption = 'No patient is currently selected'
@@ -37,14 +37,14 @@ inherited frmFrame: TfrmFrame
   object pnlPatientSelected: TPanel [1]
     Left = 0
     Top = 0
-    Width = 687
+    Width = 872
     Height = 602
     Align = alClient
     TabOrder = 0
     object bvlPageTop: TBevel
       Left = 1
       Top = 41
-      Width = 685
+      Width = 870
       Height = 1
       Align = alTop
       ExplicitWidth = 674
@@ -52,7 +52,7 @@ inherited frmFrame: TfrmFrame
     object pnlToolbar: TPanel
       Left = 1
       Top = 1
-      Width = 685
+      Width = 870
       Height = 40
       Align = alTop
       BevelOuter = bvNone
@@ -61,7 +61,7 @@ inherited frmFrame: TfrmFrame
       object bvlToolTop: TBevel
         Left = 0
         Top = 0
-        Width = 685
+        Width = 870
         Height = 1
         Align = alTop
         Style = bsRaised
@@ -265,11 +265,11 @@ inherited frmFrame: TfrmFrame
       object pnlPrimaryCare: TKeyClickPanel
         Left = 384
         Top = 1
-        Width = 11
+        Width = 50
         Height = 39
         Cursor = crHandPoint
         Hint = 'Primary Care Team / Primary Care Provider'
-        Align = alClient
+        Align = alLeft
         BevelWidth = 2
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBtnFace
@@ -342,7 +342,7 @@ inherited frmFrame: TfrmFrame
         end
       end
       object pnlReminders: TKeyClickPanel
-        Left = 580
+        Left = 765
         Top = 1
         Width = 35
         Height = 39
@@ -387,7 +387,7 @@ inherited frmFrame: TfrmFrame
         end
       end
       object pnlPostings: TKeyClickPanel
-        Left = 615
+        Left = 800
         Top = 1
         Width = 70
         Height = 39
@@ -455,7 +455,7 @@ inherited frmFrame: TfrmFrame
         end
       end
       object paVAA: TKeyClickPanel
-        Left = 313
+        Left = 498
         Top = 1
         Width = 60
         Height = 39
@@ -505,7 +505,7 @@ inherited frmFrame: TfrmFrame
         end
       end
       object pnlRemoteData: TKeyClickPanel
-        Left = 507
+        Left = 692
         Top = 1
         Width = 73
         Height = 39
@@ -555,8 +555,8 @@ inherited frmFrame: TfrmFrame
           object lblVistaWeb: TLabel
             Left = 2
             Top = 2
-            Width = 46
-            Height = 13
+            Width = 65
+            Height = 14
             Cursor = crHandPoint
             Align = alClient
             Alignment = taCenter
@@ -569,6 +569,8 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
+            ExplicitWidth = 46
+            ExplicitHeight = 13
           end
         end
         object pnlCIRN: TKeyClickPanel
@@ -597,7 +599,7 @@ inherited frmFrame: TfrmFrame
           object lblCIRN: TLabel
             Left = 2
             Top = 2
-            Width = 63
+            Width = 65
             Height = 13
             Align = alClient
             Alignment = taCenter
@@ -611,11 +613,12 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlCIRNClick
+            ExplicitWidth = 63
           end
         end
       end
       object pnlCVnFlag: TPanel
-        Left = 373
+        Left = 558
         Top = 1
         Width = 91
         Height = 39
@@ -623,12 +626,12 @@ inherited frmFrame: TfrmFrame
         TabOrder = 4
         object btnCombatVet: TButton
           Left = 1
-          Top = 20
+          Top = 1
           Width = 89
-          Height = 18
+          Height = 37
           Cursor = crHandPoint
           Hint = 'Click to display combat veteran eligibility details.'
-          Align = alBottom
+          Align = alClient
           Caption = 'CV JAN 30, 2008'
           ParentShowHint = False
           ShowHint = True
@@ -639,7 +642,7 @@ inherited frmFrame: TfrmFrame
           Left = 1
           Top = 1
           Width = 89
-          Height = 19
+          Height = 37
           Cursor = crHandPoint
           Hint = 'Click to display patient record flags.'
           Align = alClient
@@ -655,11 +658,11 @@ inherited frmFrame: TfrmFrame
           OnMouseUp = pnlFlagMouseUp
           object lblFlag: TLabel
             Left = 2
-            Top = 2
-            Width = 25
+            Top = 22
+            Width = 85
             Height = 13
             Cursor = crHandPoint
-            Align = alClient
+            Align = alBottom
             Alignment = taCenter
             Caption = 'Flag'
             Enabled = False
@@ -674,6 +677,7 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlFlagClick
             OnMouseDown = pnlFlagMouseDown
             OnMouseUp = pnlFlagMouseUp
+            ExplicitWidth = 25
           end
         end
       end
@@ -781,7 +785,7 @@ inherited frmFrame: TfrmFrame
         end
       end
       object pnlTimer: TPanel
-        Left = 464
+        Left = 649
         Top = 1
         Width = 43
         Height = 39
@@ -806,11 +810,35 @@ inherited frmFrame: TfrmFrame
           OnClick = btnTimerResetClick
         end
       end
+      object pnlSchedule: TKeyClickPanel
+        Left = 434
+        Top = 1
+        Width = 64
+        Height = 39
+        Cursor = crHandPoint
+        Align = alClient
+        Alignment = taRightJustify
+        BevelEdges = [beLeft]
+        BevelWidth = 2
+        Caption = 'Schedule'
+        Font.Charset = ARABIC_CHARSET
+        Font.Color = clBtnFace
+        Font.Height = -13
+        Font.Name = 'Times New Roman'
+        Font.Style = [fsBold]
+        ParentBackground = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 11
+        TabStop = True
+        OnClick = pnlScheduleClick
+      end
     end
     object stsArea: TStatusBar
       Left = 1
       Top = 580
-      Width = 685
+      Width = 870
       Height = 21
       Panels = <
         item
@@ -838,7 +866,7 @@ inherited frmFrame: TfrmFrame
     object tabPage: TTabControl
       Left = 1
       Top = 558
-      Width = 685
+      Width = 870
       Height = 22
       Align = alBottom
       Font.Charset = DEFAULT_CHARSET
@@ -857,10 +885,9 @@ inherited frmFrame: TfrmFrame
     object pnlPage: TPanel
       Left = 1
       Top = 42
-      Width = 685
+      Width = 870
       Height = 516
       Align = alClient
-      BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -12
@@ -1017,6 +1044,9 @@ inherited frmFrame: TfrmFrame
         'Status = stsDefault')
       (
         'Component = lblPtMHTC'
+        'Status = stsDefault')
+      (
+        'Component = pnlSchedule'
         'Status = stsDefault'))
   end
   object mnuFrame: TMainMenu
@@ -1475,5 +1505,11 @@ inherited frmFrame: TfrmFrame
     object mnuInsertTime: TMenuItem
       Caption = '&Insert Time'
     end
+  end
+  object timSchedule: TTimer
+    Enabled = False
+    OnTimer = timScheduleTimer
+    Left = 424
+    Top = 312
   end
 end

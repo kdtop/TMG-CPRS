@@ -2,7 +2,7 @@ object frmLabEntry: TfrmLabEntry
   Left = 0
   Top = 0
   Caption = 'Lab Entry'
-  ClientHeight = 377
+  ClientHeight = 394
   ClientWidth = 892
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -64,8 +64,8 @@ object frmLabEntry: TfrmLabEntry
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 163
-    Top = 9
-    Height = 335
+    Top = 41
+    Height = 320
     Color = 12183481
     ParentColor = False
     ExplicitLeft = 264
@@ -74,25 +74,62 @@ object frmLabEntry: TfrmLabEntry
   end
   object Splitter2: TSplitter
     Left = 386
-    Top = 9
-    Height = 335
+    Top = 41
+    Height = 320
     Color = 12183481
     ParentColor = False
     ExplicitTop = 8
+    ExplicitHeight = 335
   end
   object pnlTop: TPanel
     Left = 0
     Top = 0
     Width = 892
-    Height = 9
+    Height = 41
     Align = alTop
     TabOrder = 0
+    object Label1: TLabel
+      Left = 73
+      Top = 14
+      Width = 90
+      Height = 13
+      Caption = 'Predefined lists:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object cmbLabGroups: TORComboBox
+      Left = 169
+      Top = 10
+      Width = 544
+      Height = 21
+      Style = orcsDropDown
+      AutoSelect = True
+      Color = clWindow
+      DropDownCount = 8
+      ItemHeight = 13
+      ItemTipColor = clWindow
+      ItemTipEnable = True
+      ListItemsOnly = False
+      LongList = False
+      LookupPiece = 1
+      MaxLength = 0
+      Pieces = '2'
+      Sorted = False
+      SynonymChars = '<>'
+      TabOrder = 0
+      OnChange = cmbLabGroupsChange
+      CharsNeedMatch = 1
+    end
   end
   object LabsORComboBox: TORComboBox
     Left = 2
-    Top = 9
+    Top = 41
     Width = 161
-    Height = 335
+    Height = 320
     Style = orcsSimple
     Align = alLeft
     AutoSelect = False
@@ -119,7 +156,7 @@ object frmLabEntry: TfrmLabEntry
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 344
+    Top = 361
     Width = 892
     Height = 33
     Align = alBottom
@@ -216,9 +253,9 @@ object frmLabEntry: TfrmLabEntry
   end
   object pnlAddRemoveBtns: TPanel
     Left = 166
-    Top = 9
+    Top = 41
     Width = 35
-    Height = 335
+    Height = 320
     Align = alLeft
     BevelInner = bvLowered
     TabOrder = 2
@@ -408,9 +445,9 @@ object frmLabEntry: TfrmLabEntry
   end
   object pnlEntryRight: TPanel
     Left = 389
-    Top = 9
+    Top = 41
     Width = 503
-    Height = 335
+    Height = 320
     Align = alClient
     TabOrder = 4
     object Splitter3: TSplitter
@@ -617,7 +654,7 @@ object frmLabEntry: TfrmLabEntry
       Left = 1
       Top = 87
       Width = 501
-      Height = 247
+      Height = 232
       Align = alClient
       Color = 11075574
       ColCount = 7
@@ -631,9 +668,9 @@ object frmLabEntry: TfrmLabEntry
   end
   object pnlMiddle: TPanel
     Left = 201
-    Top = 9
+    Top = 41
     Width = 185
-    Height = 335
+    Height = 320
     Align = alLeft
     BevelInner = bvLowered
     TabOrder = 3
@@ -648,7 +685,7 @@ object frmLabEntry: TfrmLabEntry
       Left = 2
       Top = 25
       Width = 181
-      Height = 308
+      Height = 293
       Margins.Left = 5
       Margins.Top = 5
       Align = alBottom
@@ -666,9 +703,9 @@ object frmLabEntry: TfrmLabEntry
   end
   object pnlPadding: TPanel
     Left = 0
-    Top = 9
+    Top = 41
     Width = 2
-    Height = 335
+    Height = 320
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 6

@@ -137,7 +137,6 @@ object frmLabEntryDetails: TfrmLabEntryDetails
     OnKeyDown = cboKeyDown
     OnNeedData = cboProviderNeedData
     CharsNeedMatch = 1
-    ExplicitWidth = 381
   end
   object cboLocation: TORComboBox
     Left = 68
@@ -167,7 +166,6 @@ object frmLabEntryDetails: TfrmLabEntryDetails
     OnKeyDown = cboKeyDown
     OnNeedData = cboLocationNeedData
     CharsNeedMatch = 1
-    ExplicitWidth = 381
   end
   object btnCancel: TBitBtn
     Left = 335
@@ -205,8 +203,6 @@ object frmLabEntryDetails: TfrmLabEntryDetails
       FF00FF0001890F1DBF3E5BF36B87FE728CFF5E7BFE395BFB1231EB010FB50001
       84FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF000189030AA306
       11B2050FB10107A0000188FF00FFFF00FFFF00FFFF00FFFF00FF}
-    ExplicitLeft = 293
-    ExplicitTop = 87
   end
   object btnApply: TBitBtn
     Left = 416
@@ -245,8 +241,6 @@ object frmLabEntryDetails: TfrmLabEntryDetails
       FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF046B0B2DB851046B0BFF00FFFF00
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
-    ExplicitLeft = 374
-    ExplicitTop = 87
   end
   object cboSpecimen: TORComboBox
     Left = 60
@@ -276,7 +270,6 @@ object frmLabEntryDetails: TfrmLabEntryDetails
     OnKeyDown = cboKeyDown
     OnNeedData = cboSpecimenNeedData
     CharsNeedMatch = 1
-    ExplicitWidth = 381
   end
   object dtpDTTaken: TDateTimePicker
     Left = 68

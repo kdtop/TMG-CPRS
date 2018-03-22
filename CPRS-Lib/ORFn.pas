@@ -73,6 +73,8 @@ function IsFMDateTime(x: string): Boolean;
 function MakeFMDateTime(const AString: string): TFMDateTime;
 procedure SetListFMDateTime(AFormat: string; AList: TStringList; ADelim: Char;
                             PieceNum: Integer; KeepBad: boolean = FALSE);
+function DateTimeToHorolog(ADateTime: TDateTime) : string;  //kt added 1/18
+function HorologToDateTime(Horolog : string) : TDateTime; //kt added 1/18
 
 { Numeric functions }
 function HigherOf(i, j: Integer): Integer;
@@ -121,6 +123,7 @@ function ComparePieces(P1, P2: string; Pieces: array of integer; Delim:
                        char = '^'; CaseInsensitive: boolean = FALSE): integer;
 procedure PiecesToList(x: string; ADelim: Char; AList: TStrings);
 procedure PiecesToList2(x: string; ADelim: String; AList: TStrings);  //kt added 2/21/16
+function ListToPieces(AList : TStrings; ADelim: Char = '^') : string; //kt added 1/2/18
 function ReverseStr(const x: string): string;
 procedure SetPiece(var x: string; Delim: Char; PieceNum: Integer; const NewPiece: string);
 procedure SetPieces(var x: string; Delim: Char; Pieces: Array of Integer;
@@ -201,7 +204,7 @@ procedure ScrollControl(Window: TScrollingWinControl; ScrollingUp: boolean; Amou
 implementation  // ---------------------------------------------------------------------------
 
 uses
-  StrUtils,  //kt 8/09
+  StrUtils, Math,  //kt 8/09
   ORCtrls, Grids, Chart, CheckLst, VAUtils;
 
 const
@@ -432,6 +435,41 @@ begin
     end;
     SetPiece(s, ADelim, PieceNum, x);
     AList[i] := s;
+  end;
+end;
+
+function DateTimeToHorolog(ADateTime: TDateTime) : string;
+//kt added function 1/18
+//Output format: 'ddddd,sssss'
+
+//Horolog Day 0 = Dec 31, 1840
+//Delphi  Day 0 = Dec 30, 1900  = Fileman DT (FMDT) of 2001230 = $H of 21913,0
+var days : integer;
+    FracDay : single;
+begin
+  days := Trunc(ADateTime);
+  FracDay := ADateTime - days;
+  Result := IntToStr(days + 21913) + ',' + IntToStr(Trunc(FracDay*SecsPerDay));
+end;
+
+function HorologToDateTime(Horolog : string) : TDateTime;
+//kt added function 1/18
+//Expected Horolog format:  ddddd,sssss
+
+//Horolog Day 0 = Dec 31, 1840
+//Delphi  Day 0 = Dec 30, 1900  = Fileman DT (FMDT) of 2001230 = $H of 21913,0
+var days, sec : string;
+    Fract : single;
+    p : integer;
+begin
+  p := Pos(',',Horolog);
+  if p > 0 then begin
+    days := LeftStr(Horolog, p-1);
+    sec := MidStr(Horolog, p+1, length(Horolog));
+    Fract := StrToIntDef(sec,0)/SecsPerDay;
+    Result := StrToIntDef(days,0)-21913 + Fract;
+  end else begin
+    Result := 0;
   end;
 end;
 
@@ -928,6 +966,18 @@ begin
     Delete(x, 1, Length(APiece) + length(ADelim));
   end;
 end;
+
+function ListToPieces(AList : TStrings; ADelim: Char = '^') : string;
+//kt added 1/2/18
+var i : integer;
+begin
+  Result := '';
+  for i := 0 to AList.Count - 1 do begin
+    if Result <> '' then Result := Result + '^';
+    Result := Result + AList[i];
+  end;
+end;
+
 
 
 function ReverseStr(const x: string): string;

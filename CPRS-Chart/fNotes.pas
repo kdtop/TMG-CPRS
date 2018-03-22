@@ -491,7 +491,7 @@ type
     function  EditorHasText : boolean;                                             //kt 9/11
     procedure InsertNamedImage(FName: string);                                     //kt 9/11
     function HTMLResize(ImageFName:string) : string;                               //kt 9/11
-    function ProcessNote(Lines : TStrings): TStrings;                              //kt 4/13
+    function ProcessNote(Lines : TStrings;NoteIEN: String): TStrings;              //kt 4/13
     procedure SortBtnGroupClick(GroupBy : string);                                 //kt 3/14
     procedure SetSortBtnGroupDisplay(GroupBy : string);                            //kt 3/14
     procedure DoHideTitle;                                                         //kt 5/14
@@ -5386,22 +5386,23 @@ var ProcessedNote : TStrings;  //pointer to other objects
     OriginalNote : TStringList;
 begin
   inherited;
+  if not boolAutosaving then DoAutoSave;      //elh added 1/15/18
   OriginalNote := TStringList.Create;
   if (vmHTML in FViewMode) then begin
     SplitHTMLToArray(WrapHTML(GetEditorHTMLText), OriginalNote);
     //breaks image paths - should not be necessary HTMLTools.InsertSubs(OriginalNote);
-    ProcessedNote := ProcessNote(OriginalNote);
+    ProcessedNote := ProcessNote(OriginalNote,GetCurrentNoteIEN);
     HtmlEditor.HTMLText := ProcessedNote.Text;
     GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor); //later I can embed this functionality in THtmlObj
   end else begin
     OriginalNote.Assign(memNewNote.Lines);
-    ProcessedNote := ProcessNote(OriginalNote);
+    ProcessedNote := ProcessNote(OriginalNote,GetCurrentNoteIEN);
     memNewNote.Lines.Assign(ProcessedNote);
   end;
   OriginalNote.Free;
 end;
 
-function TfrmNotes.ProcessNote(Lines : TStrings): TStrings;
+function TfrmNotes.ProcessNote(Lines : TStrings;NoteIEN: String): TStrings;
 //kt added entire function    5/1/13
 var
   ErrStr : string;
@@ -5409,7 +5410,7 @@ begin
   Result := nil;
   if MessageDlg('Are you sure you want to process this note?'+#13#10+
                 'This cannot be undone.', mtConfirmation,[mbYes,mbNo],0) <> mrYes then exit;
-  Result := TMGProcessNote(Lines, ErrStr);
+  Result := TMGProcessNote(Lines, NoteIEN, ErrStr);
   if ErrStr <> '' then MessageDlg('Error Processing Note: ' + ErrStr, mtError, [mbOK],0);
 end;
 

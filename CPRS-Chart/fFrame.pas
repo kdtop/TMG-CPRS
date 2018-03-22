@@ -199,6 +199,10 @@ type
     mnuChangeES: TMenuItem;
     mnuTMGTemp: TMenuItem;
     mnuLabText: TMenuItem;
+    pnlSchedule: TKeyClickPanel;
+    timSchedule: TTimer;
+    procedure pnlScheduleClick(Sender: TObject);
+    procedure timScheduleTimer(Sender: TObject);
     procedure mnuLabTextClick(Sender: TObject);
     procedure mnuTMGTempClick(Sender: TObject);
     procedure mnuChangeESClick(Sender: TObject);
@@ -617,6 +621,12 @@ begin
   Time := Minutes+(Seconds/60);
   Percent := Round(Time*100/intTimerMaxTime);
   pnlTimer.Color := ColorBlend(colorTimerOnMax,colorTimerOn,Percent);
+end;
+
+procedure TfrmFrame.timScheduleTimer(Sender: TObject);
+begin
+  inherited;
+  GetCurrentPatientLoad(pnlSchedule);
 end;
 
 function TfrmFrame.GetTimedOut: boolean;
@@ -1208,7 +1218,11 @@ begin
   colortimerOnMax := StringToColor(uTMGOptions.ReadString('colorTimerOnMax','$FFFFFF'));
   intTimerMaxTime := uTMGOptions.ReadInteger('TimerMaxTime',40);
   pnlTimer.Color := colorTimerOff;
-  //kt end mod -------------------
+  CreateProgressBars(pnlSchedule); //11/2/17
+  GetCurrentPatientLoad(pnlSchedule); // 12/12/17  Load pat list before timer starts
+  timSchedule.Interval := uTMGOptions.ReadInteger('Appt Timer Interval',1000);
+  timSchedule.Enabled := true;
+  //kt end mod ------------------- /
 end;
 
 procedure TfrmFrame.PanelWindowProc(var Msg: TMessage);        //kt   4/16/14
@@ -1949,6 +1963,7 @@ begin
     end;
     if Length(Attending) > 0 then lblPtAttending.Caption := '(Inpatient) Attending:  ' + MixedCase(Attending);
     pnlPrimaryCare.Caption := lblPtCare.Caption + ' ' + lblPtAttending.Caption;
+      pnlPrimaryCare.Caption := 'TEST HERE';
     if Length(InProvider) > 0  then lblPtAttending.Caption := lblPtAttending.Caption + ' - (Inpatient) Provider: ' + MixedCase(InProvider);
     if Length(MHTC) > 0 then lblPtMHTC.Caption := 'MH Treatment Coordinator: ' + MixedCase(MHTC);
     if (Length(MHTC) = 0) and (Inpatient = True) and (SpecialtySvc = 'P') then
@@ -2411,6 +2426,7 @@ begin
  pnlPatient.Enabled := True;
  //frmCover.UpdateVAAButton; //VAA CQ7525   CQ#7933 - moved to SetupPatient, before event hook execution (RV)
  //kt  BEGIN MOD 11/1/13
+ frmOrders.TMGLoadColors;   //12/14/17
  if fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '' then begin
    SwitchToPage(frmNotes);
    Application.ProcessMessages;
@@ -3214,6 +3230,7 @@ begin
   with lblPtCWAD     do
     SetBounds(M_WVERT, lblPtSSN.Top, lblPtPostings.Width, lblPtName.Height);
   //Low resolution handling: First, try to fit everything on by shrinking fields
+  pnlPrimaryCare.Width := 350;
   if pnlPrimaryCare.Width < HigherOf( lblPtCare.Left + lblPtCare.Width, HigherOf(lblPtAttending.Left + lblPtAttending.Width,lblPtMHTC.Left + lblPtMHTC.Width)) + TINY_MARGIN then
   //if pnlPrimaryCare.Width < HigherOf( lblPtCare.Left + lblPtCare.Width, lblPtAttending.Left + lblPtAttending.Width) + TINY_MARGIN then
   begin
@@ -3225,6 +3242,10 @@ begin
     lblPtProvider.Left := TINY_MARGIN;
     pnlVisit.Width := HigherOf( lblPtLocation.Left + lblPtLocation.Width, lblPtProvider.Left + lblPtProvider.Width)+ TINY_MARGIN;
   end;
+  pnlSchedule.Width := round(pnlPrimaryCare.Width/2);
+  //pnlSchedule.Width := pnlPrimaryCare.Width;
+
+  //txtSchedule.Caption :=
   //If that is not enough, add scroll bars to form
   {if pnlPrimaryCare.Width < HigherOf( lblPtCare.Left + lblPtCare.Width, lblPtAttending.Left + lblPtAttending.Width) + TINY_MARGIN then
   begin
@@ -3477,6 +3498,12 @@ begin
   pnlReminders.BevelOuter := bvRaised;
   if(pnlReminders.tag = HAVE_REMINDERS) then
     ViewInfo(mnuViewReminders);
+end;
+
+procedure TfrmFrame.pnlScheduleClick(Sender: TObject);
+begin
+  inherited;
+  Showmessage('Schedule report coming soon.');
 end;
 
 procedure TfrmFrame.pnlTimerMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

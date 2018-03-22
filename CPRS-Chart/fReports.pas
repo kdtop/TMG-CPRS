@@ -96,6 +96,8 @@ type
     mnuAction: TMenuItem;                                  //kt 2/17
     mnuCreateReportNote: TMenuItem;
     mnuSendAlert: TMenuItem;
+    mnuCopyResultsTable: TMenuItem;
+    procedure mnuCopyResultsTableClick(Sender: TObject);
     procedure mnuSendAlertClick(Sender: TObject);                        //kt 2/17
     procedure mnuCreateResultNoteClick(Sender: TObject);   //kt 2/17
     procedure lstQualifierClick(Sender: TObject);
@@ -3072,6 +3074,21 @@ begin
     FindNextControl(Sender as TWinControl, False, True, False).SetFocus; //previous control
     key := 0;
   end;
+end;
+
+procedure TfrmReports.mnuCopyResultsTableClick(Sender: TObject);
+var
+  TableHTML : string;
+begin
+  inherited;
+  TableHTML := '';
+  TableHTML := frmReports.GetCurrentReportHTMLTable;
+  TableHTML := StringReplace(TableHTML, #$D#$A,'<BR>', [rfReplaceAll]);
+  TableHTML := StringReplace(TableHTML, '<pre>','', [rfReplaceAll]);
+  TableHTML := StringReplace(TableHTML, '</pre>','', [rfReplaceAll]);
+  CopyHTMLToClipBoard('',TableHTML);
+  MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
+               'with Ctrl-V.', mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmReports.mnuCreateResultNoteClick(Sender: TObject);

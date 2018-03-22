@@ -88,7 +88,7 @@ begin
 end;
 
 procedure GetTemplateBoilerplate(ID: string);
-begin
+begin   //kt NOTE: ID is IEN, gets Template Text, with objects UNRESOLVED
   if(ID = '') or (ID = '0') then
     RPCBrokerV.Results.Clear
   else
@@ -96,7 +96,7 @@ begin
 end;
 
 procedure GetTemplateText(BoilerPlate: TStrings);
-var
+var    //KT NOTE: This takes template text, with possible text objects, and has server resolve them
   i: integer;
 begin
   with RPCBrokerV do

@@ -35,10 +35,20 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, StrUtils,
+  Dialogs, StdCtrls, StrUtils, CommCtrl,math,
   ORNet, ORFn, ComCtrls, Grids, ORCtrls, ExtCtrls, Buttons,
   uTMGTypes, SortStringGrid;
 
+
+type
+  TProgressBarWithText = class(TProgressBar)
+  private
+    FProgressText: string;
+  protected
+    procedure WMPaint(var Message: TWMPaint); message WM_PAINT;
+  published
+    property ProgressText: string read FProgressText write FProgressText;
+  end;
 
 //Forward declarations
 function  ExtractNum (S : String; StartPos : integer=1) : string;
@@ -57,6 +67,8 @@ function TMGSpecialLocation : string;
 function AtFPGLoc : boolean;
 function AtIntracareLoc : boolean;
 function HexToTColor(sColor : string) : TColor;
+procedure CreateProgressBars(pnl:TPanel);
+function GetCurrentPatientLoad(pnl:TPanel):string;
 
 implementation
 
@@ -65,6 +77,9 @@ implementation
 
   var
     TMG_Special_Location : string;
+    APPT_COLOR_0_30 : TColor;
+    APPT_COLOR_30_60 : TColor;
+    APPT_COLOR_60PLUS : TColor;
 
   function GetOneLine(CurrentData : TStrings; oneFileNum,oneFieldNum : string) : string;
   var i : integer;
@@ -287,6 +302,96 @@ implementation
                   StrToInt('$'+Copy(sColor, 3, 2)),
                   StrToInt('$'+Copy(sColor, 5, 2))  ) ;
   end;
+
+  procedure CreateProgressBars(pnl:TPanel);
+  var  newPGBar:TProgressBarWithText;
+       nexttop,nextleft : integer;
+       i :integer;
+  begin
+    nexttop := 6;
+    nextleft := 6;
+    for i := 0 to 5 do begin
+      newPGBar := TProgressBarWithText.Create(pnl);
+      newPGBar.Parent := pnl;
+      newPGBar.Top := nexttop;
+      nexttop := nexttop+newPGBar.height+2;
+      newPGBar.Left := nextleft;
+      if nexttop>pnl.height then begin
+        nextleft:=nextleft+newPGBar.width+2;
+        nexttop := 6;
+      end;
+      newPGBar.Min:=0;
+      newPGBar.Max := 200;
+      newPGBar.Smooth := True;
+      newPGBar.ShowHint := True;
+    end;
+    //Now load colors
+    APPT_COLOR_0_30 := StringToColor(uTMGOptions.ReadString('Appt Color 0-30','$98FB98'));
+    APPT_COLOR_30_60 := StringToColor(uTMGOptions.ReadString('Appt Color 31-60','$00FFFF'));
+    APPT_COLOR_60PLUS := StringToColor(uTMGOptions.ReadString('Appt Color 60+','$0000FF'));
+  end;
+
+  procedure FillPGBars(pnl:TPanel;PtArray:TStringList);
+  var int:integer;
+      component : TComponent;
+      acct:string;
+      value:integer;
+      bgColor:TColor;
+  begin
+      for int := 0 to pnl.ControlCount-1 do begin
+        with TProgressBarWithText(pnl.Controls[int]) do begin
+          if int>PtArray.Count-1 then begin
+            Visible := false;
+          end else begin
+            Visible := true;
+            ProgressText := piece(PtArray[int],'^',1);
+            value := round(strtofloat(piece(PtArray[int],'^',2)));
+            Position := value;
+            if value<31 then
+              bgColor:=APPT_COLOR_0_30;
+            if value>30 then
+              bgColor:=APPT_COLOR_30_60;
+            if value>60 then
+              bgColor:=APPT_COLOR_60PLUS;
+            //Brush.Color := bgColor;
+            //SendMessage(Handle,PBM_SETBKCOLOR,0,clwhite);
+            SendMessage(Handle,PBM_SETBARCOLOR, 0,bgColor);
+            Hint := piece(PtArray[int],'^',3); 
+          end;
+        end;
+      end;
+  end;
+
+  function GetCurrentPatientLoad(pnl:TPanel):string;
+  var SchArray:TStringList;
+  begin
+    SchArray := TStringList.Create();
+    tCallV(SchArray,'TMG CPRS GET PATIENT LOAD',[nil]);
+    FillPGBars(pnl,SchArray);
+    SchArray.Free;
+  end;
+
+procedure TProgressBarWithText.WMPaint(var Message: TWMPaint);
+var
+  DC: HDC;
+  prevfont: HGDIOBJ;
+  prevbkmode: Integer;
+  R: TRect;
+begin
+  inherited;
+  if ProgressText <> '' then
+  begin
+    R := ClientRect;
+    DC := GetWindowDC(Handle);
+    prevbkmode := SetBkMode(DC, TRANSPARENT);
+    prevfont := SelectObject(DC, Font.Handle);
+    DrawText(DC, PChar(ProgressText), Length(ProgressText),
+      R, DT_SINGLELINE or DT_CENTER or DT_VCENTER);
+    SelectObject(DC, prevfont);
+    SetBkMode(DC, prevbkmode);
+    ReleaseDC(Handle, DC);
+  end;
+end;
 
 initialization
   TMG_Special_Location := '';

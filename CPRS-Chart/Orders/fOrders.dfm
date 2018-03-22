@@ -631,9 +631,14 @@ inherited frmOrders: TfrmOrders
       Caption = 'Copy to &New Order...'
       OnClick = mnuActCopyClick
     end
+    object popOrderComplete: TMenuItem
+      Caption = 'Complete...'
+      OnClick = popOrderCompleteClick
+    end
     object popOrderDC: TMenuItem
       Tag = 1
       Caption = '&Discontinue...'
+      Visible = False
       OnClick = mnuActDCClick
     end
     object popOrderRenew: TMenuItem

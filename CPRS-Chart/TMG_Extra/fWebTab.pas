@@ -38,7 +38,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, SHDocVw, StdCtrls,fPage, VA508AccessibilityManager, ExtCtrls, uCore,
-  uTMGAllscriptsDriver, TMGHtml2, Menus;
+  uTMGAllscriptsDriver, TMGHtml2, Menus, uTMGDiffRecord, uHTMLTools;
 
 type
   TfrmWebTab = class(TfrmPage)
@@ -46,11 +46,17 @@ type
     mnuMain: TMainMenu;
     Action1: TMenuItem;
     mnuViewHTMLSource: TMenuItem;
+    mnuToggleRecordHTML_DOMs: TMenuItem;
+    TimerRecordDOM: TTimer;
+    procedure mnuToggleRecordHTML_DOMsClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure TimerRecordDOMTimer(Sender: TObject);
     procedure mnuViewHTMLSourceClick(Sender: TObject);
     //WebBrowser: TWebBrowser;  //kt 8/5/17
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
+    DiffRecorder : TDiffRecorder;
   public
     { Public declarations }
     LastURL : string;
@@ -71,8 +77,7 @@ implementation
 
 {$R *.dfm}
 uses ORNet,ORFn,Trpcb,uConst,
-  fMemoEdit
-  ;
+     fMemoEdit;
 
 
 Procedure TfrmWebTab.RequestPrint;
@@ -82,14 +87,42 @@ begin
 end;
 
 
+procedure TfrmWebTab.mnuToggleRecordHTML_DOMsClick(Sender: TObject);
+const
+  RECORDING_TAG=1;     RECORDING_MENU_TEXT = '&Stop Recording HTML DOM''s';
+  NOT_RECORDING_TAG=0; NOT_RECORDING_MENU_TEXT = 'Recording HTML &DOM''s';
+begin
+  inherited;
+  case mnuToggleRecordHTML_DOMs.Tag of
+    RECORDING_TAG : begin
+      mnuToggleRecordHTML_DOMs.Tag := NOT_RECORDING_TAG;
+      mnuToggleRecordHTML_DOMs.Caption := NOT_RECORDING_MENU_TEXT;
+      TimerRecordDom.Enabled := False;
+    end;
+    NOT_RECORDING_TAG : begin
+      mnuToggleRecordHTML_DOMs.Tag := RECORDING_TAG;
+      mnuToggleRecordHTML_DOMs.Caption := RECORDING_MENU_TEXT;
+      TimerRecordDom.Enabled := True;
+    end;
+  end; //case
+end;
+
+procedure TfrmWebTab.TimerRecordDOMTimer(Sender: TObject);
+var SL : TStringList;
+const SAVE_TO_DISK = true;
+begin
+  inherited;
+  TimerRecordDOM.Enabled := false;
+  DiffRecorder.MakeSnapshot(SAVE_TO_DISK);  //handle recording DOM.
+  TimerRecordDOM.Enabled := True;
+end;
+
 procedure TfrmWebTab.mnuViewHTMLSourceClick(Sender: TObject);
-var OK : boolean;
-    HTMLText : string;
+var HTMLText : string;
     frmView : TfrmMemoEdit;
 begin
   inherited;
   try
-    OK := false;
     HTMLText := WebBrowser.GetFullHTMLText;
     frmView := TfrmMemoEdit.Create(self);
     frmView.memEdit.ReadOnly := false;
@@ -103,10 +136,6 @@ begin
   end;
 end;
 
-
-
-
-
 procedure TfrmWebTab.FormCreate(Sender: TObject);
 begin
   inherited;
@@ -114,16 +143,24 @@ begin
   TWinControl(WebBrowser).Parent:=pnlWBHolder;
   TWinControl(WebBrowser).Align:=alClient;
   WebBrowser.Silent := false; //should prevent page popups....
+  DiffRecorder := TDiffRecorder.Create(WebBrowser, CPRSDir+'\Cache\');
+end;
+
+procedure TfrmWebTab.FormDestroy(Sender: TObject);
+begin
+  DiffRecorder.Free;
+  WebBrowser.Free;
+  inherited;
 end;
 
 Procedure TfrmWebTab.NagivateTo(URL: WideString);
 begin
   LastURL := URL;
-  if pos('allscripts',URL)>1 then begin  //Handle AllScripts ERx in special manner.
-    AllScriptsSyncToPatient(WebBrowser, URL, Patient);
-  end else begin
+  //if pos('allscripts',URL)>1 then begin  //Handle AllScripts ERx in special manner.
+  //  AllScriptsSyncToPatient(WebBrowser, URL, Patient);
+  //end else begin
     WebBrowser.Navigate(URL);
-  end;
+  //end;
 end;
 
 //=================================================================

@@ -2,16 +2,17 @@ inherited frmWebTab: TfrmWebTab
   Left = 266
   Top = 184
   Caption = 'Web Browser'
-  ClientHeight = 321
+  ClientHeight = 341
   ClientWidth = 465
   Menu = mnuMain
   Position = poScreenCenter
+  OnDestroy = FormDestroy
   ExplicitWidth = 481
-  ExplicitHeight = 379
+  ExplicitHeight = 399
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 316
+    Top = 336
     Width = 465
     ExplicitTop = 336
     ExplicitWidth = 465
@@ -20,14 +21,10 @@ inherited frmWebTab: TfrmWebTab
     Left = 0
     Top = 0
     Width = 465
-    Height = 316
+    Height = 336
     Align = alClient
     Color = clSkyBlue
     TabOrder = 0
-    ExplicitLeft = 112
-    ExplicitTop = 64
-    ExplicitWidth = 353
-    ExplicitHeight = 252
   end
   inherited amgrMain: TVA508AccessibilityManager
     Left = 192
@@ -49,6 +46,17 @@ inherited frmWebTab: TfrmWebTab
         Caption = 'View &HTML Source'
         OnClick = mnuViewHTMLSourceClick
       end
+      object mnuToggleRecordHTML_DOMs: TMenuItem
+        Caption = 'Record HTML &DOM'#39's'
+        OnClick = mnuToggleRecordHTML_DOMsClick
+      end
     end
+  end
+  object TimerRecordDOM: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = TimerRecordDOMTimer
+    Left = 64
+    Top = 80
   end
 end

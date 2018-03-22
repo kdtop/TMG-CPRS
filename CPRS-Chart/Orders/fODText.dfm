@@ -3,6 +3,7 @@ inherited frmODText: TfrmODText
   Height = 279
   Anchors = [akLeft, akTop, akBottom]
   Caption = 'Text Only Order'
+  OnShow = FormShow
   ExplicitWidth = 525
   ExplicitHeight = 279
   PixelsPerInch = 96
@@ -78,6 +79,9 @@ inherited frmODText: TfrmODText
   inherited pnlMessage: TPanel
     TabOrder = 0
   end
+  inherited chkCopyWhenAccepted: TCheckBox
+    TabOrder = 10
+  end
   inherited amgrMain: TVA508AccessibilityManager
     Data = (
       (
@@ -107,6 +111,9 @@ inherited frmODText: TfrmODText
         'Status = stsDefault')
       (
         'Component = frmODText'
+        'Status = stsDefault')
+      (
+        'Component = chkCopyWhenAccepted'
         'Status = stsDefault'))
   end
   object VA508CompMemOrder: TVA508ComponentAccessibility

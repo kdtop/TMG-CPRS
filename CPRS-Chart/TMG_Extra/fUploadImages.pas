@@ -230,6 +230,7 @@ implementation
         uTMGOptions,
         Math,
         fTMG_DirectX_GetImage,  //for camera - DirectX
+        fFrame,
         fOptions, fDCSumm;
 
   const
@@ -761,6 +762,7 @@ implementation
 
   begin
     //Create a record with metadata about image (required for images)
+    frmFrame.timSchedule.Enabled := false;      //11/14/17 added timSchedule enabler to keep it from crashing the RPC upload
     RPCBrokerV.remoteprocedure := 'MAGGADDIMAGE';
     RPCBrokerV.Param[0].Value := '.X';
     RPCBrokerV.Param[0].PType := list;
@@ -802,6 +804,7 @@ implementation
     if result=false then begin
       ErrorMsg := 'Server Error: Couldn''t store image information.'+ #13 + Piece(RPCResult,'^',2);
       MessageDlg(ErrorMsg,mtWarning,[mbOK],0);
+      frmFrame.timSchedule.Enabled := True;
       exit; //returns FALSE
     end;
 
@@ -812,6 +815,7 @@ implementation
     if result=false then begin
       ErrorMsg := 'Error uploading image to server.'+ #13 + Piece(RPCResult,'^',2);
       MessageDlg(ErrorMsg,mtWarning,[mbCancel],0);
+      frmFrame.timSchedule.Enabled := true;
       exit;  //Returns FALSE
     end;
 
@@ -831,6 +835,7 @@ implementation
       if result=false then begin
         ErrorMsg := 'Error associating image with note.' + #13 + Piece(RPCResult,'^',2);
         MessageDlg(ErrorMsg,mtWarning,[mbCancel],0);
+        frmFrame.timSchedule.Enabled := True;
         exit;  //Returns FALSE
       end;
     end;
@@ -858,6 +863,7 @@ implementation
     if (MoveCheckBox.Visible) and (MoveCheckBox.Checked) then begin
       DeleteFile(Info.ImageFPathName);
     end;
+    frmFrame.timSchedule.Enabled := True;
     //returns: result
   end;
 

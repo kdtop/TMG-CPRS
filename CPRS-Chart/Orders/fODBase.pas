@@ -41,6 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, fAutoSz, StdCtrls,
   ORCtrls, ORFn, uConst, rOrders, rODBase, uCore, ComCtrls, ExtCtrls, Menus, Mask,
+  uHTMLTools,Clipbrd,  //elh 2/12/18
   Buttons, UBAGlobals, UBACore, VA508AccessibilityManager;
 
 type
@@ -161,6 +162,8 @@ type
     pnlMessage: TPanel;
     imgMessage: TImage;
     memMessage: TRichEdit;
+    chkCopyWhenAccepted: TCheckBox;
+    procedure FormShow(Sender: TObject);
     procedure cmdQuitClick(Sender: TObject);
     procedure cmdAcceptClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -282,6 +285,7 @@ implementation
 
 uses fOCAccept, uODBase, rCore, rMisc, fODMessage,
   fTemplateDialog, uEventHooks, uTemplates, rConsults,fOrders,uOrders,
+  uTMGOptions,  //elh  2/12/18
   fFrame, uTemplateFields, fClinicWardMeds, fODDietLT, rODDiet, VAUtils;
 
 const
@@ -1521,6 +1525,12 @@ begin
   end;
 end;
 
+procedure TfrmODBase.FormShow(Sender: TObject);
+begin
+  inherited;
+  chkCopyWhenAccepted.Checked := uTMGOptions.ReadBool('COPY ORDER BY DEFAULT',false);
+end;
+
 { Accept & Quit Buttons }
 
 function TfrmODBase.AcceptOrderChecks: Boolean;
@@ -1651,6 +1661,7 @@ begin
   CIDCOkToSave := False;
   alreadyClosed := False;
   self.Responses.Cancel := False;
+  if chkCopyWhenAccepted.checked then Clipboard.AsText := memOrder.Lines.Text;  //elh  2/12/18
   if frmOrders <> nil then
   begin
     if (frmOrders.TheCurrentView <> nil) and (frmOrders.TheCurrentView.EventDelay.PtEventIFN>0) and IsCompletedPtEvt(frmOrders.TheCurrentView.EventDelay.PtEventIFN) then

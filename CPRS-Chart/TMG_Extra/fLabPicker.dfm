@@ -31,14 +31,12 @@ object frmLabPicker: TfrmLabPicker
     Font.Height = -13
     Font.Name = 'Fixedsys'
     Font.Style = []
-    ItemHeight = 15
+    ItemHeight = 16
     Items.Strings = (
       'Item 1'
       'Item 2')
     ParentFont = False
     TabOrder = 0
-    ExplicitWidth = 543
-    ExplicitHeight = 263
   end
   object btnCheckAll: TBitBtn
     Left = 8
@@ -223,8 +221,6 @@ object frmLabPicker: TfrmLabPicker
       FFFFFFFFFFFFFFFFFFFFFFFFFFFF659E66458A463D864054975A61A1686AA670
       6AA67061A1685497593D8640458A46659E66FFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFF}
-    ExplicitLeft = 436
-    ExplicitTop = 277
   end
   object btnCancel: TBitBtn
     Left = 362
@@ -312,8 +308,6 @@ object frmLabPicker: TfrmLabPicker
       FFFFFFFFFFFFFFFFFFFFFFFFFFFF565A9C3337872B30844448965256A05C60A5
       5C60A55256A04448962B3084333787565A9CFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFF}
-    ExplicitLeft = 315
-    ExplicitTop = 277
   end
   object btnCheckAbns: TBitBtn
     Left = 96

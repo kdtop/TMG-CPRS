@@ -82,6 +82,9 @@ type
 
   TTMGAllscriptsDriver = class(TObject)
   private
+    DOMHTMLStr : string;
+    PageLoading : boolean;
+    LastKnownPageState : wpStates;
     function DriveClickReviewHistory(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
     function DriveClickBackToSelectPt(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
     function DriveScrapeMeds(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
@@ -89,6 +92,7 @@ type
     function DriveSelectSingleFoundPatient(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
     function DriveEnterPatientInfoAndSearch(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
     function DriveEnterCredentialsAndLogin(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
+    function PageStableAfterLoading(WB: THtmlObj; var ErrMsg : string) : boolean;
     function GetWebPageState(WB: THtmlObj; var ErrMsg : string) : wpStates;
     function GetWebSitePatient(var ErrMsg : string): boolean; //returns True if website = VistaPatient, False if wrong patient
     function GetNextAction(DesiredWebState : wpStates; var ErrMsg : string) : wpActions;
@@ -116,11 +120,15 @@ Procedure AllScriptsSyncToPatient(WB: THtmlObj; URL: WideString; Patient: TPatie
 //URL should always be the default, login-in URL
 var ErrMsg : string;
     PatientMatches : boolean;
+    temp : boolean;
 begin
+  temp := false;
+  if temp=true then exit;  //remove later to re-enable.
   if TMGAllscriptsDriver.InitURL = '' then begin  //should be first cycle only
     WB.Navigate(URL);
     TMGAllscriptsDriver.InitURL := URL;
     TMGAllscriptsDriver.WB := WB;
+    TMGAllscriptsDriver.PageLoading := true;
     TMGAllscriptsBackgroundTimer.Interval := 5*1000;  //fire event to login after __ seconds
     TMGAllscriptsBackgroundTimer.OnTimer := TMGAllscriptsDriver.HandleTimerEvent;
     TMGAllscriptsDriver.VistACurrentPatient := Patient;
@@ -247,6 +255,29 @@ begin
   AList.Free;
 end;
 
+function TTMGAllscriptsDriver.PageStableAfterLoading(WB: THtmlObj; var ErrMsg : string) : boolean;
+var HTMLStr : string;
+begin
+  result := false;  //default to NOT stable.
+  HTMLStr := WB.GetFullHTMLText;
+  if DOMHTMLStr = HTMLStr then begin
+    //DOM hasn't changed since last check. Next check for a loading animation
+    case LastKnownPageState of
+      wpsAtLoginForm : begin end;
+      wpsAtLoginAnimation : begin end;
+      wpsAtSelectPatient : begin end;
+      wpsAtSinglePatientFound : begin end;
+      wpsAtZeroOrMultiplePatientsFound : begin end;
+      wpsAtPatientSelected : begin end;
+      wpsAtSelectMed : begin end;
+      wpsAtReviewMeds : begin end;
+    end;
+    Result := true;
+  end;
+  DOMHTMLStr := HTMLStr;
+end;
+
+
 
 function TTMGAllscriptsDriver.GetWebPageState(WB: THtmlObj; var ErrMsg : string) : wpStates;
 var SearchLName, SelectedLName : string;
@@ -293,6 +324,9 @@ var CurState : wpStates;
     CorrectPatient : boolean;
 begin
   Result := wpaNoAction;
+  if Self.PageLoading then begin
+
+  end;
   CurState := GetWebPageState(WB, ErrMsg);  //Finish, handle ErrMsg
   if not (CurState in [wpsUnknown, wpsAtLoginForm, wpsAtLoginAnimation, wpsAtSelectPatient]) then begin
     CorrectPatient := GetWebSitePatient(ErrMsg);
@@ -405,7 +439,7 @@ var Success: boolean;
     NextAction: wpActions;
 begin
   TMGAllscriptsBackgroundTimer.Enabled := false; //prevent further event firing unless turned back on
-  NextAction := GetNextAction(Self.GoalWebPageState,ErrMsg);
+  NextAction := GetNextAction(Self.GoalWebPageState, ErrMsg);
   if ErrMsg <> '' then begin
     MessageDlg(ErrMsg, mtError, [mbOK], 0);
     exit;
@@ -423,14 +457,16 @@ function TTMGAllscriptsDriver.GetCredentials : TCredentials;
 //Later tie into an RPC call
 begin
   Result.Login := 'fpofgreeneville';
-  Result.Password :='lipw4ERx0';
+  Result.Password :='lipw4ERx00';
 end;
 
 
 Initialization
   TMGAllscriptsDriver := TTMGAllscriptsDriver.Create;
   TMGAllscriptsDriver.VistACurrentPatient := Nil;
+  TMGAllscriptsDriver.LastKnownPageState := wpsUnknown;
   TMGAllscriptsDriver.InitURL := '';
+  TMGAllscriptsDriver.DOMHTMLStr := '';
   TMGAllscriptsBackgroundTimer := TTimer.Create(Application);
   TMGAllscriptsBackgroundTimer.Enabled := false;
 

@@ -110,7 +110,8 @@ uses fODDiet, fODMisc, fODGen, fODMedIn, fODMedOut, fODText, fODConsult, fODProc
      fEncnt, fEffectDate, fOMVerify, fOrderSaveQuick, fOMSet, rMisc, uODBase, rODMeds,
      fLkUpLocation, fOrdersPrint, fOMAction, fARTAllgy, fOMHTML, fOrders, rODBase,
      fODChild, fMeds, rMeds, rPCE, frptBox, fODMedNVA, fODChangeUnreleasedRenew, rODAllergy,
-     UBAGlobals, fClinicWardMeds, uTemplateFields, VAUtils;
+     UBAGlobals, fClinicWardMeds, uTemplateFields, VAUtils
+     ,fODTMGOTP; //TMG added 11/17/17
 
 var
   uPatientLocked: Boolean;
@@ -219,6 +220,8 @@ begin
   OD_BB:        DialogClass := TfrmODBBank;
   OD_CONSULT:   DialogClass := TfrmODCslt;
   OD_PROCEDURE: DialogClass := TfrmODProc;
+  OD_NUR_OTP:   DialogClass := TfrmODTMGOTP;  //TMG
+  //OD_NUR_OSP:   DialogClass := TfrmODTMGOSP;  //TMG
   OD_TEXTONLY:  DialogClass := TfrmODText;
   OD_VITALS:    DialogClass := TfrmODVitals;
   //OD_ALLERGY:   DialogClass := TfrmODAllergy;

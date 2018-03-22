@@ -14,8 +14,8 @@ inherited frmTemplateEditor: TfrmTemplateEditor
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 756
-  ExplicitHeight = 600
+  ExplicitWidth = 748
+  ExplicitHeight = 596
   PixelsPerInch = 96
   TextHeight = 13
   object splMain: TSplitter [0]

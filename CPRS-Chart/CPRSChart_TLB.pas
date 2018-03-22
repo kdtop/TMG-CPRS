@@ -12,7 +12,7 @@ unit CPRSChart_TLB;
 // ************************************************************************ //
 
 // PASTLWTR : 1.2
-// File generated on 8/11/2017 9:16:25 AM from Type Library described below.
+// File generated on 3/20/2018 7:04:40 PM from Type Library described below.
 
 // ************************************************************************  //
 // Type Lib: P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\CPRSChart.tlb (1)

@@ -308,7 +308,8 @@ begin
       end;
       *)
       // make optional later...
-      if not RPCBrokerV.Connected then Application.Terminate;
+      if not RPCBrokerV.Connected then
+        Application.Terminate;
     end;
   end;
   AStringList.Add(' ');

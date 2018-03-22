@@ -67,6 +67,7 @@ type
     procedure FormShow(Sender: TObject);
   private
     { Private declarations }
+    procedure SetDefaults();
   public
     { Public declarations }
     procedure GetDetailsNarrative(Lines : TStrings);
@@ -86,7 +87,7 @@ implementation
 
 {$R *.dfm}
 
-Uses uCore;
+Uses uCore,uTMGOptions;
 
 function SubSetOfPersons(const StartFrom: string; Direction: Integer): TStrings;
 //Copied in from CPRS
@@ -187,6 +188,17 @@ procedure TfrmLabEntryDetails.FormShow(Sender: TObject);
 begin
   dtpDTTaken.DateTime := Now;
   dtpDTTaken.SetFocus;
+  SetDefaults;
+  dtpControlExit(Sender);
+end;
+
+procedure TfrmLabEntryDetails.SetDefaults();
+var DefaultDoc,DefaultLoc:integer;
+begin
+  DefaultDoc := uTMGOptions.ReadInteger('Default Lab Physician',-1);
+  if DefaultDoc>-1 then cboProvider.SelectByIEN(DefaultDoc);
+  DefaultLoc := uTMGOptions.ReadInteger('Default Lab Location',-1);
+  if DefaultLoc>-1 then cboLocation.SelectByIEN(DefaultLoc);
 end;
 
 function TfrmLabEntryDetails.SelectedSpecimen : string;

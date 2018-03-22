@@ -2023,7 +2023,7 @@ begin
 end;
 
 function TTemplate.GetBoilerplate: string;
-begin
+begin   //kt NOTE: This returns template text with objects UNRESOLVED (E.G. |NAME|)
   Result := '';
   if FIsReminderDialog or FIsCOMObject then exit;
   if(RealType in [ttDoc, ttGroup]) then

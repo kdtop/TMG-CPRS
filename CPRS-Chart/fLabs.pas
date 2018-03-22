@@ -4969,6 +4969,8 @@ begin
   inherited;
   HTMLTable := GetPickedLabNotesHTMLTable;
   CopyHTMLToClipBoard('',HTMLTable);
+  //MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
+    //         'with Ctrl-V.', mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmLabs.mnuSendLabAlertClick(Sender: TObject);
@@ -5128,6 +5130,8 @@ begin
     if LabPicker.ShowModal <> mrCancel then begin
       LabPicker.GetResults(LabInfo);
       Result := InfoToHTMLTable(LabInfo);
+      MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
+             'with Ctrl-V.', mtInformation, [mbOK], 0);
     end;
   finally
     LabPicker.Free;

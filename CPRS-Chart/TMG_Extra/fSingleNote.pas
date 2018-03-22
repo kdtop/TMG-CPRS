@@ -718,11 +718,14 @@ begin
          end;
     '0': begin
            if WhyNot = 'COMMIT' then Silent := True else Silent := False;
-           SaveCurrentNote(Result, Silent);
+           //SaveCurrentNote(Result, Silent);
+           if Result then begin
+             Result := HandleClosing(Result);
+             if Result then frmSingleNote.close;  
+           end; 
          end;
   end;
 end;
-
 
 function TfrmSingleNote.GetClipHTMLText(var szText:string):Boolean;
 //kt added entire function 8/16

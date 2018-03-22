@@ -65,6 +65,9 @@ type
     Splitter3: TSplitter;
     lblValueInstructions: TLabel;
     Timer1: TTimer;
+    Label1: TLabel;
+    cmbLabGroups: TORComboBox;
+    procedure cmbLabGroupsChange(Sender: TObject);
     procedure LabsORComboBoxDblClick(Sender: TObject);
     procedure sgLabValuesKeyPress(Sender: TObject; var Key: Char);
     procedure sgLabValuesDblClick(Sender: TObject);
@@ -110,6 +113,8 @@ type
     function IsPanelRow(ARow : integer) : boolean;
     function IsChildRow(ARow : integer) : boolean;
     procedure StoreToPanelChildren(StartingRow, ACol : integer; Str : string; Obj : pointer=nil);
+    procedure LoadGroups();
+    procedure LoadOneTest(DataInfo:string);
   public
     { Public declarations }
   end;
@@ -171,6 +176,20 @@ begin
   LabsORComboBox.InitLongList('A');
   Timer1.Enabled := true;
   Timer1.Interval := 200;
+  LoadGroups;
+end;
+
+procedure TfrmLabEntry.LoadGroups();
+var  GroupList:TStringList;
+     i:integer;
+begin
+  GroupList := TStringList.Create;
+  cmbLabGroups.Items.Clear;
+  tCallV(GroupList,'TMG LAB GROUP LISTS',[]);
+  for i := 0 to GroupList.Count - 1 do begin
+    cmbLabGroups.Items.Add(grouplist[i]);
+  end;
+  GroupList.Free;
 end;
 
 procedure TfrmLabEntry.Timer1Timer(Sender: TObject);
@@ -412,6 +431,38 @@ begin
   end;
 end;
 
+procedure TfrmLabEntry.cmbLabGroupsChange(Sender: TObject);
+var  LabTestList:TStringList;
+     i:integer;
+begin
+  LabTestList := TStringList.Create();
+  tCallV(LabTestList,'TMG LAB GROUP TESTS',[inttostr(cmbLabGroups.ItemIEN)]);
+  for i := 0 to LabTestList.Count - 1 do begin
+     LoadOneTest(LabTestList[i]);
+  end;
+  LabTestList.Free;
+end;
+
+procedure TfrmLabEntry.LoadOneTest(DataInfo:string);
+var Name, Store: string;
+    SelIEN60: Int64;
+    ItemIdx : integer;
+begin
+  //ItemIdx := LabsORComboBox.ItemIndex;
+  //If ItemIdx < 0 then exit;
+  //DataInfo := LabsORComboBox.Items[ItemIdx];
+  SelIEN60 := strtoint(piece(DataInfo,'^',1));
+  Name := piece(DataInfo, '^',3);
+  if (Pos('{',Name)>0) and (Pos('}',Name)>0) then begin
+    Name := piece(Name,'{',2);
+    Name := piece(Name,'}',1);
+  end;
+  Store := piece(DataInfo, '^',4);
+  AddToTV(nil, Name, SelIEN60, Store);
+  LabsORComboBox.Text := '';
+  LabsORComboBox.InitLongList('A');
+end;
+
 procedure TfrmLabEntry.btnAddCommentsClick(Sender: TObject);
 begin
   frmLabComments.memComments.Lines.Assign(LabComments);
@@ -424,6 +475,8 @@ begin
     btnAddComments.Caption := 'Add Lab &Comments';
   end;
 end;
+
+
 
 procedure TfrmLabEntry.btnAddLabClick(Sender: TObject);
 var SelIEN60 : int64; //64 bits.  NOTE pointer = 4 bytes = 32 bits = longword = 0..4,294,967,295

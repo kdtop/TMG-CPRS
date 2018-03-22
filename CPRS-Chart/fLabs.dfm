@@ -3,24 +3,24 @@ inherited frmLabs: TfrmLabs
   Top = 237
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
-  ClientHeight = 702
+  ClientHeight = 742
   ClientWidth = 721
   HelpFile = 'qnoback'
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
   ExplicitWidth = 729
-  ExplicitHeight = 756
+  ExplicitHeight = 796
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 697
+    Top = 737
     Width = 721
     ExplicitTop = 748
     ExplicitWidth = 714
   end
   inherited sptHorz: TSplitter
-    Height = 697
+    Height = 737
     ExplicitHeight = 748
   end
   object Label1: TLabel [2]
@@ -38,12 +38,12 @@ inherited frmLabs: TfrmLabs
     Visible = False
   end
   inherited pnlLeft: TPanel
-    Height = 697
+    Height = 737
     Constraints.MinWidth = 37
-    ExplicitHeight = 697
+    ExplicitHeight = 717
     object Splitter1: TSplitter
       Left = 0
-      Top = 437
+      Top = 477
       Width = 97
       Height = 10
       Cursor = crVSplit
@@ -58,11 +58,12 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 0
       Width = 97
-      Height = 437
+      Height = 477
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
+      ExplicitHeight = 457
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -80,7 +81,7 @@ inherited frmLabs: TfrmLabs
         Left = 0
         Top = 19
         Width = 97
-        Height = 418
+        Height = 458
         Align = alClient
         HideSelection = False
         Indent = 18
@@ -92,15 +93,17 @@ inherited frmLabs: TfrmLabs
         OnKeyDown = tvReportsKeyDown
         Caption = 'Available Reports'
         NodePiece = 0
+        ExplicitHeight = 438
       end
     end
     object pnlLeftBottom: TPanel
       Left = 0
-      Top = 447
+      Top = 487
       Width = 97
       Height = 250
       Align = alBottom
       TabOrder = 1
+      ExplicitTop = 467
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -228,11 +231,11 @@ inherited frmLabs: TfrmLabs
   end
   inherited pnlRight: TPanel
     Width = 620
-    Height = 697
+    Height = 737
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
-    ExplicitWidth = 613
-    ExplicitHeight = 697
+    ExplicitWidth = 620
+    ExplicitHeight = 717
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -248,10 +251,10 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 300
       Width = 620
-      Height = 377
+      Height = 417
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 613
+      ExplicitHeight = 397
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -272,13 +275,12 @@ inherited frmLabs: TfrmLabs
         WantTabs = True
         WordWrap = False
         OnKeyUp = Memo1KeyUp
-        ExplicitWidth = 611
       end
       object memLab: TRichEdit
         Left = 1
         Top = 20
         Width = 618
-        Height = 356
+        Height = 396
         Align = alClient
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -294,21 +296,22 @@ inherited frmLabs: TfrmLabs
         Visible = False
         WantReturns = False
         WordWrap = False
-        ExplicitWidth = 611
+        ExplicitHeight = 376
       end
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 20
         Width = 618
-        Height = 356
+        Height = 396
         TabStop = False
         Align = alClient
         TabOrder = 2
         OnDocumentComplete = WebBrowser1DocumentComplete
         ExplicitTop = 16
         ExplicitWidth = 611
+        ExplicitHeight = 356
         ControlData = {
-          4C000000DF3F0000CB2400000000000000000000000000000000000000000000
+          4C000000DF3F0000EE2800000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -322,7 +325,6 @@ inherited frmLabs: TfrmLabs
       Height = 251
       Align = alTop
       TabOrder = 1
-      ExplicitWidth = 613
       object bvlHeader: TBevel
         Left = 1
         Top = 61
@@ -339,7 +341,6 @@ inherited frmLabs: TfrmLabs
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 611
         object lblDateFloat: TLabel
           Left = 396
           Top = 4
@@ -356,7 +357,6 @@ inherited frmLabs: TfrmLabs
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitWidth = 611
           object chkValues: TCheckBox
             Left = 404
             Top = 39
@@ -433,7 +433,6 @@ inherited frmLabs: TfrmLabs
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 2
-          ExplicitWidth = 611
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
@@ -481,7 +480,6 @@ inherited frmLabs: TfrmLabs
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 611
           DesignSize = (
             618
             60)
@@ -562,7 +560,7 @@ inherited frmLabs: TfrmLabs
           object lblFirstSeen: TLabel
             Left = 361
             Top = 42
-            Width = 192
+            Width = 3
             Height = 13
             Anchors = [akTop, akRight]
           end
@@ -673,7 +671,6 @@ inherited frmLabs: TfrmLabs
         OnMouseWheelDown = grdLabMouseWheelDown
         OnTopLeftChanged = grdLabTopLeftChanged
         Caption = 'Laboratory Results'
-        ExplicitWidth = 611
         ColWidths = (
           64
           64
@@ -694,7 +691,6 @@ inherited frmLabs: TfrmLabs
         Caption = 'no results to graph'
         TabOrder = 2
         Visible = False
-        ExplicitWidth = 611
         object lblGraph: TLabel
           Left = 0
           Top = 72
@@ -747,7 +743,6 @@ inherited frmLabs: TfrmLabs
           PopupMenu = popChart
           TabOrder = 1
           OnMouseDown = chtChartMouseDown
-          ExplicitWidth = 514
           object serHigh: TLineSeries
             Marks.ArrowLength = 8
             Marks.Visible = False
@@ -825,7 +820,6 @@ inherited frmLabs: TfrmLabs
         OnCompare = lvReportsCompare
         OnKeyUp = lvReportsKeyUp
         OnSelectItem = lvReportsSelectItem
-        ExplicitWidth = 611
       end
     end
     object pnlRightTopHeader: TPanel
@@ -835,7 +829,6 @@ inherited frmLabs: TfrmLabs
       Height = 45
       Align = alTop
       TabOrder = 2
-      ExplicitWidth = 613
       object TabControl1: TTabControl
         Left = 1
         Top = 22
@@ -848,7 +841,6 @@ inherited frmLabs: TfrmLabs
         TabOrder = 1
         Visible = False
         OnChange = TabControl1Change
-        ExplicitWidth = 611
       end
       object pnlRightTopHeaderTop: TPanel
         Left = 1
@@ -857,7 +849,6 @@ inherited frmLabs: TfrmLabs
         Height = 21
         Align = alTop
         TabOrder = 0
-        ExplicitWidth = 611
         object lblHeading: TOROffsetLabel
           Left = 137
           Top = 1
@@ -892,18 +883,17 @@ inherited frmLabs: TfrmLabs
           TabOrder = 0
           Visible = False
           OnClick = chkMaxFreqClick
-          ExplicitLeft = 513
         end
       end
     end
     object pnlFooter: TORAutoPanel
       Left = 0
-      Top = 677
+      Top = 717
       Width = 620
       Height = 20
       Align = alBottom
       TabOrder = 3
-      ExplicitWidth = 613
+      ExplicitTop = 697
       object lblSpecimen: TLabel
         Left = 4
         Top = 28
@@ -948,7 +938,6 @@ inherited frmLabs: TfrmLabs
         Visible = False
         ItemTipColor = clWindow
         LongList = False
-        ExplicitWidth = 611
       end
     end
   end

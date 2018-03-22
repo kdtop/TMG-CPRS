@@ -352,7 +352,9 @@ function IsPendingHold(OrderID: string): boolean;
 
 implementation
 
-uses Windows, rCore, uConst, TRPCB, ORCtrls, UBAGlobals, UBACore, VAUtils;
+uses Windows, rCore, uConst, TRPCB, ORCtrls, UBAGlobals, UBACore, VAUtils
+     ,uTMGOptions   //tmg added  9/12/17
+     ;
 
 var
   uDGroupMap: TStringList;          // each string is DGroupIEN=Sequence^TopName^Name
@@ -1454,6 +1456,7 @@ procedure LockPatient(var ErrMsg: string);
 begin
   ErrMsg := sCallV('ORWDX LOCK', [Patient.DFN]);
   if Piece(ErrMsg, U, 1) = '1' then ErrMsg := '' else ErrMsg := Piece(ErrMsg, U, 2);
+  if uTMGOptions.ReadBool('Bypass order lock',False) then ErrMsg := '';
 end;
 
 procedure UnlockPatient;

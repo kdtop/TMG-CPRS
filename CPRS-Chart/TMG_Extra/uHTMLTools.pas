@@ -101,6 +101,9 @@ interface
   function  EncodeTextToSafeHTMLAttribVal(Text : string) : string;
   function  RestoreTextFromEncodedSafeHTMLAttribVal(Text : string) : string;
   procedure ResolveEmbeddedTemplates(Drawers : TObject);  //must by of type TfrmDrawers
+  function  HTMLEncode(const Data: string; var Modified : boolean): string; overload;
+  procedure HTMLEncode(const SL : TStringList); overload;
+  function  HTMLDecode(const AStr: String): String;
 
   procedure StripTags(var S : string);
   procedure StripQuotes(SL : TStrings; QtChar: char);
@@ -1406,6 +1409,103 @@ const
     end;
     Result := Text;
   end;
+
+
+  function HTMLEncode(const Data: string; var Modified : boolean): string;
+  //downloaded from here: https://stackoverflow.com/questions/2968082/is-there-a-delphi-standard-function-for-escaping-html
+  var i: Integer;
+  begin
+    result := ''; Modified := false;
+    for i := 1 to length(Data) do begin
+      case Data[i] of
+        '<': begin result := result + '&lt;'; modified := true; end;
+        '>': begin result := result + '&gt;'; modified := true; end;
+        '&': begin result := result + '&amp;'; modified := true; end;
+        '"': begin result := result + '&quot;'; modified := true; end;
+        else result := result + Data[i];
+      end; //case
+    end;
+  end;
+
+  procedure HTMLEncode(const SL : TStringList); overload;
+  var i: Integer;
+      Temp : string;
+      Modified : boolean;
+  begin
+    for i := 0 to SL.Count - 1 do begin
+      Temp := HTMLEncode(SL.Strings[i], Modified);
+      if Modified then SL.Strings[i] := Temp;
+    end;
+  end;
+
+
+  function HTMLDecode(const AStr: String): String;
+  //downloaded from here: https://stackoverflow.com/questions/1657105/delphi-html-decode
+  var
+    Sp, Rp, Cp, Tp: PChar;
+    S: String;
+    I, Code: Integer;
+  begin
+    SetLength(Result, Length(AStr));
+    Sp := PChar(AStr);
+    Rp := PChar(Result);
+    Cp := Sp;
+    try
+      while Sp^ <> #0 do begin
+        case Sp^ of
+          '&': begin
+                 Cp := Sp;
+                 Inc(Sp);
+                 case Sp^ of
+                   'a': if AnsiStrPos(Sp, 'amp;') = Sp then  { do not localize }
+                        begin
+                          Inc(Sp, 3);
+                          Rp^ := '&';
+                        end;
+                   'l',
+                   'g': if (AnsiStrPos(Sp, 'lt;') = Sp) or (AnsiStrPos(Sp, 'gt;') = Sp) then { do not localize }
+                        begin
+                          Cp := Sp;
+                          Inc(Sp, 2);
+                          while (Sp^ <> ';') and (Sp^ <> #0) do
+                            Inc(Sp);
+                          if Cp^ = 'l' then
+                            Rp^ := '<'
+                          else
+                            Rp^ := '>';
+                        end;
+                   'n': if AnsiStrPos(Sp, 'nbsp;') = Sp then  { do not localize }
+                        begin
+                          Inc(Sp, 4);
+                          Rp^ := ' ';
+                        end;
+                   'q': if AnsiStrPos(Sp, 'quot;') = Sp then  { do not localize }
+                        begin
+                          Inc(Sp,4);
+                          Rp^ := '"';
+                        end;
+                   '#': begin
+                          Tp := Sp;
+                          Inc(Tp);
+                          while (Sp^ <> ';') and (Sp^ <> #0) do
+                            Inc(Sp);
+                          SetString(S, Tp, Sp - Tp);
+                          Val(S, I, Code);
+                          Rp^ := Chr((I));
+                        end;
+                   else Exit;
+                 end;//case
+               end;  //'&' case
+          else Rp^ := Sp^;
+        end; //case
+        Inc(Rp);
+        Inc(Sp);
+      end;  //while
+    except
+    end;
+    SetLength(Result, Rp - PChar(Result));
+  end;
+
 
   type
     TFontSizeData = record

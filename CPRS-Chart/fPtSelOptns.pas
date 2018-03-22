@@ -114,6 +114,7 @@ var
   frmPtSelOptns: TfrmPtSelOptns;
   clinDoSave, clinSaveToday: boolean;
   clinDefaults: string;
+  LastSelectedOption : Integer; //stores the last selected button
 
 implementation
 
@@ -562,19 +563,31 @@ end;
 
 procedure TfrmPtSelOptns.SetDefaultPtList(Dflt: string);
 begin
-  if Length(Dflt) > 0 then                   // if default patient list available, use it
-  begin
-    radDflt.Caption := '&Default: ' + Dflt;
-    radDflt.Checked := True;                 // causes radHideSrcClick to be called
-  end
-  else                                       // otherwise, select from all patients
-  begin
-    radDflt.Enabled := False;
-    radAll.Checked := True;                  // causes radHideSrcClick to be called
-    bvlPtList.TabStop := True;
-    bvlPtList.Hint := 'No default radio button unavailable 1 of 7 to move to the other patient list categories press tab';
-    // fixes CQ #4716: 508 - No Default rad btn on Patient Selection screen doesn't read in JAWS. [CPRS v28.1] (TC).
-  end;
+    if Length(Dflt) > 0 then                   // if default patient list available, use it
+    begin
+      radDflt.Caption := '&Default: ' + Dflt;
+      radDflt.Checked := True;                 // causes radHideSrcClick to be called
+    end
+    else                                       // otherwise, select from all patients
+    begin
+      radDflt.Enabled := False;
+      radAll.Checked := True;                  // causes radHideSrcClick to be called
+      bvlPtList.TabStop := True;
+      bvlPtList.Hint := 'No default radio button unavailable 1 of 7 to move to the other patient list categories press tab';
+      // fixes CQ #4716: 508 - No Default rad btn on Patient Selection screen doesn't read in JAWS. [CPRS v28.1] (TC).
+    end;
+    if LastSelectedOption>0 then begin
+      case LastSelectedOption of
+        TAG_SRC_DFLT: radDflt.Checked := True;
+        TAG_SRC_PROV: radProviders.checked := true;
+        TAG_SRC_TEAM: radTeams.Checked := True;
+        TAG_SRC_SPEC: radSpecialties.Checked := True;
+        TAG_SRC_CLIN: radClinics.Checked := True;
+        TAG_SRC_WARD: radWards.Checked := True;
+        TAG_SRC_HX:   radHistory.Checked := True;  //kt added
+        TAG_SRC_ALL: radAll.Checked := True;
+      end;
+    end;
 end;
 
 procedure TfrmPtSelOptns.UpdateDefault;

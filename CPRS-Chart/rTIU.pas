@@ -119,7 +119,7 @@ procedure PutEditedNote(var UpdatedDoc: TCreatedDoc; const NoteRec: TNoteRec; No
 procedure PutTextOnly(var ErrMsg: string; NoteText: TStrings; NoteIEN: Int64);
 procedure SetText(var ErrMsg: string; NoteText: TStrings; NoteIEN: Int64; Suppress: Integer);
 procedure TMGLocalBackup(Text : TStrings; NoteIEN : int64);  //kt 10/12/16
-function  TMGProcessNote(Lines : TStrings; var ErrStr : string): TStrings;  //kt 3/16
+function  TMGProcessNote(Lines : TStrings; NoteIEN : string; var ErrStr : string): TStrings;  //kt 3/16
 function  TMGResolveMacro(MacroName: string; Lines : TStrings; var ErrStr : string): string;
 procedure InitParams(NoteIEN: Int64; Suppress: Integer);
 procedure UpdateAdditionalSigners(IEN: integer; Signers: TStrings);
@@ -1150,7 +1150,7 @@ begin
   end;
 end;
 
-function TMGProcessNote(Lines : TStrings; var ErrStr : string): TStrings;
+function TMGProcessNote(Lines : TStrings; NoteIEN : string; var ErrStr : string): TStrings;
 //kt added entire function 3/16
 var
   line, s, RPCResult : string;
@@ -1164,6 +1164,7 @@ begin
   RPCBrokerV.Param[0].Value := '.X';  // not used
   RPCBrokerV.param[0].ptype := list;
   RPCBrokerV.Param[0].Mult['"DFN"'] := Patient.DFN;
+  RPCBrokerV.Param[0].Mult['"NoteIEN"'] := NoteIEN;  //added 1/15/18
   TxtIdx := 0;
   i := 0;
   while i < Lines.Count do begin

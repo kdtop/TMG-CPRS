@@ -172,6 +172,8 @@ const
   OD_IMAGING   = 160;
   OD_VITALS    = 171;  // use 170 for ORWD GENERIC VITALS, 171 for GMRVOR
   OD_MEDIV     = 180;
+  OD_NUR_OTP   = 800;  //TMG
+  OD_NUR_OSP   = 801;  //TMG
   OD_TEXTONLY  = 999;
   OM_NAV       = 1001;
   OM_QUICK     = 1002;
@@ -316,6 +318,7 @@ const
   NC_CUSTOM     = 6;                             // Note Context - custom view
   //Text Search CQ: HDS00002856
   NC_SEARCHTEXT = 7;                             // Note Content - search for text
+  NC_OTHER_UNSIGNED = 22700;                     // Note Content - all others' unsigned notes  //TMG  9/12/17
 
   { Surgery View Contexts }
   SR_RECENT     = 0;

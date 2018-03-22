@@ -192,8 +192,8 @@ object frmPtAdd: TfrmPtAdd
         ParentFont = False
       end
       object PrefixLabel: TLabel
-        Left = 25
-        Top = 187
+        Left = 24
+        Top = 210
         Width = 73
         Height = 13
         Caption = 'Patient Type'
@@ -204,6 +204,19 @@ object frmPtAdd: TfrmPtAdd
         Font.Style = [fsBold]
         ParentFont = False
         Visible = False
+      end
+      object Label12: TLabel
+        Left = 9
+        Top = 187
+        Width = 94
+        Height = 13
+        Caption = 'Sequel Acct No.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
       end
       object LNameEdit: TEdit
         Left = 103
@@ -284,7 +297,7 @@ object frmPtAdd: TfrmPtAdd
       end
       object PtTypeComboBox: TComboBox
         Left = 103
-        Top = 184
+        Top = 205
         Width = 170
         Height = 21
         Anchors = [akLeft, akTop, akRight]
@@ -306,14 +319,24 @@ object frmPtAdd: TfrmPtAdd
           'TRICARE')
       end
       object VeteranCheckBox: TCheckBox
-        Left = 104
-        Top = 208
+        Left = 103
+        Top = 232
         Width = 161
         Height = 17
         Caption = 'Patient Is A Veteran'
         TabOrder = 8
         Visible = False
         OnClick = VeteranCheckBoxClick
+      end
+      object SequelAcctEdit: TEdit
+        Left = 103
+        Top = 183
+        Width = 170
+        Height = 21
+        Anchors = [akLeft, akTop, akRight]
+        TabOrder = 9
+        OnChange = SequelAcctEditChange
+        OnKeyPress = SequelAcctEditKeyPress
       end
     end
     object tsExtra: TTabSheet

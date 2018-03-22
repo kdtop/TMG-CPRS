@@ -672,6 +672,7 @@ if not (Length(cboPatient.ItemID) > 0) then  //*DFN*
     Exit;
   end;
   NewDFN := cboPatient.ItemID;  //*DFN*
+  LastSelectedOption := frmPtSelOptns.SrcType;
   if FLastPt <> cboPatient.ItemID then
   begin
     HasActiveFlg(FlagList, HasFlag, cboPatient.ItemID);

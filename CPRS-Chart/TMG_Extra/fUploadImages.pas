@@ -1751,8 +1751,35 @@ AbortPoint:
   end;
 
   procedure TfrmImageUpload.PolTimerTimer(Sender: TObject);
+      function CountPNGsInFolder:integer;
+      var
+        tsr: TSearchRec;
+      begin
+        result := 0;
+        if FindFirst ( FScanDir+ '*.png', faAnyFile and not faDirectory, tsr ) = 0 then begin
+          repeat
+            inc ( result );
+          until FindNext ( tsr ) <> 0;
+          FindClose ( tsr );
+        end;
+      end;
   begin
+    if uTMGOptions.ReadBool('Scan Enabled',false)=false then begin
+      PolTimer.Enabled := false;
+      exit;
+    end;
+    //ELH added if below  4/9/18
     PolTimer.Enabled := false;
+    if CountPNGsInFolder>0 then begin
+      if messagedlg('Images are waiting for upload'+#13#10+'Would you like to upload them now?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then begin
+        if messagedlg('Do you want to be reminded again about these images?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+          PolTimer.Interval := 600000;
+          PolTimer.Enabled := true;
+        end;
+        exit;
+      end;
+    end;
+    PolTimer.Interval := 5000;
     UploadedDocs.clear;
     try
       if Assigned(frmImages) and frmImages.AutoScanUpload.Checked then begin

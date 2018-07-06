@@ -12,14 +12,13 @@ inherited frmOptions: TfrmOptions
   Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  ExplicitWidth = 443
   ExplicitHeight = 397
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 339
-    Width = 437
+    Top = 335
+    Width = 429
     Height = 30
     HelpContext = 9999
     Align = alBottom
@@ -64,8 +63,8 @@ inherited frmOptions: TfrmOptions
   object pnlMain: TPanel [1]
     Left = 0
     Top = 0
-    Width = 437
-    Height = 339
+    Width = 429
+    Height = 335
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
@@ -74,10 +73,10 @@ inherited frmOptions: TfrmOptions
     object pagOptions: TPageControl
       Left = 5
       Top = 5
-      Width = 427
-      Height = 329
+      Width = 419
+      Height = 325
       HelpContext = 9999
-      ActivePage = tsNotes
+      ActivePage = tsImages
       Align = alClient
       TabOrder = 0
       OnEnter = pagOptionsEnter
@@ -85,8 +84,8 @@ inherited frmOptions: TfrmOptions
         HelpContext = 9700
         Caption = 'General'
         DesignSize = (
-          419
-          301)
+          411
+          297)
         object bvlCoverDays: TBevel
           Left = 125
           Top = 16
@@ -486,8 +485,8 @@ inherited frmOptions: TfrmOptions
         end
         object lvwNotifications: TCaptionListView
           Left = 0
-          Top = 142
-          Width = 419
+          Top = 138
+          Width = 411
           Height = 159
           HelpContext = 9035
           Align = alBottom
@@ -653,8 +652,8 @@ inherited frmOptions: TfrmOptions
         end
         object lvwOrderChecks: TCaptionListView
           Left = 0
-          Top = 93
-          Width = 419
+          Top = 89
+          Width = 411
           Height = 208
           HelpContext = 9041
           Align = alBottom
@@ -921,8 +920,8 @@ inherited frmOptions: TfrmOptions
         Caption = 'Notes'
         ImageIndex = 4
         DesignSize = (
-          419
-          301)
+          411
+          297)
         object bvlNotesNotes: TBevel
           Left = 88
           Top = 16
@@ -1375,8 +1374,8 @@ inherited frmOptions: TfrmOptions
         Caption = 'Graphs'
         ImageIndex = 6
         DesignSize = (
-          419
-          301)
+          411
+          297)
         object bvlGraphSettings: TBevel
           Left = 104
           Top = 16

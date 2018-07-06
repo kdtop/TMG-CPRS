@@ -2,8 +2,8 @@ object frmPatientPhotoID: TfrmPatientPhotoID
   Left = 0
   Top = 0
   Caption = 'Patient Photo ID'
-  ClientHeight = 414
-  ClientWidth = 366
+  ClientHeight = 627
+  ClientWidth = 684
   Color = clBtnFace
   Constraints.MinWidth = 350
   Font.Charset = DEFAULT_CHARSET
@@ -63,8 +63,8 @@ object frmPatientPhotoID: TfrmPatientPhotoID
   OnDestroy = FormDestroy
   OnShow = FormShow
   DesignSize = (
-    366
-    414)
+    684
+    627)
   PixelsPerInch = 96
   TextHeight = 13
   object lblDateOfPhoto: TLabel
@@ -81,7 +81,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     ParentFont = False
   end
   object PatientImage: TImage
-    Left = 326
+    Left = 644
     Top = 23
     Width = 32
     Height = 32
@@ -182,8 +182,8 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     WordWrap = True
   end
   object btnOK: TBitBtn
-    Left = 248
-    Top = 365
+    Left = 566
+    Top = 578
     Width = 110
     Height = 41
     Anchors = [akRight, akBottom]
@@ -268,21 +268,25 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       FFFFFFFFFFFFFFFFFFFFFFFFFFFF659E66458A463D864054975A61A1686AA670
       6AA67061A1685497593D8640458A46659E66FFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFF}
+    ExplicitLeft = 248
+    ExplicitTop = 365
   end
   object pnlIEHolder: TPanel
     Left = 8
     Top = 62
-    Width = 350
-    Height = 291
+    Width = 668
+    Height = 504
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelInner = bvLowered
     BevelOuter = bvLowered
     TabOrder = 1
+    ExplicitWidth = 350
+    ExplicitHeight = 291
     object WebBrowser: TWebBrowser
       Left = 2
       Top = 2
-      Width = 346
-      Height = 287
+      Width = 664
+      Height = 500
       TabStop = False
       Align = alClient
       TabOrder = 0
@@ -291,7 +295,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       ExplicitWidth = 334
       ExplicitHeight = 276
       ControlData = {
-        4C000000C3230000AA1D00000000000000000000000000000000000000000000
+        4C000000A0440000AD3300000000000000000000000000000000000000000000
         000000004C000000000000000000000001000000E0D057007335CF11AE690800
         2B2E126208000000000000004C0000000114020000000000C000000000000046
         8000000000000000000000000000000000000000000000000000000000000000
@@ -301,7 +305,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
   object cboDateOfPhoto: TComboBox
     Left = 42
     Top = 27
-    Width = 233
+    Width = 551
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     ItemHeight = 13
@@ -310,10 +314,11 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     OnChange = cboDateOfPhotoChange
     Items.Strings = (
       '<none>')
+    ExplicitWidth = 233
   end
   object btnAddPhotoID: TBitBtn
     Left = 8
-    Top = 365
+    Top = 578
     Width = 160
     Height = 41
     Anchors = [akLeft, akBottom]
@@ -451,6 +456,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+    ExplicitTop = 365
   end
   object btnLeft: TBitBtn
     Left = 8
@@ -536,7 +542,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
   end
   object btnRight: TBitBtn
-    Left = 281
+    Left = 599
     Top = 23
     Width = 28
     Height = 28
@@ -618,5 +624,6 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
       54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
       ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
+    ExplicitLeft = 281
   end
 end

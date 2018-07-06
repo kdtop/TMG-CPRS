@@ -174,6 +174,7 @@ begin
       lblPtAge.Caption := FormatFMDateTime('mmm dd,yyyy', Patient.DOB) + ' (' + IntToStr(Patient.Age) + ')';
       pnlPatient.Caption := lblPtName.Caption + ' ' + lblPtSSN.Caption + ' ' + lblPtAge.Caption;
    end;
+   frmSingleNote.FormStyle := fsStayOnTop;
    frmSingleNote.Show;  //<-- NOTE: the OnClose event sets close action to caFree --> all will be freed automatically
    //FreeAndNil(frmSingleNote);
 end;
@@ -829,6 +830,10 @@ var
 
 begin
   AllowPaste := true; //default
+  exit;
+  //ELH - (5/7/18) This function was clearing the clipboard of HTML that Kevin was wanted
+  //      to actually paste. We weren't sure of the original intent of the procedure to
+  //      for now it just exits out after setting "AllowPaste" to true.
   if not Clipboard.HasFormat(CF_HTML) then exit; //for now, I am only going to modify HTML pastes.
   try
     TempCBText := TStringList.Create;

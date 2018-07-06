@@ -99,7 +99,7 @@ end;
 
 procedure TfrmPtHTMLDemo.FormCreate(Sender: TObject);
 var
-  i, MaxWidth, AWidth, AHeight: Integer;
+  MaxWidth, AHeight: Integer;
   Rect: TRect;
   rtDemographics: TStringList;  //added to assign richtext  elh 4/23/14
 begin

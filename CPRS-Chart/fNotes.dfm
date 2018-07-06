@@ -276,7 +276,7 @@ inherited frmNotes: TfrmNotes
           OnClick = btnSortNoneClick
         end
         object btnHideTitle: TSpeedButton
-          Left = 199
+          Left = 280
           Top = 3
           Width = 50
           Height = 13
@@ -296,7 +296,7 @@ inherited frmNotes: TfrmNotes
           OnClick = btnHideTitleClick
         end
         object btnAddHide: TSpeedButton
-          Left = 191
+          Left = 270
           Top = 3
           Width = 10
           Height = 13
@@ -356,8 +356,8 @@ inherited frmNotes: TfrmNotes
           OnClick = mnuSearchNotesClick
         end
         object btnAdminDocs: TSpeedButton
-          Left = 255
-          Top = 3
+          Left = 190
+          Top = 2
           Width = 80
           Height = 13
           AllowAllUp = True
@@ -801,8 +801,8 @@ inherited frmNotes: TfrmNotes
             Left = 23
             Top = 0
             Width = 145
-            Height = 21
-            ItemHeight = 13
+            Height = 18
+            ItemHeight = 0
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0

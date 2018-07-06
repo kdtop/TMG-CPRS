@@ -2,8 +2,8 @@ object frmMemoEdit: TfrmMemoEdit
   Left = 0
   Top = 0
   Caption = 'Edit Text'
-  ClientHeight = 437
-  ClientWidth = 529
+  ClientHeight = 316
+  ClientWidth = 444
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -24,14 +24,14 @@ object frmMemoEdit: TfrmMemoEdit
   OldCreateOrder = False
   Position = poOwnerFormCenter
   DesignSize = (
-    529
-    437)
+    444
+    316)
   PixelsPerInch = 96
   TextHeight = 13
   object lblMessage: TLabel
     Left = 8
     Top = 8
-    Width = 82
+    Width = 83
     Height = 15
     Caption = 'Edit Text Below'
     Font.Charset = ANSI_CHARSET
@@ -44,18 +44,20 @@ object frmMemoEdit: TfrmMemoEdit
   object memEdit: TMemo
     Left = 0
     Top = 29
-    Width = 529
-    Height = 369
+    Width = 444
+    Height = 248
     Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
       '')
     ReadOnly = True
     TabOrder = 0
     OnKeyPress = memEditKeyPress
+    ExplicitWidth = 529
+    ExplicitHeight = 369
   end
   object btnDone: TBitBtn
-    Left = 429
-    Top = 405
+    Left = 344
+    Top = 284
     Width = 94
     Height = 25
     Anchors = [akRight, akBottom]
@@ -119,24 +121,30 @@ object frmMemoEdit: TfrmMemoEdit
       0303030303030303030303030303030303030303030303030303030303030303
       0303}
     NumGlyphs = 2
+    ExplicitLeft = 429
+    ExplicitTop = 405
   end
   object btnSelectAll: TButton
     Left = 8
-    Top = 404
+    Top = 285
     Width = 82
     Height = 25
+    Anchors = [akLeft, akBottom]
     Caption = 'Select &All'
     TabOrder = 2
     OnClick = btnSelectAllClick
+    ExplicitTop = 404
   end
   object btnSave: TButton
     Left = 96
-    Top = 404
+    Top = 285
     Width = 81
     Height = 25
+    Anchors = [akLeft, akBottom]
     Caption = '&Save'
     TabOrder = 3
     OnClick = btnSaveClick
+    ExplicitTop = 404
   end
   object SaveTextFileDialog: TSaveTextFileDialog
     DefaultExt = 'txt'

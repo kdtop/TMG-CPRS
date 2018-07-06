@@ -533,7 +533,7 @@ inherited frmImages: TfrmImages
   end
   object timLoadImages: TTimer
     Enabled = False
-    Interval = 300000
+    Interval = 600000
     OnTimer = timLoadImagesTimer
     Left = 104
     Top = 19

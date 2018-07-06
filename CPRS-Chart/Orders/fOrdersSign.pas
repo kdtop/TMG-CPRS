@@ -133,7 +133,7 @@ implementation
 uses
   Hash, rCore, rOrders, uConst, fOrdersPrint, uCore, uOrders, uSignItems, fOrders,
   fPCELex, rPCE, fODConsult, fBALocalDiagnoses, fClinicWardMeds, fFrame, rODLab, fRptBox,
-  uSavedSignature, //kt added 11/15
+  uSavedSignature, uTMGOptions,//kt added 11/15
   VAUtils;
 
 
@@ -338,6 +338,7 @@ begin
   PrintLoc := 0;
   EncLocIEN := 0;
   DoNotPrint := False;
+  //DoNotPrint := uTMGOptions.ReadBool('DO NOT PRINT ORDER AFTER SIGNATURE',TRUE);    //ELH  Autoprint changed to parameter, for future use if needed
   if BILLING_AWARE then begin
     tempOrderList := TStringList.Create;
     tempOrderList.Clear;

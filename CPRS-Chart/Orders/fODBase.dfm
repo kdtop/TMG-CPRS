@@ -97,6 +97,7 @@ inherited frmODBase: TfrmODBase
     Top = 153
     Width = 153
     Height = 17
+    Anchors = [akLeft, akBottom]
     Caption = 'Copy order when closed'
     TabOrder = 5
   end

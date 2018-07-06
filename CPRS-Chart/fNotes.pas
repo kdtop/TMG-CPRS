@@ -49,7 +49,8 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
-  VA508ImageListLabeler, OleCtrls, ToolWin;
+  uConst,
+  VA508ImageListLabeler, OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
   TEditModes = (emNone,emText,emHTML);                //kt 9/11
@@ -4391,6 +4392,18 @@ begin
         tmpList.Clear;
         FDocList.Clear;
       end;
+      //TMG added this section  4/9/18
+      if Status <> IntToStr(NC_OTHER_UNSIGNED) then begin
+        ListNotesForTree(tmpList, NC_OTHER_UNSIGNED, 0, 0, 0, 0, TreeAscending);
+        FilterTitlesForHidden(tmpList); //kt added
+        if tmpList.Count > 0 then begin
+          CreateListItemsforDocumentTree(FDocList, tmpList, NC_OTHER_UNSIGNED, GroupBy, TreeAscending, CT_NOTES);
+          UpdateTreeView(FDocList, tvNotes);
+        end;
+        tmpList.Clear;
+        FDocList.Clear;
+      end;
+      //TMG end addition  4/9/18
       ListNotesForTree(tmpList, StrToIntDef(Status, 0), FMBeginDate, FMEndDate, Author, MaxDocs, TreeAscending);
       FilterTitlesForHidden(tmpList); //kt added
       if btnAdminDocs.Down then FilterTitlesForAdmin(tmpList); //elh added 1/24/17
@@ -5384,9 +5397,12 @@ procedure TfrmNotes.popNoteMemoProcessClick(Sender: TObject);
 //kt added entire function    5/1/13
 var ProcessedNote : TStrings;  //pointer to other objects
     OriginalNote : TStringList;
+    ErrMsg:string;
 begin
   inherited;
   if not boolAutosaving then DoAutoSave;      //elh added 1/15/18
+  //What call will properly save text for Processing Note????
+  //PutTextOnly(ErrMsg, memNewNote.Lines, lstNotes.GetIEN(EditingIndex));
   OriginalNote := TStringList.Create;
   if (vmHTML in FViewMode) then begin
     SplitHTMLToArray(WrapHTML(GetEditorHTMLText), OriginalNote);
@@ -5730,6 +5746,7 @@ type
 
   begin {SetDisplayToHTMLvsText.SetHTMLorTextEditor}
     FHTMLEditMode := emHTML_MODE[HTMLEditMode];
+    CallV('TMG CPRS SET HTML MODE',[HTMLEditMode]);
     FViewMode := [vmEdit] + [vmHTML_MODE[HTMLEditMode]];
     SetPanelVisibility(pvmWriteMode,HTMLEditMode);
     //pnlRight.Repaint; //kt TEMP

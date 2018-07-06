@@ -26,7 +26,6 @@ object frmPtHTMLDemo: TfrmPtHTMLDemo
     Align = alTop
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
-    ExplicitHeight = 397
   end
   object pnlBottom: TPanel
     Left = 0
@@ -35,7 +34,6 @@ object frmPtHTMLDemo: TfrmPtHTMLDemo
     Height = 67
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 1
-    ExplicitTop = 217
     object cmdPrint: TButton
       Left = 427
       Top = 20

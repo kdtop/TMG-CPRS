@@ -318,7 +318,7 @@ const
   NC_CUSTOM     = 6;                             // Note Context - custom view
   //Text Search CQ: HDS00002856
   NC_SEARCHTEXT = 7;                             // Note Content - search for text
-  NC_OTHER_UNSIGNED = 22700;                     // Note Content - all others' unsigned notes  //TMG  9/12/17
+  NC_OTHER_UNSIGNED = 8;                      // Note Content - all others' unsigned notes  //TMG  9/12/17
 
   { Surgery View Contexts }
   SR_RECENT     = 0;
@@ -383,10 +383,10 @@ const
   IMG_BLANK      =  14;
 
   { TIU TreeView context strings}
-  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_BY_DATE] of string =
-    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range'),
-     ('','Related Documents','Medicine Results',' ',' ',' '),
-     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range'));
+  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_OTHER_UNSIGNED] of string =
+    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes'),
+     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' '),
+     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' '));
 
   CC_ALL        = 1;                             // Consult context - all Consults
   CC_BY_STATUS  = 2;                             // Consult context - Consults by Status

@@ -201,6 +201,12 @@ type
     mnuLabText: TMenuItem;
     pnlSchedule: TKeyClickPanel;
     timSchedule: TTimer;
+    mnuAnticoagulationTool: TMenuItem;
+    timCheckSequel: TTimer;
+    lblLoadSequelPat: TLabel;
+    procedure lblLoadSequelPatClick(Sender: TObject);
+    procedure timCheckSequelTimer(Sender: TObject);
+    procedure mnuAnticoagulationToolClick(Sender: TObject);
     procedure pnlScheduleClick(Sender: TObject);
     procedure timScheduleTimer(Sender: TObject);
     procedure mnuLabTextClick(Sender: TObject);
@@ -439,6 +445,7 @@ type
     procedure DrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect; Color : TColor; Active: Boolean); //kt 9/11 added
     procedure InsertFormLetterPrintingMenuItem(MenuFile : TMenuItem);                                                     //kt 9/11 added
     procedure CallERx(action: Integer);   //ERx 9/4/12
+    procedure OpenChartByDFN(NewDFN:string);  //TMG 6/11/18
   public
     FProccessingNextClick : boolean;    //kt    8/28/12
     EnduringPtSelSplitterPos, frmFrameHeight, pnlPatientSelectedHeight: integer;
@@ -517,11 +524,12 @@ uses
   {$IFDEF CCOWBROKER}
   , CCOW_const
   {$ENDIF}
-  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uTMGOptions   //kt added
-  , fIntracarePtLbl, fPtAuditLog, fImagePatientPhotoID, fBillableItems, ColorUtil       //kt added
-  , fMemoEdit                               //kt  testing purposes only can be removed later
-  , fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule, fSMSLabText      //kt
-  , VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit, fSingleNote,   //kt
+  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uTMGOptions,   //kt added
+  fIntracarePtLbl, fPtAuditLog, fImagePatientPhotoID, fBillableItems, ColorUtil,       //kt added
+  fMemoEdit,                               //kt  testing purposes only can be removed later
+  fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule, fSMSLabText,      //kt
+  VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit, fSingleNote,    //kt
+  fAnticoagulator,  //kt
   fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
   fTest_RW_HTML  //kt TEMP, KILL LATER...
   ;
@@ -1222,6 +1230,7 @@ begin
   GetCurrentPatientLoad(pnlSchedule); // 12/12/17  Load pat list before timer starts
   timSchedule.Interval := uTMGOptions.ReadInteger('Appt Timer Interval',1000);
   timSchedule.Enabled := true;
+  //timCheckSequel.Enabled := True;
   //kt end mod ------------------- /
 end;
 
@@ -1920,6 +1929,20 @@ begin
     7: Result := CT_LABS;
     8: Result := CT_REPORTS;
   end;*)
+end;
+
+procedure TfrmFrame.timCheckSequelTimer(Sender: TObject);
+begin
+  inherited;
+  timCheckSequel.Enabled := false;
+  CurSequelPat := TCurrentSequelPat.Create();
+  if (CurSequelPat.New) and (CurSequelPat.DFN<>Patient.DFN) then begin
+     if messagedlg('Would you like to open '+CurSequelPat.Name+'''s chart?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+         Showmsg('Changing to DFN '+CurSequelPat.DFN);
+     end;
+  end;
+  CurSequelPat.Free;
+  timCheckSequel.Enabled := true;
 end;
 
 { File Menu Events ------------------------------------------------------------------------- }
@@ -5004,6 +5027,18 @@ begin
   RenewAlert(XQAID);
 end;
 
+procedure TfrmFrame.mnuAnticoagulationToolClick(Sender: TObject);
+//kt added 4/2018
+var
+  frmAnticoagulate: TfrmAnticoagulate;
+begin
+  inherited;
+  frmAnticoagulate := TfrmAnticoagulate.Create(Self);
+  frmAnticoagulate.Initialize(Patient.DFN);
+  frmAnticoagulate.ShowModal;
+  frmAnticoagulate.Free;
+end;
+
 procedure TfrmFrame.mnuBillableItemsClick(Sender: TObject);
 //tmg added entire function  4/9/15  //kt
 var
@@ -5233,6 +5268,22 @@ begin
      //end CQ7782
      end;}
   ViewInfo(mnuInsurance);
+end;
+
+procedure TfrmFrame.lblLoadSequelPatClick(Sender: TObject);
+begin
+  inherited;
+  CurSequelPat := TCurrentSequelPat.Create();
+  //if (CurSequelPat.New) and (CurSequelPat.DFN<>Patient.DFN) then begin
+  if (CurSequelPat.DFN<>'') and (CurSequelPat.DFN<>Patient.DFN) then begin
+     if messagedlg('Would you like to open '+CurSequelPat.Name+'''s chart?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+        OpenChartByDFN(CurSequelPat.DFN);
+     end;
+  end else if CurSequelPat.DFN=Patient.DFN then begin
+    Showmsg('Patient is already open in CPRS');
+  end;
+           
+  CurSequelPat.Free;
 end;
 
 procedure TfrmFrame.ViewAuditTrail1Click(Sender: TObject);
@@ -5700,6 +5751,23 @@ begin
   DragFinish(THandle(Msg.WParam));
 end;
 
+procedure TfrmFrame.OpenChartByDFN(NewDFN:string)  ;  //TMG added entire function 6/11/18
+begin
+  if NewDFN=Patient.DFN then exit;
+  Patient.DFN := NewDFN;     // The patient object in uCore must have been created already!
+  FRefreshing := TRUE;
+  try
+    Encounter.Clear;
+    Changes.Clear;
+    //frmFrame.UpdatePtInfoOnRefresh;
+    if Patient.Inpatient then Encounter.VisitCategory := 'H';
+    mnuFileOpenClick(Self);
+    //DisplayEncounterText;
+  finally
+    FRefreshing := FALSE;
+    OrderPrintForm := FALSE;
+  end;
+end;
 
 
 

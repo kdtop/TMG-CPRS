@@ -42,7 +42,7 @@ unit uCore;
 interface
 
 uses SysUtils, Windows, Classes, Forms, ORFn, rCore, uConst, ORClasses, uCombatVet
-     ,Graphics,ORNet //kt Added
+     ,Graphics,ORNet,VAUtils //kt Added
      ;
 
 type
@@ -446,9 +446,34 @@ type
     HDR      : String;         //HDR is source of data if = 1
   end;
 
+  TCurrentSequelPat = class   //kt TMG added 6/5/18
+  private
+    FName: string;
+    FDOB: TDateTime;
+    FFMDOB: TFMDateTime;
+    FAcctNum: string;
+    FDFN: string;
+    FWindowText: string;
+    FNew: boolean;
+  public
+    procedure Clear;
+    constructor Create;
+    procedure SetPatientText();
+    property    Name           :string      read FName;
+    property    DOB            :TDateTime   read FDOB;
+    property    FMDOB          :TFMDateTime read FFMDOB;
+    property    AcctNum        :string      read FAcctNum;
+    property    DFN            :string      read FDFN;
+    property    WindowText     :string      read FWindowText;
+    property    New            :boolean     read FNew;
+  end;
+
 var
   User: TUser;
   Patient: TPatient;
+  CurSequelPat:TCurrentSequelPat;   //TMG added 6/5/18
+  SequelWindowText:string;          //TMG added 6/5/18
+  LastDFNFound:string;              //TMG added 6/5/18
   Encounter: TEncounter = nil;
   SavedEncounter: TEncounter = nil;
   Changes: TChanges;
@@ -831,6 +856,90 @@ procedure TUser.SetCurrentPrinter(Value: string);
 //   It wasn't grouped here with other TUser procs.
 begin
   FCurrentPrinter := Value;
+end;
+
+{ TCurrentSequelPat methods ------------------------------------------------------------------------- }
+//TMG added all these methods
+procedure TCurrentSequelPat.Clear();
+begin
+  FName := '';
+  FDOB := 0;
+  FFMDOB := 0;
+  FAcctNum := '';
+  FWindowText := '';
+  uCore.SequelWindowText := '';
+  FNew := false;
+end;
+
+function EnumWindowsProc(hwnd: HWND; lParam: LPARAM): BOOL; stdcall;
+var
+  s: string;
+  IsVisible, IsOwned, IsAppWindow: Boolean;
+begin
+  Result := True;//carry on enumerating
+
+  IsVisible := IsWindowVisible(hwnd);
+  if not IsVisible then
+    exit;
+
+  IsOwned := GetWindow(hwnd, GW_OWNER)<>0;
+  if IsOwned then
+    exit;
+
+  {IsAppWindow := GetWindowLongPtr(hwnd, GWL_STYLE) and WS_EX_APPWINDOW<>0;
+  if not IsAppWindow then
+    exit;}
+
+  SetLength(s, GetWindowTextLength(hwnd));
+  GetWindowText(hwnd, PChar(s), Length(s)+1);
+  if pos('SequelMed',s)>0 then uCore.SequelWindowText := s;
+end;
+
+procedure TCurrentSequelPat.SetPatientText();
+    function IsDate(str: string): Boolean;
+    var
+      dt: TDateTime;
+    begin
+      Result := True;
+      try
+        dt := StrToDate(str);
+      except
+        Result := False;
+      end;
+    end;
+begin
+   FWindowText := uCore.SequelWindowText;
+   //For testing only -> FWindowText := 'SequelMed GROUP sequelmed TAMMY HENSLEY 321213 03/15/1964, P# 43780 - [Patient Find]';
+   FName := piece(WindowText,' ',5)+','+piece(WindowText,' ',4);
+   FAcctNum := piece(WindowText,' ',6);
+   if (FAcctNum<>'') and (IsDate(piece(piece(WindowText,' ',7),',',1))) then begin
+     FDOB := strtodate(piece(piece(WindowText,' ',7),',',1));
+     FFMDOB := DateTimeToFMDateTime(FDOB);
+     FDFN := sCallV('TMG CPRS FIND PATIENT DFN',[FAcctNum,FName,FMDTToStr(FFMDOB)]);
+     if FDFN='0' then begin
+       Showmsg('Could not find patient in VistA'+#13#10+FWindowText);
+       Clear;
+       LastDFNFound := '0';
+     end else begin
+       FNew := FDFN<>LastDFNFound;
+       LastDFNFound := FDFN;
+     end;
+  end else begin
+   Showmsg('No patient selected in SequelMed');
+   Clear;
+   LastDFNFound := '0';
+  end;
+end;
+
+constructor TCurrentSequelPat.Create;
+begin
+  Clear;
+  EnumWindows(@EnumWindowsProc, 0);
+  if uCore.SequelWindowText<>'' then SetPatientText
+  else ShowMsg('SequelMed does not appear to be running');
+  //FName := 'zztest,baby';
+  //FDOB := '1/1/15';
+  //FAcctNum := '321111';
 end;
 
 { TPatient methods ------------------------------------------------------------------------- }

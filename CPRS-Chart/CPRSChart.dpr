@@ -404,7 +404,8 @@ uses
   uTMGAllscriptsDriver in 'TMG_Extra\uTMGAllscriptsDriver.pas',
   uTMGDiffRecord in 'TMG_Extra\uTMGDiffRecord.pas',
   Diff_NP in 'TMG_Extra\Diff_NP.pas',
-  fODTMGOTP in 'TMG_Extra\fODTMGOTP.pas' {frmODTMGOTP};
+  fODTMGOTP in 'TMG_Extra\fODTMGOTP.pas' {frmODTMGOTP},
+  fAnticoagulator in 'TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas' {frmAnticoagulate};
 
 {$R *.TLB}
 

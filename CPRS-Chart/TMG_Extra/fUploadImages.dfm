@@ -4061,7 +4061,7 @@ object frmImageUpload: TfrmImageUpload
     Top = 364
     Width = 193
     Height = 21
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 17
     Text = 'cmbWidth'
     Visible = False

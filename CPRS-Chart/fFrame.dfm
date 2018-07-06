@@ -2,7 +2,7 @@ inherited frmFrame: TfrmFrame
   Left = 196
   Top = 119
   Caption = 'p'
-  ClientHeight = 602
+  ClientHeight = 642
   ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
@@ -15,14 +15,14 @@ inherited frmFrame: TfrmFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   ExplicitWidth = 880
-  ExplicitHeight = 656
+  ExplicitHeight = 696
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
     Width = 872
-    Height = 602
+    Height = 642
     Align = alClient
     Caption = 'No patient is currently selected'
     Font.Charset = DEFAULT_CHARSET
@@ -38,7 +38,7 @@ inherited frmFrame: TfrmFrame
     Left = 0
     Top = 0
     Width = 872
-    Height = 602
+    Height = 642
     Align = alClient
     TabOrder = 0
     object bvlPageTop: TBevel
@@ -615,6 +615,25 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlCIRNClick
             ExplicitWidth = 63
           end
+          object lblLoadSequelPat: TLabel
+            Left = 2
+            Top = 2
+            Width = 65
+            Height = 13
+            Hint = 'Load patient who is selected in SequelMed'
+            Align = alClient
+            Alignment = taCenter
+            Caption = 'Sequel Pat'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -8
+            Font.Name = 'MS Sans Serif'
+            Font.Style = []
+            ParentFont = False
+            Layout = tlCenter
+            OnClick = lblLoadSequelPatClick
+            ExplicitWidth = 52
+          end
         end
       end
       object pnlCVnFlag: TPanel
@@ -837,7 +856,7 @@ inherited frmFrame: TfrmFrame
     end
     object stsArea: TStatusBar
       Left = 1
-      Top = 580
+      Top = 620
       Width = 870
       Height = 21
       Panels = <
@@ -865,7 +884,7 @@ inherited frmFrame: TfrmFrame
     end
     object tabPage: TTabControl
       Left = 1
-      Top = 558
+      Top = 598
       Width = 870
       Height = 22
       Align = alBottom
@@ -886,7 +905,7 @@ inherited frmFrame: TfrmFrame
       Left = 1
       Top = 42
       Width = 870
-      Height = 516
+      Height = 556
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -1351,6 +1370,10 @@ inherited frmFrame: TfrmFrame
         Caption = '&ADT'
         OnClick = mnuOpenADTClick
       end
+      object mnuAnticoagulationTool: TMenuItem
+        Caption = 'Anticoagulation Tool'
+        OnClick = mnuAnticoagulationToolClick
+      end
       object Z8: TMenuItem
         Caption = '-'
       end
@@ -1511,5 +1534,12 @@ inherited frmFrame: TfrmFrame
     OnTimer = timScheduleTimer
     Left = 424
     Top = 312
+  end
+  object timCheckSequel: TTimer
+    Enabled = False
+    Interval = 60000
+    OnTimer = timCheckSequelTimer
+    Left = 696
+    Top = 192
   end
 end

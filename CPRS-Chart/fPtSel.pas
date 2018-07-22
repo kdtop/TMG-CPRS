@@ -48,6 +48,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ExtCtrls, ORFn, ORNet, ORDtTmRng, Gauges, Menus, ComCtrls,
+  fImagePatientPhotoID,  //kt
   UBAGlobals, UBACore, fBase508Form, VA508AccessibilityManager, uConst, Buttons;
 
 type
@@ -86,6 +87,8 @@ type
     txtCmdRemove: TVA508StaticText;
     txtCmdForward: TVA508StaticText;
     txtCmdProcess: TVA508StaticText;
+    procedure PatientImageMouseLeave(Sender: TObject);
+    procedure PatientImageMouseEnter(Sender: TObject);
     procedure PatientImageClick(Sender: TObject);  //kt 9/11
     procedure cmdOKClick(Sender: TObject);
     procedure cmdCancelClick(Sender: TObject);
@@ -148,6 +151,7 @@ type
     FAlertsNotReady: boolean;
 
     FMouseUpPos: TPoint;
+    frmPatientPhotoID : TfrmPatientPhotoID;  //kt  7/10/18
     procedure FixPatientImageSize;  //kt 4/15/14
     procedure WMReadyAlert(var Message: TMessage); message UM_MISC;
     procedure ReadyAlert;
@@ -189,7 +193,7 @@ implementation
 
 uses rCore, uCore, fDupPts, fPtSens, fPtSelDemog, fPtSelOptns, fPatientFlagMulti,
      uOrPtf, fAlertForward, rMisc, fFrame, fRptBox, VA508AccessibilityRouter,
-     fImagePatientPhotoID, fPtAdd, fPtQuery, fLetterWriter, uTMGOptions, uTMGUtil, //kt 9/11
+     fPtAdd, fPtQuery, fLetterWriter, uTMGOptions, uTMGUtil, //kt 9/11
      VAUtils;
 
 resourcestring
@@ -1412,6 +1416,23 @@ begin
     //ShowIDInfo;  //no refresh needed, photos cannot be added at this point
   end;
   frmPatientPhotoID.Free;
+end;
+
+
+procedure TfrmPtSel.PatientImageMouseEnter(Sender: TObject);
+var refresh : boolean;
+begin
+  inherited;
+  frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
+  frmPatientPhotoID.ShowPreviewMode(cboPatient.ItemID,Self.PatientImage);
+end;
+
+
+procedure TfrmPtSel.PatientImageMouseLeave(Sender: TObject);
+begin
+  inherited;
+  if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
+
 end;
 
 procedure TfrmPtSel.ShowButts(ShowButts: Boolean);

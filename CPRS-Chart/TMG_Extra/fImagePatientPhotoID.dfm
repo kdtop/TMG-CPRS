@@ -1,6 +1,7 @@
 object frmPatientPhotoID: TfrmPatientPhotoID
   Left = 0
   Top = 0
+  BiDiMode = bdLeftToRight
   Caption = 'Patient Photo ID'
   ClientHeight = 627
   ClientWidth = 684
@@ -57,6 +58,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     0000FFFF0000FFFF000000010000800000000001000000010000000100008000
     000000010000000100000001000080010000DFF10000FFFF0000FFFF0000}
   OldCreateOrder = False
+  ParentBiDiMode = False
   Position = poOwnerFormCenter
   OnActivate = FormActivate
   OnCreate = FormCreate
@@ -179,6 +181,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     Font.Name = 'Times New Roman'
     Font.Style = []
     ParentFont = False
+    Visible = False
     WordWrap = True
   end
   object btnOK: TBitBtn
@@ -268,8 +271,6 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       FFFFFFFFFFFFFFFFFFFFFFFFFFFF659E66458A463D864054975A61A1686AA670
       6AA67061A1685497593D8640458A46659E66FFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFF}
-    ExplicitLeft = 248
-    ExplicitTop = 365
   end
   object pnlIEHolder: TPanel
     Left = 8
@@ -280,8 +281,6 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     BevelInner = bvLowered
     BevelOuter = bvLowered
     TabOrder = 1
-    ExplicitWidth = 350
-    ExplicitHeight = 291
     object WebBrowser: TWebBrowser
       Left = 2
       Top = 2
@@ -314,7 +313,6 @@ object frmPatientPhotoID: TfrmPatientPhotoID
     OnChange = cboDateOfPhotoChange
     Items.Strings = (
       '<none>')
-    ExplicitWidth = 233
   end
   object btnAddPhotoID: TBitBtn
     Left = 8
@@ -456,7 +454,6 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
-    ExplicitTop = 365
   end
   object btnLeft: TBitBtn
     Left = 8
@@ -624,6 +621,5 @@ object frmPatientPhotoID: TfrmPatientPhotoID
       EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
       54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
       ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
-    ExplicitLeft = 281
   end
 end

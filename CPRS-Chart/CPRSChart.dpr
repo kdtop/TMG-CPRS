@@ -405,7 +405,8 @@ uses
   uTMGDiffRecord in 'TMG_Extra\uTMGDiffRecord.pas',
   Diff_NP in 'TMG_Extra\Diff_NP.pas',
   fODTMGOTP in 'TMG_Extra\fODTMGOTP.pas' {frmODTMGOTP},
-  fAnticoagulator in 'TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas' {frmAnticoagulate};
+  fAnticoagulator in 'TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas' {frmAnticoagulate},
+  uTMG_WM_API in 'TMG_Extra\uTMG_WM_API.pas';
 
 {$R *.TLB}
 

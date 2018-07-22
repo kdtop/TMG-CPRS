@@ -94,9 +94,11 @@ type
     procedure SetArrowButtonEnabled;
     procedure AddPhotoID(FName : string = '');
     procedure UMActivated(var Msg: TMessage); message UM_ACTIVATED;
+    procedure SetPreviewDisplay(RelativeTo:TControl);
   public
     { Public declarations }
     MostRecentThumbBitmap: TBitmap;
+    procedure ShowPreviewMode(DFN : string;RelativeTo:TControl) overload;
     function ShowModal(DFN : string; UploadMode: boolean = True) : integer; overload;
     function ShowModalUploadFName(DFN : string; FName : string) : integer; overload;
     property UploadMode: boolean read FUploadMode write SetUploadMode;
@@ -224,6 +226,35 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     FDragAndDropFile := FName;
     SetUploadMode(UploadMode);
     result := Self.ShowModal;
+  end;
+
+  procedure TfrmPatientPhotoID.ShowPreviewMode(DFN : string; RelativeTo:TControl) overload;
+  begin
+    FDFN := DFN;
+    SetPreviewDisplay(RelativeTo);
+    Self.Show;
+  end;
+
+  procedure TfrmPatientPhotoID.SetPreviewDisplay(RelativeTo:TControl);
+  var SetTop,SetLeft:integer;
+      lPoint:TPoint;
+  begin
+    lblDateOfPhoto.Visible := false;
+    btnLeft.Visible := false;
+    btnRight.Visible := false;
+    cboDateofPhoto.Visible := false;
+    PatientImage.Visible := false;
+    btnAddPhotoID.Visible := false;
+    btnOK.Visible := false;
+    pnlIEHolder.top := 0;
+    pnlIEHolder.Anchors := [akLeft,akTop,akRight];
+    self.BorderStyle := bsNone;
+    pnlIEHolder.Height := self.Height-4;
+    Self.position:= poDesigned;
+    //Get screen position of control "RelativeTo"
+    lPoint := RelativeTo.ClientToScreen(Point(0,0));
+    self.Top := lPoint.Y+relativeto.height+2;
+    self.Left := lPoint.X+relativeto.width+2;
   end;
 
 

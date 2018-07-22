@@ -85,6 +85,7 @@ var
 
   AppStartedCursorForm: TForm = nil;
   FilteredRPCCalls : TStringList;  //kt 9/11 Any RPC calls with names held in this list held will not be logged
+  TMGRPCCallInProcess : boolean; //kt 7/2018 //Globally scoped variable to signal busy status.  
 
 implementation
 
@@ -235,94 +236,99 @@ var
   TMGFiltered : boolean; //kt 9/11
 
 begin
-  RPCLastCall := RPCBrokerV.RemoteProcedure + ' (CallBroker begin)';
-  if uShowRPCs then StatusText(RPCBrokerV.RemoteProcedure);
-  with RPCBrokerV do if not Connected then  // happens if broker connection is lost
-  begin
-    ClearResults := True;
-    Exit;
+  if TMGRPCCallInProcess then begin  //kt 7/10/18
+    ShowMessage('Warning: RPC "'+RPCBrokerV.RemoteProcedure+'"'+CRLF+
+                'being called in midst of another RPC call.');
   end;
-  if uCallList.Count = uMaxCalls then
-  begin
-    AStringList := uCallList.Items[0];
-    AStringList.Free;
-    uCallList.Delete(0);
-  end;
-  AStringList := TStringList.Create;
-  TMGFiltered := (FilteredRPCCalls.IndexOf(RPCBrokerV.RemoteProcedure) >= 0); //kt 9/11
-  AStringList.Add(RPCBrokerV.RemoteProcedure);
-  if uCurrentContext <> uBaseContext then
-    AStringList.Add('Context: ' + uCurrentContext);
-  Time1 := GetTime;                                  //kt 9/11
-  AStringList.Add('Called at: '+ TimeToStr(Time1));  //kt 9/11
-  AStringList.Add(' ');
-  AStringList.Add('Params ------------------------------------------------------------------');
-  with RPCBrokerV do for i := 0 to Param.Count - 1 do
-  begin
-    case Param[i].PType of
-    //global:    x := 'global';
-    list:      x := 'list';
-    literal:   x := 'literal';
-    //null:      x := 'null';
-    reference: x := 'reference';
-    undefined: x := 'undefined';
-    //wordproc:  x := 'wordproc';
-    end;
-    AStringList.Add(x + #9 + Param[i].Value);
-    if Param[i].PType = list then
-    begin
-      for j := 0 to Param[i].Mult.Count - 1 do
-      begin
-        x := Param[i].Mult.Subscript(j);
-        y := Param[i].Mult[x];
-        AStringList.Add(#9 + '(' + x + ')=' + y);
-      end;
-    end;
-  end; {with...for}
-  //RPCBrokerV.Call;
+  TMGRPCCallInProcess := true; //kt
   try
-    RPCBrokerV.Call;
-  except
-    // The broker erroneously sets connected to false if there is any error (including an
-    // error on the M side). It should only set connection to false if there is no connection.
-    on E:EBrokerError do
-    begin
-      if E.Code = XWB_M_REJECT then
-      begin
-        x := 'An error occurred on the server.' + CRLF + CRLF + E.Action;
-        Application.MessageBox(PChar(x), 'Server Error', MB_OK);
-      end
-      else raise;
-    (*
-      case E.Code of
-      XWB_M_REJECT:  begin
-                       x := 'An error occurred on the server.' + CRLF + CRLF + E.Action;
-                       Application.MessageBox(PChar(x), 'Server Error', MB_OK);
-                     end;
-      else           begin
-                       x := 'An error occurred with the network connection.' + CRLF +
-                            'Action was: ' + E.Action + CRLF + 'Code was: ' + E.Mnemonic +
-                            CRLF + CRLF + 'Application cannot continue.';
-                       Application.MessageBox(PChar(x), 'Network Error', MB_OK);
-                     end;
-      end;
-      *)
-      // make optional later...
-      if not RPCBrokerV.Connected then
-        Application.Terminate;
+    RPCLastCall := RPCBrokerV.RemoteProcedure + ' (CallBroker begin)';
+    if uShowRPCs then StatusText(RPCBrokerV.RemoteProcedure);
+    with RPCBrokerV do if not Connected then begin  // happens if broker connection is lost
+      ClearResults := True;
+      Exit;
     end;
+    if uCallList.Count = uMaxCalls then begin
+      AStringList := uCallList.Items[0];
+      AStringList.Free;
+      uCallList.Delete(0);
+    end;
+    AStringList := TStringList.Create;
+    TMGFiltered := (FilteredRPCCalls.IndexOf(RPCBrokerV.RemoteProcedure) >= 0); //kt 9/11
+    AStringList.Add(RPCBrokerV.RemoteProcedure);
+    if uCurrentContext <> uBaseContext then
+      AStringList.Add('Context: ' + uCurrentContext);
+    Time1 := GetTime;                                  //kt 9/11
+    AStringList.Add('Called at: '+ TimeToStr(Time1));  //kt 9/11
+    AStringList.Add(' ');
+    AStringList.Add('Params ------------------------------------------------------------------');
+    with RPCBrokerV do for i := 0 to Param.Count - 1 do
+    begin
+      case Param[i].PType of
+      //global:    x := 'global';
+      list:      x := 'list';
+      literal:   x := 'literal';
+      //null:      x := 'null';
+      reference: x := 'reference';
+      undefined: x := 'undefined';
+      //wordproc:  x := 'wordproc';
+      end;
+      AStringList.Add(x + #9 + Param[i].Value);
+      if Param[i].PType = list then begin
+        for j := 0 to Param[i].Mult.Count - 1 do begin
+          x := Param[i].Mult.Subscript(j);
+          y := Param[i].Mult[x];
+          AStringList.Add(#9 + '(' + x + ')=' + y);
+        end;
+      end;
+    end; {with...for}
+    //RPCBrokerV.Call;
+    try
+      RPCBrokerV.Call;
+    except
+      // The broker erroneously sets connected to false if there is any error (including an
+      // error on the M side). It should only set connection to false if there is no connection.
+      on E:EBrokerError do begin
+        if E.Code = XWB_M_REJECT then begin
+          x := 'An error occurred on the server.' + CRLF + CRLF + E.Action;
+          Application.MessageBox(PChar(x), 'Server Error', MB_OK);
+        end else begin
+          raise;
+        end;
+      (*
+        case E.Code of
+        XWB_M_REJECT:  begin
+                         x := 'An error occurred on the server.' + CRLF + CRLF + E.Action;
+                         Application.MessageBox(PChar(x), 'Server Error', MB_OK);
+                       end;
+        else           begin
+                         x := 'An error occurred with the network connection.' + CRLF +
+                              'Action was: ' + E.Action + CRLF + 'Code was: ' + E.Mnemonic +
+                              CRLF + CRLF + 'Application cannot continue.';
+                         Application.MessageBox(PChar(x), 'Network Error', MB_OK);
+                       end;
+        end;
+        *)
+        // make optional later...
+        if not RPCBrokerV.Connected then begin
+          Application.Terminate;
+        end;
+      end;
+    end;
+    AStringList.Add(' ');
+    AStringList.Add('Results -----------------------------------------------------------------');
+    FastAddStrings(RPCBrokerV.Results, AStringList);
+    AStringList.Add(' ');  //kt 9/11
+    Time2 := GetTime;      //kt 9/11
+    AStringList.Add('Elapsed Time: ' + IntToStr(Round(MilliSecondSpan(Time2,Time1))) + ' ms');  //kt 9/11
+    if not TMGFiltered then begin //kt 9/11
+    uCallList.Add(AStringList);
+    end;                         //kt 9/11
+    if uShowRPCs then StatusText('');
+    RPCLastCall := RPCBrokerV.RemoteProcedure + ' (completed)';
+  finally
+    TMGRPCCallInProcess := false; //kt
   end;
-  AStringList.Add(' ');
-  AStringList.Add('Results -----------------------------------------------------------------');
-  FastAddStrings(RPCBrokerV.Results, AStringList);
-  AStringList.Add(' ');  //kt 9/11
-  Time2 := GetTime;      //kt 9/11
-  AStringList.Add('Elapsed Time: ' + IntToStr(Round(MilliSecondSpan(Time2,Time1))) + ' ms');  //kt 9/11
-  if not TMGFiltered then begin //kt 9/11
-  uCallList.Add(AStringList);
-  end;                         //kt 9/11
-  if uShowRPCs then StatusText('');
-  RPCLastCall := RPCBrokerV.RemoteProcedure + ' (completed)';
 end;
 
 procedure CallBroker;

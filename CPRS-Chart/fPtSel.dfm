@@ -489,6 +489,8 @@ inherited frmPtSel: TfrmPtSel
       ShowHint = True
       Stretch = True
       OnClick = PatientImageClick
+      OnMouseEnter = PatientImageMouseEnter
+      OnMouseLeave = PatientImageMouseLeave
     end
   end
   inherited amgrMain: TVA508AccessibilityManager

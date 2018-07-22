@@ -52,6 +52,7 @@ uses
   OleCtrls, VERGENCECONTEXTORLib_TLB, ComObj, AppEvnts, fBase508Form,
   StrUtils, Variants, Types,   //eRx 9/4/12
   rTIU,   //TM
+  fImagePatientPhotoID,  //kt
   VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS;
 
 type
@@ -204,6 +205,8 @@ type
     mnuAnticoagulationTool: TMenuItem;
     timCheckSequel: TTimer;
     lblLoadSequelPat: TLabel;
+    procedure PatientImageMouseLeave(Sender: TObject);
+    procedure PatientImageMouseEnter(Sender: TObject);
     procedure lblLoadSequelPatClick(Sender: TObject);
     procedure timCheckSequelTimer(Sender: TObject);
     procedure mnuAnticoagulationToolClick(Sender: TObject);
@@ -384,6 +387,7 @@ type
     colorTimerPaused : Tcolor;             //kt 4/14/15
     colorTimerOff : TColor;                //kt 4/14/15
     OriginalPanelWindowProc :TWndMethod;   //kt 4/16/14
+    frmPatientPhotoID : TfrmPatientPhotoID;  //kt  7/10/18
     procedure PanelWindowProc(var Msg: TMessage); //kt   4/16/14
     procedure RefreshFixedStatusWidth;
     procedure FocusApplicationTopForm;
@@ -446,6 +450,7 @@ type
     procedure InsertFormLetterPrintingMenuItem(MenuFile : TMenuItem);                                                     //kt 9/11 added
     procedure CallERx(action: Integer);   //ERx 9/4/12
     procedure OpenChartByDFN(NewDFN:string);  //TMG 6/11/18
+    procedure WMCopyData(var Msg : TWMCopyData) ; message WM_COPYDATA;  //TMG added 7/9/18
   public
     FProccessingNextClick : boolean;    //kt    8/28/12
     EnduringPtSelSplitterPos, frmFrameHeight, pnlPatientSelectedHeight: integer;
@@ -525,11 +530,11 @@ uses
   , CCOW_const
   {$ENDIF}
   , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uTMGOptions,   //kt added
-  fIntracarePtLbl, fPtAuditLog, fImagePatientPhotoID, fBillableItems, ColorUtil,       //kt added
+  fIntracarePtLbl, fPtAuditLog, fBillableItems, ColorUtil,       //kt added
   fMemoEdit,                               //kt  testing purposes only can be removed later
   fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule, fSMSLabText,      //kt
   VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit, fSingleNote,    //kt
-  fAnticoagulator,  //kt
+  fAnticoagulator, uTMG_WM_API,  //kt
   fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
   fTest_RW_HTML  //kt TEMP, KILL LATER...
   ;
@@ -1231,6 +1236,7 @@ begin
   timSchedule.Interval := uTMGOptions.ReadInteger('Appt Timer Interval',1000);
   timSchedule.Enabled := true;
   //timCheckSequel.Enabled := True;
+  //Application.OnMessage := AppMessage;
   //kt end mod ------------------- /
 end;
 
@@ -1890,23 +1896,41 @@ begin
   end;*)
 end;
 
+
 procedure TfrmFrame.PatientImageClick(Sender: TObject);
 //kt added 4/14/14
-var frmPatientPhotoID : TfrmPatientPhotoID;
+//Move to TfrmFrame
+var frmPatientPhotoIDFull : TfrmPatientPhotoID;
+var refresh : boolean;
+begin
+  inherited;
+  //if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
+  frmPatientPhotoIDFull:= TfrmPatientPhotoID.Create(Self);
+  if FDragAndDropFName <> '' then begin
+    Refresh :=  (frmPatientPhotoIDFull.ShowModalUploadFName(Patient.DFN, FDragAndDropFName) = mrOK);
+    FDragAndDropFName := '';
+  end else begin
+    Refresh :=  (frmPatientPhotoIDFull.ShowModal(Patient.DFN,True) = mrOK)
+  end;
+  if refresh then begin
+    PatientImage.Picture.Bitmap.Assign(frmPatientPhotoIDFull.MostRecentThumbBitmap);
+  end;
+  frmPatientPhotoIDFull.Free;
+end;
+
+procedure TfrmFrame.PatientImageMouseEnter(Sender: TObject);
 var refresh : boolean;
 begin
   inherited;
   frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
-  if FDragAndDropFName <> '' then begin
-    Refresh :=  (frmPatientPhotoID.ShowModalUploadFName(Patient.DFN, FDragAndDropFName) = mrOK);
-    FDragAndDropFName := '';
-  end else begin
-    Refresh :=  (frmPatientPhotoID.ShowModal(Patient.DFN) = mrOK)
-  end;
-  if refresh then begin
-    PatientImage.Picture.Bitmap.Assign(frmPatientPhotoID.MostRecentThumbBitmap);
-  end;
-  frmPatientPhotoID.Free;
+  frmPatientPhotoID.ShowPreviewMode(Patient.DFN,Self.PatientImage);
+end;
+
+procedure TfrmFrame.PatientImageMouseLeave(Sender: TObject);
+begin
+  inherited;
+  if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
+
 end;
 
 function TfrmFrame.TabToPageID(Tab: Integer): Integer;
@@ -1930,6 +1954,8 @@ begin
     8: Result := CT_REPORTS;
   end;*)
 end;
+
+
 
 procedure TfrmFrame.timCheckSequelTimer(Sender: TObject);
 begin
@@ -5769,6 +5795,10 @@ begin
   end;
 end;
 
+procedure TfrmFrame.WMCopyData(var Msg: TWMCopyData) ;  //TMG 7/10/18
+begin
+  TMG_WM_API.HandleCopyDataMsg(Msg, Self.Handle);
+end;
 
 
 initialization
@@ -5778,7 +5808,6 @@ initialization
 finalization
   //put finalization code here
   NoPatientIDPhotoIcon.Free;   //kt 4/14/14
-
 
 end.
 

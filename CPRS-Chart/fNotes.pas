@@ -49,8 +49,7 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
-  uConst,
-  VA508ImageListLabeler, OleCtrls, ToolWin, VA508ImageListLabeler;
+  OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
   TEditModes = (emNone,emText,emHTML);                //kt 9/11

@@ -70,6 +70,8 @@ const
   UM_MISC         = (WM_USER + 9251);  // used for misc stuff across forms
   UM_508          = (WM_USER + 9508);  // used for 508 messages at 508 base form level
 
+  UM_AHKMSG       = (WM_USER + 4444);  //ELH Test for messages between AHK scripts and CPRS
+
   { Tab Indexes, moved from fFrame }
   CT_NOPAGE   = -1;                             // chart tab - none selected
   CT_UNKNOWN  =  0;                             // chart tab - unknown (shouldn't happen)

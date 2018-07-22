@@ -799,6 +799,8 @@ inherited frmFrame: TfrmFrame
             FFFF}
           ShowHint = True
           OnClick = PatientImageClick
+          OnMouseEnter = PatientImageMouseEnter
+          OnMouseLeave = PatientImageMouseLeave
           ExplicitLeft = 4
           ExplicitTop = -1
         end
@@ -1070,8 +1072,8 @@ inherited frmFrame: TfrmFrame
   end
   object mnuFrame: TMainMenu
     OnChange = mnuFrameChange
-    Left = 180
-    Top = 128
+    Left = 292
+    Top = 112
     object mnuFile: TMenuItem
       Caption = '&File'
       GroupIndex = 1

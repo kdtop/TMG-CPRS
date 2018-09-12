@@ -4,7 +4,9 @@ inherited frmNotePrint: TfrmNotePrint
   Caption = 'frmNotePrint'
   ClientHeight = 306
   Position = poScreenCenter
-  ExplicitHeight = 340
+  OnCreate = FormCreate
+  ExplicitWidth = 443
+  ExplicitHeight = 344
   PixelsPerInch = 96
   TextHeight = 13
   object lblPrintTo: TLabel [0]
@@ -126,7 +128,7 @@ inherited frmNotePrint: TfrmNotePrint
     end
   end
   object cmdOK: TButton [4]
-    Left = 266
+    Left = 268
     Top = 276
     Width = 72
     Height = 22

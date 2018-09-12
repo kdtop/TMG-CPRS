@@ -122,6 +122,7 @@ type
     DocsPtTransferTo         : string;
     //DocsHTMLSL               : TStringList;
     PatientInstructions      : TStringList;
+    NoteGivenString          : string;   //elh added 8/27/18
 
 
     //Below are duplicates of data found in TPatient and TAppSate
@@ -265,6 +266,7 @@ begin
   FldTotalWeeklyDose                                := '';
   DailyDosingStr                                    := '';
   PatientNotice                                     := '';
+  NoteGivenString                                   := '';  //added 8/27/18
   FldEntryCreationFMDT                              := '';
   Provider                                          := '';
   CurrentIndication                                 := '';
@@ -448,6 +450,8 @@ begin
   DocsPtMoved               := Source.DocsPtMoved;
   DocsPtTransferTo          := Source.DocsPtTransferTo;
 
+  NoteGivenString           := Source.NoteGivenString;  //added 8/27/18
+
   PatientInstructions.Assign(Source.PatientInstructions);
   //DocsHTMLSL.Assign(Source.DocsHTMLSL);
 
@@ -498,6 +502,8 @@ begin
   if subIEN                    <> Other.subIEN then exit;
   if DailyDosingStr            <> Other.DailyDosingStr then exit;
   if PatientNotice             <> Other.PatientNotice then exit;
+  if NoteGivenString           <> Other.NoteGivenString then exit;   //added 8/27/18
+  
   if Provider                  <> Other.Provider then exit;
   if CurrentIndication         <> Other.CurrentIndication then exit;
   if CurrentINRGoal            <> Other.CurrentINRGoal then exit;
@@ -1230,7 +1236,8 @@ function TPatientFlowsheetData.MostRecent : TOneFlowsheet; //returns nil if none
 begin
   if FList.Count > 0 then begin
     Result := TOneFlowsheet(FList[FList.Count-1]);
-  end else begin    Result := nil;
+  end else begin
+    Result := nil;
   end;
 end;
 

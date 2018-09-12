@@ -1,11 +1,16 @@
 unit uTMG_WM_API;
 //TMG added entire unit 7/9/18
 
+//NOTES FOR USAGE:
+//     The purpose for this functionality is to provide external applications a method for
+//     talking back and forth with CPRS through the WM_CopyData message handler.
+
+
 interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Tabs, ComCtrls,
-  ExtCtrls, Menus, StdCtrls, StrUtils, Buttons, ORFn, ORNet, uConst, ORCtrls;
+  ExtCtrls, Menus, StdCtrls, StrUtils, Buttons, ORFn, ORNet, uConst, ORCtrls, uCore;
 
   type
     TWMAPIHandler = function(Command, DataStr : string; DestHandle : THandle): string of object;
@@ -39,6 +44,7 @@ uses
       //-- handlers below -------
       function Handle_Enq(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
       function Handle_RPC(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+      function Handle_PAT(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
       // add more here...
       //-- End handlers  -------
     public
@@ -82,7 +88,8 @@ implementation
     end;
     MessageHandlers.Free;
     Queued_Messages.Free;
-    Queued_Timer.Free;
+    //Queued_Timer.Free;
+    Queued_Timer.Enabled := false;
     TempSavedRPCBrokerResult.Free;
     inherited Destroy;
   end;
@@ -176,13 +183,14 @@ implementation
     SendToHandle : THandle;
   begin
     self.FFrameHandle := FrameHandle;
+    s := PChar(Msg.CopyDataStruct.lpData);
     if Msg.From <> 0 then SendToHandle := Msg.From
-    else SendToHandle := FindWindow(PChar('AutoHotkeyGUI'),PChar('ahkWinMessages'));  //Hardcoded for now
+    else if piece(s,'^',3)<>'' then SendToHandle := strtoint(piece(s,'^',3))
+    else SendToHandle := FindWindow(PChar('AutoHotkeyGUI'),PChar('Windows Message Receiver'));  //'ahkWinMessages'));  //Hardcoded for now
     if SendToHandle = 0 then begin
       ShowMessage('CopyData Receiver NOT found!') ;
       exit;
     end;
-    s := PChar(Msg.CopyDataStruct.lpData);
     Command := UpperCase(piece(s, '^',1));
     //NOTE: To add new messages, follow pattern for ENQ handler function below.
     //      ALL command handlers must follow format of TWMAPIHandler
@@ -233,12 +241,19 @@ implementation
     PopPriorRPCBrokerVResults(); //<--- Copy and use this block if handler depends on RPCBroker.
     //---------------------------------
   end;
+
+  function TTMGWMAPI.Handle_PAT(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+  //Expected DataStr format:  none
+  begin
+    Result := Patient.Name+' ('+FormatFMDateTime('MM/DD/YY', Patient.DOB)+')';
+  end;
   //-------- End Message Handlers --------------
 
   procedure TTMGWMAPI.RegisterHandlers();
   begin
     AddHandler('ENQ', Handle_Enq);
     AddHandler('RPC', Handle_RPC);
+    AddHandler('PAT', Handle_PAT);
   end;
 
 initialization

@@ -850,7 +850,8 @@ begin
   if DoNotChangeEncWindow = false then
      begin
       lblPtLocation.Caption := 'Visit Not Selected';
-      lblPtProvider.Caption := 'Current Provider Not Selected';
+      //TMG changed "Current Provider" to "Current PCP" original line -> lblPtProvider.Caption := 'Current Provider Not Selected';
+      lblPtProvider.Caption := 'Current PCP Not Selected';  //TMG 9/7/18
       pnlVisit.Caption      := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
      end;
   lblPtCare.Caption     := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN]);  //Primary Care Team Unassigned';
@@ -915,8 +916,8 @@ begin
       then lblPtLocation.Caption := LocationText
       else lblPtLocation.Caption := 'Visit Not Selected';
     if Length(ProviderName) > 0
-      then lblPtProvider.Caption := 'Provider:  ' + ProviderName
-      else lblPtProvider.Caption := 'Current Provider Not Selected';
+      then lblPtProvider.Caption := 'PCP:  ' + ProviderName //TMG  9/7/18  original line -> lblPtProvider.Caption := 'Provider:  ' + ProviderName
+      else lblPtProvider.Caption := 'Current PCP Not Selected'; //TMG  9/7/18  original line -> lblPtProvider.Caption := 'Current Provider Not Selected';
   end;
   pnlVisit.Caption := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
   FitToolBar;
@@ -5797,7 +5798,9 @@ end;
 
 procedure TfrmFrame.WMCopyData(var Msg: TWMCopyData) ;  //TMG 7/10/18
 begin
+  //Showmsg(PChar(Msg.CopyDataStruct.lpData));
   TMG_WM_API.HandleCopyDataMsg(Msg, Self.Handle);
+  //msg.result := 2006;
 end;
 
 

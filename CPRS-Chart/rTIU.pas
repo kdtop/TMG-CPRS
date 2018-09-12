@@ -130,6 +130,7 @@ function AllowChartPrintForNote(ANote: Integer): Boolean;
 procedure PrintNoteToDevice(ANote: Integer; const ADevice: string; ChartCopy: Boolean;
   var ErrMsg: string);
 function GetFormattedNote(ANote: Integer; ChartCopy: Boolean): TStrings;
+function GetFormattedMultiNotes(NotesList: TStringList; ChartCopy: Boolean): TStrings;  //kt
 
 //  Interdisciplinary Notes
 function IDNotesInstalled: boolean;
@@ -1273,6 +1274,33 @@ begin
   CallV('ORWTIU WINPRINT NOTE',[ANote, ChartCopy]);
   Result := RPCBrokerV.Results;
 end;
+
+function GetFormattedMultiNotes(NotesList: TStringList; ChartCopy: Boolean): TStrings;
+//kt 7/23/18 --- FINISH!!
+//The server should concatinate all the files into one long single document.
+//<p style="page-break-before: always"> can suggest to browser to split into separate pages during printing.
+
+//NOTE: Expected input: NotesList[i] = 'NoteIEN^Display Text'
+var
+  RPCResult : string;
+  i : integer;
+begin
+  RPCBrokerV.remoteprocedure := 'TMG CPRS GET NOTES TO PRINT';
+  RPCBrokerV.Param[0].Value := '.X';  // not used
+  RPCBrokerV.param[0].ptype := list;
+  for i := 0 to NotesList.Count-1 do begin
+    RPCBrokerV.Param[0].Mult[piece(NotesList.Strings[i],'^',1)] := NotesList.Strings[i];
+  end;
+  CallBroker;
+  RPCResult := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
+  if piece(RPCResult,'^',1)='-1' then begin
+    Result[0] := RPCBrokerV.Results[0];
+  end else begin  //success - return result
+    RPCBrokerV.Results.Delete(0);
+    Result := RPCBrokerV.Results;
+  end;
+end;
+
 
 function GetCurrentSigners(IEN: integer): TStrings;
 begin

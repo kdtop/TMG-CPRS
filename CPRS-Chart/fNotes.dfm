@@ -801,8 +801,8 @@ inherited frmNotes: TfrmNotes
             Left = 23
             Top = 0
             Width = 145
-            Height = 21
-            ItemHeight = 13
+            Height = 18
+            ItemHeight = 0
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0

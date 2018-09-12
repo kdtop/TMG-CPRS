@@ -579,7 +579,7 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fTIUView, fTemplateEditor, uReminders, fReminderDialog, uOrders, rConsults, fReminderTree,
      fNoteProps, fNotesBP, fTemplateFieldEditor, dShared, rTemplates,
      FIconLegend, fPCEEdit, fNoteIDParents, rSurgery, uSurgery, uTemplates,
-     fOptionsNotes, fImagePickExisting, fImagesMultiUse, StrUtils, uHTMLTools, fMemoEdit,  //kt
+     fOptionsNotes, fImagePickExisting, fImagesMultiUse, StrUtils, uHTMLTools, fMemoEdit, fTMGPrintList , //kt
      fUploadImages, fPtDocSearch, uTMGOptions, fImages, fConsultLink, uTMGUtil, uHTMLTemplateFields,  //kt
      fTemplateDialog, DateUtils, uInit, uVA508CPRSCompatibility, VA508AccessibilityRouter,
   VAUtils;
@@ -799,6 +799,7 @@ var
   AParentID: string;
   SavedDocID: string;
   Saved: boolean;
+  UseCustomTMGMultiPrinting : boolean;
 begin
   inherited;
   if not uIDNotesActive then exit;
@@ -812,7 +813,12 @@ begin
     with tvNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
   end;
   if tvNotes.Selected = nil then exit;
-  AParentID := frmPrintList.SelectParentFromList(tvNotes,CT_NOTES);
+  UseCustomTMGMultiPrinting := true;  //kt 7/18  Changed to enable new functionality.
+  if UseCustomTMGMultiPrinting then begin
+    AParentID := fTMGPrintList.SelectAndPrintFromTV(tvNotes, CT_NOTES)  //kt 7/23/18
+  end else begin
+    AParentID := frmPrintList.SelectParentFromList(tvNotes,CT_NOTES);
+  end;
   if AParentID = '' then exit;
   with tvNotes do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
 end;
@@ -1252,9 +1258,7 @@ end;
 
 function TfrmNotes.GetCurrentNoteIEN : string;
 //kt added entire function   06/16
-var
-  SelNode: TORTreeNode;
-  NoteIEN : string;
+var SelNode: TORTreeNode;
 begin
   SelNode := TORTreeNode(tvNotes.Selected);
   result := piece(SelNode.StringData,U,1);

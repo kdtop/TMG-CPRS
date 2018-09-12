@@ -101,6 +101,9 @@ begin
     else if Field = '%PATNOTICE%'               then Result := AFlowsheet.PatientNotice   //added 6/11/18
     else if Field = '%PATCOMMENTS%'             then Result := AFlowsheet.Comments.Text        //added 6/11/18
 
+    else if Field = '%NOTECOPYGIVEN%'           then Result := AFlowsheet.NoteGivenString  //added 8/27/18
+         
+
     else if Field = '%NOSHOWDATE%'              then Result := IfThen(AppointmentNoShowDate<>0, DateToStr(AppointmentNoShowDate), '')
     else if Field = '%NEXTAPPT%'                then Result := IfThen(Patient.NextScheduledINRCheckDate<>0, DateToStr(Patient.NextScheduledINRCheckDate), '(none)')
     else if Field = '%NEXTAPPTTIME%'            then Result := IfThen(Patient.NextScheduledINRCheckTime<>0, TMGTimeToStr(Patient.NextScheduledINRCheckTime), '')

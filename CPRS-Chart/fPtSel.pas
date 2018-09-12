@@ -740,7 +740,8 @@ if not (Length(cboPatient.ItemID) > 0) then  //*DFN*
     Encounter.DateTime := Patient.AdmitTime;
     Encounter.VisitCategory := 'H';
   end;
-  if User.IsProvider then Encounter.Provider := User.DUZ;
+  //if User.IsProvider then Encounter.Provider := User.DUZ;    //ELH commented out for code below  9/7/18  //TMG //kt
+  Encounter.Provider := strtoint(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ)]));
 
   GetBAStatus(Encounter.Provider,Patient.DFN);
   //HDS00005025

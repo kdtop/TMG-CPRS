@@ -58,6 +58,8 @@ type
     lblPrintTo: TLabel;
     dlgWinPrinter: TPrintDialog;
     chkDefault: TCheckBox;
+    procedure FormDestroy(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure cboDeviceNeedData(Sender: TObject; const StartFrom: String;
       Direction, InsertAt: Integer);
     procedure cboDeviceChange(Sender: TObject);
@@ -68,14 +70,18 @@ type
   private
     { Private declarations }
     FNote: Integer;
+    FNotesList : TStringList; //kt
     FReportText: TRichEdit;
     procedure DisplaySelectDevice;
+    procedure TMGcmdOKClick(Sender: TObject);
   public
     { Public declarations }
   end;
 
 procedure PrintNote(ANote: Longint; const ANoteTitle: string; MultiNotes: boolean = False);
+procedure TMGPrintMultiNotes(NotesList : TStringList);  //kt 7/18
 function GetPrinter: string;      //kt added entire function  8/9/11
+
 implementation
 
 {$R *.DFM}
@@ -89,6 +95,7 @@ const
   TX_NODEVICE_CAP = 'Device Not Selected';
   TX_ERR_CAP = 'Print Error';
   PAGE_BREAK = '**PAGE BREAK**';
+
 
 procedure PrintNote(ANote: Longint; const ANoteTitle: string; MultiNotes: boolean = False);
 { displays a form that prompts for a device and then prints the progress note }
@@ -106,7 +113,7 @@ begin
         begin
           {This next code begs the question: Why are we even bothering to check
           radWorkCopy if we immediately check the other button?
-          Short answer: it seems to wokr better
+          Short answer: it seems to work better
           Long answer: The checkboxes have to in some way register with the group
           they are in.  If this doesn't happen, both will be initially included
           the tab order.  This means that the first time tabbing through the
@@ -162,6 +169,97 @@ begin
   end;
 end;
 
+procedure TMGPrintMultiNotes(NotesList : TStringList);
+//kt 7/18.  Copied and modified from PrintNote()
+//Purpose: Prompts for a device and then prints notes from list, as one document
+
+//NOTE: Expected input: AList[i] = 'NoteIEN^Display Text'
+
+var
+  DefPrt: string;
+  TMGfrmNotePrint : TfrmNotePrint;
+  OkToPrint : boolean;
+  ItemID : string;
+  ErrMsg: string;
+  TempLines : TStringList; //kt 9/11
+  ChartCopy : boolean;
+
+begin
+  DefPrt := GetDefaultPrinter(User.Duz, Encounter.Location);
+  if User.CurrentPrinter = '' then User.CurrentPrinter := DefPrt;
+  TMGfrmNotePrint := TfrmNotePrint.Create(Application);
+  try
+    TMGfrmNotePrint.cmdOK.OnClick := TMGfrmNotePrint.TMGcmdOKClick;  //redirect OK handler to TMG version
+    ResizeFormToFont(TForm(TMGfrmNotePrint));
+    with TMGfrmNotePrint.cboDevice do begin
+      if Printer.Printers.Count > 0 then begin
+        Items.Add('WIN;Windows Printer^Windows Printer');
+        Items.Add('^--------------------VistA Printers----------------------');
+      end;
+      if User.CurrentPrinter <> '' then begin
+        InitLongList(Piece(User.CurrentPrinter, ';', 2));
+        SelectByID(User.CurrentPrinter);
+      end else begin
+        InitLongList('');
+      end;
+    end;
+
+    //kt Removing block below because we have an entire list of notes, can't check 1 by 1.  So will assume all OK to print chart copies.
+    //if AllowChartPrintForNote(ANote) then begin  // check to see of Chart Print allowed outside of MAS
+    //  radWorkCopy.Checked := True;   radChartCopy.Checked := True;
+    //end else begin
+    //  radChartCopy.Enabled := False; radWorkCopy.Checked := True;
+    //end;
+
+    OkToPrint := false;
+    if ((DefPrt = 'WIN;Windows Printer') and (User.CurrentPrinter = DefPrt)) then begin
+      OkToPrint := true;
+      ChartCopy := true;
+    end else begin
+      TMGfrmNotePrint.radWorkCopy.Checked := true;
+      TMGfrmNotePrint.radChartCopy.Checked := true;
+      TMGfrmNotePrint.grpChooseCopy.Visible := false;
+      TMGfrmNotePrint.FNotesList.Assign(NotesList);
+      TMGfrmNotePrint.lblNoteTitle.Text := '(Multiple Notes)';
+      TMGfrmNotePrint.Caption := 'Print Multiple Notes';
+      OKToPrint := (TMGfrmNotePrint.ShowModal = mrOK);
+      ChartCopy := (TMGfrmNotePrint.radChartCopy.Checked = true);
+    end;
+    if not OKToPrint then exit;
+
+    //Below Copied and modified from cmdOKClick()
+    ItemID := TMGfrmNotePrint.cboDevice.ItemID;
+    if ItemID = '' then begin
+      InfoBox(TX_NODEVICE, TX_NODEVICE_CAP, MB_OK);
+      Exit;
+    end;
+    if Piece(ItemID, ';', 1) = 'WIN' then begin
+      TempLines := TStringList.Create;
+      TempLines.Assign(GetFormattedMultiNotes(NotesList, ChartCopy));  //kt Get all notes concatenated into 1 long note.
+      PrintHTMLReport(TempLines, ErrMsg, Patient.Name,
+                      FormatFMDateTime('mm/dd/yyyy', Patient.DOB),
+                      'Multiple Dates',  //We don't want a date here due to multiple dates being printed //uHTMLtools.ExtractDateOfNote(TempLines), // date for report.
+                      Patient.WardService, Application);
+      TempLines.Free;
+      if Length(ErrMsg) > 0 then InfoBox(ErrMsg, TX_ERR_CAP, MB_OK);
+    end else begin
+      //ADevice := Piece(ItemID, ';', 2);
+      //PrintNoteToDevice(FNote, ADevice, ChartCopy, ErrMsg);
+      //if Length(ErrMsg) > 0 then begin
+      //  InfoBox(ErrMsg, TX_ERR_CAP, MB_OK);
+      //end;
+      InfoBox('Sorry, must use Windows Printer.', TX_ERR_CAP, MB_OK);   //kt
+    end;
+    if TMGfrmNotePrint.chkDefault.Checked then begin
+      SaveDefaultPrinter(Piece(ItemID, ';', 1));
+    end;
+    User.CurrentPrinter := ItemID;
+  finally
+    TMGfrmNotePrint.Free;
+  end;
+end;
+
+
 procedure TfrmNotePrint.DisplaySelectDevice;
 begin
   with cboDevice, lblPrintTo do
@@ -169,6 +267,19 @@ begin
     if radChartCopy.Checked then Caption := 'Print Chart Copy on:  ' + Piece(ItemID, ';', 2);
     if radWorkCopy.Checked then Caption := 'Print Work Copy on:  ' + Piece(ItemID, ';', 2);
   end;
+end;
+
+procedure TfrmNotePrint.FormCreate(Sender: TObject);
+//kt added 7/23/18
+begin
+  inherited;
+  FNotesList := TStringList.Create; //kt
+end;
+
+procedure TfrmNotePrint.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  FNotesList.Free; //kt 7/23/18
 end;
 
 procedure TfrmNotePrint.cboDeviceNeedData(Sender: TObject; const StartFrom: string;
@@ -202,6 +313,7 @@ begin
 end;
 
 procedure TfrmNotePrint.cmdOKClick(Sender: TObject);
+//kt NOTE: this handler is overwritten to TMGcmdOKClick in a certain condition. Search this file for TMGcmdOKClick for details
 var
   ADevice, ErrMsg: string;
   ChartCopy: Boolean;
@@ -283,9 +395,17 @@ begin
   Close;
 end;
 
+procedure TfrmNotePrint.TMGcmdOKClick(Sender: TObject);
+//kt added 7/23/18
+//This OnClick handler is manually assigned in a certain case
+begin
+  Self.ModalResult := mrOK; //closes form and returns control to TMGPrintMultiNotes()
+end;
+
 procedure TfrmNotePrint.cmdCancelClick(Sender: TObject);
 begin
   inherited;
+  Self.ModalResult := mrCancel; //kt 7/18
   Close;
 end;
 

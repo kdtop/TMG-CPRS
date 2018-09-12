@@ -508,7 +508,7 @@ object frmAnticoagulate: TfrmAnticoagulate
     Top = 208
     Width = 734
     Height = 394
-    ActivePage = tsEnterInfo
+    ActivePage = tsExit
     Align = alBottom
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -2973,7 +2973,7 @@ object frmAnticoagulate: TfrmAnticoagulate
         end
         object gbxLabs: TGroupBox
           Left = 11
-          Top = 102
+          Top = 193
           Width = 185
           Height = 134
           Caption = 'Labs'
@@ -3008,7 +3008,7 @@ object frmAnticoagulate: TfrmAnticoagulate
         end
         object gbxPCE: TGroupBox
           Left = 202
-          Top = 102
+          Top = 193
           Width = 341
           Height = 134
           Caption = 'PCE Data'
@@ -3265,6 +3265,41 @@ object frmAnticoagulate: TfrmAnticoagulate
             FFFFFF3830EFFFFFFFFEFFFFFBFFFFE5E7FD524CF1F7FCFFFBFFFFFEFFFFFFFF
             FFFFFFFF3830EFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
             FFFFD7D6FCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+        end
+        object gbxNoteGiven: TGroupBox
+          Left = 11
+          Top = 105
+          Width = 287
+          Height = 72
+          Caption = 'Note Given'
+          Color = clBtnFace
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentBackground = False
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 6
+          object radNoCopyGiven: TRadioButton
+            Left = 16
+            Top = 16
+            Width = 197
+            Height = 17
+            Caption = 'No copy of note given.'
+            TabOrder = 0
+            OnClick = radNoCopyGivenClick
+          end
+          object radCopyGiven: TRadioButton
+            Left = 16
+            Top = 39
+            Width = 197
+            Height = 17
+            Caption = 'Copy of note given to patient.'
+            TabOrder = 1
+            OnClick = radCopyGivenClick
+          end
         end
       end
     end

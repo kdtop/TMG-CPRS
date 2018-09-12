@@ -25,7 +25,7 @@ uses
   Series, ExtCtrls, TeeProcs, Chart, ComCtrls, Grids, Hash, DateUtils,StrUtils,
   ORCtrls, fCosign, ExtDlgs, fSplash, {VA508AccessibilityManager,} fTimeout, uInit,
   uTMGMods, rRPCsACM, uFlowsheet, uTypesACM, uPastINRs,   //kt
-  uHTMLTools, TMGHTML2, Math, fActivityDetail, //kt
+  uHTMLTools, TMGHTML2, Math, fActivityDetail, uTMGOptions, //kt
   Menus, Mask, Buttons, {VA508AccessibilityManager,} {VclTee.TeeGDIPlus,}
   ValEdit;
 
@@ -257,6 +257,11 @@ type
     memPatientInstructions: TMemo;
     lblMissedApptDate: TLabel;
     dtpMissedAppt: TDateTimePicker;
+    gbxNoteGiven: TGroupBox;
+    radNoCopyGiven: TRadioButton;
+    radCopyGiven: TRadioButton;
+    procedure radCopyGivenClick(Sender: TObject);
+    procedure radNoCopyGivenClick(Sender: TObject);
     procedure cbxINRGoalClick(Sender: TObject);
     procedure btnDemoNextClick(Sender: TObject);
     procedure rbPhoneCClick(Sender: TObject);
@@ -594,6 +599,16 @@ begin
   if not AppState.FilePCEData then AppState.PCEProcedureStr := '0';
 end;
 
+procedure TfrmAnticoagulate.radCopyGivenClick(Sender: TObject);
+begin
+  CurrentFlowsheet.NoteGivenString := radCopyGiven.Caption;
+end;
+
+procedure TfrmAnticoagulate.radNoCopyGivenClick(Sender: TObject);
+begin
+  CurrentFlowsheet.NoteGivenString := radNoCopyGiven.Caption;
+end;
+
 procedure TfrmAnticoagulate.rbLetterClick(Sender: TObject);
 begin
   if rbLetter.Checked then begin
@@ -768,6 +783,9 @@ begin
   SwapButtonsList.Add(btnSwapThur);
   SwapButtonsList.Add(btnSwapFri);
   SwapButtonsList.Add(btnSwapSat);
+
+  radNoCopyGiven.Caption := uTMGOptions.ReadString('ORAM NOTE COPY NOT GIVEN','No copy of note given.');  //8/27/18
+  radCopyGiven.Caption := uTMGOptions.ReadString('ORAM NOTE COPY GIVEN','Copy of note given to patient.');  //8/27/18
 end;
 
 procedure TfrmAnticoagulate.FormDestroy(Sender: TObject);
@@ -1308,6 +1326,11 @@ end;
 function TfrmAnticoagulate.OKToExit : boolean;
 begin
   result := false; //default to NOT OK to exit
+  if (not radNoCopyGiven.Checked) and (not radCopyGiven.Checked) then begin
+    InfoBox('Please check is note copy was given to patient or not','Incomplete', MB_OK or MB_ICONEXCLAMATION);
+    exit;
+  end;
+  
   if Patient.DischargedFromClinic then begin
     Result := true;
     exit;

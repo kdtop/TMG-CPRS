@@ -19,7 +19,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.dfm
 113
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.dfm
-92411/1290355602
+92410/1291479974
 159
 92
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.dfm
@@ -35,7 +35,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.dfm
 467
 83
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.dfm
-18543/1290563893
+18543/1294417522
 550
 65
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSens.dfm
@@ -127,11 +127,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteCslt.dfm
 1327
 23
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotePrt.dfm
-4362/1156545363
+4410/1291479974
 1350
 41
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.dfm
-32977/1220376853
+32977/1291297373
 1391
 89
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLkUpLocation.dfm
@@ -783,7 +783,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.dfm
 8938
 35
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.dfm
-48320/1290559181
+48159/1294680396
 8973
 123
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.dfm
@@ -1155,7 +1155,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.pas
 11376
 19
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
-256663/1290359301
+256938/1291484685
 11395
 64
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.pas
@@ -1171,7 +1171,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
 11583
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas
-59314/1290566698
+59483/1294420170
 11629
 55
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSens.pas
@@ -1263,11 +1263,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteCslt.pas
 12123
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotePrt.pas
-11123/1194303829
+15792/1291488623
 12133
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.pas
-202320/1220385500
+202320/1291297394
 12178
 63
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLkUpLocation.pas
@@ -1919,7 +1919,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.pas
 14985
 25
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
-212976/1290566695
+213356/1294684752
 15010
 59
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.pas
@@ -2351,13 +2351,21 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMGOTP.pas
 18050
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool\fAnticoagulator.dfm
-139036/1288454691
+140079/1293651004
 18060
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas
-100560/1288455049
+101512/1293651114
 18062
 33
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGPrintList.dfm
+5523/1291485761
+18095
+21
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGPrintList.pas
+5635/1291486117
+18116
+13
 |EOINDEX|
 27
 inherited frmPage: TfrmPage
@@ -3709,7 +3717,7 @@ Data = (
 'Component = frmNoteConsult'
 'Status = stsDefault'))
 end
-199
+201
 inherited frmNotePrint: TfrmNotePrint
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -11332,7 +11340,7 @@ Data = (
 'Component = btnClose'
 'Status = stsDefault'))
 end
-1547
+1542
 inherited frmFrame: TfrmFrame
 inherited amgrMain: TVA508AccessibilityManager
 Left = 8
@@ -20419,7 +20427,7 @@ uses
 
 type
   TfrmODTMGOTP = class(TfrmODBase)
-3581
+3616
 object frmAnticoagulate: TfrmAnticoagulate
 unit fAnticoagulator;
 
@@ -20448,9 +20456,43 @@ uses
   Series, ExtCtrls, TeeProcs, Chart, ComCtrls, Grids, Hash, DateUtils,StrUtils,
   ORCtrls, fCosign, ExtDlgs, fSplash, {VA508AccessibilityManager,} fTimeout, uInit,
   uTMGMods, rRPCsACM, uFlowsheet, uTypesACM, uPastINRs,   //kt
-  uHTMLTools, TMGHTML2, Math, fActivityDetail, //kt
+  uHTMLTools, TMGHTML2, Math, fActivityDetail, uTMGOptions, //kt
   Menus, Mask, Buttons, {VA508AccessibilityManager,} {VclTee.TeeGDIPlus,}
   ValEdit;
 
 type
   TfrmAnticoagulate = class(TForm)
+134
+inherited frmTMGPrintList: TfrmTMGPrintList
+inherited amgrMain: TVA508AccessibilityManager
+Left = 232
+Data = (
+(
+'Component = frmTMGPrintList'
+'Status = stsDefault')
+(
+'Component = btnOK'
+'Status = stsDefault')
+(
+'Component = btnCancel'
+'Status = stsDefault')
+(
+'Component = ckbxAll'
+'Status = stsDefault')
+(
+'Component = cklbTitles'
+'Status = stsDefault'))
+end
+unit fTMGPrintList;
+//kt added 7/22/18
+//Initially copied, then modified, from fPrinList.pas
+
+interface
+
+uses
+ Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, fAutoSz, StdCtrls, ORCtrls, fConsult513Prt, VA508AccessibilityManager,
+  Buttons, CheckLst;
+
+type
+  TfrmTMGPrintList = class(TfrmAutoSz)

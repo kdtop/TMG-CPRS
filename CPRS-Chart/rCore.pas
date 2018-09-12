@@ -475,7 +475,8 @@ begin
     if HasCorTabs then
       if (IsRPL = '1') then
         begin
-          IsRPL := '0'; // Hard set for now.
+          //TMG commented following line on 9/10/18
+          //IsRPL := '0'; // Hard set for now.
           IsReportsOnly := false;
         end;
     // Following hard set to TRUE per VHA mgt decision:

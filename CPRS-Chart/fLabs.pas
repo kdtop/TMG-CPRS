@@ -41,6 +41,7 @@ uses
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Grids, Buttons, fLabTest,
   fLabTests, fLabTestGroups, ORFn, TeeProcs, TeEngine, Chart, Series, Menus,
   uConst, ORDtTmRng, OleCtrls, SHDocVw, Variants, StrUtils, fBase508Form,
+  ORNet,    //tmg
   VA508AccessibilityManager, rWVEHR;
 
 type
@@ -346,7 +347,7 @@ implementation
 
 uses uCore, rLabs, rCore, rCover, rOrders, fLabPrint, fFrame, fRptBox, Printers, fReportsPrint,
      clipbrd, rReports, rGraphs, activex, mshtml, VA508AccessibilityRouter, uReports, fLabEntry,
-     uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools, //kt
+     uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools, fLabSelector, //kt
      VAUtils;
 
 const
@@ -1026,7 +1027,7 @@ var
   addchild, addgrandchild, addgtgrandchild: boolean;
 begin
   tvReports.Items.Clear;
-  memLab.Clear;     
+  memLab.Clear;
   uHTMLDoc := '';
   BlankWeb;
   lvReports.SmallImages := uEmptyImageList;
@@ -1541,6 +1542,8 @@ end;
 
 procedure TfrmLabs.lstDatesClick(Sender: TObject);
 var
+  HTMLReport:TStringList;
+
   tmpList: TStringList;
   daysback: integer;
   date1, date2: TFMDateTime;
@@ -1748,6 +1751,30 @@ begin
       memLab.Lines.Insert(0,' ');
       memLab.Lines.Delete(0);
       memLab.SelStart := 0;
+    end
+  else if aID = '1606' then
+    begin           // HTML REPORT
+      //memLab.Clear;
+      //WebBrowser1.Navigate('http://www.yahoo.com');
+      HTMLReport := TStringList.create();
+      tCallV(HTMLReport,'TMG CPRS LAB GET HTML REPORT',[Patient.DFN,lstTests.Items]);
+      uLabLocalReportData.Text := HTMLReport.Text;
+
+      HTMLReport.free;
+      {uLabLocalReportData.Clear;
+      uLabRemoteReportData.Clear;
+      StatusText('Retrieving lab status data...');
+      GoRemoteOld(uLabRemoteReportData,10,1,'',uReportRPC,'',IntToStr(daysback),'',date1,date2);
+      TabControl1.OnChange(nil);
+      Reports(uLabLocalReportData,Patient.DFN, 'L:10', '', IntToStr(daysback),'',
+       date1, date2, uReportRPC);
+      if uLabLocalReportData.Count < 1 then
+        uLabLocalReportData.Add('<No laboratory orders for this date range.>');
+      if TabControl1.TabIndex < 1 then
+        QuickCopy(uLabLocalReportData,memLab);   }
+      //memLab.Lines.Insert(0,' ');
+      //memLab.Lines.Delete(0);
+      //memLab.SelStart := 0;
     end
   else begin          //Anything Else
          lstHeaders.Clear;
@@ -3980,6 +4007,50 @@ begin
                      else
                        tvReports.Selected := uPrevReportNode; 
                     end;
+                  end
+
+             else if aID = '1606:SELECTED LAB REPORT BY DATE' then
+                  begin               // TMG added this else    11/5/18
+                    if uPrevReportNode <> tvReports.Selected then
+                    begin
+                     lstTests.Clear;
+                     lblSpecimen.Caption := '';
+                    end;
+                    SelectLabsForReport(Font.Size);
+                    {if lstTests.Items.Count > 0 then
+                    begin}
+                     CommonComponentVisible(false,false,true,true,true,false,false,false,true,false,false,false);
+                     pnlRighttop.Height := lblHeading.Height + lblTitle.Height;
+                     pnlRightTop.Visible := false;
+                     memLab.Clear;
+                     chkBrowser;
+                     FormResize(self);
+                     RedrawActivate(memLab.Handle);
+                     lstDatesClick(self);
+                     //lstQualifierClick(self);
+                     cmdOtherTests.SetFocus;
+                     cmdOtherTests.Default := true;
+                     uPrevReportNode := tvReports.Selected;
+                     {BlankWeb;
+                     WebBrowser1.Align := alBottom;
+                     WebBrowser1.Height := pnlLeft.Height div 5;
+                     WebBrowser1.Visible := true;
+                     WebBrowser1.BringToFront;
+                     memLab.Visible := false;}
+
+                     //if lstDates.ItemIndex = -1 then
+                     // if Patient.Inpatient then lstDates.ItemIndex := 2
+                     // else lstDates.ItemIndex := 4;
+                     //lstDatesClick(self);
+                     if ScreenReaderSystemActive then
+                       grdLab.SetFocus;
+                   { end
+                    else
+                      begin
+                        uPrevReportNode := tvReports.Items.GetFirstNode;
+                        tvReports.Selected := uPrevReportNode;
+                        tvReportsClick(self);
+                      end;     }
                   end
 
             else if (POS('TMG LR-TXT',aRPC)>0) or  //kt ADDED 1/21/15

@@ -1425,7 +1425,7 @@ var refresh : boolean;
 begin
   inherited;
   frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
-  frmPatientPhotoID.ShowPreviewMode(cboPatient.ItemID,Self.PatientImage);
+  frmPatientPhotoID.ShowPreviewMode(cboPatient.ItemID,Self.PatientImage,ltLeft);
 end;
 
 

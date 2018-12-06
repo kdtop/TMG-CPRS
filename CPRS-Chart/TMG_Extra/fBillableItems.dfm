@@ -49,7 +49,6 @@ object frmBillableItems: TfrmBillableItems
     Date = 42103.996557256940000000
     Time = 42103.996557256940000000
     TabOrder = 1
-    OnChange = dateBeginningChange
   end
   object dateEnding: TDateTimePicker
     Left = 232
@@ -59,7 +58,6 @@ object frmBillableItems: TfrmBillableItems
     Date = 42103.997037037040000000
     Time = 42103.997037037040000000
     TabOrder = 2
-    OnChange = dateEndingChange
   end
   object btnPrintCPTs: TButton
     Left = 17
@@ -70,7 +68,6 @@ object frmBillableItems: TfrmBillableItems
     Caption = 'Print CPTs'
     TabOrder = 3
     OnClick = btnPrintCPTsClick
-    ExplicitTop = 440
   end
   object Button2: TButton
     Left = 708
@@ -81,8 +78,6 @@ object frmBillableItems: TfrmBillableItems
     Caption = '&Close'
     ModalResult = 1
     TabOrder = 4
-    ExplicitLeft = 571
-    ExplicitTop = 440
   end
   object radFilter: TRadioGroup
     Left = 289
@@ -99,8 +94,6 @@ object frmBillableItems: TfrmBillableItems
       'CPT - II')
     TabOrder = 5
     OnClick = radFilterClick
-    ExplicitLeft = 152
-    ExplicitTop = 430
   end
   object btnGetICDs: TButton
     Left = 541
@@ -143,10 +136,6 @@ object frmBillableItems: TfrmBillableItems
         ScrollBars = ssVertical
         TabOrder = 0
         OnResizeRequest = reBillableReportResizeRequest
-        ExplicitLeft = 153
-        ExplicitTop = 276
-        ExplicitWidth = 231
-        ExplicitHeight = 170
       end
     end
     object Panel3: TPanel
@@ -158,7 +147,6 @@ object frmBillableItems: TfrmBillableItems
       Caption = 'Panel3'
       TabOrder = 1
       OnClick = Panel3Click
-      ExplicitWidth = 389
       object reICDs: TRichEdit
         Left = 1
         Top = 1

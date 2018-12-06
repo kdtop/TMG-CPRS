@@ -57,6 +57,7 @@ type
   end;
 
   TDownloadType = (dlBoth, dlThumb, dlFull);
+  TLocationType = (ltLeft,ltRight);
 
   TfrmPatientPhotoID = class(TForm)
     btnOK: TBitBtn;
@@ -94,11 +95,11 @@ type
     procedure SetArrowButtonEnabled;
     procedure AddPhotoID(FName : string = '');
     procedure UMActivated(var Msg: TMessage); message UM_ACTIVATED;
-    procedure SetPreviewDisplay(RelativeTo:TControl);
+    procedure SetPreviewDisplay(RelativeTo:TControl;Location:TLocationType);
   public
     { Public declarations }
     MostRecentThumbBitmap: TBitmap;
-    procedure ShowPreviewMode(DFN : string;RelativeTo:TControl) overload;
+    procedure ShowPreviewMode(DFN : string;RelativeTo:TControl;Location:TLocationType) overload;
     function ShowModal(DFN : string; UploadMode: boolean = True) : integer; overload;
     function ShowModalUploadFName(DFN : string; FName : string) : integer; overload;
     property UploadMode: boolean read FUploadMode write SetUploadMode;
@@ -187,8 +188,9 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     EnsureDownloaded(InfoRec,dlBoth);
     if FileExists(InfoRec.LocalFPath) then
       WebBrowser.Navigate(InfoRec.LocalFPath)
-    else
-      WebBrowser.Navigate(frmImages.NullImageName);
+    else begin
+      //WebBrowser.Navigate(frmImages.NullImageName);
+    end;  
     if FileExists(InfoRec.LocalThumbPath) then begin
       PatientImage.Picture.LoadFromFile(InfoRec.LocalThumbPath);
       MostRecentThumbBitmap.Assign(PatientImage.Picture.Bitmap);
@@ -228,14 +230,14 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     result := Self.ShowModal;
   end;
 
-  procedure TfrmPatientPhotoID.ShowPreviewMode(DFN : string; RelativeTo:TControl) overload;
+  procedure TfrmPatientPhotoID.ShowPreviewMode(DFN : string; RelativeTo:TControl;Location:TLocationType) overload;
   begin
     FDFN := DFN;
-    SetPreviewDisplay(RelativeTo);
+    SetPreviewDisplay(RelativeTo,Location);
     Self.Show;
   end;
 
-  procedure TfrmPatientPhotoID.SetPreviewDisplay(RelativeTo:TControl);
+  procedure TfrmPatientPhotoID.SetPreviewDisplay(RelativeTo:TControl;Location:TLocationType);
   var SetTop,SetLeft:integer;
       lPoint:TPoint;
   begin
@@ -254,7 +256,9 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     //Get screen position of control "RelativeTo"
     lPoint := RelativeTo.ClientToScreen(Point(0,0));
     self.Top := lPoint.Y+relativeto.height+2;
-    self.Left := lPoint.X+relativeto.width+2;
+    if Location=ltLeft then self.Left := lPoint.X-self.width-2
+    else if Location=ltRight then self.Left := lPoint.X+relativeto.width+2;
+         
   end;
 
 

@@ -2,7 +2,7 @@ inherited frmFrame: TfrmFrame
   Left = 196
   Top = 119
   Caption = 'p'
-  ClientHeight = 702
+  ClientHeight = 722
   ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
@@ -15,14 +15,14 @@ inherited frmFrame: TfrmFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   ExplicitWidth = 880
-  ExplicitHeight = 756
+  ExplicitHeight = 776
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
     Width = 872
-    Height = 702
+    Height = 722
     Align = alClient
     Caption = 'No patient is currently selected'
     Font.Charset = DEFAULT_CHARSET
@@ -38,7 +38,7 @@ inherited frmFrame: TfrmFrame
     Left = 0
     Top = 0
     Width = 872
-    Height = 702
+    Height = 722
     Align = alClient
     TabOrder = 0
     object bvlPageTop: TBevel
@@ -555,8 +555,8 @@ inherited frmFrame: TfrmFrame
           object lblVistaWeb: TLabel
             Left = 2
             Top = 2
-            Width = 46
-            Height = 13
+            Width = 65
+            Height = 14
             Cursor = crHandPoint
             Align = alClient
             Alignment = taCenter
@@ -569,6 +569,8 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
+            ExplicitWidth = 46
+            ExplicitHeight = 13
           end
         end
         object pnlCIRN: TKeyClickPanel
@@ -597,7 +599,7 @@ inherited frmFrame: TfrmFrame
           object lblCIRN: TLabel
             Left = 2
             Top = 2
-            Width = 63
+            Width = 65
             Height = 13
             Align = alClient
             Alignment = taCenter
@@ -611,11 +613,12 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlCIRNClick
+            ExplicitWidth = 63
           end
           object lblLoadSequelPat: TLabel
             Left = 2
             Top = 2
-            Width = 52
+            Width = 65
             Height = 13
             Hint = 'Load patient who is selected in SequelMed'
             Align = alClient
@@ -629,6 +632,7 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = lblLoadSequelPatClick
+            ExplicitWidth = 52
           end
         end
       end
@@ -674,7 +678,7 @@ inherited frmFrame: TfrmFrame
           object lblFlag: TLabel
             Left = 2
             Top = 22
-            Width = 25
+            Width = 85
             Height = 13
             Cursor = crHandPoint
             Align = alBottom
@@ -692,6 +696,7 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlFlagClick
             OnMouseDown = pnlFlagMouseDown
             OnMouseUp = pnlFlagMouseUp
+            ExplicitWidth = 25
           end
         end
       end
@@ -853,7 +858,7 @@ inherited frmFrame: TfrmFrame
     end
     object stsArea: TStatusBar
       Left = 1
-      Top = 680
+      Top = 700
       Width = 870
       Height = 21
       Panels = <
@@ -881,7 +886,7 @@ inherited frmFrame: TfrmFrame
     end
     object tabPage: TTabControl
       Left = 1
-      Top = 658
+      Top = 678
       Width = 870
       Height = 22
       Align = alBottom
@@ -902,7 +907,7 @@ inherited frmFrame: TfrmFrame
       Left = 1
       Top = 42
       Width = 870
-      Height = 616
+      Height = 636
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText

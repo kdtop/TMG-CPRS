@@ -193,8 +193,12 @@ begin
       else                                          // also prompt for provider
       begin
         // InitLongList must be done AFTER FFilter is set
-        cboPtProvider.InitLongList(Encounter.ProviderName);
-        cboPtProvider.SelectByIEN(FProvider);
+        //cboPtProvider.InitLongList(Encounter.ProviderName);
+        //cboPtProvider.SelectByIEN(FProvider);
+        //A change was made to the Encounter info so the provider is now set as PCP, instead of the
+        //   current user. We still want this to show current user  elh TMG  10/8/18
+        cboPtProvider.InitLongList(User.Name);
+        cboPtProvider.SelectByIEN(User.DUZ);
       end;
       ShowModal;
       if DEAContext and ((Assigned(Changes.Orders)) and (Changes.Count > 0)) and (Encounter.Provider <> FProvider) then DelayReviewChanges := True;

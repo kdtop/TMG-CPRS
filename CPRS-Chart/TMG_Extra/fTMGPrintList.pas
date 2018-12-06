@@ -7,7 +7,7 @@ interface
 uses
  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, fAutoSz, StdCtrls, ORCtrls, fConsult513Prt, VA508AccessibilityManager,
-  Buttons, CheckLst;
+  Buttons, CheckLst, ComCtrls, ORDtTm, ORFn;
 
 type
   TfrmTMGPrintList = class(TfrmAutoSz)
@@ -16,6 +16,16 @@ type
     btnCancel: TBitBtn;
     ckbxAll: TCheckBox;
     cklbTitles: TCheckListBox;
+    btnApply: TButton;
+    Label1: TLabel;
+    Label2: TLabel;
+    dtStart: TORDateBox;
+    dtEnd: TORDateBox;
+    chkHighlightOnly: TCheckBox;
+    procedure chkHighlightOnlyClick(Sender: TObject);
+    procedure btnApplyClick(Sender: TObject);
+    procedure dtEndChange(Sender: TObject);
+    procedure dtStartChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure cklbTitlesClick(Sender: TObject);
     procedure ckbxAllClick(Sender: TObject);
@@ -28,14 +38,19 @@ type
     function SomeSelected : boolean;
   public
     { Public declarations }
+    ATree: TORTreeView;
+    PageID: Integer;
     SelectedNoteIEN: string;
     DataSL: TStringList; //will be considered to be 1:1 linked to cklbTitles.items.  Format: IEN^DisplayTitle
-    procedure Initialize(ATree: TORTreeView; PageID: Integer);
+    //procedure Initialize(ATree: TORTreeView; PageID: Integer);
+    procedure LoadList();
   end;
 
 var
   //kt frmTMGPrintList: TfrmTMGPrintList;
   HLDPageID: Integer;
+  PersistBeginDate:TFMDateTime;
+  PersistEndDate:TFMDateTime;
 
 //kt renamed to function below. function SelectParentFromList(ATree: TORTreeView; PageID: Integer): string;
 function SelectAndPrintFromTV(ATree: TORTreeView; PageID: Integer): string;
@@ -45,7 +60,7 @@ implementation
 
 {$R *.dfm}
 uses
-  uTIU, rTIU, uConst, fNotes, fNotePrt, ORFn, fConsults, fDCSumm, fFrame;
+  uTIU, rTIU, uConst, fNotes, fNotePrt, fConsults, fDCSumm, fFrame;
 
 
 //kt renamed to function below. function SelectParentFromList(ATree: TORTreeView; PageID: Integer): string;
@@ -59,7 +74,15 @@ var
   NotesToPrint := TStringList.Create;
   AFrmTMGPrintList := TfrmTMGPrintList.Create(Application);
   try
-    AFrmTMGPrintList.Initialize(ATree, PageID);
+    if PersistBeginDate<1 then PersistBeginDate := 3180101;
+    if PersistEndDate<1 then PersistEndDate := 3181231;
+    AFrmTMGPrintList.dtStart.FMDateTime := PersistBeginDate;
+    AFrmTMGPrintList.dtEnd.FMDateTime := PersistEndDate;
+    AFrmTMGPrintList.ATree := ATree;
+    AFrmTMGPrintList.PageID := PageID;
+    AFrmTMGPrintList.btnApply.Enabled := False;
+    //AFrmTMGPrintList.Initialize(ATree, PageID);
+    AFrmTMGPrintList.LoadList;
     if AFrmTMGPrintList.ShowModal <> mrOK then exit;
     AFrmTMGPrintList.LoadSelectedIntoList(NotesToPrint);
     fNotePrt.TMGPrintMultiNotes(NotesToPrint);
@@ -86,6 +109,22 @@ begin
 end;
 
 
+procedure TfrmTMGPrintList.btnApplyClick(Sender: TObject);
+begin
+  inherited;
+  LoadList;
+  btnApply.Enabled := false;
+end;
+
+procedure TfrmTMGPrintList.chkHighlightOnlyClick(Sender: TObject);
+const
+  HIGHLIGHT_LABEL : array [false .. true] of string = ('Show Highlighted Items Only','Show All Items');
+begin
+  inherited;
+  chkHighlightOnly.Caption := HIGHLIGHT_LABEL[chkHighlightOnly.checked];
+  LoadList;
+end;
+
 procedure TfrmTMGPrintList.ckbxAllClick(Sender: TObject);
 const
   CKBTN_LABEL : array [false .. true] of string = ('Select','Deselect');
@@ -97,6 +136,7 @@ begin
   for i := 0 to cklbTitles.Items.Count - 1 do begin
     cklbTitles.Checked[i] := ckbxAll.Checked;
   end;
+  btnOK.Enabled := ckbxAll.Checked;
 end;
 
 procedure TfrmTMGPrintList.LoadSelectedIntoList(AList : TStringList);
@@ -134,10 +174,27 @@ begin
   btnOK.Enabled := SomeSelected;
 end;
 
-procedure TfrmTMGPrintList.Initialize(ATree: TORTreeView; PageID: Integer);
+procedure TfrmTMGPrintList.dtEndChange(Sender: TObject);
+begin
+  inherited;
+  PersistEndDate := dtEnd.FMDateTime;
+  btnApply.Enabled := true;
+end;
+
+procedure TfrmTMGPrintList.dtStartChange(Sender: TObject);
+begin
+  inherited;
+  PersistBeginDate := dtStart.FMDateTime;
+  btnApply.Enabled := true;
+end;
+
+//procedure TfrmTMGPrintList.Initialize(ATree: TORTreeView; PageID: Integer);
+procedure TfrmTMGPrintList.LoadList;
 var
   i, AnImg: integer;
   x, TitleName: string;
+  HighlightedItem : boolean;
+  ThisDate:TFMdatetime;
 begin
   HLDPageID := PageID;
   ResizeFormToFont(TForm(self));
@@ -150,7 +207,11 @@ begin
     if AnImg in [IMG_SINGLE, IMG_PARENT,IMG_IDNOTE_SHUT, IMG_IDNOTE_OPEN,
                      IMG_IDPAR_ADDENDA_SHUT, IMG_IDPAR_ADDENDA_OPEN] then begin
       x := TORTreeNode(ATree.Items.Item[i]).Stringdata;
-      DataSL.Add(x);
+      HighlightedItem := (piece(x,'^',16)='1');
+      if (chkHighlightOnly.checked) and (not HighlightedItem) then continue;
+      ThisDate := strtofloat(piece(x,'^',3));
+      if (ThisDate>dtStart.FMDateTime) AND (ThisDate<dtEnd.FMDateTime) then
+           DataSL.Add(x);
     end; {if}
   end; {for}
 

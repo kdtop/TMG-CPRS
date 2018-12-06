@@ -1256,7 +1256,7 @@ const
   RefreshInterval = 500;
 
 begin
-  frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
+   frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
   if FileExists(LocalSaveFNamePath) then begin
     DeleteFile(LocalSaveFNamePath);
   end;

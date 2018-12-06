@@ -858,6 +858,7 @@ begin
   lblPtAttending.Caption := '';
   lblPtMHTC.Caption := '';
   pnlPrimaryCare.Caption := lblPtCare.Caption + ' ' + lblPtAttending.Caption + ' ' + lblPtMHTC.Caption;
+  pnlPrimaryCare.Hint := lblPtCare.Caption;
   frmCover.ClearPtData;
   frmProblems.ClearPtData;
   frmMeds.ClearPtData;
@@ -1924,7 +1925,7 @@ var refresh : boolean;
 begin
   inherited;
   frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
-  frmPatientPhotoID.ShowPreviewMode(Patient.DFN,Self.PatientImage);
+  frmPatientPhotoID.ShowPreviewMode(Patient.DFN,Self.PatientImage,ltRight);
 end;
 
 procedure TfrmFrame.PatientImageMouseLeave(Sender: TObject);
@@ -2069,7 +2070,8 @@ var
         Encounter.DateTime := Patient.AdmitTime;
         Encounter.VisitCategory := 'H';
       end;
-      if User.IsProvider then Encounter.Provider := User.DUZ;
+      //if User.IsProvider then Encounter.Provider := User.DUZ;  //TMG commented out for code below  11/1/18
+      Encounter.Provider := strtoint(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ)]));
       SetupPatient(FlaggedPTList);
       if (FlaggedPTList.IndexOf(Patient.DFN) < 0) then
         FlaggedPTList.Add(Patient.DFN);
@@ -4412,7 +4414,7 @@ procedure TfrmFrame.pnlPrimaryCareClick(Sender: TObject);
     Lines.Add(TempS);
   end;
 
-var i : integer;
+var i,j : integer;
     OneLine : String;
     frmMemoEdit: TfrmMemoEdit;
 
@@ -4420,8 +4422,13 @@ begin
   inherited;
   //MessageDlg('Here I can display info',mtInformation,[mbOK],0);
   frmMemoEdit := TfrmMemoEdit.Create(Self);
-  frmMemoEdit.lblMessage.Caption := 'Follow up detail below.';
-  frmMemoEdit.Caption := 'Follow up details.';
+  frmMemoEdit.lblMessage.Caption := 'Upcoming appointment and follow up detail below.';
+  frmMemoEdit.Caption := 'Upcoming appointment and follow up details.';
+  //frmMemoEdit.memEdit.Lines.add('Upcoming appt information:');
+  for j := 1 to NumPieces(lblPtCare.Caption,';') do
+    frmMemoEdit.memEdit.Lines.add(piece(lblPtCare.Caption,';',j));
+  frmMemoEdit.memEdit.Lines.add(' ');
+  frmMemoEdit.memEdit.Lines.add('Follow up detail:');
   for i := Patient.DueInfo.Count - 1 downto 2 do begin
     OneLine := Patient.DueInfo.Strings[i];
     ParseOneLine(OneLine, frmMemoEdit.memEdit.Lines);

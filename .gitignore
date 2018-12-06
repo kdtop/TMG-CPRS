@@ -1,4 +1,5 @@
 *.lnk
+**/*.dcu
 DCU_OLD
 __history
 ReaderProblems

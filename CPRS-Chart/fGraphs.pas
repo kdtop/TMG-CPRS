@@ -489,6 +489,7 @@ implementation
 uses fGraphSettings, fGraphProfiles, fGraphData, fGraphOthers, rGraphs,
   ComObj, ActiveX, ShellAPI, fFrame, uCore, rCore, uConst, fRptBox, fReports,
   fUploadImages, fNotes, uHTMLTools,  //kt 3/17
+  uTMGOptions,  //kt 9/17/18
   uFormMonitor, VAUtils;
 
 {$R *.DFM}
@@ -745,6 +746,7 @@ begin
   ChangeStyle;
   StayOnTop;
   mnuPopGraphResetClick(self);
+  chkItemsTop.Checked := uTMGOptions.ReadBool('TMG CPRS INDIVIDUAL GRAPHS',False); //tmg  9/17/18
   if pnlFooter.Tag = 1 then  // do not show footer controls on reports tab
   begin
     pnlFooter.Visible := false;

@@ -125,6 +125,7 @@ type
     procedure HandleGetOneByClassCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
     procedure HandleGetByTagNameCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
     procedure HandleGetOneByTagNameCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
+    procedure PostKeyEx32(key: Word; const shift: TShiftState; specialkey: Boolean);
   public
     {end public}
     PopupMenu:     TPopupMenu;
@@ -216,6 +217,7 @@ type
     function SearchElements(CheckMatch : TIterateCallbackProc; Msg : string; Obj : TObject) : IHTMLElement;
     function AppendBodyNode(TagName : string; Id : string = ''; InnerHTML : string= '') : IHtmlElement;
     procedure SetInnerHTMLByID(Id : string; Content : string);
+    procedure SendKeys(key: Word; const shift: TShiftState; specialkey: Boolean);
   end;
 
 function HTMLElement_PropertyValue(Elem : IHTMLElement; PropertyName : string) : string;
@@ -2314,6 +2316,57 @@ begin
     CurrentJSSummary.Free;
     JSToAdd.Free;
   end;
+end;
+
+procedure THtmlObj.PostKeyEx32(key: Word; const shift: TShiftState; specialkey: Boolean);
+type
+  TShiftKeyInfo = record
+    shift: Byte;
+    vkey: Byte;
+  end;
+  ByteSet = set of 0..7;
+const
+  shiftkeys: array [1..3] of TShiftKeyInfo = (
+    (shift: Ord(ssCtrl) ; vkey: VK_CONTROL),
+    (shift: Ord(ssShift) ; vkey: VK_SHIFT),
+    (shift: Ord(ssAlt) ; vkey: VK_MENU)
+  );
+var
+  flag: DWORD;
+  bShift: ByteSet absolute shift;
+  j: Integer;
+begin
+  for j := 1 to 3 do
+  begin
+    if shiftkeys[j].shift in bShift then
+      keybd_event(
+        shiftkeys[j].vkey, MapVirtualKey(shiftkeys[j].vkey, 0), 0, 0
+    );
+  end;
+  if specialkey then
+    flag := KEYEVENTF_EXTENDEDKEY
+  else
+    flag := 0;
+
+  keybd_event(key, MapvirtualKey(key, 0), flag, 0);
+  flag := flag or KEYEVENTF_KEYUP;
+  keybd_event(key, MapvirtualKey(key, 0), flag, 0);
+
+  for j := 3 downto 1 do
+  begin
+    if shiftkeys[j].shift in bShift then
+      keybd_event(
+        shiftkeys[j].vkey,
+        MapVirtualKey(shiftkeys[j].vkey, 0),
+        KEYEVENTF_KEYUP,
+        0
+      );
+  end;
+end;
+
+procedure THtmlObj.SendKeys(key: Word; const shift: TShiftState; specialkey: Boolean);
+begin
+  PostKeyEx32(key, shift, specialkey);
 end;
 
 //===========================================================================

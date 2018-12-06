@@ -358,12 +358,13 @@ inherited frmNotes: TfrmNotes
         object btnAdminDocs: TSpeedButton
           Left = 190
           Top = 2
-          Width = 80
+          Width = 95
           Height = 13
+          Hint = 'Click to show Admin docs'
           AllowAllUp = True
           GroupIndex = 2
           Down = True
-          Caption = 'Show Admin Docs'
+          Caption = 'Hiding Admin Docs'
           Flat = True
           Font.Charset = ARABIC_CHARSET
           Font.Color = clWindowText
@@ -801,8 +802,8 @@ inherited frmNotes: TfrmNotes
             Left = 23
             Top = 0
             Width = 145
-            Height = 18
-            ItemHeight = 0
+            Height = 21
+            ItemHeight = 13
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0
@@ -1160,8 +1161,45 @@ inherited frmNotes: TfrmNotes
             ShowHint = True
             OnClick = btnLessIndentClick
           end
-          object btnTextColor: TSpeedButton
+          object btnShiftEnter: TSpeedButton
             Left = 496
+            Top = 0
+            Width = 23
+            Height = 18
+            Hint = 'Shift Enter'
+            Glyph.Data = {
+              36030000424D3603000000000000360000002800000010000000100000000100
+              18000000000000030000130B0000130B00000000000000000000FF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FF000000FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FF000000000000000000FF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF00000000
+              0000000000000000000000FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FF000000000000000000000000000000000000000000FF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF00
+              0000000000000000FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FF000000000000000000FF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF00
+              0000000000000000FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FF030303030303030303030303030303030303FF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF03030303030303030303
+              0303030303030303FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+            ParentShowHint = False
+            ShowHint = True
+            OnClick = btnShiftEnterClick
+          end
+          object btnTextColor: TSpeedButton
+            Left = 519
             Top = 0
             Width = 23
             Height = 18
@@ -1191,7 +1229,7 @@ inherited frmNotes: TfrmNotes
             OnClick = btnTextColorClick
           end
           object btnBackColor: TSpeedButton
-            Left = 519
+            Left = 542
             Top = 0
             Width = 23
             Height = 18
@@ -1227,7 +1265,7 @@ inherited frmNotes: TfrmNotes
             OnClick = btnBackColorClick
           end
           object btnImage: TSpeedButton
-            Left = 542
+            Left = 565
             Top = 0
             Width = 23
             Height = 18
@@ -1246,7 +1284,7 @@ inherited frmNotes: TfrmNotes
             OnClick = btnImageClick
           end
           object btnEditZoomOut: TSpeedButton
-            Left = 565
+            Left = 588
             Top = 0
             Width = 18
             Height = 18
@@ -1293,7 +1331,7 @@ inherited frmNotes: TfrmNotes
             OnClick = btnEditZoomOutClick
           end
           object btnEditNormalZoom: TSpeedButton
-            Left = 583
+            Left = 606
             Top = 0
             Width = 18
             Height = 18
@@ -1340,7 +1378,7 @@ inherited frmNotes: TfrmNotes
             OnClick = btnEditZoomNormalClick
           end
           object btnEditZoomIn: TSpeedButton
-            Left = 601
+            Left = 624
             Top = 0
             Width = 18
             Height = 18

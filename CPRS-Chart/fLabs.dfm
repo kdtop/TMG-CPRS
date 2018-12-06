@@ -40,7 +40,7 @@ inherited frmLabs: TfrmLabs
   inherited pnlLeft: TPanel
     Height = 737
     Constraints.MinWidth = 37
-    ExplicitHeight = 717
+    ExplicitHeight = 737
     object Splitter1: TSplitter
       Left = 0
       Top = 477
@@ -63,7 +63,6 @@ inherited frmLabs: TfrmLabs
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
-      ExplicitHeight = 457
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -93,7 +92,6 @@ inherited frmLabs: TfrmLabs
         OnKeyDown = tvReportsKeyDown
         Caption = 'Available Reports'
         NodePiece = 0
-        ExplicitHeight = 438
       end
     end
     object pnlLeftBottom: TPanel
@@ -103,7 +101,6 @@ inherited frmLabs: TfrmLabs
       Height = 250
       Align = alBottom
       TabOrder = 1
-      ExplicitTop = 467
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -235,7 +232,7 @@ inherited frmLabs: TfrmLabs
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
     ExplicitWidth = 620
-    ExplicitHeight = 717
+    ExplicitHeight = 737
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -254,7 +251,6 @@ inherited frmLabs: TfrmLabs
       Height = 417
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 397
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -296,7 +292,6 @@ inherited frmLabs: TfrmLabs
         Visible = False
         WantReturns = False
         WordWrap = False
-        ExplicitHeight = 376
       end
       object WebBrowser1: TWebBrowser
         Left = 1
@@ -436,13 +431,12 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 618
+            Width = 367
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
-            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162
@@ -893,7 +887,6 @@ inherited frmLabs: TfrmLabs
       Height = 20
       Align = alBottom
       TabOrder = 3
-      ExplicitTop = 697
       object lblSpecimen: TLabel
         Left = 4
         Top = 28

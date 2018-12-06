@@ -37,8 +37,8 @@ unit uTIU;
 
 interface
 
-uses SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, ORCtrls, ComCtrls, Controls
-     ;
+uses SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, ORCtrls, ComCtrls, Controls,
+     uTMGOptions;    //tmg  9/17/18
 
 type
 
@@ -159,7 +159,19 @@ end;
 function MakeNoteDisplayText(RawText: string): string;
 var
   x: string;
+  DateFormat:string;  //tmg  9/17/18
 begin
+  x := RawText;
+  DateFormat := uTMGOptions.ReadString('TMG CPRS NOTE DATE FORMAT','mmm dd,yy'); //tmg 9/17/18
+  if Piece(x, U, 1) = '' then
+    Result := FormatFMDateTime(DateFormat, MakeFMDateTime(Piece(x, U, 3))) + '  ' +  //tmg 9/17/18
+        Piece(x, U, 2) + ', ' + Piece(x, U, 6) + ', ' + Piece(Piece(x, U, 5), ';', 2)
+  else if Piece(x, U, 1)[1] in ['A', 'N', 'E'] then
+    Result := Piece(x, U, 2)
+  else
+    Result := FormatFMDateTime(DateFormat, MakeFMDateTime(Piece(x, U, 3))) + '  ' +     //tmg 9/17/18
+              Piece(x, U, 2) + ', ' + Piece(x, U, 6) + ', ' + Piece(Piece(x, U, 5), ';', 2);
+{       Original function below  9/17/18
   x := RawText;
   if Piece(x, U, 1) = '' then
     Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 3))) + '  ' +
@@ -168,7 +180,7 @@ begin
     Result := Piece(x, U, 2)
   else
     Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 3))) + '  ' +
-              Piece(x, U, 2) + ', ' + Piece(x, U, 6) + ', ' + Piece(Piece(x, U, 5), ';', 2);
+              Piece(x, U, 2) + ', ' + Piece(x, U, 6) + ', ' + Piece(Piece(x, U, 5), ';', 2);  }
 end;
 
 

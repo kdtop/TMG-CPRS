@@ -261,6 +261,9 @@ type
     ViewWindowsMessages1: TMenuItem;
     btnSave: TBitBtn;
     btnAdminDocs: TSpeedButton;
+    btnShiftEnter: TSpeedButton;
+    procedure btnShiftEnterClick(Sender: TObject);
+    procedure btnLineFeedClick(Sender: TObject);
     procedure btnAdminDocsClick(Sender: TObject);
     procedure chkHideAdminClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
@@ -5851,6 +5854,12 @@ begin
   HtmlEditor.Outdent;
 end;
 
+procedure TfrmNotes.btnLineFeedClick(Sender: TObject);      
+begin
+  inherited;
+  HTMLEditor.SendKeys(VK_RETURN, [ssShift], False);
+end;
+
 procedure TfrmNotes.btnMoreIndentClick(Sender: TObject);
 //kt 9/11 added function
 begin
@@ -5869,6 +5878,12 @@ procedure TfrmNotes.btnSaveClick(Sender: TObject);
 begin
   inherited;
   if not boolAutosaving then DoAutoSave;      //elh added 11/18/16
+end;
+
+procedure TfrmNotes.btnShiftEnterClick(Sender: TObject);
+begin
+  inherited;
+  HTMLEditor.SendKeys(VK_RETURN, [ssShift], False);
 end;
 
 procedure TfrmNotes.btnSortAuthorClick(Sender: TObject);
@@ -6235,8 +6250,13 @@ end;
 procedure TfrmNotes.btnAdminDocsClick(Sender: TObject);
 begin
   inherited;
-  if btnAdminDocs.Down then btnAdminDocs.Caption := 'Show Admin Docs'
-  else btnAdminDocs.Caption := 'Hide Admin Docs';
+  if btnAdminDocs.Down then begin
+    btnAdminDocs.Caption := 'Hiding Admin Docs';
+    btnAdminDocs.Hint := 'Click to show Admin docs';
+  end else begin
+    btnAdminDocs.Caption := 'Showing Admin Docs';
+    btnAdminDocs.Hint := 'Click to hide Admin docs';
+  end;
   LoadNotes;
 end;
 

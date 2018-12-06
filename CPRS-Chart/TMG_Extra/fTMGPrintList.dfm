@@ -2,13 +2,13 @@ inherited frmTMGPrintList: TfrmTMGPrintList
   Left = 364
   Top = 191
   Caption = 'Print Selected Items'
-  ClientHeight = 394
+  ClientHeight = 410
   ClientWidth = 494
   Constraints.MinHeight = 210
   Constraints.MinWidth = 255
   OnCreate = FormCreate
   ExplicitWidth = 502
-  ExplicitHeight = 428
+  ExplicitHeight = 444
   PixelsPerInch = 96
   TextHeight = 13
   object lblListName: TLabel [0]
@@ -18,9 +18,23 @@ inherited frmTMGPrintList: TfrmTMGPrintList
     Height = 13
     Caption = 'lblListName'
   end
-  object btnOK: TBitBtn [1]
+  object Label1: TLabel [1]
+    Left = 8
+    Top = 40
+    Width = 48
+    Height = 13
+    Caption = 'Start Date'
+  end
+  object Label2: TLabel [2]
+    Left = 208
+    Top = 40
+    Width = 45
+    Height = 13
+    Caption = 'End Date'
+  end
+  object btnOK: TBitBtn [3]
     Left = 260
-    Top = 361
+    Top = 377
     Width = 113
     Height = 25
     Anchors = [akRight, akBottom]
@@ -56,9 +70,9 @@ inherited frmTMGPrintList: TfrmTMGPrintList
       FFFF00FFFF00FF3EB961FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
   end
-  object btnCancel: TBitBtn [2]
+  object btnCancel: TBitBtn [4]
     Left = 379
-    Top = 361
+    Top = 377
     Width = 107
     Height = 25
     Anchors = [akRight, akBottom]
@@ -93,7 +107,7 @@ inherited frmTMGPrintList: TfrmTMGPrintList
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
   end
-  object ckbxAll: TCheckBox [3]
+  object ckbxAll: TCheckBox [5]
     Left = 10
     Top = 15
     Width = 97
@@ -102,15 +116,55 @@ inherited frmTMGPrintList: TfrmTMGPrintList
     TabOrder = 2
     OnClick = ckbxAllClick
   end
-  object cklbTitles: TCheckListBox [4]
+  object cklbTitles: TCheckListBox [6]
     Left = 8
-    Top = 38
+    Top = 64
     Width = 478
-    Height = 317
+    Height = 307
     Anchors = [akLeft, akTop, akRight, akBottom]
     ItemHeight = 13
     TabOrder = 3
     OnClick = cklbTitlesClick
+  end
+  object btnApply: TButton [7]
+    Left = 400
+    Top = 37
+    Width = 75
+    Height = 21
+    Caption = '&Apply'
+    TabOrder = 4
+    OnClick = btnApplyClick
+  end
+  object dtStart: TORDateBox [8]
+    Left = 81
+    Top = 37
+    Width = 121
+    Height = 21
+    TabOrder = 5
+    Text = 'NOW'
+    OnChange = dtStartChange
+    DateOnly = False
+    RequireTime = False
+  end
+  object dtEnd: TORDateBox [9]
+    Left = 259
+    Top = 37
+    Width = 121
+    Height = 21
+    TabOrder = 6
+    Text = 'NOW'
+    OnChange = dtEndChange
+    DateOnly = False
+    RequireTime = False
+  end
+  object chkHighlightOnly: TCheckBox [10]
+    Left = 259
+    Top = 14
+    Width = 174
+    Height = 17
+    Caption = 'Show Highlighted Items Only'
+    TabOrder = 7
+    OnClick = chkHighlightOnlyClick
   end
   inherited amgrMain: TVA508AccessibilityManager
     Left = 232
@@ -129,6 +183,18 @@ inherited frmTMGPrintList: TfrmTMGPrintList
         'Status = stsDefault')
       (
         'Component = cklbTitles'
+        'Status = stsDefault')
+      (
+        'Component = btnApply'
+        'Status = stsDefault')
+      (
+        'Component = dtStart'
+        'Status = stsDefault')
+      (
+        'Component = dtEnd'
+        'Status = stsDefault')
+      (
+        'Component = chkHighlightOnly'
         'Status = stsDefault'))
   end
 end

@@ -1411,7 +1411,8 @@ begin
     InfoBox('Next appointment date is set to TODAY on a temporary save.',
             'Next Appointment Date', MB_OK or MB_ICONEXCLAMATION);
   end;
-
+  //Commented this section. Only consider missed is manually entered as such  elh    9/18/18
+  {
   if CurrentFlowsheet.INRLabDateStr <> '' then begin
     case DaysBetween(CurrentFlowsheet.INRLabDateTime, Patient.NextScheduledINRCheckDate) of
       0 :   AppState.AppointmentShowStatus := tsvKeptAppt;
@@ -1419,7 +1420,7 @@ begin
       else  AppState.AppointmentShowStatus := tsvNoShow;
     end;
   end;
-
+  }
   AppState.Cofactor := tcfUndef;
   // ** begin ordering section
   if PATIENT.SaveMode = tsmSave then begin

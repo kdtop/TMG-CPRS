@@ -2,8 +2,6 @@ inherited frmProcedures: TfrmProcedures
   Left = 548
   Top = 172
   Caption = 'Encounter Procedure'
-  ExplicitWidth = 632
-  ExplicitHeight = 434
   PixelsPerInch = 96
   TextHeight = 13
   object lblProcQty: TLabel [0]

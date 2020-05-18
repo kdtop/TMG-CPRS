@@ -120,6 +120,7 @@ procedure PutTextOnly(var ErrMsg: string; NoteText: TStrings; NoteIEN: Int64);
 procedure SetText(var ErrMsg: string; NoteText: TStrings; NoteIEN: Int64; Suppress: Integer);
 procedure TMGLocalBackup(Text : TStrings; NoteIEN : int64);  //kt 10/12/16
 function  TMGProcessNote(Lines : TStrings; NoteIEN : string; var ErrStr : string): TStrings;  //kt 3/16
+function  TMGTIUResolveMacro(MacroIEN,NoteIEN: string; Lines : TStrings; SelectionText : string; var Selection,ErrStr : string): TStrings;
 function  TMGResolveMacro(MacroName: string; Lines : TStrings; var ErrStr : string): string;
 procedure InitParams(NoteIEN: Int64; Suppress: Integer);
 procedure UpdateAdditionalSigners(IEN: integer; Signers: TStrings);
@@ -1204,6 +1205,68 @@ begin
     //error - return original note
   end else begin
     //success - return result
+    RPCBrokerV.Results.Delete(0);
+    Result := RPCBrokerV.Results;
+  end;
+end;
+
+function TMGTIUResolveMacro(MacroIEN,NoteIEN: string; Lines : TStrings; SelectionText : string; var Selection,ErrStr : string): TStrings;
+//kt added entire function 3/20
+var
+  line, s, RPCResult : string;
+  i, TxtIdx : integer;
+  p1, p2 : integer;
+  Response: integer;
+begin
+  ErrStr := '';
+  Result := Lines;  //Default is to return pointer to original Lines
+  RPCBrokerV.remoteprocedure := 'TMG CPRS MACRO RESOLVE';
+  RPCBrokerV.Param[0].Value := '.X';  // not used
+  RPCBrokerV.param[0].ptype := list;
+  RPCBrokerV.Param[0].Mult['"DFN"'] := Patient.DFN;
+  RPCBrokerV.Param[0].Mult['"MACRO"'] := MacroIEN;
+  RPCBrokerV.Param[0].Mult['"SELECTION"'] := Selection;
+  RPCBrokerV.Param[0].Mult['"SELTEXT"'] := SelectionText;
+  RPCBrokerV.Param[0].Mult['"NoteIEN"'] := NoteIEN;  //added 1/15/18
+  TxtIdx := 0;
+  i := 0;
+  while i < Lines.Count do begin
+    line := Lines.Strings[i];
+    p1 := Pos(CRLF, line);
+    p2 := Pos(LFCR, line);
+    if (p1 > 0) or (p2 > 0) then begin
+      while (p1 > 0) or (p2 > 0) do begin
+        s := '';
+        if (p1 > 0) and ((p1 < p2) or (p2 = 0)) then begin
+          s := Piece2(line, CRLF, 1);
+          line := MidStr(line, length(s)+ length(CRLF) + 1, MaxInt);
+        end else if (p2 > 0) and ((p2 < p1) or (p1 = 0)) then begin
+          s := Piece2(line, LFCR, 1);
+          line := MidStr(line, length(s)+ length(LFCR)+1, MaxInt);
+        end;
+        RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(TxtIdx+1)] := s; inc(TxtIdx);
+        p1 := Pos(CRLF, line);
+        p2 := Pos(LFCR, line);
+      end;
+      if line <> '' then begin
+        RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(TxtIdx+1)] := line; inc(TxtIdx);
+      end;
+    end else begin
+      RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(TxtIdx+1)] := line; inc(TxtIdx);
+    end;
+    inc (i);
+  end;
+  //for i := 0 to Lines.Count-1 do begin
+  //  RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(i+1)] := Lines.Strings[i];
+  //end;
+  CallBroker;
+  RPCResult := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
+  if piece(RPCResult,'^',1)='-1' then begin
+    ErrStr := Piece(RPCResult,'^',2);
+    //error - return original note
+  end else begin
+    //success - return result
+    Selection := piece(RPCResult,'^',3);
     RPCBrokerV.Results.Delete(0);
     Result := RPCBrokerV.Results;
   end;

@@ -9,7 +9,7 @@ unit uTMG_WM_API;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Tabs, ComCtrls,
+  Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Tabs, ComCtrls, fNotes, rODBase,
   ExtCtrls, Menus, StdCtrls, StrUtils, Buttons, ORFn, ORNet, uConst, ORCtrls, uCore;
 
   type
@@ -45,6 +45,10 @@ uses
       function Handle_Enq(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
       function Handle_RPC(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
       function Handle_PAT(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+      function Handle_HTML_PASTE(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+      function Create_Lab_Order(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+      function Get_Labs_Ordered(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+      function Get_Last_FUInfo(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
       // add more here...
       //-- End handlers  -------
     public
@@ -55,6 +59,7 @@ uses
 
   var
     TMG_WM_API : TTMGWMAPI;
+    PromptForPrint : boolean;
 
   const
     CALLBACK_INTERVAL = 500;
@@ -247,6 +252,44 @@ implementation
   begin
     Result := Patient.Name+' ('+FormatFMDateTime('MM/DD/YY', Patient.DOB)+')';
   end;
+
+  function TTMGWMAPI.Handle_HTML_PASTE(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+  //Expected DataStr format:  Tag-TextToReplaceWith^Handle
+  //                                                  |----Handle is unused
+  var
+    Tag,Replacement:string;
+  begin
+    DataStr:=piece(DataStr,'^',1);
+    Tag := piece2(DataStr,'~@~',1);
+    Replacement := piece2(DataStr,'~@~',2);
+    Result := frmNotes.WMReplaceHTMLText(Tag,Replacement);
+  end;
+
+  function TTMGWMAPI.Create_Lab_Order(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+  //Expected DataStr format:  Tag-TextToReplaceWith^Handle
+  //                                                  |----Handle is unused
+  var
+    Order:string;
+    AutoSign:boolean;
+  begin
+    DataStr:=piece(DataStr,'^',1);
+    Order := piece2(DataStr,'~@~',1);
+    AutoSign := (piece2(DataStr,'~@~',2)='1');
+    PromptForPrint := (piece2(DataStr,'~@~',3)='1');
+    Result := WM_PutNewOrder(Order,AutoSign,PromptForPrint);
+  end;
+
+  function TTMGWMAPI.Get_Labs_Ordered(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+  //                                                  |----Handle is unused
+  begin
+    Result := sCallV('TMG GET ORDERED LABS',[Patient.DFN]);
+  end;
+
+  function TTMGWMAPI.Get_Last_FUInfo(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
+  //                                                  |----Handle is unused
+  begin
+    Result := sCallV('TMG CPRS GET ONE FU DATE',[Patient.DFN]);
+  end;
   //-------- End Message Handlers --------------
 
   procedure TTMGWMAPI.RegisterHandlers();
@@ -254,10 +297,15 @@ implementation
     AddHandler('ENQ', Handle_Enq);
     AddHandler('RPC', Handle_RPC);
     AddHandler('PAT', Handle_PAT);
+    AddHandler('HTML_PASTE',Handle_HTML_PASTE);
+    AddHandler('CREATE_LAB_ORDER',Create_Lab_Order);
+    AddHandler('GET_LABS_ORDERED',Get_Labs_Ordered);
+    AddHandler('GET_LAST_FUINFO',Get_Last_FUInfo);
   end;
 
 initialization
   TMG_WM_API := TTMGWMAPI.create();
+  PromptForPrint := True;
 
 finalization
   FreeAndNil(TMG_WM_API);

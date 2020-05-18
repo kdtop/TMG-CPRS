@@ -78,7 +78,7 @@ implementation
 uses
   ORNet,   ORFn, fFrame,
   uTemplates, rTIU,
-  uCore;
+  uCore, dShared;
 
 const
   TIMER_DELAY = 200; //500 ms = 0.5 seconds
@@ -125,7 +125,8 @@ const
        CurNode := FindMatchingChild(CurNode, OneIENStr);
        if CurNode = nil then break;
        if i <> MaxNode then begin
-         CurNode.Expand(false);  //false = no recurse
+         Drawers.ExpandParentNode(CurNode);  //ELH replaced below call with this one
+         //CurNode.Expand(false);  //false = no recurse
          //Drawers.tvTemplates.Expand(CurNode);
        end
     end;

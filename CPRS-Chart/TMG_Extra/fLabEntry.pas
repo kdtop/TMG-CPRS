@@ -501,6 +501,7 @@ end;
 
 procedure TfrmLabEntry.btnCancelClick(Sender: TObject);
 begin
+  if messagedlg('Are you sure you want to cancel?',mtconfirmation,[mbYes,mbNo],0)<>mrYes then exit;     
   Self.ModalResult := mrCancel;
 end;
 

@@ -15,6 +15,7 @@ inherited frmSignOrders: TfrmSignOrders
   OnPaint = FormPaint
   OnResize = FormResize
   OnShow = FormShow
+  ExplicitTop = -109
   ExplicitWidth = 700
   ExplicitHeight = 533
   PixelsPerInch = 96
@@ -182,6 +183,32 @@ inherited frmSignOrders: TfrmSignOrders
         00FFFFFF00FFFFFF00FFFFFF00FF}
       ShowHint = True
       Transparent = True
+    end
+    object CLBubble: TShape
+      Left = 179
+      Top = -2
+      Width = 114
+      Height = 26
+      Brush.Color = clYellow
+      Pen.Style = psClear
+      Shape = stEllipse
+      Visible = False
+    end
+    object CLLabel: TLabel
+      Left = 187
+      Top = 4
+      Width = 92
+      Height = 13
+      Caption = 'Caps Lock is on'
+      Color = clYellow
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Visible = False
     end
     object txtESCode: TCaptionEdit
       Left = 6
@@ -704,5 +731,11 @@ inherited frmSignOrders: TfrmSignOrders
       ShortCut = 16453
       OnClick = Exit1Click
     end
+  end
+  object Timer1: TTimer
+    Interval = 500
+    OnTimer = Timer1Timer
+    Left = 192
+    Top = 88
   end
 end

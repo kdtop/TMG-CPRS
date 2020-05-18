@@ -19,7 +19,33 @@ inherited frmSignItem: TfrmSignItem
     Height = 13
     Caption = 'Signature Code'
   end
-  object imgPWSaved: TImage [1]
+  object CLBubble: TShape [1]
+    Left = 80
+    Top = 71
+    Width = 114
+    Height = 26
+    Brush.Color = clYellow
+    Pen.Style = psClear
+    Shape = stEllipse
+    Visible = False
+  end
+  object CLLabel: TLabel [2]
+    Left = 90
+    Top = 76
+    Width = 92
+    Height = 13
+    Caption = 'Caps Lock is on'
+    Color = clYellow
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object imgPWSaved: TImage [3]
     Left = 155
     Top = 92
     Width = 24
@@ -106,11 +132,23 @@ inherited frmSignItem: TfrmSignItem
     Transparent = True
     Visible = False
   end
-  object lblText: TMemo [2]
+  object txtESCode: TCaptionEdit [4]
+    Left = 8
+    Top = 95
+    Width = 141
+    Height = 21
+    ParentShowHint = False
+    PasswordChar = '*'
+    ShowHint = True
+    TabOrder = 0
+    OnKeyPress = txtESCodeKeyPress
+    Caption = 'Signature Code'
+  end
+  object lblText: TMemo [5]
     Left = 8
     Top = 8
     Width = 389
-    Height = 65
+    Height = 57
     BorderStyle = bsNone
     Color = clBtnFace
     Lines.Strings = (
@@ -118,17 +156,7 @@ inherited frmSignItem: TfrmSignItem
     ReadOnly = True
     TabOrder = 1
   end
-  object txtESCode: TCaptionEdit [3]
-    Left = 8
-    Top = 95
-    Width = 141
-    Height = 21
-    PasswordChar = '*'
-    TabOrder = 0
-    OnKeyPress = txtESCodeKeyPress
-    Caption = 'Signature Code'
-  end
-  object cmdOK: TButton [4]
+  object cmdOK: TButton [6]
     Left = 239
     Top = 95
     Width = 72
@@ -138,7 +166,7 @@ inherited frmSignItem: TfrmSignItem
     TabOrder = 2
     OnClick = cmdOKClick
   end
-  object cmdCancel: TButton [5]
+  object cmdCancel: TButton [7]
     Left = 325
     Top = 95
     Width = 72
@@ -165,5 +193,11 @@ inherited frmSignItem: TfrmSignItem
       (
         'Component = frmSignItem'
         'Status = stsDefault'))
+  end
+  object Timer1: TTimer
+    Interval = 500
+    OnTimer = Timer1Timer
+    Left = 192
+    Top = 88
   end
 end

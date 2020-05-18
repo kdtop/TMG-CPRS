@@ -605,14 +605,15 @@ begin
       CT_NOTES   :  begin            // v26.5 (RV) main changes here
                       WantsToCompleteConsult := False;
                       ConsultTitle := IsConsultTitle(cboNewTitle.ItemIEN);
-                      if (pnlConsults.Visible) and
+                      //TMG 5/28/19 commented below
+                      {if (pnlConsults.Visible) and
                          (lstRequests.Items.Count > 0) and
                          (not FStarting) and
                          (*(lstRequests.ItemID <> '') and*)
                          (not ConsultTitle) then
                           WantsToCompleteConsult := (InfoBox(TX_NEED_CONSULT_TITLE,
                                                             TC_NOT_CONSULT_TITLE,
-                                                            MB_ICONWARNING or MB_YESNO or MB_DEFBUTTON2) = IDNO);
+                                                            MB_ICONWARNING or MB_YESNO or MB_DEFBUTTON2) = IDNO);  }
                       if WantsToCompleteConsult and (not ConsultTitle) then cboNewTitle.ItemIndex := -1;
                       SetGenericFormSize;
                       ShowRequestList(WantsToCompleteConsult or ConsultTitle);

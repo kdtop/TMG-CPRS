@@ -126,6 +126,8 @@ type
     btnCamera: TBitBtn;
     cmbWidth: TComboBox;
     lblImageScale: TLabel;
+    ChkTimer: TTimer;
+    procedure ChkTimerTimer(Sender: TObject);
     procedure UploadButtonClick(Sender: TObject);
     procedure PickImagesButtonClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -209,7 +211,7 @@ const
   function UniqueTempSaveFilePath (RootName : string = 'temp_file'; FileType : string = 'jpg') : string;
 
 var
-  //frmImageUpload: TfrmImageUpload;
+  //frmImageUpload: TfrmImageUpload;      //this was commented out and I'm not sure why. 8/26/19
   PLargeIcon, PSmallIcon: phicon;
 
 
@@ -1770,12 +1772,18 @@ AbortPoint:
     end;
     //ELH added if below  4/9/18
     PolTimer.Enabled := false;
+    ChkTimer.Enabled := False;
     if CountPNGsInFolder>0 then begin
       if messagedlg('Images are waiting for upload'+#13#10+'Would you like to upload them now?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then begin
-        if messagedlg('Do you want to be reminded again about these images?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
-          PolTimer.Interval := 600000;
-          PolTimer.Enabled := true;
-        end;
+        {Don't give option to upload any more this session.
+        if messagedlg('Do you want to be reminded again about these images?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin    }
+        //PolTimer.Interval := 10000;
+        //PolTimer.Enabled := true;
+
+        {end;
+        }
+        ChkTimer.Enabled := True;
+        frmFrame.mnuUploadImages.Visible := True;
         exit;
       end;
     end;
@@ -1998,7 +2006,16 @@ AbortPoint:
     Self.Mode := umAnyFile;
   end;
 
-  procedure TfrmImageUpload.MoveCheckBoxClick(Sender: TObject);
+  procedure TfrmImageUpload.ChkTimerTimer(Sender: TObject);
+begin
+  if frmFrame.TurnOnUploads=True then begin
+      poltimer.enabled := true;
+      ChkTimer.enabled := False;
+      frmFrame.mnuUploadImages.Visible := false;
+  end;
+end;
+
+procedure TfrmImageUpload.MoveCheckBoxClick(Sender: TObject);
   begin
     SavedMoveFilesValue := MoveCheckBox.Checked;
   end;

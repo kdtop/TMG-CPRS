@@ -13,7 +13,11 @@ type
     cmdOK: TButton;
     cmdCancel: TButton;
     lblText: TMemo;
-    imgPWSaved: TImage;  //kt added
+    imgPWSaved: TImage;
+    Timer1: TTimer;
+    CLBubble: TShape;
+    CLLabel: TLabel;
+    procedure Timer1Timer(Sender: TObject);  //kt added
     procedure txtESCodeKeyPress(Sender: TObject; var Key: Char);   //kt added
     procedure cmdOKClick(Sender: TObject);
     procedure cmdCancelClick(Sender: TObject);
@@ -71,6 +75,16 @@ begin
   FESCode := Encrypt(txtESCode.Text);
   SavedSignature.Remember(txtESCode.Text);  //kt added 11/15.  Save for default duration (2 minutes)
   Close;
+end;
+
+procedure TfrmSignItem.Timer1Timer(Sender: TObject);
+var
+  KeyState: TKeyboardState;
+begin
+  inherited;
+  GetKeyboardState(KeyState) ;
+  CLBubble.Visible := (KeyState[VK_CAPITAL] = 1);
+  CLLabel.Visible := (KeyState[VK_CAPITAL] = 1);
 end;
 
 procedure TfrmSignItem.txtESCodeKeyPress(Sender: TObject; var Key: Char);

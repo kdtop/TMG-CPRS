@@ -180,6 +180,8 @@ type
     procedure ZoomReset;
     procedure InsertHTMLAtCaret(HTMLText : AnsiString);             //kt 4/21/10
     procedure InsertTextAtCaret(Text : AnsiString); //Note: Text is NOT HTMLtext
+    function GetCaretLocation() : TPoint;
+    function GetScrollLocation: integer;
     property  HTMLText:string read GetHTMLText write SetHTMLText;
     property  Text:string read GetText write SetText;
     //property Active : boolean read FActive write SetMsgActive;
@@ -956,6 +958,19 @@ var P : PWideChar;
 begin
   P := StringToOleStr(Text);
   FCaret.InsertText(P,Length(Text))
+end;
+
+function THtmlObj.GetCaretLocation() : TPoint;
+//added 6/3/19
+begin
+  FCaret.GetLocation(result,0);
+end;
+
+function THtmlObj.GetScrollLocation: integer;
+//var
+//ewbDocumentContent: TWebBrowser;
+begin
+    result := ((self.Document as IHTMLDocument2).body as HTMLBody).scrollTop;
 end;
 
 function THtmlObj.FlagsToWord(Flags : THTMLSearchFlags = [hsPartial]) : word;

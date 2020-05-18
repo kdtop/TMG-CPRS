@@ -82,6 +82,7 @@ procedure LoadOrderPrompting(Dest: TList; ADialog: Integer);
 //procedure LoadResponses(Dest: TList; const OrderID: string);
 procedure LoadResponses(Dest: TList; const OrderID: string; var HasObjects: boolean);
 procedure PutNewOrder(var AnOrder: TOrder; ConstructOrder: TConstructOrder; OrderSource: string);
+function WM_PutNewOrder(OrderText: string; AutoSign:boolean; PromptForPrint:boolean):string;        //TMG 5/20/19 //TMG 5/20/19
 //procedure PutNewOrderAuto(var AnOrder: TOrder; ADialog: Integer); // no longer used
 function OIMessage(IEN: Integer): string;
 function OrderMenuStyle: Integer;
@@ -131,7 +132,8 @@ function ODForVitals: TStrings;
 
 implementation
 
-uses TRPCB, uOrders, uODBase, fODBase;
+uses TRPCB, uOrders, uODBase, fODBase
+     ,fOrders, fOrdersSign;  //TMG added  5/20/19
 
 var
   uLastDispenseIEN: Integer;
@@ -548,6 +550,126 @@ begin
       end;
     SetOrderFields(AnOrder, x, y, z);
   end;
+end;
+
+function WM_PutNewOrder(OrderText: string; AutoSign:boolean; PromptForPrint:boolean):string;        //TMG 5/20/19
+var
+  i, inc, len, numLoop, remain, IndexOfOrder: Integer;
+  ocStr, tmpStr, x, y, z: string;
+  AList : Tlist;
+  j : integer;
+  OrderArray : TStringList;
+begin
+  if Patient.DFN='' then begin
+    result := 'No patient selected';
+    exit;
+  end;
+    
+  with RPCBrokerV do
+  begin
+    ClearParameters := True;
+    RemoteProcedure := 'ORWDX SAVE';
+    Param[0].PType := literal;
+    Param[0].Value := Patient.DFN;  //*DFN*
+    Param[1].PType := literal;
+    Param[1].Value := User.DUZ;    //IntToStr(Encounter.Provider);
+    Param[2].PType := literal;
+    Param[2].Value := '6';
+    Param[3].PType := literal;
+    Param[3].Value := 'OR GXTEXT WORD PROCESSING ORDER';
+    Param[4].PType := literal;
+    Param[4].Value := '13';
+    Param[5].PType := literal;
+    Param[5].Value := '49';
+    Param[6].PType := literal;
+    Param[6].Value := '';        // null if new order, otherwise ORIFN of original
+
+
+    {if (ConstructOrder.DGroup = IVDisp) or (ConstructOrder.DialogName = 'PSJI OR PAT FLUID OE') then
+      SetupORDIALOG(Param[7], ConstructOrder.ResponseList, True)
+    else
+      SetupORDIALOG(Param[7], ConstructOrder.ResponseList);
+    if Length(ConstructOrder.LeadText)  > 0
+      then Param[7].Mult['"ORLEAD"']  := ConstructOrder.LeadText;
+    if Length(ConstructOrder.TrailText) > 0
+      then Param[7].Mult['"ORTRAIL"'] := ConstructOrder.TrailText;
+    Param[7].Mult['"ORCHECK"'] := IntToStr(ConstructOrder.OCList.Count);
+    with ConstructOrder do for i := 0 to OCList.Count - 1 do
+    begin
+      // put quotes around everything to prevent broker from choking
+      y := '"ORCHECK","' + Piece(OCList[i], U, 1) + '","' + Piece(OCList[i], U, 3) +
+        '","' + IntToStr(i+1) + '"';
+      //Param[7].Mult[y] := Pieces(OCList[i], U, 2, 4);
+      OCStr :=  Pieces(OCList[i], U, 2, 4);
+      len := Length(OCStr);
+      if len > 255 then
+        begin
+          numLoop := len div 255;
+          remain := len mod 255;
+          inc := 0;
+          while inc <= numLoop do
+            begin
+              tmpStr := Copy(OCStr, 1, 255);
+              OCStr := Copy(OCStr, 256, Length(OcStr));
+              Param[7].Mult[y + ',' + InttoStr(inc)] := tmpStr;
+              inc := inc +1;
+            end;
+          if remain > 0 then  Param[7].Mult[y + ',' + inttoStr(inc)] := OCStr;
+
+        end
+      else
+       Param[7].Mult[y] := OCStr;
+    end;
+    if ConstructOrder.DelayEvent in ['A','D','T','M','O'] then
+      Param[7].Mult['"OREVENT"'] := ConstructOrder.PTEventPtr;
+    if ConstructOrder.LogTime > 0
+      then Param[7].Mult['"ORSLOG"'] := FloatToStr(ConstructOrder.LogTime);}
+    Param[7].PType := list;
+    Param[7].Mult['6,1'] := 'NOW';
+    Param[7].Mult['15,1'] := 'ORDIALOG("WP",15,1)';
+    OrderArray := TStringList.Create;
+    OrderArray.Text := OrderText;
+    LimitStringLength(OrderArray, 74);
+    for j := 0 to OrderArray.Count - 1 do begin
+      Param[7].Mult['"WP",15,1,'+inttostr(j+1)+',0'] := OrderArray[j];
+//            Mult[x] := WPStrings[ALine];
+    end;
+    OrderArray.Free;
+    //Param[7].Mult['"WP",15,1,'+inttostr(j)+',0'] := OrderText;
+    Param[7].Mult['"ORTS"'] := '0';
+    Param[7].Mult['"ORCHECK"'] := '0';
+    Param[7].Mult['"ORTS"'] := '0';  // pass in treating specialty for ORTS
+
+    Param[8].PType := literal;
+    Param[8].Value := '';
+    Param[9].PType := literal;                       //IMO
+    Param[9].Value := '';
+    Param[10].PType := literal;
+    Param[10].Value := '';
+    Param[11].PType := literal;
+    Param[11].Value := '0';
+
+    CallBroker;
+    if Results.Count = 0 then Exit;          // error creating order
+    x := Results[0];
+    Results.Delete(0);
+    frmOrders.RefreshToFirstItem;
+
+    if AutoSign then begin
+      AList := TList.Create();
+      IndexOfOrder := -1;
+      for i := 0 to frmOrders.lstOrders.Items.Count - 1 do
+        if TOrder(frmOrders.lstOrders.Items.Objects[i]).ID = piece(piece(x,'^',1),'~',2) then IndexOfOrder := i;
+      if IndexOfOrder<>-1 then begin      
+        AList.Add(frmOrders.lstOrders.Items.Objects[IndexOfOrder]);
+        if fOrdersSign.ExecuteSignOrders(AList) then begin
+          frmOrders.RefreshToFirstItem;
+        end;
+        AList.free;
+      end;
+    end;
+    Result := Results.Text;
+   end;
 end;
 
 { no longer used -

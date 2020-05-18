@@ -87,6 +87,8 @@ type
     txtCmdRemove: TVA508StaticText;
     txtCmdForward: TVA508StaticText;
     txtCmdProcess: TVA508StaticText;
+    btnRefresh: TButton;
+    procedure btnRefreshClick(Sender: TObject);
     procedure PatientImageMouseLeave(Sender: TObject);
     procedure PatientImageMouseEnter(Sender: TObject);
     procedure PatientImageClick(Sender: TObject);  //kt 9/11
@@ -218,6 +220,7 @@ procedure SelectPatient(ShowNotif: Boolean; FontSize: Integer; var UserCancelled
 { displays patient selection dialog (with optional notifications), updates Patient object }
 var
   frmPtSel: TfrmPtSel;
+  ResetTimer:boolean;
 begin
   frmPtSel := TfrmPtSel.Create(Application);
   RPLProblem := false;
@@ -245,7 +248,11 @@ begin
       FUserCancelled := FALSE;
       ShowModal;
       UserCancelled := FUserCancelled;
-      if not UserCancelled then frmFrame.btnTimerResetClick(nil);  //kt
+      if not UserCancelled then begin
+        //ELH allow user to over ride this reset 5/14/20
+        ResetTimer := uTMGOptions.ReadBool('CPRS Reset Timer On New Chart',True);
+        if ResetTimer then frmFrame.btnTimerResetClick(nil);  //kt
+      end;
     end;
   finally
     frmPtSel.Release;
@@ -784,6 +791,7 @@ var
   AFollowUp, i, infocount: Integer;
   enableclose: boolean;
   ADFN, x, RecordID, XQAID: string;  //*DFN*
+  Response: integer;
 begin
   if FAlertsNotReady then exit;  
   enableclose := false;
@@ -821,7 +829,17 @@ begin
       if Items[i].Caption = 'I' then begin
         // If Caption is 'I' delete the information only alert.
         ggeInfo.Progress := ggeInfo.Progress + 1;
-        DeleteAlert(XQAID);
+        if pos('mailbox',RecordID)>0 then begin       //TMG added if 8/26/19
+           //ADFN := '74592';  //*DFN*
+           ADFN := uTMGOptions.ReadString('Mailbox Patient','74592');
+           AFollowUp := NF_MAILBOX;   //StrToIntDef(Piece(Piece(XQAID, ';', 1), ',', 3), 0);  //kt Matches Notification types in uConst, e.g. NF_NOTES_UNSIGNED_NOTE
+           Notifications.Add(ADFN, AFollowUp, RecordID, Items[i].SubItems[3]); //CB
+           enableclose := true;
+           DeleteAlert(XQAID);
+        end else begin
+           Response := messagedlg(piece(RecordID,'^',1)+#13#10+#13#10+'Do you want to remove this alert?',mtConfirmation,[mbYes,mbNo],0); //TMG  8/22/19
+           if Response=mrYes then DeleteAlert(XQAID);  //TMG  8/22/19
+        end;
       end else if Piece(XQAID, ',', 1) = 'OR' then begin
         //e.g.  OR,16,50;1311;2980626.100756
         ADFN := Piece(XQAID, ',', 2);  //*DFN*
@@ -949,8 +967,17 @@ end;
 procedure TfrmPtSel.cmdRemoveClick(Sender: TObject);
 var
   i: integer;
+  msg:string;  //TMG  1/21/19
 begin
   if FAlertsNotReady then exit;
+  //tmg begin addition 1/21/19
+  if lstvAlerts.Items.Count>1 then
+     msg := 'Are you sure you want to REMOVE these alerts?'
+  else
+     msg := 'Are you sure you want to REMOVE this alert?';
+
+  if messagedlg(msg+#13#10+'This can not be undone.',mtConfirmation,[mbYes,mbNo],0)<>mrYes then exit;
+  //tmg end addition   1/21/19
   with lstvAlerts do
     begin
       if SelCount <= 0 then Exit;
@@ -1651,6 +1678,12 @@ if RadioGroup1.ItemIndex >0 then
 
 end;
  //end vwpt enhanced
+
+procedure TfrmPtSel.btnRefreshClick(Sender: TObject);
+begin
+  inherited;
+  AlertList;
+end;
 
 procedure TfrmPtSel.btnSearchPtClick(Sender: TObject);
 //kt 9/11 added

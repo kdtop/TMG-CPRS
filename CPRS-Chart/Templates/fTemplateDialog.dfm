@@ -13,8 +13,8 @@ inherited frmTemplateDialog: TfrmTemplateDialog
   OnMouseWheel = FormMouseWheel
   OnPaint = FormPaint
   OnShow = FormShow
-  ExplicitWidth = 648
-  ExplicitHeight = 451
+  ExplicitWidth = 640
+  ExplicitHeight = 447
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBottom: TScrollBox [0]
@@ -91,10 +91,6 @@ inherited frmTemplateDialog: TfrmTemplateDialog
     TabOrder = 1
     object tsPlainDlg: TTabSheet
       Caption = 'Standard'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object sbMain: TScrollBox
         Left = 0
         Top = 0
@@ -116,10 +112,6 @@ inherited frmTemplateDialog: TfrmTemplateDialog
     object tsHTMLDlg: TTabSheet
       Caption = 'HTML'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pnlHoldWebBrowser: TPanel
         Left = 0
         Top = 0

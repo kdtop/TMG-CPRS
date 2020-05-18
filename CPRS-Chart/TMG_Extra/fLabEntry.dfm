@@ -171,7 +171,6 @@ object frmLabEntry: TfrmLabEntry
       Height = 25
       Anchors = [akRight, akBottom]
       Caption = '&Cancel'
-      ModalResult = 2
       TabOrder = 0
       OnClick = btnCancelClick
       Glyph.Data = {

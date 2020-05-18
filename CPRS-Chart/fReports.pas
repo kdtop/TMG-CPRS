@@ -97,6 +97,11 @@ type
     mnuCreateReportNote: TMenuItem;
     mnuSendAlert: TMenuItem;
     mnuCopyResultsTable: TMenuItem;
+    mnuNotifyOK: TMenuItem;
+    mnuNotifyOk1: TMenuItem;
+    mnuCopyResultsTable1: TMenuItem;
+    procedure mnuCopyResultsTable1Click(Sender: TObject);
+    procedure mnuNotifyOKClick(Sender: TObject);
     procedure mnuCopyResultsTableClick(Sender: TObject);
     procedure mnuSendAlertClick(Sender: TObject);                        //kt 2/17
     procedure mnuCreateResultNoteClick(Sender: TObject);   //kt 2/17
@@ -169,6 +174,7 @@ type
     procedure RequestPrint; override;
     function GetCurrentReportHTMLTable : string;                        //kt added 2/17
     function SLToHTMLTable(Title : String; SL : TStringList) : string;  //kt added 2/17
+    function GetCurrentReportString : string;
   end;
 
 var
@@ -816,6 +822,7 @@ begin
               aCurCol := aColID;
               aCurRow := aCurRow + 1;
             end else if aColID = aCurCol then begin
+              {elh  commented below because I couldn't understand the rationale behind this code
               z := '';
               y := piece(x,'^',2);
               if length(y) > 0 then z := y;
@@ -828,7 +835,10 @@ begin
                 aTmpAray.Add(z);
               end else begin
                 aTmpAray.Add(y);
-              end;
+              end;}
+              z := piece(x,'^',1);
+              y := copy(x,length(z)+2,9999);
+              aTmpAray.Add(y);
               continue;
             end;
             if aTmpAray.Count > 0 then begin
@@ -1385,6 +1395,21 @@ begin //ProcessNotifications;
         tvReports.Selected := tvReports.Items[AnIndex];
         SelectID := Piece(Notifications.AlertData, U, 2);
         IDColumn := 3;
+        if tvReports.Selected <> tvReports.Items[AnIndex] then
+          tvReports.Selected := tvReports.Items[AnIndex];
+      end;
+    NF_HL7MESSAGES:
+      begin
+        //kt doc.  Find report in left Treeview with Qualifer = 3 (imaging) --> only 1 standard report has that.
+        //EDDIE - PICK UP HERE.... REWRITE SO THAT IT OPENS HL7 MESSAGES REPORT
+        if not FindReport(QT_IMAGING, AnIndex) then exit; //kt docn AnIndex is OUT parameter.
+        tvReports.Selected := tvReports.Items[AnIndex];
+        //kt doc Notifications.AlertData -->  RPC 'ORWORB GETDATA' with (XQAID) --> returns XQDATA
+        SelectID := 'i' + Piece(Notifications.AlertData, '~', 1) +
+          '-' + Piece(Notifications.AlertData, '~', 2);
+        IDColumn := 0;
+        //kt doc: SelectID is matched below via: ListItem.Subitems[IDColumn] = SelectID
+        //        This is used to select study in right top window for a particular study.
         if tvReports.Selected <> tvReports.Items[AnIndex] then
           tvReports.Selected := tvReports.Items[AnIndex];
       end;
@@ -3076,6 +3101,12 @@ begin
   end;
 end;
 
+procedure TfrmReports.mnuCopyResultsTable1Click(Sender: TObject);
+begin
+  inherited;
+  mnuCopyResultsTableClick(Sender);
+end;
+
 procedure TfrmReports.mnuCopyResultsTableClick(Sender: TObject);
 var
   TableHTML : string;
@@ -3098,6 +3129,41 @@ begin
   fSingleNote.CreateSingleNote(snmReport);
 end;
 
+
+procedure TfrmReports.mnuNotifyOKClick(Sender: TObject);
+begin
+  inherited;
+  fSingleNote.CreateSingleNote(snmReport,True);
+end;
+
+function TfrmReports.GetCurrentReportString : string;
+var
+  i,j: integer;
+  line: string;
+  ListItem: TListItem;
+  aText: String;
+begin
+  inherited;
+  Result := '';
+  for i := 0 to lvReports.Items.Count - 1 do begin
+    if lvReports.Items[i].Selected then begin
+      ListItem := lvReports.Items[i];
+      line := '';
+      //for j := 1 to 3 do begin
+        if (lvReports.Column[j].Width <> 0) and (j < (ListItem.SubItems.Count + 1)) then begin
+          line := ListItem.SubItems[2]+' done on '+ListItem.SubItems[1];
+        end;
+      //end;
+      if (length(line) > 0) and (lvReports.Column[0].Width <> 0) then begin
+        line := ListItem.Caption + '  ' + line;
+      end;
+      if length(aText) > 0 then begin
+        aText := aText + CRLF + line
+      end else aText := line;
+    end;
+  end;
+  Result := aText;
+end;
 
 procedure TfrmReports.mnuSendAlertClick(Sender: TObject);
 //kt added entire function 3/14/17

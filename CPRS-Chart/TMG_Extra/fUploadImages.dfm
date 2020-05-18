@@ -4061,7 +4061,7 @@ object frmImageUpload: TfrmImageUpload
     Top = 364
     Width = 193
     Height = 21
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 17
     Text = 'cmbWidth'
     Visible = False
@@ -4085,5 +4085,12 @@ object frmImageUpload: TfrmImageUpload
     OnTimer = PolTimerTimer
     Left = 24
     Top = 48
+  end
+  object ChkTimer: TTimer
+    Enabled = False
+    Interval = 5000
+    OnTimer = ChkTimerTimer
+    Left = 232
+    Top = 192
   end
 end

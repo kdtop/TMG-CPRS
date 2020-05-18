@@ -203,7 +203,7 @@ function OrderDisabledMessage(DlgIEN: Integer): string;
 procedure SendOrders(OrderList: TStringList; const ESCode: string);
 procedure SendReleaseOrders(OrderList: TStringList);
 procedure SendAndPrintOrders(OrderList, ErrList: TStrings; const ESCode: string; const DeviceInfo: string);
-procedure ExecutePrintOrders(SelectedList: TStringList; const DeviceInfo: string);
+procedure ExecutePrintOrders(SelectedList: TStringList; const DeviceInfo: string; NumToPrint:string);
 procedure PrintOrdersOnReview(OrderList: TStringList; const DeviceInfo: string; PrintLoc: Integer = 0);  {*KCM*}
 procedure PrintServiceCopies(OrderList: TStringList; PrintLoc: Integer = 0);  {*REV*}
 procedure OrderPrintDeviceInfo(OrderList: TStringList; var PrintParams: TPrintParams; Nature: Char; PrintLoc: Integer = 0); {*KCM*}
@@ -1405,9 +1405,9 @@ begin
   CallV('ORWD1 SVONLY',  [Loc, OrderList]);
 end;
 
-procedure ExecutePrintOrders(SelectedList: TStringList; const DeviceInfo: string);
+procedure ExecutePrintOrders(SelectedList: TStringList; const DeviceInfo: string; NumToPrint:string);
 begin
-  CallV('ORWD1 PRINTGUI', [Encounter.Location, DeviceInfo, SelectedList]);
+  CallV('ORWD1 PRINTGUI', [Encounter.Location, DeviceInfo, SelectedList, NumToPrint]);
 end;
 
 { Order Actions }

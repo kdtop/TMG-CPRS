@@ -41,6 +41,10 @@ type
     pnlCombined: TORAutoPanel;
     pnlTop: TPanel;
     imgPWSaved: TImage;
+    CLBubble: TShape;
+    CLLabel: TLabel;
+    Timer1: TTimer;
+    procedure Timer1Timer(Sender: TObject);
     procedure txtESCodeKeyPress(Sender: TObject; var Key: Char);      //kt added 11/15
     procedure FormCreate(Sender: TObject);
     procedure cmdOKClick(Sender: TObject);
@@ -134,7 +138,7 @@ uses
   Hash, rCore, rOrders, uConst, fOrdersPrint, uCore, uOrders, uSignItems, fOrders,
   fPCELex, rPCE, fODConsult, fBALocalDiagnoses, fClinicWardMeds, fFrame, rODLab, fRptBox,
   uSavedSignature, uTMGOptions,//kt added 11/15
-  VAUtils;
+  VAUtils, uTMG_WM_API;
 
 
 const
@@ -742,6 +746,8 @@ begin
         finally
           AList.Free;
         end;
+        if uTMG_WM_API.PromptForPrint=False then DoNotPrint := True;  //TMG 7/16/19
+        
         if(ClinicList.Count > 0) or (WardList.count > 0) then
             PrintOrdersOnSignReleaseMult(SignList, CLinicList, WardList, NO_PROVIDER, EncLocIEN, WardIEN, EncLocName, wardName)
         else if DoNotPrint = False then PrintOrdersOnSignRelease(SignList, NO_PROVIDER, PrintLoc);
@@ -1797,6 +1803,16 @@ begin
       raise;
     end;
   end;
+end;
+
+procedure TfrmSignOrders.Timer1Timer(Sender: TObject);
+var
+  KeyState: TKeyboardState;
+begin
+  inherited;
+  GetKeyboardState(KeyState) ;
+  CLBubble.Visible := (KeyState[VK_CAPITAL] = 1);
+  CLLabel.Visible := (KeyState[VK_CAPITAL] = 1);
 end;
 
 procedure TfrmSignOrders.txtESCodeKeyPress(Sender: TObject; var Key: Char);

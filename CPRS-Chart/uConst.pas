@@ -88,9 +88,10 @@ const
   CT_SURGERY  = 11;                             // chart tab - surgery
   CT_IMAGES   = 12;                             // chart tab - images      //kt 9/11 added
   CT_CONSOLE  = 13;                             // chart tab - console     //kt 9/11 added
-  CT_WEBTAB1  = 14;                             // chart tab - web browser //kt 9/11 added
-  CT_WEBTAB2  = 15;                             // chart tab - web browser //kt 9/11 added
-  CT_WEBTAB3  = 16;                             // chart tab - web browser //kt 9/11 added
+  CT_MAILBOX  = 14;                             // chart tab - mailbox     //elh 4/30/19 added
+  CT_WEBTAB1  = 15;                             // chart tab - web browser //kt 9/11 added
+  CT_WEBTAB2  = 16;                             // chart tab - web browser //kt 9/11 added
+  CT_WEBTAB3  = 17;                             // chart tab - web browser //kt 9/11 added
   //kt 9/11 NOTE --> Option: add more CT_WEBTAB#'s here.  But set CT_LAST_WEBTAB= to last one...
   CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
 
@@ -282,6 +283,8 @@ const
   NF_CONSULT_UNSIGNED_NOTE         = 902;
   NF_NOTES_UNSIGNED_NOTE           = 903;
   NF_SURGERY_UNSIGNED_NOTE         = 904;
+  NF_MAILBOX                       = 22710;   //TMG 8/26/19
+  NF_HL7MESSAGES                   = 22711;   //TMG 8/26/19
   NF_ERX_REFILL_NEEDED             = 11305;   //ERx 4/22/11
   NF_ERX_INCOMPLETE_ORDER          = 11306;   //ERx 4/22/11
 
@@ -320,7 +323,8 @@ const
   NC_CUSTOM     = 6;                             // Note Context - custom view
   //Text Search CQ: HDS00002856
   NC_SEARCHTEXT = 7;                             // Note Content - search for text
-  NC_OTHER_UNSIGNED = 8;                      // Note Content - all others' unsigned notes  //TMG  9/12/17
+  NC_OTHER_UNSIGNED = 8;                         // Note Content - all others' unsigned notes  //TMG  9/12/17
+  NC_SCANNED_RECORDS = 9;                        // Note Content - Scanned Records  //TMG 3/12/19
 
   { Surgery View Contexts }
   SR_RECENT     = 0;
@@ -385,10 +389,11 @@ const
   IMG_BLANK      =  14;
 
   { TIU TreeView context strings}
-  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_OTHER_UNSIGNED] of string =
-    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes'),
-     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' '),
-     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' '));
+  //Original line -> 3/12/19 NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_OTHER_UNSIGNED] of string =
+  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_SCANNED_RECORDS] of string =
+    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records'),
+     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' '),
+     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' ',' '));
 
   CC_ALL        = 1;                             // Consult context - all Consults
   CC_BY_STATUS  = 2;                             // Consult context - Consults by Status
@@ -543,11 +548,12 @@ const
 var
   ScrollBarWidth: integer = 0;
 
+
 implementation
 
 uses
   Windows;
-  
+
 initialization
   ScrollBarWidth := GetSystemMetrics(SM_CXVSCROLL);
 

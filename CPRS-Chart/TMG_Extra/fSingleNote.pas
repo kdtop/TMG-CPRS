@@ -102,6 +102,7 @@ type
     FLabData : TStringList;
     FNotes : TStringList;
     FSaveAndCloseTriggered : boolean;
+    NotifyOK:boolean;
     FDefaultType : string;
     //procedure HTMLEditorKeyPress(Sender: TObject; var Key: Char);
     function LacksRequiredForCreate(EditNoteRec : TEditNoteRec): Boolean;
@@ -142,7 +143,7 @@ var
   frmSingleNote: TfrmSingleNote;  //<--Not autocreated
 
 
-procedure CreateSingleNote(Mode : tSNModes = snmNone);
+procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false);
 
 implementation
 
@@ -164,7 +165,7 @@ const
 
 //====================================================================
 
-procedure CreateSingleNote(Mode : tSNModes = snmNone);
+procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false);
 begin
    frmSingleNote := TfrmSingleNote.Create(Application);
    frmSingleNote.Initialize(Mode);
@@ -175,6 +176,7 @@ begin
       pnlPatient.Caption := lblPtName.Caption + ' ' + lblPtSSN.Caption + ' ' + lblPtAge.Caption;
    end;
    frmSingleNote.FormStyle := fsStayOnTop;
+   frmSingleNote.NotifyOK := NotifyOK;
    frmSingleNote.Show;  //<-- NOTE: the OnClose event sets close action to caFree --> all will be freed automatically
    //FreeAndNil(frmSingleNote);
 end;
@@ -284,6 +286,13 @@ begin
   HTMLEditor.SetFocus;
   HTMLEditor.ShowCaret;
   HTMLEditor.MoveCaretToEnd;
+  if NotifyOK then begin
+    if frmSingleNote.FMode = snmLab then begin
+      HTMLEditor.InsertTextAtCaret('For labs drawn on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
+    end else if frmSingleNote.FMode= snmReport then begin
+      HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.');
+    end;  
+  end;
 end;
 
 procedure TfrmSingleNote.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -324,7 +333,7 @@ begin
   end else begin
     EmptyNote := (HtmlEditor.GetTextLen = 0) or not HTMLContainsVisibleItems(HtmlEditor.HTMLText);
     if not EmptyNote then begin
-      Response := MessageDlg('Do you want to save this note before exiting?',mtConfirmation,[mbYes,mbNo,mbCancel],0);
+      Response := MessageDlg('Do you want to save (unsigned) this note before exiting?',mtConfirmation,[mbYes,mbNo,mbCancel],0);
     end else begin
       Response := mrNo;
     end;
@@ -411,7 +420,15 @@ var
   Param, DefValue, NoteTitle : string;
 begin
   if Encounter.NeedVisit then begin
-    UpdateVisit(Font.Size, DfltTIULocation);
+    //7/9/19 - Autocreate encounter whether NotifyOk or not
+    //if NotifyOK then begin
+      Encounter.Location := 6;
+      Encounter.DateTime := DateTimeToFMDateTime(Now);
+      Encounter.VisitCategory := 'A';
+      Encounter.StandAlone := true;
+    //end else begin
+      //UpdateVisit(Font.Size, DfltTIULocation);
+    //end;
     frmFrame.DisplayEncounterText;
   end;
   if Encounter.NeedVisit then begin

@@ -152,7 +152,7 @@ implementation
 
 uses dShared, fRptBox, uInit, rMisc, uDlgComponents,
   uTMGOptions, uTMGUtil, fNotes, StrUtils, uCarePlan, uTemplateMath, uHTMLTools, uCore, //kt, //kt-tm, //kt-cp
-  rTIU, rTemplates, //kt
+  rTIU, rTemplates,  //kt
   VA508AccessibilityRouter, VAUtils;
 
 {$R *.DFM}
@@ -1110,6 +1110,7 @@ end;
 
 procedure TfrmTemplateDialog.FormShow(Sender: TObject);
 var HTMLText : string;  //kt
+    InitialTab : integer;
 begin
   inherited;
   if FFirstBuild then begin
@@ -1121,6 +1122,10 @@ begin
   HTMLText := HTMLDlg.HTML.Text;
   HTMLText := FixNoBRs(HTMLText);
   HTMLEditor.HTMLText := HTMLText;
+  InitialTab := uTMGOptions.ReadInteger('CPRS Template Inital Tab',0);
+  if InitialTab<0 then InitialTab := 0;
+  if InitialTab>pcDlg.PageCount-1 then InitialTab := pcDlg.PageCount-1;  
+  pcDlg.ActivePageIndex := InitialTab
   //kt end mod 3/16 ----------
 end;
 

@@ -2,7 +2,7 @@ inherited frmFrame: TfrmFrame
   Left = 196
   Top = 119
   Caption = 'p'
-  ClientHeight = 722
+  ClientHeight = 753
   ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
@@ -15,14 +15,14 @@ inherited frmFrame: TfrmFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   ExplicitWidth = 880
-  ExplicitHeight = 776
+  ExplicitHeight = 807
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
     Width = 872
-    Height = 722
+    Height = 753
     Align = alClient
     Caption = 'No patient is currently selected'
     Font.Charset = DEFAULT_CHARSET
@@ -38,7 +38,7 @@ inherited frmFrame: TfrmFrame
     Left = 0
     Top = 0
     Width = 872
-    Height = 722
+    Height = 753
     Align = alClient
     TabOrder = 0
     object bvlPageTop: TBevel
@@ -858,7 +858,7 @@ inherited frmFrame: TfrmFrame
     end
     object stsArea: TStatusBar
       Left = 1
-      Top = 700
+      Top = 731
       Width = 870
       Height = 21
       Panels = <
@@ -886,7 +886,7 @@ inherited frmFrame: TfrmFrame
     end
     object tabPage: TTabControl
       Left = 1
-      Top = 678
+      Top = 709
       Width = 870
       Height = 22
       Align = alBottom
@@ -907,7 +907,7 @@ inherited frmFrame: TfrmFrame
       Left = 1
       Top = 42
       Width = 870
-      Height = 636
+      Height = 667
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -1408,6 +1408,11 @@ inherited frmFrame: TfrmFrame
         Caption = 'Test HTML'
         OnClick = mnuTMGTempClick
       end
+      object mnuUploadImages: TMenuItem
+        Caption = 'Upload Images'
+        Visible = False
+        OnClick = mnuUploadImagesClick
+      end
     end
     object mnuHelp: TMenuItem
       Caption = '&Help'
@@ -1529,6 +1534,7 @@ inherited frmFrame: TfrmFrame
     end
     object mnuInsertTime: TMenuItem
       Caption = '&Insert Time'
+      OnClick = mnuInsertTimeClick
     end
   end
   object timSchedule: TTimer

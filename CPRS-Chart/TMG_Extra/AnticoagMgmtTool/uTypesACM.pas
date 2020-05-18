@@ -773,6 +773,7 @@ begin
   if FNextApptTime > 0 then begin
     //tmFormat := TFormatSettings.Create(LOCALE_USER_DEFAULT);
     tmFormat.LongTimeFormat := 'HH:mm';
+    tmFormat.TimeSeparator := ':';  //elh added 7/22/19
     FNextApptTimeStr := TimeToStr(FNextApptTime, tmFormat);
     FNextApptDateTimeStr := FNextApptDateStr + '@' + FNextApptTimeStr;
   end else begin

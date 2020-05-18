@@ -2,27 +2,37 @@ inherited frmOrdersPrint: TfrmOrdersPrint
   Left = 353
   Top = 194
   Caption = 'Print orders'
-  ClientHeight = 288
+  ClientHeight = 322
   ClientWidth = 356
   OldCreateOrder = True
   Position = poScreenCenter
   OnKeyUp = FormKeyUp
+  ExplicitWidth = 364
+  ExplicitHeight = 356
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBase: TORAutoPanel [0]
     Left = 0
     Top = 0
     Width = 356
-    Height = 288
+    Height = 322
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitTop = -8
     object lblDevice: TLabel
       Left = 127
       Top = 74
       Width = 71
       Height = 13
       Caption = 'Print to device:'
+    end
+    object Label1: TLabel
+      Left = 85
+      Top = 247
+      Width = 35
+      Height = 13
+      Caption = 'Copies:'
     end
     object lblPartOne: TMemo
       Left = 16
@@ -197,7 +207,7 @@ inherited frmOrdersPrint: TfrmOrdersPrint
     end
     object cmdOK: TORAlignButton
       Left = 7
-      Top = 253
+      Top = 283
       Width = 160
       Height = 21
       Caption = 'Print All Checked Items'
@@ -206,12 +216,30 @@ inherited frmOrdersPrint: TfrmOrdersPrint
     end
     object cmdCancel: TORAlignButton
       Left = 188
-      Top = 253
+      Top = 283
       Width = 160
       Height = 21
       Caption = 'Print Highlighted Items Only'
       TabOrder = 13
       OnClick = cmdCancelClick
+    end
+    object edtNumToPrint: TEdit
+      Left = 127
+      Top = 244
+      Width = 50
+      Height = 21
+      TabOrder = 20
+      Text = '0'
+      OnChange = edtNumToPrintChange
+      OnKeyPress = edtNumToPrintKeyPress
+    end
+    object UpDown1: TUpDown
+      Left = 177
+      Top = 244
+      Width = 16
+      Height = 21
+      Associate = edtNumToPrint
+      TabOrder = 21
     end
   end
   inherited amgrMain: TVA508AccessibilityManager
@@ -269,6 +297,12 @@ inherited frmOrdersPrint: TfrmOrdersPrint
         'Status = stsDefault')
       (
         'Component = frmOrdersPrint'
+        'Status = stsDefault')
+      (
+        'Component = edtNumToPrint'
+        'Status = stsDefault')
+      (
+        'Component = UpDown1'
         'Status = stsDefault'))
   end
 end

@@ -49,5 +49,7 @@
     <Transaction>2018/07/10 12:50:35.743.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMG_WM_API.pas</Transaction>
     <Transaction>2018/11/05 16:17:24.242.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSelector.pas</Transaction>
     <Transaction>2018/11/05 16:17:24.242.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSelector.dfm</Transaction>
+    <Transaction>2019/04/30 10:57:02.217.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.pas</Transaction>
+    <Transaction>2019/04/30 10:57:02.217.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.dfm</Transaction>
   </Transactions>
 </BorlandProject>

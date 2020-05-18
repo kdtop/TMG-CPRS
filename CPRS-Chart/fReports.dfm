@@ -593,10 +593,20 @@ inherited frmReports: TfrmReports
       ShortCut = 16462
       OnClick = mnuCreateResultNoteClick
     end
+    object mnuNotifyOk1: TMenuItem
+      Caption = 'Notify OK'
+      ShortCut = 16463
+      OnClick = mnuNotifyOKClick
+    end
     object mnuSendAlert: TMenuItem
       Caption = 'Send Imaging Alert'
       ShortCut = 16457
       OnClick = mnuSendAlertClick
+    end
+    object mnuCopyResultsTable1: TMenuItem
+      Caption = 'Copy Results Table'
+      ShortCut = 16466
+      OnClick = mnuCopyResultsTable1Click
     end
   end
   object calApptRng: TORDateRangeDlg
@@ -660,6 +670,11 @@ inherited frmReports: TfrmReports
         Caption = 'Create Report Note'
         ShortCut = 16462
         OnClick = mnuCreateResultNoteClick
+      end
+      object mnuNotifyOK: TMenuItem
+        Caption = 'Notify OK'
+        ShortCut = 16463
+        OnClick = mnuNotifyOKClick
       end
     end
   end

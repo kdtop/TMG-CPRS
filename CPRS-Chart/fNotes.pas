@@ -262,6 +262,9 @@ type
     btnSave: TBitBtn;
     btnAdminDocs: TSpeedButton;
     btnShiftEnter: TSpeedButton;
+    popNotePasteHTML: TMenuItem;
+    popNoteMacro: TMenuItem;
+    procedure popNotePasteHTMLClick(Sender: TObject);
     procedure btnShiftEnterClick(Sender: TObject);
     procedure btnLineFeedClick(Sender: TObject);
     procedure btnAdminDocsClick(Sender: TObject);
@@ -445,6 +448,7 @@ type
     FDesiredPCEInitialPageEditIndex : byte;         //kt 5/16
     frmWinMessageLog: TfrmWinMessageLog;            //kt 8/16 -- debugging tool
     clTMGHighlight : TColor;                        //elh   8/4/16
+    clTMGHospitalColor : TColor;                    //elh   4/30/19  
     boolAutosaving : Boolean;                       //elh  11/18/16
     procedure HandleInsertDate(Sender: TObject);    //kt
     procedure HandleHTMLObjPaste(Sender : TObject; var AllowPaste : boolean); //kt 8/16
@@ -498,8 +502,8 @@ type
     procedure SortBtnGroupClick(GroupBy : string);                                 //kt 3/14
     procedure SetSortBtnGroupDisplay(GroupBy : string);                            //kt 3/14
     procedure DoHideTitle;                                                         //kt 5/14
-    procedure FilterTitlesForHidden(TitlesList : TStringList);                     //kt 5/14
-    procedure FilterTitlesForAdmin(TitlesList : TStringList);                      //kt 1/24/17
+    procedure FilterTitlesForHidden(TitlesList : TStringList; var HiddenCount:integer);                     //kt 5/14
+    procedure FilterTitlesForAdmin(TitlesList : TStringList; var HiddenCount:integer);               //kt 1/24/17
     procedure ResetHideButton;                                                     //kt 5/14
     //procedure SetZoom(Pct : integer);                                            //kt 6/14
     procedure AutoEditCurrent;                                                     //kt 5/15
@@ -516,11 +520,13 @@ type
     function InsertChildDoc(DocumentType : integer;
                             ParentData : string; DocSubject : string =  '';
                             Lines : TStrings = nil) : string;                      //kt 5/15
-    function GetEditorHTMLText : string;                                           //kt 3/16
+    function GetEditorHTMLText : string;
+    procedure RunMacro(Sender:TObject);                                        //kt 3/16
   public
     HtmlEditor : THtmlObj;                                                         //kt 9//11
     HtmlViewer : THtmlObj;                                                         //kt 9/11
     TMGForceSaveSwitchEdit : boolean;                                              //kt 4/17/15
+    function InsertText(TextToInsert:string):string;    //kt
     procedure UpdateTreeView(DocList: TStringList; Tree: TORTreeView);             //kt moved from private 5/15
     procedure ReloadNotes;                                                         //kt added 4/15
     function AllowSignature(): Boolean;                                              //VEFA 2/8/15
@@ -561,6 +567,7 @@ type
     function tvIndexOfIEN(IEN : string) : integer;                                 //kt 4/15
     function tvIndexOfNode(Node : TORTreeNode) : integer;                          //kt 4/15
     procedure IdentifyAddlSigners(NoteIEN : int64; ARefDate: TFMDateTime);         //kt 2/17
+    function WMReplaceHTMLText(TagToReplace,ReplacementText:string):string;        //kt 5/9/19
   published
     property Drawers: TFrmDrawers read GetDrawers; // Keep Drawers published
     property HTMLEditMode: TEditModes read FHTMLEditMode;
@@ -1952,6 +1959,9 @@ end;
 procedure TfrmNotes.FormCreate(Sender: TObject);
 var
   CacheDir : AnsiString;  //kt 9/11
+  NewItem:tMenuItem;
+  arrMacros : TStringList;
+  i : integer;
 const
   DEBUGGING_WIN_MESSAGES = true; //change to false when not in use --> will save memory, speed.
 begin
@@ -2032,11 +2042,80 @@ begin
   FDocList := TStringList.Create;
   RestoreRegHTMLFontSize;  //kt 9/11
   clTMGHighlight := TColor(StringToColor(uTMGOptions.ReadString('color for TIU highlight','$FFFFB3')));   //elh 8/4/16    //kt
+  //clTMGHospitalColor := TColor(StringToColor(uTMGOptions.ReadString('color for TIU hospital','$FFFFB3')));   //elh 8/4/16    //kt
+
+  //Create submenu for Macro
+  arrMacros := TStringList.Create();
+  tCallV(arrMacros,'TMG CPRS GET MACRO LIST',[User.DUZ]);
+  popNoteMacro.Visible := (arrMacros.Count>1);
+   if arrMacros.Count>1 then begin
+     arrMacros.Delete(0);
+     for i := 0 to arrMacros.Count - 1 do begin
+      //mnuRelationships.Items[i].Add(NewItem(piece(arrRelatives.Strings[i],'^',2)+' '+piece(arrRelatives.strings[i],'^',3),0,False,True,OpenRelationshipChart,0,'mnuRelation'+inttostr(i)));
+      NewItem := TMenuItem.Create(popNoteMacro);
+      NewItem.Caption := piece(arrMacros.Strings[i],'^',2);
+      //NewItem.
+      NewItem.Name := 'Macro_'+piece(arrMacros.Strings[i],'^',1); //'mnuRelation_'+piece(arrRelatives.Strings[i],'^',1)+'_'+inttostr(i);
+      NewItem.Tag := strtoint(piece(arrMacros.Strings[i],'^',1));
+      NewItem.Hint := piece(arrMacros.Strings[i],'^',3);
+      NewItem.OnClick := RunMacro;
+      //mnuRelationships.Items[i].Add(NewItem);
+      popNoteMacro.Insert(i,NewItem);
+    end;
+  end;
+end;
+
+procedure TfrmNotes.RunMacro(Sender:TObject);
+var ProcessedNote : TStrings;  //pointer to other objects
+    OriginalNote : TStringList;
+    Selection,SelText : string;
+    ErrMsg:string;
+begin
+  inherited;
+  if not boolAutosaving then DoAutoSave;      //elh added 1/15/18
+  //What call will properly save text for Processing Note????
+  //PutTextOnly(ErrMsg, memNewNote.Lines, lstNotes.GetIEN(EditingIndex));
+  OriginalNote := TStringList.Create;
+  if (vmHTML in FViewMode) then begin
+    SplitHTMLToArray(WrapHTML(GetEditorHTMLText), OriginalNote);
+    //breaks image paths - should not be necessary HTMLTools.InsertSubs(OriginalNote);
+    if HTMLEditor.SelText<>'' then begin
+      Selection := '1';
+      SelText := HTMLEditor.SelText;
+    end else begin
+      Selection := '0';
+      SelText := '';
+    end;
+    ProcessedNote := TMGTIUResolveMacro(inttostr(TMenuItem(Sender).Tag),GetCurrentNoteIEN, OriginalNote, SelText,Selection, ErrMsg);
+    //ProcessedNote := ProcessNote(OriginalNote,GetCurrentNoteIEN);
+    if ErrMsg<>'' then begin
+      messagedlg('Error with macro'+#13#10+ErrMsg,mtError,[mbOk],0);
+    end else begin
+      if Selection='1' then
+        HtmlEditor.SelText := ProcessedNote.Text
+      else
+        HtmlEditor.HTMLText := ProcessedNote.Text;
+      GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor); //later I can embed this functionality in THtmlObj
+    end;
+    //messagedlg(piece(TMenuItem(Sender).Name,'-',2),mtConfirmation,[mbok],0);
+    //OpenNewPatient(piece(TMenuItem(Sender).Name,'_',2));
+
+  end;
 end;
 
 procedure TfrmNotes.HandleInsertDate(Sender: TObject);  //kt
 begin
   HTMLEditor.InsertHTMLAtCaret(datetostr(date));
+end;
+
+function TfrmNotes.InsertText(TextToInsert:string):string;    //kt
+begin
+  if not (vmEdit in FViewMode) then begin
+    result := '-1^Not in edit mode.';
+  end else begin
+    HTMLEditor.InsertHTMLAtCaret(TextToInsert);
+    result := '1^Successful';
+  end;
 end;
 
 function TfrmNotes.SetClipText(szText:string):Boolean;
@@ -2730,7 +2809,7 @@ begin
                    end;
                  end;
   end; {case}
-  lblNotes.Caption := SetNoteTreeLabel(FCurrentContext);
+  //lblNotes.Caption := SetNoteTreeLabel(FCurrentContext);   //5/20/19
   // Text Search CQ: HDS00002856 --------------------
   If FCurrentContext.SearchString <> '' then
     lblNotes.Caption := lblNotes.Caption+', containing "'+FCurrentContext.SearchString+'"';
@@ -3668,7 +3747,9 @@ begin
   popNoteMemoSign.Enabled := not NoteIsComponent;       //kt 5/15
   popNoteMemoHTMLFormat.Caption := 'Change Edit Mode To ' + FORMAT_MODE[(vmHTML in FViewMode)];  //kt 9/11
   popNoteMemoHTMLFormat.Enabled := pnlWrite.Visible;                                             //kt 9/11
-  popNoteMemoProcess.Enabled := pnlWrite.Visible;                                             //kt 5/1/13
+  popNoteMemoProcess.Enabled := pnlWrite.Visible;
+  popNoteMacro.Enabled := pnlWrite.Visible;                                             //kt 5/1/13
+  popNotePasteHTML.Enabled := pnlWrite.Visible;  //tmg 1/21/19 //(pnlWrite.Visible and Clipboard.HasFormat(CF_HTML));
   if pnlWrite.Visible then begin
     popNoteMemoSpell.Enabled      := not pnlHTMLWrite.Visible; //kt 9/11
     popNoteMemoGrammar.Enabled    := not pnlHTMLWrite.Visible; //kt 9/11
@@ -3880,6 +3961,12 @@ begin
   end;
 end;
 
+procedure TfrmNotes.popNotePasteHTMLClick(Sender: TObject);
+begin
+  inherited;
+  HTMLEditor.InsertHTMLAtCaret(Clipboard.AsText);
+end;
+
 procedure TfrmNotes.mnuViewDetailClick(Sender: TObject);
 begin
   inherited;
@@ -3936,6 +4023,50 @@ begin
       end; {if not LastSaveClean}
     end; {else}
   end; {if frmFrame}
+end;
+
+function TfrmNotes.WMReplaceHTMLText(TagToReplace,ReplacementText:string):string;
+//kt 5/9/19
+//   This function replaces all occurrences of a tag with the replacement text.
+//   It is called through a WM_COPYDATA Windows message. See uTMG_WM_API for details.
+var position:integer;
+    DIVTagToReplace:string;
+    CaretPosition :TPoint;
+    ScrollPosition : integer;
+    CheckForReplacement : boolean;
+begin
+  //CaretPosition := HtmlEditor.GetCaretLocation;
+  ScrollPosition := HtmlEditor.GetScrollLocation;
+  CheckForReplacement := not (pos(TagToReplace,ReplacementText)>0);  //if the tag is found in the replacement text, then we know it will be found again after the replacement so don't check for replacement since it will always fail
+  //messagedlg(inttostr(SCrollPosition),mtinformation,[mbOK],0);
+  if not (vmEdit in FViewMode) then begin
+    result := '-1^Not in edit mode.';
+    exit;  //quit if not in edit mode
+  end;
+  DIVTagToReplace:='<DIV name="'+piece(piece(TagToReplace,'[',2),']',1)+'"></DIV>';    //Test for DIV first
+  position := Pos(DIVTagToReplace,HtmlEditor.HTMLText);
+  if position<1 then begin
+    position := Pos(TagToReplace,HtmlEditor.HTMLText);
+    if position<1 then begin
+      result := '-1^Tag sent "'+TagToReplace+'" could not be found in note.';
+      exit;  //quit if tag isn't found
+    end;
+  end else begin
+    TagToReplace := DIVTagToReplace;
+    ReplacementText := '<br>'+ReplacementText;
+  end;
+  //position := Pos(TagToReplace,HtmlEditor.HTMLText);
+
+  result := '1^success';
+  HtmlEditor.HTMLText := StringReplace(HtmlEditor.HTMLText,TagToReplace,ReplacementText,[rfReplaceAll, rfIgnoreCase]);
+  position := Pos(TagToReplace,HtmlEditor.HTMLText);
+  if Pos('DIV',TagToReplace)>1 then CheckForReplacement:=False;  //DIVs are normally replaced with more DIVs
+  if (position>0) and (CheckForReplacement=True) then begin
+    result := '-1^Tag "'+TagToReplace+'" was found but could not be replaced in note. Error unknown.';
+  end;
+  HTMLEditor.Repaint;         //repaint so position can be set properly
+  Application.Processmessages;
+  HtmlEditor.ScrollDoc(ScrollPosition);
 end;
 
 procedure TfrmNotes.IdentifyAddlSigners(NoteIEN : int64; ARefDate: TFMDateTime);
@@ -4358,9 +4489,11 @@ var
   Dest: TStrings;  // Text Search CQ: HDS00002856
   KeepFlag: Boolean;  // Text Search CQ: HDS00002856
   NoteCount, NoteMatches: integer;  // Text Search CQ: HDS00002856
+  HiddenCount: integer;      //tmg 5/20/19
 begin
   tmpList := TStringList.Create;
   try
+    HiddenCount := 0;
     FDocList.Clear;
     uChanging := True;
     RedrawSuspend(memNote.Handle);
@@ -4380,7 +4513,7 @@ begin
     with FCurrentContext do begin
       if Status <> IntToStr(NC_UNSIGNED) then begin
         ListNotesForTree(tmpList, NC_UNSIGNED, 0, 0, 0, 0, TreeAscending);
-        FilterTitlesForHidden(tmpList); //kt added
+        FilterTitlesForHidden(tmpList,HiddenCount); //kt added
         if tmpList.Count > 0 then begin
           CreateListItemsforDocumentTree(FDocList, tmpList, NC_UNSIGNED, GroupBy, TreeAscending, CT_NOTES);
           UpdateTreeView(FDocList, tvNotes);
@@ -4390,7 +4523,7 @@ begin
       end;
       if Status <> IntToStr(NC_UNCOSIGNED) then begin
         ListNotesForTree(tmpList, NC_UNCOSIGNED, 0, 0, 0, 0, TreeAscending);
-        FilterTitlesForHidden(tmpList); //kt added
+        FilterTitlesForHidden(tmpList,HiddenCount); //kt added
         if tmpList.Count > 0 then begin
           CreateListItemsforDocumentTree(FDocList, tmpList, NC_UNCOSIGNED, GroupBy, TreeAscending, CT_NOTES);
           UpdateTreeView(FDocList, tvNotes);
@@ -4401,7 +4534,7 @@ begin
       //TMG added this section  4/9/18
       if Status <> IntToStr(NC_OTHER_UNSIGNED) then begin
         ListNotesForTree(tmpList, NC_OTHER_UNSIGNED, 0, 0, 0, 0, TreeAscending);
-        FilterTitlesForHidden(tmpList); //kt added
+        FilterTitlesForHidden(tmpList,HiddenCount); //kt added
         if tmpList.Count > 0 then begin
           CreateListItemsforDocumentTree(FDocList, tmpList, NC_OTHER_UNSIGNED, GroupBy, TreeAscending, CT_NOTES);
           UpdateTreeView(FDocList, tvNotes);
@@ -4409,10 +4542,22 @@ begin
         tmpList.Clear;
         FDocList.Clear;
       end;
+
+      //if Status <> IntToStr(NC_OTHER_UNSIGNED) then begin
+      ListNotesForTree(tmpList, NC_SCANNED_RECORDS, 0, 0, 0, 0, TreeAscending);
+      //  FilterTitlesForHidden(tmpList); //kt added
+      if tmpList.Count > 0 then begin
+        CreateListItemsforDocumentTree(FDocList, tmpList, NC_SCANNED_RECORDS, GroupBy, TreeAscending, CT_NOTES);
+        UpdateTreeView(FDocList, tvNotes);
+      end;
+      tmpList.Clear;
+      FDocList.Clear;
+      //end;
+
       //TMG end addition  4/9/18
       ListNotesForTree(tmpList, StrToIntDef(Status, 0), FMBeginDate, FMEndDate, Author, MaxDocs, TreeAscending);
-      FilterTitlesForHidden(tmpList); //kt added
-      if btnAdminDocs.Down then FilterTitlesForAdmin(tmpList); //elh added 1/24/17
+      FilterTitlesForHidden(tmpList,HiddenCount); //kt added
+      if btnAdminDocs.Down then FilterTitlesForAdmin(tmpList,HiddenCount); //elh added 1/24/17
       CreateListItemsforDocumentTree(FDocList, tmpList, StrToIntDef(Status, 0), GroupBy, TreeAscending, CT_NOTES);
       // Text Search CQ: HDS00002856 ---------------------------------------
       if FCurrentContext.SearchString<>''  then begin  // Text Search CQ: HDS00002856
@@ -4461,6 +4606,7 @@ begin
           //Reset the caption
           lblNotes.Caption := SetNoteTreeLabel(FCurrentContext);
       NoteTotal := sCallV('ORCNOTE GET TOTAL', [Patient.DFN]);
+      if HiddenCount>0 then lblNotes.Caption := lblNotes.Caption + ' ('+inttostr(HiddenCount)+' Docs Hidden)';     //5/20/19
       lblNotes.Caption := lblNotes.Caption + ' (Total: ' + NoteTotal + ')';
       // Text Search CQ: HDS00002856 ---------------------------------------
       UpdateTreeView(FDocList, tvNotes);
@@ -4615,6 +4761,8 @@ var
   AutoEditPlanned :         boolean;       //kt 5/15
   UnsignedDocsNode:         TORTreeNode;   //kt 5/15
   DescendentDepth:          Integer;       //kt 5/15
+  R1             :          TDownloadResult;  //3/12/19
+  CacheFName     :          string;  //3/12/19
 begin
   fImages.ListBox := frmNotes.lstNotes;
   if uChanging then Exit;
@@ -4734,6 +4882,37 @@ begin
         ShowPCEButtons(FALSE);
         //-----------------------------
         //memNote.Clear;
+
+      end else if pos('PDF',Piece(x, U, 1))>0 then begin
+        memNote.Clear;
+        HTMLViewer.Clear; //kt 9/11
+
+        {TO DO: Here we want to copy the file locally. The below function corrupts the PDF for some reason.
+        Also to make this work we have to change the DownloadFile function because the pdf doesn't exist in
+        /opt/worldvista/EHR/images (which is the default location to look) yet. Something in the call to port 9080 moves it.
+        We can change the LocIEN in Download file RPC, which is variable #3. CallV('TMG DOWNLOAD FILE', [FPath,FName]);
+                                                                                                                    ^
+                                                                                                           Here  ---|
+
+        //Download file
+        R1 := drSuccess;  //default
+        CacheFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+Piece(x, U, 2);
+        if not FileExists(CacheFName) then begin
+            R1 := frmImages.DownloadFile('',Piece(x, U, 17)+Piece(x, U, 2),CacheFName,1,1);
+            Application.ProcessMessages;
+        end;
+        HTMLViewer.HTMLText := '<embed src="'+CacheFName+'" width="800px" height="2100px" />';             }
+
+        HTMLViewer.HTMLText := '<embed src="http://192.168.3.99:9080'+Piece(x, U, 18)+'" width="800px" height="1200px" />';
+        Mode := [vmView] + [vmHTML_MODE[vmHTML in FViewMode]];
+        SetDisplayToHTMLvsText(Mode,nil,VIEW_ACTIVATE_ONLY);
+
+
+        //HTMLViewer.Navigate('http://192.168.3.99:9080/filesystem/oldrecs/A-D/C/Conduff,Allie_06-14-1923/Misc_(2).pdf');
+        //HTMLViewer.Navigate('\\server1\public\FPG CHARTS\A-D\C\Conduff,Allie_06-14-1923\'+Piece(x, U, 2));
+        //lvNotes.Visible := False;
+        //lstNotes.SelectByID(Piece(x, U, 1));
+        //lstNotesClick(Self);    //<-- lots of action takes place here...
       end else if StrToIntDef(Piece(x, U, 1), 0) > 0 then begin
         memNote.Clear;
         HTMLViewer.Clear; //kt 9/11
@@ -4822,6 +5001,11 @@ begin
     //ELH added to highlight office notes
     if piece(TORTreeNode(Node).StringData,'^',16)='1' then begin
        tvNotes.Canvas.Brush.Color := clTMGHighlight;  //server side set
+    end;
+    //ELH added to highlight other colors
+    if piece(TORTreeNode(Node).StringData,'^',17)<>'' then begin
+       clTMGHospitalColor := TColor(StringToColor(piece(TORTreeNode(Node).StringData,'^',17)));//TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
+       tvNotes.Canvas.Brush.Color := clTMGHospitalColor;  //server side set
     end;
   end;
   if not assigned(tvNotes.Selected) then exit;
@@ -5890,6 +6074,7 @@ procedure TfrmNotes.btnSortAuthorClick(Sender: TObject);
 //kt added function
 begin
   inherited;
+  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
   FSortBtnGroupBy := 'A';
   SortBtnGroupClick(FSortBtnGroupBy);
@@ -5899,6 +6084,7 @@ procedure TfrmNotes.btnSortDateClick(Sender: TObject);
 //kt added function
 begin
   inherited;
+  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
   FSortBtnGroupBy := 'D';
   SortBtnGroupClick(FSortBtnGroupBy);
@@ -5908,6 +6094,7 @@ procedure TfrmNotes.btnSortLocationClick(Sender: TObject);
 //kt added function
 begin
   inherited;
+  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
   FSortBtnGroupBy := 'L';
   SortBtnGroupClick(FSortBtnGroupBy);
@@ -5917,6 +6104,7 @@ procedure TfrmNotes.btnSortNoneClick(Sender: TObject);
 //kt added function
 begin
   inherited;
+  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
   FSortBtnGroupBy := '';
   SortBtnGroupClick(FSortBtnGroupBy);
@@ -5926,6 +6114,7 @@ procedure TfrmNotes.btnSortTitleClick(Sender: TObject);
 //kt added function
 begin
   inherited;
+  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
   FSortBtnGroupBy := 'T';
   SortBtnGroupClick(FSortBtnGroupBy);
@@ -6304,7 +6493,7 @@ begin
   FHideTitleBusy := false;
 end;
 
-procedure TfrmNotes.FilterTitlesForHidden(TitlesList : TStringList);
+procedure TfrmNotes.FilterTitlesForHidden(TitlesList : TStringList; var HiddenCount:integer);
 //kt added
 var
   i : integer;
@@ -6313,11 +6502,12 @@ begin
   for i := TitlesList.Count - 1 downto 0 do begin
     NoteTitle := piece(TitlesList.Strings[i],U,2);
     if FNotesToHide.IndexOf(NoteTitle)<0 then continue;
+    HiddenCount := HiddenCount + 1;
     TitlesList.Delete(i);
   end;
 end;
 
-procedure TfrmNotes.FilterTitlesForAdmin(TitlesList : TStringList);
+procedure TfrmNotes.FilterTitlesForAdmin(TitlesList : TStringList; var HiddenCount:integer);
 //kt added
 var
   i : integer;
@@ -6330,6 +6520,7 @@ begin
     NoteTitle := piece(TitlesList.Strings[i],U,2);
     if AdminTitles.IndexOf(NoteTitle)<0 then continue;
     //if piece(TitlesList.Strings[i],'^',16)='1' then continue;
+    HiddenCount := HiddenCount+1;
     TitlesList.Delete(i);
   end;
   AdminTitles.Free;
@@ -6557,6 +6748,7 @@ var
    Saved:boolean;
    RPCExists: boolean;
    RPCResult:string;
+   RPCResultStr:TStringList;
 begin
   RPCExists := frmFrame.CheckForRPC('TMG TIU NOTE CAN BE SIGNED');
   if RPCExists=False then begin
@@ -6564,7 +6756,11 @@ begin
     exit;
   end;
   SaveCurrentNote(Saved);
-  RPCResult := sCallV('TMG TIU NOTE CAN BE SIGNED',[Patient.DFN,lstNotes.ItemIEN]);
+  //RPCResult :=
+  RPCResultStr := TStringList.create();
+  tCallV(RPCResultStr,'TMG TIU NOTE CAN BE SIGNED',[Patient.DFN,lstNotes.ItemIEN]);
+  RPCResult := RPCResultStr.text;
+  RPCResultStr.free;
   if piece(RPCResult,'^',1)='1' then begin
     Result := True;
     Exit;

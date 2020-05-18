@@ -11,7 +11,7 @@ inherited frmARTAllergy: TfrmARTAllergy
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   ExplicitWidth = 561
-  ExplicitHeight = 465
+  ExplicitHeight = 472
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBase: TORAutoPanel [0]

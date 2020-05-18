@@ -989,7 +989,9 @@ begin
     ServerFName := Rec.ServerThumbFName;
     ServerPathName := Rec.ServerThumbPathName;
     if not FileExists(Rec.CacheThumbFName) then begin
-      R2 := DownloadFile(ServerPathName,ServerFName,Rec.CacheThumbFName,CurrentImage+1,TotalImages);
+      //COMMENTED BELOW DO NOT DOWNLOAD THUMBNAIL 5/12/20
+      if uTMGOptions.ReadBool('CPRS Download Thumbnails',False) then
+        R2 := DownloadFile(ServerPathName,ServerFName,Rec.CacheThumbFName,CurrentImage+1,TotalImages);
     end;
     Application.ProcessMessages;
     if (R1 = drFailure) or (R2 = drFailure) then begin

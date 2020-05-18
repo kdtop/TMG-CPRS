@@ -209,6 +209,7 @@ begin
       x := TORTreeNode(ATree.Items.Item[i]).Stringdata;
       HighlightedItem := (piece(x,'^',16)='1');
       if (chkHighlightOnly.checked) and (not HighlightedItem) then continue;
+      if pos('PDF',piece(x,'^',1))>0 then continue;      //6/4/19
       ThisDate := strtofloat(piece(x,'^',3));
       if (ThisDate>dtStart.FMDateTime) AND (ThisDate<dtEnd.FMDateTime) then
            DataSL.Add(x);

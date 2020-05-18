@@ -302,6 +302,7 @@ type
     function GetTemplateTextForInsertion(Template : TTemplate) : string;  //kt added 6/15
     procedure ClearPtData; //kt added 6/15
     procedure ClearProbs;  //kt added 10/15
+    procedure ExpandParentNode(ThisNode:TTreeNode);   //TMG
   published
     property Align: TAlign read GetAlign write SetAlign;
   end;
@@ -335,6 +336,7 @@ function TfrmDrawers.MinDrawerControlHeight: integer;
 begin
   result := ResizeHeight( BaseFont, MainFont, BaseMinDrawerControlHeight);
 end;
+
 
 procedure TfrmDrawers.ResizeToVisible;
 var
@@ -2312,6 +2314,11 @@ begin
         CurrPanel.SetFocus;
     end;
   end;
+end;
+
+procedure TfrmDrawers.ExpandParentNode(ThisNode:TTreeNode);   //TMG  9/12/19
+begin
+   dmodShared.ExpandNode(tvTemplates, ThisNode, FEmptyNodeCount);
 end;
 
 initialization

@@ -239,7 +239,10 @@ begin
         AList.Add('Adm^Inpatient Notes' + U + IntToStr(Context));
         AList.Add('Vis^Outpatient Notes' + U + IntToStr(Context));
       end;
-      Dest.Insert(0, IntToStr(Context) + '^' + NC_TV_TEXT[TabIndex, Context] + '^^^^^^^^^^^%^0');
+      if Context=9 then
+        Dest.Insert(0, IntToStr(Context) + '^' + NC_TV_TEXT[TabIndex, Context]+' ('+inttostr(SrcList.Count)+')' + '^^^^^^^^^^^%^0')
+      else
+        Dest.Insert(0, IntToStr(Context) + '^' + NC_TV_TEXT[TabIndex, Context] + '^^^^^^^^^^^%^0');
       Alist.Sort;
       InvertStringList(AList);
       if GroupBy <> '' then if GroupBy[1] ='D' then

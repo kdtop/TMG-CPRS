@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ORfn, ExtCtrls, rOrders, fFrame, fBase508Form,
-  VA508AccessibilityManager;
+  VA508AccessibilityManager, Buttons, ComCtrls;
 
 type
   TfrmOrdersPrint = class(TfrmBase508Form)
@@ -27,6 +27,13 @@ type
     lblDevice: TLabel;
     lblPartOne: TMemo;
     lblPart2: TMemo;
+    edtNumToPrint: TEdit;
+    Label1: TLabel;
+    UpDown1: TUpDown;
+    procedure edtNumToPrintChange(Sender: TObject);
+    procedure btnNumMinusClick(Sender: TObject);
+    procedure btnNumPlusClick(Sender: TObject);
+    procedure edtNumToPrintKeyPress(Sender: TObject; var Key: Char);
     procedure SetupControls(PrintParams: TPrintParams);
     procedure cmdChartClick(Sender: TObject);
     procedure cmdLabelsClick(Sender: TObject);
@@ -55,6 +62,7 @@ var
   PrintParams: TPrintParams;
   AnyPrompts: boolean;
   ResultList: TStringList;
+  NumToPrint:integer;
 
 const
   NO_WIN_PRINT = False;
@@ -76,6 +84,7 @@ var
   frmOrdersPrint: TfrmOrdersPrint;
 begin
   frmOrdersPrint := TfrmOrdersPrint.Create(Application);
+  NumToPrint := 1;
   if PrintTitle <> '' then frmOrdersPrint.Caption := 'Print Orders for ' + PrintTitle;
   try
     frmFrame.CCOWBusy := True;
@@ -249,6 +258,7 @@ begin
     end
   else
     begin
+      NumToPrint := strtoint(edtNumToPrint.text);  //TMG 5/20/19
       FPrintIt := True;
       Close;
     end;
@@ -298,6 +308,21 @@ begin
   Close;
 end;
 
+procedure TfrmOrdersPrint.btnNumMinusClick(Sender: TObject);
+begin
+  inherited;
+  if strtoint(edtNumToPrint.text)=1 then
+    //don't do anything
+  else
+    //edtNumToPrint.text := inttostr(strtoint(edtNumToPrint.Text)-1);
+end;
+
+procedure TfrmOrdersPrint.btnNumPlusClick(Sender: TObject);
+begin
+  inherited;
+  //edtNumToPrint.text := inttostr(strtoint(edtNumToPrint.Text)+1);
+end;
+
 procedure TfrmOrdersPrint.ckChartCopyClick(Sender: TObject);
 begin
   cmdChart.Enabled := (ckChartCopy.Checked) and (PrintParams.PromptForChartCopy <> '2');
@@ -321,6 +346,20 @@ end;
 procedure TfrmOrdersPrint.DeviceListClick(Sender: TObject);
 begin
   TORListBox(Sender).ItemIndex := -1;
+end;
+
+procedure TfrmOrdersPrint.edtNumToPrintChange(Sender: TObject);
+begin
+  inherited;
+  if edtNumToPrint.Text = '0' then edtNumToPrint.Text := '1';  
+end;
+
+procedure TfrmOrdersPrint.edtNumToPrintKeyPress(Sender: TObject; var Key: Char);
+begin
+ if Key In ['0'..'9', #8] Then // #8 = backspace
+   inherited
+ else
+   Key := #0;
 end;
 
 procedure TfrmOrdersPrint.FormKeyUp(Sender: TObject; var Key: Word;

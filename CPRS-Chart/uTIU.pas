@@ -146,6 +146,9 @@ const
 
 implementation
 
+uses
+ fFrame;
+
 function MakeConsultDisplayText(RawText:string): string;
 var
  x: string;
@@ -162,7 +165,7 @@ var
   DateFormat:string;  //tmg  9/17/18
 begin
   x := RawText;
-  DateFormat := uTMGOptions.ReadString('TMG CPRS NOTE DATE FORMAT','mmm dd,yy'); //tmg 9/17/18
+  DateFormat := frmFrame.NoteTitleDateFormat;  //moved to uConst //uTMGOptions.ReadString('TMG CPRS NOTE DATE FORMAT','mmm dd,yy'); //tmg 9/17/18
   if Piece(x, U, 1) = '' then
     Result := FormatFMDateTime(DateFormat, MakeFMDateTime(Piece(x, U, 3))) + '  ' +  //tmg 9/17/18
         Piece(x, U, 2) + ', ' + Piece(x, U, 6) + ', ' + Piece(Piece(x, U, 5), ';', 2)

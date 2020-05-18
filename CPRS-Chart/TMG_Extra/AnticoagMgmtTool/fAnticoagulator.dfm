@@ -508,7 +508,7 @@ object frmAnticoagulate: TfrmAnticoagulate
     Top = 208
     Width = 734
     Height = 394
-    ActivePage = tsEnterInfo
+    ActivePage = tsExit
     Align = alBottom
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText

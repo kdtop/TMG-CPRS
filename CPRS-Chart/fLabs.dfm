@@ -3,24 +3,24 @@ inherited frmLabs: TfrmLabs
   Top = 237
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
-  ClientHeight = 742
+  ClientHeight = 774
   ClientWidth = 721
   HelpFile = 'qnoback'
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
   ExplicitWidth = 729
-  ExplicitHeight = 796
+  ExplicitHeight = 828
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 737
+    Top = 769
     Width = 721
     ExplicitTop = 748
     ExplicitWidth = 714
   end
   inherited sptHorz: TSplitter
-    Height = 737
+    Height = 769
     ExplicitHeight = 748
   end
   object Label1: TLabel [2]
@@ -38,12 +38,12 @@ inherited frmLabs: TfrmLabs
     Visible = False
   end
   inherited pnlLeft: TPanel
-    Height = 737
+    Height = 769
     Constraints.MinWidth = 37
-    ExplicitHeight = 737
+    ExplicitHeight = 749
     object Splitter1: TSplitter
       Left = 0
-      Top = 477
+      Top = 509
       Width = 97
       Height = 10
       Cursor = crVSplit
@@ -58,11 +58,12 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 0
       Width = 97
-      Height = 477
+      Height = 509
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
+      ExplicitHeight = 489
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -80,7 +81,7 @@ inherited frmLabs: TfrmLabs
         Left = 0
         Top = 19
         Width = 97
-        Height = 458
+        Height = 490
         Align = alClient
         HideSelection = False
         Indent = 18
@@ -92,15 +93,17 @@ inherited frmLabs: TfrmLabs
         OnKeyDown = tvReportsKeyDown
         Caption = 'Available Reports'
         NodePiece = 0
+        ExplicitHeight = 470
       end
     end
     object pnlLeftBottom: TPanel
       Left = 0
-      Top = 487
+      Top = 519
       Width = 97
       Height = 250
       Align = alBottom
       TabOrder = 1
+      ExplicitTop = 499
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -228,11 +231,11 @@ inherited frmLabs: TfrmLabs
   end
   inherited pnlRight: TPanel
     Width = 620
-    Height = 737
+    Height = 769
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
     ExplicitWidth = 620
-    ExplicitHeight = 737
+    ExplicitHeight = 749
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -242,15 +245,17 @@ inherited frmLabs: TfrmLabs
       Align = alTop
       Visible = False
       OnCanResize = sptHorzRightCanResize
+      OnMoved = sptHorzRightMoved
       ExplicitWidth = 613
     end
     object pnlRightBottom: TPanel
       Left = 0
       Top = 300
       Width = 620
-      Height = 417
+      Height = 449
       Align = alClient
       TabOrder = 0
+      ExplicitHeight = 429
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -276,7 +281,7 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 618
-        Height = 396
+        Height = 428
         Align = alClient
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -292,21 +297,20 @@ inherited frmLabs: TfrmLabs
         Visible = False
         WantReturns = False
         WordWrap = False
+        ExplicitHeight = 408
       end
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 20
         Width = 618
-        Height = 396
+        Height = 428
         TabStop = False
         Align = alClient
         TabOrder = 2
         OnDocumentComplete = WebBrowser1DocumentComplete
-        ExplicitTop = 16
-        ExplicitWidth = 611
-        ExplicitHeight = 356
+        ExplicitHeight = 412
         ControlData = {
-          4C000000DF3F0000EE2800000000000000000000000000000000000000000000
+          4C000000DF3F00003C2C00000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -431,12 +435,13 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 367
+            Width = 618
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
+            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162
@@ -882,11 +887,12 @@ inherited frmLabs: TfrmLabs
     end
     object pnlFooter: TORAutoPanel
       Left = 0
-      Top = 717
+      Top = 749
       Width = 620
       Height = 20
       Align = alBottom
       TabOrder = 3
+      ExplicitTop = 729
       object lblSpecimen: TLabel
         Left = 4
         Top = 28
@@ -1200,6 +1206,11 @@ inherited frmLabs: TfrmLabs
       ShortCut = 16462
       OnClick = CreateNewNoteClick
     end
+    object mnuNotifyOk: TMenuItem
+      Caption = 'Notify OK'
+      ShortCut = 16463
+      OnClick = NotifyOKClick
+    end
     object mnuSendLabAlert2: TMenuItem
       Caption = 'Send Lab Alert'
       ShortCut = 16460
@@ -1226,6 +1237,16 @@ inherited frmLabs: TfrmLabs
         ShortCut = 16462
         OnClick = CreateNewNoteClick
       end
+      object NotifyOK: TMenuItem
+        Caption = 'Notify &OK...'
+        ShortCut = 16463
+        OnClick = NotifyOKClick
+      end
+      object AddToImportIgnore: TMenuItem
+        Caption = '&Ignore HL7 imports for patient'
+        ShortCut = 16457
+        OnClick = AddToImportIgnoreClick
+      end
     end
   end
   object popTMGGridPopup: TPopupMenu
@@ -1235,6 +1256,11 @@ inherited frmLabs: TfrmLabs
       Caption = 'Create Lab Note'
       ShortCut = 16462
       OnClick = CreateNewNoteClick
+    end
+    object popNotifyOK: TMenuItem
+      Caption = 'Notify OK'
+      ShortCut = 16463
+      OnClick = NotifyOKClick
     end
     object mnuSendLabAlert: TMenuItem
       Caption = 'Send Lab Alert'

@@ -2,14 +2,14 @@ inherited frmDbgServer: TfrmDbgServer
   Left = 206
   Top = 168
   Caption = 'Server Information'
-  ClientHeight = 301
+  ClientHeight = 315
   ClientWidth = 500
   OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   ExplicitWidth = 508
-  ExplicitHeight = 328
+  ExplicitHeight = 349
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel [0]
@@ -22,8 +22,9 @@ inherited frmDbgServer: TfrmDbgServer
   object memSymbols: TRichEdit [1]
     Left = 6
     Top = 20
-    Width = 488
-    Height = 248
+    Width = 486
+    Height = 257
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -39,9 +40,10 @@ inherited frmDbgServer: TfrmDbgServer
   end
   object RadioButton1: TRadioButton [2]
     Left = 8
-    Top = 276
+    Top = 285
     Width = 125
     Height = 17
+    Anchors = [akLeft, akBottom]
     Caption = 'Current Symbol Table'
     Checked = True
     TabOrder = 1
@@ -49,19 +51,23 @@ inherited frmDbgServer: TfrmDbgServer
   end
   object RadioButton2: TRadioButton [3]
     Left = 156
-    Top = 276
+    Top = 285
     Width = 105
     Height = 17
+    Anchors = [akLeft, akBottom]
     Caption = 'Global Reference'
     TabOrder = 2
+    Visible = False
   end
   object Edit1: TEdit [4]
     Left = 264
-    Top = 274
+    Top = 283
     Width = 229
     Height = 21
+    Anchors = [akLeft, akBottom]
     Enabled = False
     TabOrder = 3
+    Visible = False
   end
   inherited amgrMain: TVA508AccessibilityManager
     Data = (

@@ -2696,7 +2696,7 @@ begin
     if Encounter.Location <> 0 then
       begin
         SetupOrdersPrint(SelectedList, DeviceInfo, Nature, False, PrintIt);
-        if PrintIt then ExecutePrintOrders(SelectedList, DeviceInfo);
+        if PrintIt then ExecutePrintOrders(SelectedList, DeviceInfo, inttostr(NumToPrint));
         SynchListToOrders;
       end
     else InfoBox(TX_PRINT_LOC, TC_REQ_LOC, MB_OK or MB_ICONWARNING);

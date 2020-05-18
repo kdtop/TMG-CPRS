@@ -4094,6 +4094,7 @@ begin
   //asm int 3 end; //trap
   if (TwebBrowser(Self).Document <> nil) and (Pos > 0)
      then begin
+         //messagedlg('Scrolling',mtinformation,[mbOK],0);
         (Doc.Body as IHTMLElement2).ScrollTop := Pos;
         FScrollTop := 0;
      end;

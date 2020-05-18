@@ -171,6 +171,13 @@ type
     mnuCopyResultsTable: TMenuItem;
     mnuCopyResultsTable1: TMenuItem;
     lblFirstSeen: TLabel;
+    NotifyOK: TMenuItem;
+    mnuNotifyOk: TMenuItem;
+    popNotifyOK: TMenuItem;
+    AddToImportIgnore: TMenuItem;
+    procedure AddToImportIgnoreClick(Sender: TObject);
+    procedure NotifyOKClick(Sender: TObject);
+    procedure sptHorzRightMoved(Sender: TObject);
     procedure mnuCopyResultsTableClick(Sender: TObject);                             //kt 2/17
     procedure mnuSendLabAlertClick(Sender: TObject);         //kt 2/17
     procedure CreateNewNoteClick(Sender: TObject);
@@ -293,6 +300,7 @@ type
     procedure ChkBrowser;
     procedure CommonComponentVisible(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12: Boolean);
     procedure BlankWeb;
+    procedure CheckForHiddenRows();   //tmg  3/12/19
   public
     procedure ClearPtData; override;
     function AllowContextChange(var WhyNot: string): Boolean; override;
@@ -303,6 +311,7 @@ type
     procedure GetVisibleLabs(var LabInfo: tLabsInfoRec);        //kt added 2/17
     //procedure ExtlstReportsClick(Sender: TObject; Ext: boolean);
     function GetCurrentLabs : tLabsInfoRec;
+    function GetCurrentDate : string;                           //kt added 5/19
     function InfoToHTMLTable(LabInfo: tLabsInfoRec) : string;   //kt added 2/17
     function GetCurrentLabsHTMLTable : string;                  //kt added 2/17
     function GetAbnormalCurrentLabsHTMLTable : string;          //kt added 2/17
@@ -389,6 +398,8 @@ var
 procedure TfrmLabs.RequestPrint;
 var
   aID : integer;
+  TempLines:TStringList;
+  ErrMsg:string;
 begin
   aID := 0;
   if CharAt(uRPTID,2) =':' then
@@ -400,6 +411,16 @@ begin
       InfoBox(TX_NOREPORT, TX_NOREPORT_CAP, MB_OK);
       Exit;
     end;
+  if uReportType = 'H' then begin   //TMG added this if  7/12/19
+    TempLines := TStringList.Create;
+    TempLines.Text := uHTMLDoc;  //kt Get all notes concatenated into 1 long note.
+    PrintHTMLReport(TempLines, ErrMsg, Patient.Name,
+                      FormatFMDateTime('mm/dd/yyyy', Patient.DOB),
+                      'Laboratory Results',  //We don't want a date here due to multiple dates being printed //uHTMLtools.ExtractDateOfNote(TempLines), // date for report.
+                      Patient.WardService, Application);
+    TempLines.Free;
+    exit;
+  end;
   if (uReportType = 'V') and (length(piece(uHState,';',2)) > 0) then
     begin
       if lvReports.Items.Count < 1 then
@@ -602,6 +623,7 @@ begin
                   + '</TR></TABLE></DIV><HR>';
                   //the preferred method would be to use headers and footers
                   //so this is just an interim solution.
+  uHTMLPatient := '';  //TMG - allow report to set the header manually
   if InitPage then
   begin
     Splitter1.Visible := false;
@@ -999,6 +1021,19 @@ begin
     Caption := x;
   end;
   lvReports.Caption := x;
+end;
+
+procedure TfrmLabs.AddToImportIgnoreClick(Sender: TObject);
+var RPCResult:string;
+begin
+  inherited;
+  if messagedlg('Are you sure you want to ignore all HL7 lab results for this patient?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+    RPCResult := sCallV('TMG CPRS IGNORE PT HL7 MSG',[Patient.DFN]);
+    messagedlg(piece(RPCResult,'^',2),mtInformation,[mbok],0);
+    //if piece(RPCResult,'^',1)='1' then
+
+    
+  end;
 end;
 
 procedure TfrmLabs.AlignList;
@@ -1523,7 +1558,7 @@ case StrToInt(Piece(uRptID,':',1)) of
     StatusText('');
     memLab.Lines.Insert(0,' ');
     memLab.Lines.Delete(0);
-    if WebBrowser1.Visible = true then          
+    if WebBrowser1.Visible = true then
       begin
         if uReportType = 'R' then
           uHTMLDoc := HTML_PRE + uLocalReportData.Text + HTML_POST
@@ -1858,6 +1893,20 @@ begin
   end;
 end;
 
+procedure TfrmLabs.CheckForHiddenRows();
+//tmg added entire procedure   3/12/19
+var Diff:integer;
+begin
+  Diff := grdlab.RowCount-grdlab.VisibleRowCount;
+  if Diff>1 then begin
+    sptHorzRight.color := clRed;
+  end else begin
+    sptHorzRight.color := clBtnFace;
+  end;
+  sptHorzRight.Repaint;
+  //Showmsg('Visible Row:'+inttostr(grdlab.VisibleRowCount)+' - Total Row:'+inttostr(grdlab.RowCount));
+end;
+
 procedure TfrmLabs.grdLabDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 //kt Eddie added function  7/14/16
 //kt Also added OnDraw event on form pointing to this function.  
@@ -1881,6 +1930,8 @@ begin
     InflateRect(RectForText, -2, -2);
     grdLab.Canvas.TextRect(RectForText, text);
   end;
+  CheckForHiddenRows;
+
 end;
 
 procedure TfrmLabs.grdLabMouseDown(Sender: TObject; Button: TMouseButton;
@@ -2729,7 +2780,7 @@ end;
 procedure TfrmLabs.CreateNewNoteClick(Sender: TObject);
 begin
   inherited;
-  fSingleNote.CreateSingleNote(snmLab);
+  fSingleNote.CreateSingleNote(snmLab,False);
 end;
 
 procedure TfrmLabs.Print2Click(Sender: TObject);
@@ -5002,6 +5053,12 @@ begin
   if NewSize < 5 then
       Newsize := 5;
 end;
+procedure TfrmLabs.sptHorzRightMoved(Sender: TObject);
+begin
+  inherited;
+  CheckForHiddenRows;     //tmg
+end;
+
 procedure TfrmLabs.ManLabsClick(Sender: TObject);
 var frmLabEntry: TfrmLabEntry;
 begin
@@ -5082,12 +5139,26 @@ begin
 end;
 
 
+procedure TfrmLabs.NotifyOKClick(Sender: TObject);
+begin
+  inherited;
+  fSingleNote.CreateSingleNote(snmLab,True);
+end;
+
 function TfrmLabs.GetCurrentLabs : tLabsInfoRec;
 //kt added 2/17
 begin
   Result.Data := FLabData; //owned by the TfrmLabs class
   Result.Notes := FNotes;  //owned by the TfrmLabs class
   frmLabs.GetVisibleLabs(Result);
+end;
+
+function TfrmLabs.GetCurrentDate : string;
+var
+  LabInfo: tLabsInfoRec;
+begin
+  LabInfo := GetCurrentLabs;
+  Result := piece(LabInfo.Date,' ',1);
 end;
 
 

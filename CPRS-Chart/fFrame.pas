@@ -205,6 +205,10 @@ type
     mnuAnticoagulationTool: TMenuItem;
     timCheckSequel: TTimer;
     lblLoadSequelPat: TLabel;
+    mnuUploadImages: TMenuItem;
+    procedure mnuInsertTimeClick(Sender: TObject);
+    procedure mnuViewInsurancesClick(Sender: TObject);
+    procedure mnuUploadImagesClick(Sender: TObject);
     procedure PatientImageMouseLeave(Sender: TObject);
     procedure PatientImageMouseEnter(Sender: TObject);
     procedure lblLoadSequelPatClick(Sender: TObject);
@@ -458,6 +462,8 @@ type
     WebServerIP : string;  //kt 4/7/15
     WebServerPort: string; //kt 4/7/15
     EnduringPtSelColumns: string;
+    NoteTitleDateFormat: string;           //tmg 7//25/19
+    TurnOnUploads:boolean;                 //tmg  8/27/19
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;  //kt 4/15/14
     procedure SetBADxList;
     procedure SetActiveTab(PageID: Integer);
@@ -508,6 +514,7 @@ var
   DEAContext: Boolean = False;
   DelayReviewChanges: Boolean = False;
 
+
 const
   PASSCODE = '_gghwn7pghCrOJvOV61PtPvgdeEU2u5cRsGvpkVDjKT_H7SdKE_hqFYWsUIVT1H7JwT6Yz8oCtd2u2PALqWxibNXx3Yo8GPcTYsNaxW' + 'ZFo8OgT11D5TIvpu3cDQuZd3Yh_nV9jhkvb0ZBGdO9n-uNXPPEK7xfYWCI2Wp3Dsu9YDSd_EM34nvrgy64cqu9_jFJKJnGiXY96Lf1ecLiv4LT9qtmJ-BawYt7O9JZGAswi344BmmCbNxfgvgf0gfGZea';
   TMG_ADD_PATIENT_RPC = 'TMG ADD PATIENT';  //kt 9/11 added
@@ -537,7 +544,7 @@ uses
   fAnticoagulator, uTMG_WM_API,  //kt
   fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
   fTest_RW_HTML  //kt TEMP, KILL LATER...
-  ;
+  , fMailbox, fUploadImages;
 
 var                                 //  RV 05/11/04
   IsRunExecuted: Boolean = FALSE;           //  RV 05/11/04
@@ -1166,6 +1173,7 @@ begin
   CreateTab(CT_COVER,    'Cover Sheet');
 
   CreateTab(CT_IMAGES,   'Images');  //kt 9/11
+  CreateTab(CT_MAILBOX,  'Mailbox');  //kt 9/11
   ImagesEnabled := uTMGOptions.ReadBool('EnableImages',false);           //kt 9/11
   if not ImagesEnabled then SetATabVisibility(CT_IMAGES, ImagesEnabled); //kt 9/11
 
@@ -1231,12 +1239,14 @@ begin
   colorTimerOff := StringToColor(uTMGOptions.ReadString('colorTimerOff','$C0C0C0'));
   colorTimerPaused := StringToColor(uTMGOptions.ReadString('colorTimerPaused','$00FFFF'));
   colortimerOnMax := StringToColor(uTMGOptions.ReadString('colorTimerOnMax','$FFFFFF'));
+  NoteTitleDateFormat := uTMGOptions.ReadString('TMG CPRS NOTE DATE FORMAT','mmm dd,yy'); //tmg 7/25/19
   intTimerMaxTime := uTMGOptions.ReadInteger('TimerMaxTime',40);
   pnlTimer.Color := colorTimerOff;
   CreateProgressBars(pnlSchedule); //11/2/17
   GetCurrentPatientLoad(pnlSchedule); // 12/12/17  Load pat list before timer starts
   timSchedule.Interval := uTMGOptions.ReadInteger('Appt Timer Interval',1000);
   timSchedule.Enabled := true;
+  TurnOnUploads := False;
   //timCheckSequel.Enabled := True;
   //Application.OnMessage := AppMessage;
   //kt end mod ------------------- /
@@ -1863,6 +1873,7 @@ begin
       CT_LABS:     SwitchToPage(frmLabs);
       CT_REPORTS:  SwitchToPage(frmReports);
       CT_IMAGES:   SwitchToPage(frmImages);     //kt 9/11
+      CT_MAILBOX:  SwitchToPage(frmMailbox);
       CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(WebTabsList[PageID-CT_WEBTAB1]);  //kt 9/11
     end; {case}
   end
@@ -2218,6 +2229,7 @@ begin
     NF_CONSULT_UNSIGNED_NOTE         : NextIndex := PageIDToTab(CT_CONSULTS);
     NF_DCSUMM_UNSIGNED_NOTE          : NextIndex := PageIDToTab(CT_DCSUMM);
     NF_NOTES_UNSIGNED_NOTE           : NextIndex := PageIDToTab(CT_NOTES);
+    NF_MAILBOX                       : NextIndex := PageIDToTab(CT_MAILBOX);  //TMG  8/26/19
     NF_CONSULT_REQUEST_UPDATED       : NextIndex := PageIDToTab(CT_CONSULTS);
     NF_FLAGGED_OI_EXP_INPT           : NextIndex := PageIDToTab(CT_ORDERS);
     NF_FLAGGED_OI_EXP_OUTPT          : NextIndex := PageIDToTab(CT_ORDERS);
@@ -2781,6 +2793,12 @@ begin
   DebugShowServer;
 end;
 
+procedure TfrmFrame.mnuInsertTimeClick(Sender: TObject);
+begin
+  inherited;
+  frmNotes.InsertText(uTMGOptions.ReadString('TMG CPRS TIME INSERT PREFIX','')+pnlTimer.Caption);
+end;
+
 procedure TfrmFrame.mnuLabTextClick(Sender: TObject);
 begin
   inherited;
@@ -3088,6 +3106,7 @@ begin
   if Assigned(frmSurgery) then MoveWindow(frmSurgery.Handle,     0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
   MoveWindow(frmLabs.Handle,     0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
   MoveWindow(frmReports.Handle,  0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
+  MoveWindow(frmMailbox.Handle,  0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
   //kt 9/11 -- start addition --
   for i := CT_WEBTAB1 to CT_LAST_WEBTAB do begin
     index := i-CT_WEBTAB1;
@@ -3951,6 +3970,12 @@ begin
   DialogOptions(i);
 end;
 
+procedure TfrmFrame.mnuUploadImagesClick(Sender: TObject);
+begin
+  inherited;
+  TurnOnUploads := True;
+end;
+
 procedure TfrmFrame.LoadUserPreferences;
 begin
   LoadSizesForUser;
@@ -4063,6 +4088,10 @@ begin
     CT_IMAGES  : begin                                                //kt 9/11
                     frmImages := TfrmImages.Create(Self);             //kt 9/11
                     frmImages.Parent := pnlPage;                      //kt 9/11
+                  end;                                                //kt 9/11
+    CT_MAILBOX : begin                                                //kt 9/11
+                    frmMailbox := TfrmMailbox.Create(Self);             //kt 9/11
+                    frmMailbox.Parent := pnlPage;                      //kt 9/11
                   end;                                                //kt 9/11
     CT_WEBTAB1..CT_LAST_WEBTAB : begin                                //kt 9/11
                     TempFrmWebTab := TfrmWebTab.Create(Self);         //kt 9/11
@@ -5420,6 +5449,12 @@ begin
   mnuViewRemoteData.Enabled := frmFrame.lblCirn.Enabled;
   mnuViewReminders.Enabled := frmFrame.pnlReminders.Enabled;
   mnuViewPostings.Enabled := frmFrame.pnlPostings.Enabled;
+end;
+
+procedure TfrmFrame.mnuViewInsurancesClick(Sender: TObject);
+begin
+  inherited;
+  ViewInfo(mnuInsurance);
 end;
 
 procedure TfrmFrame.CallERx(action: Integer);     //ERx //kt 9/4/12  added entire function

@@ -40,6 +40,7 @@ object frmLabSelector: TfrmLabSelector
     Width = 496
     Height = 307
     Anchors = [akLeft, akTop, akRight, akBottom]
+    Columns = 2
     ItemHeight = 13
     TabOrder = 1
     OnClick = cklbTitlesClick
@@ -119,5 +120,28 @@ object frmLabSelector: TfrmLabSelector
       FF00FFFF00FFFF00FF808080000000000000000000000000000000808080FF00
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+  end
+  object ListView1: TListView
+    Left = 8
+    Top = 38
+    Width = 494
+    Height = 307
+    Checkboxes = True
+    Columns = <
+      item
+        Caption = 'Include'
+        Width = 20
+      end
+      item
+        Caption = 'Date'
+        Width = 92
+      end
+      item
+        Caption = 'Lab Tests'
+        Width = 379
+      end>
+    TabOrder = 4
+    ViewStyle = vsReport
+    OnClick = ListView1Click
   end
 end

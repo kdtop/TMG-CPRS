@@ -1142,6 +1142,10 @@ inherited frmFrame: TfrmFrame
         Enabled = False
         OnClick = mnuFilePrintClick
       end
+      object mnuExportChart: TMenuItem
+        Caption = 'Export Chart'
+        OnClick = mnuExportChartClick
+      end
       object PrintLabels1: TMenuItem
         Caption = 'Print Labels...'
         OnClick = PrintLabels1Click

@@ -76,13 +76,17 @@ inherited frmOptions: TfrmOptions
       Width = 419
       Height = 325
       HelpContext = 9999
-      ActivePage = tsImages
+      ActivePage = tsNotes
       Align = alClient
       TabOrder = 0
       OnEnter = pagOptionsEnter
       object tsCoverSheet: TTabSheet
         HelpContext = 9700
         Caption = 'General'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           411
           297)
@@ -371,6 +375,10 @@ inherited frmOptions: TfrmOptions
       object tsNotifications: TTabSheet
         HelpContext = 9030
         Caption = 'Notifications'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object bvlNotifications: TBevel
           Left = 88
           Top = 16
@@ -565,6 +573,10 @@ inherited frmOptions: TfrmOptions
         HelpContext = 9040
         Caption = 'Order Checks'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object lblOrderChecksDesc: TLabel
           Left = 125
           Top = 27
@@ -689,6 +701,10 @@ inherited frmOptions: TfrmOptions
         HelpContext = 9050
         Caption = 'Lists/Teams'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object bvlPatientSelection: TBevel
           Left = 144
           Top = 16

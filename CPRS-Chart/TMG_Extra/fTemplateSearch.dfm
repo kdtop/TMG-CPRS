@@ -3,8 +3,8 @@ object frmTemplateSearch: TfrmTemplateSearch
   Top = 0
   BorderStyle = bsSizeToolWin
   Caption = 'Search Templates'
-  ClientHeight = 242
-  ClientWidth = 486
+  ClientHeight = 317
+  ClientWidth = 540
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,47 +15,42 @@ object frmTemplateSearch: TfrmTemplateSearch
   Position = poOwnerFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   DesignSize = (
-    486
-    242)
+    540
+    317)
   PixelsPerInch = 96
   TextHeight = 13
-  object StatusBar: TStatusBar
+  object PageControl1: TPageControl
     Left = 0
-    Top = 223
-    Width = 486
-    Height = 19
-    Panels = <
-      item
-        Width = 50
-      end>
+    Top = 0
+    Width = 540
+    Height = 25
+    ActivePage = tsTemplates
+    Align = alTop
+    TabOrder = 0
+    OnChange = PageControl1Change
+    object tsTemplates: TTabSheet
+      Caption = '&Templates'
+    end
+    object tsReminders: TTabSheet
+      Caption = '&Reminders'
+      ImageIndex = 1
+    end
   end
-  object lbMatches: TListBox
-    Left = 0
-    Top = 29
-    Width = 486
-    Height = 194
-    Align = alBottom
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    ItemHeight = 13
-    TabOrder = 1
-    OnClick = lbMatchesClick
-    OnDblClick = lbMatchesDblClick
-    OnEnter = lbMatchesEnter
-  end
-  object edtSearchTerms: TEdit
-    Left = 2
-    Top = 2
-    Width = 346
+  object edtTemSearchTerms: TEdit
+    Left = 4
+    Top = 31
+    Width = 348
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     BevelEdges = []
-    TabOrder = 0
-    OnChange = edtSearchTermsChange
+    TabOrder = 1
+    OnChange = edtTemSearchTermsChange
   end
-  object btnAccept: TBitBtn
-    Left = 351
-    Top = 2
+  object btnTemAccept: TBitBtn
+    Left = 355
+    Top = 31
     Width = 65
     Height = 24
     Anchors = [akTop, akRight]
@@ -63,7 +58,7 @@ object frmTemplateSearch: TfrmTemplateSearch
     Default = True
     ModalResult = 1
     TabOrder = 2
-    OnClick = btnAcceptClick
+    OnClick = btnTemAcceptClick
     Glyph.Data = {
       9E050000424D9E05000000000000360400002800000012000000120000000100
       08000000000068010000130B0000130B00000001000000010000000000000000
@@ -112,14 +107,14 @@ object frmTemplateSearch: TfrmTemplateSearch
       F6F6F6F6F6F6F6F6F6FAF6F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6
       0000}
   end
-  object btnCancel: TBitBtn
-    Left = 419
-    Top = 2
+  object btnTemCancel: TBitBtn
+    Left = 423
+    Top = 31
     Width = 65
     Height = 24
     Anchors = [akTop, akRight]
     Caption = '&Cancel'
-    ModalResult = 1
+    ModalResult = 2
     TabOrder = 3
     Glyph.Data = {
       36040000424D3604000000000000360000002800000010000000100000000100
@@ -156,6 +151,28 @@ object frmTemplateSearch: TfrmTemplateSearch
       FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
       80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+  end
+  object lbTemMatches: TListBox
+    Left = 4
+    Top = 61
+    Width = 532
+    Height = 233
+    Align = alCustom
+    ItemHeight = 13
+    TabOrder = 4
+    OnClick = lbTemMatchesClick
+    OnDblClick = lbTemMatchesDblClick
+    OnEnter = lbTemMatchesEnter
+  end
+  object StatusBar: TStatusBar
+    Left = 0
+    Top = 298
+    Width = 540
+    Height = 19
+    Panels = <
+      item
+        Width = 50
+      end>
   end
   object Timer: TTimer
     OnTimer = TimerTimer

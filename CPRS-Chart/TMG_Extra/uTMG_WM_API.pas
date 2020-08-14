@@ -159,7 +159,7 @@ implementation
     Handler: TWMAPIHandler;
     HandlerObj : THandlerObj;
     Result : string;
-
+                                 
   begin
     Handled := false;
     CmdIdx := MessageHandlers.IndexOf(Command);
@@ -250,7 +250,8 @@ implementation
   function TTMGWMAPI.Handle_PAT(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
   //Expected DataStr format:  none
   begin
-    Result := Patient.Name+' ('+FormatFMDateTime('MM/DD/YY', Patient.DOB)+')';
+    //Result := Patient.Name+' ('+FormatFMDateTime('MM/DD/YY', Patient.DOB)+','+Patient.)';
+    Result := sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]);
   end;
 
   function TTMGWMAPI.Handle_HTML_PASTE(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler

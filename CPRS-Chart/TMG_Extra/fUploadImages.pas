@@ -160,28 +160,28 @@ type
     procedure GetAssociatedIcon(FileName: TFilename; PLargeIcon, PSmallIcon: PHICON);
     procedure LoadNotesEdit();
     //procedure LoadNotesList();
-    function UploadFile(Info: TImageInfo; DelOrig : boolean): boolean;
+    function UploadFile(Info: TImageInfo; DelOrig : boolean; ErrLog : TStringList = nil): boolean;
     procedure RunModal(ExecuteFile, ParamString:string);
     function GetWindowsFolder: string;
     function CopyFileToTemp(FNamePath : string;TempBrowseable : boolean=false) : string;
     procedure UploadChosenFiles();
-    function ProcessOneLine(Line : string) : string;
-    function ProcessOneFile(FileName : string) : boolean;
-    procedure ScanAndHandleImgTxt;
-    procedure ScanAndHandleImages;
+    function ProcessOneLine(Line : string; ErrLog : TStringList = nil) : string;
+    function ProcessOneFile(FileName : string; ErrLog : TStringList = nil) : boolean;
     procedure DecodeImgTxt(Line : string; out ChartNum, Location,
                            FName, LName, MName, Sex, DOB, DOS, Provider,
                            Title : string; FilePaths : TStrings);
     function EncodeImgTxt(ChartNum, Location, FName, LName, MName, Sex, DOB,
                            DOS, Provider, Title : string; FilePaths : TStrings) : AnsiString;
-    procedure FinishDocument(UploadNote : TAutoUploadNote);
+    procedure FinishDocument(UploadNote : TAutoUploadNote; ErrLog : TStringList = nil);
     procedure SetPatientPhotoID(Value : boolean);
     procedure SetAllowNonImages(Value : boolean);
     procedure SetUniversalImages(Value : boolean);
     procedure SetUploadMode(Value : tImageUploadMode);
-    procedure VerifyDocuments(TIUIENList: TStringList);
     //procedure SetCallingForm(form : string);
     procedure LinkSignatureImage(var Info: TImageInfo);
+    procedure ScanAndHandleImgTxt(ErrLog : TStringList = nil);
+    procedure ScanAndHandleImages;
+    procedure VerifyDocuments(TIUIENList: TStringList);
   public
     { Public declarations }
     FScanDir : String;
@@ -189,6 +189,7 @@ type
     FileExt : string;
     Picture : TPicture;
     UploadedDocs : TStringList;
+    procedure DoScanAndUpload(ErrLog : TStringList = nil); //kt added 8/3/20
     procedure SetScanDir(NewDir : string);
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;
   published
@@ -546,6 +547,7 @@ implementation
   begin
     Self.TIUIEN := 0;
     Self.Patient := TPatient.Create;
+    Self.Patient.SyncWebPages := false;
     Self.CurNoteImages := TStringList.Create;
     Self.ImageInfo := TImageInfo.Create;
     Self.Clear;
@@ -752,8 +754,9 @@ implementation
     end;
   end;
 
-  function TfrmImageUpload.UploadFile(Info: TImageInfo; DelOrig : boolean): boolean;
+  function TfrmImageUpload.UploadFile(Info: TImageInfo; DelOrig : boolean; ErrLog : TStringList = nil): boolean;
   //result: true if success, false if failure
+  //kt 8/10/20 Added ErrLog.  Optional.  If provided, then errors will be added to this, and MessageDlg will not be shown.
   var
     RPCResult,index              : AnsiString;
     ImageIEN                     : AnsiString;
@@ -764,7 +767,7 @@ implementation
 
   begin
     //Create a record with metadata about image (required for images)
-    frmFrame.timSchedule.Enabled := false;      //11/14/17 added timSchedule enabler to keep it from crashing the RPC upload
+    if assigned(frmFrame) then frmFrame.timSchedule.Enabled := false;      //11/14/17 added timSchedule enabler to keep it from crashing the RPC upload.  //kt 8/10/20 added if Assigned()...
     RPCBrokerV.remoteprocedure := 'MAGGADDIMAGE';
     RPCBrokerV.Param[0].Value := '.X';
     RPCBrokerV.Param[0].PType := list;
@@ -805,8 +808,12 @@ implementation
     result := ((ImageIEN <> '0') and (ImageIEN <> ''));  // function result.
     if result=false then begin
       ErrorMsg := 'Server Error: Couldn''t store image information.'+ #13 + Piece(RPCResult,'^',2);
-      MessageDlg(ErrorMsg,mtWarning,[mbOK],0);
-      frmFrame.timSchedule.Enabled := True;
+      if assigned(ErrLog) then begin     //kt 8/10/20
+        ErrLog.Add(ErrorMsg);            //kt 8/10/20
+      end else begin                     //kt 8/10/20
+        MessageDlg(ErrorMsg,mtWarning,[mbOK],0);   //kt 8/10/20 <-- original line
+      end;                               //kt 8/10/20
+      if assigned(frmFrame) then frmFrame.timSchedule.Enabled := True;   //kt 8/10/20 added If assigned()...
       exit; //returns FALSE
     end;
 
@@ -816,8 +823,12 @@ implementation
     result := frmImages.UploadFile(Info.ImageFPathName,Info.ServerPath,Info.ServerFName,1,1);
     if result=false then begin
       ErrorMsg := 'Error uploading image to server.'+ #13 + Piece(RPCResult,'^',2);
-      MessageDlg(ErrorMsg,mtWarning,[mbCancel],0);
-      frmFrame.timSchedule.Enabled := true;
+      if assigned(ErrLog) then begin     //kt 8/10/20
+        ErrLog.Add(ErrorMsg);            //kt 8/10/20
+      end else begin                     //kt 8/10/20
+        MessageDlg(ErrorMsg,mtWarning,[mbOK],0);   //kt 8/10/20 <-- original line
+      end;                               //kt 8/10/20
+      if assigned(frmFrame) then frmFrame.timSchedule.Enabled := true;    //kt 8/10/20 added If assigned()...
       exit;  //Returns FALSE
     end;
 
@@ -836,8 +847,12 @@ implementation
       result := (MsgNum = '1');
       if result=false then begin
         ErrorMsg := 'Error associating image with note.' + #13 + Piece(RPCResult,'^',2);
-        MessageDlg(ErrorMsg,mtWarning,[mbCancel],0);
-        frmFrame.timSchedule.Enabled := True;
+        if assigned(ErrLog) then begin     //kt 8/10/20
+          ErrLog.Add(ErrorMsg);            //kt 8/10/20
+        end else begin                     //kt 8/10/20
+          MessageDlg(ErrorMsg,mtWarning,[mbOK],0);   //kt 8/10/20 <-- original line
+        end;                               //kt 8/10/20
+        if assigned(frmFrame) then frmFrame.timSchedule.Enabled := True;    //kt 8/10/20 added If assigned()...
         exit;  //Returns FALSE
       end;
     end;
@@ -852,7 +867,11 @@ implementation
       result := frmImages.UploadFile(Info.ThumbFPathName,Info.ServerPath,Info.ServerThumbFName,1,1);
       if result=false then begin
         ErrorMsg :='Error sending thumbnail image to server.'+ #13 + Piece(RPCResult,'^',2);
-        MessageDlg(ErrorMsg,mtWarning,[mbOK],0);
+        if assigned(ErrLog) then begin     //kt 8/10/20
+          ErrLog.Add(ErrorMsg);            //kt 8/10/20
+        end else begin                     //kt 8/10/20
+          MessageDlg(ErrorMsg,mtWarning,[mbOK],0);   //kt 8/10/20 <-- original line
+        end;                               //kt 8/10/20
       end;
       CacheFPathName := uHTMLTools.CPRSDir + '\cache\' + ExtractFileName (Info.ServerFName);
       if not FileExists(CacheFPathName) then begin
@@ -865,7 +884,7 @@ implementation
     if (MoveCheckBox.Visible) and (MoveCheckBox.Checked) then begin
       DeleteFile(Info.ImageFPathName);
     end;
-    frmFrame.timSchedule.Enabled := True;
+    if assigned(frmFrame) then frmFrame.timSchedule.Enabled := True;    //kt 8/10/20 added If assigned()...
     //returns: result
   end;
 
@@ -1276,16 +1295,17 @@ implementation
   end;                           
 
   
-  procedure TfrmImageUpload.FinishDocument(UploadNote : TAutoUploadNote);
+  procedure TfrmImageUpload.FinishDocument(UploadNote : TAutoUploadNote; ErrLog : TStringList = nil);
+  //kt 8/4/20  Adding OPTIONAL ErrLog.  If provided, then MessageDlg to show errors is bypassed.
   var Text : TStringList;
       ErrMsg : String;
       RPCResult : String;
       i : integer;
       oneImage: string;
       //TIUIEN : int64;
-        
+
   begin
-    if (UploadNote.TIUIEN>0) and (UploadNote.CurNoteImages.Count>0) 
+    if (UploadNote.TIUIEN>0) and (UploadNote.CurNoteImages.Count>0)
     and (UploadNote.UploadError = False) then begin
       //Add text for note: "See scanned image" --
       //   or later, some HTML code to show note in CPRS directly....
@@ -1332,7 +1352,11 @@ implementation
         RPCResult := '-1';
       end;
       if RPCResult='-1' then begin
-        MessageDlg('Unable to set status for scanned document to SIGNED',mtError,[mbOK],0);
+        if assigned(ErrLog) then begin
+          ErrLog.Add('Unable to set status for scanned document to SIGNED.  IEN8925=' + IntToStr(UploadNote.TIUIEN));
+        end else begin
+          MessageDlg('Unable to set status for scanned document to SIGNED',mtError,[mbOK],0);
+        end;
       end;
       UploadNote.TIUIEN := 0;
     end;
@@ -1340,8 +1364,9 @@ implementation
   end;
 
 
-  function TfrmImageUpload.ProcessOneLine(Line : string) : string;
+  function TfrmImageUpload.ProcessOneLine(Line : string; ErrLog : TStringList = nil) : string;
   //Returns: if success, '';  if failure, returns reason
+  //kt 8/10/20 added ErrLog.  If provided, then error messages put into that, and MessageDlg's not used to display errors.
 
   //format of line is as follows:
   //ChartNum^Location^FName^LName^MName^Sex^DOB^DOS^Provider^Title^FilePath(s)
@@ -1389,7 +1414,7 @@ implementation
         AutoUploadNote.ImageInfo.ImageFPathName := FilePaths.Strings[i];
         AutoUploadNote.ImageInfo.Extension := ExtractFileExt(AutoUploadNote.ImageInfo.ImageFPathName); //includes '.'
         AutoUploadNote.ImageInfo.Extension := MidStr(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.'
-        if not UploadFile(AutoUploadNote.ImageInfo,true) then begin   //Upload function passes back filename info in Info class
+        if not UploadFile(AutoUploadNote.ImageInfo, true, ErrLog) then begin   //Upload function passes back filename info in Info class
           Result := 'ERROR UPLOADING IMAGE FILE';
         end;    
         AutoUploadNote.CurNoteImages.Add(AutoUploadNote.ImageInfo.ServerFName);
@@ -1404,7 +1429,7 @@ implementation
   end;
 
   
-  function TfrmImageUpload.ProcessOneFile(FileName : string) : boolean;
+  function TfrmImageUpload.ProcessOneFile(FileName : string; ErrLog : TStringList = nil) : boolean;
   //This will process image(s) indicated in textfile FileName
   //After uploading image to server, textfile and specified images are deleted
   //Returns Success
@@ -1417,6 +1442,7 @@ implementation
   //        can not be reported for just one image.  It will be ONE for any/all
   //      OR, if the next file in process-order is still has the same info as
   //        the prior file, then it will be appended.
+  //kt 8/10/20 added ErrLog.  Optional.  If provided, errors put there and not shown via MessageDlgs.
   var
     Lines : TStringList;
     i : integer;
@@ -1429,7 +1455,7 @@ implementation
     //FinishDocument(AutoUploadNote);  //will save and clear any old data.
     for i := 0 to Lines.Count-1 do begin
       OneLine := Lines.Strings[i];
-      ResultStr := ProcessOneLine(OneLine);  //Even process with //failed markeers (to preserve batches)
+      ResultStr := ProcessOneLine(OneLine, ErrLog);  //Even process with //failed markeers (to preserve batches)
       if Pos('//Failed',OneLine)> 0 then begin  //If we already have //Failed, don't duplicate another Error Msg
         Result := false;  //prevent deletion of file containing //Failed//      
       end else begin
@@ -1447,7 +1473,7 @@ implementation
   end;
 
   
-  procedure TfrmImageUpload.ScanAndHandleImgTxt;
+  procedure TfrmImageUpload.ScanAndHandleImgTxt(ErrLog : TStringList = nil);
   var
     FoundFile : string;
     tempFileName : string;
@@ -1456,12 +1482,6 @@ implementation
     i         : integer;
     //result : boolean;
   begin
-    //NOTE: Later I may make this spawn a separate thread, so that
-    //  user doesn't encounter sudden unresponsiveness of CPRS
-    //I can use BeginThread, then EndTread
-    //Issues: ProcessOneFile would probably have to be a function
-    //  not in a class/object...
-      
     FilesList := TStringList.Create;
 
     //scan for new *.ImgTxt file
@@ -1483,11 +1503,18 @@ implementation
     //Now process images in correct order.
     for i := 0 to FilesList.Count-1 do begin
       FoundFile := FilesList.Strings[i];
-      if ProcessOneFile(FoundFile) = true then begin  {process *.imgtxt file}
-        DeleteFile(FoundFile); 
+      if ProcessOneFile(FoundFile, ErrLog) = true then begin  {process *.imgtxt file}
+        if assigned(ErrLog) then begin
+          ErrLog.Add('Successful processing of: "' + FoundFile + '"');
+        end;
+        DeleteFile(FoundFile);
         FoundFile := ChangeFileExt(FoundFile,'.barcode.txt');
         DeleteFile(FoundFile);
-      end; //Note: it is OK to continue, to get other non-error notes afterwards.
+      end else begin; //Note: it is OK to continue, to get other non-error notes afterwards.
+        if assigned(ErrLog) then begin
+          ErrLog.Add('**Error processing "' + FoundFile + '"');
+        end;
+      end;
     end;
     FinishDocument(AutoUploadNote);  // Close and clear any existing note
     FilesList.Free
@@ -1604,12 +1631,6 @@ implementation
       AllFiles := TStringList.Create;
       BatchFInfo := TFileInfo.Create;
       
-      //NOTE: Later I may make this spawn a separate thread, so that
-      //  user doesn't encounter sudden unresponsiveness of CPRS
-      //I can use BeginThread, then EndTread
-      //Issues: ProcessOneFile would probably have to be a function
-      //  not in a class/object...
-
       //scan for all instances *.ImageType Image file
       //Store info for processesing after loop
       //Do this as a separate step, so files can be processed in proper order
@@ -1788,16 +1809,31 @@ AbortPoint:
       end;
     end;
     PolTimer.Interval := 5000;
-    UploadedDocs.clear;
+    //kt 8/3/20 Putting in separate function --> UploadedDocs.clear;
     try
+      DoScanAndUpload();
+      { //kt 8/3/20 -- splitting to separate function
       if Assigned(frmImages) and frmImages.AutoScanUpload.Checked then begin
         ScanAndHandleImages;  //create metadata for images (if not done already)
         ScanAndHandleImgTxt;  //process upload file, based on metadata
         VerifyDocuments(UploadedDocs);
       end;
+      }
     finally
       PolTimer.Enabled := true;
       PolTimer.Interval := PolInterval;
+    end;
+  end;
+
+  procedure TfrmImageUpload.DoScanAndUpload(ErrLog : TStringList = nil);
+  //kt added 8/3/20, moving from PolTimerTimer above.  This will allow
+  //  Just this part of code to be called separately.  
+  begin
+    UploadedDocs.clear;
+    if Assigned(frmImages) and frmImages.AutoScanUpload.Checked then begin
+      ScanAndHandleImages;  //create metadata for images (if not done already)
+      ScanAndHandleImgTxt(ErrLog);  //process upload file, based on metadata
+      VerifyDocuments(UploadedDocs);
     end;
   end;
 
@@ -1819,7 +1855,7 @@ AbortPoint:
       if piece(results[0],'^',1)='-1' then
         messagedlg(piece(results[0],'^',2),mtwarning,[mbOK],0);
       //if Piece(Results[0], U, 1) = '0' then ErrMsg := Piece(Results[0], U, 2) else ErrMsg := '';
-  end;
+    end;
   end;
 
   procedure TfrmImageUpload.SetPatientPhotoID(Value : boolean);

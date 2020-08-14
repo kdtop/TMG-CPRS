@@ -1,0 +1,226 @@
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fDedicatedImageUploaderMain.dfm
+996/1359695661
+0
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.dfm
+277121/1359646156
+2
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fBase508Form.dfm
+584/1229756048
+4
+8
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPage.dfm
+568/1195859396
+12
+8
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fDedicatedImageUploaderMain.pas
+2732/1359696309
+20
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.pas
+86465/1359640749
+32
+98
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fBase508Form.pas
+10818/1229755812
+130
+15
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPage.pas
+6188/1195860015
+145
+48
+|EOINDEX|
+49
+object Form1: TForm1
+4096
+object frmImageUpload: TfrmImageUpload
+25
+object frmBase508Form: TfrmBase508Form
+object amgrMain: TVA508AccessibilityManager
+Data = (
+(
+'Component = frmBase508Form'
+'Status = stsDefault'))
+end
+27
+inherited frmPage: TfrmPage
+inherited amgrMain: TVA508AccessibilityManager
+Data = (
+(
+'Component = frmPage'
+'Status = stsDefault'))
+end
+unit fDedicatedImageUploaderMain;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls,
+  fImages, fUploadImages, Loginfrm, ORNet, ORSystem, uTMGOptions, uCore,
+  StdCtrls;
+
+type
+  TForm1 = class(TForm)
+unit fUploadImages;
+//kt 9/11 added
+ (*
+ Copyright 6/23/2015 Kevin S. Toppenberg, MD
+ --------------------------------------------------------------------
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+ == Alternatively, at user's choice, GPL license below may be used ===
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You may view details of the GNU General Public License at this URL:
+ http://www.gnu.org/licenses/
+ *)
+
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Buttons, ExtCtrls, pngimage, ExtDlgs, OleCtrls,
+  uCore, iniFiles, ShellAPI, fTMG_WIA_GetImage, registry, jpeg,
+  SHDocVw;
+
+type
+
+  PHICON = ^HICON;
+
+  TImageInfo = class
+    private
+    public
+      TIUIEN :             int64;      //IEN in file# 8925
+      DFN :                AnsiString; //IEN in Patient File (#2)
+      IMAGEIEN :           int64;      //IEN in file# 2005 (IMAGE)
+      UploadDUZ :          int64;      //IEN in NEW PERSON file
+      ThumbFPathName :     AnsiString; // local file path name
+      ImageFPathName :     AnsiString; // local file path name
+      ServerPath :         AnsiString;
+      ServerFName :        AnsiString;
+      ServerThumbFName:    AnsiString;
+      ShortDesc :          String[60];
+      Extension :          String[16];
+      ImageDateTime :      AnsiString;
+      UploadDateTime:      AnsiString;
+      ObjectType :         int64;      //pointer to file 2005.02
+      ProcName :           String[10]; //server limit is 10 chars.
+      pLongDesc :          TStrings;  //Won't be owned by this list
+      procedure Assign(Source : TImageInfo);
+      procedure Clear;
+  end;
+
+  TAutoUploadNote = class
+    private
+    public
+      TIUIEN :       int64;      //IEN in file# 8925
+      ErrMsg :       AnsiString;
+      NoteTitle :    AnsiString; //Title of note to be associated with image
+      Patient :      TPatient;
+      ImageInfo :    TImageInfo;
+      Location :     AnsiString; //Location that image if from
+      DOS :          AnsiString; //Date of service
+      Provider :     AnsiString;
+      CurNoteImages: TStringList;
+      UploadError :  Boolean;
+      procedure SetDFN(var ChartNum,Location,FName,LName,MName,DOB,Sex : string);
+      Procedure SetInfo(var DOS,Provider,Location,Title : string);
+      function SameAs(OtherNote: TAutoUploadNote): boolean;
+      function MakeNewBlankNote(DFN,DOS,Provider,Location,Title : string): string;
+      procedure InitFrom(OtherNote: TAutoUploadNote; UploadedDocs: TStringList);
+      function IsValid : boolean;
+      procedure Clear;
+      constructor Create();
+      destructor Destroy;  override;
+  end;
+
+  //NOTE: If changes are made to tImageUploadMode, also change THUMBNAIL_SIZE constant.
+  tImageUploadMode = (umAnyFile, umImagesOnly, umUniversal, umPatientID, umSigImage);
+
+  TfrmImageUpload = class(TForm)
+unit fBase508Form;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls, VA508AccessibilityManager, OR2006Compatibility, uConst;
+
+type
+  TAccessibilityAction = (aaColorConversion, aaTitleBarHeightAdjustment,
+                          aaFixTabStopArrowNavigationBug);
+  TAccessibilityActions = set of TAccessibilityAction;
+
+type
+  TfrmBase508Form = class(TForm)
+unit fPage;
+
+{$OPTIMIZATION OFF}                              // REMOVE AFTER UNIT IS DEBUGGED
+
+ (*
+ NOTE: The original version of this file may be obtained freely from the VA.
+
+ This modified version of the file is Copyright 6/23/2015 Kevin S. Toppenberg, MD
+ --------------------------------------------------------------------
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+ == Alternatively, at user's choice, GPL license below may be used ===
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You may view details of the GNU General Public License at this URL:
+ http://www.gnu.org/licenses/
+ *)
+
+
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, uConst,
+  rOrders, fBase508Form, VA508AccessibilityManager;
+
+type
+  TfrmPage = class(TfrmBase508Form)

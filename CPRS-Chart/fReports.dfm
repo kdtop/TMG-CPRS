@@ -3,18 +3,18 @@ inherited frmReports: TfrmReports
   Top = 69
   HelpContext = 9000
   Caption = 'Reports Page'
-  ClientHeight = 707
+  ClientHeight = 727
   ClientWidth = 717
   HelpFile = 'qnoback'
   Menu = mnuMainMenu
   OnDestroy = FormDestroy
   OnShow = FormShow
   ExplicitWidth = 725
-  ExplicitHeight = 761
+  ExplicitHeight = 781
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 697
+    Top = 717
     Width = 717
     Height = 10
     ExplicitTop = 617
@@ -23,14 +23,14 @@ inherited frmReports: TfrmReports
   end
   inherited sptHorz: TSplitter
     Left = 119
-    Height = 697
+    Height = 717
     OnMoved = sptHorzMoved
     ExplicitLeft = 119
     ExplicitHeight = 617
   end
   inherited pnlLeft: TPanel
     Width = 119
-    Height = 697
+    Height = 717
     ExplicitWidth = 119
     ExplicitHeight = 697
     object Splitter1: TSplitter
@@ -87,12 +87,13 @@ inherited frmReports: TfrmReports
       Left = 0
       Top = 365
       Width = 119
-      Height = 332
+      Height = 352
       Align = alBottom
       Anchors = [akLeft, akTop, akRight, akBottom]
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
+      ExplicitHeight = 332
       object lblQualifier: TOROffsetLabel
         Left = 0
         Top = 0
@@ -119,7 +120,7 @@ inherited frmReports: TfrmReports
         Left = 0
         Top = 26
         Width = 119
-        Height = 306
+        Height = 326
         Align = alClient
         ItemHeight = 13
         ParentShowHint = False
@@ -131,12 +132,13 @@ inherited frmReports: TfrmReports
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2'
+        ExplicitHeight = 306
       end
       object lstQualifier: TORListBox
         Left = 0
         Top = 26
         Width = 119
-        Height = 306
+        Height = 326
         Style = lbOwnerDrawFixed
         Align = alClient
         ItemHeight = 13
@@ -149,16 +151,18 @@ inherited frmReports: TfrmReports
         LongList = False
         Pieces = '2,3'
         TabPositions = '10'
+        ExplicitHeight = 306
       end
       object pnlViews: TORAutoPanel
         Left = 0
         Top = 26
         Width = 119
-        Height = 306
+        Height = 326
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 3
         Visible = False
+        ExplicitHeight = 306
         object pnlTopViews: TPanel
           Left = 0
           Top = 0
@@ -213,7 +217,7 @@ inherited frmReports: TfrmReports
           Left = 0
           Top = 80
           Width = 119
-          Height = 226
+          Height = 246
           Align = alClient
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
@@ -230,6 +234,7 @@ inherited frmReports: TfrmReports
           LongList = False
           Pieces = '2'
           TabPositions = '10'
+          ExplicitHeight = 226
         end
       end
     end
@@ -279,7 +284,7 @@ inherited frmReports: TfrmReports
   inherited pnlRight: TPanel
     Left = 123
     Width = 594
-    Height = 697
+    Height = 717
     ExplicitLeft = 123
     ExplicitWidth = 594
     ExplicitHeight = 697
@@ -370,14 +375,15 @@ inherited frmReports: TfrmReports
       Left = 0
       Top = 181
       Width = 594
-      Height = 516
+      Height = 536
       Align = alClient
       TabOrder = 2
+      ExplicitHeight = 516
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 31
         Width = 592
-        Height = 357
+        Height = 377
         TabStop = False
         Align = alClient
         TabOrder = 1
@@ -386,7 +392,7 @@ inherited frmReports: TfrmReports
         ExplicitTop = 25
         ExplicitHeight = 277
         ControlData = {
-          4C0000002F3D0000E62400000000000000000000000000000000000000000000
+          4C0000002F3D0000F72600000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -413,7 +419,7 @@ inherited frmReports: TfrmReports
       end
       object memText: TRichEdit
         Left = 1
-        Top = 388
+        Top = 408
         Width = 592
         Height = 127
         Align = alBottom
@@ -433,6 +439,7 @@ inherited frmReports: TfrmReports
         Visible = False
         WantReturns = False
         WordWrap = False
+        ExplicitTop = 388
       end
     end
     object pnlRightMiddle: TPanel

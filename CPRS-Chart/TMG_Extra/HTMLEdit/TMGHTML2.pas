@@ -133,6 +133,7 @@ type
     NextControl : TWinControl;
     PrevControl : TWinControl;
     OnLaunchTemplateSearch : TNotifyEvent;                          //kt 10/2014
+    OnLaunchDialogSearch : TNotifyEvent;                          //kt 10/2014
     OnLaunchConsole : TNotifyEvent;                                 //kt 6/2015
     OnModified : TNotifyEvent;                                      //kt 9/4/15
     OnInsertDate : TNotifyEvent;                                    //kt 12/29/15
@@ -267,6 +268,7 @@ begin
   NextControl := nil;
   PrevControl := nil;
   OnLaunchTemplateSearch := nil;
+  OnLaunchDialogSearch := nil;               
   OnLaunchConsole := nil;
   OnModified := nil; //kt 9/4/15
   OnInsertDate := nil;  //kt 12/29/15
@@ -1303,7 +1305,12 @@ begin
                                                   //            http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
                                                  try
                                                    SuspendKeyProcessing := true;
-                                                   if Assigned(OnLaunchTemplateSearch) then OnLaunchTemplateSearch(self);
+                                                   if ShiftToBeProcessed=true then begin
+                                                      if Assigned(OnLaunchDialogSearch) then OnLaunchDialogSearch(self);
+                                                      ShiftToBeProcessed := False;
+                                                   end else begin
+                                                      if Assigned(OnLaunchTemplateSearch) then OnLaunchTemplateSearch(self);
+                                                   end;
                                                  finally
                                                    Msg.Result := 1; //Handled
                                                    SuspendKeyProcessing := false;

@@ -154,7 +154,6 @@ type
     FImageDeleteMode : TImgDelMode;
     FInsideDownload : boolean;
     frmImageTransfer: TfrmImageTransfer;
-    frmImageUpload: TfrmImageUpload;
     DownloadRetryCount : integer;
     procedure ExecuteFileIfNeeded(Selected: integer);
     procedure EnsureImageListLoaded();
@@ -178,6 +177,7 @@ type
     CacheDir : AnsiString;
     TransferMethod : TImgTransferMethod;
     DropBoxDir : string;
+    frmImageUpload: TfrmImageUpload;  //kt 8/4/20.  Moved from private to public
     NullImageName : AnsiString;
     NumImagesAvailableOnServer : integer;
     DownloadImagesInBackground : boolean;
@@ -290,7 +290,7 @@ begin
     uTMGOptions.WriteString('Dropbox directory','');
   end;
   AutoScanUpload.Checked := uTMGOptions.ReadBool('Scan Enabled',false);
-  ListBox := frmNotes.lstNotes;
+  if assigned(frmNotes) then ListBox := frmNotes.lstNotes;  //kt 8/10/20 added if Assigned() ...
 end;
 
 procedure TfrmImages.FormDestroy(Sender: TObject);

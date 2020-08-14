@@ -37,40 +37,50 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  fDrawers,
+  fDrawers,fNotes,fReminderDialog,uReminders,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons;
 
 type
+  TSearchMode = (TsmTemplate, TsmDialog);
+
   TfrmTemplateSearch = class(TForm)
-    StatusBar: TStatusBar;
-    lbMatches: TListBox;
-    edtSearchTerms: TEdit;
-    btnAccept: TBitBtn;
-    btnCancel: TBitBtn;
     Timer: TTimer;
-    procedure btnAcceptClick(Sender: TObject);
-    procedure lbMatchesEnter(Sender: TObject);
+    PageControl1: TPageControl;
+    tsTemplates: TTabSheet;
+    tsReminders: TTabSheet;
+    edtTemSearchTerms: TEdit;
+    btnTemAccept: TBitBtn;
+    btnTemCancel: TBitBtn;
+    lbTemMatches: TListBox;
+    StatusBar: TStatusBar;
+    procedure FormShow(Sender: TObject);
+    procedure PageControl1Change(Sender: TObject);
+    procedure btnTemAcceptClick(Sender: TObject);
+    procedure lbTemMatchesEnter(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
-    procedure lbMatchesDblClick(Sender: TObject);
-    procedure lbMatchesClick(Sender: TObject);
+    procedure lbTemMatchesDblClick(Sender: TObject);
+    procedure lbTemMatchesClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure edtSearchTermsChange(Sender: TObject);
+    procedure edtTemSearchTermsChange(Sender: TObject);
   private
     { Private declarations }
     SavedResults : TStringList;
     CaseSensitiveStr : string;  //should be "0" or "1"
     procedure DoTemplateSearch;
+    procedure DoDialogSearch;
   public
     { Public declarations }
     SelectedInfo : string;  //  topIEN^childIEN^grandchildIEN^... etc
   end;
 
-  procedure LaunchTemplateSearch(Drawers : TfrmDrawers);  forward;
+  procedure LaunchTemplateSearch(Drawers : TfrmDrawers; Mode : TSearchMode);  forward;
   function InsertTemplateByName(Drawers : TfrmDrawers; AName : String) : boolean;   //not interactive
 
-//var
+var
 //  frmTemplateSearch: TfrmTemplateSearch;
+  SearchMode: TSearchMode;
+
 
 implementation
 
@@ -174,41 +184,86 @@ const
     end;
   end;
 
-  procedure LaunchTemplateSearch(Drawers : TfrmDrawers);
+  procedure LaunchTemplateSearch(Drawers : TfrmDrawers; Mode : TSearchMode);
   var frmTemplateSearch: TfrmTemplateSearch;
       SelNode : TTreeNode;
       SelectedInfo : string;
       ModalResult : integer;
+      i,node_index,ParentNode : integer;
   begin
+    fTemplateSearch.SearchMode := Mode;
     frmTemplateSearch := TfrmTemplateSearch.Create(frmFrame);
+    if Mode=TsmDialog then
+      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsReminders
+    else
+      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTemplates;
+    frmTemplateSearch.PageControl1Change(nil);
     ModalResult := frmTemplateSearch.ShowModal;
+    //Check mode here and add functionality for dialogs
     SelectedInfo := frmTemplateSearch.SelectedInfo;
     frmTemplateSearch.Free;
     if ModalResult = mrOK then begin
-      if (Drawers.TheOpenDrawer <> odTemplates) then Drawers.sbTemplatesClick(nil); //Ensure Templates drawer is open
-      SelNode := SelectTemplateNodePath(Drawers, SelectedInfo);
-      if SelNode <> nil then begin
-        Drawers.tvTemplates.Selected := SelNode;
-        Drawers.tvTemplatesClick(nil);  //must first have a click before a doubleclick.
-        Drawers.tvTemplatesDblClick(nil);
+      if fTemplateSearch.SearchMode = TsmTemplate then begin      
+        if (Drawers.TheOpenDrawer <> odTemplates) then Drawers.sbTemplatesClick(nil); //Ensure Templates drawer is open
+        SelNode := SelectTemplateNodePath(Drawers, SelectedInfo);
+        if SelNode <> nil then begin
+          Drawers.tvTemplates.Selected := SelNode;
+          Drawers.tvTemplatesClick(nil);  //must first have a click before a doubleclick.
+          Drawers.tvTemplatesDblClick(nil);
+        end;
+      end else if fTemplateSearch.SearchMode = TsmDialog then begin
+        if Drawers.TheOpenDrawer <> odReminders then Drawers.sbRemindersClick(nil);
+        ParentNode := strtoint(piece(SelectedInfo,'^',1));
+        node_index := strtoint(piece(SelectedInfo,'^',2));
+        //SelNode := SelectTemplateNodePath(Drawers,SelectedInfo);
+        //if SelNode <> nil then begin
+         // Drawers.tvReminders.Selected := SelNode;
+          //Drawers.tvRemindersMouseUp(nil,mbLeft);  //must first have a click before a doubleclick.
+         // ViewReminderDialog(ReminderNode(Drawers.tvReminders.Selected));
+          //Drawers.tvRemindersDblClick(nil);
+        //end;
+        for i:=0 to Drawers.tvReminders.Items.count-1 do begin   //TreeView1.Items.Count - 1 do begin
+          if (Drawers.tvReminders.Items[i].Parent.Index = ParentNode) and (Drawers.tvReminders.Items[i].Index = node_index) then begin
+            Drawers.tvReminders.Select(Drawers.tvReminders.Items[i]);
+            Drawers.tvReminders.SetFocus;
+            ViewReminderDialog(ReminderNode(Drawers.tvReminders.Selected));
+            break;
+          end;
+
+        end;
       end;
     end;
   end;
 
-  procedure TfrmTemplateSearch.edtSearchTermsChange(Sender: TObject);
+  procedure TfrmTemplateSearch.edtTemSearchTermsChange(Sender: TObject);
   var LastChar : Char;
       Len : integer;
+      i : integer;
+      OneLine:string;
   begin
-    Len := Length(edtSearchTerms.Text);
+    StatusBar.Panels[0].Text := '';
+    Len := Length(edtTemSearchTerms.Text);
     if Len > 1 then begin   //Added because if Len 0 then program crashed
-      LastChar := edtSearchTerms.Text[Len];
-      if LastChar=' ' then begin
-        DoTemplateSearch; //Launch search directly after every space
-      end else begin
-        Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
-        Timer.Enabled := true;
-        //So as long as user keeps changing search terms, search will not launch
-        //until there has been a 0.5 second pause.
+      LastChar := edtTemSearchTerms.Text[Len];
+      if fTemplateSearch.SearchMode = TsmTemplate then begin
+        if LastChar=' ' then begin
+          DoTemplateSearch; //Launch search directly after every space
+        end else begin
+          Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
+          Timer.Enabled := true;
+          //So as long as user keeps changing search terms, search will not launch
+          //until there has been a 0.5 second pause.
+        end;
+      end else if fTemplateSearch.SearchMode = TsmDialog then begin
+        if LastChar=' ' then begin
+          DoDialogSearch; //Launch search directly after every space
+        end else begin
+          Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
+          Timer.Enabled := true;
+          //So as long as user keeps changing search terms, search will not launch
+          //until there has been a 0.5 second pause.
+        end;
+
       end;
     end;
   end;
@@ -219,7 +274,10 @@ const
   begin
     SavedResults := TStringList.Create();
     CaseSensitiveStr := '0';  //later hook into checkbox.
-    DoTemplateSearch();  //fill box initially with ALL templates
+    if fTemplateSearch.SearchMode=TsmTemplate then
+      DoTemplateSearch()  //fill box initially with ALL templates
+    else
+      DoDialogSearch;
     Pos := Mouse.CursorPos;
     self.Top := Pos.Y; self.Left := Pos.X;
   end;
@@ -229,9 +287,29 @@ const
     SavedResults.Free
   end;
 
-  procedure TfrmTemplateSearch.btnAcceptClick(Sender: TObject);
+  procedure TfrmTemplateSearch.FormShow(Sender: TObject);
+begin
+  edtTemSearchTerms.SetFocus;
+end;
+
+procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
   begin
     Self.ModalResult := mrOK;
+  end;
+
+  procedure TfrmTemplateSearch.DoDialogSearch;
+  var OneLine:string;
+      i : integer;
+  begin
+    Timer.Enabled := false;
+    lbTemMatches.Items.Clear;
+    frmNotes.Drawers.ReminderSearch(SavedResults,edtTemSearchTerms.Text);
+    for i := 0 to SavedResults.Count - 1 do begin
+      OneLine := SavedResults.Strings[i];
+      OneLine := piece(OneLine,'^',1);
+      OneLine := piece(OneLine,';',2);
+      lbTemMatches.Items.Add(OneLine);
+    end;
   end;
 
   procedure TfrmTemplateSearch.DoTemplateSearch;
@@ -241,8 +319,8 @@ const
       OneLine : string;
   begin
     Timer.Enabled := false;
-    lbMatches.Items.Clear;
-    RPCSuccess := TMGSearchTemplates(SavedResults, edtSearchTerms.Text, User.DUZ, CaseSensitiveStr);
+    lbTemMatches.Items.Clear;
+    RPCSuccess := TMGSearchTemplates(SavedResults, edtTemSearchTerms.Text, User.DUZ, CaseSensitiveStr);
     if piece(RPCSuccess,'^',1) <> '1' then exit;
     {
     CallV('TMG CPRS SEARCH TEMPLATE', [edtSearchTerms.Text, User.DUZ, CaseSensitiveStr]);
@@ -257,21 +335,21 @@ const
       OneLine := SavedResults.Strings[i];
       OneLine := piece(OneLine,'^',1);
       OneLine := piece(OneLine,';',2);
-      lbMatches.Items.Add(OneLine);
+      lbTemMatches.Items.Add(OneLine);
     end;
     if SavedResults.Count = 1 then begin  //autoselect if only 1 option
-      lbMatchesEnter(nil);
+      lbTemMatchesEnter(nil);
     end;
   end;
 
-  procedure TfrmTemplateSearch.lbMatchesClick(Sender: TObject);
+  procedure TfrmTemplateSearch.lbTemMatchesClick(Sender: TObject);
   var SourceLine, Part: string;
       i : integer;
   begin
     StatusBar.Panels[0].Text := '';
-    SourceLine := SavedResults.Strings[lbMatches.ItemIndex];
+    SourceLine := SavedResults.Strings[lbTemMatches.ItemIndex];
     SelectedInfo := '';
-    if lbMatches.ItemIndex > -1 then begin
+    if lbTemMatches.ItemIndex > -1 then begin
       for i := NumPieces(SourceLine,'^') downto 1 do begin
         if StatusBar.Panels[0].Text <> '' then StatusBar.Panels[0].Text := StatusBar.Panels[0].Text + '/';
         if SelectedInfo <> '' then SelectedInfo := SelectedInfo + '^';
@@ -282,20 +360,43 @@ const
     end;
   end;
 
-  procedure TfrmTemplateSearch.lbMatchesDblClick(Sender: TObject);
+  procedure TfrmTemplateSearch.lbTemMatchesDblClick(Sender: TObject);
   begin
-    lbMatchesClick(Sender);
-    btnAcceptClick(Sender);
+    lbTemMatchesClick(Sender);
+    btnTemAcceptClick(Sender);
   end;
 
-  procedure TfrmTemplateSearch.lbMatchesEnter(Sender: TObject);
+  procedure TfrmTemplateSearch.lbTemMatchesEnter(Sender: TObject);
   begin
-    lbMatches.ItemIndex := 0;
-    lbMatchesClick(Sender);
+    lbTemMatches.ItemIndex := 0;
+    lbTemMatchesClick(Sender);
   end;
 
-  procedure TfrmTemplateSearch.TimerTimer(Sender: TObject);
+  procedure TfrmTemplateSearch.PageControl1Change(Sender: TObject);
   begin
+    SavedResults.Clear;
+    lbTemMatches.clear;
+    StatusBar.Panels[0].Text := '';
+    case PageControl1.ActivePageIndex of
+    0: begin
+      fTemplateSearch.SearchMode := TsmTemplate;
+      Caption := 'Search Templates';
+      DoTemplateSearch;
+      end;
+    1: begin
+      fTemplateSearch.SearchMode := TsmDialog;
+      Caption := 'Search Reminder Dialogs';
+      DoDialogSearch;
+      end;
+    end;
+
+  end;
+
+procedure TfrmTemplateSearch.TimerTimer(Sender: TObject);
+  begin
+  if SearchMode=TsmDialog then
+    DoDialogSearch
+  else
     DoTemplateSearch;
   end;
 

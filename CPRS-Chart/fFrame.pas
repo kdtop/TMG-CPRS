@@ -52,7 +52,7 @@ uses
   OleCtrls, VERGENCECONTEXTORLib_TLB, ComObj, AppEvnts, fBase508Form,
   StrUtils, Variants, Types,   //eRx 9/4/12
   rTIU,   //TM
-  fImagePatientPhotoID,  //kt
+  fImagePatientPhotoID, fTMGChartExporter, //kt
   VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS;
 
 type
@@ -206,6 +206,8 @@ type
     timCheckSequel: TTimer;
     lblLoadSequelPat: TLabel;
     mnuUploadImages: TMenuItem;
+    mnuExportChart: TMenuItem;
+    procedure mnuExportChartClick(Sender: TObject);
     procedure mnuInsertTimeClick(Sender: TObject);
     procedure mnuViewInsurancesClick(Sender: TObject);
     procedure mnuUploadImagesClick(Sender: TObject);
@@ -751,6 +753,7 @@ procedure TfrmFrame.btnTimerResetClick(Sender: TObject);
 //kt added entire function   4/14/15
 begin
   inherited;
+  if bTimerOn=True then pnlTimer.SetFocus;
   pnlTimer.Caption := '00:00';
   pnlTimer.Color := clBtnFace;
   timerStopwatch.enabled := False;
@@ -3397,6 +3400,12 @@ end;
 procedure TfrmFrame.mnuEditUndoClick(Sender: TObject);
 begin
   FEditCtrl.Perform(EM_UNDO, 0, 0);
+end;
+
+procedure TfrmFrame.mnuExportChartClick(Sender: TObject);
+begin
+  inherited;
+  fTMGChartExporter.ExportOneChart(frmNotes.tvNotes);
 end;
 
 procedure TfrmFrame.mnuEditRedoClick(Sender: TObject);

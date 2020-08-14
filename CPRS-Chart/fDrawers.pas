@@ -295,6 +295,7 @@ type
     property TheOpenDrawer: TDrawer read FOpenDrawer;
     function HTMLEditActive : boolean;  //kt 9/11
     procedure HandleLaunchTemplateQuickSearch(Sender: TObject);  //kt 10/2014
+    procedure HandleLaunchDialogQuickSearch(Sender: TObject);
     procedure HandleLaunchConsole(Sender: TObject);              //kt 6/2015
     procedure InsertTemplateText(Template : TTemplate);          //kt added 6/15
     function InsertTemplatebyName(TemplateName : string) : boolean;       //kt added 6/16
@@ -303,6 +304,7 @@ type
     procedure ClearPtData; //kt added 6/15
     procedure ClearProbs;  //kt added 10/15
     procedure ExpandParentNode(ThisNode:TTreeNode);   //TMG
+    procedure ReminderSearch(ReturnData: TStrings; SearchTerm:string);  //TMG 7/16/20
   published
     property Align: TAlign read GetAlign write SetAlign;
   end;
@@ -1529,7 +1531,13 @@ end;
 procedure TfrmDrawers.HandleLaunchTemplateQuickSearch(Sender: TObject);
 //kt added 10/28/14
 begin
-  fTemplateSearch.LaunchTemplateSearch(self);
+  fTemplateSearch.LaunchTemplateSearch(self,TsmTemplate);
+end;
+
+procedure TfrmDrawers.HandleLaunchDialogQuickSearch(Sender: TObject);
+//kt added 10/28/14
+begin
+  fTemplateSearch.LaunchTemplateSearch(self,TsmDialog);
 end;
 
 procedure TfrmDrawers.HandleLaunchConsole(Sender: TObject);
@@ -1947,6 +1955,35 @@ begin
     tvReminders.OnMouseUp := tvRemindersMouseUp;
   finally
     dec(FHoldResize);
+  end;
+end;
+
+procedure TfrmDrawers.ReminderSearch(ReturnData: TStrings; SearchTerm:string);
+var Node:TORTreeNode;
+    FoundIENS : string;
+    ThisIEN:string;
+    ParentNode:TORTreeNode;
+    DataStr,UpSearchTerm:string;
+begin
+  if TheOpenDrawer <> odReminders then sbRemindersClick(nil);
+  ReturnData.Clear;
+  Node := TORTreeNode(tvReminders.Items.GetFirstNode);
+  UpSearchTerm := Uppercase(SearchTerm);
+  FoundIENS := '-';  //Delimiter
+  while Assigned(Node) do
+  begin
+    if (pos(UpSearchTerm,Uppercase(Node.Text))>0)or(SearchTerm='') then begin
+      ParentNode := Node.Parent;
+      if ParentNode<>nil then begin
+        ThisIEN := piece(Node.StringData,'^',1)+'-';
+        if pos(ThisIEN,FoundIENS)<1 then begin
+          FoundIENS := FoundIENS+ThisIEN;
+          DataStr := inttostr(Node.Index)+';'+Node.Text+'^'+inttostr(ParentNode.Index)+';'+ParentNode.Text;    //Node.StringData;
+          ReturnData.Add(DataStr);
+        end;  
+      end;
+    end;
+    Node := TORTreeNode(Node.GetNext);
   end;
 end;
 

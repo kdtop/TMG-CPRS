@@ -2036,6 +2036,7 @@ begin
   frmDrawers.Splitter := splDrawers;
   frmDrawers.DefTempPiece := 1;
   HtmlEditor.OnLaunchTemplateSearch := frmDrawers.HandleLaunchTemplateQuickSearch;
+  HtmlEditor.OnLaunchDialogSearch := frmDrawers.HandleLaunchDialogQuickSearch;
   HtmlEditor.OnLaunchConsole := frmDrawers.HandleLaunchConsole;
   HtmlEditor.OnInsertDate := HandleInsertDate;  //kt
   FImageFlag := TBitmap.Create;
@@ -5974,6 +5975,8 @@ type
         HtmlViewer.BackgroundColor := clCream;
         HtmlViewer.TabStop := true;
         RedrawActivate(HtmlViewer.Handle);
+        //Lines.SaveToFile(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\HTMLPrint.HTML');
+        //HTMLViewer.Navigate(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\HTMLPrint.HTML');
       end;
     end; {SetDisplayToHTMLvsText.SetHTMLorTextViewer.ActivateHtmlViewer}
 

@@ -149,14 +149,15 @@ function UserInactive(EIN: String): boolean;
 
 //Miscellaneous
 function TIUPatch175Installed: boolean;
+function ExportChart(NotesList,LabList,RadList: TStringList; Recip,Fax,Re:String; Comments:TStrings): String;
 
 const
   CLS_PROGRESS_NOTES = 3;
 
 implementation
 
-uses rMisc,
-     StrUtils;  //kt added 
+uses rMisc, fImages,
+     StrUtils;  //kt added
 
 var
   uTIUSiteParams: string;
@@ -1362,6 +1363,97 @@ begin
     RPCBrokerV.Results.Delete(0);
     Result := RPCBrokerV.Results;
   end;
+end;
+
+function ExportChart(NotesList,LabList,RadList: TStringList; Recip,Fax,Re:String; Comments:TStrings): String;
+//Export selected chart items into one PDF files and download to client
+
+  function UniqueFName : AnsiString;
+    var  FName,tempFName : AnsiString;
+         count : integer;
+  begin
+    FName := 'ChartExport';
+    count := 0;
+    repeat
+      tempFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\' + FName + inttostr(count) + '.pdf';
+      //FName := FName + '1';
+      count := count+1;
+    until (fileExists(tempFName)=false);
+    result := tempFName;
+  end;
+
+var
+  RPCResult : string;
+  i : integer;
+  FileName                      : string;
+  count                         : integer;
+  j                             : word;
+  OutFile                       : TFileStream;
+  s                             : AnsiString;
+  Buffer                        : array[0..1024] of byte;
+  RefreshCountdown              : integer;
+  bResult                       : boolean;
+  BrokerResult                  : string;
+  ErrMsg                        : string;
+
+begin
+  result := '1';
+  RPCBrokerV.remoteprocedure := 'TMG CPRS EXPORT CHART';
+  RPCBrokerV.Param[0].Value := Patient.DFN;
+  RPCBrokerV.Param[0].ptype := literal;
+  RPCBrokerV.Param[1].Value := '.X';  // not used
+  RPCBrokerV.param[1].ptype := list;
+  for i := 0 to NotesList.Count-1 do begin
+    RPCBrokerV.Param[1].Mult[piece(NotesList.Strings[i],'^',1)] := ''; //NotesList.Strings[i];
+  end;
+  RPCBrokerV.Param[2].Value := '.X';  // not used
+  RPCBrokerV.param[2].ptype := list;
+  for i := 0 to LabList.Count-1 do begin
+    RPCBrokerV.Param[2].Mult[piece(LabList.Strings[i],'^',1)] := '';  //LabList.Strings[i];
+  end;
+  RPCBrokerV.Param[3].Value := '.X';  // not used
+  RPCBrokerV.param[3].ptype := list;
+  for i := 0 to RadList.Count-1 do begin
+    RPCBrokerV.Param[3].Mult['"'+piece(RadList.Strings[i],'^',1)+'"'] := '';  //RadList.Strings[i];
+  end;
+  RPCBrokerV.Param[4].Value := '.X';  // not used
+  RPCBrokerV.param[4].ptype := list;
+  RPCBrokerV.Param[4].Mult['"TO"'] := Recip;
+  RPCBrokerV.Param[4].Mult['"FAX"'] := FAX;
+  RPCBrokerV.Param[4].Mult['"RE"'] := RE;
+  for i := 0 to Comments.Count-1 do begin
+    RPCBrokerV.Param[4].Mult['"COMMENTS",' + IntToStr(i+1)] := Comments[i];
+  end;
+  CallBroker;
+
+
+  if RPCBrokerV.Results.Count=0 then RPCBrokerV.Results.Add('-1^Unknown download error.');
+  BrokerResult := RPCBrokerV.Results[0];
+  if Piece(BrokerResult,'^',1)='1' then begin
+
+    FileName := UniqueFName;
+    //OutFile := TFileStream.Create(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\ChartExport.pdf',fmCreate);
+    OutFile := TFileStream.Create(FileName,fmCreate);
+    for i:=1 to (RPCBrokerV.Results.Count-1) do begin
+      s :=frmImages.Decode(RPCBrokerV.Results[i]);
+      count := Length(s);
+      if count>1024 then begin
+        bResult := false; //failure of load.
+        break;
+      end;
+      for j := 1 to count do Buffer[j-1] := ord(s[j]);
+      OutFile.Write(Buffer,count);
+    end;
+    OutFile.Free;
+    result := '1^'+FileName;
+  end else begin
+    ErrMsg := Piece(BrokerResult,'^',2);
+    bresult := false;
+  end;
+  if ErrMsg <> '' then begin
+    result := '0^ERROR: '+ErrMsg;
+  end;
+
 end;
 
 

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2020/07/31 07:45:00.190.pas,C:\Users\Eddie\Documents\Borland Studio Projects\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fDedicatedImageUploaderMain.pas</Transaction>
+    <Transaction>2020/07/31 07:45:00.190.dfm,C:\Users\Eddie\Documents\Borland Studio Projects\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fDedicatedImageUploaderMain.dfm</Transaction>
+    <Transaction>2020/07/31 07:45:15.847.bdsproj,C:\Users\Eddie\Documents\Borland Studio Projects\Project1.bdsproj=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\DedicatedImageUploader.bdsproj</Transaction>
+  </Transactions>
+</BorlandProject>

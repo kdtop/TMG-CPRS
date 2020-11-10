@@ -7,7 +7,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
   OleCtrls, SHDocVw, MSHTML, ORFn, fLabs,
-  rTIU, uTIU, rCore, fDrawers,
+  rTIU, uTIU, rCore, fDrawers, ORNet, 
   Menus, ORCtrls, ActnList;
 
 type
@@ -56,6 +56,7 @@ type
     Action1: TAction;
     NotePopupMenu: TPopupMenu;
     mnuSignNote: TMenuItem;
+    popNoteMacro: TMenuItem;
     procedure mnuSignNoteClick(Sender: TObject);
     procedure Action1Execute(Sender: TObject); //TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -129,6 +130,7 @@ type
     //function InfoToHTMLTable(LabInfo: tLabsInfoRec) : string;
     function GetEditNoteDisplay(): string;
     procedure UpdateNoteTitleDisplay();
+    procedure RunMacro(Sender:TObject);
   public
     { Public declarations }
     HTMLEditor : THtmlObj;
@@ -218,12 +220,17 @@ end;
 //====================================================================
 
 procedure TfrmSingleNote.FormCreate(Sender: TObject);
+var
+  NewItem:tMenuItem;
+  arrMacros : TStringList;
+  i : integer;
+
 begin
   cbFontNames.Items.Assign(Screen.Fonts);
   HTMLEditor := THtmlObj.Create(pnlHTMLEdit,Application);
   TWinControl(HTMLEditor).Parent:=pnlHTMLEdit;
   TWinControl(HTMLEditor).Align:=alClient;
-  FHTMLEditorWarmedUp := false;;
+  FHTMLEditorWarmedUp := false;
   FEditIEN := 0;
   FVerifyNoteTitle := 0;
   FMode := snmNone;
@@ -257,7 +264,70 @@ begin
   HtmlEditor.OnLaunchConsole := frmDrawers.HandleLaunchConsole;
   HtmlEditor.OnInsertDate := HandleInsertDate;
   HtmlEditor.PopupMenu := NotePopupMenu;
+
+  //Create submenu for Macro
+  //Duplicate code: similar to fNotes.OnCreate
+  arrMacros := TStringList.Create();
+  tCallV(arrMacros,'TMG CPRS GET MACRO LIST',[User.DUZ]);
+  popNoteMacro.Visible := (arrMacros.Count>1);
+   if arrMacros.Count>1 then begin
+     arrMacros.Delete(0);
+     for i := 0 to arrMacros.Count - 1 do begin
+      //mnuRelationships.Items[i].Add(NewItem(piece(arrRelatives.Strings[i],'^',2)+' '+piece(arrRelatives.strings[i],'^',3),0,False,True,OpenRelationshipChart,0,'mnuRelation'+inttostr(i)));
+      NewItem := TMenuItem.Create(popNoteMacro);
+      NewItem.Caption := piece(arrMacros.Strings[i],'^',2);
+      //NewItem.
+      NewItem.Name := 'Macro_'+piece(arrMacros.Strings[i],'^',1); //'mnuRelation_'+piece(arrRelatives.Strings[i],'^',1)+'_'+inttostr(i);
+      NewItem.Tag := strtoint(piece(arrMacros.Strings[i],'^',1));
+      NewItem.Hint := piece(arrMacros.Strings[i],'^',3);
+      NewItem.OnClick := RunMacro;
+      //mnuRelationships.Items[i].Add(NewItem);
+      popNoteMacro.Insert(i,NewItem);
+    end;
+  end;
+
+
 end;
+
+procedure TfrmSingleNote.RunMacro(Sender:TObject);
+  //Duplicate code: similar to fNotes.RunMacro
+var ProcessedNote : TStrings;  //pointer to other objects
+    OriginalNote : TStringList;
+    Selection,SelText : string;
+    ErrMsg:string;
+begin
+  inherited;
+  if not boolAutosaving then DoAutoSave;      //elh added 1/15/18
+  //What call will properly save text for Processing Note????
+  //PutTextOnly(ErrMsg, memNewNote.Lines, lstNotes.GetIEN(EditingIndex));
+  OriginalNote := TStringList.Create;
+  //if (vmHTML in FViewMode) then begin
+    SplitHTMLToArray(WrapHTML(HtmlEditor.HTMLText), OriginalNote);
+    //breaks image paths - should not be necessary HTMLTools.InsertSubs(OriginalNote);
+    if HTMLEditor.SelText<>'' then begin
+      Selection := '1';
+      SelText := HTMLEditor.SelText;
+    end else begin
+      Selection := '0';
+      SelText := '';
+    end;
+    ProcessedNote := TMGTIUResolveMacro(inttostr(TMenuItem(Sender).Tag), IntToStr(FEditIEN), OriginalNote, SelText,Selection, ErrMsg);
+    //ProcessedNote := ProcessNote(OriginalNote,GetCurrentNoteIEN);
+    if ErrMsg<>'' then begin
+      messagedlg('Error with macro'+#13#10+ErrMsg,mtError,[mbOk],0);
+    end else begin
+      if Selection='1' then
+        HtmlEditor.SelText := ProcessedNote.Text
+      else
+        HtmlEditor.HTMLText := ProcessedNote.Text;
+      //GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor); //later I can embed this functionality in THtmlObj
+    end;
+    //messagedlg(piece(TMenuItem(Sender).Name,'-',2),mtConfirmation,[mbok],0);
+    //OpenNewPatient(piece(TMenuItem(Sender).Name,'_',2));
+  //end;
+end;
+
+
 
 procedure TfrmSingleNote.FormDestroy(Sender: TObject);
 begin

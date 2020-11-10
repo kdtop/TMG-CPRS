@@ -63,6 +63,8 @@ function LabPatchInstalled: boolean;
 function GetLabGridColor(DFN,Date,User:string; var DateSeen:string):integer; //kt  added 4/20/17
 
 function TMGSendLabAlert(Recipients : TStringList; Info1 : string; Info2 : string = ''; Level : string = '') : string;  ////kt 2/17
+function TMGHasLabReport(DFN,DisplayDate:string):boolean;  //kt 10/23/20
+///
 
 implementation
 
@@ -271,6 +273,14 @@ begin
   end;
 end;
 
+function TMGHasLabReport(DFN,DisplayDate:string):boolean;  //kt 10/23/20
+var Results:TStringList;
+begin
+  Results := TStringList.create();
+  tCallV(Results,'TMG CPRS LAB PDF LIST',[DFN,piece(DisplayDate,'.',1)+'.0001',piece(DisplayDate,'.',1)+'.9999']);
+  result := (Results.Count>1);  //the [0] is "1^OK" etc.
+  Results.Free;
+end;
 
 
 function Worksheet(const PatientDFN: string; ADate1, ADate2: TFMDateTime; spec: string; tests: TStrings): TStrings;  //*DFN*

@@ -9,8 +9,8 @@ inherited frmLabs: TfrmLabs
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 729
-  ExplicitHeight = 828
+  ExplicitWidth = 737
+  ExplicitHeight = 832
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -40,7 +40,7 @@ inherited frmLabs: TfrmLabs
   inherited pnlLeft: TPanel
     Height = 769
     Constraints.MinWidth = 37
-    ExplicitHeight = 749
+    ExplicitHeight = 769
     object Splitter1: TSplitter
       Left = 0
       Top = 509
@@ -63,7 +63,6 @@ inherited frmLabs: TfrmLabs
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
-      ExplicitHeight = 489
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -93,7 +92,6 @@ inherited frmLabs: TfrmLabs
         OnKeyDown = tvReportsKeyDown
         Caption = 'Available Reports'
         NodePiece = 0
-        ExplicitHeight = 470
       end
     end
     object pnlLeftBottom: TPanel
@@ -103,7 +101,6 @@ inherited frmLabs: TfrmLabs
       Height = 250
       Align = alBottom
       TabOrder = 1
-      ExplicitTop = 499
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -235,7 +232,7 @@ inherited frmLabs: TfrmLabs
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
     ExplicitWidth = 620
-    ExplicitHeight = 749
+    ExplicitHeight = 769
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -255,7 +252,6 @@ inherited frmLabs: TfrmLabs
       Height = 449
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 429
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -297,7 +293,6 @@ inherited frmLabs: TfrmLabs
         Visible = False
         WantReturns = False
         WordWrap = False
-        ExplicitHeight = 408
       end
       object WebBrowser1: TWebBrowser
         Left = 1
@@ -642,6 +637,21 @@ inherited frmLabs: TfrmLabs
             TabOrder = 1
             OnClick = cmdOldClick
           end
+          object btnViewReport: TButton
+            Left = 527
+            Top = 10
+            Width = 76
+            Height = 25
+            Caption = 'View Report'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBtnText
+            Font.Height = -12
+            Font.Name = 'MS Sans Serif'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 5
+            OnClick = btnViewReportClick
+          end
         end
       end
       object grdLab: TCaptionStringGrid
@@ -892,7 +902,6 @@ inherited frmLabs: TfrmLabs
       Height = 20
       Align = alBottom
       TabOrder = 3
-      ExplicitTop = 729
       object lblSpecimen: TLabel
         Left = 4
         Top = 28
@@ -1081,6 +1090,9 @@ inherited frmLabs: TfrmLabs
         'Status = stsDefault')
       (
         'Component = WebBrowser1'
+        'Status = stsDefault')
+      (
+        'Component = btnViewReport'
         'Status = stsDefault'))
   end
   object popChart: TPopupMenu
@@ -1136,14 +1148,14 @@ inherited frmLabs: TfrmLabs
     Top = 280
   end
   object dlgWinPrint: TPrintDialog
-    Left = 618
-    Top = 63
+    Left = 522
+    Top = 79
   end
   object Timer1: TTimer
     Interval = 100
     OnTimer = Timer1Timer
-    Left = 653
-    Top = 61
+    Left = 557
+    Top = 77
   end
   object PopupMenu2: TPopupMenu
     Left = 603
@@ -1246,6 +1258,11 @@ inherited frmLabs: TfrmLabs
         Caption = '&Ignore HL7 imports for patient'
         ShortCut = 16457
         OnClick = AddToImportIgnoreClick
+      end
+      object mnuViewLabReports: TMenuItem
+        Caption = 'View Lab &Reports'
+        ShortCut = 16466
+        OnClick = mnuViewLabReportsClick
       end
     end
   end

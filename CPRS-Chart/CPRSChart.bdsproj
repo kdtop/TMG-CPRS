@@ -32,8 +32,8 @@
 			<Compiler Name="N">1</Compiler>
 			<Compiler Name="O">1</Compiler>
 			<Compiler Name="P">1</Compiler>
-			<Compiler Name="Q">0</Compiler>
-			<Compiler Name="R">0</Compiler>
+			<Compiler Name="Q">1</Compiler>
+			<Compiler Name="R">1</Compiler>
 			<Compiler Name="S">0</Compiler>
 			<Compiler Name="T">0</Compiler>
 			<Compiler Name="U">0</Compiler>
@@ -163,7 +163,7 @@
 		</VersionInfo>
 		<VersionInfoKeys>
 			<VersionInfoKeys Name="CompanyName">Department of Veterans Affairs / Family Physicians of Greeneville, PC</VersionInfoKeys>
-			<VersionInfoKeys Name="FileDescription">2020.07.27</VersionInfoKeys>
+			<VersionInfoKeys Name="FileDescription">2020.09.17</VersionInfoKeys>
 			<VersionInfoKeys Name="FileVersion">1.0.30.16</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">1.0.30.16 server required</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalCopyright">Unauthorized access or misuse of this system and/or its data is a federal crime. Use of all data shall be in accordance with VA policy on security and privacy.</VersionInfoKeys>

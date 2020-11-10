@@ -88,6 +88,8 @@ type
     txtCmdForward: TVA508StaticText;
     txtCmdProcess: TVA508StaticText;
     btnRefresh: TButton;
+    mnuMultiTIUSign: TMenuItem;
+    procedure mnuMultiTIUSignClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
     procedure PatientImageMouseLeave(Sender: TObject);
     procedure PatientImageMouseEnter(Sender: TObject);
@@ -195,7 +197,8 @@ implementation
 
 uses rCore, uCore, fDupPts, fPtSens, fPtSelDemog, fPtSelOptns, fPatientFlagMulti,
      uOrPtf, fAlertForward, rMisc, fFrame, fRptBox, VA508AccessibilityRouter,
-     fPtAdd, fPtQuery, fLetterWriter, uTMGOptions, uTMGUtil, //kt 9/11
+     fPtAdd, fPtQuery, fLetterWriter, uTMGOptions, uTMGUtil, fMultiTIUSign,
+     uTMGEvent,    //TMG
      VAUtils;
 
 resourcestring
@@ -246,12 +249,18 @@ begin
       if (IsRPL = '1') then                          // Deal with restricted patient list users.
         RPLDisplay;                                  // Removes unnecessary components from view.
       FUserCancelled := FALSE;
+      //ELH allow user to over ride this reset 5/14/20
+      ResetTimer := uTMGOptions.ReadBool('CPRS Reset Timer On New Chart',True);
+      if ResetTimer then frmFrame.btnTimerResetClick(nil);  //kt
       ShowModal;
       UserCancelled := FUserCancelled;
       if not UserCancelled then begin
-        //ELH allow user to over ride this reset 5/14/20
-        ResetTimer := uTMGOptions.ReadBool('CPRS Reset Timer On New Chart',True);
-        if ResetTimer then frmFrame.btnTimerResetClick(nil);  //kt
+        CheckForOpenEvent('',0);   //TMG  11/2/20
+        if uTMGOptions.ReadBool('CPRS TIMER PROMPT',False)=True then begin
+          if messagedlg('Would you like to start the chart timer?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+            frmFrame.btnTimerClick(nil);
+          end;
+        end;
       end;
     end;
   finally
@@ -453,80 +462,78 @@ end;
 
 procedure TfrmPtSel.cboPatientChange(Sender: TObject);
 
-    procedure ShowMatchingPatients;
-    begin
-      with cboPatient do
-        begin
-          ClearIDInfo;
-          if ShortCount > 0 then
-            begin
-              if ShortCount = 1 then
-                begin
-                  ItemIndex := 0;
-                  ShowIDInfo;
-                  ShowFlagInfo;                  
-                end;
-              Items.Add(LLS_LINE);
-              Items.Add(LLS_SPACE);
-            end;
-          InitLongList('');
+  procedure ShowMatchingPatients;
+  begin
+    with cboPatient do begin
+      ClearIDInfo;
+      if ShortCount > 0 then begin
+        if ShortCount = 1 then begin
+          ItemIndex := 0;
+          ShowIDInfo;
+          ShowFlagInfo;
         end;
+        Items.Add(LLS_LINE);
+        Items.Add(LLS_SPACE);
+      end;
+      InitLongList('');
     end;
+  end;
 
 var
 index:integer;
 begin
-  with cboPatient do
-    if IsOther(integer(1))and (IsRPL <> '1')and (enhanceskip=0) and (frmPtSelOptns.IsEnhanced(Text))and (not frmPtSelOptns.IsPatientName(Text)) then
-      begin
-        if (IsRPL = '1') then
-          ///ListPtByRPLLast5(Items, Text)   Messagebox error
-        else
-         begin
-             index := RadioGroup1.ItemIndex;
-             caption := piece(RadioGroup1.Items[index],'&',2);
-             //Application.MessageBox(pChar(caption), pChar('Message'),MB_OK);
-             //caption := '' ; //derivative of integer(1) or other index of radio button selection
-             ListPtByOther(Items, Text, caption); // one extra argument on radio button selection
-             if Items.Count>0  then
-             begin
-                  //itimson :=0 ;//no check for timson change in cbopatient until after click event finished
-             RadioGroup1.ItemIndex  := 0;
-             RadioGroup1.SetFocus;
-             RadioGroup1.Refresh;
-             end;
-             ShowMatchingPatients;
-         end;
-      end
+  with cboPatient do begin
+    if IsOther(integer(1)) and
+    (IsRPL <> '1') and
+    (enhanceskip=0) and
+    (frmPtSelOptns.IsEnhanced(Text)) and
+    (not frmPtSelOptns.IsPatientName(Text)) then begin
+      if (IsRPL = '1') then begin
+        ///ListPtByRPLLast5(Items, Text)   Messagebox error
+      end else  begin
+        index := RadioGroup1.ItemIndex;
+        caption := piece(RadioGroup1.Items[index],'&',2);
+        //Application.MessageBox(pChar(caption), pChar('Message'),MB_OK);
+        //caption := '' ; //derivative of integer(1) or other index of radio button selection
+        ListPtByOther(Items, Text, caption); // one extra argument on radio button selection
+        if Items.Count>0  then begin
+          //itimson :=0 ;//no check for timson change in cbopatient until after click event finished
+          RadioGroup1.ItemIndex  := 0;
+          RadioGroup1.SetFocus;
+          RadioGroup1.Refresh;
+        end;
+        ShowMatchingPatients;
+      end;
+    end
     //agp //kt prior --> else if frmPtSelOptns.IsLast5(Text) then
     else //  agp wv change removed if statement  //kt
-    if frmPtSelOptns.IsLast5(Text) then
-      begin
-        if (IsRPL = '1') then
-          ListPtByRPLLast5(Items, Text)
-        else
-          ListPtByLast5(Items, Text);
-        ShowMatchingPatients;
-      end
-    else if frmPtSelOptns.IsFullSSN(Text) then
-      begin
-        if (IsRPL = '1') then
-           ListPtByRPLFullSSN(Items, Text)
-        else
-           ListPtByFullSSN(Items, Text);
-        ShowMatchingPatients;
-      end
-      else if (not IsOther(integer(1))) and (IsRPL <> '1')and (enhanceskip=0) and (frmPtSelOptns.IsEnhanced(Text)) and (not frmPtSelOptns.IsPatientName(Text)) then
-        begin
-          //ListPtByTimson(Items,Text) ;
-          //ShowMatchingPatients;
-          //vwpt enhanced changes
-          //check for change here if itimson flag =1 .no matter what however, even if 0,
-         //set it back to 1
-         //itimson :=1;
-         //end vwpt enhanced
-        end
+    if frmPtSelOptns.IsLast5(Text) then begin
+      if (IsRPL = '1') then
+        ListPtByRPLLast5(Items, Text)
+      else
+        ListPtByLast5(Items, Text);
+      ShowMatchingPatients;
+    end else if frmPtSelOptns.IsFullSSN(Text) then begin
+      if (IsRPL = '1') then
+        ListPtByRPLFullSSN(Items, Text)
+      else
+        ListPtByFullSSN(Items, Text);
+      ShowMatchingPatients;
+    end else if (not IsOther(integer(1))) and
+    (IsRPL <> '1') and
+    (enhanceskip=0) and
+    (frmPtSelOptns.IsEnhanced(Text)) and
+    (not frmPtSelOptns.IsPatientName(Text)) then begin
+      //ListPtByTimson(Items,Text) ;
+      //ShowMatchingPatients;
+      //vwpt enhanced changes
+      //check for change here if itimson flag =1 .no matter what however, even if 0,
+     //set it back to 1
+     //itimson :=1;
+     //end vwpt enhanced
+    end
     //enhanceskip := 0 ;
+  end;  
 end;
 
 procedure TfrmPtSel.cboPatientKeyPause(Sender: TObject);
@@ -793,7 +800,7 @@ var
   ADFN, x, RecordID, XQAID: string;  //*DFN*
   Response: integer;
 begin
-  if FAlertsNotReady then exit;  
+  if FAlertsNotReady then exit;
   enableclose := false;
   with lstvAlerts do
   begin
@@ -1432,6 +1439,14 @@ begin
   end
   else
     ReadyAlert;
+end;
+
+procedure TfrmPtSel.mnuMultiTIUSignClick(Sender: TObject);
+//kt added 9/10/20
+begin
+  inherited;
+  ShowMultiAlertsSign(lstvAlerts.Items);
+  AlertList;  //refresh alerts
 end;
 
 procedure TfrmPtSel.PatientImageClick(Sender: TObject);

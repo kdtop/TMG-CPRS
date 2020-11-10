@@ -47,6 +47,7 @@ interface
   var
     DesiredHTMLFontSize : byte;
     CPRSDir : string;
+    CPRSCacheDir : string;
     URL_CPRSDir : string;  //This is CPRSDir, but all '\'s are converted to '/'s
 
   CONST
@@ -104,6 +105,7 @@ interface
   function  HTMLEncode(const Data: string; var Modified : boolean): string; overload;
   procedure HTMLEncode(const SL : TStringList); overload;
   function  HTMLDecode(const AStr: String): String;
+  procedure MakePDFWrapperHTMLFile(PDFFullFilePathName, TargetSaveFilePathName : string);
 
   procedure StripTags(var S : string);
   procedure StripQuotes(SL : TStrings; QtChar: char);
@@ -138,7 +140,7 @@ implementation
     public
       SavedDefaultPrinter : string;
       LastChosenPrinterName : string;
-      RestorePrinterTimer : TTimer;       
+      RestorePrinterTimer : TTimer;
       PrintingNow : boolean;
       procedure HandleRestorePrinting (Sender: TObject);
       Constructor Create;
@@ -225,7 +227,7 @@ implementation
      apparently is owned by another thread than CPRS, because GetActiveWindow would
      not bring back a handle to the printer dialog window.  I therefore told IE
      to print WITHOUT asking which printer via UI.  In that case it prints to the
-     system wide default printer.  So I have to set the default printer to the 
+     system wide default printer.  So I have to set the default printer to the
      user's choice, and then change it back again.  This is bit of a kludge,
      but I couldn't figure out any other way after hours of trial and error.
      NOTE: I tried to query IE to see if it was able to print, thinking that it
@@ -1181,7 +1183,7 @@ const
     if pos('<BODY>',HTMLText)>0 then begin  //elh 2/12/16
       HTMLText := ORFn.piece2(HTMLText,'<BODY>',2);
       HTMLText := ORFn.piece2(HTMLText,'</BODY>',1);
-    end;  
+    end;
     result := HTMLText;
   end;
 
@@ -2161,12 +2163,31 @@ begin
   end;
 end;
 
+
+procedure MakePDFWrapperHTMLFile(PDFFullFilePathName, TargetSaveFilePathName : string);
+var
+   MyHTML: TStringList;
+   HTML : string;
+   TempFile: string;
+begin
+  HTML := '<embed src="file://'+PDFFullFilePathName+'" width="800px" height="1200px" />';
+  MyHTML := TStringList.create;
+  try
+    MyHTML.add(HTML);
+    MyHTML.SaveToFile(TargetSaveFilePathName);
+  finally
+    MyHTML.Free;
+  end;
+end;
+
+
 initialization
   DesiredHTMLFontSize := 2; //probably overwritten in fNotes initialization
   PrinterEvents := TPrinterEvents.Create;
   //CPRSDir := ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   CPRSDir := ExcludeTrailingPathDelimiter(GetEnvironmentVariable('USERPROFILE')+'\.CPRS');
   URL_CPRSDir := EncodePath(CPRSDir);
+  CPRSCacheDir := CPRSDir +'\Cache\';
   SubsFoundList := TStringList.Create;
 
 finalization

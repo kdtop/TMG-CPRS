@@ -46,6 +46,7 @@ type
     Image1: TImage;
     ProgressMsg: TLabel;
     btnCancel: TButton;
+    procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormHide(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
@@ -56,7 +57,9 @@ type
     { Public declarations }
     UserCanceled : boolean;
     procedure setMax(Max : integer);
-    procedure updateProgress(Current: integer);
+    procedure UpdateProgress(CurrentValue: integer); overload;
+    procedure UpdateProgress(CurrentValue, TotalValue : integer; Msg : string=''); overload;
+
   end;
 
 //var
@@ -82,19 +85,36 @@ implementation
     Abort;
   end;
 
-  procedure TfrmImageTransfer.Abort;
+  procedure TfrmImageTransfer.FormShow(Sender: TObject);
+  begin
+    btnCancel.Enabled := true;
+  end;
+
+procedure TfrmImageTransfer.Abort;
   begin
     UserCanceled := true;
+    btnCancel.Enabled := false;
+    Application.ProcessMessages;
   end;
 
   procedure TfrmImageTransfer.setMax(Max : integer);
   begin
     ProgressBar.Max := Max;
+    Application.ProcessMessages;
   end;
 
-  procedure TfrmImageTransfer.updateProgress(Current: integer);
+  procedure TfrmImageTransfer.updateProgress(CurrentValue: integer);
   begin
-    ProgressBar.Position := Current;
+    ProgressBar.Position := CurrentValue;
+    Application.ProcessMessages;
+  end;
+
+  procedure TfrmImageTransfer.UpdateProgress(CurrentValue, TotalValue : integer; Msg : string='');
+  begin
+    if Msg <> '' then ProgressMsg.Caption := Msg;
+    ProgressBar.Position := CurrentValue;
+    ProgressBar.Max := TotalValue;
+    Application.ProcessMessages;
   end;
 
 end.

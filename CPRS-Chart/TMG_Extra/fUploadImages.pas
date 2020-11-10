@@ -234,6 +234,7 @@ implementation
         Math,
         fTMG_DirectX_GetImage,  //for camera - DirectX
         fFrame,
+        rFileTransferU,
         fOptions, fDCSumm;
 
   const
@@ -632,7 +633,7 @@ implementation
         end;
         Bitmap.Canvas.StretchDraw(Rect, Picture.Graphic);
       end;
-      ThumbFName := frmImages.CacheDir + '\Thumb-' + ExtractFileName(Info.ImageFPathName);
+      ThumbFName := CacheDir + '\Thumb-' + ExtractFileName(Info.ImageFPathName);
       ThumbFName := ChangeFileExt(ThumbFName,'.bmp');
       Bitmap.SaveToFile(ThumbFName);  //save to local cache (for upload)
       Info.ThumbFPathName := ThumbFName;  //pass info back out.
@@ -1205,9 +1206,9 @@ implementation
       lpSourceFile : PAnsiChar;
   begin
     if TempBrowseable then begin
-      DestFile := frmImages.CacheDir + '\tempbrowseable' + ExtractFileExt(FNamePath);
+      DestFile := CacheDir + '\tempbrowseable' + ExtractFileExt(FNamePath);
     end else begin
-      DestFile := frmImages.CacheDir + '\' + ExtractFileName(FNamePath);
+      DestFile := CacheDir + '\' + ExtractFileName(FNamePath);
     end;
     lpDestFile := PAnsiChar(DestFile);
     lpSourceFile := PAnsiChar(FNamePath);
@@ -1955,8 +1956,8 @@ AbortPoint:
     //so we will move it to the cache folder prior to editing it
     if not movecheckbox.Checked then begin
       ImageName := ExtractFileName(FilesToUploadList.Items[FilesToUploadList.ItemIndex]);
-      CopyFile(PChar(FilesToUploadList.Items[FilesToUploadList.ItemIndex]),PChar(frmImages.CacheDir + '\' + ImageName),False);
-      FilesToUploadList.Items[FilesToUploadList.ItemIndex] := frmImages.CacheDir + '\' + ImageName;
+      CopyFile(PChar(FilesToUploadList.Items[FilesToUploadList.ItemIndex]),PChar(CacheDir + '\' + ImageName),False);
+      FilesToUploadList.Items[FilesToUploadList.ItemIndex] := CacheDir + '\' + ImageName;
     end;
 
     //Run the selected program then refresh the preview

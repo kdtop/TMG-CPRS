@@ -52,6 +52,7 @@ uses
   OleCtrls, VERGENCECONTEXTORLib_TLB, ComObj, AppEvnts, fBase508Form,
   StrUtils, Variants, Types,   //eRx 9/4/12
   rTIU,   //TM
+  uTMGEvent,   //TMG  10/29/20
   fImagePatientPhotoID, fTMGChartExporter, //kt
   VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS;
 
@@ -743,8 +744,10 @@ begin
   timerStopwatch.enabled := bTimerOn;
   if bTimerOn then begin
      pnlTimer.color := colorTimerOn;
+     SaveEvent('',1);
   end else begin
      pnlTimer.color := colorTimerPaused;
+     SaveEvent('',2);
   end;
 
 end;
@@ -753,7 +756,10 @@ procedure TfrmFrame.btnTimerResetClick(Sender: TObject);
 //kt added entire function   4/14/15
 begin
   inherited;
-  if bTimerOn=True then pnlTimer.SetFocus;
+  if bTimerOn=True then begin
+    pnlTimer.SetFocus;
+    SaveEvent('',2);
+  end;
   pnlTimer.Caption := '00:00';
   pnlTimer.Color := clBtnFace;
   timerStopwatch.enabled := False;
@@ -864,8 +870,8 @@ begin
       lblPtProvider.Caption := 'Current PCP Not Selected';  //TMG 9/7/18
       pnlVisit.Caption      := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
      end;
-  lblPtCare.Caption     := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN]);  //Primary Care Team Unassigned';
-  lblPtAttending.Caption := '';
+  lblPtCare.Caption     := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'0']);  //Primary Care Team Unassigned
+  lblPtAttending.Caption := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'1']);  //Primary Care Team Unassigned;
   lblPtMHTC.Caption := '';
   pnlPrimaryCare.Caption := lblPtCare.Caption + ' ' + lblPtAttending.Caption + ' ' + lblPtMHTC.Caption;
   pnlPrimaryCare.Hint := lblPtCare.Caption;
@@ -1448,7 +1454,7 @@ end;
 
 procedure TfrmFrame.FormDestroy(Sender: TObject);
 { free core objects used by CPRS }
-begin
+begiN
   Application.OnActivate := FOldActivate;
   Screen.OnActiveFormChange := FOldActiveFormChange;
   FNextButtonBitmap.Free;
@@ -1653,6 +1659,7 @@ end;
 
 procedure TfrmFrame.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  if bTimerOn then btnTimerResetClick(nil);  //tmg   11/2/20
   FClosing := TRUE;
   SetFormMonitoring(false);
   if FCreateProgress < FCP_FINISH then FTerminate := True;
@@ -2362,6 +2369,8 @@ begin
     SaveDFN := ''
   else
     SaveDFN := Patient.DFN;
+
+  if bTimerOn then btnTimerResetClick(nil);    //10/29/20
     
   OldRemindersStarted := RemindersStarted;
   RemindersStarted := FALSE;

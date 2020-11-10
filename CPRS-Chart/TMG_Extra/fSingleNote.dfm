@@ -3631,5 +3631,8 @@ object frmSingleNote: TfrmSingleNote
       Caption = 'Sign note now...'
       OnClick = mnuSignNoteClick
     end
+    object popNoteMacro: TMenuItem
+      Caption = 'Macro'
+    end
   end
 end

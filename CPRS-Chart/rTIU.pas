@@ -149,7 +149,7 @@ function UserInactive(EIN: String): boolean;
 
 //Miscellaneous
 function TIUPatch175Installed: boolean;
-function ExportChart(NotesList,LabList,RadList: TStringList; Recip,Fax,Re:String; Comments:TStrings): String;
+function ExportChart(NotesList,LabList,RadList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
 
 const
   CLS_PROGRESS_NOTES = 3;
@@ -157,6 +157,7 @@ const
 implementation
 
 uses rMisc, fImages,
+     rFileTransferU,  //kt added 10/27/20
      StrUtils;  //kt added
 
 var
@@ -1365,7 +1366,7 @@ begin
   end;
 end;
 
-function ExportChart(NotesList,LabList,RadList: TStringList; Recip,Fax,Re:String; Comments:TStrings): String;
+function ExportChart(NotesList,LabList,RadList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
 //Export selected chart items into one PDF files and download to client
 
   function UniqueFName : AnsiString;
@@ -1404,26 +1405,44 @@ begin
   RPCBrokerV.Param[1].Value := '.X';  // not used
   RPCBrokerV.param[1].ptype := list;
   for i := 0 to NotesList.Count-1 do begin
-    RPCBrokerV.Param[1].Mult[piece(NotesList.Strings[i],'^',1)] := ''; //NotesList.Strings[i];
+    RPCBrokerV.Param[1].Mult[piece(NotesList.Strings[i],'^',3)+','+piece(NotesList.Strings[i],'^',1)] := NotesList.Strings[i];
   end;
   RPCBrokerV.Param[2].Value := '.X';  // not used
   RPCBrokerV.param[2].ptype := list;
   for i := 0 to LabList.Count-1 do begin
-    RPCBrokerV.Param[2].Mult[piece(LabList.Strings[i],'^',1)] := '';  //LabList.Strings[i];
+    RPCBrokerV.Param[2].Mult[piece(LabList.Strings[i],'^',1)] := LabList.Strings[i];
   end;
   RPCBrokerV.Param[3].Value := '.X';  // not used
   RPCBrokerV.param[3].ptype := list;
   for i := 0 to RadList.Count-1 do begin
-    RPCBrokerV.Param[3].Mult['"'+piece(RadList.Strings[i],'^',1)+'"'] := '';  //RadList.Strings[i];
+    RPCBrokerV.Param[3].Mult['"'+piece(RadList.Strings[i],'^',1)+'"'] := RadList.Strings[i];
   end;
   RPCBrokerV.Param[4].Value := '.X';  // not used
   RPCBrokerV.param[4].ptype := list;
   RPCBrokerV.Param[4].Mult['"TO"'] := Recip;
   RPCBrokerV.Param[4].Mult['"FAX"'] := FAX;
   RPCBrokerV.Param[4].Mult['"RE"'] := RE;
+  RPCBrokerV.Param[4].Mult['"MODE"'] := Mode;
+  RPCBrokerV.Param[4].Mult['"UPLOADED"'] := Uploaded;
+  RPCBrokerV.Param[4].Mult['"CONSULTANT"'] := piece(Consultant,'^',1);
+  RPCBrokerV.Param[4].Mult['"DEMOGRAPHICS"'] := Demographics;
+  RPCBrokerV.Param[4].Mult['"TEMPLATE"'] := Template;
   for i := 0 to Comments.Count-1 do begin
     RPCBrokerV.Param[4].Mult['"COMMENTS",' + IntToStr(i+1)] := Comments[i];
   end;
+
+  RPCBrokerV.Param[5].Value := '.X';  // not used
+  RPCBrokerV.param[5].ptype := list;
+  for i := 0 to ScansList.Count-1 do begin
+    RPCBrokerV.Param[5].Mult['"'+piece(ScansList.Strings[i],'^',18)+'"'] := ScansList.Strings[i];
+  end;
+
+  RPCBrokerV.Param[6].Value := '.X';  // not used
+  RPCBrokerV.param[6].ptype := list;
+  for i := 0 to OtherDocList.Count-1 do begin
+    RPCBrokerV.Param[6].Mult['"'+piece(OtherDocList.Strings[i],'^',1)+'"'] := '';  //RadList.Strings[i];
+  end;
+
   CallBroker;
 
 
@@ -1435,7 +1454,8 @@ begin
     //OutFile := TFileStream.Create(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\ChartExport.pdf',fmCreate);
     OutFile := TFileStream.Create(FileName,fmCreate);
     for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-      s :=frmImages.Decode(RPCBrokerV.Results[i]);
+      //s :=frmImages.Decode(RPCBrokerV.Results[i]);
+      s :=Decode64(RPCBrokerV.Results[i]);
       count := Length(s);
       if count>1024 then begin
         bResult := false; //failure of load.

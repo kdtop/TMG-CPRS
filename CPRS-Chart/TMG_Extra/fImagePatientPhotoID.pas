@@ -38,6 +38,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   ORNet, ORFn,
+  rFileTransferU,  //10/27/20
   Dialogs, ExtCtrls, StdCtrls, OleCtrls, SHDocVw, Buttons;
 
 const
@@ -317,9 +318,9 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
       OneRec.DateTime := FMDateTimeToDateTime(FMDT);
       OneRec.DisplayDate := piece(s,'^',9);
       frmImages.SplitLinuxFilePath(OneRec.ThumbnailFPath,FPath,FName);
-      OneRec.LocalThumbPath := frmImages.CacheDir+'\'+ChangeFileExt(FName,'.bmp');
+      OneRec.LocalThumbPath := CacheDir+'\'+ChangeFileExt(FName,'.bmp');
       frmImages.SplitLinuxFilePath(OneRec.ImageFPath,FPath,FName);
-      OneRec.LocalFPath := frmImages.CacheDir+'\'+FName;
+      OneRec.LocalFPath := CacheDir+'\'+FName;
     end;
 
   var s : string;

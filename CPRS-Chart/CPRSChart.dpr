@@ -409,7 +409,12 @@ uses
   uTMG_WM_API in 'TMG_Extra\uTMG_WM_API.pas',
   fTMGPrintList in 'TMG_Extra\fTMGPrintList.pas' {frmTMGPrintList},
   fLabSelector in 'TMG_Extra\fLabSelector.pas' {frmLabSelector},
-  fMailbox in 'TMG_Extra\fMailbox.pas' {frmMailbox};
+  fMailbox in 'TMG_Extra\fMailbox.pas' {frmMailbox},
+  fTMGChartExporter in 'TMG_Extra\fTMGChartExporter.pas' {frmTMGChartExporter},
+  fMultiTIUSign in 'TMG_Extra\fMultiTIUSign.pas' {frmMultiTIUSign},
+  fViewLabPDF in 'TMG_Extra\fViewLabPDF.pas' {frmViewLabPDF},
+  rFileTransferU in 'TMG_Extra\rFileTransferU.pas',
+  uTMGEvent in 'TMG_Extra\uTMGEvent.pas';
 
 {$R *.TLB}
 
@@ -431,7 +436,6 @@ begin
     Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmSearchStop, frmSearchStop);
-  Application.CreateForm(TfrmLabSelector, frmLabSelector);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;
   end;

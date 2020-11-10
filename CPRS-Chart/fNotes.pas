@@ -49,6 +49,7 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
+  rFileTransferU,                                     //kt 10/27/20
   OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
@@ -264,6 +265,11 @@ type
     btnShiftEnter: TSpeedButton;
     popNotePasteHTML: TMenuItem;
     popNoteMacro: TMenuItem;
+    N10: TMenuItem;
+    mnuLooseInChartDelete: TMenuItem;
+    mnuLooseInChartMoveScanned: TMenuItem;
+    mnuLooseInChartMoveTIU: TMenuItem;
+    procedure mnuLooseInChartDeleteClick(Sender: TObject);
     procedure popNotePasteHTMLClick(Sender: TObject);
     procedure btnShiftEnterClick(Sender: TObject);
     procedure btnLineFeedClick(Sender: TObject);
@@ -3751,6 +3757,9 @@ begin
   popNoteMemoProcess.Enabled := pnlWrite.Visible;
   popNoteMacro.Enabled := pnlWrite.Visible;                                             //kt 5/1/13
   popNotePasteHTML.Enabled := pnlWrite.Visible;  //tmg 1/21/19 //(pnlWrite.Visible and Clipboard.HasFormat(CF_HTML));
+  mnuLooseInChartDelete.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
+  mnuLooseInChartMoveScanned.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
+  mnuLooseInChartMoveTIU.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
   if pnlWrite.Visible then begin
     popNoteMemoSpell.Enabled      := not pnlHTMLWrite.Visible; //kt 9/11
     popNoteMemoGrammar.Enabled    := not pnlHTMLWrite.Visible; //kt 9/11
@@ -4073,7 +4082,7 @@ end;
 procedure TfrmNotes.IdentifyAddlSigners(NoteIEN : int64; ARefDate: TFMDateTime);
 //kt added function 2/17 -- moving code from mnuActIdentifyAddlSignersClick
 //kt Reason for splitting code was so that fSingleNote could use this
-//   function of a separate document, not in this Notes Tab.
+//   function for a separate document, not in this Notes Tab.
 var
   Exclusions: TStrings;
   Saved, x, y: boolean;
@@ -4546,13 +4555,22 @@ begin
 
       //if Status <> IntToStr(NC_OTHER_UNSIGNED) then begin
       ListNotesForTree(tmpList, NC_SCANNED_RECORDS, 0, 0, 0, 0, TreeAscending);
-      //  FilterTitlesForHidden(tmpList); //kt added
       if tmpList.Count > 0 then begin
         CreateListItemsforDocumentTree(FDocList, tmpList, NC_SCANNED_RECORDS, GroupBy, TreeAscending, CT_NOTES);
         UpdateTreeView(FDocList, tvNotes);
       end;
       tmpList.Clear;
       FDocList.Clear;
+
+      //kt added section 9/8/20
+      ListNotesForTree(tmpList, NC_SCANNED_LOOSE_DOCS, 0, 0, 0, 0, TreeAscending);
+      if tmpList.Count > 0 then begin
+        CreateListItemsforDocumentTree(FDocList, tmpList, NC_SCANNED_LOOSE_DOCS, GroupBy, TreeAscending, CT_NOTES);
+        UpdateTreeView(FDocList, tvNotes);
+      end;
+      tmpList.Clear;
+      FDocList.Clear;
+
       //end;
 
       //TMG end addition  4/9/18
@@ -4894,7 +4912,6 @@ begin
         We can change the LocIEN in Download file RPC, which is variable #3. CallV('TMG DOWNLOAD FILE', [FPath,FName]);
                                                                                                                     ^
                                                                                                            Here  ---|
-
         //Download file
         R1 := drSuccess;  //default
         CacheFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+Piece(x, U, 2);
@@ -4908,9 +4925,6 @@ begin
         Mode := [vmView] + [vmHTML_MODE[vmHTML in FViewMode]];
         SetDisplayToHTMLvsText(Mode,nil,VIEW_ACTIVATE_ONLY);
 
-
-        //HTMLViewer.Navigate('http://192.168.3.99:9080/filesystem/oldrecs/A-D/C/Conduff,Allie_06-14-1923/Misc_(2).pdf');
-        //HTMLViewer.Navigate('\\server1\public\FPG CHARTS\A-D\C\Conduff,Allie_06-14-1923\'+Piece(x, U, 2));
         //lvNotes.Visible := False;
         //lstNotes.SelectByID(Piece(x, U, 1));
         //lstNotesClick(Self);    //<-- lots of action takes place here...
@@ -5355,6 +5369,17 @@ procedure TfrmNotes.mnuIconLegendClick(Sender: TObject);
 begin
   inherited;
   ShowIconLegend(ilNotes);
+end;
+
+procedure TfrmNotes.mnuLooseInChartDeleteClick(Sender: TObject);
+var IEN,DataStr:string;
+    FilePath:string;
+begin
+  inherited;
+  //DataStr := tvNotes.Items.Item[lstNotes.ItemIndex].;
+  //IEN := piece(piece(DataStr,'^',1),'-',2);
+  //FilePath := piece(DataStr,'^',18);
+  messagedlg('To Be Finished'+#13#10,mtInformation,[mbOk],0);
 end;
 
 procedure TfrmNotes.mnuActAttachtoIDParentClick(Sender: TObject);

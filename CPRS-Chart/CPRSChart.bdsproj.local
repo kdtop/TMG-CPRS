@@ -53,5 +53,9 @@
     <Transaction>2019/04/30 10:57:02.217.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.dfm</Transaction>
     <Transaction>2020/07/30 15:05:09.505.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas=</Transaction>
     <Transaction>2020/07/30 15:05:09.521.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.dfm=</Transaction>
+    <Transaction>2020/10/27 08:38:04.861.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.pas</Transaction>
+    <Transaction>2020/10/27 08:38:04.861.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.dfm</Transaction>
+    <Transaction>2020/10/27 09:11:58.372.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\rFileTransferU.pas</Transaction>
+    <Transaction>2020/10/29 15:55:42.550.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMGEvent.pas</Transaction>
   </Transactions>
 </BorlandProject>

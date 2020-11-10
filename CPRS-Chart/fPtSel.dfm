@@ -12,8 +12,8 @@ inherited frmPtSel: TfrmPtSel
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 794
-  ExplicitHeight = 593
+  ExplicitWidth = 802
+  ExplicitHeight = 597
   PixelsPerInch = 96
   TextHeight = 13
   object sptVert: TSplitter [0]
@@ -585,6 +585,10 @@ inherited frmPtSel: TfrmPtSel
     object mnuRemove: TMenuItem
       Caption = 'Remove'
       OnClick = cmdRemoveClick
+    end
+    object mnuMultiTIUSign: TMenuItem
+      Caption = '&Sign Multiple Documents'
+      OnClick = mnuMultiTIUSignClick
     end
   end
 end

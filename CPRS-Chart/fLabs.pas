@@ -175,6 +175,10 @@ type
     mnuNotifyOk: TMenuItem;
     popNotifyOK: TMenuItem;
     AddToImportIgnore: TMenuItem;
+    btnViewReport: TButton;
+    mnuViewLabReports: TMenuItem;
+    procedure mnuViewLabReportsClick(Sender: TObject);
+    procedure btnViewReportClick(Sender: TObject);
     procedure AddToImportIgnoreClick(Sender: TObject);
     procedure NotifyOKClick(Sender: TObject);
     procedure sptHorzRightMoved(Sender: TObject);
@@ -356,7 +360,8 @@ implementation
 
 uses uCore, rLabs, rCore, rCover, rOrders, fLabPrint, fFrame, fRptBox, Printers, fReportsPrint,
      clipbrd, rReports, rGraphs, activex, mshtml, VA508AccessibilityRouter, uReports, fLabEntry,
-     uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools, fLabSelector, //kt
+     uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools,
+     fLabSelector, fViewLabPDF,//kt
      VAUtils;
 
 const
@@ -2331,6 +2336,7 @@ begin
     cmdRecent.Enabled := nexton;
     cmdPrev.Enabled := prevon;
     cmdOld.Enabled := prevon;
+    btnViewReport.enabled := TMGHasLabReport(Patient.DFN,DisplayDate);  //kt    10/23/20
     if cmdOld.Enabled and cmdRecent.Enabled then
       lblMostRecent.Visible := false
     else
@@ -5021,6 +5027,15 @@ begin
   end;
 end;
                   
+procedure TfrmLabs.btnViewReportClick(Sender: TObject);
+var
+  InitFMDateTime : TFMDateTime;
+begin
+  inherited;
+  InitFMDateTime := StrToFMdatetime(lblDateFloat.Caption);
+  ShowLabReport(InitFMDateTime);
+end;
+
 procedure TfrmLabs.ShowTabControl;
 begin
   if TabControl1.Tabs.Count > 1 then
@@ -5138,6 +5153,14 @@ begin
   end;
 end;
 
+
+procedure TfrmLabs.mnuViewLabReportsClick(Sender: TObject);
+var InitFMDateTime : TFMDateTime;
+begin
+  inherited;
+  InitFMDateTime := 0;  //TO DO: SET THIS TO CURRENT LAB
+  ShowLabReport(InitFMDateTime);
+end;
 
 procedure TfrmLabs.NotifyOKClick(Sender: TObject);
 begin

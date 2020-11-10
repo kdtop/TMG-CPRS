@@ -40,6 +40,7 @@ unit ORFn;
 interface  // --------------------------------------------------------------------------------
 
 uses SysUtils, Windows, Messages, Classes, Controls, StdCtrls, ExtCtrls, ComCtrls, Forms,
+     DateUtils, //kt added 11/20
      Graphics, Menus, RichEdit, Buttons;
 
 const
@@ -78,6 +79,10 @@ procedure SetListFMDateTime(AFormat: string; AList: TStringList; ADelim: Char;
                             PieceNum: Integer; KeepBad: boolean = FALSE);
 function DateTimeToHorolog(ADateTime: TDateTime) : string;  //kt added 1/18
 function HorologToDateTime(Horolog : string) : TDateTime; //kt added 1/18
+function IncFMDTDay(ADate : TFMDateTime; NumDays : integer) : TFMDateTime; //kt added 11/10/2020
+function DecFMDTDay(ADate : TFMDateTime; NumDays : integer) : TFMDateTime; //kt added 11/10/2020
+function FMDTNow : TFMDateTime;
+
 
 { Numeric functions }
 function HigherOf(i, j: Integer): Integer;
@@ -509,6 +514,26 @@ begin
   end else begin
     Result := 0;
   end;
+end;
+
+function IncFMDTDay(ADate : TFMDateTime; NumDays : integer) : TFMDateTime;
+//kt added 11/10/2020
+var tempDT : TDateTime;
+begin
+  tempDT := FMDateTimeToDateTime(ADate);
+  tempDT := IncDay(tempDT, NumDays);
+  Result := DateTimeToFMDateTime(tempDT);
+end;
+
+function DecFMDTDay(ADate : TFMDateTime; NumDays : integer) : TFMDateTime;
+//kt added 11/10/2020
+begin
+  Result := IncFMDTDay(ADate, -NumDays);
+end;
+
+function FMDTNow : TFMDateTime;
+begin
+  Result := DateTimeToFMDateTime(Now);
 end;
 
 { Numeric functions }

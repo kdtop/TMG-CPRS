@@ -325,6 +325,7 @@ const
   NC_SEARCHTEXT = 7;                             // Note Content - search for text
   NC_OTHER_UNSIGNED = 8;                         // Note Content - all others' unsigned notes  //TMG  9/12/17
   NC_SCANNED_RECORDS = 9;                        // Note Content - Scanned Records  //TMG 3/12/19
+  NC_SCANNED_LOOSE_DOCS = 10;                    // Note Content - items loose in chart, not part of record.  //TMG 9/8/20
 
   { Surgery View Contexts }
   SR_RECENT     = 0;
@@ -390,10 +391,10 @@ const
 
   { TIU TreeView context strings}
   //Original line -> 3/12/19 NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_OTHER_UNSIGNED] of string =
-  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_SCANNED_RECORDS] of string =
-    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records'),
-     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' '),
-     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' ',' '));
+  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_SCANNED_LOOSE_DOCS] of string =
+    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records','Loose documents'),
+     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' ',' '),
+     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' ',' ',' '));
 
   CC_ALL        = 1;                             // Consult context - all Consults
   CC_BY_STATUS  = 2;                             // Consult context - Consults by Status

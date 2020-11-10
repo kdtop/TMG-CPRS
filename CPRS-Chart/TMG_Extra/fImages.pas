@@ -42,7 +42,7 @@ uses
   uPCE, ORClasses, fDrawers, ImgList, rTIU, uTIU, uDocTree, fRptBox, fPrintList,
   OleCtrls, SHDocVw, ShellAPI,
   VAUtils,  TMGHTML2, ActiveX,
-  fImageTransferProgress, fUploadImages,
+  fImageTransferProgress, fUploadImages, rFileTransferU,
   ORNet, TRPCB, fHSplit, Buttons, ExtDlgs, VA508AccessibilityManager;
 
 type
@@ -77,7 +77,7 @@ type
   end;
 
   TImgTransferMethod = (itmDropbox,itmDirect,itmRPC);
-  TDownloadResult = (drSuccess, drTryAgain, drFailure, drGiveUp);
+  // moved to rFileTransferU -- TDownloadResult = (drSuccess, drTryAgain, drFailure, drGiveUp);
 
   TfrmImages = class(TfrmPage)
     mnuNotes: TMainMenu;
@@ -162,7 +162,7 @@ type
     procedure SetupTab(i : integer);
     procedure UpdateNoteInfoMemo();
     procedure UpdateImageInfoMemo(Rec: TImageInfo);
-    function FileSize(fileName : wideString) : Int64;
+    //function FileSize(fileName : wideString) : Int64;
     function GetImagesCount : integer;
     function GetImageInfo(Index : integer) : TImageInfo;
     procedure SetupTimer;
@@ -173,8 +173,11 @@ type
                           DeleteMode : TImgDelMode; const Reason: string);
     procedure GetUnlinkedImagesList(ImageInfoList: TList; ImagesInHTMLNote: TStringList);
     procedure DisplayMediaInBrowser(MediaName : string);
+    procedure FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
+    function FileTransferProgressCallback(CurrentValue, TotalValue : integer; Msg : string = '') : boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
+    procedure FileTransferProgressDone();
   public
-    CacheDir : AnsiString;
+    //CacheDir : AnsiString;
     TransferMethod : TImgTransferMethod;
     DropBoxDir : string;
     frmImageUpload: TfrmImageUpload;  //kt 8/4/20.  Moved from private to public
@@ -182,8 +185,6 @@ type
     NumImagesAvailableOnServer : integer;
     DownloadImagesInBackground : boolean;
     function GetImageForIEN(IEN: AnsiString): integer;
-    function Decode(input: AnsiString) : AnsiString;
-    function Encode(input: AnsiString) : AnsiString;
     function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
     function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
     function UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
@@ -338,12 +339,12 @@ begin
   timLoadImages.Enabled := false;
   EnsureImageListLoaded();
   if NumImagesAvailableOnServer = 0 then begin
-    FreeAndNil(frmImageTransfer);
+    //FreeAndNil(frmImageTransfer);
     exit;
   end;
   if (ImageIndexLastDownloaded >= (ImageInfoList.Count-1)) then exit;
-  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  frmImageTransfer.ProgressMsg.Caption := 'Downloading Images';
+  //if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
+  //frmImageTransfer.ProgressMsg.Caption := 'Downloading Images';
   if FInsideDownload = false then begin
     Result := DownloadToCache(ImageIndexLastDownloaded+1); //Only load 1 image per timer firing.
     if Result = drTryAgain then begin
@@ -361,19 +362,23 @@ begin
     if TabControl.TabIndex < 0 then TabControl.TabIndex := 0;
     TabControlChange(self);
   end;
-  if not frmImageTransfer.UserCanceled then begin
+  //if not frmImageTransfer.UserCanceled then begin
+  if Result <> drUserAborted then begin
     SetupTimer;
   end;
   DownloadRetryCount := 0;
 end;
 
 procedure TfrmImages.SetupTimer;
+const
+  BACKGROUND_DELAY : ARRAY[FALSE..TRUE] of integer = (IMAGE_DOWNLOAD_DELAY_FOREGROUND, IMAGE_DOWNLOAD_DELAY_BACKGROUND);
 begin
-  if DownloadImagesInBackground then begin
-    timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_BACKGROUND;
-  end else begin
-    timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
-  end;
+  timLoadImages.Interval := BACKGROUND_DELAY[DownloadImagesInBackground];
+  //if DownloadImagesInBackground then begin
+  //  timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_BACKGROUND;
+  //end else begin
+  //  timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
+  //end;
   timLoadImages.Enabled := true;
 end;
 
@@ -775,9 +780,6 @@ begin
   Rec.ServerThumbPathName := ServerPathName;
   Rec.ServerThumbFName := ServerFName;
   Rec.CacheThumbFName := CacheDir + '\' + ServerFName;
-  //ImageInfoList.Add(Rec);  // ImageInfoList will own Rec.
-  //Result := Rec;
-  //exit;
 
   ImageIEN := Rec.IEN;
   CallV('TMG GET IMAGE LONG DESCRIPTION', [ImageIEN]);
@@ -823,25 +825,16 @@ procedure TfrmImages.GetImageList();
 var
   TIUIEN : AnsiString;
   i  : integer;
-  //j : integer;
-  //s2 : AnsiString;
-  //ImageIEN : integer;
-  //ServerFName : AnsiString;
-  //ServerPathName : AnsiString;
-  //ImageFPathName :     AnsiString;  //path on server of image  -- original data provided by server
-  //ThumbnailFPathName : AnsiString;  //path on server of thumbnail -- original data provided by server
   AddendumList: TStringList;
 
 begin
   inherited;
   AddendumList := TStringList.Create;
   ClearImageList;
-  //if frmNotes.lstNotes.ItemID = '' then begin
   if ListBox.ItemID = '' then begin
     TIUIEN := '0';
   end else begin
     try
-      //TIUIEN := IntToStr(frmNotes.lstNotes.ItemID);
       TIUIEN := IntToStr(ListBox.ItemID);
     except
       //Error occurs after note is signed, and frmNotes.lstNotes.ItemID is "inaccessible"
@@ -860,109 +853,6 @@ begin
   AddendumList.Free;
 end;
 
-//OLD GetImagesList below   6/19/13
-//procedure TfrmImages.GetImageList();
-//Sets up ImageInfoList
-//var
-//  i  : integer;
-//  Rec  : TImageInfo;
-//  s : string;
-//  TIUIEN : AnsiString;
-//  BrokerResults: TStringList;
-  //elh{
-//  j : integer;
-//  s2 : AnsiString;
-//  ImageIEN : integer;
-//  ServerFName : AnsiString;
-//  ServerPathName : AnsiString;
-//  ImageFPathName :     AnsiString;  //path on server of image  -- original data provided by server
-//  ThumbnailFPathName : AnsiString;  //path on server of thumbnail -- original data provided by server
-  //elh}
-
-//begin
-//  inherited;
-//  ClearImageList;
-//  if frmNotes.lstNotes.ItemID = '' then begin
-//    TIUIEN := '0';
-//  end else begin
-//    try
-//      TIUIEN := IntToStr(frmNotes.lstNotes.ItemID);
-//    except
-      //Error occurs after note is signed, and frmNotes.lstNotes.ItemID is "inaccessible"
-//      on E: Exception do exit;
-//    end;
-//  end;
-//  StatusText('Retrieving images information...');
-//  CallV('MAG3 CPRS TIU NOTE', [TIUIEN]);
-//  BrokerResults := TStringList.Create;
-//  BrokerResults.Assign(RPCBrokerV.Results);
-//  for i:=0 to (BrokerResults.Count-1) do begin
-//    s :=BrokerResults.Strings[i];
-//    if i=0 then begin
-//      if piece(s,'^',1)='0' then break //i.e. abort due to error signal
-//      else continue;   //ignore rest of header (record #0)
-//    end;
-//    Rec := HandleOneImageListLine(s);
-//    if Rec = nil then continue;
-    {
-    if Pos('-1~',s)>0 then continue;  //abort if error signal.
-    Rec := TImageInfo.Create; // ImageInfoList will own this.
-    Rec.LongDesc := nil;
-    Rec.TabIndex := -1;
-    Rec.TabImageIndex := 0;
-    s2 := piece(s,'^',2); if s2='' then s2 := '0'; //IEN
-    Rec.IEN := StrToInt(s2);
-    ImageFPathName := piece(s,'^',3);       //Image FullPath and name
-    ThumbnailFPathName := piece(s,'^',4);   //Abstract FullPath and Name
-    Rec.ShortDesc := piece(s,'^',5);            //SHORT DESCRIPTION field
-    s2 := piece(s,'^',6); if s2='' then s2 := '0'; //PROCEDURE/ EXAM DATE/TIME field
-    Rec.DateTime := s2;
-    s2 := piece(s,'^',7); if s2='' then s2 := '0';  //OBJECT TYPE
-    Rec.ImageType := StrToInt(s2);
-    Rec.ProcName := piece(s,'^',8);                 //PROCEDURE field
-    Rec.DisplayDate := piece(s,'^',9);              //Procedure Date in Display format
-    s2 := piece(s,'^',10); if s2='' then s2 := '0'; //PARENT DATA FILE image pointer
-    Rec.ParentDataFileIEN := StrToInt(s2);
-    Rec.AbsType := piece(s,'^',11)[1];              //the ABSTYPE :  'M' magnetic 'W' worm  'O' offline
-    s2 := piece(s,'^',12); if s2='' then s2 :='O';
-    Rec.Accessibility := s2[1];                     //Image accessibility   'A' accessable  or  'O' offline
-    s2 := piece(s,'^',13); if s2='' then s2 := '0'; //Dicom Series number
-    Rec.DicomSeriesNum := StrToInt(s2);
-    s2 := piece(s,'^',14); if s2='' then s2 := '0'; //Dicom Image Number
-    Rec.DicomImageNum := StrToInt(s2);
-    s2 := piece(s,'^',15); if s2='' then s2 := '0'; //Count of images in the group, or 1 if a single image
-    Rec.GroupCount := StrToInt(s2);
-
-    SplitLinuxFilePath(ImageFPathName,ServerPathName,ServerFName);
-    Rec.ServerPathName := ServerPathName;
-    Rec.ServerFName := ServerFName;
-    Rec.CacheFName := CacheDir + '\' + ServerFName;
-    SplitLinuxFilePath(ThumbnailFPathName,ServerPathName,ServerFName);
-    Rec.ServerThumbPathName := ServerPathName;
-    Rec.ServerThumbFName := ServerFName;
-    Rec.CacheThumbFName := CacheDir + '\' + ServerFName;
-    //elh}
-//    ImageInfoList.Add(Rec);  // ImageInfoList will own Rec.
-//  end;
-  {
-  for i:= 0 to ImageInfoList.Count-1 do begin
-    Rec := TImageInfo(ImageInfoList.Items[i]);
-    ImageIEN := Rec.IEN;
-    CallV('TMG GET IMAGE LONG DESCRIPTION', [ImageIEN]);
-    for j:=0 to (RPCBrokerV.Results.Count-1) do begin
-      if (j>0) then begin
-        if Rec.LongDesc = nil then Rec.LongDesc := TStringList.Create;
-        Rec.LongDesc.Add(RPCBrokerV.Results.Strings[j]);
-      end else begin
-        if RPCBrokerV.Results[j]='' then break;
-      end;
-    end;
-  end;
-  }
-//  StatusText('');
-// NumImagesAvailableOnServer := ImageInfoList.Count;
-//  BrokerResults.Free;
-//end;
 
 Function TfrmImages.DownloadToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;
 //Loads image specified in Rec to Cache (unless already present)
@@ -998,6 +888,8 @@ begin
       Result := drFailure;
     end else if (R1 = drTryAgain) or (R2 = drTryAgain) then begin
       Result := drTryAgain;
+    end else if (R1 = drUserAborted) or (R2 = drUserAborted) then begin
+      Result := drUserAborted;
     end else begin
       Result := drSuccess;
     end;
@@ -1043,6 +935,22 @@ end;
 
 
 function TfrmImages.UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+//NOTICE!:  I made a backup of this function, see in comments below this function
+var
+  ErrMsg : string;
+begin
+  Result := false; //default to failure.
+  if not FileExists(LocalFNamePath) then exit;
+
+  StatusText('Uploading full image...');
+  Application.ProcessMessages;
+  Result := rFileTransferU.UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir, CurrentImage,TotalImages, ErrMsg);
+  If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
+  StatusText('');
+end;
+
+(* //backup of function above
+function TfrmImages.UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
 var
   DropboxFile : AnsiString;
 begin
@@ -1073,7 +981,30 @@ begin
   end else Result := false;
 end;
 
+*)
 
+function TfrmImages.UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+//NOTICE!:  I made a backup of this function, see in comments below this function
+var
+  ErrMsg : string;
+begin
+  Result := false; //default to failure.
+  if not FileExists(LocalFNamePath) then exit;
+  if TransferMethod = itmDropbox then begin
+    Result := UploadFileViaDropBox(LocalFNamePath,FPath,FName, CurrentImage,TotalImages);
+    exit;
+  end;
+
+  FileTransferProgressInitialize(CurrentImage, TotalImages, 'Uploading full image...');
+  StatusText('Uploading full image...');
+  Application.ProcessMessages;
+  Result := rFileTransferU.UploadFile(LocalFNamePath,FPath,FName, CurrentImage,TotalImages, ErrMsg, FileTransferProgressCallback);
+  StatusText('');
+  FileTransferProgressDone();
+  If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
+end;
+
+(*  //backup of function above when making big changes.... delete later if working OK.
 function TfrmImages.UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
 const
   RefreshInterval = 500;
@@ -1144,7 +1075,8 @@ begin
       if ReadCount > 0 then begin
         SetLength(OneLine,ReadCount);
         for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
-        RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode(OneLine);
+        //RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode(OneLine);
+        RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
         Inc(ParamIndex);
 
         Dec(RefreshCountdown);
@@ -1189,6 +1121,46 @@ begin
 end;
 
 
+*)
+
+procedure TfrmImages.FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
+begin
+  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
+  frmImageTransfer.UpdateProgress(CurrentValue, TotalValue, Msg);
+end;
+
+function TfrmImages.FileTransferProgressCallback(CurrentValue, TotalValue : integer; Msg : string): boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
+begin
+  if not assigned(frmImageTransfer) then begin
+    Result := false;
+    exit;
+  end;
+  frmImageTransfer.UpdateProgress(CurrentValue, TotalValue, Msg);
+  Result := not frmImageTransfer.UserCanceled;
+end;
+
+procedure TfrmImages.FileTransferProgressDone();
+begin
+  FreeAndNil(frmImageTransfer);
+end;
+
+
+function TfrmImages.DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;
+                                           CurrentImage,TotalImages: Integer): TDownloadResult;
+//NOTE: There is a backup of this function below this one.
+var
+  ErrMsg          : string;
+begin
+  StatusText('Retrieving full image...');
+  ErrMsg := '';
+  FileTransferProgressInitialize(CurrentImage, TotalImages, 'Downloading images via a drop box');
+  Result := rFileTransferU.DownloadFileViaDropbox(FPath, FName, LocalSaveFNamePath, DropboxDir, CurrentImage, TotalImages, ErrMsg, FileTransferProgressCallback);
+  FileTransferProgressDone();
+  If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
+  StatusText('');
+end;
+
+(*  //backup of function.
 function TfrmImages.DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;
                                            CurrentImage,TotalImages: Integer): TDownloadResult;
 var
@@ -1197,6 +1169,7 @@ var
   ErrMsg          : string;
   bResult         : boolean;
 begin
+  Result := rFileTransferU.DownloadFileViaDropbox(FPath, FName, LocalSaveFNamePath, DropboxDir, CurrentImage, TotalImages);
   CallV('TMG DOWNLOAD FILE DROPBOX', [FPath,FName]);  //Move file into dropbox.
   if RPCBrokerV.Results.Count > 0 then begin
     bResult := (Piece(RPCBrokerV.Results[0],'^',1)='1');  //1=success, 0=failure
@@ -1239,8 +1212,33 @@ begin
   else Result := drSuccess;
   FreeAndNil(frmImageTransfer);
 end;
+*)
 
 
+
+function TfrmImages.DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
+                                 CurrentImage,TotalImages: Integer): TDownloadResult;
+//NOTE: There is a backup of this function below this one.
+var
+  ErrMsg          : string;
+begin
+  frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
+  if TransferMethod = itmDropbox then begin
+    Result := DownloadFileViaDropBox(FPath, FName, LocalSaveFNamePath, CurrentImage, TotalImages);
+    exit;
+  end else begin
+    FileTransferProgressInitialize(CurrentImage, TotalImages, 'Downloading Image');
+    ErrMsg := '';
+    StatusText('Retrieving full image...');
+    Result := rFileTransferU.DownloadFile(FPath,FName,LocalSaveFNamePath, CurrentImage,TotalImages, ErrMsg, FileTransferProgressCallback);
+    StatusText('');
+    //FileTransferProgressDone();
+    If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
+  end;
+  frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
+end;
+
+(*  //backup of function
 function TfrmImages.DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
                                  CurrentImage,TotalImages: Integer): TDownloadResult;
 var
@@ -1257,22 +1255,24 @@ var
 const
   RefreshInterval = 500;
 
-begin
-   frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
+  begin
+  frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
   if FileExists(LocalSaveFNamePath) then begin
     DeleteFile(LocalSaveFNamePath);
   end;
+
   if TransferMethod = itmDropbox then begin
-    Result := DownloadFileViaDropBox(FPath,FName,LocalSaveFNamePath,CurrentImage,TotalImages);
+    Result := rFileTransferU.DownloadFileViaDropBox(FPath,FName,LocalSaveFNamePath,DropboxDir, CurrentImage,TotalImages, nil);
     exit;
   end;
   //LATER add support for itmDirect mode
   //kt   Result := drTryAgain;
   //kt   exit;
   //kt end;
+  StatusText('Retrieving full image...');
+
   bResult := true; //default to success;
   ErrMsg := '';
-  StatusText('Retrieving full image...');
   //Application.ProcessMessages;      //elh moved up a line because it was throwing the Broker out of sync
   CallV('TMG DOWNLOAD FILE', [FPath,FName]);
   RefreshCountdown := RefreshInterval;
@@ -1282,7 +1282,8 @@ begin
   if Piece(BrokerResult,'^',1)='1' then begin
     OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
     for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-      s :=Decode(RPCBrokerV.Results[i]);
+      //s :=Decode(RPCBrokerV.Results[i]);
+      s :=Decode64(RPCBrokerV.Results[i]);
       count := Length(s);
       if count>1024 then begin
         bResult := false; //failure of load.
@@ -1301,150 +1302,16 @@ begin
     ErrMsg := Piece(BrokerResult,'^',2);
     bresult := false;
   end;
-  StatusText('');
   if ErrMsg <> '' then begin
     MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
   end;
   if bResult = false then Result := drFailure
   else Result := drSuccess;
+  StatusText('');
   frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
 end;
+*)
 
-
-function TfrmImages.Encode(Input: AnsiString) : AnsiString;
-//This function is based on ENCODE^RGUTUU, which is match for
-//DECODE^RGUTUU that is used to decode (ascii armouring) on the
-//server side.  This is a base64 encoder.
-const
-  //FYI character set is 64 characters (starting as 'A')
-  //  (65 characters if intro '=' is counted)
-  CharSet  = '=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-var
-  //Result : AnsiString;  // RGZ1  //'Result' is implicitly declared by Pascal
-
-  i : integer;            //RGZ2
-  j : integer;            //RGZ4
-  PlainTrio : longword;   //RGZ3   //unsigned 32-bit
-  EncodedByte : Byte;
-  PlainByte : byte;       //RGZ5
-  EncodedQuad : string[4];//RGZ6
-
-begin
-  //e.g. input (10 bytes):
-  // 174 231 193   16 29 251   93 138 4    57
-  // AE  E7  C1    10 1D FB    5D 8A  04   39
-  Result := '';
-  i := 1;
-  while i<= Length(Input) do begin  //cycle in groups of 3
-    PlainTrio := 0;
-    EncodedQuad := '';
-    //Get 3 bytes, to be converted into 4 characters eventually.
-    //Fill with 0's if needed to make an even 3-byte group.
-    For j:=0 to 2 do begin
-      //e.g. '174'->PlainByte=174
-      if (i+j) <= Length(Input) then PlainByte := ord(Input[i+j])
-      else PlainByte := 0;
-      PlainTrio := (PlainTrio shl 8) or PlainByte;
-    end;
-    //e.g. first 3 bytes--> PlainTrio= $AEE7C1 (10101110 11100111 11000001)
-    //e.g. last  3 bytes--> PlainTrio= $390000 (00111001 00000000 00000000) (note padded 0's)
-
-    //Take each 6 bits and convert into a character.
-    //e.g. first 3 bytes--> (101011 101110 011111 000001)
-    //                       43      46     31     1
-
-    //e.g. last 3 bytes-->(001110 010000 000000 000000)  (after redivision)
-    //                        14     16     0     0  <-- last 2 bytes are padded 0
-    //                               ^ last 4 bits of '16' are padded 0's
-    For j := 1 to 4 do begin
-      //e.g. $AEE7C1 --> (43+2)=45 (46+2)=48 (31+2)=33 (1+2)=3
-      //                         r        u         f        b
-
-      //e.g. $39AF00 --> (14+2)=16 (16+2)=18 (0+2)=2 (0+2)=2
-      //                         O        Q        A       A <-- 2 padded bytes
-      EncodedByte := (PlainTrio and 63)+2;  //63=$3F=b0111111;  0->A 1->B etc
-      EncodedQuad := CharSet[EncodedByte]+ EncodedQuad;  //string Concat, not math add
-      PlainTrio := PlainTrio shr 6
-    end;
-
-    //Append result with latest quad
-    Result := Result + EncodedQuad;
-    Inc(i,3);
-  end;
-
-  // e.g. result: rufb .... .... OQAA <-- 2 padded bytes (and part of Q is padded also)
-  i := 3-(Length(Input) mod 3);  //returns 1,2,or 3 (3 needs to be set to 0)
-  if (i=3) then i:=0;   //e.g. input=10 -> i=2
-  j := Length(Result);
-  //i is the number of padded characters that need to be replaced with '='
-  if i>=1 then Result[j] := '=';  //replace 1st paddeded char
-  if i>=2 then Result[Length(Result)-1] := '=';//replace 2nd paddeded char
-  // e.g. result: rufb .... .... OQ==
-
-  //results passed out in Result
-end;
-
-
-function TfrmImages.Decode(Input: AnsiString) : AnsiString;
-//This function is based on DECODE^RGUTUU, which is match for
-//ENCODE^RGUTUU that is used to encode (ascii armouring) on the
-//server side.  This is a Base64 decoder
-const
-  //FYI character set is 64 characters (starting as 'A')
-  //  (65 characters if intro '=' is counted)
-  CharSet  = '=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
-var
-  //Result : AnsiString;  //RGZ1  //'Result' is implicitly declared by Pascal
-  i : integer;            //RGZ2
-  PlainTrio : longword;   //RGZ3  //unsigned 32-bit
-  j : integer;            //RGZ4
-  EncodedChar : char;
-  PlainInt : integer;
-  PlainByte : byte;       //RGZ5
-  DecodedTrio : string[3];//RGZ6
-
-begin
-  Result:='';
-  i := 1;
-  //e.g. input: rufb .... .... OQ==
-
-  while i <= Length(Input) Do begin  //cycle in groups of 4
-    PlainTrio :=0;
-    DecodedTrio :='';
-    //Get 4 characters, to be converted into 3 bytes.
-    For j :=0 to 3 do begin
-      //e.g. last 4 chars --> 0A==
-      if (i+j) <= Length(Input) then begin
-        EncodedChar := Input[i+j];
-        PlainInt := Pos(EncodedChar,CharSet)-2; //A=0, B=1 etc.
-        if (PlainInt>=0) then PlainByte := (PlainInt and $FF) else PlainByte := 0;
-      end else PlainByte := 0;
-      //e.g. with last 4 characters:
-      //e.g. '0'->14=(b001110) 'Q'->16=(b010000) '='-> -1 -> 0=(b000000) '=' -> 0=(b000000)
-      //e.g.-- So last PlainTrio = 001110 010000 000000 000000 = 00111001 00000000 00000000
-      //Each encoded character contributes 6 bytes to final 3 bytes.
-      //4 chars * 6 bits/char=24 bits -->  24 bits / 8 bits/byte = 3 bytes
-      PlainTrio := (PlainTrio shl 6) or PlainByte;  //PlainTrio := PlainTrio*64 + PlainByte;
-    end;
-    //Now take 3 bytes, and add to cumulative output (in same order)
-    For j :=0 to 2 do begin
-      DecodedTrio := Chr(PlainTrio and $FF) + DecodedTrio;  //string concat (not math addition)
-      PlainTrio := PlainTrio shr 8;  // PlainTrio := PlainTrio div 256
-    end;
-    //e.g. final DecodedTrio = 'chr($39) + chr(0) + chr(0)'
-    Result := Result + DecodedTrio;
-    Inc(i,4);
-  end;
-
-  //Now remove 1 byte from the output for each '=' in input string
-  //(each '=' represents 1 padded 0 added to allow for even groups of 3)
-  for j :=0 to 1 do begin
-    if (Input[Length(Input)-j] = '=') then begin
-      Result := MidStr(Result,1,Length(Result)-1);
-    end;
-  end;
-end;
 
 procedure TfrmImages.NewNoteSelected(EditIsActive : boolean);
 //Will be called by  fNotes when a new note has been selected.
@@ -1743,7 +1610,8 @@ begin
   if (RPCBrokerV.Results.Count>0) and (RPCBrokerV.Results[0]='1') then begin
     OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
     for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-      s :=Decode(RPCBrokerV.Results[i]);
+      //s :=Decode(RPCBrokerV.Results[i]);
+      s :=Decode64(RPCBrokerV.Results[i]);
       count := Length(s);
       if count>1024 then begin
         Result := ''; //failure of load.
@@ -1785,7 +1653,6 @@ begin
   result := '';  //default of failure
   if not FileExists(LocalFNamePath) then exit;
   if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  Abort := false;
   RPCResult := '';
   try
     InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
@@ -1819,7 +1686,8 @@ begin
     if ReadCount > 0 then begin
       SetLength(OneLine,ReadCount);
       for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
-      RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode(OneLine);
+      //RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode(OneLine);
+      RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
       Inc(ParamIndex);
       Dec(RefreshCountdown);
       if RefreshCountdown < 1 then begin
@@ -1882,6 +1750,7 @@ begin
   AutoScanUpload.Checked := true;
 end;
 
+{
 function TfrmImages.FileSize(fileName : wideString) : Int64;
 var
   sr : TSearchRec;
@@ -1893,6 +1762,7 @@ begin
 
   FindClose(sr) ;
 end;
+}
 
 function TfrmImages.GetImagesCount : integer;
 //Returns number of images possible, not just those already downloaded.

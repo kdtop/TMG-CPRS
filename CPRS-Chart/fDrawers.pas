@@ -1264,7 +1264,7 @@ begin
   if ErrStr <> '' then MessageDlg(ErrStr, mtError, [mbOK], 0); //kt added
   DBControlData.Free; //kt added
   if uTemplates.UsingHTMLTargetMode then begin
-    if uHTMLTools.IsHTML(Txt)  then begin
+    if uHTMLTools.TextIsHTML(Txt)  then begin
       txt := uHTMLTools.FixHTMLCRLF(Txt);
       txt := uHTMLTools.ConvertSpaces2HTML(Txt);
       txt := uHTMLTools.UnwrapHTML(Txt);

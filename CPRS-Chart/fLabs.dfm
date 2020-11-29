@@ -4,18 +4,18 @@ inherited frmLabs: TfrmLabs
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
   ClientHeight = 774
-  ClientWidth = 721
+  ClientWidth = 876
   HelpFile = 'qnoback'
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 737
+  ExplicitWidth = 892
   ExplicitHeight = 832
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 769
-    Width = 721
+    Width = 876
     ExplicitTop = 748
     ExplicitWidth = 714
   end
@@ -227,16 +227,16 @@ inherited frmLabs: TfrmLabs
     end
   end
   inherited pnlRight: TPanel
-    Width = 620
+    Width = 775
     Height = 769
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
-    ExplicitWidth = 620
+    ExplicitWidth = 775
     ExplicitHeight = 769
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
-      Width = 620
+      Width = 775
       Height = 4
       Cursor = crVSplit
       Align = alTop
@@ -248,14 +248,14 @@ inherited frmLabs: TfrmLabs
     object pnlRightBottom: TPanel
       Left = 0
       Top = 300
-      Width = 620
+      Width = 775
       Height = 449
       Align = alClient
       TabOrder = 0
       object Memo1: TMemo
         Left = 1
         Top = 1
-        Width = 618
+        Width = 773
         Height = 19
         Align = alTop
         Font.Charset = DEFAULT_CHARSET
@@ -276,7 +276,7 @@ inherited frmLabs: TfrmLabs
       object memLab: TRichEdit
         Left = 1
         Top = 20
-        Width = 618
+        Width = 773
         Height = 428
         Align = alClient
         Color = clCream
@@ -297,15 +297,16 @@ inherited frmLabs: TfrmLabs
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 20
-        Width = 618
+        Width = 773
         Height = 428
         TabStop = False
         Align = alClient
         TabOrder = 2
         OnDocumentComplete = WebBrowser1DocumentComplete
+        ExplicitWidth = 618
         ExplicitHeight = 412
         ControlData = {
-          4C000000DF3F00003C2C00000000000000000000000000000000000000000000
+          4C000000E44F00003C2C00000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -315,14 +316,14 @@ inherited frmLabs: TfrmLabs
     object pnlRightTop: TPanel
       Left = 0
       Top = 45
-      Width = 620
+      Width = 775
       Height = 251
       Align = alTop
       TabOrder = 1
       object bvlHeader: TBevel
         Left = 1
         Top = 61
-        Width = 618
+        Width = 773
         Height = 1
         Align = alTop
         ExplicitWidth = 612
@@ -330,7 +331,7 @@ inherited frmLabs: TfrmLabs
       object pnlHeader: TORAutoPanel
         Left = 1
         Top = 1
-        Width = 618
+        Width = 773
         Height = 60
         Align = alTop
         BevelOuter = bvNone
@@ -346,7 +347,7 @@ inherited frmLabs: TfrmLabs
         object pnlWorksheet: TORAutoPanel
           Left = 0
           Top = 0
-          Width = 618
+          Width = 773
           Height = 60
           Align = alClient
           BevelOuter = bvNone
@@ -422,7 +423,7 @@ inherited frmLabs: TfrmLabs
         object pnlGraph: TORAutoPanel
           Left = 0
           Top = 0
-          Width = 618
+          Width = 773
           Height = 60
           Align = alClient
           BevelOuter = bvNone
@@ -430,7 +431,7 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 618
+            Width = 773
             Height = 13
             Align = alBottom
             Caption = 
@@ -469,13 +470,13 @@ inherited frmLabs: TfrmLabs
         object pnlButtons: TORAutoPanel
           Left = 0
           Top = 0
-          Width = 618
+          Width = 773
           Height = 60
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
           DesignSize = (
-            618
+            773
             60)
           object lblOld: TOROffsetLabel
             Left = 4
@@ -552,11 +553,12 @@ inherited frmLabs: TfrmLabs
             ParentFont = False
           end
           object lblFirstSeen: TLabel
-            Left = 361
+            Left = 516
             Top = 42
             Width = 3
             Height = 13
             Anchors = [akTop, akRight]
+            ExplicitLeft = 361
           end
           object lblDate: TVA508StaticText
             Name = 'lblDate'
@@ -637,27 +639,76 @@ inherited frmLabs: TfrmLabs
             TabOrder = 1
             OnClick = cmdOldClick
           end
-          object btnViewReport: TButton
-            Left = 527
+          object btnViewReport: TBitBtn
+            Left = 541
             Top = 10
-            Width = 76
-            Height = 25
+            Width = 116
+            Height = 30
             Caption = 'View Report'
             Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBtnText
-            Font.Height = -12
+            Font.Color = clWindowText
+            Font.Height = -11
             Font.Name = 'MS Sans Serif'
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 5
             OnClick = btnViewReportClick
+            Glyph.Data = {
+              E6050000424DE605000000000000A60300002800000018000000180000000100
+              08000000000040020000130B0000130B0000DC000000DC00000000000000FFFF
+              FF002E1EBF00EAE9F9002718BD003C2EC4007268D400B5B0E800B7B2E900C2BE
+              EC00C4C0ED00BDBADD00E0DEF600EDECFA00EFEEFA00F1F0FB00F0EFFA001807
+              B800200FBB002110BB002211BB002312BC002413BC002313BB002615BD002515
+              BC002716C1002817C2002717BD002A19C7002918BD002A19BE002919BE002A19
+              BD002D1CC6002C1BBE002B1BBE002C1CBF002F1FBF003020C0002C1EA5002016
+              73003727C2003728C2003124AA00392AC2004031C4004133C5004334C5004335
+              C7004638C700483AC7004A3CC8004D3FC8004E40C8004C3FC6004F42CA005043
+              CA004F42C9003A308D005649CB005A4DCC005B4FCD005E51CD006155CF006D62
+              D3006F63D3007165D3007166D300756AD500766CD500776DD6007B71D7007D73
+              D7008379D900837AD900867DDA008A81DD008980DB008C83DE008C83DD008B82
+              DB008D84DE008F86E0008D84DC00928ADE00978EDF009C94E200A099E200A29B
+              E300ACA5E500B0AAE700B3ADE800B2ACE700B5AFE800B7B1E900B9B3E900BCB7
+              EB00BFBAEC00CAC6EF00D0CCF000DDDAF500DCD9F400E4E2F700E7E5F800E8E6
+              F800F4F3FD00F5F4FC00EEECFA00EDEBF9004140460007060B0008070C000C0B
+              10000D0C110019181D0008070B000B0A0E000E0D110014131700151418001615
+              190017161A0018171B001A191D001C1B1F001E1D21001F1E2200201F23002120
+              240022212500242327002524280028272B002A292D002D2C3000302F33002E2D
+              31003433370039383C003B3A3E003A393D0036353800353437003D3C3F004241
+              440041404300403F42003F3E41004443460052515400504F52004F4E51004B4A
+              4D0059585B006766690066656800646366009796990083828500131116003937
+              3B0023222400A6A5A700A2A1A3009B9A9C009A999B00939294008B8A8C008180
+              8200B4B3B500AFAEB000AAA9AB009593960042414200FCFBFC00E3E2E300D4D3
+              D400CCCBCC0023231E002B2B2500FAFAF900DADBD200F3F4EE00FEFFFC002222
+              2800222226002F2F3200414144005151540057575A00565659005E5E6100E1E1
+              E500FBFBFE00F7F7FA00A5A5A700FEFEFF00FDFDFE00CCCCCD00CBCBCC00C7C7
+              C800C3C3C400B5B5B600ADADAE00ABABAC00AAAAAB00A4A4A50096969700FCFC
+              FC00FBFBFB00F8F8F800F7F7F700F5F5F500F3F3F300F1F1F100EFEFEF00EBEB
+              EB00E5E5E500D4D4D40054020202020202020202020202020202020224310BB7
+              01012323261C190202021C161515022415230202021D29B4A7C502021C4B5927
+              23044C600848163E08341E0202223BB375A60202165F6921181962016D014A42
+              013D1702021453B681900202160710403012096C2E686345013F1F2602135201
+              948A0202165B01016D2F610F25636548010E0C331E135001938E02021607033D
+              6B51070D026664460156432A23134F01938E0202165E0E49C64E5CC207015841
+              015506321F134F01938E0202165A01010E325D0101672F420101014415134F01
+              938E2402252F36362F203036352B1C2D3535352B25134D01938E05131C161B1A
+              151C151313160419131313191C115701938E0A3C3837282C3A39393939393939
+              3939393935476AB8938E01C601C1B96EC301C5C5C5C5C5C2C2C2C2C2C20101D2
+              938E010101DAA2AEAF01B5B5B5B5B5C501010101010101D2938E010101DABA91
+              01A6979A9A9A96C90101C5D6D8D8D7D9908E010101DABA9101C9ADA6A6A69EB0
+              01B0C086BA8384897E8C010101DABA9101A598BEBEBFBDC7019870959C9D9B86
+              778B010101DABABCD201010101010101CA7699D30101CB7A7DCC010101DABABC
+              D201010101010101AC6FA90101A57987C801010101DA8291D201010101010101
+              CE6F9F01D07185B10101010101DA8092D201010101010101CD74A8C4727CAA01
+              0101010101D4A173ABD1D5D5D5D5D501CFA08C7389B20101010101010101A472
+              7B8C8D8D8D8D8D8C887F78BBDB01010101010101010101A38F7A7C7C7C7C7C7C
+              7D7EBAC9010101010101}
           end
         end
       end
       object grdLab: TCaptionStringGrid
         Left = 1
         Top = 62
-        Width = 618
+        Width = 773
         Height = 33
         Align = alTop
         Color = clCream
@@ -693,7 +744,7 @@ inherited frmLabs: TfrmLabs
       object pnlChart: TPanel
         Left = 1
         Top = 95
-        Width = 618
+        Width = 773
         Height = 85
         Align = alTop
         BevelOuter = bvNone
@@ -729,7 +780,7 @@ inherited frmLabs: TfrmLabs
         object chtChart: TChart
           Left = 97
           Top = 0
-          Width = 521
+          Width = 676
           Height = 85
           AllowPanning = pmNone
           AllowZoom = False
@@ -810,7 +861,7 @@ inherited frmLabs: TfrmLabs
       object lvReports: TCaptionListView
         Left = 1
         Top = 180
-        Width = 618
+        Width = 773
         Height = 70
         Hint = 'To sort, click on column headers|'
         Align = alClient
@@ -829,19 +880,20 @@ inherited frmLabs: TfrmLabs
         OnCompare = lvReportsCompare
         OnKeyUp = lvReportsKeyUp
         OnSelectItem = lvReportsSelectItem
+        ExplicitWidth = 618
       end
     end
     object pnlRightTopHeader: TPanel
       Left = 0
       Top = 0
-      Width = 620
+      Width = 775
       Height = 45
       Align = alTop
       TabOrder = 2
       object TabControl1: TTabControl
         Left = 1
         Top = 22
-        Width = 618
+        Width = 773
         Height = 22
         Align = alClient
         HotTrack = True
@@ -854,14 +906,14 @@ inherited frmLabs: TfrmLabs
       object pnlRightTopHeaderTop: TPanel
         Left = 1
         Top = 1
-        Width = 618
+        Width = 773
         Height = 21
         Align = alTop
         TabOrder = 0
         object lblHeading: TOROffsetLabel
           Left = 137
           Top = 1
-          Width = 383
+          Width = 538
           Height = 19
           Align = alClient
           Caption = 'Laboratory Results'
@@ -883,7 +935,7 @@ inherited frmLabs: TfrmLabs
           WordWrap = False
         end
         object chkMaxFreq: TCheckBox
-          Left = 520
+          Left = 675
           Top = 1
           Width = 97
           Height = 19
@@ -898,7 +950,7 @@ inherited frmLabs: TfrmLabs
     object pnlFooter: TORAutoPanel
       Left = 0
       Top = 749
-      Width = 620
+      Width = 775
       Height = 20
       Align = alBottom
       TabOrder = 3
@@ -921,7 +973,7 @@ inherited frmLabs: TfrmLabs
       object lblFooter: TOROffsetLabel
         Left = 1
         Top = 1
-        Width = 618
+        Width = 773
         Height = 25
         Align = alTop
         Caption = 
@@ -936,7 +988,7 @@ inherited frmLabs: TfrmLabs
       object lstTests: TORListBox
         Left = 1
         Top = 26
-        Width = 618
+        Width = 773
         Height = 17
         Align = alTop
         ItemHeight = 13

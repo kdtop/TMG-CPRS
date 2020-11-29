@@ -12,19 +12,22 @@ inherited frmOptions: TfrmOptions
   Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
+  ExplicitWidth = 320
   ExplicitHeight = 397
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 335
-    Width = 429
+    Top = 339
+    Width = 437
     Height = 30
     HelpContext = 9999
     Align = alBottom
     BevelOuter = bvNone
     ParentColor = True
     TabOrder = 1
+    ExplicitTop = 335
+    ExplicitWidth = 429
     object btnOK: TButton
       Left = 187
       Top = 2
@@ -63,23 +66,27 @@ inherited frmOptions: TfrmOptions
   object pnlMain: TPanel [1]
     Left = 0
     Top = 0
-    Width = 429
-    Height = 335
+    Width = 437
+    Height = 339
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
     ParentColor = True
     TabOrder = 0
+    ExplicitWidth = 429
+    ExplicitHeight = 335
     object pagOptions: TPageControl
       Left = 5
       Top = 5
-      Width = 419
-      Height = 325
+      Width = 427
+      Height = 329
       HelpContext = 9999
       ActivePage = tsNotes
       Align = alClient
       TabOrder = 0
       OnEnter = pagOptionsEnter
+      ExplicitWidth = 419
+      ExplicitHeight = 325
       object tsCoverSheet: TTabSheet
         HelpContext = 9700
         Caption = 'General'
@@ -88,8 +95,8 @@ inherited frmOptions: TfrmOptions
         ExplicitWidth = 0
         ExplicitHeight = 0
         DesignSize = (
-          411
-          297)
+          419
+          301)
         object bvlCoverDays: TBevel
           Left = 125
           Top = 16
@@ -935,9 +942,13 @@ inherited frmOptions: TfrmOptions
         HelpContext = 9200
         Caption = 'Notes'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
-          411
-          297)
+          419
+          301)
         object bvlNotesNotes: TBevel
           Left = 88
           Top = 16
@@ -1125,6 +1136,10 @@ inherited frmOptions: TfrmOptions
       object tsCprsReports: TTabSheet
         Caption = 'Reports'
         ImageIndex = 5
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object bvlReports: TBevel
           Left = 80
           Top = 16
@@ -1389,9 +1404,13 @@ inherited frmOptions: TfrmOptions
       object tsGraphs: TTabSheet
         Caption = 'Graphs'
         ImageIndex = 6
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
-          411
-          297)
+          419
+          301)
         object bvlGraphSettings: TBevel
           Left = 104
           Top = 16
@@ -1539,6 +1558,10 @@ inherited frmOptions: TfrmOptions
         Caption = 'Images'
         ImageIndex = 7
         OnShow = tsImagesShow
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object lblImageRetvMethod: TLabel
           Left = 16
           Top = 26

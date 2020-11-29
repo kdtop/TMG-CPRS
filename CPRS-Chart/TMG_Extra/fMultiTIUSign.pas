@@ -91,7 +91,7 @@ type
     ESCode : string;
     FZoomValue : integer;
     FZoomStep : integer;  //e.g. 5% change with each zoom in
-    ColLeftWidth, ColCenterWidth, ColRightWidth : integer;
+    //ColLeftWidth, ColCenterWidth, ColRightWidth : integer;
     frmPatientPhotoID : TfrmPatientPhotoID;
     Procedure Initialize(Items : TListItems);
     procedure SetupInfoList(Items : TListItems);
@@ -246,6 +246,7 @@ begin
     if Copy(XQAID, 1, 3) <> 'TIU' then continue;   //e.g. TIU6028;1423;3021203.09
     x := GetTIUAlertInfo(XQAID);    //658502^11514^903
     if Piece(x, U, 2) = '' then continue;
+    if Piece(x, U, 4) = 'Y' then continue;   //11/19/20
 
     ItemInfo := TItemInfo.Create; //owned by ItemInfoList
     tempS := piece(XQAID,';',1);

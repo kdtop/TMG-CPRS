@@ -802,7 +802,7 @@ inherited frmFrame: TfrmFrame
           OnMouseEnter = PatientImageMouseEnter
           OnMouseLeave = PatientImageMouseLeave
           ExplicitLeft = 4
-          ExplicitTop = -1
+          ExplicitTop = 6
         end
       end
       object pnlTimer: TPanel
@@ -1081,13 +1081,17 @@ inherited frmFrame: TfrmFrame
         Caption = 'Select &New Patient...'
         OnClick = mnuFileOpenClick
       end
+      object mnuClosePatient: TMenuItem
+        Caption = '&Close Patient'
+        OnClick = mnuClosePatientClick
+      end
       object mnuFileRefresh: TMenuItem
         Caption = 'Refresh Patient &Information'
         OnClick = mnuFileRefreshClick
       end
-      object EditDemographics: TMenuItem
+      object mnuEditDemographics: TMenuItem
         Caption = 'Edit Patient &Demographics'
-        OnClick = EditDemographicsClick
+        OnClick = mnuEditDemographicsClick
       end
       object mnuFileResumeContext: TMenuItem
         Caption = 'Rejoin patient link'
@@ -1146,13 +1150,13 @@ inherited frmFrame: TfrmFrame
         Caption = 'Export Chart'
         OnClick = mnuExportChartClick
       end
-      object PrintLabels1: TMenuItem
+      object mnuPrintLabels: TMenuItem
         Caption = 'Print Labels...'
-        OnClick = PrintLabels1Click
+        OnClick = mnuPrintLabelsClick
       end
-      object PrintAdmissionLabel1: TMenuItem
+      object mnuPrintAdmissionLabel: TMenuItem
         Caption = 'Print Admission Label...'
-        OnClick = PrintAdmissionLabel1Click
+        OnClick = mnuPrintAdmissionLabelClick
       end
       object mnuFileExit: TMenuItem
         Caption = 'E&xit'

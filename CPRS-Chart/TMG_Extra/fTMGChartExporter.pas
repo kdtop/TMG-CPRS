@@ -165,7 +165,8 @@ implementation
 
 {$R *.dfm}
 uses
-  uTIU, rTIU, uConst, fNotes, fNotePrt, fConsults, fDCSumm, fFrame, fUploadImages, fImages;
+  uTIU, rTIU, uConst, fNotes, fNotePrt, fConsults, fDCSumm, fFrame, fUploadImages, fImages,
+  uImages;
 
 CONST
   COVER_NO_COVERSHEET = 0;
@@ -381,11 +382,11 @@ begin
     Application.ProcessMessages;
     if radCoverGroup.ItemIndex = COVER_UPLOAD_COVERSHEET then begin
       FileName := ExtractFileName(edtCoversheetFile.text);
-      frmImages.UploadFile(edtCoversheetFile.text,'',FileName,1,1);
+      uImages.UploadFile(edtCoversheetFile.text,'',FileName,1,1);
     end;
     for i := 0 to lstExtraFileToUpload.items.count - 1 do begin
       FileName := ExtractFileName(lstExtraFileToUpload.Items[i]);
-      frmImages.UploadFile(lstExtraFileToUpload.Items[i],'',FileName,1,1);
+      uImages.UploadFile(lstExtraFileToUpload.Items[i],'',FileName,1,1);
     end;
     LoadPrintLists;
     if cmbConsultants.ItemIndex>-1 then

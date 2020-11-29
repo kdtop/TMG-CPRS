@@ -42,42 +42,12 @@ uses
   uPCE, ORClasses, fDrawers, ImgList, rTIU, uTIU, uDocTree, fRptBox, fPrintList,
   OleCtrls, SHDocVw, ShellAPI,
   VAUtils,  TMGHTML2, ActiveX,
-  fImageTransferProgress, fUploadImages, rFileTransferU,
+  fImageTransferProgress, fUploadImages, rFileTransferU, uImages,
   ORNet, TRPCB, fHSplit, Buttons, ExtDlgs, VA508AccessibilityManager;
 
-type
-  TImgDelMode = (idmNone,idmDelete,idmRetract); //NOTE: DO NOT change order
-  TImageInfo = class
-    private
-    public
-      IEN :                int64;    //IEN in file# 2005
-      ServerPathName :     AnsiString;
-      ServerFName :        AnsiString;
-      ServerThumbPathName: AnsiString;
-      ServerThumbFName :   AnsiString;
-      //Note: if there is no thumbnail to download, CacheThumbFName will still
-      //      contain a file name and path, but a test for FileExists() will wail.
-      CacheThumbFName :    AnsiString; // local cache path and File name of thumbnail image
-      CacheFName :         AnsiString; // local cache path and File name of image
-      ShortDesc :          AnsiString;
-      LongDesc :           TStringList; //will be nil unless holds data.
-      DateTime :           AnsiString;  //fileman format
-      ImageType :          Integer;
-      ProcName :           AnsiString;
-      DisplayDate :        AnsiString;
-      ParentDataFileIEN:   int64;
-      AbsType :            char;      //'M' magnetic 'W' worm  'O' offline
-      Accessibility :      char;      //'A' accessable  or  'O' offline
-      DicomSeriesNum :     int64;
-      DicomImageNum :      int64;
-      GroupCount :         integer;
-      TabIndex :           integer;
-      TabImageIndex :      integer;
-    published
-  end;
 
-  TImgTransferMethod = (itmDropbox,itmDirect,itmRPC);
-  // moved to rFileTransferU -- TDownloadResult = (drSuccess, drTryAgain, drFailure, drGiveUp);
+type
+  //TImgTransferMethod = (itmDropbox,itmDirect,itmRPC);
 
   TfrmImages = class(TfrmPage)
     mnuNotes: TMainMenu;
@@ -134,80 +104,78 @@ type
     procedure UploadImagesButtonClick(Sender: TObject);
     procedure FormHide(Sender: TObject);
     procedure TabControlChange(Sender: TObject);
-    procedure TabControlGetImageIndex(Sender: TObject; TabIndex: Integer;
-      var ImageIndex: Integer);
+    procedure TabControlGetImageIndex(Sender: TObject; TabIndex: Integer; var ImageIndex: Integer);
     procedure TabControlResize(Sender: TObject);
     procedure EnableAutoScanUploadClick(Sender: TObject);
     procedure PickScanFolderClick(Sender: TObject);
-    procedure TabControlMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure TabControlMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure mnuPopupPopup(Sender: TObject);
     procedure mnuPopDeleteImageClick(Sender: TObject);
     procedure mnuDeleteImageClick(Sender: TObject);
     procedure AddUniversalImage1Click(Sender: TObject);
   private
-    ImageInfoList : TList;
+    //ImageInfoList : TList;
     LastDisplayedTIUIEN : AnsiString;
-    ImageIndexLastDownloaded : integer;
+    //ImageIndexLastDownloaded : integer;
     FDeleteImageIndex : integer;
     FEditIsActive : boolean;
     FImageDeleteMode : TImgDelMode;
-    FInsideDownload : boolean;
-    frmImageTransfer: TfrmImageTransfer;
-    DownloadRetryCount : integer;
+    //InsideImageDownload : boolean;
+    //frmImageTransfer: TfrmImageTransfer;
+    //DownloadRetryCount : integer;
+    //DownloadThumbnails : tBoolUnknown;
     procedure ExecuteFileIfNeeded(Selected: integer);
-    procedure EnsureImageListLoaded();
-    procedure ClearImageList();
+    //procedure EnsureImageListLoaded(AImageInfoList : TList);
+    //procedure ClearImageList(AImageInfoList : TList);
     procedure ClearTabPages();
-    procedure SetupTab(i : integer);
+    procedure SetupTab(i : integer; AImageInfoList : TList);
     procedure UpdateNoteInfoMemo();
     procedure UpdateImageInfoMemo(Rec: TImageInfo);
     //function FileSize(fileName : wideString) : Int64;
-    function GetImagesCount : integer;
-    function GetImageInfo(Index : integer) : TImageInfo;
+    //function GetImagesCount : integer;
+    //function GetImageInfo(Index : integer) : TImageInfo;
     procedure SetupTimer;
     function CanDeleteImages : boolean;
     function TestExtenstion(FileName: string): integer;
     procedure DeleteImageIndex(ImageIndex : integer; DeleteMode : TImgDelMode; boolPromptUser: boolean);
     procedure DeleteImage(var DeleteSts: TActionRec; ImageFileName: string; ImageIEN, DocIEN: Integer;
                           DeleteMode : TImgDelMode; const Reason: string);
-    procedure GetUnlinkedImagesList(ImageInfoList: TList; ImagesInHTMLNote: TStringList);
+    //procedure GetUnlinkedImagesList(AImageInfoList: TList; ImagesInHTMLNote: TStringList);
     procedure DisplayMediaInBrowser(MediaName : string);
-    procedure FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
-    function FileTransferProgressCallback(CurrentValue, TotalValue : integer; Msg : string = '') : boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
-    procedure FileTransferProgressDone();
+    //procedure FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
+    //function FileTransferProgressCallback(CurrentValue, TotalValue : integer; Msg : string = '') : boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
+    //procedure FileTransferProgressDone();
   public
     //CacheDir : AnsiString;
-    TransferMethod : TImgTransferMethod;
-    DropBoxDir : string;
-    frmImageUpload: TfrmImageUpload;  //kt 8/4/20.  Moved from private to public
+    //TransferMethod : TImgTransferMethod;
+    //DropBoxDir : string;
+    //frmImageUpload: TfrmImageUpload;  //kt 8/4/20.  Moved from private to public
     NullImageName : AnsiString;
-    NumImagesAvailableOnServer : integer;
+    //NumImagesAvailableOnServer : integer;
     DownloadImagesInBackground : boolean;
-    function GetImageForIEN(IEN: AnsiString): integer;
-    function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
-    function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
-    function UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-    function UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-    procedure SplitLinuxFilePath(FullPathName : AnsiString;
-                                 var Path : AnsiString;
-                                 var FName : AnsiString);
-    function HandleOneImageListLine(s : string) : TImageInfo;
-    procedure GetImageList();
+    //function GetImagesForIEN(IEN: AnsiString; AImageInfoList : TList): integer;
+    //function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
+    //function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
+    //function UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+    //function UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+    //procedure SplitLinuxFilePath(FullPathName : AnsiString; var Path : AnsiString; var FName : AnsiString);
+    //function ParseOneImageListLine(s : string) : TImageInfo;
+    //procedure FillImageList(TIUIEN : string; AImageInfoList : TList);
     procedure NewNoteSelected(EditIsActive : boolean);
-    function CreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
+    //function CreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
     function DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
-    procedure EnsureImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
-    procedure EnsureALLImagesDownloaded;
-    function DownloadToCache(ImageIndex : integer) : TDownloadResult; overload;
-    function DownloadToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;     overload;
+    //procedure EnsureSLImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
+    //procedure EnsureLinkedImagesDownloaded;
+    //function DownloadToCache(AImageInfoList: TList; ImageIndex : integer) : TDownloadResult;
+    //function DownloadRecToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;
     procedure DeleteAll(DeleteMode: TImgDelMode);
-    property ImagesCount : integer read GetImagesCount;
-    property ImageInfo[index : integer] : TImageInfo read GetImageInfo;
+    //property ImagesCount : integer read GetImagesCount;
+    //property ImageInfo[index : integer] : TImageInfo read GetImageInfo;
     procedure GetThumbnailBitmapForFName (FName : string; Bitmap : TBitmap);
     function ThumbnailIndexForFName (FName : string) : integer;
     function AllowContextChange(var WhyNot: string): Boolean;
-    procedure EmptyCache();
+    //procedure RemoveSuccessfullyDownloadedRecs(AImageInfoList: TList);
+    //procedure EmptyCache();
   published
   end;
 
@@ -243,12 +211,12 @@ Const
 
 var
   frmImages: TfrmImages;
-  ListBox: TORListBox;
+  ListBox: TORListBox;  //will be set as pointer to frmNotes.lstNotes
   HTMLEditor: TWebBrowser;
 
 
 function LoadAnyImageFormatToBMP(FPath : string; BMP : TBitmap) : boolean;  forward;
-
+function NotesTIUIEN : string;
 
 implementation
 
@@ -267,17 +235,29 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fImagesMultiUse;  {//kt added 5-27-05 for IsHTMLDocument}
 
 
+function NotesTIUIEN : string;
+begin
+  Result := '0';
+  if ListBox.ItemID <> '' then begin
+    try
+      Result := IntToStr(ListBox.ItemID);
+    except
+      //Error occurs after note is signed, and frmNotes.lstNotes.ItemID is "inaccessible"
+      on E: Exception do exit;
+    end;
+  end;
+end;
+
 procedure TfrmImages.FormCreate(Sender: TObject);
-//var i : integer;
 begin
   inherited;
+  ImageDownloadInitialize();
   frmImageUpload := TfrmImageUpload.Create(Self);
   LastDisplayedTIUIEN := '0';
   FDeleteImageIndex := -1;
-  FInsideDownload := false;
   DownloadRetryCount := 0;
-  ImageInfoList := TList.Create;
-  ClearImageList(); //sets up other needed variables.
+  //ImageInfoList := TList.Create;
+  //ClearImageList(ImageInfoList); //sets up other needed variables.
   DownloadImagesInBackground := true;
   //CacheDir := ExtractFilePath(ParamStr(0))+ 'Cache';
   CacheDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
@@ -285,11 +265,11 @@ begin
   if not DirectoryExists(CacheDir) then ForceDirectories(CacheDir);
 
   TransferMethod := TImgTransferMethod(uTMGOptions.ReadInteger('ImageTransferMethod',2));
-  DropBoxDir := uTMGOptions.ReadString('Dropbox directory','??');
-  if DropBoxDir='??' then begin  //just on first run.
-    uTMGOptions.WriteBool('Use dropbox directory for transfers',false);
-    uTMGOptions.WriteString('Dropbox directory','');
-  end;
+  //DropBoxDir := uTMGOptions.ReadString('Dropbox directory','??');
+  //if DropBoxDir='??' then begin  //just on first run.
+  //  uTMGOptions.WriteBool('Use dropbox directory for transfers',false);
+  //  uTMGOptions.WriteString('Dropbox directory','');
+  //end;
   AutoScanUpload.Checked := uTMGOptions.ReadBool('Scan Enabled',false);
   if assigned(frmNotes) then ListBox := frmNotes.lstNotes;  //kt 8/10/20 added if Assigned() ...
 end;
@@ -297,8 +277,8 @@ end;
 procedure TfrmImages.FormDestroy(Sender: TObject);
 begin
   inherited;
-  ClearImageList;
-  ImageInfoList.Free;
+  //ClearImageList(ImageInfoList);
+  //ImageInfoList.Free;
   EmptyCache;
   frmImageUpload.Free;
 end;
@@ -333,20 +313,18 @@ end;
 procedure TfrmImages.timLoadImagesTimer(Sender: TObject);
 //This function's goal is to download images in the background,
 // with one image to be downloaded each time the timer fires
+//UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
 var  Result : TDownloadResult;
 begin
   inherited;
+  {
   timLoadImages.Enabled := false;
-  EnsureImageListLoaded();
-  if NumImagesAvailableOnServer = 0 then begin
-    //FreeAndNil(frmImageTransfer);
-    exit;
-  end;
+  exit; //kt 11/24/20 disabling timer downloads.
+  EnsureImageListLoaded(ImageInfoList);
+  if NumImagesAvailableOnServer = 0 then exit;
   if (ImageIndexLastDownloaded >= (ImageInfoList.Count-1)) then exit;
-  //if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  //frmImageTransfer.ProgressMsg.Caption := 'Downloading Images';
-  if FInsideDownload = false then begin
-    Result := DownloadToCache(ImageIndexLastDownloaded+1); //Only load 1 image per timer firing.
+  if InsideImageDownload = false then begin
+    Result := DownloadToCache(ImageInfoList, ImageIndexLastDownloaded+1); //Only load 1 image per timer firing.
     if Result = drTryAgain then begin
       inc (DownloadRetryCount);
       if DownloadRetryCount > DOWNLOAD_RETRY_LIMIT then begin
@@ -356,41 +334,42 @@ begin
   end else begin
     Result := drTryAgain;
   end;
-  if Result = drSuccess then SetupTab(ImageIndexLastDownloaded+1);
+  if Result = drSuccess then SetupTab(ImageIndexLastDownloaded+1, ImageInfoList);
   if Result <> drTryAgain then Inc(ImageIndexLastDownloaded);
   if Result = drSuccess then begin
     if TabControl.TabIndex < 0 then TabControl.TabIndex := 0;
     TabControlChange(self);
   end;
-  //if not frmImageTransfer.UserCanceled then begin
   if Result <> drUserAborted then begin
     SetupTimer;
   end;
   DownloadRetryCount := 0;
+  }
 end;
 
 procedure TfrmImages.SetupTimer;
+//UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
+
 const
   BACKGROUND_DELAY : ARRAY[FALSE..TRUE] of integer = (IMAGE_DOWNLOAD_DELAY_FOREGROUND, IMAGE_DOWNLOAD_DELAY_BACKGROUND);
 begin
+  timLoadImages.Enabled := false;  //kt disabling timer downloads
+  exit;
+  //kt ------------------------
   timLoadImages.Interval := BACKGROUND_DELAY[DownloadImagesInBackground];
-  //if DownloadImagesInBackground then begin
-  //  timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_BACKGROUND;
-  //end else begin
-  //  timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
-  //end;
   timLoadImages.Enabled := true;
 end;
 
-procedure TfrmImages.GetUnlinkedImagesList(ImageInfoList: TList; ImagesInHTMLNote: TStringList);
+{
+procedure TfrmImages.GetUnlinkedImagesList(AImageInfoList: TList; ImagesInHTMLNote: TStringList);
 
   function FileNameInList(FileName : string):boolean;
   var i : integer;
       Rec : TImageInfo;
   begin
     result := False;
-    for i := 0 to ImageInfoList.Count - 1 do begin
-      Rec := TImageInfo(ImageInfoList[i]);
+    for i := 0 to AImageInfoList.Count - 1 do begin
+      Rec := TImageInfo(AImageInfoList[i]);
       if FileName = Rec.ServerFName then begin
         result := true;
         break;
@@ -427,26 +406,38 @@ begin
     HashedFileName := HashFileName(FileName);   //Note: server must be set for hashed file use
     SetPiece(s,'^',3,HashedFileName);
     SetPiece(s,'^',11,'M');
-    ImageInfo := HandleOneImageListLine(s);
-    if ImageInfo <> nil then ImageInfoList.Add(ImageInfo);
+    ImageInfo := ParseOneImageListLine(s);
+    if ImageInfo <> nil then AImageInfoList.Add(ImageInfo);
   end;
 end;
+}
 
-procedure TfrmImages.EnsureImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
+{
+procedure TfrmImages.EnsureSLImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
 //This function's goal is to download SOME images in the FOREground,
 // But only images matching those passed in ImagesList will be downloaded;
 // The intent is to only download images that have links to them in HTML source
 //Thus, if note has a large amount of images attached to it, but not referenced
 //  in HTML code, then they will not be downloaded here. (But will be downloaded
 //  later via timLoadImagesTimer
+//-------------
+//UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
+//                   So will plan for all downloads to be in FOREGROUND
+//NOTE: I encountered problem when this function is called recursively via user selecting a different note
+//      while download is in process.  Onclick evoked via Application.ProcessMessages.  I will therefore
+//      rewrite this to handle the situation.  
+//Called by: uHTMLTools.ScanForSubs() <-- uHTMLTools.IsHTML (and others)
+//       by:
 var i : integer;
     Rec : TImageInfo;
     DownloadResult : TDownloadResult;
+    TIUIEN : string;
 
 begin
   if ImagesInHTMLNote.Count = 0 then exit;
-  GetImageList();
-  GetUnlinkedImagesList(ImageInfoList,ImagesInHTMLNote);
+  TIUIEN := NotesTIUIEN();
+  NumImagesAvailableOnServer := FillImageList(TIUIEN, ImageInfoList);
+  AddNoteImagesToList(ImagesInHTMLNote, ImageInfoList);
   if ImageInfoList.Count = 0 then exit;
   if ImageInfoList.Count > 0 then begin
     if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
@@ -463,7 +454,7 @@ begin
     if ImagesInHTMLNote.IndexOf(Rec.ServerFName)>-1 then begin
       DownloadRetryCount := 0;
       Repeat
-        DownloadResult := DownloadToCache(i);
+        DownloadResult := DownloadToCache(ImageInfoList, i);
         Application.ProcessMessages;
         if DownloadResult = drTryAgain then begin
           inc(DownloadRetryCount);
@@ -476,22 +467,36 @@ begin
   end;
   SetupTimer;
   DownloadRetryCount := 0;
+  //remove successful records
+  RemoveSuccessfullyDownloadedRecs(ImageInfoList);    //to do,.... this may need to be repositioned....
   FreeAndNil(frmImageTransfer);
 end;
 
-procedure TfrmImages.EnsureALLImagesDownloaded;
+procedure TfrmImages.RemoveSuccessfullyDownloadedRecs(AImageInfoList: TList);
+var i : integer;
+    Rec : TImageInfo;
+begin
+  for i := AImageInfoList.Count-1 downto 0 do begin
+    Rec := TImageInfo(AImageInfoList[i]);
+    if not Rec.SucessfullyDownloaded then continue;
+    FreeAndNil(Rec);
+    AImageInfoList.Delete(i);
+  end;
+end;
+
+procedure TfrmImages.EnsureLinkedImagesDownloaded;
 //This function's goal is to download ALL images in the FOREground.
 var
   DownloadResult : TDownloadResult;
 begin
-  EnsureImageListLoaded();
+  EnsureImageListLoaded(ImageInfoList);
   if NumImagesAvailableOnServer = 0 then exit;
   if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
   frmImageTransfer.ProgressMsg.Caption := 'Downloading Images';
   while (ImageIndexLastDownloaded < (ImageInfoList.Count-1)) do begin
     DownloadRetryCount := 0;
     Repeat
-      DownloadResult := DownloadToCache(ImageIndexLastDownloaded+1);
+      DownloadResult := DownloadToCache(ImageInfoList, ImageIndexLastDownloaded+1);
       Application.ProcessMessages;
       if DownloadResult = drTryAgain then begin
         inc(DownloadRetryCount);
@@ -500,13 +505,14 @@ begin
       if frmImageTransfer.UserCanceled then DownloadResult := drGiveUp;
     until DownloadResult <> drTryAgain;
     if DownloadResult <> drGiveUp then begin
-      SetupTab(ImageIndexLastDownloaded+1);
+      SetupTab(ImageIndexLastDownloaded+1, ImageInfoList);
       if TabControl.TabIndex < 0 then TabControl.TabIndex := 0;
       TabControlChange(self);
     end;
     Inc(ImageIndexLastDownloaded);
   end;
 end;
+}
 
 { TPage common methods --------------------------------------------------------------------- }
 procedure TfrmImages.mnuChartTabClick(Sender: TObject);
@@ -591,7 +597,7 @@ begin
   end;
 end;
 
-procedure TfrmImages.SetupTab(i : integer);
+procedure TfrmImages.SetupTab(i : integer; AImageInfoList : TList);
 //i is index in ImageInfoList (array of TImageInfo's)
 var
   Rec  : TImageInfo; //this will be a copy of record, not pointer (I think)
@@ -608,8 +614,8 @@ var
   *)
 
 begin
-  if i < ImageInfoList.Count then begin
-    Rec := TImageInfo(ImageInfoList[i]);
+  if i < AImageInfoList.Count then begin
+    Rec := TImageInfo(AImageInfoList[i]);
     if (Rec.TabImageIndex < 1) then begin
       if FileExists(Rec.CacheThumbFName) then begin
         Bitmap := TBitmap.Create;
@@ -619,7 +625,6 @@ begin
         Bitmap.Width := ThumbsImageList.Width;  //shrinkage crops image
         Bitmap.Height := ThumbsImageList.Height;
         index := ThumbsImageList.Add(Bitmap,nil);
-        //TImageInfo(ImageInfoList[i]).TabImageIndex := index;
         Rec.TabImageIndex := index;
         Bitmap.Free;
       end else begin
@@ -694,167 +699,43 @@ end;
 procedure TfrmImages.ClearTabPages();
 begin
   TabControl.Tabs.Clear;
-  ClearImageList();
+  ClearImageList(nil);
 end;
 
-
-procedure TfrmImages.ClearImageList();
+{
+procedure TfrmImages.ClearImageList(AImageInfoList : TList);
 //Note: !! This should also clear any visible images/thumbnails etc.
 //Note: Need to remove thumbnail image from image list.
 var i    : integer;
 begin
-  for i := ImageInfoList.Count-1 downto 0 do begin
-    if TImageInfo(ImageInfoList[i]).LongDesc <> nil then begin
-      TImageInfo(ImageInfoList[i]).LongDesc.Free;
+  if assigned(AImageInfoList) then for i := AImageInfoList.Count-1 downto 0 do begin
+    if TImageInfo(AImageInfoList[i]).LongDesc <> nil then begin
+      TImageInfo(AImageInfoList[i]).LongDesc.Free;
     end;
     try
-      TImageInfo(ImageInfoList[i]).Free;
+      TImageInfo(AImageInfoList[i]).Free;
     except
       On E: Exception do begin
       end;
     end;
-    ImageInfoList.Delete(i);
+    AImageInfoList.Delete(i);
   end;
   NumImagesAvailableOnServer := NOT_YET_CHECKED_SERVER;
   ImageIndexLastDownloaded := -1;
 end;
+}
 
-
-procedure TfrmImages.EnsureImageListLoaded();
+{
+procedure TfrmImages.EnsureImageListLoaded(AImageInfoList : TList);
 begin
   if NumImagesAvailableOnServer = NOT_YET_CHECKED_SERVER then begin
-    GetImageList();
+    NumImagesAvailableOnServer := FillImageList(NotesTIUIEN, AImageInfoList);
   end;
 end;
+}
 
-function TfrmImages.HandleOneImageListLine(s : string) : TImageInfo;
-//Note: This function create TImageInfo objects but does NOT own them.
-//      So caller must be responsible for them.
-var
-  j : integer;
-  s2 : AnsiString;
-  Rec  : TImageInfo;
-  ImageIEN : integer;
-  //TIUIEN : AnsiString;
-  ServerFName : AnsiString;
-  ServerPathName : AnsiString;
-  ImageFPathName :     AnsiString;  //path on server of image  -- original data provided by server
-  ThumbnailFPathName : AnsiString;  //path on server of thumbnail -- original data provided by server
-
-begin
-
-  Result := nil;
-  if Pos('-1~',s)>0 then exit;  //abort if error signal.
-  Rec := TImageInfo.Create; // ImageInfoList will own this.
-  Rec.LongDesc := nil;
-  Rec.TabIndex := -1;
-  Rec.TabImageIndex := 0;
-  s2 := piece(s,'^',2); if s2='' then s2 := '0'; //IEN
-  Rec.IEN := StrToInt(s2);
-  ImageFPathName := piece(s,'^',3);       //Image FullPath and name
-  ThumbnailFPathName := piece(s,'^',4);   //Abstract FullPath and Name
-  Rec.ShortDesc := piece(s,'^',5);            //SHORT DESCRIPTION field
-  s2 := piece(s,'^',6); if s2='' then s2 := '0'; //PROCEDURE/ EXAM DATE/TIME field
-  Rec.DateTime := s2;
-  s2 := piece(s,'^',7); if s2='' then s2 := '0';  //OBJECT TYPE
-  Rec.ImageType := StrToInt(s2);
-  Rec.ProcName := piece(s,'^',8);                 //PROCEDURE field
-  Rec.DisplayDate := piece(s,'^',9);              //Procedure Date in Display format
-  s2 := piece(s,'^',10); if s2='' then s2 := '0'; //PARENT DATA FILE image pointer
-  Rec.ParentDataFileIEN := StrToInt(s2);
-  Rec.AbsType := piece(s,'^',11)[1];              //the ABSTYPE :  'M' magnetic 'W' worm  'O' offline
-  s2 := piece(s,'^',12); if s2='' then s2 :='O';
-  Rec.Accessibility := s2[1];                     //Image accessibility   'A' accessable  or  'O' offline
-  s2 := piece(s,'^',13); if s2='' then s2 := '0'; //Dicom Series number
-  Rec.DicomSeriesNum := StrToInt(s2);
-  s2 := piece(s,'^',14); if s2='' then s2 := '0'; //Dicom Image Number
-  Rec.DicomImageNum := StrToInt(s2);
-  s2 := piece(s,'^',15); if s2='' then s2 := '0'; //Count of images in the group, or 1 if a single image
-  Rec.GroupCount := StrToInt(s2);
-
-  SplitLinuxFilePath(ImageFPathName,ServerPathName,ServerFName);
-  Rec.ServerPathName := ServerPathName;
-  Rec.ServerFName := ServerFName;
-  Rec.CacheFName := CacheDir + '\' + ServerFName;
-  SplitLinuxFilePath(ThumbnailFPathName,ServerPathName,ServerFName);
-  Rec.ServerThumbPathName := ServerPathName;
-  Rec.ServerThumbFName := ServerFName;
-  Rec.CacheThumbFName := CacheDir + '\' + ServerFName;
-
-  ImageIEN := Rec.IEN;
-  CallV('TMG GET IMAGE LONG DESCRIPTION', [ImageIEN]);
-  for j:=0 to (RPCBrokerV.Results.Count-1) do begin
-    if (j>0) then begin
-      if Rec.LongDesc = nil then Rec.LongDesc := TStringList.Create;
-      Rec.LongDesc.Add(RPCBrokerV.Results.Strings[j]);
-    end else begin
-      if RPCBrokerV.Results[j]='' then break;
-    end;
-  end;
-  Result := Rec;
-
-end;
-
-function TfrmImages.GetImageForIEN(IEN: AnsiString): integer;
-var
-  i  : integer;
-  s : string;
-  Rec  : TImageInfo;
-  BrokerResults: TStringList;
-begin
-  CallV('MAG3 CPRS TIU NOTE', [IEN]);
-  BrokerResults := TStringList.Create;
-  BrokerResults.Assign(RPCBrokerV.Results);
-  for i:=0 to (BrokerResults.Count-1) do begin
-    s :=BrokerResults.Strings[i];
-    if i=0 then begin
-      if piece(s,'^',1)='0' then break //i.e. abort due to error signal
-      else continue;   //ignore rest of header (record #0)
-    end;
-    Rec := HandleOneImageListLine(s);
-    if Rec = nil then continue;
-
-    ImageInfoList.Add(Rec);  // ImageInfoList will own Rec.
-  end;
-  Result := ImageInfoList.Count;
-  BrokerResults.Free;
-end;
-
-procedure TfrmImages.GetImageList();
-//Sets up ImageInfoList
-var
-  TIUIEN : AnsiString;
-  i  : integer;
-  AddendumList: TStringList;
-
-begin
-  inherited;
-  AddendumList := TStringList.Create;
-  ClearImageList;
-  if ListBox.ItemID = '' then begin
-    TIUIEN := '0';
-  end else begin
-    try
-      TIUIEN := IntToStr(ListBox.ItemID);
-    except
-      //Error occurs after note is signed, and frmNotes.lstNotes.ItemID is "inaccessible"
-      on E: Exception do exit;
-    end;
-  end;
-  StatusText('Retrieving images information...');
-  NumImagesAvailableOnServer := GetImageForIEN(TIUIEN);
-  //Get all images for addendums now
-  CallV('TMG GET NOTE ADDENDUMS', [TIUIEN]);
-  AddendumList.Assign(RPCBrokerV.Results);
-  for i:=1 to AddendumList.count-1 do begin
-    NumImagesAvailableOnServer := GetImageForIEN(AddendumList[i]);
-  end;
-  StatusText('');
-  AddendumList.Free;
-end;
-
-
-Function TfrmImages.DownloadToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;
+{
+Function TfrmImages.DownloadRecToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;
 //Loads image specified in Rec to Cache (unless already present)
 var
   ServerFName : AnsiString;
@@ -862,13 +743,12 @@ var
   R1,R2 : TDownloadResult;
 
 begin
-  if FInsideDownload then begin
+  if InsideImageDownload then begin
     Result := drTryAgain;
     Exit;
   end;
   try
-    FInsideDownload := true;
-    //timLoadImages.enabled := False;
+    InsideImageDownload := true;
     ServerFName := Rec.ServerFName;
     ServerPathName := Rec.ServerPathName;
     R1 := drSuccess;  //default
@@ -879,8 +759,8 @@ begin
     ServerFName := Rec.ServerThumbFName;
     ServerPathName := Rec.ServerThumbPathName;
     if not FileExists(Rec.CacheThumbFName) then begin
-      //COMMENTED BELOW DO NOT DOWNLOAD THUMBNAIL 5/12/20
-      if uTMGOptions.ReadBool('CPRS Download Thumbnails',False) then
+      if DownloadThumbnails = tbuUnknown then DownloadThumbnails := BOOLU2BOOL[uTMGOptions.ReadBool('CPRS Download Thumbnails',False)];
+      if (DownloadThumbnails = tbuTrue) then
         R2 := DownloadFile(ServerPathName,ServerFName,Rec.CacheThumbFName,CurrentImage+1,TotalImages);
     end;
     Application.ProcessMessages;
@@ -893,47 +773,27 @@ begin
     end else begin
       Result := drSuccess;
     end;
+    Rec.DownloadStatus := Result;
+    Rec.SucessfullyDownloaded := (Result = drSuccess);
     //SetupTimer;
   finally
-    FInsideDownload := false;
+    InsideImageDownload := false;
   end;
 end;
+}
 
-Function TfrmImages.DownloadToCache(ImageIndex : integer) : TDownloadResult;
+{
+Function TfrmImages.DownloadToCache(AImageInfoList: TList; ImageIndex : integer) : TDownloadResult;
 //Loads image specified in ImageInfoList to Cache (unless already present)
 var
   Rec : TImageInfo;
 begin
-  Rec := TImageInfo(ImageInfoList[ImageIndex]);
-  Result := DownloadToCache(Rec,(ImageIndex*2)-1,ImageInfoList.Count*2);
+  Rec := TImageInfo(AImageInfoList[ImageIndex]);
+  Result := DownloadRecToCache(Rec,(ImageIndex*2)-1, AImageInfoList.Count*2);
 end;
+}
 
-
-procedure TfrmImages.SplitLinuxFilePath(FullPathName : AnsiString;
-                                        var Path     : AnsiString;
-                                        var FName    : AnsiString);
-var  p : integer;
-     n : integer;
-begin
-  Path := '';  FName := '';
-  FullPathName := StringReplace(FullPathName,'/','\',[rfReplaceAll]);
-  repeat
-    p := Pos('\',FullPathName);
-    if p > 0 then begin
-      n := NumPieces(FullPathName, '\');
-      FName := Piece(FullPathName, '\', n);
-      Path := Pieces(FullPathName, '\', 1, n-1);
-      FullPathName := '';
-      //Path := Path + MidStr(FullPathName,1,p);
-      //FullPathName := MidStr(FullPathName,p+1,1000);
-    end else begin   //kt mod 11/23/12
-      FName := FullPathName;
-      FullPathName := '';
-    end;
-  until (FullPathName = '');
-end;
-
-
+{
 function TfrmImages.UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
 //NOTICE!:  I made a backup of this function, see in comments below this function
 var
@@ -944,45 +804,13 @@ begin
 
   StatusText('Uploading full image...');
   Application.ProcessMessages;
-  Result := rFileTransferU.UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir, CurrentImage,TotalImages, ErrMsg);
+  Result := rFileTransferU.UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir, ErrMsg);
   If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
   StatusText('');
 end;
+}
 
-(* //backup of function above
-function TfrmImages.UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-var
-  DropboxFile : AnsiString;
-begin
-  //First copy LocalFileNamePath --> DropBox\FileName
-  DropboxFile := ExcludeTrailingBackslash(DropboxDir) + '\' + FName;
-  if CopyFile(pchar(LocalFNamePath),pchar(DropboxFile),false)=false then begin
-    MessageDlg('Dropbox file transfer failed.  Code='+InttoStr(GetLastError),
-               mtError,[mbOK],0);
-    result := false;
-    exit;
-  end;
-
-  CallV('TMG UPLOAD FILE DROPBOX', [FPath,FName]);     //Move file into dropbox.
-  {
-  RPCBrokerV.ClearParameters := true;
-  RPCBrokerV.remoteprocedure := 'TMG UPLOAD FILE DROPBOX';
-  RPCBrokerV.param[0].PType := literal;
-  RPCBrokerV.param[0].Value := FPath;
-  RPCBrokerV.Param[1].PType := literal;
-  RPCBrokerV.Param[1].Value := FName;
-  RPCBrokerV.Param[2].PType := literal;
-  RPCBrokerV.Param[2].Value := '1'; //see comments in UploadFile re '1' hardcoding
-
-  CallBroker; //Move file into dropbox.
-  }
-  if RPCBrokerV.Results.Count>0 then begin
-    Result := (Piece(RPCBrokerV.Results[0],'^',1)='1');  //1=success, 0=failure
-  end else Result := false;
-end;
-
-*)
-
+{
 function TfrmImages.UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
 //NOTICE!:  I made a backup of this function, see in comments below this function
 var
@@ -998,132 +826,15 @@ begin
   FileTransferProgressInitialize(CurrentImage, TotalImages, 'Uploading full image...');
   StatusText('Uploading full image...');
   Application.ProcessMessages;
-  Result := rFileTransferU.UploadFile(LocalFNamePath,FPath,FName, CurrentImage,TotalImages, ErrMsg, FileTransferProgressCallback);
+  Result := rFileTransferU.UploadFile(LocalFNamePath,FPath,FName, ErrMsg, FileTransferProgressCallback);
   StatusText('');
   FileTransferProgressDone();
   If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
 end;
+}
 
-(*  //backup of function above when making big changes.... delete later if working OK.
-function TfrmImages.UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-const
-  RefreshInterval = 500;
-  BlockSize = 512;
-
-var
-  ReadCount                     : Word;
-  totalReadCount                : Integer;
-  ParamIndex                    : LongWord;
-  j                             : word;
-  InFile                        : TFileStream;
-  LocalOutFile                  : TFileStream;
-  Buffer                        : array[0..1024] of byte;
-  RefreshCountdown              : integer;
-  OneLine                       : AnsiString;
-  RPCResult                     : AnsiString;
-  SavedCursor                   : TCursor;
-  ErrorMsg                      : string;
-  Aborted                       : boolean;
-
-begin
-  result := false;  //default of failure
-  if not FileExists(LocalFNamePath) then exit;
-  if TransferMethod = itmDropbox then begin
-    Result := UploadFileViaDropBox(LocalFNamePath,FPath,FName,CurrentImage,TotalImages);
-    exit;
-  end;
-  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  //LATER add support for itmDirect mode
-  try
-    InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
-    LocalOutFile := TFileStream.Create(CacheDir+'\'+FName,fmCreate or fmOpenWrite); //for local copy
-    //Note: I may well cut this out.  Most of the delay occurs during
-    // the RPC call, and I can't make a progress bar change during that...
-    // (or I could, but I'm not going to change the RPC broker...)
-    frmImageTransfer.setMax(InFile.Size);
-    frmImageTransfer.ProgressMsg.Caption := 'Preparing to upload...';
-    frmImageTransfer.Show;
-    totalReadCount := 0;
-  except
-    // catch failure here...  on eError...
-    FreeAndNil(frmImageTransfer);
-    exit;
-  end;
-
-  StatusText('Uploading full image...');
-  Application.ProcessMessages;
-  Aborted := false;
-  try
-    RPCBrokerV.remoteprocedure := 'TMG UPLOAD FILE';
-    RPCBrokerV.ClearParameters := true;
-    RPCBrokerV.Param[0].PType := literal;
-    RPCBrokerV.Param[0].Value := FPath;
-    RPCBrokerV.Param[1].PType := literal;
-    RPCBrokerV.Param[1].Value := FName;
-    RPCBrokerV.Param[2].PType := literal;
-    RPCBrokerV.Param[2].Value := ''; //kt 7/11/10  was '1'; //Specifying a NETWORK LOCATION is now depreciated.
-
-    RPCBrokerV.Param[3].PType := list;
-    ParamIndex := 0;
-    RefreshCountdown := RefreshInterval;
-    repeat
-      ReadCount := InFile.Read(Buffer,BlockSize);
-      LocalOutFile.Write(Buffer,ReadCount); //for local copy
-      totalReadCount := totalReadCount + ReadCount;
-      frmImageTransfer.updateProgress(totalReadCount);
-      OneLine := '';
-      if ReadCount > 0 then begin
-        SetLength(OneLine,ReadCount);
-        for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
-        //RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode(OneLine);
-        RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
-        Inc(ParamIndex);
-
-        Dec(RefreshCountdown);
-        if RefreshCountdown < 1 then begin
-          Application.ProcessMessages;
-          RefreshCountdown := RefreshInterval;
-        end;
-      end;
-      Aborted := frmImageTransfer.UserCanceled;
-      if Aborted then break;
-    until (ReadCount < BlockSize);
-
-    SavedCursor := Screen.Cursor;
-    Screen.Cursor := crHourGlass;
-    frmImageTransfer.ProgressMsg.Caption := 'Uploading file to server...';
-    Application.ProcessMessages;
-
-    if not Aborted then CallBroker;
-  finally
-    //
-  end;
-  Screen.Cursor := SavedCursor;
-  //elh  NOTE TO SELF
-  //Why aren't there any results here? The UPLOAD^TMGRPC1C clearly returns RESLTMSG.
-  //Recheck all variables and the RPC call itself to ensure that the Result is set
-  //properly
-  if Aborted then RPCBrokerV.Results.Clear;
-  if RPCBrokerV.Results.Count > 0 then begin
-    RPCResult := RPCBrokerV.Results[0];
-  end else RPCResult := '';
-  result := (Piece(RPCResult,'^',1)='1');
-  FreeAndNil(frmImageTransfer);
-  //frmImageTransfer.Hide;
-  if (result=false) and not Aborted then begin
-    ErrorMsg := 'Error uploading file.' + #13 + Piece(RPCResult,'^',2);
-    MessageDlg(ErrorMsg,mtWarning,[mbOK],0);
-  end;
-
-  InFile.Free;
-  LocalOutFile.Free;
-  StatusText('');
-end;
-
-
-*)
-
-procedure TfrmImages.FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
+{
+    procedure TfrmImages.FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
 begin
   if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
   frmImageTransfer.UpdateProgress(CurrentValue, TotalValue, Msg);
@@ -1143,8 +854,9 @@ procedure TfrmImages.FileTransferProgressDone();
 begin
   FreeAndNil(frmImageTransfer);
 end;
+ }
 
-
+{
 function TfrmImages.DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;
                                            CurrentImage,TotalImages: Integer): TDownloadResult;
 //NOTE: There is a backup of this function below this one.
@@ -1154,73 +866,20 @@ begin
   StatusText('Retrieving full image...');
   ErrMsg := '';
   FileTransferProgressInitialize(CurrentImage, TotalImages, 'Downloading images via a drop box');
-  Result := rFileTransferU.DownloadFileViaDropbox(FPath, FName, LocalSaveFNamePath, DropboxDir, CurrentImage, TotalImages, ErrMsg, FileTransferProgressCallback);
+  Result := rFileTransferU.DownloadFileViaDropbox(FPath, FName, LocalSaveFNamePath, DropboxDir, ErrMsg, FileTransferProgressCallback);
   FileTransferProgressDone();
   If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
   StatusText('');
 end;
+}
 
-(*  //backup of function.
-function TfrmImages.DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;
-                                           CurrentImage,TotalImages: Integer): TDownloadResult;
-var
-  DropboxFile : AnsiString;
-  CurrentFileSize : Integer;
-  ErrMsg          : string;
-  bResult         : boolean;
-begin
-  Result := rFileTransferU.DownloadFileViaDropbox(FPath, FName, LocalSaveFNamePath, DropboxDir, CurrentImage, TotalImages);
-  CallV('TMG DOWNLOAD FILE DROPBOX', [FPath,FName]);  //Move file into dropbox.
-  if RPCBrokerV.Results.Count > 0 then begin
-    bResult := (Piece(RPCBrokerV.Results[0],'^',1)='1');  //1=success, 0=failure
-    if bResult = false then ErrMsg := Piece(RPCBrokerV.Results[0],'^',2);
-  end else begin
-    bResult := false;
-    ErrMsg := 'Error communicating with server to retrieve image.';
-  end;
-
-  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  if bResult=true then begin
-    if DirectoryExists(DropboxDir) then begin
-      CurrentFileSize := strtoint(Piece(RPCBrokerV.Results[0],'^',3));  //Piece 3 = file size
-      DropboxFile := ExcludeTrailingBackslash(DropboxDir) + '\' + FName;
-      if frmImageTransfer.visible = False then frmImageTransfer.show;
-      while FileSize(DropboxFile) <> CurrentFileSize do begin
-        sleep(1000);
-        //CHANGE: If file never transfers, this will hang for ever.  Needs timeout code added.
-      end;
-      frmImageTransfer.ProgressBar.Max := TotalImages;
-      frmImageTransfer.ProgressBar.Position := CurrentImage+2;
-      if TotalImages = (CurrentImage+2) then begin
-        Sleep(1000);
-        frmImageTransfer.hide;
-      end;
-      //Now move DropBox\FileName --> LocalFileNamePath
-      if MoveFile(pchar(DropboxFile),pchar(LocalSaveFNamePath))=false then begin
-        MessageDlg('Dropbox file transfer failed.  Code='+InttoStr(GetLastError),
-                   mtError,[mbOK],0);
-      end;
-    end else begin
-      MessageDlg('Invalid Dropbox Directory. Please check your settings and try again.',mtError,[mbOK],0);
-      //frmImageTransfer.hide;
-      Result := drFailure;
-    end;
-  end else begin
-    MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
-  end;
-  if bResult = false then Result := drFailure
-  else Result := drSuccess;
-  FreeAndNil(frmImageTransfer);
-end;
-*)
-
-
-
+{
 function TfrmImages.DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
                                  CurrentImage,TotalImages: Integer): TDownloadResult;
 //NOTE: There is a backup of this function below this one.
 var
-  ErrMsg          : string;
+  ErrMsg            : string;
+  AProgressCallback :   TProgressCallback;
 begin
   frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
   if TransferMethod = itmDropbox then begin
@@ -1230,7 +889,8 @@ begin
     FileTransferProgressInitialize(CurrentImage, TotalImages, 'Downloading Image');
     ErrMsg := '';
     StatusText('Retrieving full image...');
-    Result := rFileTransferU.DownloadFile(FPath,FName,LocalSaveFNamePath, CurrentImage,TotalImages, ErrMsg, FileTransferProgressCallback);
+    AProgressCallback := self.FileTransferProgressCallback;
+    Result := rFileTransferU.DownloadFile(FPath,FName,LocalSaveFNamePath, ErrMsg, AProgressCallback);
     StatusText('');
     //FileTransferProgressDone();
     If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
@@ -1238,80 +898,7 @@ begin
   frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
 end;
 
-(*  //backup of function
-function TfrmImages.DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
-                                 CurrentImage,TotalImages: Integer): TDownloadResult;
-var
-  i,count                       : integer;
-  j                             : word;
-  OutFile                       : TFileStream;
-  s                             : AnsiString;
-  Buffer                        : array[0..1024] of byte;
-  RefreshCountdown              : integer;
-  bResult                       : boolean;
-  BrokerResult                  : string;
-  ErrMsg                        : string;
-
-const
-  RefreshInterval = 500;
-
-  begin
-  frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
-  if FileExists(LocalSaveFNamePath) then begin
-    DeleteFile(LocalSaveFNamePath);
-  end;
-
-  if TransferMethod = itmDropbox then begin
-    Result := rFileTransferU.DownloadFileViaDropBox(FPath,FName,LocalSaveFNamePath,DropboxDir, CurrentImage,TotalImages, nil);
-    exit;
-  end;
-  //LATER add support for itmDirect mode
-  //kt   Result := drTryAgain;
-  //kt   exit;
-  //kt end;
-  StatusText('Retrieving full image...');
-
-  bResult := true; //default to success;
-  ErrMsg := '';
-  //Application.ProcessMessages;      //elh moved up a line because it was throwing the Broker out of sync
-  CallV('TMG DOWNLOAD FILE', [FPath,FName]);
-  RefreshCountdown := RefreshInterval;
-  //Note:RPCBrokerV.Results[0]=1 if successful load, =0 if failure
-  if RPCBrokerV.Results.Count=0 then RPCBrokerV.Results.Add('-1^Unknown download error.');
-  BrokerResult := RPCBrokerV.Results[0];
-  if Piece(BrokerResult,'^',1)='1' then begin
-    OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
-    for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-      //s :=Decode(RPCBrokerV.Results[i]);
-      s :=Decode64(RPCBrokerV.Results[i]);
-      count := Length(s);
-      if count>1024 then begin
-        bResult := false; //failure of load.
-        break;
-      end;
-      for j := 1 to count do Buffer[j-1] := ord(s[j]);
-      OutFile.Write(Buffer,count);
-      Dec(RefreshCountdown);
-      if RefreshCountdown < 1 then begin
-        Application.ProcessMessages;
-        RefreshCountdown := RefreshInterval;
-      end;
-    end;
-    OutFile.Free;
-  end else begin
-    ErrMsg := Piece(BrokerResult,'^',2);
-    bresult := false;
-  end;
-  if ErrMsg <> '' then begin
-    MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
-  end;
-  if bResult = false then Result := drFailure
-  else Result := drSuccess;
-  StatusText('');
-  frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
-end;
-*)
-
+}
 
 procedure TfrmImages.NewNoteSelected(EditIsActive : boolean);
 //Will be called by  fNotes when a new note has been selected.
@@ -1319,7 +906,7 @@ procedure TfrmImages.NewNoteSelected(EditIsActive : boolean);
 begin
   ClearTabPages();
   DownloadImagesInBackground := true;
-  SetupTimer;
+  //kt SetupTimer; //UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
   //This will start downloading images after few second delay (so that if
   //user is just browsing past note, this won't waste effort.
   //If user selects images tab, then load will occur without delay.
@@ -1331,6 +918,7 @@ begin
 end;
 
 
+{
 procedure TfrmImages.EmptyCache();
 //This will delete ALL files in the Cache directory
 //Note: This will include the html_note file created by
@@ -1371,6 +959,7 @@ begin
   end;
   Files.Free;
 end;
+}
 
 procedure TfrmImages.UploadImagesButtonClick(Sender: TObject);
 var
@@ -1382,9 +971,9 @@ begin
   AddResult := frmImageUpload.ShowModal;
   if not IsAbortResult(AddResult) then begin
     NewNoteSelected(true);  //force a reload to show recently added image.
-    timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
-    DownloadImagesInBackground := false;
-    SetupTimer;
+    //kt timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
+    //kt DownloadImagesInBackground := false;
+    //kt SetupTimer;  //UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
     Node := TORTreeNode(frmNotes.tvNotes.Selected);
     case Node.StateIndex of
       IMG_NO_IMAGES         :  Node.StateIndex := IMG_1_IMAGE;
@@ -1559,6 +1148,8 @@ begin
   end;
 end;
 
+
+{ //backup of function
 function TfrmImages.CreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
 //Create a local barcode file, in .png format, from MsgStr
 //ImageType is optional, default ='png'.  It should NOT contain '.'
@@ -1626,8 +1217,22 @@ begin
   end;
   StatusText('');
 end;
+}
+
+function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
+//Decode data from barcode on image, or return '' if none
+//Note: if I could find a cost-effective way of decoding this on client side,
+//      then that code be done here in the function, instead of uploading image
+//      to the server for decoding.
+begin
+  StatusText('Checking image for barcodes...');
+  Application.ProcessMessages;
+  Result := DoDecodeBarcode(LocalFNamePath,ImageType);
+  StatusText('');
+end;
 
 
+{ //backup of function
 function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
 //Decode data from barcode on image, or return '' if none
 //Note: if I could find a cost-effective way of decoding this on client side,
@@ -1725,7 +1330,7 @@ begin
   InFile.Free;
   StatusText('');
 end;
-
+}
 
 procedure TfrmImages.EnableAutoScanUploadClick(Sender: TObject);
 begin
@@ -1764,13 +1369,16 @@ begin
 end;
 }
 
+{
 function TfrmImages.GetImagesCount : integer;
 //Returns number of images possible, not just those already downloaded.
 begin
-  EnsureImageListLoaded();
+  EnsureImageListLoaded(ImageInfoList);
   Result := NumImagesAvailableOnServer;
 end;
+}
 
+{
 function TfrmImages.GetImageInfo(Index : integer) : TImageInfo;
 begin
   if (Index > -1) and (Index < ImageInfoList.Count) then begin
@@ -1779,6 +1387,7 @@ begin
     Result := nil;
   end;
 end;
+}
 
 procedure TfrmImages.ExecuteFileIfNeeded(Selected: integer);
 var
@@ -1898,11 +1507,11 @@ end;
 
 procedure TfrmImages.DeleteAll(DeleteMode: TImgDelMode);
 begin
-  EnsureALLImagesDownloaded;
+  EnsureLinkedImagesDownloaded;
   while TabControl.Tabs.Count > 0 do begin
     DeleteImageIndex(0,DeleteMode,False);
     NewNoteSelected(False);
-    EnsureALLImagesDownloaded;
+    EnsureLinkedImagesDownloaded;
     frmImages.Formshow(self);
   end;
 end;
@@ -1920,11 +1529,11 @@ CONST
   TMG_ADMIN    = 'ADMINISTRATIVE'; //Server message (don't translate)
 
 begin
-  if (ImageIndex<0) or (ImageIndex>=ImagesCount) then begin
+  if (ImageIndex<0) or (ImageIndex>=GetImagesCount) then begin
     MessageDlg('Invalid image index to delete: '+IntToStr(ImageIndex), mtError,[mbOK],0);
     exit;
   end;
-  ImageInfo := Self.ImageInfo[ImageIndex];
+  ImageInfo := GetImageInfo(ImageIndex);
   if boolPromptUser then begin
     //ReasonForDelete := SelectDeleteReason(frmNotes.lstNotes.ItemIEN);
     ReasonForDelete := SelectDeleteReason(ListBox.ItemIEN);
@@ -1938,9 +1547,25 @@ begin
     ReasonForDelete := 'DeleteAll';
   end;
 
-  //DeleteImage(DeleteSts, ImageInfo.ServerFName, ImageInfo.IEN, frmNotes.lstNotes.ItemIEN, DeleteMode, ReasonForDelete);
   DeleteImage(DeleteSts, ImageInfo.ServerFName, ImageInfo.IEN, ListBox.ItemIEN, DeleteMode, ReasonForDelete);
 end;
+
+
+procedure TfrmImages.DeleteImage(var DeleteSts: TActionRec; ImageFileName: String;
+                                 ImageIEN, DocIEN: Integer; DeleteMode : TImgDelMode;
+                                 const Reason: string);  //Reason should be 10-60 chars;
+var
+  RefreshNeeded : boolean;
+begin
+  uImages.DeleteImage(DeleteSts, ImageFileName, ImageIEN, DocIEN, DeleteMode,
+                      frmnotes.HtmlEditor, FEditIsActive, RefreshNeeded, User, Reason);
+  if RefreshNeeded then begin
+    NewNoteSelected(True);
+    frmImages.Formshow(self);
+  end;
+end;
+
+{   //backup of procedure.
 
 procedure TfrmImages.DeleteImage(var DeleteSts: TActionRec;
                                  ImageFileName: String;
@@ -2028,6 +1653,9 @@ begin
   end;
 end;
 
+}
+
+
 
 procedure TfrmImages.mnuDeleteImageClick(Sender: TObject);
 var
@@ -2044,7 +1672,7 @@ begin
     if not assigned(frmImagePickExisting.SelectedImageInfo) then exit;
     SelectedImageTab := -1;
     for i := 0 to TabControl.Tabs.Count - 1 do begin
-      ImageInfo := Self.ImageInfo[i];
+      ImageInfo := GetImageInfo(i);
       if frmImagePickExisting.SelectedImageInfo.ServerFName = ImageInfo.ServerFName then begin
         SelectedImageTab := i;
       end;
@@ -2057,7 +1685,7 @@ begin
       DeleteImageIndex(SelectedImageTab,idmRetract,True);
     end;
     NewNoteSelected(False);
-    EnsureALLImagesDownloaded;
+    EnsureLinkedImagesDownloaded;
     frmImages.Formshow(self);
   end;
   FreeAndNil(frmImagePickExisting);

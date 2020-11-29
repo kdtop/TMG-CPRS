@@ -19,15 +19,15 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.dfm
 113
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.dfm
-95496/1365604775
+95495/1367047863
 159
 92
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.dfm
-55456/1220383351
+55456/1367047867
 251
 71
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.dfm
-34322/1365933677
+38241/1366396006
 322
 148
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.dfm
@@ -35,7 +35,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.dfm
 470
 83
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.dfm
-18941/1365412832
+18941/1366057446
 553
 68
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSens.dfm
@@ -291,7 +291,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\dShared.dfm
 3320
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDrawers.dfm
-20454/1358386633
+20454/1366836465
 3322
 61
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMedCopy.dfm
@@ -731,7 +731,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsTitles.dfm
 8417
 53
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptions.dfm
-89268/1357797942
+89869/1367044891
 8470
 239
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mCoPayDesc.dfm
@@ -783,7 +783,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.dfm
 8950
 35
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.dfm
-48632/1365411961
+48773/1366784400
 8985
 123
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.dfm
@@ -955,7 +955,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlan.dfm
 10885
 77
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.dfm
-277122/1364933255
+277122/1367037192
 10962
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AddOneFileEntryU.dfm
@@ -999,11 +999,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fGUIEditFMFile.dfm
 10982
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePatientPhotoID.dfm
-37427/1364946808
+37427/1367037192
 10984
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.dfm
-7184/1194949858
+7184/1367047844
 10986
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickPDF.dfm
@@ -1011,7 +1011,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickPDF.dfm
 10988
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImages.dfm
-601785/1365068564
+601785/1367047488
 10990
 35
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultAddDlg.dfm
@@ -1019,11 +1019,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultAddDlg.dfm
 11025
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultiUse.dfm
-56550/1194952337
+45750/1367050907
 11027
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImageTransferProgress.dfm
-17301/1364956568
+17301/1367044949
 11029
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePrintPreview.dfm
@@ -1127,7 +1127,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbLex.dfm
 11236
 69
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtLabelPrint.dfm
-23885/1195858760
+23885/1366856216
 11305
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlanSignDialog.dfm
@@ -1155,15 +1155,15 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.pas
 11388
 19
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
-269126/1365606646
+269127/1367047866
 11407
 65
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.pas
-158648/1220383459
+158654/1367048269
 11472
 56
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
-205637/1365933701
+205637/1366396009
 11528
 69
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
@@ -1171,7 +1171,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
 11597
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas
-61349/1365412871
+61062/1366058386
 11643
 55
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSens.pas
@@ -1427,7 +1427,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\dShared.pas
 12932
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDrawers.pas
-75958/1358399030
+75962/1366836467
 12977
 61
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMedCopy.pas
@@ -1867,7 +1867,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsTitles.pas
 14826
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptions.pas
-40154/1194952802
+40141/1367044899
 14836
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mCoPayDesc.pas
@@ -1919,7 +1919,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.pas
 14999
 25
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
-216021/1365412261
+214856/1366381530
 15024
 60
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.pas
@@ -2091,7 +2091,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlan.pas
 15700
 65
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.pas
-86440/1364946789
+86499/1367045829
 15765
 98
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AddOneFileEntryU.pas
@@ -2135,284 +2135,284 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fGUIEditFMFile.pas
 16247
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePatientPhotoID.pas
-15353/1364946962
+15290/1367043840
 16291
 63
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.pas
-7228/1194949863
+7236/1367050603
 16354
-42
+43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickPDF.pas
 4037/1194948344
-16396
+16397
 43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImages.pas
-76535/1365068952
-16439
-82
+62231/1367050819
+16440
+52
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultAddDlg.pas
 2484/1190813506
-16521
+16492
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultiUse.pas
-12598/1194952391
-16566
+12800/1367051503
+16537
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImageTransferProgress.pas
-3517/1364952906
-16612
+3541/1367044968
+16583
 43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePrintPreview.pas
 6697/1194934062
-16655
+16626
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePtLbl.pas
 19626/1194934100
-16699
+16670
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\flabComments.pas
 1823/1188535857
-16743
+16714
 43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabDateEdit.pas
 3066/1188535861
-16786
+16757
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.pas
 29149/1320977541
-16830
+16801
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntryDetails.pas
 7986/1280136419
-16874
+16845
 43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSpecimenEdit.pas
 3274/1188535876
-16917
+16888
 42
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMemoEdit.pas
 2552/1258767001
-16959
+16930
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\FMErrorU.pas
 2433/1194932816
-17003
+16974
 42
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiRecEditU.pas
 23555/1194940061
-17045
+17016
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteCompParentPick.pas
 4558/1198869765
-17089
+17060
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fOneRecEditU.pas
 17804/1194940028
-17134
+17105
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fProbAutoAdd.pas
 31055/1199727858
-17179
+17150
 43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAdd.pas
 25153/1278171639
-17222
+17193
 73
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAuditDetail.pas
 4004/1188535923
-17295
+17266
 42
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAuditLog.pas
 7138/1188535925
-17337
+17308
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDemoEdit.pas
 66783/1197316545
-17381
+17352
 52
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDocSearch.pas
 12563/1194932680
-17433
+17404
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtHTMLDemo.pas
 8032/1285132628
-17477
+17448
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtQuery.pas
 9581/1194937522
-17522
+17493
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGServerSearch.pas
 5627/1194937457
-17567
+17538
 43
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSearchResults.pas
 15501/1194937384
-17610
+17581
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\PostU.pas
 6722/1194938647
-17655
+17626
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbEdt.pas
 60430/1199286780
-17699
+17670
 49
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbLex.pas
 21824/1199273044
-17748
+17719
 51
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtLabelPrint.pas
-15842/1195858763
-17799
+15842/1366856288
+17770
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlanSignDialog.pas
 509/1195858874
-17843
+17814
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fESEdit.dfm
 5613/1216245526
-17853
+17824
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fESEdit.pas
 4050/1216245812
-17855
+17826
 18
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTest_RW_HTML.dfm
 16316/1221475320
-17873
+17844
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTest_RW_HTML.pas
 7431/1221475480
-17875
+17846
 12
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDiscreteData.dfm
 6412/1221492566
-17887
+17858
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDiscreteData.pas
 6499/1221492535
-17889
+17860
 33
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.dfm
 2085/1224711217
-17922
+17893
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.pas
 19451/1224711587
-17924
+17895
 14
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSMSLabText.dfm
 1491/1244300480
-17938
+17909
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSMSLabText.pas
 1315/1244300750
-17940
+17911
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSingleNote.dfm
-235048/1361604189
-17950
+235048/1366836271
+17921
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSingleNote.pas
-45177/1361614599
-17952
+45191/1366854508
+17923
 16
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabPicker.dfm
 20692/1281469134
-17968
+17939
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabPicker.pas
 4630/1281469134
-17970
+17941
 12
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fAlertSender.dfm
 4934/1248954999
-17982
+17953
 38
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fAlertSender.pas
 6400/1248956099
-18020
+17991
 12
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMPOTP.dfm
 347/1265720986
-18032
+18003
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMPOTP.pas
 334/1265721002
-18034
+18005
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMGOTP.dfm
 729/1265721602
-18044
+18015
 23
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMGOTP.pas
 414/1265721604
-18067
+18038
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool\fAnticoagulator.dfm
 140079/1328187539
-18077
+18048
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas
 101612/1295150525
-18079
+18050
 33
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGPrintList.dfm
 6887/1357274508
-18112
+18083
 33
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGPrintList.pas
 7735/1357274508
-18145
+18116
 13
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSelector.dfm
 5632/1324108043
-18158
+18129
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSelector.pas
 3970/1324108054
-18160
+18131
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.dfm
 27291/1320055566
-18170
+18141
 44
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.pas
 12426/1320055627
-18214
+18185
 12
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.dfm
-251847/1365603457
-18226
+236932/1367045065
+18197
 172
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiAlertSign.dfm
 329/1361612657
-18398
+18369
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiAlertSign.pas
 320/1361612808
-18400
+18371
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.dfm
-162098/1364418275
-18410
+162036/1366843845
+18381
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
-22133/1364418645
-18412
+22192/1366843849
+18383
 40
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
-24023/1365603223
-18452
+24031/1367045099
+18423
 14
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.dfm
-14272/1365937069
-18466
+69630/1366578538
+18437
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.pas
-12240/1365939513
-18468
+12087/1366578146
+18439
 46
 |EOINDEX|
 27
@@ -2737,7 +2737,7 @@ Data = (
 'Component = frmDCSumm'
 'Status = stsDefault'))
 end
-1293
+1345
 inherited frmLabs: TfrmLabs
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -10885,7 +10885,7 @@ Data = (
 'Component = frmOptionsTitles'
 'Status = stsDefault'))
 end
-2128
+2151
 inherited frmOptions: TfrmOptions
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -11400,7 +11400,7 @@ Data = (
 'Component = btnClose'
 'Status = stsDefault'))
 end
-1557
+1561
 inherited frmFrame: TfrmFrame
 inherited amgrMain: TVA508AccessibilityManager
 Left = 8
@@ -13442,7 +13442,7 @@ Data = (
 end
 158
 object frmImagesMultAddDlg: TfrmImagesMultAddDlg
-870
+720
 object frmImagesMultiUse: TfrmImagesMultiUse
 292
 object frmImageTransfer: TfrmImageTransfer
@@ -13873,7 +13873,7 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
-  rFileTransferU,                                     //kt 10/27/20
+  rFileTransferU, uImages,                            //kt 10/27/20
   OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
@@ -17292,7 +17292,7 @@ interface
 
 uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ComCtrls, ExtCtrls, ORCtrls, OrFn, Dialogs, ORDtTmRng, fBAOptionsDiagnoses,
-  inifiles, uConst, strUtils, //kt 9/11 added line
+  inifiles, uConst, strUtils, uImages, //kt 9/11 added line
   uBAGlobals, fBase508Form, VA508AccessibilityManager, fAutoSz;
 
 type
@@ -18220,14 +18220,14 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, pngimage, ExtDlgs, OleCtrls,
-  uCore, iniFiles, ShellAPI, fTMG_WIA_GetImage, registry, jpeg,
+  uCore, iniFiles, ShellAPI, fTMG_WIA_GetImage, registry, jpeg, uImages,
   SHDocVw;
 
 type
 
   PHICON = ^HICON;
 
-  TImageInfo = class
+  TUploadImageInfo = class
     private
     public
       TIUIEN :             int64;      //IEN in file# 8925
@@ -18246,7 +18246,7 @@ type
       ObjectType :         int64;      //pointer to file 2005.02
       ProcName :           String[10]; //server limit is 10 chars.
       pLongDesc :          TStrings;  //Won't be owned by this list
-      procedure Assign(Source : TImageInfo);
+      procedure Assign(Source : TUploadImageInfo);
       procedure Clear;
   end;
 
@@ -18257,7 +18257,7 @@ type
       ErrMsg :       AnsiString;
       NoteTitle :    AnsiString; //Title of note to be associated with image
       Patient :      TPatient;
-      ImageInfo :    TImageInfo;
+      ImageInfo :    TUploadImageInfo;
       Location :     AnsiString; //Location that image if from
       DOS :          AnsiString; //Date of service
       Provider :     AnsiString;
@@ -18746,7 +18746,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   ORNet, ORFn,
-  rFileTransferU,  //10/27/20
+  rFileTransferU, uImages,
   Dialogs, ExtCtrls, StdCtrls, OleCtrls, SHDocVw, Buttons;
 
 const
@@ -18807,6 +18807,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  uImages,
   Dialogs, fImages, StdCtrls, Buttons, ExtCtrls;
 
 type
@@ -18898,42 +18899,12 @@ uses
   uPCE, ORClasses, fDrawers, ImgList, rTIU, uTIU, uDocTree, fRptBox, fPrintList,
   OleCtrls, SHDocVw, ShellAPI,
   VAUtils,  TMGHTML2, ActiveX,
-  fImageTransferProgress, fUploadImages, rFileTransferU,
+  fImageTransferProgress, fUploadImages, rFileTransferU, uImages,
   ORNet, TRPCB, fHSplit, Buttons, ExtDlgs, VA508AccessibilityManager;
 
-type
-  TImgDelMode = (idmNone,idmDelete,idmRetract); //NOTE: DO NOT change order
-  TImageInfo = class
-    private
-    public
-      IEN :                int64;    //IEN in file# 2005
-      ServerPathName :     AnsiString;
-      ServerFName :        AnsiString;
-      ServerThumbPathName: AnsiString;
-      ServerThumbFName :   AnsiString;
-      //Note: if there is no thumbnail to download, CacheThumbFName will still
-      //      contain a file name and path, but a test for FileExists() will wail.
-      CacheThumbFName :    AnsiString; // local cache path and File name of thumbnail image
-      CacheFName :         AnsiString; // local cache path and File name of image
-      ShortDesc :          AnsiString;
-      LongDesc :           TStringList; //will be nil unless holds data.
-      DateTime :           AnsiString;  //fileman format
-      ImageType :          Integer;
-      ProcName :           AnsiString;
-      DisplayDate :        AnsiString;
-      ParentDataFileIEN:   int64;
-      AbsType :            char;      //'M' magnetic 'W' worm  'O' offline
-      Accessibility :      char;      //'A' accessable  or  'O' offline
-      DicomSeriesNum :     int64;
-      DicomImageNum :      int64;
-      GroupCount :         integer;
-      TabIndex :           integer;
-      TabImageIndex :      integer;
-    published
-  end;
 
-  TImgTransferMethod = (itmDropbox,itmDirect,itmRPC);
-  // moved to rFileTransferU -- TDownloadResult = (drSuccess, drTryAgain, drFailure, drGiveUp);
+type
+  //TImgTransferMethod = (itmDropbox,itmDirect,itmRPC);
 
   TfrmImages = class(TfrmPage)
 unit fImagesMultAddDlg;
@@ -19021,7 +18992,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, SHDocVw, ExtCtrls, StdCtrls, Buttons, ImgList,
-  fImages, ORNet,
+  fImages, ORNet, uImages,
   ComCtrls;
 
 type
@@ -20375,7 +20346,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
-  OleCtrls, SHDocVw, MSHTML, ORFn, fLabs,
+  OleCtrls, SHDocVw, MSHTML, ORFn, fLabs, uImages, 
   rTIU, uTIU, rCore, fDrawers, ORNet, 
   Menus, ORCtrls, ActnList;
 
@@ -20641,7 +20612,7 @@ type
   tMailboxActionType=(mailNone,mailDelete,mailImport,mailPrint,mailRotate,mailToMailbox);
 
   TfrmMailbox = class(TfrmPage)
-4023
+3831
 inherited frmTMGChartExporter: TfrmTMGChartExporter
 inherited amgrMain: TVA508AccessibilityManager
 Left = 896
@@ -20825,7 +20796,7 @@ uses
 
 type
   TForm1 = class(TForm)
-2399
+2397
 object frmMultiTIUSign: TfrmMultiTIUSign
 unit fMultiTIUSign;
 
@@ -20881,7 +20852,7 @@ uses
 
 type
   TfrmTMGChartExporter = class(TfrmAutoSz)
-327
+1092
 object frmViewLabPDF: TfrmViewLabPDF
 unit fViewLabPDF;
 

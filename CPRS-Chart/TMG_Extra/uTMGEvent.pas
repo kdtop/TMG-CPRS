@@ -55,7 +55,7 @@ begin
    RPCResults := TStringList.Create;
    EventData := 'SAVE^'+inttostr(User.DUZ)+'^'+Patient.DFN+'^'+inttostr(Event)+'^'+DateTimeToFMDTStr(Now)+'^'+Data;
    tCallV(RPCResults,'TMG EVENT CHANNEL',[EventData]);
-   //messagedlg(RPCResults.text+'-'+inttostr(Event),mtinformation,[mbOk],0);
+   //messagedlg(RPCResults.text+'-'+inttostr(Event)+#13#10+#13#10+Patient.Name,mtinformation,[mbOk],0);
    RPCResults.free;
 end;
 

@@ -66,8 +66,8 @@ interface
 
   procedure PrintHTMLReport(Lines: TStringList; var ErrMsg: string;
                             PtName, DOB, VisitDate, Location:string; Application : TApplication);  //kt added 5-2-05
-  function  IsHTML(Lines : TStrings): boolean; overload;
-  function  IsHTML(Line : String): boolean; overload;
+  function  IsHTML(Lines : TStrings): boolean;
+  function  TextIsHTML(Line : String): boolean;
   function  HasHTMLTags(Text: string) : boolean;
   procedure EditSL(Lines : TStrings);
   procedure FixHTML(Lines : TStrings);
@@ -96,7 +96,8 @@ interface
   procedure SetupHTMLPrinting(Name,DOB,VisitDate,Location,Institution : string);
   procedure RestoreIEPrinting;
   function  ExtractDateOfNote(Lines : TStringList) : string;
-  Procedure ScanForSubs(Lines : TStrings);
+  Procedure ScanForSubs(Lines : TStrings); overload;
+  procedure ScanForSubs(var Text : string); overload;
   Procedure InsertSubs(Lines : TStrings);
   function  HTTPEncode(const AStr: string): string;
   function  EncodeTextToSafeHTMLAttribVal(Text : string) : string;
@@ -133,6 +134,7 @@ implementation
        fMemoEdit,
        fDrawers,
        uTemplateFields,
+       uImages,
        fTemplateDialog;
 
   type
@@ -292,7 +294,18 @@ implementation
   end;
   *)
 
-  Procedure ScanForSubs(Lines : TStrings);
+  procedure ScanForSubs(var Text : string); overload;
+  var  Lines : TStringList;
+  begin
+    Lines := TStringList.Create;
+    Lines.Text := Text;
+    ScanForSubs(Lines);
+    Text := Lines.Text;
+    Lines.Free;
+  end;
+
+
+  Procedure ScanForSubs(Lines : TStrings);  overload; //Scan for substitutions
   //Purpose: To scan note for constant $CPRS$ and replace with CPRS's actual directory
   var i,p,p2 : integer;
       tempS : String;
@@ -325,7 +338,7 @@ implementation
         //Ensure images are downloaded before passing page to web browser
       end;
     end;
-    frmImages.EnsureImagesDownloaded(SubsFoundList);
+    uImages.EnsureSLImagesDownloaded(SubsFoundList);
   end;
 
 
@@ -371,16 +384,16 @@ implementation
   end;
 
 
-  function IsHTML(Line : String): boolean;
+  function TextIsHTML(Line : String): boolean;
   {Purpose: To look at the Text and determine if it is an HTML document.
    Test used: if document contains <!DOCTYPE HTML" or <HTML> or </BODY> or other tags
-        This is not a fool-proof test...                                   
-   NOTE: **This does NOT call ScanForSubs as the other IsHTML(TStrings) function does.     }
+        This is not a fool-proof test...
+   NOTE: **This does NOT call ScanForSubs as the other IsHTML(TStrings) function does. UPDATE: changed so that it does...    }
 
   begin
     Result := false;  //default of false
     Line := UpperCase(Line);
-    if (Pos('<!DOCTYPE HTML',Line) > 0) 
+    if (Pos('<!DOCTYPE HTML',Line) > 0)
       or (Pos('<HTML>',Line) > 0)
       or (Pos('<BR>',Line) > 0)
       or (Pos(HTML_BEGIN_TAG,Line) > 0)
@@ -389,17 +402,18 @@ implementation
       or (Pos('</BODY>',Line) > 0)then begin
       Result := true;
     end;
+    //if Result = true then ScanForSubs(Line);  //kt NOTE: can't do here because changes won't be passed out...
   end;
 
-  
+
   function IsHTML(Lines : TStrings): boolean;
   //Purpose: To look at the note loaded into Lines and determine if it is
   //          an HTML document.  See other IsHTML(String) function for test used.
   begin
-    Result := false;  
+    Result := false;
     if Lines = nil then exit;
-    Result := IsHTML(Lines.Text);
-    if Result = true then ScanForSubs(Lines);  
+    Result := TextIsHTML(Lines.Text);
+    if Result = true then ScanForSubs(Lines);
   end;
 
   

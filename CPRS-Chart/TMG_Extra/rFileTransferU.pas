@@ -49,13 +49,12 @@ type
     LabDate: TFMDateTime;
   end;
   TDownloadResult = (drSuccess, drTryAgain, drFailure, drGiveUp, drUserAborted);
-  TProgressCallback = function(CurrentValue, TotalValue : integer; Msg : string=''): boolean of object;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
+  TProgressCallback = function(CurrentValue, TotalValue : integer; Msg : string=''): boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
 
 procedure GetAvailLabPDFs(OutList : TStringList; DFN : string; StartDate: TFMDateTime = 0; EndDate : TFMDateTime = 9999999);
 
 function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: AnsiString;
                             RPCName : string;
-                            CurrentImage,TotalImages: Integer;
                             var ErrMsg : string;
                             ProgressCallback :   TProgressCallback = nil): TDownloadResult;
 function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: AnsiString;
@@ -63,20 +62,15 @@ function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: AnsiString;
                         var ErrMsg : string;
                         ProgressCallback : TProgressCallback = nil) : TDownloadResult;
 function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
-                      CurrentImage,TotalImages: Integer;
                       var ErrMsg : string;
                       ProgressCallback : TProgressCallback = nil): TDownloadResult;
 function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath, DropboxDir: AnsiString;
-                                CurrentImage,TotalImages: Integer;
                                 var ErrMsg : string;
                                 ProgressCallback : TProgressCallback = nil): TDownloadResult;
 function UploadFile(LocalFNamePath,FPath,FName: AnsiString;
-                    CurrentImage,TotalImages: Integer;
                     var ErrMsg : string;
                     ProgressCallback : TProgressCallback = nil): boolean;
-function UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir: AnsiString;
-                              CurrentImage,TotalImages: Integer;
-                              var ErrMsg : string): boolean;
+function UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir: AnsiString; var ErrMsg : string): boolean;
 
 function Encode64(Input: AnsiString) : AnsiString;
 function Decode64(Input: AnsiString) : AnsiString;
@@ -98,7 +92,6 @@ end;
 
 function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: AnsiString;
                             RPCName : string;
-                            CurrentImage,TotalImages: Integer;
                             var ErrMsg : string;
                             ProgressCallback :   TProgressCallback = nil): TDownloadResult;
 var
@@ -109,7 +102,7 @@ var
   Buffer                        : array[0..1024] of byte;
   RefreshCountdown              : integer;
   BrokerResult                  : string;
-  //Abort                         : boolean;
+  LocalBrokerResults            : TStringList;
 
 const
   RefreshInterval = 250;
@@ -117,41 +110,46 @@ begin
   Result := drFailure; //default to failure
   ErrMsg := '';
   if FileExists(LocalSaveFNamePath) then DeleteFile(LocalSaveFNamePath);
-
-  CallV(RPCName, [FPath,FName]);
-  RefreshCountdown := RefreshInterval;
-  //Note:RPCBrokerV.Results[0]=1 if successful load, =0 if failure
-  if RPCBrokerV.Results.Count=0 then RPCBrokerV.Results.Add('-1^Unknown download error.');
-  BrokerResult := RPCBrokerV.Results[0];
-  if Piece(BrokerResult,'^',1)<>'1' then begin
-    ErrMsg := Piece(BrokerResult,'^',2);
-    exit;
-  end;
-
-  OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
-  for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-    s := Decode64(RPCBrokerV.Results[i]);
-    count := Length(s);
-    if count>1024 then begin
-      ErrMsg := 'During download, server sent line that was too long.';
-      break;
+  LocalBrokerResults := TStringList.Create;
+  try
+    CallV(RPCName, [FPath,FName]);
+    RefreshCountdown := RefreshInterval;
+    LocalBrokerResults.Assign(RPCBrokerV.Results);
+    //Note:LocalBrokerResults[0]=1 if successful load, =0 if failure
+    if LocalBrokerResults.Count=0 then LocalBrokerResults.Add('-1^Unknown download error.');
+    BrokerResult := LocalBrokerResults[0];
+    if Piece(BrokerResult,'^',1)<>'1' then begin
+      ErrMsg := Piece(BrokerResult,'^',2);
+      exit;
     end;
-    for j := 1 to count do Buffer[j-1] := ord(s[j]);
-    OutFile.Write(Buffer,count);
-    Dec(RefreshCountdown);
-    if RefreshCountdown < 1 then begin
-      RefreshCountdown := RefreshInterval;
-      if assigned(ProgressCallback) then begin
-        if not ProgressCallback(i, RPCBrokerV.Results.Count-1) then begin
-          Result := drUserAborted;
-          exit;
+
+    OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
+    for i:=1 to (LocalBrokerResults.Count-1) do begin
+      s := Decode64(LocalBrokerResults[i]);
+      count := Length(s);
+      if count>1024 then begin
+        ErrMsg := 'During download, server sent line that was too long.';
+        break;
+      end;
+      for j := 1 to count do Buffer[j-1] := ord(s[j]);
+      OutFile.Write(Buffer,count);
+      Dec(RefreshCountdown);
+      if RefreshCountdown < 1 then begin
+        RefreshCountdown := RefreshInterval;
+        if assigned(ProgressCallback) then begin
+          if not ProgressCallback(i, LocalBrokerResults.Count-1) then begin
+            Result := drUserAborted;
+            exit;
+          end;
         end;
       end;
     end;
+    if ErrMsg <> '' then exit;
+    Result := drSuccess;  //if we got this far, all is good.
+  finally
+    OutFile.Free;
+    LocalBrokerResults.Free;
   end;
-  OutFile.Free;
-  if ErrMsg <> '' then exit;
-  Result := drSuccess;  //if we got this far, all is good.
 end;
 
 
@@ -161,23 +159,20 @@ function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: AnsiString;
                         ProgressCallback : TProgressCallback = nil) : TDownloadResult;
 begin
   Result := DownloadFileCommon(FPath,FName,LocalSaveFNamePath,
-                               'TMG CPRS LAB PDF DOWNLOAD', CurrentFileNum, TotalFileNum,
+                               'TMG CPRS LAB PDF DOWNLOAD',
                                ErrMsg, ProgressCallback);
 end;
 
 
 function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
-                      CurrentImage,TotalImages: Integer;
                       var ErrMsg : string;
                       ProgressCallback :   TProgressCallback = nil): TDownloadResult;
 begin
   Result := DownloadFileCommon(FPath,FName,LocalSaveFNamePath,
-                               'TMG DOWNLOAD FILE', CurrentImage, TotalImages,
-                               ErrMsg, ProgressCallback);
+                               'TMG DOWNLOAD FILE', ErrMsg, ProgressCallback);
 end;
 
 function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath, DropboxDir: AnsiString;
-                                CurrentImage,TotalImages: Integer;
                                 var ErrMsg : string;
                                 ProgressCallback :   TProgressCallback = nil): TDownloadResult;
 var
@@ -243,7 +238,6 @@ end;
 
 
 function UploadFile(LocalFNamePath,FPath,FName: AnsiString;
-                    CurrentImage,TotalImages: Integer;
                     var ErrMsg : string;
                     ProgressCallback : TProgressCallback = nil): boolean;
 const
@@ -339,9 +333,7 @@ begin
 end;
 
 
-function UploadFileViaDropBox(LocalFNamePath,FPath,FName, DropboxDir: AnsiString;
-                              CurrentImage,TotalImages: Integer;
-                              var ErrMsg : string): boolean;
+function UploadFileViaDropBox(LocalFNamePath,FPath,FName, DropboxDir: AnsiString; var ErrMsg : string): boolean;
 //NOTE: Callback progress function not used because I can't give it a meaningful result.
 var
   DropboxFile : AnsiString;

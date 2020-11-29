@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
-  OleCtrls, SHDocVw, MSHTML, ORFn, fLabs,
+  OleCtrls, SHDocVw, MSHTML, ORFn, fLabs, uImages, 
   rTIU, uTIU, rCore, fDrawers, ORNet, 
   Menus, ORCtrls, ActnList;
 
@@ -550,7 +550,7 @@ begin
         FEditNote.Lines.Assign(TmpBoilerPlate);
         ResolveEmbeddedTemplates(frmDrawers);
         HtmlEditor.MoveCaretToEnd;
-        if uHTMLTools.IsHTML(TmpBoilerPlate.Text) then begin
+        if uHTMLTools.TextIsHTML(TmpBoilerPlate.Text) then begin
           HTMLEditor.InsertHTMLAtCaret(TmpBoilerPlate.Text);
         end else begin
           HTMLEditor.InsertHTMLAtCaret(Text2HTML(TmpBoilerPlate));

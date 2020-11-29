@@ -407,7 +407,7 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fTemplateEditor, rTIU, fDCSummProps, fNotesBP, fTemplateFieldEditor, uTemplates,
      fReminderDialog, dShared, rTemplates, fIconLegend, fNoteIDParents,
      fTemplateDialog, uVA508CPRSCompatibility, VA508AccessibilityRouter, uHTMLTools, fOptionsNotes, uTMGOptions,
-  fImages, fUploadImages, fImagesMultiUse, fImagePickExisting;
+  fImages, fUploadImages, fImagesMultiUse, fImagePickExisting, uImages;
 
 const
   NA_CREATE     = 0;                             // New Summ action - create new Summ
@@ -1034,12 +1034,12 @@ begin
       ExecuteTemplateOrBoilerPlate(TmpBoilerPlate, FEditDCSumm.Title, ltTitle, Self, 'Title: ' + FEditDCSumm.TitleName, DocInfo);
       //kt original QuickCopyWith508Msg(TmpBoilerPlate, memNewSumm);
       //kt QuickCopyWith508Msg(TmpBoilerPlate, memNewNote);
-      BoilerplateIsHTML := uHTMLTools.IsHTML(TmpBoilerPlate.Text);    //kt 9/11
-      FEditDCSumm.Lines.Assign(TmpBoilerPlate);                         //kt 9/11
+      BoilerplateIsHTML := uHTMLTools.TextIsHTML(TmpBoilerPlate.Text);//kt 9/11
+      FEditDCSumm.Lines.Assign(TmpBoilerPlate);                       //kt 9/11
       if not ((vmHTML in FViewMode)) and BoilerplateIsHTML then begin //kt 9/11
         FViewMode := FViewMode - [vmText] + [vmHTML];                 //kt 9/11
       end;                                                            //kt 9/11
-      SetDisplayToHTMLvsText(FViewMode,FEditDCSumm.Lines);              //kt 9/11
+      SetDisplayToHTMLvsText(FViewMode,FEditDCSumm.Lines);            //kt 9/11
       if (vmHTML in FViewMode) then begin                             //kt 9/11
         HtmlEditor.MoveCaretToEnd;                                    //kt 9/11
         Application.ProcessMessages;                                  //kt 9/11
@@ -3870,7 +3870,7 @@ end;
 procedure TfrmDCSumm.btnImageClick(Sender: TObject);
 begin
   inherited;
-  mnuSelectExistingImage.Enabled := (frmImages.ImagesCount > 0);
+  mnuSelectExistingImage.Enabled := (uImages.GetImagesCount > 0);
   popupAddImage.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
 end;
 

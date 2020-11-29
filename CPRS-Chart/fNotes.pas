@@ -49,7 +49,7 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
-  rFileTransferU,                                     //kt 10/27/20
+  rFileTransferU, uImages,                            //kt 10/27/20
   OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
@@ -1468,7 +1468,7 @@ begin
       DocInfo := MakeXMLParamTIU(IntToStr(CreatedNote.IEN), FEditNote);
       ExecuteTemplateOrBoilerPlate(TmpBoilerPlate, FEditNote.Title, ltTitle, Self, 'Title: ' + FEditNote.TitleName, DocInfo);
       //kt QuickCopyWith508Msg(TmpBoilerPlate, memNewNote);
-      BoilerplateIsHTML := uHTMLTools.IsHTML(TmpBoilerPlate.Text);    //kt 9/11
+      BoilerplateIsHTML := uHTMLTools.TextIsHTML(TmpBoilerPlate.Text);//kt 9/11
       FEditNote.Lines.Assign(TmpBoilerPlate);                         //kt 9/11
       if not ((vmHTML in FViewMode)) and BoilerplateIsHTML then begin //kt 9/11
         FViewMode := FViewMode - [vmText] + [vmHTML];                 //kt 9/11
@@ -6201,7 +6201,7 @@ end;
 procedure TfrmNotes.btnImageClick(Sender: TObject);
 //kt 9/11 added function
 begin
-  mnuSelectExistingImage.Enabled := (frmImages.ImagesCount > 0);
+  mnuSelectExistingImage.Enabled := (uImages.GetImagesCount > 0);
   popupAddImage.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
 end;
 

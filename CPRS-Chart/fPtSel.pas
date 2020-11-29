@@ -255,12 +255,7 @@ begin
       ShowModal;
       UserCancelled := FUserCancelled;
       if not UserCancelled then begin
-        CheckForOpenEvent('',0);   //TMG  11/2/20
-        if uTMGOptions.ReadBool('CPRS TIMER PROMPT',False)=True then begin
-          if messagedlg('Would you like to start the chart timer?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
-            frmFrame.btnTimerClick(nil);
-          end;
-        end;
+        //Is this needed??
       end;
     end;
   finally

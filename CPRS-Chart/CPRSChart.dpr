@@ -414,7 +414,8 @@ uses
   fMultiTIUSign in 'TMG_Extra\fMultiTIUSign.pas' {frmMultiTIUSign},
   fViewLabPDF in 'TMG_Extra\fViewLabPDF.pas' {frmViewLabPDF},
   rFileTransferU in 'TMG_Extra\rFileTransferU.pas',
-  uTMGEvent in 'TMG_Extra\uTMGEvent.pas';
+  uTMGEvent in 'TMG_Extra\uTMGEvent.pas',
+  uImages in 'TMG_Extra\uImages.pas';
 
 {$R *.TLB}
 

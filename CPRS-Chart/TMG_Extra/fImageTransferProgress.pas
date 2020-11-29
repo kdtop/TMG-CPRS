@@ -62,8 +62,8 @@ type
 
   end;
 
-//var
-//  frmImageTransfer: TfrmImageTransfer;
+var
+  frmImageTransfer: TfrmImageTransfer;  //not auto-instantiaged.  
 
 implementation
 

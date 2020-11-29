@@ -38,7 +38,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   ORNet, ORFn,
-  rFileTransferU,  //10/27/20
+  rFileTransferU, uImages,
   Dialogs, ExtCtrls, StdCtrls, OleCtrls, SHDocVw, Buttons;
 
 const
@@ -172,14 +172,14 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
   begin
     if DLType in [dlBoth,dlThumb]  then begin
       if not FileExists(InfoRec.LocalThumbPath) then begin
-        frmImages.SplitLinuxFilePath(InfoRec.ThumbnailFPath,FPath,FName);
-        Result := frmImages.DownloadFile(FPath,FName,InfoRec.LocalThumbPath,-1,1);
+        SplitLinuxFilePath(InfoRec.ThumbnailFPath,FPath,FName);
+        Result := DownloadFile(FPath,FName,InfoRec.LocalThumbPath,-1,1);
       end;
     end;
     if DLType in [dlBoth,dlFull]  then begin
       if not FileExists(InfoRec.LocalFPath) then begin
-        frmImages.SplitLinuxFilePath(InfoRec.ImageFPath,FPath,FName);
-        Result := frmImages.DownloadFile(FPath,FName,InfoRec.LocalFPath,-1,1);
+        SplitLinuxFilePath(InfoRec.ImageFPath,FPath,FName);
+        Result := DownloadFile(FPath,FName,InfoRec.LocalFPath,-1,1);
       end;
     end;
   end;
@@ -317,9 +317,9 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
       FMDT := StrToFloatDef(DT,0);
       OneRec.DateTime := FMDateTimeToDateTime(FMDT);
       OneRec.DisplayDate := piece(s,'^',9);
-      frmImages.SplitLinuxFilePath(OneRec.ThumbnailFPath,FPath,FName);
+      SplitLinuxFilePath(OneRec.ThumbnailFPath,FPath,FName);
       OneRec.LocalThumbPath := CacheDir+'\'+ChangeFileExt(FName,'.bmp');
-      frmImages.SplitLinuxFilePath(OneRec.ImageFPath,FPath,FName);
+      SplitLinuxFilePath(OneRec.ImageFPath,FPath,FName);
       OneRec.LocalFPath := CacheDir+'\'+FName;
     end;
 

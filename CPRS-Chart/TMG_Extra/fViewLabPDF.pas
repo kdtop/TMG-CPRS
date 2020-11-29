@@ -60,6 +60,10 @@ type
     ORDateBoxSD: TORDateBox;
     ORDateBoxED: TORDateBox;
     ORDateTimeDlg: TORDateTimeDlg;
+    btnPrev: TBitBtn;
+    btnNext: TBitBtn;
+    procedure btnNextClick(Sender: TObject);
+    procedure btnPrevClick(Sender: TObject);
     procedure ORDateBoxEDChange(Sender: TObject);
     procedure ORDateBoxSDChange(Sender: TObject);
     procedure cboDispDatesChange(Sender: TObject);
@@ -82,6 +86,7 @@ type
     procedure DisplayPDF(InfoObj : TPDFInfo);
     procedure ClearPDFDisplay;
     function EnsurePDFLocal(InfoObj : TPDFInfo) : TDownloadResult;
+    procedure SetNextPrevBtnEnable();
   public
     { Public declarations }
   end;
@@ -92,6 +97,7 @@ type
 procedure ShowLabReport(InitFMDateTime : TFMDateTime);
 
 implementation
+  uses fFrame;
 
 type
 tDatePick = (tdpOneDate=0,   //NOTE: These MUST match sequence if ITEMS of cboDispDates
@@ -148,35 +154,8 @@ begin
   ChangingORDateBox := false;
   ChangingDispDates := false;
   SetDate(InitFMDateTime);
-  {
-  InfoList := TStringList.Create;
-  try
-    if InitFMDateTime=0 then begin
-        StartDate:= 0;
-        EndDate := 9999999; //change later with date filters control objects etc. ...
-    end else begin
-        StartTime := EncodeTime(00,01,00,0);
-        EndTime := EncodeTime(23,59,00,0);
-        TempStartDate := FMDateTimeToDateTime(InitFMDateTime);
-        TempEndDate := FMDateTimeToDateTime(InitFMDateTime);
-        ReplaceTime(TempStartDate,StartTime);
-        ReplaceTime(TempEndDate,EndTime);
-        StartDate := DateTimeToFMDateTime(TempStartDate) ;
-        EndDate := DateTimeToFMDateTime(TempEndDate);
-    end;
-    GetAvailLabPDFs(InfoList, Patient.DFN, StartDate, EndDate);
-    if InfoList.Count = 0 then exit;
-    ResultStr := InfoList.Strings[0];
-    if piece(ResultStr,'^',1) = '-1' then begin
-      MessageDlg('Error: ' + Pieces(ResultStr, '^', 2, 99),mtError,[mbOK],0);
-      exit;
-    end;
-    LoadLB(InfoList); //load results into listbox
-    SelectByDate(InitFMDateTime);
-  finally
-    InfoList.Free;
-  end;
-  }
+  self.Top := frmFrame.Top;
+  self.Height := frmFrame.Height;
 end;
 
 function TfrmViewLabPDF.BeginningOfDay(FMDateTime : TFMDateTime) : TFMDateTime;
@@ -261,6 +240,27 @@ begin
   Result := DateTimeToFMDateTime(EncodeDate(2200, 12, 30));
 end;
 
+procedure TfrmViewLabPDF.btnNextClick(Sender: TObject);
+begin
+  if ListBox.ItemIndex < ListBox.Items.Count then ListBox.ItemIndex := ListBox.ItemIndex + 1;
+  ListBoxClick(Sender);
+  SetNextPrevBtnEnable();
+end;
+
+
+procedure TfrmViewLabPDF.btnPrevClick(Sender: TObject);
+begin
+  if ListBox.ItemIndex > 0 then ListBox.ItemIndex := ListBox.ItemIndex - 1;
+  ListBoxClick(Sender);
+  SetNextPrevBtnEnable();
+end;
+
+procedure TfrmViewLabPDF.SetNextPrevBtnEnable();
+begin
+  btnNext.Enabled := (ListBox.Items.Count > 0) and (ListBox.ItemIndex < ListBox.Items.Count-1);
+  btnPrev.Enabled := (ListBox.ItemIndex > 0);
+end;
+
 
 procedure TfrmViewLabPDF.cboDispDatesChange(Sender: TObject);
 begin
@@ -322,6 +322,7 @@ begin
     DispText := FormatFMDateTime('mmm dd, yyyy hh:nn', InfoObj.LabDate);
     ListBox.Items.AddObject(DispText,InfoObj);
   end;
+  SetNextPrevBtnEnable();
 end;
 
 procedure TfrmViewLabPDF.ORDateBoxEDChange(Sender: TObject);

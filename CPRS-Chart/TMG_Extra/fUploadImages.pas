@@ -38,14 +38,14 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, pngimage, ExtDlgs, OleCtrls,
-  uCore, iniFiles, ShellAPI, fTMG_WIA_GetImage, registry, jpeg,
+  uCore, iniFiles, ShellAPI, fTMG_WIA_GetImage, registry, jpeg, uImages,
   SHDocVw;
 
 type
 
   PHICON = ^HICON;
 
-  TImageInfo = class
+  TUploadImageInfo = class
     private
     public
       TIUIEN :             int64;      //IEN in file# 8925
@@ -64,7 +64,7 @@ type
       ObjectType :         int64;      //pointer to file 2005.02
       ProcName :           String[10]; //server limit is 10 chars.
       pLongDesc :          TStrings;  //Won't be owned by this list
-      procedure Assign(Source : TImageInfo);
+      procedure Assign(Source : TUploadImageInfo);
       procedure Clear;
   end;
 
@@ -75,7 +75,7 @@ type
       ErrMsg :       AnsiString;
       NoteTitle :    AnsiString; //Title of note to be associated with image
       Patient :      TPatient;
-      ImageInfo :    TImageInfo;
+      ImageInfo :    TUploadImageInfo;
       Location :     AnsiString; //Location that image if from
       DOS :          AnsiString; //Date of service
       Provider :     AnsiString;
@@ -156,11 +156,11 @@ type
     FUploadedImagesList : TStringList; //List of strings of images succesfully uploaded.
     FUploadedImagesIENList : TStringList; //List of strings of IMAGE file IEN's succesfully uploaded.
                                           //Note: 1:1 relationship with FUploadedImagesList
-    function MakeThumbNail(Info: TImageInfo; Size : integer = 64): boolean;
+    function MakeThumbNail(Info: TUploadImageInfo; Size : integer = 64): boolean;
     procedure GetAssociatedIcon(FileName: TFilename; PLargeIcon, PSmallIcon: PHICON);
     procedure LoadNotesEdit();
     //procedure LoadNotesList();
-    function UploadFile(Info: TImageInfo; DelOrig : boolean; ErrLog : TStringList = nil): boolean;
+    function UploadFile(Info: TUploadImageInfo; DelOrig : boolean; ErrLog : TStringList = nil): boolean;
     procedure RunModal(ExecuteFile, ParamString:string);
     function GetWindowsFolder: string;
     function CopyFileToTemp(FNamePath : string;TempBrowseable : boolean=false) : string;
@@ -178,7 +178,7 @@ type
     procedure SetUniversalImages(Value : boolean);
     procedure SetUploadMode(Value : tImageUploadMode);
     //procedure SetCallingForm(form : string);
-    procedure LinkSignatureImage(var Info: TImageInfo);
+    procedure LinkSignatureImage(var Info: TUploadImageInfo);
     procedure ScanAndHandleImgTxt(ErrLog : TStringList = nil);
     procedure ScanAndHandleImages;
     procedure VerifyDocuments(TIUIENList: TStringList);
@@ -212,7 +212,7 @@ const
   function UniqueTempSaveFilePath (RootName : string = 'temp_file'; FileType : string = 'jpg') : string;
 
 var
-  //frmImageUpload: TfrmImageUpload;      //this was commented out and I'm not sure why. 8/26/19
+  frmImageUpload: TfrmImageUpload;    //not auto-instantiated
   PLargeIcon, PSmallIcon: phicon;
 
 
@@ -362,7 +362,7 @@ implementation
 
   //-------------------------------------------------------------------------
   //-------------------------------------------------------------------------
-  procedure TImageInfo.Assign(Source : TImageInfo);
+  procedure TUploadImageInfo.Assign(Source : TUploadImageInfo);
   begin
     TIUIEN := Source.TIUIEN;
     DFN := Source.DFN;
@@ -381,7 +381,7 @@ implementation
     pLongDesc := Source.pLongDesc;  //this is only a pointer to object owned elsewhere
   end;
 
-  procedure TImageInfo.Clear;
+  procedure TUploadImageInfo.Clear;
   begin
     TIUIEN := 0;
     DFN := '';
@@ -550,7 +550,7 @@ implementation
     Self.Patient := TPatient.Create;
     Self.Patient.SyncWebPages := false;
     Self.CurNoteImages := TStringList.Create;
-    Self.ImageInfo := TImageInfo.Create;
+    Self.ImageInfo := TUploadImageInfo.Create;
     Self.Clear;
   end;
 
@@ -563,7 +563,7 @@ implementation
 
   //-------------------------------------------------------------------------
   //-------------------------------------------------------------------------
-  function TfrmImageUpload.MakeThumbNail(Info: TImageInfo; Size : integer = 64) : boolean;
+  function TfrmImageUpload.MakeThumbNail(Info: TUploadImageInfo; Size : integer = 64) : boolean;
   //This takes Info.ImageFPathName and creates a 64x64 .bmp file with
   //this same name, and saves in cache directory.
   //saves name of this thumbnail in info.ThumbFPathName
@@ -755,7 +755,7 @@ implementation
     end;
   end;
 
-  function TfrmImageUpload.UploadFile(Info: TImageInfo; DelOrig : boolean; ErrLog : TStringList = nil): boolean;
+  function TfrmImageUpload.UploadFile(Info: TUploadImageInfo; DelOrig : boolean; ErrLog : TStringList = nil): boolean;
   //result: true if success, false if failure
   //kt 8/10/20 Added ErrLog.  Optional.  If provided, then errors will be added to this, and MessageDlg will not be shown.
   var
@@ -821,7 +821,7 @@ implementation
     //Now actually send image up to server
     Info.ServerPath := Piece(RPCResult,'^',2);
     Info.ServerFName := Piece(RPCResult,'^',3);
-    result := frmImages.UploadFile(Info.ImageFPathName,Info.ServerPath,Info.ServerFName,1,1);
+    result := uImages.UploadFile(Info.ImageFPathName, Info.ServerPath,Info.ServerFName,1,1);
     if result=false then begin
       ErrorMsg := 'Error uploading image to server.'+ #13 + Piece(RPCResult,'^',2);
       if assigned(ErrLog) then begin     //kt 8/10/20
@@ -865,7 +865,7 @@ implementation
       CopyFile(PChar(tempFName),PChar(CacheFPathName),FALSE);
     end;
     if MakeThumbNail(Info, THUMBNAIL_SIZE[FUploadMode]) then begin;
-      result := frmImages.UploadFile(Info.ThumbFPathName,Info.ServerPath,Info.ServerThumbFName,1,1);
+      result := uImages.UploadFile(Info.ThumbFPathName,Info.ServerPath,Info.ServerThumbFName,1,1);
       if result=false then begin
         ErrorMsg :='Error sending thumbnail image to server.'+ #13 + Piece(RPCResult,'^',2);
         if assigned(ErrLog) then begin     //kt 8/10/20
@@ -892,10 +892,10 @@ implementation
 
   procedure TfrmImageUpload.UploadChosenFiles();
   var i : integer;
-      Info: TImageInfo;
+      Info: TUploadImageInfo;
 
   begin
-    Info := TImageInfo.Create();
+    Info := TUploadImageInfo.Create();
     Info.pLongDesc := nil;
 
     //Load up info class/record
@@ -938,10 +938,10 @@ implementation
       end;
     end;
     Info.Free;
-    frmImages.NumImagesAvailableOnServer := NOT_YET_CHECKED_SERVER;   //Forces re-query of server
+    uImages.NumImagesAvailableOnServer := NOT_YET_CHECKED_SERVER;   //Forces re-query of server
   end;
 
-  procedure TfrmImageUpload.LinkSignatureImage(var Info: TImageInfo);
+  procedure TfrmImageUpload.LinkSignatureImage(var Info: TUploadImageInfo);
   begin
     //Set up link in file TMG IMAGE ESIG
     CallV('TMG CPRS STORE ESIG IMAGE',[User.DUZ, Info.IMAGEIEN]);

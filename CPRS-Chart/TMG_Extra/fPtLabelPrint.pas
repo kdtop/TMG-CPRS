@@ -114,8 +114,8 @@ implementation
 {$R *.dfm}
 
 uses rCore,rTIU,uConst,
-      IniFiles // for IniFile
-      , fImages;
+      IniFiles, // for IniFile
+      uImages, fImages;
 
 const
   ANY_NUM_PAGES = '<ANY>';
@@ -218,7 +218,7 @@ begin
 
   try
     pic := TPicture.Create;
-    FNamePath := frmImages.CreateBarcode(BCLine,'png');
+    FNamePath := DoCreateBarcode(BCLine,'png');
     pic.LoadFromFile(FNamePath);  
     //barcodeWidth := pic.Bitmap.Width;
     //barcodeHeight := pic.Bitmap.Height;

@@ -36,6 +36,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  uImages,
   Dialogs, fImages, StdCtrls, Buttons, ExtCtrls;
 
 type
@@ -166,10 +167,10 @@ var i : integer;
     Rec  : TImageInfo;
 
 begin
-  frmImages.EnsureALLImagesDownloaded;
+  EnsureLinkedImagesDownloaded;
   ImagesListClear;
-  for i := 0 to frmImages.ImagesCount - 1 do begin
-    Rec := frmImages.ImageInfo[i];
+  for i := 0 to uImages.GetImagesCount - 1 do begin
+    Rec := uImages.GetImageInfo(i);
     Image := TImage.Create(Self);
     ShownImagesList.Add(Image);  //index will match Image.Tag below
     Image.Visible := false;
@@ -205,7 +206,7 @@ function TfrmImagePickExisting.GetSelectedImageInfo : TImageInfo;
 //Returns nil if not selcted.
 begin
   if SelectedIndex> -1 then begin
-    Result := frmImages.ImageInfo[SelectedIndex];
+    Result := uImages.GetImageInfo(SelectedIndex);
   end else begin
     Result := nil;
   end;

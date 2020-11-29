@@ -39,7 +39,7 @@ interface
 
 uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ComCtrls, ExtCtrls, ORCtrls, OrFn, Dialogs, ORDtTmRng, fBAOptionsDiagnoses,
-  inifiles, uConst, strUtils, //kt 9/11 added line
+  inifiles, uConst, strUtils, uImages, //kt 9/11 added line
   uBAGlobals, fBase508Form, VA508AccessibilityManager, fAutoSz;
 
 type
@@ -595,7 +595,7 @@ begin
     frmFrame.SetATabVisibility(CT_IMAGES, cbEnableImages.Checked, 'Images');
 
     uTMGOptions.WriteInteger('ImageTransferMethod',cboTransMethod.itemindex);
-    frmImages.TransferMethod := TImgTransferMethod(cboTransMethod.itemindex);
+    TransferMethod := TImgTransferMethod(cboTransMethod.itemindex);
     {
     if cboTransMethod.text = 'Dropbox Transfer' then begin
       frmImages.UseDropBox := True;
@@ -604,7 +604,7 @@ begin
     end;
     }
     uTMGOptions.WriteString('Dropbox directory',editDropboxLocation.text);
-    frmImages.DropBoxDir := editDropboxLocation.text;
+    uImages.DropBoxDir := editDropboxLocation.text;
 
     uTMGOptions.WriteBool('Scan Enabled',cbEnableScanning.Checked);
 
@@ -1006,7 +1006,7 @@ end;
 procedure TfrmOptions.btnEmptyImageCacheClick(Sender: TObject);
 begin
   inherited;
-  frmImages.EmptyCache;
+  EmptyCache;
   //refresh html text here
 end;
 

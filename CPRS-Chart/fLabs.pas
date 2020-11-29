@@ -175,8 +175,8 @@ type
     mnuNotifyOk: TMenuItem;
     popNotifyOK: TMenuItem;
     AddToImportIgnore: TMenuItem;
-    btnViewReport: TButton;
     mnuViewLabReports: TMenuItem;
+    btnViewReport: TBitBtn;
     procedure mnuViewLabReportsClick(Sender: TObject);
     procedure btnViewReportClick(Sender: TObject);
     procedure AddToImportIgnoreClick(Sender: TObject);

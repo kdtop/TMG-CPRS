@@ -38,7 +38,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, SHDocVw, ExtCtrls, StdCtrls, Buttons, ImgList,
-  fImages, ORNet,
+  fImages, ORNet, uImages,
   ComCtrls;
 
 type
@@ -98,7 +98,7 @@ implementation
   uses
     fImagesMultAddDlg,
     ORFn,
-    fUploadImages;
+    fUploadImages, rFileTransferU;
 
   procedure TfrmImagesMultiUse.FormCreate(Sender: TObject);
   begin
@@ -114,7 +114,7 @@ implementation
   var i : integer;
   begin
     for i := 0 to FImageInfoList.Count - 1 do begin
-      fImages.TImageInfo(FImageInfoList.Objects[i]).Free;
+      TImageInfo(FImageInfoList.Objects[i]).Free;
     end;
     FImageInfoList.Free;
   end;
@@ -170,19 +170,20 @@ implementation
   end;
 
   function TfrmImagesMultiUse.SelectNamedImage(Name: string): boolean;  
-  //
   var
-  Rec : fImages.TImageInfo;
+    Rec : TImageInfo;  //owned here
+    DLResult : TDownloadResult;
   begin
-    Rec := GetImageByName(Name);
+    Rec := GetImageByName(Name); //instantiates new Rec
     if Assigned(Rec) then begin
-      frmImages.DownloadToCache(Rec);
+      DLResult := EnsureRecDownloaded(Rec);
       FSelectedImage := Rec.ServerFName;
       FSelectedImageName := Name;
-      Result := True
+      Result := (DLResult = drSuccess);
     end else begin
       Result := False;
     end;
+    FreeAndNil(Rec);
   end;
 
   procedure TfrmImagesMultiUse.ClearTV;
@@ -250,30 +251,30 @@ implementation
     btnUseImage.Enabled := true;
   end;
 
-  function TfrmImagesMultiUse.GetImage(MagIEN : string) : fImages.TImageInfo;
+  function TfrmImagesMultiUse.GetImage(MagIEN : string) : TImageInfo;
   var s : string ;
       i : integer;
   begin
     //If MagIEN requested previously, return stored results
     i := FImageInfoList.IndexOf(MagIEN);
     if i > -1 then begin
-      Result := fImages.TImageInfo(FImageInfoList.Objects[i]);
+      Result := TImageInfo(FImageInfoList.Objects[i]);
       exit;
     end;
     //RPC returns info from MagIEN (file 2005)
-    //Format is same as returned by MAG3 CPRS TIU NOTE (see TfrmImages.GetImageList)
+    //Format is same as returned by MAG3 CPRS TIU NOTE (see TfrmImages.FillImageList)
     s := sCallV('TMG MULTI IMAGE INFO', [MagIEN]);
     if strtoint(Piece(s,'^',1)) < 1 then begin
       MessageDlg('Error: ' + Piece(s,'^',2),mtError,[mbOK],0);
       Result := nil;
       exit;
     end;
-    Result := frmImages.HandleOneImageListLine(s);
+    Result := ParseOneImageListLine(s);
     if Result = nil then exit;
     FImageInfoList.AddObject(MagIEN,Result);  //FImageInfoList owns objects
   end;
 
-  function TfrmImagesMultiUse.GetImageByName(Name : string) : fImages.TImageInfo;
+  function TfrmImagesMultiUse.GetImageByName(Name : string) : TImageInfo;
   var s : string ;
   begin
     s := sCallV('TMG MULTI IMAGE BY NAME', [Name]);
@@ -282,18 +283,22 @@ implementation
       Result := nil;
       exit;
     end;
-    Result := frmImages.HandleOneImageListLine(s);
+    Result := ParseOneImageListLine(s);
   end;
 
   procedure TfrmImagesMultiUse.DisplayImage(MagIEN, Name : string);
-  var Rec : fImages.TImageInfo;
+  var Rec : TImageInfo; //NOT owned here
+      Success : boolean;
   begin
     Rec := GetImage(MagIEN);
+    Success := false; //default
     if Assigned(Rec) then begin
-      frmImages.DownloadToCache(Rec);
+      Success := (EnsureRecDownloaded(Rec) = drSuccess);
+    end;
+    if Success then begin
       WebBrowser.Navigate(Rec.CacheFName);
       FSelectedImage := Rec.ServerFName;
-      FSelectedImageName := Name
+      FSelectedImageName := Name;
     end else begin
       WebBrowser.Navigate(frmImages.NullImageName);
       FSelectedImage := '';

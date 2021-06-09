@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2020/12/08 14:46:13.529.pas,C:\Users\Eddie\Documents\Borland Studio Projects\Unit1.pas=C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\Main.pas</Transaction>
+    <Transaction>2020/12/08 14:46:13.529.dfm,C:\Users\Eddie\Documents\Borland Studio Projects\Unit1.dfm=C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\Main.dfm</Transaction>
+    <Transaction>2020/12/08 14:46:21.747.bdsproj,C:\Users\Eddie\Documents\Borland Studio Projects\Project1.bdsproj=C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\MDMGrid.bdsproj</Transaction>
+    <Transaction>2020/12/08 15:03:39.988.pas,C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\Unit2.pas=C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\MDMHelper.pas</Transaction>
+    <Transaction>2020/12/08 15:03:39.988.dfm,C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\Unit2.dfm=C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\MDMHelper.dfm</Transaction>
+    <Transaction>2020/12/08 15:41:18.221.pas,C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\Unit1.pas=C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\CollapsablePanelU.pas</Transaction>
+  </Transactions>
+</BorlandProject>

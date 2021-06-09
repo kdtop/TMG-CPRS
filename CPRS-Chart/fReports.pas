@@ -40,6 +40,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Menus, uConst, ORDtTmRng,
   OleCtrls, SHDocVw, Buttons, ClipBrd, rECS, Variants, StrUtils, fBase508Form,
+  uTMGOptions, //kt 4/1/21
   VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR;
 
 type
@@ -100,6 +101,8 @@ type
     mnuNotifyOK: TMenuItem;
     mnuNotifyOk1: TMenuItem;
     mnuCopyResultsTable1: TMenuItem;
+    procedure sptHorzRightMoved(Sender: TObject);
+    procedure lvReportsDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
     procedure mnuCopyResultsTable1Click(Sender: TObject);
     procedure mnuNotifyOKClick(Sender: TObject);
     procedure mnuCopyResultsTableClick(Sender: TObject);
@@ -166,6 +169,8 @@ type
     function TVImagingSelected(): boolean; //kt added 3/20/17
     function GetLVReportsVisibleHeight : integer; //kt added 3/20/17
     procedure AdjustLVReportsHeight(); //kt added 3/20/17
+    procedure CheckForHiddenRows();  //elh  3/15/21
+    function SelectUserDefaultReport: boolean; //kt added 3/17/21
   public
     procedure ClearPtData; override;
     function AllowContextChange(var WhyNot: string): Boolean; override;
@@ -234,6 +239,7 @@ const
               '</style></head><body><pre>';
   HTML_POST = CRLF + '</pre></body></html>';
   BlankWebPage = 'about:blank';
+  TMG_LAST_REPORT_KEY = 'Last Report Viewed';
 
 var
   uRemoteCount: Integer;
@@ -534,10 +540,12 @@ begin
       TRemoteSite(RemoteSites.SiteList.Items[i]).ReportClear;
     pnlRightTop.Height := lblTitle.Height + TabControl1.Height;
     StatusText('');
-    with tvReports do begin
-      if Items.Count > 0 then begin
-        tvReports.Selected := tvReports.Items.GetFirstNode;
-        tvReportsClick(self);
+    if not SelectUserDefaultReport then begin  //kt added wrapper to this preexisting bloc  4/1/21
+      with tvReports do begin
+        if Items.Count > 0 then begin
+          tvReports.Selected := tvReports.Items.GetFirstNode;
+          tvReportsClick(self);
+        end;
       end;
     end;
   end;
@@ -610,6 +618,10 @@ begin
          lvReportsSelectItem(self, lvReports.Selected, true);
         end;
       end;  }
+  end;
+  if (tvReports.Selected = nil) and (tvReports.Items.Count > 0) then begin  //kt added block 4/1/21
+    tvReports.Selected := tvReports.Items.GetFirstNode;
+    tvReportsClick(self);
   end;
 end;
 
@@ -711,10 +723,12 @@ begin
       end;
     end;
   end;
+  {  //kt commented out 4/1/21
   if tvReports.Items.Count > 0 then begin
     tvReports.Selected := tvReports.Items.GetFirstNode;
     tvReportsClick(self);
   end;
+  }
 end;
 
 procedure TfrmReports.SetFontSize(NewFontSize: Integer);
@@ -1496,6 +1510,27 @@ begin
   end;
 end;
 
+function TfrmReports.SelectUserDefaultReport() : boolean;
+//kt added procedure.
+//Results:  TRUE if a default report was found for user.  Otherwise FALSE
+//
+var
+  RptName: String;
+  i: integer;
+  ANode: TTreeNode;
+begin
+  Result := false; //default
+  RptName := uTMGOptions.ReadString(TMG_LAST_REPORT_KEY,''); //'Imaging (local only)'; //<--- change later to user stored data...
+  if RptName <> '' then for i := 0 to tvReports.Items.Count - 1 do begin
+    ANode := tvReports.Items[i];
+    if ANode.Text <> RptName then continue;
+    tvReports.Selected := ANode;
+    tvReportsClick(self);
+    Result := True;
+    break;
+  end;
+end;
+
 procedure TfrmReports.Timer1Timer(Sender: TObject);
 var
   i,j,fail,t: integer;
@@ -1919,6 +1954,12 @@ begin
     Newsize := 50;
 end;
 
+procedure TfrmReports.sptHorzRightMoved(Sender: TObject);
+begin
+  inherited;
+  CheckForHiddenRows;
+end;
+
 procedure TfrmReports.lstQualifierDrawItem(Control: TWinControl;
   Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
@@ -1960,6 +2001,20 @@ begin
   Result := (lvReports.Items.Count + 2) * (RowHeight); //add row for header, and extra row for base when horizontal slider is visible. 
 end;
 
+procedure TfrmReports.CheckForHiddenRows();
+//tmg added entire procedure   3/12/19
+var Diff:integer;
+begin
+  Diff := lvReports.Items.Count-lvReports.VisibleRowCount;
+  if Diff>0 then begin
+    sptHorzRight.color := clRed;
+  end else begin
+    sptHorzRight.color := clBtnFace;
+  end;
+  sptHorzRight.Repaint;
+  //Showmsg('Visible Row:'+inttostr(grdlab.VisibleRowCount)+' - Total Row:'+inttostr(grdlab.RowCount));
+end;
+
 procedure TfrmReports.AdjustLVReportsHeight();
 //kt added 3/20/17
 var
@@ -1980,6 +2035,7 @@ var
   CurrentParentNode, CurrentNode: TTreeNode;
 begin
   inherited;
+  uTMGOptions.WriteString(TMG_LAST_REPORT_KEY,tvReports.Selected.Text); //kt 4/1/21
   lvReports.Hint := 'To sort, click on column headers|';
   tvReports.TopItem := tvReports.Selected;
   uRemoteCount := 0;
@@ -2206,6 +2262,7 @@ begin
         ListReportDateRanges(lstQualifier.Items);
         if lstQualifier.ItemID = '' then begin
           lstQualifier.ItemIndex := lstQualifier.Items.Add(aStartTime + ';' + aStopTime + '^' + aStartTime + ' to ' + aStopTime);
+          if piece(aID,':',1)='1610' then lstQualifier.ItemIndex := 1;          
           lvReports.SmallImages := uEmptyImageList;
           imgLblImages.ComponentImageListChanged;
           lvReports.Items.Clear;
@@ -2755,6 +2812,12 @@ begin
     end;
   end;
   if not ColumnSortForward then Compare := -Compare;
+end;
+
+procedure TfrmReports.lvReportsDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
+begin
+  inherited;
+  CheckForHiddenRows;
 end;
 
 procedure TfrmReports.lvReportsSelectItem(Sender: TObject; Item: TListItem;

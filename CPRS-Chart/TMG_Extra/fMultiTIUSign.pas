@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, DateUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, rCore, fFrame, fAddlSigners, Math,fImagePatientPhotoID,
+  Dialogs, ComCtrls, rCore, fFrame, fAddlSigners, Math,fImagePatientPhotoID, fNotes, 
   TMGHTML2, StdCtrls, Buttons, ORCtrls, ORNet, ExtCtrls, OleCtrls, SHDocVw;
 
 type
@@ -69,6 +69,9 @@ type
     btnEditNormalZoom: TSpeedButton;
     btnEditZoomIn: TSpeedButton;
     PatientImage: TImage;
+    btnMoveToLoose: TBitBtn;
+    procedure pnlCenterBottomResize(Sender: TObject);
+    procedure btnMoveToLooseClick(Sender: TObject);
     procedure PatientImageMouseLeave(Sender: TObject);
     procedure PatientImageMouseEnter(Sender: TObject);
     procedure btnEditZoomInClick(Sender: TObject);
@@ -91,6 +94,7 @@ type
     ESCode : string;
     FZoomValue : integer;
     FZoomStep : integer;  //e.g. 5% change with each zoom in
+    SelectedDFN : string;
     //ColLeftWidth, ColCenterWidth, ColRightWidth : integer;
     frmPatientPhotoID : TfrmPatientPhotoID;
     Procedure Initialize(Items : TListItems);
@@ -123,7 +127,7 @@ implementation
 
 {$R *.dfm}
 
-uses VAUtils, ORFn, uConst, StrUtils, fSignItem,
+uses VAUtils, ORFn, uConst, StrUtils, fSignItem, fImages, uImages,
      uTIU, rTIU, uHTMLTools, fConsultLink;
 
 //===========================================================
@@ -287,7 +291,7 @@ begin
   while j >= lbUnSelected.Count do dec(j);
   lbUnSelected.ItemIndex := j;
   lbUnSelectedClick(Sender);
-  UpdateButtonEnableStates;  
+  UpdateButtonEnableStates;
 end;
 
 
@@ -381,6 +385,56 @@ begin
   ZoomOut;
 end;
 
+procedure TfrmMultiTIUSign.btnMoveToLooseClick(Sender: TObject);
+var j : integer;
+    ItemInfo : TItemInfo;
+    Success : boolean;
+    ActionSts,DeleteSts : TActionRec;
+    ImageList:TList;
+    i : integer;
+    RPCResult,Reason : string;
+    Result : boolean;
+    ImageInfo : TImageInfo;
+    Suggestion : string;
+begin
+  ItemInfo := SelectedItemInfoFromLB(lbUnSelected);
+  if not assigned(ItemInfo) then exit;
+
+  Suggestion := pieces(ItemInfo.AlertMsg,' ',2,999);
+  Suggestion := piece2(Suggestion,'available',1);
+  Success := frmNotes.MoveTIUToLoose(ItemInfo.DFN,ItemInfo.IEN8925,Suggestion);
+  if Success=False then exit;
+
+  ActOnDocument(ActionSts, strtoint(ItemInfo.IEN8925), 'DELETE RECORD');
+  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
+    ImageList := TList.Create;
+    FillImageList(ItemInfo.IEN8925, ImageList);
+    Reason := 'DeleteAll';
+    //DeleteAllAttachedImages(ItemInfo., idmDelete, HtmlEditor, false); // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
+    for i := 0 to ImageList.Count - 1 do begin
+       ImageInfo := GetImageInfo(ImageList, i);
+       RPCResult := sCallV('TMG IMAGE DELETE', [inttostr(ImageInfo.IEN),'1',Reason]);
+       Result := Piece(RPCResult,'^',1)= '1';
+       if Result = false then begin
+           MessageDlg(Piece(RPCResult,'^',2),mtError,[mbOK],0);
+       end;
+    end;
+    ImageList.Free;
+  end;
+
+  DeleteDocument(DeleteSts, strtoint(ItemInfo.IEN8925),'');
+  if DeleteSts.Success=False then begin
+    messagedlg(DeleteSts.Reason,mtError,[mbOk],0);
+    exit;
+  end;
+  j := lbUnSelected.ItemIndex;
+  lbUnSelected.Items.Delete(j);
+  while j >= lbUnSelected.Count do dec(j);
+  lbUnSelected.ItemIndex := j;
+  lbUnSelectedClick(Sender);
+  UpdateButtonEnableStates;
+end;
+
 procedure TfrmMultiTIUSign.btnNextClick(Sender: TObject);
 //NOTE: disabled unless next is possible.
 begin
@@ -414,6 +468,7 @@ procedure TfrmMultiTIUSign.DisplayFromList(LB : TListBox);
 var
   ItemInfo : TItemInfo;
 begin
+  SelectedDFN := '';
   ItemInfo := SelectedItemInfoFromLB(LB);
   if not assigned(ItemInfo) then exit;
   LoadNoteForView(ItemInfo);
@@ -423,6 +478,7 @@ begin
   LoadMostRecentPhotoIDThumbNail(ItemInfo.DFN,PatientImage.Picture.Bitmap);
   pnlPatientID.Color := ItemInfo.PtRec.DueColor;
   UpdateButtonEnableStates;
+  SelectedDFN := ItemInfo.DFN;
 end;
 
 function TfrmMultiTIUSign.SelectedItemInfoFromLB(LB : TListBox) : TItemInfo;
@@ -449,19 +505,40 @@ procedure TfrmMultiTIUSign.PatientImageMouseEnter(Sender: TObject);
 var refresh : boolean;
   ItemInfo : TItemInfo;
 begin
-  inherited;
-  ItemInfo := SelectedItemInfoFromLB(lbUnSelected);
-  if not assigned(ItemInfo) then exit;
-  frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
-  frmPatientPhotoID.ShowPreviewMode(ItemInfo.DFN,Self.PatientImage,ltLeft);
+  //if not assigned(ItemInfo) then exit;
+  if SelectedDFN = '' then exit;
+  try
+    if not assigned(frmPatientPhotoID) then frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
+    frmPatientPhotoID.ShowPreviewMode(SelectedDFN,Self.PatientImage,ltLeft);
+  except
+    //On E : exception do messagedlg('Error on Mouse Enter'+#13#10+E.Message,mtError,[mbok],0);
+  end;
 end;
 
 
 procedure TfrmMultiTIUSign.PatientImageMouseLeave(Sender: TObject);
 begin
   inherited;
-  if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
+  //if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
+  try
+    if assigned(frmPatientPhotoID) then frmPatientPhotoID.hide;
+  except
+    //On E : exception do messagedlg('Error on Mouse Leave'+#13#10+E.Message,mtError,[mbok],0);
+  end;
+end;
 
+procedure TfrmMultiTIUSign.pnlCenterBottomResize(Sender: TObject);
+var btnWidth:integer;
+begin
+   btnWidth := round((pnlCenterBottom.Width-23)/4);
+   btnPrev.width := btnWidth;
+   btnAddToSign.width := btnWidth;
+   btnMoveToLoose.width := btnWidth;
+   btnNext.width := btnWidth;
+   btnPrev.left := 5;
+   btnAddToSign.Left := 5+6+btnWidth;
+   btnMoveToLoose.Left := 5+12+(btnWidth*2);
+   btnNext.Left := 5+18+(btnWidth*3);
 end;
 
 procedure TfrmMultiTIUSign.LoadNoteForView(ItemInfo : TItemInfo);

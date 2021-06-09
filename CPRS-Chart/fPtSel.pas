@@ -668,19 +668,17 @@ var
   RPCResult : string;  //kt
 begin
 // vwpt enhanced   on click or double clck set mode back to normal to a.) not allow change event
-//erroneiusly checked with false lookup, and b.0 immedicately put back into normal mode
+//erroniously checked with false lookup, and b.0 immedicately put back into normal mode
 //without separate step needed.
-  if (RadioGroup1.ItemIndex  > 0 ) then
-begin
-      //itimson :=0 ;//no check for timson change in cbopatient until after click event finished
-      RadioGroup1.ItemIndex  := 0;
-      RadioGroup1.SetFocus;
-      RadioGroup1.Refresh;
-    end;
+  if (RadioGroup1.ItemIndex  > 0 ) then begin
+    //itimson :=0 ;//no check for timson change in cbopatient until after click event finished
+    RadioGroup1.ItemIndex  := 0;
+    RadioGroup1.SetFocus;
+    RadioGroup1.Refresh;
+  end;
 //end vwpt enhanced
 
-if not (Length(cboPatient.ItemID) > 0) then  //*DFN*
-  begin
+  if not (Length(cboPatient.ItemID) > 0) then begin //*DFN*
     InfoBox('A patient has not been selected.', 'No Patient Selected', MB_OK);
     Exit;
   end;
@@ -750,7 +748,7 @@ if not (Length(cboPatient.ItemID) > 0) then  //*DFN*
     Encounter.VisitCategory := 'H';
   end;
   //if User.IsProvider then Encounter.Provider := User.DUZ;    //ELH commented out for code below  9/7/18  //TMG //kt
-  Encounter.Provider := strtoint(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ)]));
+  Encounter.Provider := StrToInt(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN, IntToStr(User.DUZ)]));
 
   GetBAStatus(Encounter.Provider,Patient.DFN);
   //HDS00005025
@@ -1456,7 +1454,30 @@ begin
   frmPatientPhotoID.Free;
 end;
 
+procedure TfrmPtSel.PatientImageMouseEnter(Sender: TObject);
+var refresh : boolean;
+begin
+  inherited;
+  try
+    if not assigned(frmPatientPhotoID) then frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
+    frmPatientPhotoID.ShowPreviewMode(cboPatient.ItemID,Self.PatientImage,ltLeft);
+  except
+    //On E : exception do messagedlg('Error on Mouse Enter'+#13#10+E.Message,mtError,[mbok],0);
+  end;
+end;
 
+procedure TfrmPtSel.PatientImageMouseLeave(Sender: TObject);
+begin
+  inherited;
+  try
+    if assigned(frmPatientPhotoID) then frmPatientPhotoID.hide;
+  except
+    //On E : exception do messagedlg('Error on Mouse Leave'+#13#10+E.Message,mtError,[mbok],0);
+  end;
+
+end;
+
+{    previous code
 procedure TfrmPtSel.PatientImageMouseEnter(Sender: TObject);
 var refresh : boolean;
 begin
@@ -1471,7 +1492,7 @@ begin
   inherited;
   if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
 
-end;
+end;}
 
 procedure TfrmPtSel.ShowButts(ShowButts: Boolean);
 begin

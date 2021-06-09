@@ -1,0 +1,24 @@
+uses MDMHelper;
+
+{$R *.dfm}
+
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  frmMDMGrid: TfrmMDMGrid;    //not autocreated
+  s : string;
+  i : integer;
+  SL : TStringList;
+
+begin
+  frmMDMGrid := TfrmMDMGrid.Create(Self);
+  if frmMDMGrid.ShowModal = mrOK then begin
+    Memo1.Lines.Add(frmMDMGrid.CPT);
+    Memo1.Lines.Add(frmMDMGrid.Narrative);
+    SL := frmMDMGrid.TextTable;
+    for i := 0 to SL.Count - 1 do begin
+      Memo1.Lines.Add(SL[i]);
+    end;
+
+  end;
+  frmMDMGrid.Free;
+end;

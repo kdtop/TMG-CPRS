@@ -158,6 +158,7 @@ implementation
 uses fNotes, uPCE, uOrders, rOrders, uCore, rMisc, rReminders,
   fReminderTree, uVitals, rVitals, RichEdit, fConsults, fTemplateDialog,
   {uTemplateFields,} fRemVisitInfo, rCore, uVA508CPRSCompatibility,
+  TMGHTML2, //kt 4/8/21
   VA508AccessibilityRouter, VAUtils, uHTMLTools;
 
 {$R *.DFM}
@@ -253,7 +254,7 @@ begin
       InfoBox(Err, 'Reminders in Process', MB_OK or MB_ICONERROR);
       exit;
     end;
-
+    //RemForm.NewNoteHTMLE.InsertHTMLAtCaret('INSERT 1<P>');//elh
     if (InitDlg and (not assigned(frmRemDlg))) then begin
       //(AGP add) Check for a bad encounter date
       if RemForm.PCEObj.DateTime < 0 then begin
@@ -277,11 +278,13 @@ begin
         frmRemDlg.FSHDRelated := RemForm.PCEObj.SHADRelated;
       end;
       UpdateReminderFinish;
+      //RemForm.NewNoteHTMLE.InsertHTMLAtCaret('INSERT 2<P>');//elh
       if IsTemplate then begin
         frmRemDlg.ProcessTemplate(Template)
       end else if assigned(RemNode) then begin
         frmRemDlg.ProcessReminder(RemNode.StringData, RemNode.TreeView.GetNodeID(RemNode, 1, IncludeParentID));
       end;
+      //RemForm.NewNoteHTMLE.InsertHTMLAtCaret('INSERT 3<P>');//elh
     end;
   finally
     uRemDlgStarting := False;
@@ -1238,12 +1241,10 @@ begin  //btnFinishClick();
             inc(i);
           end;
         until(FProcessingTemplate or (i >= RemindersInProcess.Count));
-
         if FProcessingTemplate then
           PCEType := ptTemplate
         else
           PCEType := ptReminder;
-
         Process := TRUE;
         if (TmpList.Count > 0) then begin
           Msg := REQ_TXT + TmpList.Text;
@@ -1318,12 +1319,15 @@ begin  //btnFinishClick();
                   If HTMLEditing then begin
                     HTMLStringToAdd := '';                            //kt 9/11
                     for i := 0 to TmpText.count-1 do begin
-                      TempString := Text2HTML(TmpText.Strings[i]);               //kt 9/11
+                      //RemForm.NewNoteHTMLE.InsertTextAtCaret(TmpText.strings[i]);
+                      TempString := Text2HTML(TmpText.Strings[i], false);               //kt 9/11
                       TempString := ANSIReplaceText(TempString,'<P>','<BR>');
                       if TempString = '' then TempString := '<P>';
                       HTMLStringToAdd := HTMLStringToAdd + TempString;  //kt //elh added 7/17/13
                     end;
-                    RemForm.NewNoteHTMLE.InsertHTMLAtCaret(HTMLStringToAdd);//elh
+                    //RemForm.NewNoteHTMLE.InsertTextAtCaret('Cursor HERE>');
+                    RemForm.NewNoteHTMLE.InsertHTMLAtCaret(HTMLStringToAdd);//elh   //FIX!!!!
+                    //RemForm.NewNoteHTMLE.InsertTextAtCaret(TmpText.Text);
                   end else begin                                            //kt 9/11
                     RemForm.NewNoteRE.SelText := TmpText.Text;
                     SpeakTextInserted;
@@ -1868,3 +1872,4 @@ finalization
   KillObj(@PositionList);
 
 end.
+

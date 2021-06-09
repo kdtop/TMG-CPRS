@@ -415,7 +415,9 @@ uses
   fViewLabPDF in 'TMG_Extra\fViewLabPDF.pas' {frmViewLabPDF},
   rFileTransferU in 'TMG_Extra\rFileTransferU.pas',
   uTMGEvent in 'TMG_Extra\uTMGEvent.pas',
-  uImages in 'TMG_Extra\uImages.pas';
+  uImages in 'TMG_Extra\uImages.pas',
+  MDMHelper in 'TMG_Extra\MDM grid\MDMHelper.pas' {frmMDMGrid},
+  CollapsablePanelU in 'TMG_Extra\MDM grid\CollapsablePanelU.pas';
 
 {$R *.TLB}
 
@@ -437,6 +439,7 @@ begin
     Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmSearchStop, frmSearchStop);
+  Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;
   end;

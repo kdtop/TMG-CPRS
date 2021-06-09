@@ -111,6 +111,7 @@ begin
   ErrMsg := '';
   if FileExists(LocalSaveFNamePath) then DeleteFile(LocalSaveFNamePath);
   LocalBrokerResults := TStringList.Create;
+  OutFile := nil;
   try
     CallV(RPCName, [FPath,FName]);
     RefreshCountdown := RefreshInterval;
@@ -123,7 +124,7 @@ begin
       exit;
     end;
 
-    OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
+    OutFile := TFileStream.Create(LocalSaveFNamePath, fmCreate);
     for i:=1 to (LocalBrokerResults.Count-1) do begin
       s := Decode64(LocalBrokerResults[i]);
       count := Length(s);
@@ -147,7 +148,7 @@ begin
     if ErrMsg <> '' then exit;
     Result := drSuccess;  //if we got this far, all is good.
   finally
-    OutFile.Free;
+    if assigned(OutFile) then OutFile.Free;
     LocalBrokerResults.Free;
   end;
 end;

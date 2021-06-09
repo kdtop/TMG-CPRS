@@ -121,7 +121,9 @@ implementation
 {$R *.DFM}
 
 uses
-  rCore, fPtSelOptSave, fPtSel, VA508AccessibilityRouter;
+  rCore, fPtSelOptSave, fPtSel,
+  uCore,  //kt   1/2/21
+  VA508AccessibilityRouter;
 
 const
   TX_LS_DFLT = 'This is already saved as your default patient list settings.';
@@ -303,6 +305,7 @@ end;
 
 procedure TfrmPtSelOptns.radLongSrcClick(Sender: TObject);
 { called by radProviders, radClinics - switches to long list & shows items for the list source }
+var i:integer;
 begin
   //vwpt remove other radio button selections
  if fPtSel.radiogrp1index <> 0 then
@@ -348,6 +351,12 @@ begin
                     ShowDateRange;  //elh  5/22/17
                     //ListProviderTop(Items);
                     SubsetofTMGProviders(Items);
+                    for I := 0 to cboList.Items.Count - 1 do begin
+                       if piece(cboList.Items.Strings[i],'^',1)=inttostr(User.DUZ) then begin
+                          cboList.ItemIndex := i;
+                          cboListMouseClick(Sender);
+                       end;
+                    end;
                   end;
     TAG_SRC_CLIN: begin
                     ShowDateRange;

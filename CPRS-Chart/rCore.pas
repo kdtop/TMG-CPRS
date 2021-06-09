@@ -857,7 +857,7 @@ begin
   with RPCBrokerV do
   begin
     //if Sort = 'P' then
-      SortByPiece(TStringList(Results), U, 4);
+      //2/16/21  ->  let the RPC sort the data SortByPiece(TStringList(Results), U, 4);
     //else
       //SortByPiece(TStringList(Results), U, 2);
     for i := 0 to Results.Count - 1 do

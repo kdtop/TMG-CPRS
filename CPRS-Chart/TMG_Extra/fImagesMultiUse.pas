@@ -269,7 +269,7 @@ implementation
       Result := nil;
       exit;
     end;
-    Result := ParseOneImageListLine(s);
+    Result := ParseOneImageListLine(s); //instantiates new Rec
     if Result = nil then exit;
     FImageInfoList.AddObject(MagIEN,Result);  //FImageInfoList owns objects
   end;

@@ -145,6 +145,7 @@ type
     FDueInfo : TStringList;                      // Holds patient due status info  //kt
     FDueHint : string;                           // Hint for due status   //kt
     FSyncWebPages : boolean;                     // If true changing patient will change web pages  //kt
+    FMostRecentPhoto : string;                   // FPath for most recent patient photo
     //vwpt  HRN
     FHRN:  string ;                              //HRN
     FAltHRN : string ;                           //alternate HRN (future)

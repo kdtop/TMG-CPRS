@@ -71,6 +71,7 @@ type
     btnLeft: TBitBtn;
     btnRight: TBitBtn;
     lblInfo: TLabel;
+    procedure FormHide(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
     procedure btnLeftClick(Sender: TObject);
@@ -100,6 +101,7 @@ type
   public
     { Public declarations }
     MostRecentThumbBitmap: TBitmap;
+    MostRecentFileName: string;
     procedure ShowPreviewMode(DFN : string;RelativeTo:TControl;Location:TLocationType) overload;
     function ShowModal(DFN : string; UploadMode: boolean = True) : integer; overload;
     function ShowModalUploadFName(DFN : string; FName : string) : integer; overload;
@@ -108,8 +110,8 @@ type
 
 
   procedure LoadMostRecentPhotoIDThumbNail(DFN: string; BM: TBitmap);
-//var
-//  frmPatientPhotoID: TfrmPatientPhotoID; <-- not auto created
+var
+  frmPatientPhotoID: TfrmPatientPhotoID; //Set this to autocreated now, because it seems that occasionally a race condition occurred where it was being destroyed before it was actually created.
 
 
 
@@ -119,6 +121,7 @@ implementation
 
 uses
   fUploadImages,fImages,fFrame;
+
 
   procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadType); forward;
   procedure LoadPhotoIDRPC(DFN: string; SL: TStringList); forward;
@@ -190,8 +193,8 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     if FileExists(InfoRec.LocalFPath) then
       WebBrowser.Navigate(InfoRec.LocalFPath)
     else begin
-      //WebBrowser.Navigate(frmImages.NullImageName);
-    end;  
+      WebBrowser.Navigate(frmImages.NullImageName);
+    end;
     if FileExists(InfoRec.LocalThumbPath) then begin
       PatientImage.Picture.LoadFromFile(InfoRec.LocalThumbPath);
       MostRecentThumbBitmap.Assign(PatientImage.Picture.Bitmap);
@@ -428,7 +431,6 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
       BM.LoadFromFile(OneRec.LocalThumbPath)
     else
       BM.Assign(fFrame.NoPatientIDPhotoIcon);
-
     ClearInfoList(InfoList);
     SL.Free;
     InfoList.Free;
@@ -454,23 +456,40 @@ procedure TfrmPatientPhotoID.FormCreate(Sender: TObject);
   begin
     FChangesMade := false;
     FDFN := '';
+    //IDPhotosInfo := TStringList.Create;
+    //InfoList := TList.create;
+    //MostRecentThumbBitmap := TBitmap.Create;
+    //FUploadMode := True;
+    //FDragAndDropFile := '';
+  end;
+
+  procedure TfrmPatientPhotoID.FormDestroy(Sender: TObject);
+  begin
+    //IDPhotosInfo.Free;
+    //ClearInfoList(InfoList);
+    //InfoList.free;
+    //MostRecentThumbBitmap.Free;
+  end;
+
+procedure TfrmPatientPhotoID.FormHide(Sender: TObject);
+begin
+    //FROM FORM DESTROY
+    IDPhotosInfo.Free;
+    ClearInfoList(InfoList);
+    InfoList.free;
+    MostRecentThumbBitmap.Free;
+end;
+
+procedure TfrmPatientPhotoID.FormShow(Sender: TObject);
+  begin
+    //FROM FORM CREATE
     IDPhotosInfo := TStringList.Create;
     InfoList := TList.create;
     MostRecentThumbBitmap := TBitmap.Create;
     FUploadMode := True;
     FDragAndDropFile := '';
-  end;
-
-  procedure TfrmPatientPhotoID.FormDestroy(Sender: TObject);
-  begin
-    IDPhotosInfo.Free;
-    ClearInfoList(InfoList);
-    InfoList.free;
-    MostRecentThumbBitmap.Free;
-  end;
-
-procedure TfrmPatientPhotoID.FormShow(Sender: TObject);
-  begin
+    WebBrowser.Navigate(frmImages.NullImageName);
+    //END FROM CREATE
     UserCancelledUpload := False;
     if FDFN = '' then begin
       MessageDlg('Which patient is selected??', mtError, [mbOK],0);

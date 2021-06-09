@@ -63,6 +63,8 @@ interface
     EMBEDDED_TEMPLATE_START_TAG = '{TMPL:';
     EMBEDDED_TEMPLATE_END_TAG = '}';
 
+  type
+    TFileType = (tftPDF, tftImage);
 
   procedure PrintHTMLReport(Lines: TStringList; var ErrMsg: string;
                             PtName, DOB, VisitDate, Location:string; Application : TApplication);  //kt added 5-2-05
@@ -84,8 +86,8 @@ interface
   function  CheckForImageLink(Lines: TStrings; ImageList : TStringList) : boolean;
   function  ConvertSpacesAndChars2HTML(Text : String) : string;
   function  ConvertSpaces2HTML(Text : String) : string;
-  function  Text2HTML(Lines : TStrings) : String; overload;
-  function  Text2HTML(text : string) : String;    overload;
+  function  Text2HTML(Lines : TStrings; EnsureDoc : boolean = true) : String; overload;
+  function  Text2HTML(text : string; EnsureDoc : boolean = true) : String;    overload;
   procedure EnsureHTMLStructure(Lines : TStrings);
   function  ProtectTag(text, TagName : string) : string;
   function  UnProtectTag(text, TagName : string) : string;
@@ -106,7 +108,8 @@ interface
   function  HTMLEncode(const Data: string; var Modified : boolean): string; overload;
   procedure HTMLEncode(const SL : TStringList); overload;
   function  HTMLDecode(const AStr: String): String;
-  procedure MakePDFWrapperHTMLFile(PDFFullFilePathName, TargetSaveFilePathName : string);
+  procedure MakeWrapperHTMLFile(FullFilePathName, TargetSaveFilePathName : string; Parent:TControl; FileType: TFileType);
+  function  UniqueCacheFName(FName : string) : AnsiString;
 
   procedure StripTags(var S : string);
   procedure StripQuotes(SL : TStrings; QtChar: char);
@@ -119,9 +122,12 @@ interface
   procedure SummarizeScript(InSL, OutSL : TStrings);
   procedure StripJavaScript(SL: TStrings; var Modified : boolean);
   function GetWebBrowserHTML(const WebBrowser: TWebBrowser): String;
+  procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string);
 
   function FormatHTMLClipboardHeader(HTMLText: string): string;
   procedure CopyHTMLToClipBoard(const str: AnsiString; const htmlStr: AnsiString = '');
+
+  function StripHTMLTags(strHTML: string): string;
 
 implementation
 
@@ -147,7 +153,8 @@ implementation
       procedure HandleRestorePrinting (Sender: TObject);
       Constructor Create;
       Destructor Destroy; override;
-    end;  
+    end;
+
 
   var
     PrinterEvents : TPrinterEvents;
@@ -197,7 +204,7 @@ implementation
      Freemem(Driver, 255) ;
      Freemem(Port, 255) ;
      aPrinter.Free;
-  end;    
+  end;
 
 
   procedure Wait(Sec : byte; Application : TApplication);
@@ -211,7 +218,7 @@ implementation
   end;
 
   
-  procedure PrintHTMLReport(Lines: TStringList; var ErrMsg: string; 
+  procedure PrintHTMLReport(Lines: TStringList; var ErrMsg: string;
                             PtName, DOB, VisitDate, Location:string;
                             Application : TApplication);
   //      Web browser printing options:
@@ -1310,9 +1317,10 @@ const
     end;
   end;
 
-  function  Text2HTML(Lines : TStrings) : String;
+  function  Text2HTML(Lines : TStrings; EnsureDoc : boolean = true) : String;
   //Purpose: Take plain text, and prep for viewing in HTML viewer.
   //i.e. convert TABs into &nbsp's and add <br> at end of line etc.
+  //NOTE: Resulting text will be wrapped with <HTML> tags, etc. to make FULL HTML document
   var i : integer;
       tempS : string;
       TempSL : TStringList;
@@ -1326,17 +1334,18 @@ const
       else tempS := tempS + '<BR>';
       TempSL.Strings[i] := tempS;
     end;
-    EnsureHTMLStructure(TempSL);  //kt 3/22/16
+    if EnsureDoc then EnsureHTMLStructure(TempSL);  //kt 3/22/16, 4/8/21
     Result := TempSL.Text;
     TempSL.Free;
   end;
 
-  function Text2HTML(text : string) : String;    overload;
+  function Text2HTML(text : string; EnsureDoc : boolean = true) : String;    overload;
+  //NOTE: Resulting text will be wrapped with <HTML> tags, etc. to make FULL HTML document
   var Lines : TStringList;
   begin
     Lines := TStringList.create;
     Lines.Text := text;
-    Result := Text2HTML(Lines);
+    Result := Text2HTML(Lines, EnsureDoc);
     Lines.Free;
   end;
 
@@ -1578,7 +1587,7 @@ const
   begin
     if DesiredHTMLFontSize > 0 then begin
       SetRegHTMLFontSize(DesiredHTMLFontSize-1);   //Downsize by 1 step
-    end;  
+    end;
     NewHeader := Location + ' &b ' + Institution + ' &b Printed: &d &t';
     NewFooter := Name + ' (' + DOB + ') &b Note: ' + VisitDate + ' &b &p of &P';
     Reg := TRegistry.Create;  //to be freed in RestoreIEPrinting
@@ -1694,10 +1703,12 @@ const
       Temp        : string;
       HtmlEditor : THtmlObj;
       TypedDrawers : TfrmDrawers;
+      SavedSelRange : TRangeInfo; //kt 4/8/21
   begin
     if not (Drawers is TfrmDrawers) then exit;
     TypedDrawers := TfrmDrawers(Drawers);
     HtmlEditor := TypedDrawers.HTMLEditControl;
+    SavedSelRange := HtmlEditor.SelectionInfo; //kt 4/8/21
     repeat
       Found := HtmlEditor.FindFirst(EMBEDDED_TEMPLATE_START_TAG);
       if not Found then break;
@@ -1711,6 +1722,7 @@ const
       //Messagedlg('Here I can insert: '+Temp, mtInformation, [mbOK],0);
       TypedDrawers.InsertTemplatebyName(Temp);
     until false;
+    HtmlEditor.SetSelectionByRangeInfo(SavedSelRange); //kt 4/8/21
   end;
 
   procedure StripTags(var S : string);
@@ -1884,36 +1896,6 @@ const
     SL.Text := s;
   end;
 
-  (*
-  procedure THtmlObj.TrimFunction(SL : TStrings; FnStr : string);
-  var  p,i,j : integer;
-       s : string;
-  begin
-    i := 0;
-    while i < SL.Count do begin
-      s := Trim(SL.Strings[i]);
-      if s = '' then begin
-        SL.Delete(i);
-        continue;
-      end;
-      inc(i);
-      p := Pos(FnStr, s);
-      if p = 0 then continue;
-      s := Trim(MidStr(s, p + Length(FnStr), Length(s)));
-      if s <> '' then begin
-        if s[1] = '(' then begin
-          p := Pos(')', s);
-          if p > 0 then s := MidStr(s, p+1, length(s));
-        end;
-      end;
-      SL.Strings[i-1] := s;
-      StripBetweenTags(SL, '{', '}', i-1, 1);
-      break;
-    end;
-    SL.Text := s;
-  end;
-  *)
-
   procedure SummarizeScript(InSL, OutSL : TStrings);
   //Return in OutSL a list of names of all defined function.
   var s : string;
@@ -2073,6 +2055,26 @@ const
     result := document.body.innerHTML;
   end;
 
+  procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string);
+  var
+     MyHTML: TStringList;
+     TempFile: string;
+  begin
+     MyHTML := TStringList.create;
+     TempFile := UniqueCacheFName('Temp.html');
+     try
+       MyHTML.add(HTMLCode);
+       MyHTML.SaveToFile(TempFile);
+      finally
+       MyHTML.Free;
+      end;
+     WebBrowser.Navigate(TempFile) ;
+
+     while WebBrowser.ReadyState < READYSTATE_INTERACTIVE do
+      Application.ProcessMessages;
+  end;  {WBLoadHTML}
+
+
   //===============================================================
 
   Constructor TPrinterEvents.Create;
@@ -2178,13 +2180,19 @@ begin
 end;
 
 
-procedure MakePDFWrapperHTMLFile(PDFFullFilePathName, TargetSaveFilePathName : string);
+procedure MakeWrapperHTMLFile(FullFilePathName, TargetSaveFilePathName : string; Parent:TControl; FileType: TFileType);
 var
    MyHTML: TStringList;
    HTML : string;
    TempFile: string;
 begin
-  HTML := '<embed src="file://'+PDFFullFilePathName+'" width="800px" height="1200px" />';
+  //HTML := '<embed src="file://'+PDFFullFilePathName+'" width="800px" height="1200px" />';
+  case FileType of
+  tftPDF:
+    HTML := '<BODY contentEditable=false><EMBED height='+inttostr(Parent.height-40)+' width='+inttostr(Parent.width-40)+' src="'+FullFilePathName+'"></BODY>';
+  tftImage:
+    HTML := '<img height='+inttostr(Parent.height-40)+' width='+inttostr(Parent.width-40)+' src="'+FullFilePathName+'">';
+  end;
   MyHTML := TStringList.create;
   try
     MyHTML.add(HTML);
@@ -2193,6 +2201,65 @@ begin
     MyHTML.Free;
   end;
 end;
+
+
+function UniqueCacheFName(FName : string) : AnsiString;
+//NOTE: FName should not include path.
+
+var  Ext, PartA, TempFName : AnsiString;
+     Num, count : integer;
+begin
+  //Num := NumPieces(CPRSCacheDir + FName, '.');
+  //if Num < 2 then Num := 2;
+  Ext := ExtractFileExt(FName);
+  PartA := CPRSCacheDir + piece(extractfilename(FName),'.',1); //the piece function should be replace with a more robust one that handles a file with multiple periods
+  count := 0;
+  TempFName := PartA + Ext;
+  While fileExists(tempFName) do begin
+    inc(count);
+    tempFName := PartA + IntToStr(count) + '.' + Ext;
+  end;
+  result := tempFName;
+end;
+
+function StripHTMLTags(strHTML: string): string;
+var
+  P: PChar;
+  InTag: Boolean;
+  i, intResultLength: Integer;
+begin
+  strHTML := StringReplace(strHTML, '<BR>', '@@BR@@',  [rfReplaceAll]);
+  P := PChar(strHTML);
+  Result := '';
+
+  InTag := False;
+  repeat
+    case P^ of
+      '<': InTag := True;
+      '>': InTag := False;
+      #13, #10: ; {do nothing}
+      else
+        if not InTag then
+        begin
+          if (P^ in [#9, #32]) and ((P+1)^ in [#10, #13, #32, #9, '<']) then
+          else
+            Result := Result + P^;
+        end;
+    end;
+    Inc(P);
+  until (P^ = #0);
+
+  {convert system characters}
+  Result := StringReplace(Result, '&quot;', '"',  [rfReplaceAll]);
+  Result := StringReplace(Result, '&apos;', '''', [rfReplaceAll]);
+  Result := StringReplace(Result, '&gt;',   '>',  [rfReplaceAll]);
+  Result := StringReplace(Result, '&lt;',   '<',  [rfReplaceAll]);
+  Result := StringReplace(Result, '&amp;',  '&',  [rfReplaceAll]);
+  Result := StringReplace(Result, '&nbsp;', ' ',  [rfReplaceAll]);
+  Result := StringReplace(Result, '@@BR@@', #13#10,  [rfReplaceAll]);
+  {here you may add another symbols from RFC if you need}
+end;
+
 
 
 initialization

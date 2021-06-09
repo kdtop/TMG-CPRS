@@ -249,6 +249,7 @@ inherited frmDrawers: TfrmDrawers
       Caption = 'Templates'
       NodePiece = 2
       OnDragging = tvTemplatesDragging
+      ExplicitTop = 33
     end
     object pnlTemplateSearch: TPanel
       Left = 0
@@ -278,7 +279,7 @@ inherited frmDrawers: TfrmDrawers
       end
       object edtSearch: TCaptionEdit
         Left = 0
-        Top = 0
+        Top = 6
         Width = 134
         Height = 21
         Anchors = [akLeft, akTop, akRight]

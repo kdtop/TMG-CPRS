@@ -152,7 +152,7 @@ var
 
 implementation
 
-  uses fTMG_DirectX_GetImage, fImages;
+  uses fTMG_DirectX_GetImage, fImages, uImages;
 
 {$R *.dfm}
 
@@ -499,7 +499,7 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
     BMP := TBitmap.Create;
     OpenPictureDialog := TOpenPictureDialog.Create(Self);
     if OpenPictureDialog.Execute then begin
-      if fImages.LoadAnyImageFormatToBMP(OpenPictureDialog.FileName, BMP) then begin
+      if LoadAnyImageFormatToBMP(OpenPictureDialog.FileName, BMP) then begin
         ImageContainer.Picture.Bitmap := BMP;
       end;
     end;

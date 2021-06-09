@@ -3,7 +3,7 @@ inherited frmNotes: TfrmNotes
   Top = 115
   HelpContext = 5000
   Caption = 'Progress Notes Page'
-  ClientHeight = 793
+  ClientHeight = 753
   ClientWidth = 1079
   HelpFile = 'overvw'
   Menu = mnuNotes
@@ -12,30 +12,30 @@ inherited frmNotes: TfrmNotes
   OnHide = FormHide
   OnShow = FormShow
   ExplicitWidth = 1087
-  ExplicitHeight = 847
+  ExplicitHeight = 807
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 788
+    Top = 748
     Width = 1079
     ExplicitTop = 358
     ExplicitWidth = 679
   end
   inherited sptHorz: TSplitter
     Left = 260
-    Height = 788
+    Height = 748
     ParentColor = False
     ExplicitLeft = 261
     ExplicitHeight = 989
   end
   inherited pnlLeft: TPanel
     Width = 260
-    Height = 788
+    Height = 748
     ExplicitWidth = 260
-    ExplicitHeight = 788
+    ExplicitHeight = 748
     object lblSpace1: TLabel
       Left = 0
-      Top = 743
+      Top = 703
       Width = 260
       Height = 3
       Align = alBottom
@@ -46,7 +46,7 @@ inherited frmNotes: TfrmNotes
     end
     object cmdNewNote: TORAlignButton
       Left = 0
-      Top = 746
+      Top = 706
       Width = 260
       Height = 21
       Align = alBottom
@@ -57,7 +57,7 @@ inherited frmNotes: TfrmNotes
     end
     object cmdPCE: TORAlignButton
       Left = 0
-      Top = 767
+      Top = 727
       Width = 260
       Height = 21
       Align = alBottom
@@ -71,13 +71,13 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 33
       Width = 260
-      Height = 710
+      Height = 670
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
       object splDrawers: TSplitter
         Left = 0
-        Top = 707
+        Top = 667
         Width = 260
         Height = 3
         Cursor = crVSplit
@@ -109,7 +109,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 0
         Width = 260
-        Height = 707
+        Height = 667
         Align = alClient
         Constraints.MinWidth = 30
         HideSelection = False
@@ -382,13 +382,13 @@ inherited frmNotes: TfrmNotes
   inherited pnlRight: TPanel
     Left = 264
     Width = 815
-    Height = 788
+    Height = 748
     ExplicitLeft = 264
     ExplicitWidth = 815
-    ExplicitHeight = 788
+    ExplicitHeight = 748
     object sptVert: TSplitter
       Left = 0
-      Top = 739
+      Top = 699
       Width = 815
       Height = 4
       Cursor = crVSplit
@@ -398,7 +398,7 @@ inherited frmNotes: TfrmNotes
     end
     object memPCEShow: TRichEdit
       Left = 0
-      Top = 743
+      Top = 703
       Width = 815
       Height = 45
       Align = alBottom
@@ -417,7 +417,7 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 0
       Width = 815
-      Height = 739
+      Height = 699
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
@@ -448,7 +448,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 116
         Width = 815
-        Height = 623
+        Height = 583
         Align = alClient
         Color = clCream
         Ctl3D = True
@@ -524,7 +524,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 116
         Width = 815
-        Height = 623
+        Height = 583
         Align = alClient
         BevelOuter = bvNone
         Color = clBtnShadow
@@ -533,7 +533,7 @@ inherited frmNotes: TfrmNotes
           Left = 0
           Top = 20
           Width = 815
-          Height = 603
+          Height = 563
           Align = alClient
           BevelOuter = bvNone
           Color = clBtnShadow
@@ -701,7 +701,7 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 0
       Width = 815
-      Height = 739
+      Height = 699
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
@@ -711,7 +711,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 67
         Width = 815
-        Height = 672
+        Height = 632
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlTextWrite'
@@ -720,7 +720,7 @@ inherited frmNotes: TfrmNotes
           Left = 0
           Top = 0
           Width = 815
-          Height = 672
+          Height = 632
           Align = alClient
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
@@ -743,7 +743,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 67
         Width = 815
-        Height = 672
+        Height = 632
         Align = alClient
         BevelOuter = bvNone
         Color = clInactiveBorder
@@ -753,7 +753,7 @@ inherited frmNotes: TfrmNotes
           Left = 0
           Top = 18
           Width = 815
-          Height = 654
+          Height = 614
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -1879,6 +1879,7 @@ inherited frmNotes: TfrmNotes
     object mnuAct: TMenuItem
       Caption = '&Action'
       GroupIndex = 4
+      OnClick = mnuActClick
       object mnuActNew: TMenuItem
         Caption = '&New Progress Note...'
         Hint = 'Creates a new progress note'
@@ -1960,6 +1961,10 @@ inherited frmNotes: TfrmNotes
       object mnuQuickSearchTemplates: TMenuItem
         Caption = '&Quick Search Templates'
         OnClick = mnuQuickSearchTemplatesClick
+      end
+      object mnuLaunchMDM: TMenuItem
+        Caption = 'Launch MDM &Helper'
+        OnClick = mnuLaunchMDMClick
       end
     end
     object mnuOptions: TMenuItem
@@ -2146,6 +2151,14 @@ inherited frmNotes: TfrmNotes
       Caption = '&Link To Consult'
       OnClick = popNoteMemoLinkToConsultClick
     end
+    object popNoteViewInBrowser: TMenuItem
+      Caption = 'View This Note In Browser'
+      OnClick = popNoteViewInBrowserClick
+    end
+    object popNoteViewInBrowser2: TMenuItem
+      Caption = 'View This Scan In Browser'
+      OnClick = popNoteViewInBrowser2Click
+    end
     object ViewWindowsMessages1: TMenuItem
       Caption = 'View Windows Messages'
       OnClick = ViewWindowsMessages1Click
@@ -2159,9 +2172,15 @@ inherited frmNotes: TfrmNotes
     end
     object mnuLooseInChartMoveScanned: TMenuItem
       Caption = 'Move Loose Doc To Scanned Records'
+      OnClick = mnuLooseInChartMoveScannedClick
     end
     object mnuLooseInChartMoveTIU: TMenuItem
       Caption = 'Move Loose Doc To TIU Note'
+      OnClick = mnuLooseInChartMoveTIUClick
+    end
+    object mnuMoveToLoose: TMenuItem
+      Caption = 'Move Note To Loose Document'
+      OnClick = mnuMoveToLooseClick
     end
   end
   object popNoteList: TPopupMenu
@@ -2243,6 +2262,22 @@ inherited frmNotes: TfrmNotes
     object mnuHideTitle: TMenuItem
       Caption = 'Hide Title'
       OnClick = mnuHideTitleClick
+    end
+    object mnuLooseDelete: TMenuItem
+      Caption = 'Delete Loose Doc'
+      OnClick = mnuLooseInChartDeleteClick
+    end
+    object mnuLooseDocToScanned: TMenuItem
+      Caption = 'Move Loose Doc To Scanned Records'
+      OnClick = mnuLooseInChartMoveScannedClick
+    end
+    object mnuLooseDocToTIUNote: TMenuItem
+      Caption = 'Move Loose Doc To TIU Note'
+      OnClick = mnuLooseInChartMoveTIUClick
+    end
+    object mnuViewThisScanInBrowser: TMenuItem
+      Caption = 'View This Scan In Browser'
+      OnClick = popNoteViewInBrowser2Click
     end
   end
   object timAutoSave: TTimer

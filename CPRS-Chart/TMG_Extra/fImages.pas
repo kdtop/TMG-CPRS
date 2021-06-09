@@ -47,7 +47,29 @@ uses
 
 
 type
-  //TImgTransferMethod = (itmDropbox,itmDirect,itmRPC);
+  TIconDispMode = (tGenericImage, tThumbnail);
+
+  TNoteInfo = record
+    IEN : string;
+    DisplayTitle : string;
+    RefDate : string;
+    PatientName : string;
+    AuthorIEN : string;
+    AuthorSigName : string;
+    AuthorName  : string;
+    LocationName : string;
+    Status  : string;
+    VisitLabel  : string;
+    VisitDate : string;
+    ImageCount : integer;
+    Subject  : string;
+    Prefix : string;
+    ParentIEN : string;
+    IDSortIndicator : string;
+    HighlightNote : string;
+    HospitalNote : string;
+  end;
+
 
   TfrmImages = class(TfrmPage)
     mnuNotes: TMainMenu;
@@ -65,117 +87,75 @@ type
     mnuAct: TMenuItem;
     Z3: TMenuItem;
     mnuOptions: TMenuItem;
-    timLoadImages: TTimer;
     N3: TMenuItem;
     mnuIconLegend: TMenuItem;
     mnuChartSurgery: TMenuItem;
-    ThumbsImageList: TImageList;
+    FileTypeIconsImageList: TImageList;
     CurrentNoteMemo: TMemo;
     pnlTop: TPanel;
-    HorizSplitter: TSplitter;
     Splitter2: TSplitter;
-    UploadImagesButton: TBitBtn;
     OpenPictureDialog: TOpenPictureDialog;
-    ButtonPanel: TPanel;
     CurrentImageMemo: TMemo;
-    MemosPanel: TPanel;
-    UploadImagesMnuAction: TMenuItem;
-    pnlBottom: TPanel;
-    TabControl: TTabControl;
+    mnuUploadImages: TMenuItem;
+    pnlMiddle: TPanel;
     WebBrowser: TWebBrowser;
-    AutoScanUpload: TMenuItem;
-    PickScanFolder: TMenuItem;
+    mnuAutoScanUpload: TMenuItem;
+    mnuPickScanFolder: TMenuItem;
     OpenDialog: TOpenDialog;
     mnuPopup: TPopupMenu;
     mnuPopDeleteImage: TMenuItem;
     mnuDeleteImage: TMenuItem;
-    AddUniversalImage1: TMenuItem;
-    lblTextForObject: TLabel;
-    AddSignatureImage: TMenuItem;
-    procedure AddSignatureImageClick(Sender: TObject);
-    procedure TabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    mnuAddUniversalImage: TMenuItem;
+    mnuAddSignatureImage: TMenuItem;
+    pnlBottom: TPanel;
+    lvThumbnails: TListView;
+    Splitter1: TSplitter;
+    ThumbnailsImageList: TImageList;
+    btnOpenLinkedDoc: TBitBtn;
+    procedure btnOpenLinkedDocClick(Sender: TObject);
+    procedure lvThumbnailsClick(Sender: TObject);
+    procedure FormHide(Sender: TObject);
+    procedure lvThumbnailsData(Sender: TObject; Item: TListItem);
+    procedure FormDestroy(Sender: TObject);
+    procedure mnuAddSignatureImageClick(Sender: TObject);
     procedure mnuChartTabClick(Sender: TObject);
     procedure mnuActNewClick(Sender: TObject);
-    procedure timLoadImagesTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure mnuActClick(Sender: TObject);
-    procedure UploadImagesButtonClick(Sender: TObject);
-    procedure FormHide(Sender: TObject);
-    procedure TabControlChange(Sender: TObject);
-    procedure TabControlGetImageIndex(Sender: TObject; TabIndex: Integer; var ImageIndex: Integer);
-    procedure TabControlResize(Sender: TObject);
+    procedure UploadImagesClick(Sender: TObject);
     procedure EnableAutoScanUploadClick(Sender: TObject);
-    procedure PickScanFolderClick(Sender: TObject);
-    procedure TabControlMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure mnuPickScanFolderClick(Sender: TObject);
     procedure mnuPopupPopup(Sender: TObject);
     procedure mnuPopDeleteImageClick(Sender: TObject);
-    procedure mnuDeleteImageClick(Sender: TObject);
-    procedure AddUniversalImage1Click(Sender: TObject);
+    procedure mnuAddUniversalImageClick(Sender: TObject);
   private
-    //ImageInfoList : TList;
     LastDisplayedTIUIEN : AnsiString;
-    //ImageIndexLastDownloaded : integer;
     FDeleteImageIndex : integer;
-    FEditIsActive : boolean;
+    FEditIsActive : boolean;  //note: I suspect this is not kept in sync with actual editing in the various other forms.
     FImageDeleteMode : TImgDelMode;
-    //InsideImageDownload : boolean;
-    //frmImageTransfer: TfrmImageTransfer;
-    //DownloadRetryCount : integer;
-    //DownloadThumbnails : tBoolUnknown;
+    AllPatientImagesInfoList : TList; //contains TImageInfo items, and owns them.  This is different from uImages.DownloadQueInfoList
+    ThumbnailDisplayMode: TIconDispMode;
     procedure ExecuteFileIfNeeded(Selected: integer);
-    //procedure EnsureImageListLoaded(AImageInfoList : TList);
-    //procedure ClearImageList(AImageInfoList : TList);
-    procedure ClearTabPages();
-    procedure SetupTab(i : integer; AImageInfoList : TList);
-    procedure UpdateNoteInfoMemo();
+    procedure UpdateNoteInfoMemo(IEN : string);
     procedure UpdateImageInfoMemo(Rec: TImageInfo);
-    //function FileSize(fileName : wideString) : Int64;
-    //function GetImagesCount : integer;
-    //function GetImageInfo(Index : integer) : TImageInfo;
-    procedure SetupTimer;
     function CanDeleteImages : boolean;
     function TestExtenstion(FileName: string): integer;
-    procedure DeleteImageIndex(ImageIndex : integer; DeleteMode : TImgDelMode; boolPromptUser: boolean);
     procedure DeleteImage(var DeleteSts: TActionRec; ImageFileName: string; ImageIEN, DocIEN: Integer;
                           DeleteMode : TImgDelMode; const Reason: string);
-    //procedure GetUnlinkedImagesList(AImageInfoList: TList; ImagesInHTMLNote: TStringList);
     procedure DisplayMediaInBrowser(MediaName : string);
-    //procedure FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
-    //function FileTransferProgressCallback(CurrentValue, TotalValue : integer; Msg : string = '') : boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
-    //procedure FileTransferProgressDone();
+    procedure ReloadForPatient();
+    procedure Clear();
+    procedure LoadAllPatientImagesInfoList();
+    procedure AddThumbToImageList(Rec: TImageInfo);
+    function ParseNoteInfo(s : string) : TNoteInfo;
   public
-    //CacheDir : AnsiString;
-    //TransferMethod : TImgTransferMethod;
-    //DropBoxDir : string;
-    //frmImageUpload: TfrmImageUpload;  //kt 8/4/20.  Moved from private to public
     NullImageName : AnsiString;
-    //NumImagesAvailableOnServer : integer;
-    DownloadImagesInBackground : boolean;
-    //function GetImagesForIEN(IEN: AnsiString; AImageInfoList : TList): integer;
-    //function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
-    //function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
-    //function UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-    //function UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-    //procedure SplitLinuxFilePath(FullPathName : AnsiString; var Path : AnsiString; var FName : AnsiString);
-    //function ParseOneImageListLine(s : string) : TImageInfo;
-    //procedure FillImageList(TIUIEN : string; AImageInfoList : TList);
     procedure NewNoteSelected(EditIsActive : boolean);
-    //function CreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
     function DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
-    //procedure EnsureSLImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
-    //procedure EnsureLinkedImagesDownloaded;
-    //function DownloadToCache(AImageInfoList: TList; ImageIndex : integer) : TDownloadResult;
-    //function DownloadRecToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;
-    procedure DeleteAll(DeleteMode: TImgDelMode);
-    //property ImagesCount : integer read GetImagesCount;
-    //property ImageInfo[index : integer] : TImageInfo read GetImageInfo;
     procedure GetThumbnailBitmapForFName (FName : string; Bitmap : TBitmap);
     function ThumbnailIndexForFName (FName : string) : integer;
     function AllowContextChange(var WhyNot: string): Boolean;
-    //procedure RemoveSuccessfullyDownloadedRecs(AImageInfoList: TList);
-    //procedure EmptyCache();
+    procedure HandlePatientChanged();
   published
   end;
 
@@ -211,12 +191,10 @@ Const
 
 var
   frmImages: TfrmImages;
-  ListBox: TORListBox;  //will be set as pointer to frmNotes.lstNotes
   HTMLEditor: TWebBrowser;
 
 
-function LoadAnyImageFormatToBMP(FPath : string; BMP : TBitmap) : boolean;  forward;
-function NotesTIUIEN : string;
+//function NotesTIUIEN : string;
 
 implementation
 
@@ -234,32 +212,16 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      uHTMLTools, fNotes, fImagePickExisting,
      fImagesMultiUse;  {//kt added 5-27-05 for IsHTMLDocument}
 
-
-function NotesTIUIEN : string;
-begin
-  Result := '0';
-  if ListBox.ItemID <> '' then begin
-    try
-      Result := IntToStr(ListBox.ItemID);
-    except
-      //Error occurs after note is signed, and frmNotes.lstNotes.ItemID is "inaccessible"
-      on E: Exception do exit;
-    end;
-  end;
-end;
-
 procedure TfrmImages.FormCreate(Sender: TObject);
 begin
   inherited;
+  ThumbnailDisplayMode := tGenericImage;  //don't download thumbnails initially.
   ImageDownloadInitialize();
+  AllPatientImagesInfoList := TList.Create; //contains TImageInfo items, and owns them.
   frmImageUpload := TfrmImageUpload.Create(Self);
   LastDisplayedTIUIEN := '0';
   FDeleteImageIndex := -1;
-  DownloadRetryCount := 0;
-  //ImageInfoList := TList.Create;
-  //ClearImageList(ImageInfoList); //sets up other needed variables.
-  DownloadImagesInBackground := true;
-  //CacheDir := ExtractFilePath(ParamStr(0))+ 'Cache';
+  //DownloadImagesInBackground := true;
   CacheDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
   NullImageName := 'about:blank';
   if not DirectoryExists(CacheDir) then ForceDirectories(CacheDir);
@@ -270,17 +232,20 @@ begin
   //  uTMGOptions.WriteBool('Use dropbox directory for transfers',false);
   //  uTMGOptions.WriteString('Dropbox directory','');
   //end;
-  AutoScanUpload.Checked := uTMGOptions.ReadBool('Scan Enabled',false);
-  if assigned(frmNotes) then ListBox := frmNotes.lstNotes;  //kt 8/10/20 added if Assigned() ...
+  mnuAutoScanUpload.Checked := uTMGOptions.ReadBool('Scan Enabled',false);
 end;
 
 procedure TfrmImages.FormDestroy(Sender: TObject);
 begin
   inherited;
-  //ClearImageList(ImageInfoList);
-  //ImageInfoList.Free;
-  EmptyCache;
-  frmImageUpload.Free;
+  ClearImageList(AllPatientImagesInfoList);
+  FreeAndNil(AllPatientImagesInfoList);
+end;
+
+procedure TfrmImages.FormHide(Sender: TObject);
+begin
+  inherited;
+  ThumbnailDisplayMode := tGenericImage;
 end;
 
 procedure TfrmImages.FormShow(Sender: TObject);
@@ -288,231 +253,10 @@ var  TIUIEN : AnsiString;
 begin
   inherited;
   mnuDeleteImage.Enabled := CanDeleteImages;
-  //if frmNotes.lstNotes.ItemID = '' then begin
-  if ListBox.ItemID = '' then begin
-    TIUIEN := '0';
-  end else begin
-    try
-      //TIUIEN := IntToStr(frmNotes.lstNotes.ItemID);
-      TIUIEN := IntToStr(ListBox.ItemID);
-    except
-      on E:Exception do begin
-        TIUIEN := '0';
-      end;
-    end;
-  end;
-  DownloadImagesInBackground := false;
-  SetupTimer;
-  if LastDisplayedTIUIEN <> TIUIEN then begin
-    UpdateNoteInfoMemo();
-    LastDisplayedTIUIEN := TIUIEN;
-  end;
+  TIUIEN := ActiveTIUIENForImages;
+  ThumbnailDisplayMode := tThumbnail;
+  if AllPatientImagesInfoList.Count = 0 then LoadAllPatientImagesInfoList();
 end;
-
-
-procedure TfrmImages.timLoadImagesTimer(Sender: TObject);
-//This function's goal is to download images in the background,
-// with one image to be downloaded each time the timer fires
-//UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
-var  Result : TDownloadResult;
-begin
-  inherited;
-  {
-  timLoadImages.Enabled := false;
-  exit; //kt 11/24/20 disabling timer downloads.
-  EnsureImageListLoaded(ImageInfoList);
-  if NumImagesAvailableOnServer = 0 then exit;
-  if (ImageIndexLastDownloaded >= (ImageInfoList.Count-1)) then exit;
-  if InsideImageDownload = false then begin
-    Result := DownloadToCache(ImageInfoList, ImageIndexLastDownloaded+1); //Only load 1 image per timer firing.
-    if Result = drTryAgain then begin
-      inc (DownloadRetryCount);
-      if DownloadRetryCount > DOWNLOAD_RETRY_LIMIT then begin
-        Result := drGiveUp;
-      end;
-    end;
-  end else begin
-    Result := drTryAgain;
-  end;
-  if Result = drSuccess then SetupTab(ImageIndexLastDownloaded+1, ImageInfoList);
-  if Result <> drTryAgain then Inc(ImageIndexLastDownloaded);
-  if Result = drSuccess then begin
-    if TabControl.TabIndex < 0 then TabControl.TabIndex := 0;
-    TabControlChange(self);
-  end;
-  if Result <> drUserAborted then begin
-    SetupTimer;
-  end;
-  DownloadRetryCount := 0;
-  }
-end;
-
-procedure TfrmImages.SetupTimer;
-//UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
-
-const
-  BACKGROUND_DELAY : ARRAY[FALSE..TRUE] of integer = (IMAGE_DOWNLOAD_DELAY_FOREGROUND, IMAGE_DOWNLOAD_DELAY_BACKGROUND);
-begin
-  timLoadImages.Enabled := false;  //kt disabling timer downloads
-  exit;
-  //kt ------------------------
-  timLoadImages.Interval := BACKGROUND_DELAY[DownloadImagesInBackground];
-  timLoadImages.Enabled := true;
-end;
-
-{
-procedure TfrmImages.GetUnlinkedImagesList(AImageInfoList: TList; ImagesInHTMLNote: TStringList);
-
-  function FileNameInList(FileName : string):boolean;
-  var i : integer;
-      Rec : TImageInfo;
-  begin
-    result := False;
-    for i := 0 to AImageInfoList.Count - 1 do begin
-      Rec := TImageInfo(AImageInfoList[i]);
-      if FileName = Rec.ServerFName then begin
-        result := true;
-        break;
-      end;
-    end;
-  end;
-
-  function HashFileName(FileName: string): string;
-  var i : integer;
-      frag : string;
-      tempFileName : string;
-      HashLen : integer;
-  begin
-    tempFileName := piece(FileName,'.',1);
-    HashLen := Length(tempFileName)-2;
-    result :='/'+Midstr(FileName,1,4);
-    i := 5;
-    repeat
-      frag := MidStr(FileName,i,2);
-      result := result + '\' + frag;
-      inc(i,2);
-    until (i >= HashLen);
-    result := result + '\' + FileName;
-  end;
-
-var i : integer;
-    s :string;
-    FileName,HashedFileName: string;
-    ImageInfo : TImageInfo;
-begin
-  for i  := 0 to ImagesInHTMLNote.Count - 1 do begin
-    FileName := ImagesInHTMLNote[i];
-    if FileNameInList(FileName) then continue;
-    HashedFileName := HashFileName(FileName);   //Note: server must be set for hashed file use
-    SetPiece(s,'^',3,HashedFileName);
-    SetPiece(s,'^',11,'M');
-    ImageInfo := ParseOneImageListLine(s);
-    if ImageInfo <> nil then AImageInfoList.Add(ImageInfo);
-  end;
-end;
-}
-
-{
-procedure TfrmImages.EnsureSLImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
-//This function's goal is to download SOME images in the FOREground,
-// But only images matching those passed in ImagesList will be downloaded;
-// The intent is to only download images that have links to them in HTML source
-//Thus, if note has a large amount of images attached to it, but not referenced
-//  in HTML code, then they will not be downloaded here. (But will be downloaded
-//  later via timLoadImagesTimer
-//-------------
-//UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
-//                   So will plan for all downloads to be in FOREGROUND
-//NOTE: I encountered problem when this function is called recursively via user selecting a different note
-//      while download is in process.  Onclick evoked via Application.ProcessMessages.  I will therefore
-//      rewrite this to handle the situation.  
-//Called by: uHTMLTools.ScanForSubs() <-- uHTMLTools.IsHTML (and others)
-//       by:
-var i : integer;
-    Rec : TImageInfo;
-    DownloadResult : TDownloadResult;
-    TIUIEN : string;
-
-begin
-  if ImagesInHTMLNote.Count = 0 then exit;
-  TIUIEN := NotesTIUIEN();
-  NumImagesAvailableOnServer := FillImageList(TIUIEN, ImageInfoList);
-  AddNoteImagesToList(ImagesInHTMLNote, ImageInfoList);
-  if ImageInfoList.Count = 0 then exit;
-  if ImageInfoList.Count > 0 then begin
-    if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-    frmImageTransfer.ProgressMsg.Caption := 'Downloading Images';
-    frmImageTransfer.ProgressBar.Min := 0;
-    frmImageTransfer.ProgressBar.Position := 0;
-    frmImageTransfer.ProgressBar.Max := ImageInfoList.Count; //elh was -1
-    if not HideProgress then frmImageTransfer.Show;
-  end;
-  timLoadImages.enabled := False;
-  for i := 0 to ImageInfoList.Count-1 do begin
-    frmImageTransfer.ProgressBar.Position := i;
-    Rec := TImageInfo(ImageInfoList[i]);
-    if ImagesInHTMLNote.IndexOf(Rec.ServerFName)>-1 then begin
-      DownloadRetryCount := 0;
-      Repeat
-        DownloadResult := DownloadToCache(ImageInfoList, i);
-        Application.ProcessMessages;
-        if DownloadResult = drTryAgain then begin
-          inc(DownloadRetryCount);
-          if DownloadRetryCount > DOWNLOAD_RETRY_LIMIT then DownloadResult := drGiveUp;
-        end;
-        if frmImageTransfer.UserCanceled then break;
-      until  DownloadResult <> drTryAgain;
-    end;
-    if frmImageTransfer.UserCanceled then break;
-  end;
-  SetupTimer;
-  DownloadRetryCount := 0;
-  //remove successful records
-  RemoveSuccessfullyDownloadedRecs(ImageInfoList);    //to do,.... this may need to be repositioned....
-  FreeAndNil(frmImageTransfer);
-end;
-
-procedure TfrmImages.RemoveSuccessfullyDownloadedRecs(AImageInfoList: TList);
-var i : integer;
-    Rec : TImageInfo;
-begin
-  for i := AImageInfoList.Count-1 downto 0 do begin
-    Rec := TImageInfo(AImageInfoList[i]);
-    if not Rec.SucessfullyDownloaded then continue;
-    FreeAndNil(Rec);
-    AImageInfoList.Delete(i);
-  end;
-end;
-
-procedure TfrmImages.EnsureLinkedImagesDownloaded;
-//This function's goal is to download ALL images in the FOREground.
-var
-  DownloadResult : TDownloadResult;
-begin
-  EnsureImageListLoaded(ImageInfoList);
-  if NumImagesAvailableOnServer = 0 then exit;
-  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  frmImageTransfer.ProgressMsg.Caption := 'Downloading Images';
-  while (ImageIndexLastDownloaded < (ImageInfoList.Count-1)) do begin
-    DownloadRetryCount := 0;
-    Repeat
-      DownloadResult := DownloadToCache(ImageInfoList, ImageIndexLastDownloaded+1);
-      Application.ProcessMessages;
-      if DownloadResult = drTryAgain then begin
-        inc(DownloadRetryCount);
-        if DownloadRetryCount > DOWNLOAD_RETRY_LIMIT then DownloadResult := drGiveUp;
-      end;
-      if frmImageTransfer.UserCanceled then DownloadResult := drGiveUp;
-    until DownloadResult <> drTryAgain;
-    if DownloadResult <> drGiveUp then begin
-      SetupTab(ImageIndexLastDownloaded+1, ImageInfoList);
-      if TabControl.TabIndex < 0 then TabControl.TabIndex := 0;
-      TabControlChange(self);
-    end;
-    Inc(ImageIndexLastDownloaded);
-  end;
-end;
-}
 
 { TPage common methods --------------------------------------------------------------------- }
 procedure TfrmImages.mnuChartTabClick(Sender: TObject);
@@ -530,14 +274,6 @@ const
 begin
   inherited;
 end;
-
-procedure TfrmImages.mnuActClick(Sender: TObject);
-begin
-  inherited;
-
-end;
-
-{ General procedures ----------------------------------------------------------------------- }
 
 procedure TfrmImages.UpdateImageInfoMemo(Rec : TImageInfo);
 var s : AnsiString;
@@ -562,6 +298,7 @@ begin
 end;
 
 
+{
 procedure TfrmImages.UpdateNoteInfoMemo();
 var
   NoteInfo,s : AnsiString;
@@ -596,43 +333,482 @@ begin
     CurrentNoteMemo.Lines.Add(s);
   end;
 end;
+}
 
-procedure TfrmImages.SetupTab(i : integer; AImageInfoList : TList);
-//i is index in ImageInfoList (array of TImageInfo's)
-var
-  Rec  : TImageInfo; //this will be a copy of record, not pointer (I think)
-  Bitmap : TBitmap;
-  index : integer;
-  //Ext : AnsiString;
-
-  (*Notice: A TabControl doesn't directly support specifying which
-           images in an ImageList to show for a given tab.  To get
-          around this, the help documentation recommends setting up
-         a TabControlGetImageIndex event handler.
-        I am doing this.  When the event is called, then RecInfo.TabImageIndex
-       is returned.
-  *)
-
+function TfrmImages.ParseNoteInfo(s : string) : TNoteInfo;
+//s: IEN^ExDateOfNote^Title, Location, Author^ImageCount^Visit
+var temp : string;
 begin
-  if i < AImageInfoList.Count then begin
-    Rec := TImageInfo(AImageInfoList[i]);
-    if (Rec.TabImageIndex < 1) then begin
-      if FileExists(Rec.CacheThumbFName) then begin
-        Bitmap := TBitmap.Create;
-        Bitmap.Width := 1024;    //something big enough to hold any thumbnail.
-        Bitmap.Height := 768;
-        Bitmap.LoadFromFile(Rec.CacheThumbFName);
-        Bitmap.Width := ThumbsImageList.Width;  //shrinkage crops image
-        Bitmap.Height := ThumbsImageList.Height;
-        index := ThumbsImageList.Add(Bitmap,nil);
-        Rec.TabImageIndex := index;
-        Bitmap.Free;
-      end else begin
-        Rec.TabImageIndex := ThumbnailIndexForFName(Rec.CacheFName);
+ { Return: Pieces as below
+   piece 1:  TIU IEN
+         2:  DisplayTitle         e.g. Addendum to LAB/XRAYS/STUDIES RESULTS
+         3:  FMReferenceDate(#1301)   e.g. 3150422.174108
+         4:  PatientName   e.g. ZZTEST, BABY  (Z0103)
+         5:  AuthorIEN;AuthorSigName;AuthorName   e.g. 168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S
+         6:  LocationName   e.g. Laughlin_Office
+         7:  Status  e.g. unsigned
+         8:  Adm[or Visit]: DateStr;FMDT   e.g. Visit: 04/21/15;3150421.083119
+         9:  Dis: DateStr;FMDT   e.g. "        ;"
+        10:  REQUESTING PACKAGE REFERENCE IEN(var ptr)  e.g. ""
+        11:  Image Count   e.g. 0
+        12:  Subject(#1701)  e.g. ""
+        13:  Prefix (child indicator)   e.g. "+"
+        14:  ParentIEN (#.06), or IDParentien (#2101), or Context, or 1  e.g. 361381
+        15:  ID Sort indicator  e.g.  ""
+        16:  Highlight Note  ELH   8/4/16
+        17:  Hospital Note   ELH   4/30/19
+ }
+  Result.IEN := piece(s,'^',1);
+  Result.DisplayTitle := piece(s,'^',2);
+  Result.RefDate := FormatFMDateTime('mmm dd,yy', FMDTStrToFMDT(piece(s,'^',3)));
+  Result.PatientName  := piece(s,'^',4);
+  temp := piece(s,'^',5);
+  Result.AuthorIEN := piece(temp,';',1);
+  Result.AuthorSigName := piece(temp,';',2);
+  Result.AuthorName := piece(temp,';',3);
+  Result.LocationName := piece(s,'^',6);
+  Result.Status := piece(s,'^',7);
+  temp := piece(s,'^',8);
+  Result.VisitLabel := piece(temp,':', 1);
+  temp := piece(temp,':',2);
+  Result.VisitDate := piece(temp,';',1);
+  Result.ImageCount := StrToIntDef(piece(s, '^', 11), 0);
+  Result.Subject := piece(s, '^', 12);
+  Result.Prefix := piece(s, '^', 13);
+  Result.ParentIEN := piece(s, '^', 14);
+  Result.IDSortIndicator := piece(s, '^', 15);
+  Result.HighlightNote := piece(s, '^', 16);
+  Result.HospitalNote := piece(s, '^', 17);
+end;
+
+
+procedure TfrmImages.UpdateNoteInfoMemo(IEN : string);
+var Info : TStringList;
+    Result : string;
+    NoteInfo : TNoteInfo;
+begin
+  CurrentNoteMemo.Lines.Clear;
+  Info := TStringList.Create;
+  try
+    GetNoteInfo(Info, IEN);
+    if Info.Count > 0 then Result := Info[0];
+    if piece(Result,'^',1)='-1' then begin
+      MessageDlg('Error: '+piece(Result,'^',2), mtError, [mbOK], 0);
+      exit;
+    end;
+    if Info.Count > 1 then begin
+      NoteInfo := ParseNoteInfo(Info[1]);
+      With CurrentNoteMemo do begin
+        Lines.add(NoteInfo.RefDate + ' - ' + NoteInfo.DisplayTitle + ' - ' + NoteInfo.AuthorSigName);
+        Lines.Add(NoteInfo.LocationName + ',  IEN:' + NoteInfo.IEN);
       end;
     end;
-    TabControl.Tabs.Add(' ');  //add the tab.  Thumbnail should exist before this
+  finally
+    Info.Free;
   end;
+end;
+
+//procedure GetNoteInfo(Dest : TStrings; IEN : string);   //kt added 12/9/2020
+
+
+procedure TfrmImages.UploadImagesClick(Sender: TObject);
+var
+  Node: TORTreeNode;
+  AddResult : TModalResult;
+
+begin
+  inherited;
+  AddResult := frmImageUpload.ShowModal;
+  if not IsAbortResult(AddResult) then begin
+    NewNoteSelected(true);  //force a reload to show recently added image.
+    //kt timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
+    //kt DownloadImagesInBackground := false;
+    //kt SetupTimer;  //UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
+    Node := TORTreeNode(frmNotes.tvNotes.Selected);
+    case Node.StateIndex of
+      IMG_NO_IMAGES         :  Node.StateIndex := IMG_1_IMAGE;
+      IMG_1_IMAGE           :  Node.StateIndex := IMG_2_IMAGES;
+      IMG_2_IMAGES          :  Node.StateIndex := IMG_MANY_IMAGES;
+      IMG_MANY_IMAGES       :  Node.StateIndex := IMG_MANY_IMAGES;
+    end;
+  end;
+end;
+
+procedure TfrmImages.DisplayMediaInBrowser(MediaName : string);
+
+    function GetHTMLText(TextArray : TStrings) : string;
+    var i : integer;
+    begin
+      for i := 0 to TextArray.Count - 1 do begin
+        result := result + TextArray[i];
+      end;
+    end;
+
+var  HTMLWrapper, MyRPCResults : TStringList;
+     Result, P1Result : string;
+begin
+  HTMLWrapper := TStringList.Create;
+  MyRPCResults := TStringList.Create;
+  if MediaName = NullImageName then begin
+    WebBrowser.Navigate(NullImageName);
+  end else begin
+    with RPCBrokerV do begin
+      ClearParameters := True;
+      RemoteProcedure := 'TMG CPRS IMAGES TAB HTML';
+      Param[0].PType := list;
+      with Param[0] do begin
+        Mult['1'] := MediaName; //add loop when ready for multiple images
+      end;
+      CallBroker;
+    end;
+    MyRPCResults.Assign(RPCBrokerV.Results);
+    if MyRPCResults.Count = 0 then MyRPCResults.Add('0');
+    Result := MyRPCResults[0];
+    P1Result := piece(Result,'^',1);
+    if P1Result ='0' then begin
+      WebBrowser.Navigate(MediaName);
+    end else if P1Result='1' then begin
+      MyRPCResults.Delete(0);
+      WBLoadHTML(WebBrowser,GetHTMLText(MyRPCResults));
+    end else begin
+      ShowMessage(Piece(Result,'^',2));
+    end;
+  end;
+  HTMLWrapper.free;
+  MyRPCResults.Free;
+end;
+
+
+function TfrmImages.TestExtenstion(FileName: string): integer;
+var  FileExt : string;
+begin
+  FileExt := UpperCase(ExtractFileExt(FileName));
+  if Pos(FileExt,INSIDE_BROWSER)>0 then begin
+    Result := 1
+  end else if Pos(FileExt, OUTSIDE_BROWSER)>0 then begin
+    Result := 2
+  end else begin
+    Result := 3;
+  end;
+end;
+
+
+function TfrmImages.AllowContextChange(var WhyNot: string): Boolean;
+//This is called when the application is shutting down.  It may also
+//be called under other circumstances.
+//Return: TRUE if OK to exit or change.
+begin
+  Result := true; //default
+  exit; //later could deny quit if doing something important...
+  {
+  WhyNot := 'Images busy';
+  Result := False;
+  }
+end;
+
+
+procedure TfrmImages.btnOpenLinkedDocClick(Sender: TObject);
+var Item : TListItem;
+    Rec  : TImageInfo; //not owned here
+    DownloadResult : TDownloadResult;
+    TryNum : integer;
+    HideProgress : boolean;
+    TreeNode : TORTreeNode;
+
+begin
+  inherited;
+  if lvThumbnails.ItemIndex < 0 then exit;
+  Item := lvThumbnails.Items[lvThumbnails.ItemIndex];
+  if not assigned(Item) then exit;
+  Rec := GetImageInfo(AllPatientImagesInfoList, Item.Index);
+  if not assigned(Rec) then exit;
+  TreeNode := frmNotes.GetNodeByIEN(frmNotes.tvNotes, Rec.LinkedTIUIEN);
+  if not assigned(TreeNode) then begin
+    MessageDlg('Unable to automatically open that note.' + CRLF +
+               'Perhaps note is not shown on Notes tab?' + CRLF +
+               'Try increasing number of notes to show.' + CRLF +
+               'To try opening note manually, use info:' + CRLF +
+               CurrentNoteMemo.Lines.Text, mtError, [mbOK], 0);
+    exit;
+  end;
+  frmNotes.tvNotes.Selected := TreeNode;
+  frmFrame.SelectChartTab(CT_NOTES);
+end;
+
+procedure TfrmImages.mnuAddSignatureImageClick(Sender: TObject);
+var AddResult: integer;
+begin
+  inherited;
+  frmImageUpload.Mode := umSigImage;
+  AddResult := frmImageUpload.ShowModal;
+  frmImageUpload.Mode := umAnyFile;
+  if IsAbortResult(AddResult) then exit;
+end;
+
+procedure TfrmImages.mnuAddUniversalImageClick(Sender: TObject);
+var
+  frmImagesMultiUse: TfrmImagesMultiUse;
+begin
+  inherited;
+  frmImagesMultiUse := TfrmImagesMultiUse.Create(Self);
+  frmImagesMultiUse.Mode := imuAddImage;
+  frmImagesMultiUse.ShowModal;
+  frmImagesMultiUse.Free;
+end;
+
+procedure TfrmImages.Clear();
+begin
+  ClearImageList(AllPatientImagesInfoList);
+  ThumbnailsImageList.Clear;
+  ThumbnailsImageList.AddImage(FileTypeIconsImageList, 0);  //keep generic image as index 0
+  lvThumbnails.Items.Count := 0;
+end;
+
+procedure TfrmImages.LoadAllPatientImagesInfoList();
+var
+  SDT, EDT : TFMDateTime;
+  ExcludeSL : TStringList; //Implement later....
+  i : integer;
+  Rec  : TImageInfo;
+
+begin
+  SDT := 0;   //Later allow user to change
+  EDT := 9999999.999999;   //Later allow user to change
+  ExcludeSL := nil; //implement later.
+  GetAllImages(AllPatientImagesInfoList, SDT, EDT, ExcludeSL);
+  //Data is returned in ascending chronological order.  I want to display in decending chronological order.
+  for i := 0 to AllPatientImagesInfoList.Count - 1 do begin
+    Rec := GetImageInfo(AllPatientImagesInfoList, i);
+    if not assigned(Rec) then continue;
+    Rec.Tag := -1;
+  end;
+  lvThumbnails.Items.Count := AllPatientImagesInfoList.Count;
+  //NOTE: Actual downloading will occur in the OnData event from the lvThumbnails TListView --> calls lvThumbsData() procedure
+end;
+
+procedure TfrmImages.lvThumbnailsClick(Sender: TObject);
+//Handle showing full image.
+var Item : TListItem;
+    Rec  : TImageInfo; //not owned here
+    DownloadResult : TDownloadResult;
+    TryNum : integer;
+    HideProgress : boolean;
+
+begin
+  inherited;
+  if lvThumbnails.ItemIndex < 0 then exit;
+  Item := lvThumbnails.Items[lvThumbnails.ItemIndex];
+  if not assigned(Item) then exit;
+  btnOpenLinkedDoc.Enabled := true;
+  Rec := GetImageInfo(AllPatientImagesInfoList, Item.Index);
+  HideProgress := false; //Later could make a parameter etc.
+  TryNum := 0;
+  if not Rec.SucessfullyDownloaded and (Rec.NumDownloadAttempts < DOWNLOAD_RETRY_LIMIT) then begin
+    repeat
+      Rec.DesiredDownloadMode := twdImgeOnly;
+      //FYI: Increasing RefCount is a signal that we will own these recs, otherwise they would be deleted during processing download cue.
+      inc(Rec.RefCount); //RefCount gets decreased during RemoveSuccessfullyDownloadedRecs when processing DownloadQue
+      DownloadResult := EnsureRecDownloaded(Rec, HideProgress);
+      Inc(TryNum);
+      if DownloadResult = drTryAgain then Application.ProcessMessages;
+    until (DownloadResult <> drTryAgain) or (TryNum >= DOWNLOAD_RETRY_LIMIT);
+  end;
+  if Rec.SucessfullyDownloaded then begin
+    DisplayMediaInBrowser(Rec.CacheFName);
+  end;
+  UpdateImageInfoMemo(Rec);
+  UpdateNoteInfoMemo(Rec.LinkedTIUIEN);
+end;
+
+procedure TfrmImages.lvThumbnailsData(Sender: TObject; Item: TListItem);
+var
+  ImageIndex : integer;
+  Rec  : TImageInfo; //not owned here
+  DownloadResult : TDownloadResult;
+  TryNum : integer;
+  HideProgress : boolean;
+
+begin
+  inherited;
+  Item.ImageIndex := 0;  //default to generic image.
+  if ThumbnailDisplayMode = tGenericImage then exit;
+  if (Item.Index >= AllPatientImagesInfoList.Count) then exit;
+  Rec := GetImageInfo(AllPatientImagesInfoList, Item.Index);
+  if not assigned(Rec) then exit;
+  HideProgress := true; //Later could make a parameter etc.
+  Item.Caption := Rec.DisplayDate;
+  TryNum := 0;
+  if (Rec.Tag = -1) then begin
+    if not Rec.SucessfullyDownloadedThumb and (Rec.NumDownloadAttempts < DOWNLOAD_RETRY_LIMIT) then begin
+      repeat
+        Rec.DesiredDownloadMode := twdThumbOnly;
+        //FYI: Increasing RefCount is a signal that we will own these recs, otherwise they would be deleted during processing download cue.
+        inc(Rec.RefCount); //RefCount gets decreased during RemoveSuccessfullyDownloadedRecs when processing DownloadQue
+        DownloadResult := EnsureRecDownloaded(Rec, HideProgress);
+        Inc(TryNum);
+        if DownloadResult = drTryAgain then Application.ProcessMessages;
+      until (DownloadResult <> drTryAgain) or (TryNum >= DOWNLOAD_RETRY_LIMIT);
+    end;
+    if Rec.SucessfullyDownloadedThumb then begin
+      AddThumbToImageList(Rec);
+      Item.ImageIndex := Rec.Tag;
+    end;
+  end else begin
+    Item.ImageIndex := Rec.Tag;
+  end;
+end;
+
+
+procedure TfrmImages.AddThumbToImageList(Rec: TImageInfo);
+var
+  TempBitmap : TBitmap;
+begin
+  TempBitmap := TBitmap.Create;
+  try
+    TempBitmap.LoadFromFile(Rec.CacheThumbFName);
+    TempBitmap.SetSize(64, 64);
+    Rec.Tag :=  ThumbnailsImageList.Add(TempBitmap, nil);
+  finally
+    TempBitmap.Free;
+  end;
+end;
+
+procedure TfrmImages.ReloadForPatient();
+begin
+  Clear();
+  if ThumbnailDisplayMode = tThumbnail then begin
+    LoadAllPatientImagesInfoList();
+  end;
+  btnOpenLinkedDoc.Enabled := false;
+end;
+
+procedure TfrmImages.HandlePatientChanged();
+begin
+  uImages.HandlePatientChanged();
+  ReloadForPatient();
+end;
+
+//===========================================================================
+//Code below may be eligible for deletion after reconstruction done.
+//===========================================================================
+
+procedure TfrmImages.DeleteImage(var DeleteSts: TActionRec; ImageFileName: String;
+                                 ImageIEN, DocIEN: Integer; DeleteMode : TImgDelMode;
+                                 const Reason: string);  //Reason should be 10-60 chars;
+var
+  RefreshNeeded : boolean;
+begin
+  uImages.DeleteImage(DeleteSts, ImageFileName, ImageIEN, DocIEN, DeleteMode,
+                      frmnotes.HtmlEditor, FEditIsActive, RefreshNeeded, User, Reason);
+  if RefreshNeeded then begin
+    NewNoteSelected(True);
+    frmImages.Formshow(self);
+  end;
+end;
+
+procedure TfrmImages.mnuPopupPopup(Sender: TObject);
+//Determine here if delete option should be enabled.
+begin
+  inherited;
+  mnuPopDeleteImage.Enabled := CanDeleteImages;
+end;
+
+function TfrmImages.CanDeleteImages : boolean;
+//Determine here if image can be deleted.
+var
+  ActionSts: TActionRec;
+
+begin
+  FImageDeleteMode := idmNone;
+  if FEditIsActive then begin
+    Result := true;
+    FImageDeleteMode := idmDelete;
+    exit;
+  end;
+  //Will use same user class managment rules for images as for notes.
+  //So if user can delete a note, then they can also delete images.
+  //ActOnDocument(ActionSts, frmNotes.lstNotes.ItemIEN, 'DELETE RECORD');
+  ActOnDocument(ActionSts, ActiveTIUIENForImagesInt, 'DELETE RECORD');
+  if (ActionSts.Success = false) then begin
+    if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;
+  end;
+  Result := ActionSts.Success;
+  if Result then begin
+    //if AuthorSignedDocument(frmNotes.lstNotes.ItemIEN) then FImageDeleteMode := idmRetract
+    if AuthorSignedDocument(ActiveTIUIENForImagesInt) then FImageDeleteMode := idmRetract
+    else FImageDeleteMode := idmDelete;
+  end;
+end;
+
+procedure TfrmImages.mnuPopDeleteImageClick(Sender: TObject);
+begin
+  inherited;
+  DeleteImageIndex(FDeleteImageIndex, FImageDeleteMode, True, frmNotes.HtmlEditor, FEditIsActive);
+end;
+
+
+function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
+//Decode data from barcode on image, or return '' if none
+//Note: if I could find a cost-effective way of decoding this on client side,
+//      then that code be done here in the function, instead of uploading image
+//      to the server for decoding.
+begin
+  StatusText('Checking image for barcodes...');
+  Application.ProcessMessages;
+  Result := DoDecodeBarcode(LocalFNamePath,ImageType);
+  StatusText('');
+end;
+
+
+procedure TfrmImages.EnableAutoScanUploadClick(Sender: TObject);
+begin
+  inherited;
+  mnuAutoScanUpload.Checked := not mnuAutoScanUpload.Checked;
+  uTMGOptions.WriteBool('Scan Enabled',mnuAutoScanUpload.Checked);
+end;
+
+
+procedure TfrmImages.mnuPickScanFolderClick(Sender: TObject);
+var
+  CurScanDir : string;
+
+begin
+  inherited;
+  CurScanDir := frmImageUpload.ScanDir;
+  OpenDialog.InitialDir := CurScanDir;
+  MessageDlg('Please pick ANY file in the desired directory.',mtInformation,[mbOK],0);
+  if OpenDialog.Execute then begin
+    frmImageUpload.SetScanDir(ExtractFilePath(OpenDialog.FileName));
+  end;
+  mnuAutoScanUpload.Checked := true;
+end;
+
+
+procedure TfrmImages.ExecuteFileIfNeeded(Selected: integer);
+var
+  FileName : AnsiString;
+  Rec  : TImageInfo;
+begin
+  inherited;
+  if Selected > -1 then begin
+    Rec := GetImageInfo(Selected); // TImageInfo(ImageInfoList[Selected]);
+    if assigned(Rec) then FileName := Rec.CacheFName else FileName := '';
+    UpdateImageInfoMemo(Rec); //OK if rec is nil
+  end else begin
+    FileName := NullImageName;
+    UpdateImageInfoMemo(nil);
+  end;
+  if TestExtenstion(FileName) > 1 then begin
+    DisplayMediaInBrowser(FileName);
+  end;
+end;
+
+procedure TfrmImages.NewNoteSelected(EditIsActive : boolean);
+//Will be called by  fNotes when a new note has been selected.
+begin
+  FEditIsActive := EditIsActive;
+  mnuUploadImages.Enabled := EditIsActive;
+  DisplayMediaInBrowser(NullImageName);
 end;
 
 function TfrmImages.ThumbnailIndexForFName (FName : string) : integer;
@@ -687,1084 +863,17 @@ begin
 end;
 
 
-procedure TfrmImages.GetThumbnailBitmapForFName (FName : string; Bitmap : TBitmap);
+procedure TfrmImages.GetThumbnailBitmapForFName(FName : string; Bitmap : TBitmap);
 var index: integer;
 begin
   index := ThumbnailIndexForFName(FName);
   Bitmap.Canvas.FillRect(Rect(0,0,Bitmap.Height,Bitmap.Width));
-  ThumbsImageList.GetBitmap(index,Bitmap);
+  FileTypeIconsImageList.GetBitmap(index,Bitmap);
 end;
 
 
-procedure TfrmImages.ClearTabPages();
-begin
-  TabControl.Tabs.Clear;
-  ClearImageList(nil);
-end;
 
-{
-procedure TfrmImages.ClearImageList(AImageInfoList : TList);
-//Note: !! This should also clear any visible images/thumbnails etc.
-//Note: Need to remove thumbnail image from image list.
-var i    : integer;
-begin
-  if assigned(AImageInfoList) then for i := AImageInfoList.Count-1 downto 0 do begin
-    if TImageInfo(AImageInfoList[i]).LongDesc <> nil then begin
-      TImageInfo(AImageInfoList[i]).LongDesc.Free;
-    end;
-    try
-      TImageInfo(AImageInfoList[i]).Free;
-    except
-      On E: Exception do begin
-      end;
-    end;
-    AImageInfoList.Delete(i);
-  end;
-  NumImagesAvailableOnServer := NOT_YET_CHECKED_SERVER;
-  ImageIndexLastDownloaded := -1;
-end;
-}
 
-{
-procedure TfrmImages.EnsureImageListLoaded(AImageInfoList : TList);
-begin
-  if NumImagesAvailableOnServer = NOT_YET_CHECKED_SERVER then begin
-    NumImagesAvailableOnServer := FillImageList(NotesTIUIEN, AImageInfoList);
-  end;
-end;
-}
-
-{
-Function TfrmImages.DownloadRecToCache(Rec : TImageInfo; CurrentImage : integer = 1;TotalImages: Integer=2) : TDownloadResult;
-//Loads image specified in Rec to Cache (unless already present)
-var
-  ServerFName : AnsiString;
-  ServerPathName : AnsiString;
-  R1,R2 : TDownloadResult;
-
-begin
-  if InsideImageDownload then begin
-    Result := drTryAgain;
-    Exit;
-  end;
-  try
-    InsideImageDownload := true;
-    ServerFName := Rec.ServerFName;
-    ServerPathName := Rec.ServerPathName;
-    R1 := drSuccess;  //default
-    R2 := drSuccess;  //default
-    if not FileExists(Rec.CacheFName) then begin
-      R1 := DownloadFile(ServerPathName,ServerFName,Rec.CacheFName,CurrentImage,TotalImages);
-    end;
-    ServerFName := Rec.ServerThumbFName;
-    ServerPathName := Rec.ServerThumbPathName;
-    if not FileExists(Rec.CacheThumbFName) then begin
-      if DownloadThumbnails = tbuUnknown then DownloadThumbnails := BOOLU2BOOL[uTMGOptions.ReadBool('CPRS Download Thumbnails',False)];
-      if (DownloadThumbnails = tbuTrue) then
-        R2 := DownloadFile(ServerPathName,ServerFName,Rec.CacheThumbFName,CurrentImage+1,TotalImages);
-    end;
-    Application.ProcessMessages;
-    if (R1 = drFailure) or (R2 = drFailure) then begin
-      Result := drFailure;
-    end else if (R1 = drTryAgain) or (R2 = drTryAgain) then begin
-      Result := drTryAgain;
-    end else if (R1 = drUserAborted) or (R2 = drUserAborted) then begin
-      Result := drUserAborted;
-    end else begin
-      Result := drSuccess;
-    end;
-    Rec.DownloadStatus := Result;
-    Rec.SucessfullyDownloaded := (Result = drSuccess);
-    //SetupTimer;
-  finally
-    InsideImageDownload := false;
-  end;
-end;
-}
-
-{
-Function TfrmImages.DownloadToCache(AImageInfoList: TList; ImageIndex : integer) : TDownloadResult;
-//Loads image specified in ImageInfoList to Cache (unless already present)
-var
-  Rec : TImageInfo;
-begin
-  Rec := TImageInfo(AImageInfoList[ImageIndex]);
-  Result := DownloadRecToCache(Rec,(ImageIndex*2)-1, AImageInfoList.Count*2);
-end;
-}
-
-{
-function TfrmImages.UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-//NOTICE!:  I made a backup of this function, see in comments below this function
-var
-  ErrMsg : string;
-begin
-  Result := false; //default to failure.
-  if not FileExists(LocalFNamePath) then exit;
-
-  StatusText('Uploading full image...');
-  Application.ProcessMessages;
-  Result := rFileTransferU.UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir, ErrMsg);
-  If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
-  StatusText('');
-end;
-}
-
-{
-function TfrmImages.UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-//NOTICE!:  I made a backup of this function, see in comments below this function
-var
-  ErrMsg : string;
-begin
-  Result := false; //default to failure.
-  if not FileExists(LocalFNamePath) then exit;
-  if TransferMethod = itmDropbox then begin
-    Result := UploadFileViaDropBox(LocalFNamePath,FPath,FName, CurrentImage,TotalImages);
-    exit;
-  end;
-
-  FileTransferProgressInitialize(CurrentImage, TotalImages, 'Uploading full image...');
-  StatusText('Uploading full image...');
-  Application.ProcessMessages;
-  Result := rFileTransferU.UploadFile(LocalFNamePath,FPath,FName, ErrMsg, FileTransferProgressCallback);
-  StatusText('');
-  FileTransferProgressDone();
-  If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
-end;
-}
-
-{
-    procedure TfrmImages.FileTransferProgressInitialize(CurrentValue, TotalValue : integer; Msg : string);
-begin
-  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  frmImageTransfer.UpdateProgress(CurrentValue, TotalValue, Msg);
-end;
-
-function TfrmImages.FileTransferProgressCallback(CurrentValue, TotalValue : integer; Msg : string): boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
-begin
-  if not assigned(frmImageTransfer) then begin
-    Result := false;
-    exit;
-  end;
-  frmImageTransfer.UpdateProgress(CurrentValue, TotalValue, Msg);
-  Result := not frmImageTransfer.UserCanceled;
-end;
-
-procedure TfrmImages.FileTransferProgressDone();
-begin
-  FreeAndNil(frmImageTransfer);
-end;
- }
-
-{
-function TfrmImages.DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;
-                                           CurrentImage,TotalImages: Integer): TDownloadResult;
-//NOTE: There is a backup of this function below this one.
-var
-  ErrMsg          : string;
-begin
-  StatusText('Retrieving full image...');
-  ErrMsg := '';
-  FileTransferProgressInitialize(CurrentImage, TotalImages, 'Downloading images via a drop box');
-  Result := rFileTransferU.DownloadFileViaDropbox(FPath, FName, LocalSaveFNamePath, DropboxDir, ErrMsg, FileTransferProgressCallback);
-  FileTransferProgressDone();
-  If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
-  StatusText('');
-end;
-}
-
-{
-function TfrmImages.DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
-                                 CurrentImage,TotalImages: Integer): TDownloadResult;
-//NOTE: There is a backup of this function below this one.
-var
-  ErrMsg            : string;
-  AProgressCallback :   TProgressCallback;
-begin
-  frmFrame.timSchedule.Enabled := false;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
-  if TransferMethod = itmDropbox then begin
-    Result := DownloadFileViaDropBox(FPath, FName, LocalSaveFNamePath, CurrentImage, TotalImages);
-    exit;
-  end else begin
-    FileTransferProgressInitialize(CurrentImage, TotalImages, 'Downloading Image');
-    ErrMsg := '';
-    StatusText('Retrieving full image...');
-    AProgressCallback := self.FileTransferProgressCallback;
-    Result := rFileTransferU.DownloadFile(FPath,FName,LocalSaveFNamePath, ErrMsg, AProgressCallback);
-    StatusText('');
-    //FileTransferProgressDone();
-    If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
-  end;
-  frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
-end;
-
-}
-
-procedure TfrmImages.NewNoteSelected(EditIsActive : boolean);
-//Will be called by  fNotes when a new note has been selected.
-//var
-begin
-  ClearTabPages();
-  DownloadImagesInBackground := true;
-  //kt SetupTimer; //UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
-  //This will start downloading images after few second delay (so that if
-  //user is just browsing past note, this won't waste effort.
-  //If user selects images tab, then load will occur without delay.
-  //Note: OnTimer calls timLoadImagesTimer()
-  FEditIsActive := EditIsActive;
-  UploadImagesButton.Enabled := EditIsActive;
-  UploadImagesMnuAction.Enabled := EditIsActive;
-  DisplayMediaInBrowser(NullImageName);
-end;
-
-
-{
-procedure TfrmImages.EmptyCache();
-//This will delete ALL files in the Cache directory
-//Note: This will include the html_note file created by
-// the notes tab.
-var
-  //CacheDir : AnsiString;
-  FoundFile : boolean;
-  FSearch : TSearchRec;
-  Files : TStringList;
-  i : integer;
-  FName : AnsiString;
-  FExt : string;
-  SkipFile, Crashing, IsNoteBackup : boolean;
-
-begin
-  Crashing := (ExceptObject <> nil) or TMGShuttingDownDueToCrash;
-  Files := TStringList.Create;
-//  CacheDir := ExtractFilePath(ParamStr(0))+ 'Cache';
-  FoundFile := (FindFirst(CacheDir+'\*.*',faAnyFile,FSearch)=0);
-  while FoundFile do Begin
-    FName := FSearch.Name;
-    FExt := UpperCase(ExtractFileExt(FName));
-    IsNoteBackup := (FExt = '.TXT') and (Pos('BACKUP',FName)>0); //FYI BACKUP files are made in rTIU.TMGLocalBackup();
-    SkipFile := (FName = '.') or (FName = '..');
-    SkipFile := SkipFile or (Crashing and IsNoteBackup);
-    if not SkipFile then begin
-      FName := CacheDir + '\' + FName;
-      Files.Add(FName);
-    end;
-    FoundFile := (FindNext(FSearch)=0);
-  end;
-
-  for i := 0 to Files.Count-1 do begin
-    FName := Files.Strings[i];
-    if DeleteFile(FName) = false then begin
-      //kt raise Exception.Create('Unable to delete file: '+FSearch.Name+#13+'Will try again later...');
-    end;
-  end;
-  Files.Free;
-end;
-}
-
-procedure TfrmImages.UploadImagesButtonClick(Sender: TObject);
-var
-  Node: TORTreeNode;
-  AddResult : TModalResult;
-
-begin
-  inherited;
-  AddResult := frmImageUpload.ShowModal;
-  if not IsAbortResult(AddResult) then begin
-    NewNoteSelected(true);  //force a reload to show recently added image.
-    //kt timLoadImages.Interval := IMAGE_DOWNLOAD_DELAY_FOREGROUND;
-    //kt DownloadImagesInBackground := false;
-    //kt SetupTimer;  //UPDATE 11/24/20 -- To simplify code flow, and handling some problems, I am DISABLING the timer functionality
-    Node := TORTreeNode(frmNotes.tvNotes.Selected);
-    case Node.StateIndex of
-      IMG_NO_IMAGES         :  Node.StateIndex := IMG_1_IMAGE;
-      IMG_1_IMAGE           :  Node.StateIndex := IMG_2_IMAGES;
-      IMG_2_IMAGES          :  Node.StateIndex := IMG_MANY_IMAGES;
-      IMG_MANY_IMAGES       :  Node.StateIndex := IMG_MANY_IMAGES;
-    end;
-  end;
-end;
-
-procedure TfrmImages.FormHide(Sender: TObject);
-begin
-  inherited;
-  DownloadImagesInBackground := true;
-
-//  Application.MessageBox('Here I can hide images.','title');
-end;
-
-procedure TfrmImages.TabControlChange(Sender: TObject);
-var
-  FileName : AnsiString;
-  Rec  : TImageInfo;
-  Selected : integer;
-  FileAction : integer;
-  //ExecuteFile : string;
-  //ParamString: string;
-begin
-  inherited;
-  //here tab has been changed.
-  Selected := TabControl.TabIndex;
-  if Selected > -1 then begin
-    Rec := TImageInfo(ImageInfoList[Selected]);
-    FileName := Rec.CacheFName;
-    UpdateImageInfoMemo(Rec);
-  end else begin
-    FileName := NullImageName;
-    UpdateImageInfoMemo(nil);
-  end;
-  //Test File Type, if ext is web based(1), pass to WebBrowser
-  FileAction := TestExtenstion(FileName);
-  if FileAction = 1 then begin
-    DisplayMediaInBrowser(FileName);
-  end else if FileAction = 2 then begin
-    DisplayMediaInBrowser(NullImageName);
-  end else begin
-    DisplayMediaInBrowser(NullImageName);
-  end;
-end;
-
-procedure TfrmImages.DisplayMediaInBrowser(MediaName : string);
-
-    {procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string) ;
-    var
-       sl: TStringList;
-       ms: TMemoryStream;
-    begin
-       WebBrowser.Navigate('about:blank') ;
-       while WebBrowser.ReadyState < READYSTATE_INTERACTIVE do
-        Application.ProcessMessages;
-
-       if Assigned(WebBrowser.Document) then
-       begin
-         sl := TStringList.Create;
-         try
-           ms := TMemoryStream.Create;
-           try
-             sl.Text := HTMLCode;
-             sl.SaveToStream(ms) ;
-             ms.Seek(0, 0) ;
-             (WebBrowser.Document as IPersistStreamInit).Load(TStreamAdapter.Create(ms)) ;
-           finally
-             ms.Free;
-           end;
-         finally
-           sl.Free;
-         end;
-       end;
-    end;    }
-    procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string) ;
-    var
-       MyHTML: TStringList;
-       TempFile: string;
-    begin
-       MyHTML := TStringList.create;
-       //TempFile := ExtractFilePath(ParamStr(0))+ 'Cache'+'\Temp.html';
-       TempFile := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\Temp.html';
-       try
-         MyHTML.add(HTMLCode);
-         MyHTML.SaveToFile(TempFile);
-        finally
-         MyHTML.Free;
-        end;
-       WebBrowser.Navigate(TempFile) ;
-
-       while WebBrowser.ReadyState < READYSTATE_INTERACTIVE do
-        Application.ProcessMessages;
-    end;  {WBLoadHTML}
-
-
-
-
-    function GetHTMLText(TextArray : TStrings) : string;
-    var i : integer;
-    begin
-      for i := 1 to TextArray.Count - 1 do begin
-        result := result + TextArray[i];
-      end;
-    end;
-
-var  HTMLWrapper : TStringList;
-begin
-  HTMLWrapper := TStringList.Create;
-  if MediaName = NullImageName then begin
-    WebBrowser.Navigate(NullImageName);
-  end else begin
-    //CallV('TMG CPRS IMAGES TAB HTML',[MediaName]);
-
-    with RPCBrokerV do begin
-      ClearParameters := True;
-      RemoteProcedure := 'TMG CPRS IMAGES TAB HTML';
-      Param[0].PType := list;
-      with Param[0] do begin
-        Mult['0'] := MediaName; //add loop when ready for multiple images
-      end;
-      CallBroker;
-    end;
-
-    if RPCBrokerV.Results[0]='0' then begin
-      WebBrowser.Navigate(MediaName);
-    end else if RPCBrokerV.Results[0]='1' then begin
-      RPCBrokerV.Results.Delete(0);
-      WBLoadHTML(WebBrowser,GetHTMLText(RPCBrokerV.Results));
-    end else begin
-      ShowMessage(Piece(RPCBrokerV.Results[0],'^',2));
-    end;
-  end;
-  HTMLWrapper.free;
-end;
-
-
-function TfrmImages.TestExtenstion(FileName: string): integer;
-
-var
-   FileExt : string;
-begin
-//Eddie Finish Here
-   FileExt := UpperCase(ExtractFileExt(FileName));
-   if Pos(FileExt,INSIDE_BROWSER)>0 then
-     Result := 1
-   else if Pos(FileExt,OUTSIDE_BROWSER)>0 then
-     Result := 2
-   else
-     Result := 3;
-end;
-
-procedure TfrmImages.TabControlGetImageIndex(Sender: TObject;
-                                             TabIndex: Integer;
-                                             var ImageIndex: Integer);
-//specify which image to display, from ThumbsImageList
-begin
-  inherited;
-  if (ImageInfoList <> nil) and (TabIndex < ImageInfoList.Count) then begin
-    ImageIndex := TImageInfo(ImageInfoList[TabIndex]).TabImageIndex;
-  end else ImageIndex := 0;
-end;
-
-procedure TfrmImages.TabControlResize(Sender: TObject);
-begin
-  inherited;
-  if TabControl.Width < 80 then begin
-    TabControl.Width := 80;
-  end;
-end;
-
-
-{ //backup of function
-function TfrmImages.CreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
-//Create a local barcode file, in .png format, from MsgStr
-//ImageType is optional, default ='png'.  It should NOT contain '.'
-//Returns file path on local client of new barcode image.
-//Note: this function is not related to uploading or downloading images
-//      to the server for attaching to progress notes.  It is included
-//      in this unit because the functionality used is nearly identical to
-//      the other code.
-  function UniqueFName : AnsiString;
-    var  FName,tempFName : AnsiString;
-         count : integer;
-  begin
-    FName := 'Barcode-Image';
-    count := 0;
-    repeat
-      tempFName := CacheDir + '\' + FName + '.' + ImageType;
-      FName := FName + '1';
-      count := count+1;
-    until (fileExists(tempFName)=false) or (count> 32);
-    result := tempFName;
-  end;
-
-var
-  i,count                       : integer;
-  j                             : word;
-  OutFile                       : TFileStream;
-  s                             : AnsiString;
-  Buffer                        : array[0..1024] of byte;
-  LocalSaveFNamePath            : AnsiString;
-
-begin
-  StatusText('Getting Barcode...');
-  LocalSaveFNamePath := UniqueFName;
-  Result := LocalSaveFNamePath;  //default to success;
-
-  // CallV('TMG BARCODE ENCODE', [MsgStr]);
-  RPCBrokerV.ClearParameters := true;
-  RPCBrokerV.remoteprocedure := 'TMG BARCODE ENCODE';
-  RPCBrokerV.param[0].Value := MsgStr;
-  RPCBrokerV.param[0].PType := literal;
-  RPCBrokerV.Param[1].Value := '.X';  //<-- is this needed or used?
-  RPCBrokerV.Param[1].PType := list;
-  RPCBrokerV.Param[1].Mult['"IMAGE TYPE"'] := ImageType;
-  //RPCBrokerV.Call;
-  CallBroker;
-
-  Application.ProcessMessages;
-  //Note:RPCBrokerV.Results[0]=1 if successful load, =0 if failure
-  if (RPCBrokerV.Results.Count>0) and (RPCBrokerV.Results[0]='1') then begin
-    OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
-    for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-      //s :=Decode(RPCBrokerV.Results[i]);
-      s :=Decode64(RPCBrokerV.Results[i]);
-      count := Length(s);
-      if count>1024 then begin
-        Result := ''; //failure of load.
-        break;
-      end;
-      for j := 1 to count do Buffer[j-1] := ord(s[j]);
-      OutFile.Write(Buffer,count);
-    end;
-    OutFile.Free;
-  end else begin
-    result := '';
-  end;
-  StatusText('');
-end;
-}
-
-function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
-//Decode data from barcode on image, or return '' if none
-//Note: if I could find a cost-effective way of decoding this on client side,
-//      then that code be done here in the function, instead of uploading image
-//      to the server for decoding.
-begin
-  StatusText('Checking image for barcodes...');
-  Application.ProcessMessages;
-  Result := DoDecodeBarcode(LocalFNamePath,ImageType);
-  StatusText('');
-end;
-
-
-{ //backup of function
-function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
-//Decode data from barcode on image, or return '' if none
-//Note: if I could find a cost-effective way of decoding this on client side,
-//      then that code be done here in the function, instead of uploading image
-//      to the server for decoding.
-const
-  RefreshInterval = 500;
-  BlockSize = 512;
-
-var
-  ReadCount                     : Word;
-  ParamIndex                    : LongWord;
-  j                             : word;
-  InFile                        : TFileStream;
-  Buffer                        : array[0..1024] of byte;
-  RefreshCountdown              : integer;
-  OneLine                       : AnsiString;
-  RPCResult                     : AnsiString;
-  SavedCursor                   : TCursor;
-  totalReadCount                : integer;
-  Abort                         : Boolean;
-begin
-  result := '';  //default of failure
-  if not FileExists(LocalFNamePath) then exit;
-  if not assigned(frmImageTransfer) then frmImageTransfer := TfrmImageTransfer.Create(Self);
-  RPCResult := '';
-  try
-    InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
-    //Note: I may well cut this out.  Most of the delay occurs during
-    // the RPC call, and I can't make a progress bar change during that...
-    // (or I could, but I'm not going to change the RPC broker...)
-    frmImageTransfer.setMax(InFile.Size);
-    //frmImageTransfer.ResetStartTime;
-    frmImageTransfer.ProgressMsg.Caption := 'Preparing to upload...';
-    frmImageTransfer.Show;
-    totalReadCount := 0;
-  except
-    // catch failure here...  on eError...
-    exit;
-  end;
-
-  StatusText('Checking image for barcodes...');
-  Application.ProcessMessages;
-
-  RPCBrokerV.ClearParameters := true;
-  RPCBrokerV.Param.Clear;
-  RPCBrokerV.Param[0].PType := list;
-  ParamIndex := 0;
-  RefreshCountdown := RefreshInterval;
-  //Put image data into parameter 0 (ARRAY parameter of RPC on server side)
-  repeat
-    ReadCount := InFile.Read(Buffer,BlockSize);
-    OneLine := '';
-    totalReadCount := totalReadCount + ReadCount;
-    frmImageTransfer.updateProgress(totalReadCount);
-    if ReadCount > 0 then begin
-      SetLength(OneLine,ReadCount);
-      for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
-      //RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode(OneLine);
-      RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
-      Inc(ParamIndex);
-      Dec(RefreshCountdown);
-      if RefreshCountdown < 1 then begin
-        Application.ProcessMessages;
-        RefreshCountdown := RefreshInterval;
-      end;
-    end;
-    Abort := frmImageTransfer.UserCanceled;
-    if Abort then break;
-  until (ReadCount < BlockSize);
-  RPCBrokerV.Param[1].PType := literal;
-  RPCBrokerV.Param[1].Value := ImageType;
-
-  RPCBrokerV.remoteprocedure := 'TMG BARCODE DECODE';
-
-  SavedCursor := Screen.Cursor;
-  Screen.Cursor := crHourGlass;
-  frmImageTransfer.ProgressMsg.Caption := 'Uploading file to server...';
-  Application.ProcessMessages;
-
-  if not Abort then begin
-    CallBroker;  //this is the slow step, pass to server and get response.
-  end else begin
-    RPCBrokerV.Results.Clear;
-  end;
-  Screen.Cursor := SavedCursor;
-  frmImageTransfer.Hide;
-  //Get result: 1^DecodedMessage, or 0^Error Message
-  if RPCBrokerV.Results.Count > 0 then RPCResult := RPCBrokerV.Results[0];
-  if Piece(RPCResult,'^',1)='0' then begin
-    MessageDlg(Piece(RPCResult,'^',2),mtError,[mbOK],0);
-  end else begin
-    result := Piece(RPCResult,'^',2);
-  end;
-  InFile.Free;
-  StatusText('');
-end;
-}
-
-procedure TfrmImages.EnableAutoScanUploadClick(Sender: TObject);
-begin
-  inherited;
-  AutoScanUpload.Checked := not AutoScanUpload.Checked;
-  uTMGOptions.WriteBool('Scan Enabled',AutoScanUpload.Checked);
-end;
-
-
-procedure TfrmImages.PickScanFolderClick(Sender: TObject);
-var
-  CurScanDir : string;
-
-begin
-  inherited;
-  CurScanDir := frmImageUpload.ScanDir;
-  OpenDialog.InitialDir := CurScanDir;
-  MessageDlg('Please pick ANY file in the desired directory.',mtInformation,[mbOK],0);
-  if OpenDialog.Execute then begin
-    frmImageUpload.SetScanDir(ExtractFilePath(OpenDialog.FileName));
-  end;
-  AutoScanUpload.Checked := true;
-end;
-
-{
-function TfrmImages.FileSize(fileName : wideString) : Int64;
-var
-  sr : TSearchRec;
-begin
-  if FindFirst(fileName, faAnyFile, sr ) = 0 then
-     result := Int64(sr.FindData.nFileSizeHigh) shl Int64(32) +  Int64(sr.FindData.nFileSizeLow)
-  else
-     result := -1;
-
-  FindClose(sr) ;
-end;
-}
-
-{
-function TfrmImages.GetImagesCount : integer;
-//Returns number of images possible, not just those already downloaded.
-begin
-  EnsureImageListLoaded(ImageInfoList);
-  Result := NumImagesAvailableOnServer;
-end;
-}
-
-{
-function TfrmImages.GetImageInfo(Index : integer) : TImageInfo;
-begin
-  if (Index > -1) and (Index < ImageInfoList.Count) then begin
-    Result := TImageInfo(ImageInfoList[Index]);
-  end else begin
-    Result := nil;
-  end;
-end;
-}
-
-procedure TfrmImages.ExecuteFileIfNeeded(Selected: integer);
-var
-  FileName : AnsiString;
-  Rec  : TImageInfo;
-  //FileAction : integer;
-  //SEInfo: TShellExecuteInfo;
-  //ExitCode: DWord;
-  //ExecuteFile, ParamString: string;
-begin
-  inherited;
-  if Selected > -1 then begin
-    Rec := TImageInfo(ImageInfoList[Selected]);
-    FileName := Rec.CacheFName;
-    UpdateImageInfoMemo(Rec);
-  end else begin
-    FileName := NullImageName;
-    UpdateImageInfoMemo(nil);
-  end;
-  if TestExtenstion(FileName) > 1 then begin
-    DisplayMediaInBrowser(FileName);
-    {
-    ExecuteFile := FileName;
-
-    FillChar(SEInfo,Sizeof(SEInfo),0);
-    SEInfo.cbSize := Sizeof(TShellExecuteInfo);
-    with SEInfo do begin
-      fMask := SEE_MASK_NOCLOSEPROCESS;
-      Wnd := Application.Handle;
-      lpFile := PChar(ExecuteFile);
-      ParamString := '';
-      lpParameters := PChar(ParamString);
-      nShow := SW_SHOWNORMAL;
-    end;
-    if ShellExecuteEx(@SEInfo) then begin
-      repeat
-        Application.ProcessMessages;
-        GetExitCodeProcess(SEInfo.hProcess, ExitCode);
-      until (Exitcode <> STILL_ACTIVE) or Application.Terminated;
-    end;}
-  end;
-end;
-
-procedure TfrmImages.TabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-var
-  iPos : integer;
-  Rec : TImageInfo;
-begin
-  inherited;
-  iPos := TabControl.IndexOfTabAt(X,Y);
-
-  if iPos > -1  then begin
-    Rec := TImageInfo(ImageInfoList[iPos]);
-    TabControl.Hint := Rec.ShortDesc;
-  end else
-    TabControl.Hint := '';
-end;
-
-procedure TfrmImages.TabControlMouseUp(Sender: TObject; Button: TMouseButton;
-                                       Shift: TShiftState; X, Y: Integer);
-//kt add 7/6/10
-var TabIndex : integer;
-    P : TPoint;
-begin
-  inherited;
-  TabIndex := TabControl.IndexOfTabAt(X,Y);
-  if TabIndex < 0 then exit;
-  FDeleteImageIndex := TabIndex;
-  P.X := X; P.Y := Y;
-  P := TabControl.ClientToScreen(P);
-  if Button = mbRight then begin
-    TabControl.PopupMenu := mnuPopup;
-    mnuPopup.Popup(P.X, P.Y);
-    TabControl.PopupMenu := nil;
-  end;
-  if Button = mbLeft then ExecuteFileIfNeeded(TabIndex);
-end;
-
-procedure TfrmImages.mnuPopupPopup(Sender: TObject);
-//Determine here if delete option should be enabled.
-begin
-  inherited;
-  mnuPopDeleteImage.Enabled := CanDeleteImages;
-end;
-
-function TfrmImages.CanDeleteImages : boolean;
-//Determine here if image can be deleted.
-var
-  ActionSts: TActionRec;
-begin
-  FImageDeleteMode := idmNone;
-  if FEditIsActive then begin
-    Result := true;
-    FImageDeleteMode := idmDelete;
-    exit;
-  end;
-  //Will use same user class managment rules for images as for notes.
-  //So if user can delete a note, then they can also delete images.
-  //ActOnDocument(ActionSts, frmNotes.lstNotes.ItemIEN, 'DELETE RECORD');
-  ActOnDocument(ActionSts, ListBox.ItemIEN, 'DELETE RECORD');
-  if (ActionSts.Success = false) then begin
-    if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;
-  end;
-  Result := ActionSts.Success;
-  if Result then begin
-    //if AuthorSignedDocument(frmNotes.lstNotes.ItemIEN) then FImageDeleteMode := idmRetract
-    if AuthorSignedDocument(ListBox.ItemIEN) then FImageDeleteMode := idmRetract
-    else FImageDeleteMode := idmDelete;
-  end;
-end;
-
-procedure TfrmImages.mnuPopDeleteImageClick(Sender: TObject);
-begin
-  inherited;
-  DeleteImageIndex(FDeleteImageIndex, FImageDeleteMode, True);
-end;
-
-procedure TfrmImages.DeleteAll(DeleteMode: TImgDelMode);
-begin
-  EnsureLinkedImagesDownloaded;
-  while TabControl.Tabs.Count > 0 do begin
-    DeleteImageIndex(0,DeleteMode,False);
-    NewNoteSelected(False);
-    EnsureLinkedImagesDownloaded;
-    frmImages.Formshow(self);
-  end;
-end;
-
-
-procedure TfrmImages.DeleteImageIndex(ImageIndex : integer; DeleteMode : TImgDelMode; boolPromptUser: boolean);
-//Note: permissions must be checked before running this function
-var
-  ImageInfo : TImageInfo;
-  ReasonForDelete : string;
-  DeleteSts : TActionRec;
-
-CONST
-  TMG_PRIVACY  = 'FOR PRIVACY';  //Server message (don't translate)
-  TMG_ADMIN    = 'ADMINISTRATIVE'; //Server message (don't translate)
-
-begin
-  if (ImageIndex<0) or (ImageIndex>=GetImagesCount) then begin
-    MessageDlg('Invalid image index to delete: '+IntToStr(ImageIndex), mtError,[mbOK],0);
-    exit;
-  end;
-  ImageInfo := GetImageInfo(ImageIndex);
-  if boolPromptUser then begin
-    //ReasonForDelete := SelectDeleteReason(frmNotes.lstNotes.ItemIEN);
-    ReasonForDelete := SelectDeleteReason(ListBox.ItemIEN);
-    if ReasonForDelete = DR_CANCEL then Exit;
-    if ReasonForDelete = DR_PRIVACY then begin
-      ReasonForDelete := TMG_PRIVACY;
-    end else if ReasonForDelete = DR_ADMIN then begin
-      ReasonForDelete := TMG_ADMIN;
-    end;
-  end else begin
-    ReasonForDelete := 'DeleteAll';
-  end;
-
-  DeleteImage(DeleteSts, ImageInfo.ServerFName, ImageInfo.IEN, ListBox.ItemIEN, DeleteMode, ReasonForDelete);
-end;
-
-
-procedure TfrmImages.DeleteImage(var DeleteSts: TActionRec; ImageFileName: String;
-                                 ImageIEN, DocIEN: Integer; DeleteMode : TImgDelMode;
-                                 const Reason: string);  //Reason should be 10-60 chars;
-var
-  RefreshNeeded : boolean;
-begin
-  uImages.DeleteImage(DeleteSts, ImageFileName, ImageIEN, DocIEN, DeleteMode,
-                      frmnotes.HtmlEditor, FEditIsActive, RefreshNeeded, User, Reason);
-  if RefreshNeeded then begin
-    NewNoteSelected(True);
-    frmImages.Formshow(self);
-  end;
-end;
-
-{   //backup of procedure.
-
-procedure TfrmImages.DeleteImage(var DeleteSts: TActionRec;
-                                 ImageFileName: String;
-                                 ImageIEN, DocIEN: Integer;
-                                 DeleteMode : TImgDelMode;
-                                 const Reason: string);  //Reason should be 10-60 chars;
-
-  function ServerImageDelete(ImageIEN:integer; DeleteMode:tImgDelMode; Reason:String) : boolean;
-  //Returns success
-  var RPCResult,IEN,Mode : string;
-  begin
-    IEN := IntToStr(ImageIEN);
-    Mode := IntToStr(Ord(DeleteMode));
-    RPCResult := sCallV('TMG IMAGE DELETE', [IEN,Mode,Reason]);
-    Result := Piece(RPCResult,'^',1)= '1';
-    if Result = false then begin
-      MessageDlg(Piece(RPCResult,'^',2),mtError,[mbOK],0);
-    end;
-  end;
-
-  procedure NoteImageDelete(DocIEN:integer; FileName: string; DeleteMode:tImgDelMode; Reason:String);
-  var
-     NoteText, tempString: string;
-     Beginning, Ending: integer;
-     boolFound: boolean;
-  // <!-- Retracted By: UserName on Date  ...;..   -->
-  // FEditIsActive
-  begin
-     if FEditIsActive then begin
-       Ending := 1;
-       Beginning := 1;
-       boolFound := False;
-       While (boolFound = False) AND (Beginning > 0) Do Begin
-         NoteText := frmNotes.HtmlEditor.HTMLText;
-         Beginning := PosEx('<IMG',NoteText, Ending);
-         Ending :=  PosEx('>', NoteText, Beginning) + 1;
-         tempString := MidStr(NoteText, Beginning, Ending-Beginning);
-         if pos(FileName,tempString) > 0 then boolFound := True;
-       end;
-       if boolFound = false then  begin
-         Ending := 1;
-         Beginning := 1;
-         boolFound := False;
-         While (boolFound = False) AND (Beginning > 0) Do Begin
-           NoteText := frmNotes.HtmlEditor.HTMLText;
-           Beginning := PosEx('<embed',NoteText, Ending);
-           Ending :=  PosEx('>', NoteText, Beginning) + 1;
-           tempString := MidStr(NoteText, Beginning, Ending-Beginning);
-           if pos(FileName,tempString) > 0 then boolFound := True;
-         end;
-       end;
-       if boolFound = False then exit;
-       if DeleteMode = idmDelete then begin
-         frmnotes.HtmlEditor.HTMLText := AnsiReplaceStr(frmNotes.HtmlEditor.HTMLText, tempString, '');
-       end else if DeleteMode = idmRetract then begin
-         frmnotes.HtmlEditor.HTMLText := AnsiReplaceStr(frmNotes.HtmlEditor.HTMLText, tempString, ' <!-- ' + tempString + ' Retracted By: ' + User.Name + ' on ' +  DateToStr(Now));
-       end;
-       //ClearImageList;
-       //EmptyCache;
-       //frmImages.FormHide(self);
-       //LastDisplayedTIUIEN := '0';
-       //frmImages.Formshow(self);
-       NewNoteSelected(True);
-       frmImages.Formshow(self);
-     end else begin
-       //NewNoteSelected(True);
-       //frmImages.Formshow(self);
-     end;
-  end;
-
-begin
-  //'Permanently delete attached image or file?'
-  //Create dialog that gives option to export before deleting?
-  //"You are about to permanently delete this image. Would you like to export before deletion? Yes/No/Cancel
-  //Yes = export dialog then delete (if export is later cancelled assume cancel was pressed here), No=Only Delete, Cancel = No deletion
-  if Reason <> 'DeleteAll' then begin
-    if MessageDlg('Permanently delete attached image or file?',mtConfirmation,mbOKCancel,0) <> mrOK then exit;
-  end;
-  if ServerImageDelete(ImageIEN,DeleteMode,Reason) = false then exit;
-  NoteImageDelete(DocIEN,ImageFileName,DeleteMode,Reason);
-  if DeleteMode = idmRetract then begin
-    InfoBox('NOTICE','This image or file will now be RETRACTED.  As such, it has been'+CRLF +
-            'removed from public view, and from typical Releases of Information,'+CRLF +
-            'but will remain indefinitely discoverable to HIMS.'+CRLF+CRLF,MB_OK);
-  end;
-end;
-
-}
-
-
-
-procedure TfrmImages.mnuDeleteImageClick(Sender: TObject);
-var
-   SelectedImageTab,i : integer;
-   ImageInfo : TImageInfo;
-   frmImagePickExisting: TfrmImagePickExisting;
-
-begin
-  inherited;
-  If TabControl.Tabs.Count < 1 then exit;
-  frmImagePickExisting := TfrmImagePickExisting.Create(Self);
-  if frmImagePickExisting.ShowModal = mrOK then begin
-    //ImageFName := frmImagePickExisting.SelectedImageFName;
-    if not assigned(frmImagePickExisting.SelectedImageInfo) then exit;
-    SelectedImageTab := -1;
-    for i := 0 to TabControl.Tabs.Count - 1 do begin
-      ImageInfo := GetImageInfo(i);
-      if frmImagePickExisting.SelectedImageInfo.ServerFName = ImageInfo.ServerFName then begin
-        SelectedImageTab := i;
-      end;
-    end;
-    if frmNotes.HTMLEditor.Active then begin
-      FEditIsActive := true;
-      DeleteImageIndex(SelectedImageTab,idmDelete,True);
-    end else begin
-      FEditIsActive := false;
-      DeleteImageIndex(SelectedImageTab,idmRetract,True);
-    end;
-    NewNoteSelected(False);
-    EnsureLinkedImagesDownloaded;
-    frmImages.Formshow(self);
-  end;
-  FreeAndNil(frmImagePickExisting);
-end;
-
-
-function TfrmImages.AllowContextChange(var WhyNot: string): Boolean;
-//This is called when the application is shutting down.  It may also
-//be called under other circumstances.
-//Return: TRUE if OK to exit or change.
-begin
-  Result := true; //default
-  //kt -- used for TMGConsole--> if not TMGApplicationShutdownInitiated then exit;
-  //From here down, we are shutting down...
-  timLoadImages.Enabled := false;
-  exit; //later could deny quit if doing something important...
-  {
-  WhyNot := 'Images busy';
-  Result := False;
-  }
-end;
-
-
-function LoadAnyImageFormatToBMP(FPath : string; BMP : TBitmap) : boolean;
-//Taken from here:  http://stackoverflow.com/questions/959160/load-jpg-gif-bitmap-and-convert-to-bitmap
-//Returns TRUE if OK, or FALSE if problem.
-Var
-  OleGraphic  : TOleGraphic;
-  fs          : TFileStream;
-  Source      : TImage;
-  //BMP         : TBitmap;
-Begin
-  Result := false;  //default to failure.
-  Try
-    OleGraphic := TOleGraphic.Create; {The magic class!}
-    Source := Timage.Create(Nil);
-    fs := TFileStream.Create(FPath, fmOpenRead Or fmSharedenyNone);
-    OleGraphic.LoadFromStream(fs);
-    Source.Picture.Assign(OleGraphic);
-    bmp.Width := Source.Picture.Width;
-    bmp.Height := source.Picture.Height;
-    //For some reason, this seems to make bmp's that look stretched too wide.
-    bmp.Canvas.Draw(0, 0, source.Picture.Graphic);
-    Result := true;
-  Finally
-    fs.Free;
-    OleGraphic.Free;
-    Source.Free;
-  End;
-End;
-
-
-procedure TfrmImages.AddSignatureImageClick(Sender: TObject);
-var AddResult: integer;
-begin
-  inherited;
-  frmImageUpload.Mode := umSigImage;
-  AddResult := frmImageUpload.ShowModal;
-  frmImageUpload.Mode := umAnyFile;
-  if IsAbortResult(AddResult) then exit;
-end;
-
-procedure TfrmImages.AddUniversalImage1Click(Sender: TObject);
-var
-  frmImagesMultiUse: TfrmImagesMultiUse;
-
-begin
-  inherited;
-  frmImagesMultiUse := TfrmImagesMultiUse.Create(Self);
-  frmImagesMultiUse.Mode := imuAddImage;
-  frmImagesMultiUse.ShowModal;
-  frmImagesMultiUse.Free;
-end;
-
-initialization
-  //put init code here
-
-finalization
-  //put finalization code here
 
 end.
 

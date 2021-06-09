@@ -62,6 +62,7 @@ type
     ORDateTimeDlg: TORDateTimeDlg;
     btnPrev: TBitBtn;
     btnNext: TBitBtn;
+    procedure FormShow(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnPrevClick(Sender: TObject);
     procedure ORDateBoxEDChange(Sender: TObject);
@@ -73,6 +74,7 @@ type
     StartDate, EndDate : TFMDateTime;
     ChangingORDateBox : boolean;
     ChangingDispDates : boolean;
+    InitialFMDateTime : TFMDateTime;
     function EarliestDate : TFMDateTime;
     function LatestDate : TFMDateTime;
     function BeginningOfDay(FMDateTime : TFMDateTime) : TFMDateTime;
@@ -118,6 +120,7 @@ var
 begin
   frmViewLabPDF := TfrmViewLabPDF.Create(Application);
   frmViewLabPDF.Initialize(InitFMDateTime);
+  frmViewLabPDF.InitialFMDateTime := InitFMDateTime;
   frmViewLabPDF.ShowModal;
   frmViewLabPDF.Free;
 end;
@@ -153,9 +156,9 @@ procedure TfrmViewLabPDF.Initialize(InitFMDateTime : TFMDateTime = 0);
 begin
   ChangingORDateBox := false;
   ChangingDispDates := false;
-  SetDate(InitFMDateTime);
   self.Top := frmFrame.Top;
   self.Height := frmFrame.Height;
+  //Moved to form show -> SetDate(InitFMDateTime);
 end;
 
 function TfrmViewLabPDF.BeginningOfDay(FMDateTime : TFMDateTime) : TFMDateTime;
@@ -225,6 +228,7 @@ begin
     end;
     LoadLB(InfoList); //load results into listbox  -- OK if list is empty.
     SelectByDate(StartDate);
+    SetNextPrevBtnEnable();
   finally
     InfoList.Free;
   end;
@@ -383,10 +387,15 @@ begin
   TargetHTMLFilename := TargetPDFFilename + '.html';
   Result :=rFileTransferU.DownloadLabPDF(InfoObj.RelPath, InfoObj.FName, TargetPDFFilename, 0, 0, ErrMsg);
   if Result = drSuccess then begin
-    MakePDFWrapperHTMLFile(TargetPDFFilename, TargetHTMLFilename);
+    MakeWrapperHTMLFile(TargetPDFFilename, TargetHTMLFilename, WebBrowser, tftPDF);
     InfoObj.LocalSaveFNamePath := TargetHTMLFilename;
   end;
 end;
 
+
+procedure TfrmViewLabPDF.FormShow(Sender: TObject);
+begin
+  SetDate(InitialFMDateTime);
+end;
 
 end.

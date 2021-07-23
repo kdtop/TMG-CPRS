@@ -34,7 +34,7 @@ unit fLabs;
  *)
 
 
-interface                                     
+interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -42,6 +42,7 @@ uses
   fLabTests, fLabTestGroups, ORFn, TeeProcs, TeEngine, Chart, Series, Menus,
   uConst, ORDtTmRng, OleCtrls, SHDocVw, Variants, StrUtils, fBase508Form,
   ORNet,    //tmg
+  fImagePickPDF,rFileTransferU,Trpcb,       //tmg
   VA508AccessibilityManager, rWVEHR;
 
 type
@@ -177,6 +178,9 @@ type
     AddToImportIgnore: TMenuItem;
     mnuViewLabReports: TMenuItem;
     btnViewReport: TBitBtn;
+    mnuUploadLabPDF: TMenuItem;
+    procedure mnuUploadLabPDFClick(Sender: TObject);
+    procedure Action1Click(Sender: TObject);
     procedure mnuViewLabReportsClick(Sender: TObject);
     procedure btnViewReportClick(Sender: TObject);
     procedure AddToImportIgnoreClick(Sender: TObject);
@@ -1026,6 +1030,12 @@ begin
     Caption := x;
   end;
   lvReports.Caption := x;
+end;
+
+procedure TfrmLabs.Action1Click(Sender: TObject);
+begin
+  inherited;
+  mnuUploadLabPDF.Enabled := not btnViewReport.Enabled;
 end;
 
 procedure TfrmLabs.AddToImportIgnoreClick(Sender: TObject);
@@ -5153,6 +5163,76 @@ begin
   end;
 end;
 
+
+procedure TfrmLabs.mnuUploadLabPDFClick(Sender: TObject);
+const
+  RefreshInterval = 250;
+  BlockSize = 512;
+
+var
+  LocalFNamePath,FPath,FName    : AnsiString;
+  ReadCount                     : Word;
+  totalReadCount                : Integer;
+  LocalFileSize                 : integer;
+  ParamIndex                    : LongWord;
+  j                             : word;
+  InFile                        : TFileStream;
+  Buffer                        : array[0..1024] of byte;
+  OneLine                       : AnsiString;
+  RPCResult                     : AnsiString;
+  Abort                         : boolean;
+  frmImagePickPDF               : TfrmImagePickPDF;
+begin
+  frmImagePickPDF := TfrmImagePickPDF.Create(Self);   //free'd in OnHide  <-- no longer true
+  if frmImagePickPDF.Execute then begin
+      LocalFNamePath := frmImagePickPDF.Files.Strings[0];
+  end;
+  FName := Patient.DFN+'-'+DateTimeToFMDTStr(Now)+'.pdf';
+  frmImagePickPDF.Free;
+  Application.ProcessMessages;
+  LocalFileSize := FileSize(LocalFNamePath);
+  try
+    InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
+  except
+    InFile.Free;
+    exit;
+  end;
+
+  RPCBrokerV.remoteprocedure := 'TMG LAB UPLOAD ONE PDF';
+  RPCBrokerV.ClearParameters := true;
+
+  RPCBrokerV.Param[0].PType := list;
+  ParamIndex := 0;
+  repeat
+    ReadCount := InFile.Read(Buffer,BlockSize);
+    totalReadCount := totalReadCount + ReadCount;
+    OneLine := '';
+    if ReadCount > 0 then begin
+      SetLength(OneLine,ReadCount);
+      for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
+      RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
+      Inc(ParamIndex);
+    end;
+  until (ReadCount < BlockSize);
+
+
+  RPCBrokerV.Param[1].PType := literal;
+  RPCBrokerV.Param[1].Value := FName;  //FName;
+  RPCBrokerV.Param[2].PType := literal;
+  RPCBrokerV.Param[2].Value := Patient.DFN;  //DFN;
+  RPCBrokerV.Param[3].PType := literal;
+  RPCBrokerV.Param[3].Value := lblDateFloat.Caption;  //LABDT;
+
+  CallBroker;
+  RPCResult := RPCBrokerV.Results.Text;
+  if piece(RPCResult,'^',1)='-1' then begin
+      messagedlg('Error uploading lab PDF: '+piece(RPCResult,'^',2),mtError,[mbOk],0);
+  end else begin
+      messagedlg('PDF uploaded successfully',mtConfirmation,[mbOk],0);
+      btnViewReport.enabled := TMGHasLabReport(Patient.DFN,lblDateFloat.Caption);  //kt    10/23/20
+  end;
+  InFile.Free;
+end;
 
 procedure TfrmLabs.mnuViewLabReportsClick(Sender: TObject);
 var InitFMDateTime : TFMDateTime;

@@ -209,6 +209,13 @@ type
     mnuUploadImages: TMenuItem;
     mnuExportChart: TMenuItem;
     mnuClosePatient: TMenuItem;
+    btnEditNormalZoom: TSpeedButton;
+    btnEditZoomOut: TSpeedButton;
+    btnEditZoomIn: TSpeedButton;
+    sbtnFontSmaller: TSpeedButton;
+    sbtnFontNormal: TSpeedButton;
+    sbtnFontLarger: TSpeedButton;
+    procedure sbtnFontChangeClick(Sender: TObject);
     procedure mnuClosePatientClick(Sender: TObject);
     procedure mnuExportChartClick(Sender: TObject);
     procedure mnuInsertTimeClick(Sender: TObject);
@@ -397,6 +404,7 @@ type
     colorTimerOff : TColor;                //kt 4/14/15
     OriginalPanelWindowProc :TWndMethod;   //kt 4/16/14
     frmPatientPhotoID : TfrmPatientPhotoID;  //kt  7/10/18
+    TMGInitialFontSize : integer;          //kt 4/28/21
     procedure PanelWindowProc(var Msg: TMessage); //kt   4/16/14
     procedure RefreshFixedStatusWidth;
     procedure FocusApplicationTopForm;
@@ -451,6 +459,7 @@ type
     function FindBestCCOWDFN: string;
     procedure HandleCCOWError(AMessage: string);
     procedure SetUpNextButton;
+    procedure SetUpResizeButtons;  //kt 4/28/21
     procedure NextButtonClick(Sender: TObject);
     procedure NextButtonMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -474,6 +483,7 @@ type
     procedure SetActiveTab(PageID: Integer);
     function  GetActiveTab: integer;  //kt added 6/15
     function CheckForRPC(RPCName: string): boolean;  //kt 9/11
+    procedure SelectChartTab(PageID : integer); //kt 12/10/20
 
     function PageIDToTab(PageID: Integer): Integer;
     procedure ShowHideChartTabMenus(AMenuItem: TMenuItem);
@@ -542,7 +552,7 @@ uses
   {$IFDEF CCOWBROKER}
   , CCOW_const
   {$ENDIF}
-  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uTMGOptions,   //kt added
+  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uImages, uTMGOptions,   //kt added
   fIntracarePtLbl, fPtAuditLog, fBillableItems, ColorUtil,       //kt added
   fMemoEdit,                               //kt  testing purposes only can be removed later
   fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule, fSMSLabText,      //kt
@@ -917,6 +927,7 @@ procedure TfrmFrame.mnuClosePatientClick(Sender: TObject);
 //kt added fnction
 begin
   inherited;
+  SetActiveTab(0); //12/28/20
   HideEverything();
 end;
 
@@ -1245,6 +1256,7 @@ begin
   timSchedule.Interval := uTMGOptions.ReadInteger('Appt Timer Interval',1000);
   timSchedule.Enabled := true;
   TurnOnUploads := False;
+  SetUpResizeButtons; //kt 4/28/21
   //timCheckSequel.Enabled := True;
   //Application.OnMessage := AppMessage;
   //kt end mod ------------------- /
@@ -1428,6 +1440,7 @@ procedure TfrmFrame.UMInitiate(var Message: TMessage);
 begin
   NotifyOtherApps(NAE_OPEN, IntToStr(User.DUZ));
   LoadUserPreferences;
+  TMGInitialFontSize := MainFontSize;  //kt 4/28/21
   GetBAStatus(User.DUZ,Patient.DFN);
   mnuFileOpenClick(Self);
   Enabled := True;
@@ -1809,10 +1822,22 @@ end;
 procedure TfrmFrame.mnuChartTabClick(Sender: TObject);
 { use the Tag property of the menu item to switch to proper page }
 begin
-  with Sender as TMenuItem do tabPage.TabIndex := PageIDToTab(Tag);
+ SelectChartTab(TMenuItem(Sender).Tag);
+ //kt with Sender as TMenuItem do tabPage.TabIndex := PageIDToTab(Tag);
+ //kt LastTab := TabToPageID(tabPage.TabIndex) ;
+ //kt tabPageChange(tabPage);
+end;
+
+
+procedure TfrmFrame.SelectChartTab(PageID : integer);
+//kt added 12/10/20, taken from mnuChartTabClick above
+//kt NOTE PageID example:  CT_NOTES    =  6;  defined in uConst
+begin
+  tabPage.TabIndex := PageIDToTab(PageID);
   LastTab := TabToPageID(tabPage.TabIndex) ;
   tabPageChange(tabPage);
 end;
+
 
 procedure TfrmFrame.tabPageChange(Sender: TObject);
 { switches to form linked to NewTab }
@@ -1904,14 +1929,22 @@ procedure TfrmFrame.PatientImageMouseEnter(Sender: TObject);
 var refresh : boolean;
 begin
   inherited;
-  frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
-  frmPatientPhotoID.ShowPreviewMode(Patient.DFN,Self.PatientImage,ltRight);
+  try
+    if not assigned(frmPatientPhotoID) then frmPatientPhotoID:= TfrmPatientPhotoID.Create(Self);
+    frmPatientPhotoID.ShowPreviewMode(Patient.DFN,Self.PatientImage,ltRight);
+  except
+    //On E : exception do messagedlg('Error on Mouse Enter'+#13#10+E.Message,mtError,[mbok],0);
+  end;
 end;
 
 procedure TfrmFrame.PatientImageMouseLeave(Sender: TObject);
 begin
   inherited;
-  if assigned(frmPatientPhotoID) then FreeAndNil(frmPatientPhotoID);
+  try
+    if assigned(frmPatientPhotoID) then frmPatientPhotoID.hide;
+  except
+    //On E : exception do messagedlg('Error on Mouse Leave'+#13#10+E.Message,mtError,[mbok],0);
+  end;
 
 end;
 
@@ -2253,10 +2286,8 @@ begin
   pnlPatient.Enabled := false;
   if (Sender = mnuFileOpen) or (FRefreshing) then PTSwitchRefresh := True
   else PTSwitchRefresh := False;  //part of a change to CQ #11529
-  //kt SetWebTabsPerServer;  //kt 9/11 added
   PtSelCancelled := FALSE;
-  if not FRefreshing then mnuFile.Tag := 0
-  else mnuFile.Tag := 1;
+  if not FRefreshing then mnuFile.Tag := 0 else mnuFile.Tag := 1;
   DetermineNextTab;
 (*  if (FRefreshing or User.UseLastTab) and (not FFirstLoad) then
     NextTab := TabToPageID(tabPage.TabIndex)
@@ -2407,8 +2438,10 @@ begin
  end;
  pnlPatient.Enabled := True;
  //frmCover.UpdateVAAButton; //VAA CQ7525   CQ#7933 - moved to SetupPatient, before event hook execution (RV)
- //kt  BEGIN MOD 11/1/13
+
+ //kt  BEGIN MOD 11/1/13 ---------------------------------------------------------
  frmOrders.TMGLoadColors;   //12/14/17
+ frmImages.HandlePatientChanged();  //11/29/20
  CheckForOpenEvent('',0);   //TMG  11/2/20
  if uTMGOptions.ReadBool('CPRS TIMER PROMPT',False)=True then begin    //TMG  11/2/20
    if messagedlg('Would you like to start the chart timer?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin    //TMG  11/2/20
@@ -2420,7 +2453,7 @@ begin
    Application.ProcessMessages;
    frmNotes.ChangeToNote(fSearchResults.TMGSearchResultsLastSelectedTIUIEN);
  end;
- //kt  END MOD 11/1/13
+ //kt  END MOD 11/1/13 -----------------------------------------------------------
 end;
 
 procedure TfrmFrame.DetermineNextTab;
@@ -3008,12 +3041,13 @@ begin
       MoveWindow(tempFrmWebTab.Handle,  0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
     end;
   end;
-  //kt 9/11 -- end addition -- 
+  //kt 9/11 -- end addition --
   with stsArea do begin
     Panels[1].Width := stsArea.Width - FFixedStatusWidth;
     FNextButtonL := Panels[0].Width + Panels[1].Width;
     FNextButtonR := FNextButtonL + Panels[2].Width;
   end;
+  SetUpResizeButtons; //kt 4/28/21
   if Notifications.Active then SetUpNextButton;
   lstCIRNLocations.Left  := FNextButtonL - ScrollBarWidth - 100;
   lstCIRNLocations.Width := ClientWidth - lstCIRNLocations.Left;
@@ -3277,7 +3311,7 @@ end;
 procedure TfrmFrame.mnuExportChartClick(Sender: TObject);
 begin
   inherited;
-  fTMGChartExporter.ExportOneChart(frmNotes.tvNotes);
+  fTMGChartExporter.ExportOneChart(0);
 end;
 
 procedure TfrmFrame.mnuEditRedoClick(Sender: TObject);
@@ -3825,6 +3859,59 @@ procedure TfrmFrame.SaveUserPreferences;
 begin
   SaveSizesForUser;         // position & size settings
   SaveUserTemplateDefaults;
+end;
+
+procedure TfrmFrame.sbtnFontChangeClick(Sender: TObject);
+//kt added entire function 4/28/21
+//Input: It is expected that the TSpeedButtons that have this as OnClick event handler
+//       will have .tag property with value of -1, 0, or 1
+type
+  TSizeMode = (smSmaller=-1, smNormal=0, smLarger=1);
+const
+  NUM_SIZES = 5;
+  ALLOWED_SIZES : array[1..NUM_SIZES] of integer = (8, 10, 12, 14, 18);
+var
+  ATag              : integer;
+  SizeMode          : TSizeMode;
+  i                 : integer;
+  SizeIdx           : integer;
+  CurSize, NewSize  : integer;
+  FakeMenuItem      : TMenuItem;
+
+begin
+  inherited;
+  ATag := TSpeedButton(Sender).Tag;
+  if (ATag < -1) or (ATag > 1) then exit; //shouldn't happen.
+  SizeMode := TSizeMode(ATag);
+  CurSize := MainFontSize();
+  NewSize := 0;
+  SizeIdx := -1;
+  for i := 1 to NUM_SIZES do begin
+    if ALLOWED_SIZES[i] <> CurSize then continue;
+    SizeIdx := i;
+    break;
+  end;
+  if SizeIdx = -1 then exit;  //shouldn't happen.
+  case SizeMode of
+    smSmaller : begin
+                  Dec(SizeIdx);
+                  if SizeIdx < 1 then exit;
+                  NewSize := ALLOWED_SIZES[SizeIdx];
+                end;
+    smNormal  : NewSize := TMGInitialFontSize;
+    smLarger  : begin
+                   Inc(SizeIdx);
+                   if SizeIdx > NUM_SIZES then exit;
+                   NewSize := ALLOWED_SIZES[SizeIdx];
+                end;
+  end; {case}
+  try
+    FakeMenuItem := TMenuItem.Create(Self);
+    FakeMenuItem.Tag := NewSize;
+    mnuFontSizeClick(FakeMenuItem);
+  finally
+    FakeMenuItem.Free;
+  end;
 end;
 
 procedure TfrmFrame.mnuFileRefreshClick(Sender: TObject);
@@ -5569,27 +5656,51 @@ begin
 end;
 
 procedure TfrmFrame.SetUpNextButton;
- begin
-   if FNextButton <> nil then
-   begin
-      FNextButton.free;
-      FNextButton := nil;
-   end;
-   FNextButton := TBitBtn.Create(self);
-   FNextButton.Parent:= frmFrame;
-   FNextButton.Glyph := FNextButtonBitmap;
-   FNextButton.OnMouseDown := NextButtonMouseDown;
-   FNextButton.OnClick := NextButtonClick;
-   //kt FNextButton.Caption := '&Next';
-   FNextButton.Caption := 'Next';
-   FNextButton.PopupMenu := popAlerts;
-   FNextButton.Top := stsArea.Top;
-   FNextButton.Left := FNextButtonL;
-   FNextButton.Height := stsArea.Height;
-   FNextButton.Width := stsArea.Panels[2].Width;
-   FNextButton.TabStop := True;
-   FNextButton.TabOrder := 1;
-   FNextButton.show;
+begin
+  if FNextButton <> nil then begin
+    FNextButton.free;
+    FNextButton := nil;
+  end;
+  FNextButton := TBitBtn.Create(self);
+  FNextButton.Parent:= frmFrame;
+  FNextButton.Glyph := FNextButtonBitmap;
+  FNextButton.OnMouseDown := NextButtonMouseDown;
+  FNextButton.OnClick := NextButtonClick;
+  //kt FNextButton.Caption := '&Next';
+  FNextButton.Caption := 'Next';
+  FNextButton.PopupMenu := popAlerts;
+  FNextButton.Top := stsArea.Top;
+  FNextButton.Left := FNextButtonL;
+  FNextButton.Height := stsArea.Height;
+  FNextButton.Width := stsArea.Panels[2].Width;
+  FNextButton.TabStop := True;
+  FNextButton.TabOrder := 1;
+  FNextButton.show;
+end;
+
+procedure TfrmFrame.SetUpResizeButtons;  //kt 4/28/21
+var
+  FontSmallerLPos: Integer;
+  FontNormalLPos: Integer;
+  FontLargerLPos: Integer;
+  Top : integer;
+begin
+  sbtnFontSmaller.Parent := stsArea;
+  sbtnFontNormal.Parent := stsArea;
+  sbtnFontLarger.Parent := stsArea;
+
+  with stsArea do begin
+    FontLargerLPos := Panels[0].Width + Panels[1].Width - sbtnFontLarger.Width - 2;
+    FontNormalLPos := FontLargerLPos - sbtnFontNormal.Width;
+    FontSmallerLPos := FontNormalLPos - sbtnFontSmaller.Width;
+  end;
+  sbtnFontSmaller.Left := FontSmallerLPos;
+  sbtnFontNormal.Left := FontNormalLPos;
+  sbtnFontLarger.Left := FontLargerLPos;
+  Top := 1;
+  sbtnFontSmaller.Top := Top;
+  sbtnFontNormal.Top := Top;
+  sbtnFontLarger.Top := Top;
 end;
 
 procedure TfrmFrame.WMDropFiles(var Msg: TMessage); //kt 4/15/14

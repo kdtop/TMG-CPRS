@@ -104,6 +104,8 @@ type
     btnActiveLoad: TSpeedButton;
     btnCompletedLoad: TSpeedButton;
     popOrderComplete: TMenuItem;
+    mnuSendOrders: TMenuItem;
+    procedure mnuSendOrdersClick(Sender: TObject);
     procedure popOrderCompleteClick(Sender: TObject);
     procedure btnActiveLoadClick(Sender: TObject);
     procedure btnCompletedLoadClick(Sender: TObject);
@@ -285,6 +287,7 @@ uses fFrame, fEncnt, fOrderVw, fRptBox, fLkUpLocation, fOrdersDC, fOrdersCV, fOr
      fOrdersCopy, fOMVerify, fODAuto, rODBase, uODBase, rMeds,fODValidateAction, fMeds, uInit, fBALocalDiagnoses,
      fODConsult, fClinicWardMeds, fActivateDeactivate, VA2006Utils, rodMeds,
      uTMGOptions,  //TMG 12/14/17
+     fTMGChartExporter,  //TMG 3/9/21
      VA508AccessibilityRouter, VAUtils;
 
 {$R *.DFM}
@@ -2455,6 +2458,12 @@ procedure TfrmOrders.mnuOptSaveQuickClick(Sender: TObject);
 begin
   inherited;
   QuickOrderSave;
+end;
+
+procedure TfrmOrders.mnuSendOrdersClick(Sender: TObject);
+begin
+  inherited;
+  fTMGChartExporter.ExportOneChart(4);
 end;
 
 procedure TfrmOrders.mnuOptEditCommonClick(Sender: TObject);

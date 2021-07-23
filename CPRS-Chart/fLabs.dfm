@@ -3,24 +3,24 @@ inherited frmLabs: TfrmLabs
   Top = 237
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
-  ClientHeight = 774
+  ClientHeight = 794
   ClientWidth = 876
   HelpFile = 'qnoback'
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
   ExplicitWidth = 892
-  ExplicitHeight = 832
+  ExplicitHeight = 852
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 769
+    Top = 789
     Width = 876
     ExplicitTop = 748
     ExplicitWidth = 714
   end
   inherited sptHorz: TSplitter
-    Height = 769
+    Height = 789
     ExplicitHeight = 748
   end
   object Label1: TLabel [2]
@@ -38,12 +38,12 @@ inherited frmLabs: TfrmLabs
     Visible = False
   end
   inherited pnlLeft: TPanel
-    Height = 769
+    Height = 789
     Constraints.MinWidth = 37
-    ExplicitHeight = 769
+    ExplicitHeight = 789
     object Splitter1: TSplitter
       Left = 0
-      Top = 509
+      Top = 529
       Width = 97
       Height = 10
       Cursor = crVSplit
@@ -58,7 +58,7 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 0
       Width = 97
-      Height = 509
+      Height = 529
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 30
@@ -80,7 +80,7 @@ inherited frmLabs: TfrmLabs
         Left = 0
         Top = 19
         Width = 97
-        Height = 490
+        Height = 510
         Align = alClient
         HideSelection = False
         Indent = 18
@@ -96,7 +96,7 @@ inherited frmLabs: TfrmLabs
     end
     object pnlLeftBottom: TPanel
       Left = 0
-      Top = 519
+      Top = 539
       Width = 97
       Height = 250
       Align = alBottom
@@ -228,11 +228,11 @@ inherited frmLabs: TfrmLabs
   end
   inherited pnlRight: TPanel
     Width = 775
-    Height = 769
+    Height = 789
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
     ExplicitWidth = 775
-    ExplicitHeight = 769
+    ExplicitHeight = 789
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -249,7 +249,7 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 300
       Width = 775
-      Height = 449
+      Height = 469
       Align = alClient
       TabOrder = 0
       object Memo1: TMemo
@@ -277,7 +277,7 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 773
-        Height = 428
+        Height = 448
         Align = alClient
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -298,7 +298,7 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 773
-        Height = 428
+        Height = 448
         TabStop = False
         Align = alClient
         TabOrder = 2
@@ -306,7 +306,7 @@ inherited frmLabs: TfrmLabs
         ExplicitWidth = 618
         ExplicitHeight = 412
         ControlData = {
-          4C000000E44F00003C2C00000000000000000000000000000000000000000000
+          4C000000E44F00004D2E00000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -880,7 +880,6 @@ inherited frmLabs: TfrmLabs
         OnCompare = lvReportsCompare
         OnKeyUp = lvReportsKeyUp
         OnSelectItem = lvReportsSelectItem
-        ExplicitWidth = 618
       end
     end
     object pnlRightTopHeader: TPanel
@@ -949,7 +948,7 @@ inherited frmLabs: TfrmLabs
     end
     object pnlFooter: TORAutoPanel
       Left = 0
-      Top = 749
+      Top = 769
       Width = 775
       Height = 20
       Align = alBottom
@@ -1292,6 +1291,7 @@ inherited frmLabs: TfrmLabs
     object Action1: TMenuItem
       Caption = 'Action'
       GroupIndex = 4
+      OnClick = Action1Click
       object ManLabs: TMenuItem
         Caption = '&Manual Lab Entry'
         OnClick = ManLabsClick
@@ -1315,6 +1315,10 @@ inherited frmLabs: TfrmLabs
         Caption = 'View Lab &Reports'
         ShortCut = 16466
         OnClick = mnuViewLabReportsClick
+      end
+      object mnuUploadLabPDF: TMenuItem
+        Caption = 'Upload Lab Result PDF'
+        OnClick = mnuUploadLabPDFClick
       end
     end
   end

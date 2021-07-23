@@ -518,7 +518,7 @@ end;
 procedure TfrmOptions.btnAddSigImageClick(Sender: TObject);
 begin
   inherited;
-  frmImages.AddSignatureImageClick(Sender);
+  frmImages.mnuAddSignatureImageClick(Sender);
 end;
 
 procedure TfrmOptions.btnApplyClick(Sender: TObject);

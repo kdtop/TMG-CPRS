@@ -210,7 +210,7 @@ const
   function SaveCanvasToFile(Canvas : TCanvas; Rect: TRect; FilePath : String) : boolean; //forward.  Returns success of save
   function UploadFromCanvas(Canvas : TCanvas; Rect: TRect) : string;  //Forward.  Returns VistA name of image, or '' if abort
   function UniqueTempSaveFilePath (RootName : string = 'temp_file'; FileType : string = 'jpg') : string;
-
+  function SingleFile(FilePathName:string): string;  //2/2/21
 var
   frmImageUpload: TfrmImageUpload;    //not auto-instantiated
   PLargeIcon, PSmallIcon: phicon;
@@ -938,7 +938,54 @@ implementation
       end;
     end;
     Info.Free;
-    uImages.NumImagesAvailableOnServer := NOT_YET_CHECKED_SERVER;   //Forces re-query of server
+    ForceServerImageReQuery;
+//    uImages.NumImagesAvailableOnServer := NOT_YET_CHECKED_SERVER;   //Forces re-query of server
+  end;
+
+  function SingleFile(FilePathName:string): string;  //2/2/21
+  var i : integer;
+      Info: TUploadImageInfo;
+
+  begin
+    result := '';
+    Info := TUploadImageInfo.Create();
+    Info.pLongDesc := nil;
+
+    //Load up info class/record
+    Info.ShortDesc := 'Moved from Loose Documents';
+    Info.UploadDUZ := User.DUZ;
+    //if LongDescMemo.Lines.Count>0 then begin
+    //  Info.pLongDesc := LongDescMemo.Lines;
+    //end;
+    Info.ObjectType := 1; //type 1 is Still Image (jpg).  OK to use with .bmp??
+    //if FUploadMode = umPatientID then begin
+    //  Info.ProcName := 'PHOTO ID'; //max length is 10 characters
+    //end else if FUploadMode = umSigImage then begin
+    //  Info.ProcName := 'SIGNATURE'; //max length is 10 characters
+    //end else begin
+    Info.ProcName := 'Picture'; //max length is 10 characters
+    //end;
+    Info.ImageDateTime := 'NOW';
+    //if FUploadMode in [umUniversal, umPatientID, umSigImage] then begin
+    //  Info.TIUIEN := 0;
+    //end else begin
+      //if CallingForm = 'frmDCSumm' then
+        //Info.TIUIEN := frmDCSumm.lstSumms.ItemID
+      //else
+    Info.TIUIEN := frmNotes.lstNotes.ItemID;
+    //end;
+    Info.UploadDateTime := 'NOW';
+    Info.DFN := Patient.DFN;
+
+    //for i:= 0 to FilesToUploadList.Items.Count-1 do begin
+    Info.ImageFPathName := FilePathName;
+    Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
+    Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
+    if frmImageUpload.UploadFile(Info,False) then begin   //Upload function passes back filename info in Info class
+       result := Info.ServerFName;
+    end;
+    //end;
+    Info.Free;
   end;
 
   procedure TfrmImageUpload.LinkSignatureImage(var Info: TUploadImageInfo);
@@ -1596,7 +1643,7 @@ implementation
       function DeltaMins(CurrentTime,PriorTime : TDateTime) : integer;
         //Return ABSOLUTE difference in minutes between Current <--> Prior.
         //NOTE: if value is > 1440, then 1440 is returned
-      var DeltaDays,FracDays : double;  
+      var DeltaDays,FracDays : double;
       begin
         DeltaDays := abs(CurrentTime-PriorTime);
         FracDays := DeltaDays - Round(DeltaDays);
@@ -1631,7 +1678,7 @@ implementation
       OutFileLines := TStringList.Create;
       AllFiles := TStringList.Create;
       BatchFInfo := TFileInfo.Create;
-      
+
       //scan for all instances *.ImageType Image file
       //Store info for processesing after loop
       //Do this as a separate step, so files can be processed in proper order
@@ -1831,7 +1878,7 @@ AbortPoint:
   //  Just this part of code to be called separately.  
   begin
     UploadedDocs.clear;
-    if Assigned(frmImages) and frmImages.AutoScanUpload.Checked then begin
+    if Assigned(frmImages) and frmImages.mnuAutoScanUpload.Checked then begin
       ScanAndHandleImages;  //create metadata for images (if not done already)
       ScanAndHandleImgTxt(ErrLog);  //process upload file, based on metadata
       VerifyDocuments(UploadedDocs);
@@ -2044,15 +2091,15 @@ AbortPoint:
   end;
 
   procedure TfrmImageUpload.ChkTimerTimer(Sender: TObject);
-begin
-  if frmFrame.TurnOnUploads=True then begin
-      poltimer.enabled := true;
-      ChkTimer.enabled := False;
-      frmFrame.mnuUploadImages.Visible := false;
+  begin
+    if frmFrame.TurnOnUploads=True then begin
+        poltimer.enabled := true;
+        ChkTimer.enabled := False;
+        frmFrame.mnuUploadImages.Visible := false;
+    end;
   end;
-end;
 
-procedure TfrmImageUpload.MoveCheckBoxClick(Sender: TObject);
+  procedure TfrmImageUpload.MoveCheckBoxClick(Sender: TObject);
   begin
     SavedMoveFilesValue := MoveCheckBox.Checked;
   end;
@@ -2096,5 +2143,9 @@ procedure TfrmImageUpload.MoveCheckBoxClick(Sender: TObject);
     DragFinish(THandle(Msg.WParam));
   end;
 
+initialization
+  
+finalization
+  //kt causing crashes... 12/4/20 --> FreeAndNil(frmImageUpload);
 
 end.

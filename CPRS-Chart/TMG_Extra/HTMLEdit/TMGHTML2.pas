@@ -58,6 +58,11 @@ type
       False: (RGBColor : TRGBColor);
   end; {record}
 
+  TRangeInfo = record
+    StartPos : longint;
+    EndPos   : longint;
+  end;
+
   TIterateCallbackProc = procedure (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean) of object;  //kt 2/21/16
   //ktTPasteEventProc = procedure (var ClipboardText : TStringList; var TextModified : boolean; var AllowPaste : boolean; var IsHTML : boolean) of object; //kt 8/16
   TPasteEventProc = procedure (Sender : TObject; var AllowPaste : boolean) of object; //kt 8/16
@@ -164,8 +169,15 @@ type
     function  SelStart:integer;
     function  SelEnd:integer;
     function  Selection : IHTMLSelectionObject;  //kt 6/16
+    function  SelectionInfo(): TRangeInfo;  //kt 4/8/21
+    procedure SetSelectionByPos(StartPos, EndPos : longint); //kt 4/8/21
+    procedure SetSelectionByRange(ARange : IHtmlTxtRange); //kt 4/8/21
+    procedure SetSelectionByRangeInfo(ARangeInfo : TRangeInfo); //kt 4/8/21
     procedure SelCollapse;
+    function  RangeInfo(ARange : IHtmlTxtRange): TRangeInfo;    //kt 4/8/21
     function  SelLength:integer;
+    function  CustomRange(RangeInfo : TRangeInfo) : IHtmlTxtRange;  overload; //kt 4/8/21
+    function  CustomRange(StartPos, EndPos : longint) : IHtmlTxtRange;  overload; //kt 4/8/21
     function  GetTextRange:IHtmlTxtRange;
     procedure ReplaceSelection(HTML:string);
     function  Find(Text : string; Flags : THTMLSearchFlags = [hsPartial]; Mode : TFindMode = fmFirst) : boolean;  //kt 6/16
@@ -242,7 +254,7 @@ uses
 
 const
   FontScale=3;
-  MaxTextLength = 10000;  //was 100
+  MaxTextLength = 10000000; //was 10000;  //was 100
   nl = #13#10;
 
 
@@ -806,7 +818,32 @@ begin
   Result:=Abs(Integer(TextRange.MoveEnd('character',-MaxTextLength)));
 end;
 
-function  THtmlObj.Selection : IHTMLSelectionObject;  //kt 6/16
+procedure THtmlObj.SetSelectionByPos(StartPos, EndPos : longint); //kt 4/8/21
+var ARangeInfo : TRangeInfo;
+begin
+  ARangeInfo.StartPos := StartPos;
+  ARangeInfo.EndPos := EndPos;
+  SetSelectionByRangeInfo(ARangeInfo);
+end;
+
+procedure THtmlObj.SetSelectionByRangeInfo(ARangeInfo : TRangeInfo); //kt 4/8/21
+var ARange : IHtmlTxtRange;
+begin
+  ARange := CustomRange(ARangeInfo);
+  SetSelectionByRange(ARange);
+end;
+
+procedure THtmlObj.SetSelectionByRange(ARange : IHtmlTxtRange);
+//kt added 4/8/21
+var SelRange : IHtmlTxtRange;
+begin
+  //SelRange := GetTextRange;
+  //SelRange.setEndPoint('StartToStart',ARange);
+  //SelRange.setEndPoint('EndToEnd',ARange);
+  ARange.select;
+end;
+
+function THtmlObj.Selection : IHTMLSelectionObject;  //kt 6/16
 begin
   if assigned(DOC) then begin
     Result := DOC.selection;
@@ -814,6 +851,47 @@ begin
     Result := nil;
   end;
 end;
+
+function THtmlObj.SelectionInfo(): TRangeInfo;    //kt 4/8/21
+begin
+  Result := RangeInfo(GetTextRange);
+end;
+
+function THtmlObj.RangeInfo(ARange : IHtmlTxtRange): TRangeInfo;    //kt 4/8/21
+//NOTICE: ARange that is passed in will be modified.
+begin
+  if ARange=nil then begin
+    Result.StartPos := 0;
+    Result.EndPos := 0;
+  end else begin
+    Result.StartPos := Abs(Integer(ARange.moveStart('character',-MaxTextLength)));
+    Result.EndPos   := Abs(Integer(ARange.moveEnd('character',-MaxTextLength)));
+  end;
+end;
+
+function THtmlObj.CustomRange(RangeInfo : TRangeInfo) : IHtmlTxtRange;   //kt 4/8/21
+//kt added 4/8/21
+begin
+  Result := CustomRange(RangeInfo.StartPos, RangeInfo.EndPos);
+end;
+
+function THtmlObj.CustomRange(StartPos, EndPos : longint) : IHtmlTxtRange;   //kt 4/8/21
+//kt added 4/8/21
+var Len : integer;
+    ARange : IHtmlTxtRange;
+begin
+  Len := EndPos - StartPos;
+  if DOC<> nil then begin
+    ARange := DOC.Selection.CreateRange as IHtmlTxtRange;
+    ARange.move('word',-MaxTextLength); //collapse Range and move to beginning of document
+    ARange.moveStart('character',StartPos);
+    ARange.moveEnd('character',Len);
+    Result := ARange;
+  end else begin
+    ARange := Nil;
+  end;
+end;
+
 
 procedure THtmlObj.SelCollapse;
 //kt added 6/16
@@ -827,6 +905,7 @@ function THtmlObj.SelLength:integer;
 begin
   Result:=SelEnd-SelStart;
 end;
+
 
 function THtmlObj.GetTextRange:IHtmlTxtRange;
 begin
@@ -934,6 +1013,7 @@ begin
   SendMessage(FmsHTMLwinHandle, WM_KEYUP, VK_END, 0);
   }
 end;
+
 
 function THtmlObj.MoveCaretToPos(ScreenPos: TPoint) : HRESULT;
 //kt added entire function

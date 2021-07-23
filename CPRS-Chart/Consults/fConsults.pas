@@ -463,7 +463,7 @@ uses fVisit, rCore, uCore, rConsults, fConsultBS, fConsultBD, fSignItem,
      fTemplateEditor, fNotePrt, {fNotes,} fNoteProps, fNotesBP, fReminderTree,
      fReminderDialog, uReminders, fConsMedRslt, fTemplateFieldEditor,
      dShared, rTemplates, fIconLegend, fNoteIDParents, fNoteCPFields,
-     uTMGOptions, fImages,         //kt 9/11
+     uTMGOptions, fImages, uImages,        //kt 9/11, 11/20
      uHTMLTools, fOptionsNotes,          //kt 9/11
      uTemplates, fTemplateDialog, DateUtils, uVA508CPRSCompatibility, VA508AccessibilityRouter;
 
@@ -4334,73 +4334,68 @@ var
   x, WhyNot: string;
   Mode : TViewModeSet; //kt
 begin
-  fImages.ListBox := frmConsults.lstNotes;        //kt  5/5/14
+  uImages.SetActiveListBoxForImages(frmConsults.lstNotes); //fImages.ListBox := frmConsults.lstNotes;        //kt  5/5/14, 11/29/20
   if uChanging then Exit;
   //This gives the change a chance to occur when keyboarding, so that WindowEyes
   //doesn't use the old value.
   Application.ProcessMessages;
-  with tvCsltNotes do
-    begin
-      if (Selected = nil) then Exit;
-      //HTMLResultViewer.clear;  //kt
-      HTMLResultViewer.Navigate('about:blank');
-      if uIDNotesActive then
-        begin
-          mnuActDetachFromIDParent.Enabled := (Selected.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD]);
-          popNoteListDetachFromIDParent.Enabled := mnuActDetachFromIDParent.Enabled;
-          if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT, IMG_ID_CHILD, IMG_ID_CHILD_ADD]) then
-            mnuActAttachtoIDParent.Enabled := CanBeAttached(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
-          else
-            mnuActAttachtoIDParent.Enabled := False;
-          popNoteListAttachtoIDParent.Enabled := mnuActAttachtoIDParent.Enabled;
-          if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT,
-                                      IMG_IDNOTE_OPEN, IMG_IDNOTE_SHUT,
-                                      IMG_IDPAR_ADDENDA_OPEN, IMG_IDPAR_ADDENDA_SHUT]) then
-            mnuActAddIDEntry.Enabled := CanReceiveAttachment(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
-          else
-            mnuActAddIDEntry.Enabled := False;
-          popNoteListAddIDEntry.Enabled := mnuActAddIDEntry.Enabled
-        end;
-      RedrawSuspend(HTMLResultViewer.Handle);
-      popNoteListExpandSelected.Enabled := Selected.HasChildren;
-      popNoteListCollapseSelected.Enabled := Selected.HasChildren;
-      if (Selected.ImageIndex = IMG_TOP_LEVEL) then
-        begin
-          pnlResults.Visible := False;
-          pnlResults.SendToBack;
-          pnlRead.Visible := True;
-          pnlRead.BringToFront ;
-          memConsult.TabStop := True;
-          UpdateReminderFinish;
-          ShowPCEControls(False);
-          frmDrawers.DisplayDrawers(FALSE);
-          cmdPCE.Visible := FALSE;
-          popNoteMemoEncounter.Visible := FALSE;
-          pnlConsultList.Enabled := True; //CQ#15785
+  with tvCsltNotes do begin
+    if (Selected = nil) then Exit;
+    HTMLResultViewer.Navigate('about:blank');
+    if uIDNotesActive then begin
+      mnuActDetachFromIDParent.Enabled := (Selected.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD]);
+      popNoteListDetachFromIDParent.Enabled := mnuActDetachFromIDParent.Enabled;
+      if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT, IMG_ID_CHILD, IMG_ID_CHILD_ADD]) then
+        mnuActAttachtoIDParent.Enabled := CanBeAttached(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
+      else
+        mnuActAttachtoIDParent.Enabled := False;
+      popNoteListAttachtoIDParent.Enabled := mnuActAttachtoIDParent.Enabled;
+      if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT,
+                                  IMG_IDNOTE_OPEN, IMG_IDNOTE_SHUT,
+                                  IMG_IDPAR_ADDENDA_OPEN, IMG_IDPAR_ADDENDA_SHUT]) then
+        mnuActAddIDEntry.Enabled := CanReceiveAttachment(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
+      else
+        mnuActAddIDEntry.Enabled := False;
+      popNoteListAddIDEntry.Enabled := mnuActAddIDEntry.Enabled
+    end;
+    RedrawSuspend(HTMLResultViewer.Handle);
+    popNoteListExpandSelected.Enabled := Selected.HasChildren;
+    popNoteListCollapseSelected.Enabled := Selected.HasChildren;
+    if (Selected.ImageIndex = IMG_TOP_LEVEL) then begin
+      pnlResults.Visible := False;
+      pnlResults.SendToBack;
+      pnlRead.Visible := True;
+      pnlRead.BringToFront ;
+      memConsult.TabStop := True;
+      UpdateReminderFinish;
+      ShowPCEControls(False);
+      frmDrawers.DisplayDrawers(FALSE);
+      cmdPCE.Visible := FALSE;
+      popNoteMemoEncounter.Visible := FALSE;
+      pnlConsultList.Enabled := True; //CQ#15785
 //          lstConsults.Enabled := True ;
 //          tvConsults.Enabled := True;
-          lstNotes.Enabled := True;
-          lblTitle.Caption := '';
-          lblTitle.Hint := lblTitle.Caption;
-          Mode := [vmView] + [vmHTML_MODE[vmHTML in FViewMode]]; //kt 9/11
-          SetDisplayToHTMLvsText(Mode,nil,VIEW_ACTIVATE_ONLY);   //kt 9/11
-          Exit;
-        end;
-      x := TORTreeNode(Selected).StringData;
-      if StrToIntDef(Piece(Piece(x, U, 1), ';', 1), 0) > 0 then
-        begin
-          memConsult.Clear;
-          //HTMLResultViewer.clear;  //kt
-          HTMLResultViewer.Navigate('about:blank');
-          lstNotes.SelectByID(Piece(x, U, 1));
-          lstNotesClick(Self);
-          if (vmHTML in FViewMode) then begin       //kt
-            SendMessage(HTMLResultViewer.Handle, WM_VSCROLL, SB_TOP, 0);  //kt
-          end else begin
-          SendMessage(memConsult.Handle, WM_VSCROLL, SB_TOP, 0);
-          end;
-        end;
+      lstNotes.Enabled := True;
+      lblTitle.Caption := '';
+      lblTitle.Hint := lblTitle.Caption;
+      Mode := [vmView] + [vmHTML_MODE[vmHTML in FViewMode]]; //kt 9/11
+      SetDisplayToHTMLvsText(Mode,nil,VIEW_ACTIVATE_ONLY);   //kt 9/11
+      Exit;
     end;
+    x := TORTreeNode(Selected).StringData;
+    if StrToIntDef(Piece(Piece(x, U, 1), ';', 1), 0) > 0 then begin
+      memConsult.Clear;
+      //HTMLResultViewer.clear;  //kt
+      HTMLResultViewer.Navigate('about:blank');
+      lstNotes.SelectByID(Piece(x, U, 1));
+      lstNotesClick(Self);
+      if (vmHTML in FViewMode) then begin       //kt
+        SendMessage(HTMLResultViewer.Handle, WM_VSCROLL, SB_TOP, 0);  //kt
+      end else begin
+        SendMessage(memConsult.Handle, WM_VSCROLL, SB_TOP, 0);
+      end;
+    end;
+  end;
 end;
 
 procedure TfrmConsults.tvCsltNotesCollapsed(Sender: TObject; Node: TTreeNode);

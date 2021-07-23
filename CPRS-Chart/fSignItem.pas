@@ -1,4 +1,4 @@
-unit fSignItem;
+ unit fSignItem;
 
 interface
 
@@ -17,6 +17,8 @@ type
     Timer1: TTimer;
     CLBubble: TShape;
     CLLabel: TLabel;
+    TMGAutoPrintCKBox: TCheckBox;
+    procedure txtESCodeChange(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);  //kt added
     procedure txtESCodeKeyPress(Sender: TObject; var Key: Char);   //kt added
     procedure cmdOKClick(Sender: TObject);
@@ -27,12 +29,15 @@ type
     { Public declarations }
   end;
 
+var PrintAfterSignature : boolean;
+
 procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string);
 
 implementation
 
 {$R *.DFM}
 uses
+  uTMGOptions,      //TMG 7/2/21
   uSavedSignature;  //kt added 11/15
 
 const
@@ -45,6 +50,7 @@ var
   frmSignItem: TfrmSignItem;
 begin
   frmSignItem := TfrmSignItem.Create(Application);
+  fSignItem.PrintAfterSignature := False;
   try
     ResizeAnchoredFormToFont(frmSignItem);
     with frmSignItem do
@@ -54,7 +60,9 @@ begin
       lblText.Text := AText;
       txtESCode.Text := SavedSignature.Value; //kt added 11/15 -- returns '' unless saved in past few minutes.
       imgPWSaved.Visible := (Trim(txtESCode.Text) <> '');  //kt added 11/15
+      TMGAutoPrintCKBox.Checked := uTMGOptions.ReadBool('Print Note On Signature Checked',True);
       ShowModal;
+      fSignItem.PrintAfterSignature := TMGAutoPrintCKBox.checked;  //TMG 7/1/21
       ESCode := FESCode;
     end;
   finally
@@ -85,6 +93,12 @@ begin
   GetKeyboardState(KeyState) ;
   CLBubble.Visible := (KeyState[VK_CAPITAL] = 1);
   CLLabel.Visible := (KeyState[VK_CAPITAL] = 1);
+end;
+
+procedure TfrmSignItem.txtESCodeChange(Sender: TObject);
+begin
+  inherited;
+  TMGAutoPrintCKBox.Visible := (txtESCode.Text<>'');
 end;
 
 procedure TfrmSignItem.txtESCodeKeyPress(Sender: TObject; var Key: Char);

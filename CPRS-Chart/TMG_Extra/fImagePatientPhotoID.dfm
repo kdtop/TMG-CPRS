@@ -63,6 +63,7 @@ object frmPatientPhotoID: TfrmPatientPhotoID
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnHide = FormHide
   OnShow = FormShow
   DesignSize = (
     684

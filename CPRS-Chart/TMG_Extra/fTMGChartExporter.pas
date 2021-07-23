@@ -84,6 +84,19 @@ type
     pnlRefConsultant: TPanel;
     pnlTemplateCoversheet: TPanel;
     chkIncludeDemo: TCheckBox;
+    tsOrders: TTabSheet;
+    dtOrderEndDt: TORDateBox;
+    dtOrderStartDt: TORDateBox;
+    btnOrderDatesApply: TBitBtn;
+    lstOrders: TCheckListBox;
+    Label11: TLabel;
+    Label12: TLabel;
+    Label13: TLabel;
+    Label14: TLabel;
+    Label15: TLabel;
+    procedure edtToFaxChange(Sender: TObject);
+    procedure edtToChange(Sender: TObject);
+    procedure btnOrderDatesApplyClick(Sender: TObject);
     procedure pnlExportRightResize(Sender: TObject);
     procedure btnListRemoveClick(Sender: TObject);
     procedure btnListRemoveAllClick(Sender: TObject);
@@ -120,24 +133,27 @@ type
     DataSL: TStringList; //will be considered to be 1:1 linked to cklbTitles.items.  Format: IEN^DisplayTitle
     LabDataSL: TStringList;
     RadDataSL: TStringList;
+    OrderDataSL: TStringList;
     ScannedDataSL: TStringList;
     ConsultsDataSL : TStringList;
     //ARRAYS TO HOLD PRINT LISTS
     NotesToPrint : TStringList;
     LabsToPrint : TStringList;
     RadToPrint : TStringList;
+    OrdersToPrint : TStringList;
     ScansToPrint : TStringList;
     OtherDocToPrint : TStringList;
     DirtyForm:boolean;
     DownloadedFile : string;
     //
     procedure LoadPrintLists;
-    function FirstSelectedIEN : string;
+    function AreSomeSelectedInList(ChkLBox:TCheckListBox) : boolean;
     function SomeSelected : boolean;
     //Load listboxes
     procedure LoadNoteListbox;
     procedure LoadLabsListbox;
     procedure LoadRadListbox;
+    procedure LoadOrderListbox;
     procedure LoadScannedListbox;
     //
     procedure LoadSelectedIntoList(AList : TStringList; Checkbox: TCheckListBox; Data:TStringList);
@@ -158,7 +174,7 @@ var
   AFrmTMGChartExporter: TfrmTMGChartExporter;
 
 
-procedure ExportOneChart(ATree: TORTreeView);
+procedure ExportOneChart(InitialTab:integer);
 
 
 implementation
@@ -175,30 +191,34 @@ CONST
   COVER_CONSULTANT_COVERSHEET = 3;
   COVER_TEMPLATE_COVERSHEET = 4;
 
-procedure ExportOneChart(ATree: TORTreeView);
+procedure ExportOneChart(InitialTab:integer);
   begin
   AFrmTMGChartExporter := TfrmTMGChartExporter.Create(Application);
   try
-    if PersistBeginDate<1 then PersistBeginDate := 3190101;
-    if PersistEndDate<1 then PersistEndDate := 3201201;
+    if PersistBeginDate<1 then PersistBeginDate := DecFMDTDay(DateTimeToFMDateTime(Now),365);
+    if PersistEndDate<1 then PersistEndDate := DateTimeToFMDateTime(Now);
     AFrmTMGChartExporter.dtNotesStart.FMDateTime := PersistBeginDate;
     AFrmTMGChartExporter.dtNotesEnd.FMDateTime := PersistEndDate;
     AFrmTMGChartExporter.dtLabsStartDt.FMDateTime := PersistBeginDate;
     AFrmTMGChartExporter.dtLabsEndDt.FMDateTime := PersistEndDate;
     AFrmTMGChartExporter.dtRadStartDt.FMDateTime := PersistBeginDate;
     AFrmTMGChartExporter.dtRadEndDt.FMDateTime := PersistEndDate;
-    AFrmTMGChartExporter.ATree := ATree;
+    AFrmTMGChartExporter.dtOrderStartDt.FMDateTime := PersistBeginDate;
+    AFrmTMGChartExporter.dtOrderEndDt.FMDateTime := PersistEndDate;
+    //AFrmTMGChartExporter.ATree := ATree;
     AFrmTMGChartExporter.PageID := CT_Notes;
     //AFrmTMGChartExporter.btnApply.Enabled := False;
     AFrmTMGChartExporter.LoadNoteListbox;
     AFrmTMGChartExporter.LoadLabsListbox;
     AFrmTMGChartExporter.LoadRadListbox;
+    AFrmTMGChartExporter.LoadOrderListbox;
     AFrmTMGChartExporter.LoadScannedListbox;
     AFrmTMGChartExporter.ExportPageControl.ActivePageIndex := 0;
     AFrmTMGChartExporter.RadCoverGroup.ItemIndex := 1;
     AFrmTMGChartExporter.RadCoverGroupClick(nil);
     AFrmTMGChartExporter.ExportPageControlChange(nil);
     AFrmTMGChartExporter.lstExtraFiles.Drive := 'C';
+    AFrmTMGChartExporter.ExportPageControl.ActivePageIndex := InitialTab;
     AFrmTMGChartExporter.ShowModal;
     AFrmTMGChartExporter.Destroy;
   finally
@@ -214,12 +234,14 @@ begin
   DataSL := TStringList.Create;
   LabDataSL := TStringList.Create;
   RadDataSL := TStringList.Create;
+  OrderDataSL := TStringList.Create;
   ScannedDataSL := TStringList.Create;
   ConsultsDataSL := TStringList.Create;
   //
   NotesToPrint := TStringList.Create;
   LabsToPrint := TStringList.Create;
   RadToPrint := TStringList.Create;
+  OrdersToPrint := TStringList.Create;
   ScansToPrint := TStringList.Create;
   OtherDocToPrint := TStringList.Create;
   SelectedNoteIEN := '';
@@ -231,12 +253,14 @@ begin
   DataSL.Free;
   LabDataSL.Free;
   RadDataSL.Free;
+  OrderDataSL.Free;
   ScannedDataSL.Free;
   ConsultsDataSL.Free;
   //
   NotesToPrint.Free;
   LabsToPrint.Free;
   RadToPrint.Free;
+  OrdersToPrint.Free;
   ScansToPrint.Free;
   OtherDocToPrint.Free;
   //
@@ -315,6 +339,12 @@ begin
   ExportPageControlChange(nil);
 end;
 
+procedure TfrmTMGChartExporter.btnOrderDatesApplyClick(Sender: TObject);
+begin
+  inherited;
+  LoadOrderListBox;
+end;
+
 procedure TfrmTMGChartExporter.btnPersonalPatientRAClick(Sender: TObject);
 begin
   inherited;
@@ -376,8 +406,25 @@ var ExportResult:string;
     Consultant:string;
     FileName:string;
     i : integer;
+    AlertText : string;
 begin
   inherited;
+    AlertText := '';
+    if edtTo.Text='' then begin
+      edtTo.Color := clYellow;
+      AlertText := 'Missing entry for Send To';
+    end;
+    if edtToFax.Text='' then begin
+      edtToFax.Color := clYellow;
+      if AlertText<>'' then AlertText := AlertText+',';
+      AlertText := AlertText+'Missing entry for Fax Number ';
+    end;
+    if AlertText<>'' then begin
+      messagedlg('Cannot export due to: '+#13#10+AlertText,mtError,[mbOk],0);
+      ExportPageControl.ActivePageIndex := 0;
+      exit;
+    end;
+
     AFrmTMGChartExporter.WebBrowser1.Navigate('about:blank');
     Application.ProcessMessages;
     if radCoverGroup.ItemIndex = COVER_UPLOAD_COVERSHEET then begin
@@ -393,7 +440,7 @@ begin
       Consultant := ConsultsDataSL[cmbConsultants.ItemIndex]
     else
       Consultant := '';
-    ExportResult := ExportChart(NotesToPrint,LabsToPrint,RadToPrint,ScansToPrint,OtherDocToPrint,edtTo.Text,edtToFax.Text,edtRE.text,inttostr(radCoverGroup.ItemIndex),ExtractFileName(edtCoversheetFile.text),Consultant,cmbTemplateCover.ItemID,booltostr(chkIncludeDemo.checked),memComments.Lines);
+    ExportResult := ExportChart(NotesToPrint,LabsToPrint,RadToPrint,OrdersToPrint,ScansToPrint,OtherDocToPrint,edtTo.Text,edtToFax.Text,edtRE.text,inttostr(radCoverGroup.ItemIndex),ExtractFileName(edtCoversheetFile.text),Consultant,cmbTemplateCover.ItemID,booltostr(chkIncludeDemo.checked),memComments.Lines);
     if piece(ExportResult,'^',1)='1' then begin
       DownloadedFile := piece(ExportResult,'^',2);
       AFrmTMGChartExporter.WebBrowser1.Navigate(DownloadedFile);
@@ -452,21 +499,23 @@ begin
 end;
 
 
-function TfrmTMGChartExporter.FirstSelectedIEN : string;
+function TfrmTMGChartExporter.AreSomeSelectedInList(ChkLBox:TCheckListBox) : boolean;
 var
   i : integer;
 begin
-  Result := '';
-  for i := 0 to cklbTitles.Items.Count - 1 do begin
-    if not cklbTitles.Selected[i] then continue;
-    Result := piece(DataSL[i], U, 1);
+  Result := false;
+  for i := 0 to ChkLBox.Items.Count - 1 do begin
+    if not ChkLBox.Checked[i] then continue;
+    //Result := piece(DataSL[i], U, 1);
+    Result := True;
     break;
   end;
 end;
 
 function TfrmTMGChartExporter.SomeSelected : boolean;
 begin
-  Result := (FirstSelectedIEN <> '');
+  Result := (AreSomeSelectedInList(cklbTitles)) or (AreSomeSelectedInList(lstLabs)) or (AreSomeSelectedInList(lstRad)) or (AreSomeSelectedInList(lstOrders));
+  if (Result=False) and (radCoverGroup.ItemIndex>0) then Result := True;
 end;
 
 procedure TfrmTMGChartExporter.cklbTitlesClick(Sender: TObject);
@@ -493,6 +542,18 @@ begin
   inherited;
   PersistBeginDate := dtNotesStart.FMDateTime;
   //btnApply.Enabled := true;
+end;
+
+procedure TfrmTMGChartExporter.edtToChange(Sender: TObject);
+begin
+  inherited;
+  edtTo.Color := clWindow;
+end;
+
+procedure TfrmTMGChartExporter.edtToFaxChange(Sender: TObject);
+begin
+  inherited;
+  edtToFax.color := clWindow;
 end;
 
 //----PROCEDURES TO LOAD THE LISTBOXES
@@ -577,15 +638,17 @@ begin
   lstLabs.Clear;
   lstLabs.Sorted := FALSE;
   RPCResults := TStringList.Create();
-  tCallV(RPCResults,'TMG CPRS LAB GET DATES',[Patient.DFN,'1']);
+  //tCallV(RPCResults,'TMG CPRS LAB GET DATES',[Patient.DFN,'1']);
+  tCallV(RPCResults,'TMG CPRS LAB PDF LIST',[Patient.DFN,dtNotesStart.FMDateTime,dtNotesEnd.FMDateTime]);
+  RPCResults.Delete(0);
   for i := 0 to RPCResults.Count - 1 do begin
    x := RPCResults[i];
-   ThisDate := strtofloat(piece(x,'^',1));
-   if (ThisDate>dtNotesStart.FMDateTime) AND (ThisDate<dtNotesEnd.FMDateTime) then begin
-     TitleName := FormatFMDateTime('mm/dd/yy', strtofloat(piece(x,'^',1)))+' '+piece(x,'^',2);
-     LabDataSL.Add(piece(x,'^',1));
-     lstLabs.Items.Add(TitleName);
-   end;
+   //ThisDate := strtofloat(piece(x,'^',1));
+   //if (ThisDate>dtNotesStart.FMDateTime) AND (ThisDate<dtNotesEnd.FMDateTime) then begin
+     //TitleName := FormatFMDateTime('mm/dd/yy', strtofloat(piece(x,'^',1)))+' '+piece(x,'^',2);
+   LabDataSL.Add(piece(x,'^',2)+'^'+piece(x,'^',3));
+   lstLabs.Items.Add(FormatFMDateTime('mmm dd, yyyy hh:nn', strtofloat(piece(x,'^',4))));
+   //end;
   end;
   RPCResults.free;
 end;
@@ -606,6 +669,33 @@ begin
   RadList.Free;
 end;
 
+procedure TfrmTMGChartExporter.LoadOrderListbox;
+var OrderList : TStringList;
+    i : integer;
+    ID,OrderTime:string;
+    OrderTextSL:TStringList;
+begin
+  OrderDataSL.Clear;
+  lstOrders.Clear;
+  OrderList := TStringList.create();
+  OrderTextSL := TStringList.Create();
+  // Get Orders Here ListImagingExams(RadList);
+  tCallV(OrderList,'ORWORR AGET', [Patient.DFN,'2^0','1','0','0','0']);
+  for I := 0 to OrderList.Count - 1 do begin
+    //check data here
+    if (piece(OrderList[i], '^', 1) = '0') or (Piece(OrderList[i], '^', 1) = '') then Continue;
+    if (DelimCount(OrderList[i],'^') = 2) then Continue;
+    ID := Piece(OrderList[i], U, 1);
+    //OrderTime := MakeFMDateTime(Piece(OrderList[i], U, 3));
+    OrderTime := Piece(OrderList[i], U, 3);
+    tCallV(OrderTextSL,'ORQOR DETAIL', [ID, Patient.DFN]);
+    //lstOrders.Items.Add(piece2(piece2(OrderTextSL.Text),'Order Text;',2),'Nature of Order',1);
+    lstOrders.Items.Add(piece2(OrderTextSL.Text,'Activity',1));
+    OrderDataSL.Add(ID);
+  end;
+  OrderList.Free;
+  OrderTextSL.Free;
+end;
 //----PROCEDURES TO POPULATE ARRAYS FOR EXPORTING
 
 procedure TfrmTMGChartExporter.LoadSelectedIntoList(AList : TStringList; Checkbox: TCheckListBox; Data:TStringList);
@@ -684,6 +774,7 @@ begin
     end;
   end;
   SetCoversheetVisibility();
+  cklbTitlesClick(Sender);
 end;
 
 procedure TfrmTMGChartExporter.SetCoversheetVisibility();
@@ -757,6 +848,7 @@ begin
   LoadSelectedIntoList(NotesToPrint,cklbTitles,DataSL);
   LoadSelectedIntoList(LabsToPrint,lstLabs,LabDataSL);
   LoadSelectedIntoList(RadToPrint,lstRad,RadDataSL);
+  LoadSelectedIntoList(OrdersToPrint,lstOrders,OrderDataSL);
   LoadSelectedIntoList(ScansToPrint,chkScanned,ScannedDataSL);
   LoadOthersIntoList;
 end;

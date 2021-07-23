@@ -326,8 +326,8 @@ inherited frmReview: TfrmReview
     object lblDEAText: TStaticText
       Left = 0
       Top = 0
-      Width = 687
-      Height = 40
+      Width = 1574
+      Height = 17
       Align = alClient
       Anchors = [akLeft, akTop, akRight]
       Caption = 

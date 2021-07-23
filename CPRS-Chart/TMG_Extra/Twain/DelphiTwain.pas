@@ -735,8 +735,11 @@ end;
 
 {Sets application language property}
 procedure TTwainIdentity.SetLanguage(const Value: TTwainLanguage);
+var temp : Word;
 begin
-  Structure.Version.Language := Word(Value) - 1;
+  temp := Word(Value);              //TMG   6/24/21 added temp and if because if Value=0, we were getting Range Check Error
+  if temp=0 then Structure.Version.Language := temp
+  else Structure.Version.Language := temp - 1;
 end;
 
 {Copy properties from another TTwainIdentity}

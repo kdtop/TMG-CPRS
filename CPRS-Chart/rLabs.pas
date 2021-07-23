@@ -275,8 +275,10 @@ end;
 
 function TMGHasLabReport(DFN,DisplayDate:string):boolean;  //kt 10/23/20
 var Results:TStringList;
+    SDT:integer;
 begin
   Results := TStringList.create();
+  //SDT := strtoint(piece(DisplayDate,'.',1))-1;  //Back up a day
   tCallV(Results,'TMG CPRS LAB PDF LIST',[DFN,piece(DisplayDate,'.',1)+'.0001',piece(DisplayDate,'.',1)+'.9999']);
   result := (Results.Count>1);  //the [0] is "1^OK" etc.
   Results.Free;

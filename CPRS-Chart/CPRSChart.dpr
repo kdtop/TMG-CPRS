@@ -33,7 +33,6 @@ uses
   rReports in 'rReports.pas',
   fAbout in 'fAbout.pas' {frmAbout},
   fxLists in 'fxLists.pas' {frmDbgList},
-  fProbs in 'fProbs.pas' {frmProblems},
   fAutoSz in 'fAutoSz.pas' {frmAutoSz},
   rMisc in 'rMisc.pas',
   fxServer in 'fxServer.pas' {frmDbgServer},
@@ -249,7 +248,6 @@ uses
   VERGENCECONTEXTORLib_TLB in 'VERGENCECONTEXTORLib_TLB.pas',
   uOrPtf in 'uOrPtf.pas',
   fPatientFlagMulti in 'fPatientFlagMulti.pas' {frmFlags},
-  fFrame in 'fFrame.pas' {frmFrame},
   fAlertForward in 'fAlertForward.pas' {frmAlertForward},
   fODMedNVA in 'Orders\fODMedNVA.pas' {frmODMedNVA},
   fPrintList in 'fPrintList.pas' {frmPrintList},
@@ -295,7 +293,6 @@ uses
   VA2006Utils in '..\VA\VA2006Utils.pas',
   VAClasses in '..\VA\VAClasses.pas',
   fPrintLocation in 'fPrintLocation.pas' {frmPrintLocation},
-  uVA508CPRSCompatibility in 'uVA508CPRSCompatibility.pas',
   VA508AccessibilityManager in '..\VA\VA508Accessibility\VA508AccessibilityManager.pas',
   ORCtrlsVA508Compatibility in '..\CPRS-Lib\ORCtrlsVA508Compatibility.pas',
   VA508DelphiCompatibility in '..\VA\VA508Accessibility\VA508DelphiCompatibility.pas',
@@ -415,7 +412,12 @@ uses
   fViewLabPDF in 'TMG_Extra\fViewLabPDF.pas' {frmViewLabPDF},
   rFileTransferU in 'TMG_Extra\rFileTransferU.pas',
   uTMGEvent in 'TMG_Extra\uTMGEvent.pas',
-  uImages in 'TMG_Extra\uImages.pas';
+  uImages in 'TMG_Extra\uImages.pas',
+  MDMHelper in 'TMG_Extra\MDM grid\MDMHelper.pas' {frmMDMGrid},
+  CollapsablePanelU in 'TMG_Extra\MDM grid\CollapsablePanelU.pas',
+  fFrame in 'fFrame.pas' {frmFrame},
+  fProbs in 'fProbs.pas' {frmProblems},
+  uVA508CPRSCompatibility in 'uVA508CPRSCompatibility.pas';
 
 {$R *.TLB}
 
@@ -436,7 +438,7 @@ begin
     Application.HelpFile := 'cprs.hlp';
     Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
-  Application.CreateForm(TfrmSearchStop, frmSearchStop);
+  Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;
   end;

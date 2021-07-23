@@ -69,6 +69,7 @@ function DateTimeToFMDateTime(ADateTime: TDateTime): TFMDateTime;
 function DateTimeToFMDTStr(ADateTime: TDateTime): string;
 function FMDateTimeToDateTime(ADateTime: TFMDateTime): TDateTime;
 function FMDTStrToDateTime(FMDTStr: String): TDateTime;
+function FMDTStrToFMDT(FMDTStr: String): TFMDateTime;
 function FMDTToStr(ADateTime: TFMDateTime): string;
 function FMDateTimeOffsetBy(ADateTime: TFMDateTime; DaysDiff: Integer): TFMDateTime;
 function FormatFMDateTime(AFormat: string; ADateTime: TFMDateTime): string;
@@ -304,7 +305,6 @@ begin
   end;
 end;
 
-
 function FMDateTimeToDateTime(ADateTime: TFMDateTime): TDateTime;
 { converts a Fileman date/time (type double) to a Delphi date/time }
 var
@@ -322,6 +322,18 @@ begin
                       StrToInt(Copy(TimePart, 3, 2)),
                       StrToInt(Copy(TimePart, 5, 2)), 0);
   Result := ADate + ATime;
+end;
+
+function FMDTStrToFMDT(FMDTStr: String): TFMDateTime;
+//kt added 12/20  -- then realized thet MakeFMDateTime is same thing
+//Convert string with FMDT into actual FMDT
+begin
+  Result := MakeFMDateTime(FMDTStr);
+  //if IsFMDateTime(FMDTStr) then begin
+  //  Result := StrToFloat(FMDTStr);
+  //end else begin
+  //  Result := 0;
+  //end;
 end;
 
 function FMDTStrToDateTime(FMDTStr: String): TDateTime;
@@ -464,7 +476,7 @@ procedure SetListFMDateTime(AFormat: string; AList: TStringList; ADelim: Char;
 var
   i: Integer;
   s, x, x1: string;
-  
+
 begin
   for i := 0 to AList.Count - 1 do
   begin

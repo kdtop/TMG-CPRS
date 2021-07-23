@@ -82,6 +82,7 @@ procedure ListNotes(Dest: TStrings; Context: Integer; Early, Late: TFMDateTime;
   Person: int64; OccLim: Integer; SortAscending: Boolean);
 procedure ListNotesForTree(Dest: TStrings; Context: Integer; Early, Late: TFMDateTime;
   Person: int64; OccLim: Integer; SortAscending: Boolean);
+procedure GetNoteInfo(Dest : TStrings; IEN : string);   //kt added 12/9/2020
 procedure ListConsultRequests(Dest: TStrings);
 procedure ListDCSumm(Dest: TStrings);
 procedure LoadDetailText(Dest: TStrings; IEN: Integer);    //**KCM**
@@ -149,7 +150,8 @@ function UserInactive(EIN: String): boolean;
 
 //Miscellaneous
 function TIUPatch175Installed: boolean;
-function ExportChart(NotesList,LabList,RadList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
+//function ExportChart(NotesList,LabList,RadList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
+function ExportChart(NotesList,LabList,RadList,OrdersList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
 
 const
   CLS_PROGRESS_NOTES = 3;
@@ -475,6 +477,33 @@ begin
     end;
 end;
 
+procedure GetNoteInfo(Dest : TStrings; IEN : string);   //kt added 12/9/2020
+{Gets information about selected notes.
+  Input: IEN can be 1 or more TIU-IEN values.  E.g. '12345' or '12345^23456^45678'
+  Output: Dest[0]='1^OK' or '-1^Error message'
+          Dest[i]=string with pieces as below
+   piece 1:  TIU IEN
+         2:  DisplayTitle         e.g. Addendum to LAB/XRAYS/STUDIES RESULTS
+         3:  FMReferenceDate(#1301)   e.g. 3150422.174108
+         4:  PatientName   e.g. ZZTEST, BABY  (Z0103)
+         5:  AuthorIEN;AuthorSigName;AuthorName   e.g. 168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S
+         6:  LocationName   e.g. Laughlin_Office
+         7:  Status  e.g. unsigned
+         8:  Adm[or Visit]: DateStr;FMDT   e.g. Visit: 04/21/15;3150421.083119
+         9:  Dis: DateStr;FMDT   e.g. "        ;"
+        10:  REQUESTING PACKAGE REFERENCE IEN(var ptr)  e.g. ""
+        11:  Image Count   e.g. 0
+        12:  Subject(#1701)  e.g. ""
+        13:  Prefix (child indicator)   e.g. "+"
+        14:  ParentIEN (#.06), or IDParentien (#2101), or Context, or 1  e.g. 361381
+        15:  ID Sort indicator  e.g.  ""
+        16:  Highlight Note  ELH   8/4/16
+        17:  Hospital Note   ELH   4/30/19
+}
+begin
+  CallV('TMG CPRS GET NOTES INFO', [IEN]);
+  FastAssign(RPCBrokerV.Results, Dest);
+end;
 
 procedure ListDCSumm(Dest: TStrings);
 { returns the list of discharge summaries for a patient - see ListNotes for pieces }
@@ -1366,12 +1395,13 @@ begin
   end;
 end;
 
-function ExportChart(NotesList,LabList,RadList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
+function ExportChart(NotesList,LabList,RadList,OrdersList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
 //Export selected chart items into one PDF files and download to client
 
   function UniqueFName : AnsiString;
-    var  FName,tempFName : AnsiString;
-         count : integer;
+  //NOTE: Could also consider using uHTMLTool.UniqueCacheFName(FName : string) : AnsiString;
+  var  FName,tempFName : AnsiString;
+       count : integer;
   begin
     FName := 'ChartExport';
     count := 0;
@@ -1410,7 +1440,7 @@ begin
   RPCBrokerV.Param[2].Value := '.X';  // not used
   RPCBrokerV.param[2].ptype := list;
   for i := 0 to LabList.Count-1 do begin
-    RPCBrokerV.Param[2].Mult[piece(LabList.Strings[i],'^',1)] := LabList.Strings[i];
+    RPCBrokerV.Param[2].Mult['"'+LabList.Strings[i]+'"'] := '';
   end;
   RPCBrokerV.Param[3].Value := '.X';  // not used
   RPCBrokerV.param[3].ptype := list;
@@ -1441,6 +1471,12 @@ begin
   RPCBrokerV.param[6].ptype := list;
   for i := 0 to OtherDocList.Count-1 do begin
     RPCBrokerV.Param[6].Mult['"'+piece(OtherDocList.Strings[i],'^',1)+'"'] := '';  //RadList.Strings[i];
+  end;
+
+  RPCBrokerV.Param[7].Value := '.X';  // not used
+  RPCBrokerV.param[7].ptype := list;
+  for i := 0 to OrdersList.Count-1 do begin
+    RPCBrokerV.Param[7].Mult['"'+piece(OrdersList.Strings[i],'^',1)+'"'] := '';  //RadList.Strings[i];
   end;
 
   CallBroker;

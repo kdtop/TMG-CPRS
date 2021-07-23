@@ -332,6 +332,7 @@ uses fTemplateView, uCore, rTemplates, fTemplateEditor, dShared, uReminders,
 const
   BaseMinDrawerControlHeight = 24;
   FindNextText = 'Find Next';
+  AWAIT_DLG_FOR_TEXT = '@^@ AWAIT_DIALOG @^@';
 
 
 function TfrmDrawers.MinDrawerControlHeight: integer;
@@ -915,6 +916,7 @@ end;
 
 procedure TfrmDrawers.tvTemplatesDblClick(Sender: TObject);
 var  ATemplate : TTemplate;  //kt
+
 begin
   if(not FClickOccurred) then begin
     CheckAsk
@@ -1190,10 +1192,12 @@ procedure TfrmDrawers.InsertTemplateText(Template : TTemplate);
 //   Instead, a copy of the original InsertText() will be included above.
 var
   txt: string;
+
 begin
   if not InsertOK(TRUE) then exit;
   if not dmodShared.TemplateOK(Template) then exit;
   txt := GetTemplateTextForInsertion(Template);
+  if txt = AWAIT_DLG_FOR_TEXT then exit;  //kt 4/8/21
   CheckParseComponentCluster(txt, Template.PrintName);  //kt added 2015
   TransformInsertionText(txt, Template.PrintName);
   PutTemplateTextIntoEditControl(txt, Template.PrintName);
@@ -1219,7 +1223,6 @@ function TfrmDrawers.GetTemplateTextForInsertion(Template : TTemplate) : string;
 var
   txt, DocInfo: string;
   //TemplateIsHTML : boolean;
-
 begin
   Result := '';
   txt := '';
@@ -1232,6 +1235,7 @@ begin
   Template.TemplatePreviewMode := FALSE;
   if Template.IsReminderDialog then begin
     Template.ExecuteReminderDialog(TForm(Owner));
+    Result := AWAIT_DLG_FOR_TEXT; //kt 4/8/21
     exit;
   end else begin
     uCarePlan.CurrentDialogIsCarePlan := uCarePlan.TemplateNameIsCP(Template.PrintName);  //kt-cp  -- will affect if aswers are wrapped in tagged-text markers
@@ -1360,6 +1364,7 @@ begin
     }
     FHtmlEditControl.SelText := txt;
     FHtmlEditControl.SetFocus;
+    //FHtmlEditControl.InsertHTMLAtCaret('INSERT 4<P>');//elh
   end else begin
     IndentMemoTextIfCarePlan(PrintName, txt, FRichEditControl);
     BeforeLine := SendMessage(FRichEditControl.Handle, EM_EXLINEFROMCHAR, 0, FRichEditControl.SelStart);

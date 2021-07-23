@@ -11,7 +11,6 @@ inherited frmdlgProb: TfrmdlgProb
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitTop = -23
   ExplicitWidth = 680
   ExplicitHeight = 629
   PixelsPerInch = 96

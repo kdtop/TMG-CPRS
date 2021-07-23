@@ -12,6 +12,7 @@ object frmViewLabPDF: TfrmViewLabPDF
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel

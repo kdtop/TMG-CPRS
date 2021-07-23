@@ -261,7 +261,8 @@ var
   idx: integer;
 begin
   Result := '';
-  if assigned(frmFrame) and assigned(frmFrame.tabPage) then
+  //kt if assigned(frmFrame) and assigned(frmFrame.tabPage) then
+  if assigned(frmFrame) and (frmFrame.tabPage <> nil) then  //kt
   begin
     idx := frmFrame.tabPage.TabIndex;
     if (idx >= 0) and (idx < uTabList.Count) then

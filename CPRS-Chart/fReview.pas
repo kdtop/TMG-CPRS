@@ -206,6 +206,7 @@ implementation
 uses ORFn, rCore, fNotes, fConsults, fOrders, rOrders, Hash, fDCSumm, fOCSession, uOrders,
      fSignItem, fOrdersPrint, fLkUpLocation, fFrame, uSignItems, fSurgery,
      fBALocalDiagnoses, UBAConst, UBAMessages, fOrdersSign, fClinicWardMeds,
+     uTMGOptions,   //TMG 7/2/21
      fNotePrt, //kt 9/11
      rODLab, fRptBox, VAUtils;
 
@@ -3041,6 +3042,7 @@ procedure TfrmReview.FormShow(Sender: TObject);
 var
   numOrderItems: integer;
 begin
+  TMGAutoPrintCKBox.Checked := uTMGOptions.ReadBool('Print Note On Review Checked',True);   //TMG  7/2/21
   if pnlSignature.Visible then
   else
   if pnlOrderAction.Visible then

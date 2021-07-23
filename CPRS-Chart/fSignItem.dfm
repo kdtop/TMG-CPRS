@@ -141,6 +141,7 @@ inherited frmSignItem: TfrmSignItem
     PasswordChar = '*'
     ShowHint = True
     TabOrder = 0
+    OnChange = txtESCodeChange
     OnKeyPress = txtESCodeKeyPress
     Caption = 'Signature Code'
   end
@@ -154,7 +155,7 @@ inherited frmSignItem: TfrmSignItem
     Lines.Strings = (
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
     ReadOnly = True
-    TabOrder = 1
+    TabOrder = 4
   end
   object cmdOK: TButton [6]
     Left = 239
@@ -176,6 +177,16 @@ inherited frmSignItem: TfrmSignItem
     TabOrder = 3
     OnClick = cmdCancelClick
   end
+  object TMGAutoPrintCKBox: TCheckBox [8]
+    Left = 239
+    Top = 75
+    Width = 146
+    Height = 17
+    Anchors = [akRight, akBottom]
+    Caption = 'Print note(s) after signing'
+    TabOrder = 1
+    Visible = False
+  end
   inherited amgrMain: TVA508AccessibilityManager
     Data = (
       (
@@ -192,6 +203,9 @@ inherited frmSignItem: TfrmSignItem
         'Status = stsDefault')
       (
         'Component = frmSignItem'
+        'Status = stsDefault')
+      (
+        'Component = TMGAutoPrintCKBox'
         'Status = stsDefault'))
   end
   object Timer1: TTimer

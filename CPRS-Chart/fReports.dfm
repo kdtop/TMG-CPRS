@@ -9,8 +9,8 @@ inherited frmReports: TfrmReports
   Menu = mnuMainMenu
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 725
-  ExplicitHeight = 781
+  ExplicitWidth = 733
+  ExplicitHeight = 785
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -32,7 +32,7 @@ inherited frmReports: TfrmReports
     Width = 119
     Height = 717
     ExplicitWidth = 119
-    ExplicitHeight = 697
+    ExplicitHeight = 717
     object Splitter1: TSplitter
       Left = 0
       Top = 259
@@ -93,7 +93,6 @@ inherited frmReports: TfrmReports
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
-      ExplicitHeight = 332
       object lblQualifier: TOROffsetLabel
         Left = 0
         Top = 0
@@ -132,7 +131,6 @@ inherited frmReports: TfrmReports
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2'
-        ExplicitHeight = 306
       end
       object lstQualifier: TORListBox
         Left = 0
@@ -151,7 +149,6 @@ inherited frmReports: TfrmReports
         LongList = False
         Pieces = '2,3'
         TabPositions = '10'
-        ExplicitHeight = 306
       end
       object pnlViews: TORAutoPanel
         Left = 0
@@ -162,7 +159,6 @@ inherited frmReports: TfrmReports
         BevelOuter = bvNone
         TabOrder = 3
         Visible = False
-        ExplicitHeight = 306
         object pnlTopViews: TPanel
           Left = 0
           Top = 0
@@ -234,7 +230,6 @@ inherited frmReports: TfrmReports
           LongList = False
           Pieces = '2'
           TabPositions = '10'
-          ExplicitHeight = 226
         end
       end
     end
@@ -287,7 +282,7 @@ inherited frmReports: TfrmReports
     Height = 717
     ExplicitLeft = 123
     ExplicitWidth = 594
-    ExplicitHeight = 697
+    ExplicitHeight = 717
     object sptHorzRight: TSplitter
       Left = 0
       Top = 177
@@ -297,6 +292,7 @@ inherited frmReports: TfrmReports
       Align = alTop
       Visible = False
       OnCanResize = sptHorzRightCanResize
+      OnMoved = sptHorzRightMoved
     end
     object pnlRightTop: TPanel
       Left = 0
@@ -378,7 +374,6 @@ inherited frmReports: TfrmReports
       Height = 536
       Align = alClient
       TabOrder = 2
-      ExplicitHeight = 516
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 31
@@ -439,7 +434,6 @@ inherited frmReports: TfrmReports
         Visible = False
         WantReturns = False
         WordWrap = False
-        ExplicitTop = 388
       end
     end
     object pnlRightMiddle: TPanel
@@ -472,12 +466,14 @@ inherited frmReports: TfrmReports
         ViewStyle = vsReport
         OnColumnClick = lvReportsColumnClick
         OnCompare = lvReportsCompare
+        OnDrawItem = lvReportsDrawItem
         OnKeyUp = lvReportsKeyUp
         OnSelectItem = lvReportsSelectItem
       end
     end
   end
   inherited amgrMain: TVA508AccessibilityManager
+    Left = 280
     Data = (
       (
         'Component = pnlLefTop'
@@ -664,8 +660,7 @@ inherited frmReports: TfrmReports
       end>
     Labels = <>
     RemoteLabeler = dmodShared.imgLblImages
-    Left = 40
-    Top = 200
+    Left = 344
   end
   object mnuMainMenu: TMainMenu
     Left = 160

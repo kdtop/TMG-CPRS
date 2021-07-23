@@ -358,7 +358,7 @@ begin
   HTMLEditor.MoveCaretToEnd;
   if NotifyOK then begin
     if frmSingleNote.FMode = snmLab then begin
-      HTMLEditor.InsertTextAtCaret('For labs drawn on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
+      HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
     end else if frmSingleNote.FMode= snmReport then begin
       HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.');
     end;  
@@ -685,7 +685,8 @@ begin
   if ReasonForDelete = DR_CANCEL then Exit;
   if not NoPrompt and (InfoBox(TX_DEL_OK, TX_DEL_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES) then Exit;
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
-    frmImages.DeleteAll(idmDelete);  // Delete attached images
+    //frmImages.DeleteAll(idmDelete);  // Delete attached images
+    MessageDlg('Todo, handle deleting images in TfrmSingleNote.DoDeleteDocument', mtWarning, [mbOK], 0);
   end;
   //if not LockNote(FEditIEN) then Exit;
   if JustifyDocumentDelete(FEditIEN) then InfoBox(TX_RETRACT, TX_RETRACT_CAP, MB_OK);

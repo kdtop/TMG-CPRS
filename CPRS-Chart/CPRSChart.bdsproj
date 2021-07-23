@@ -33,7 +33,7 @@
 			<Compiler Name="O">1</Compiler>
 			<Compiler Name="P">1</Compiler>
 			<Compiler Name="Q">1</Compiler>
-			<Compiler Name="R">1</Compiler>
+			<Compiler Name="R">0</Compiler>
 			<Compiler Name="S">0</Compiler>
 			<Compiler Name="T">0</Compiler>
 			<Compiler Name="U">0</Compiler>
@@ -125,7 +125,7 @@
 			<Directories Name="UnitOutputDir">P:\vista\TMGCPRS v30A - GOOD\DCU</Directories>
 			<Directories Name="PackageDLLOutputDir"></Directories>
 			<Directories Name="PackageDCPOutputDir"></Directories>
-			<Directories Name="SearchPath">$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart;P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib;P:\vista\TMGCPRS v30A - GOOD\VA;P:\vista\TMGCPRS v30A - GOOD\VA\VA508Accessibility;P:\vista\TMGCPRS v30A - GOOD\WVEHR-Lib;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\DirectXDelphiWebcamCapture;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\DirectXDelphiWebcamCapture\DirectX;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Twain;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\png_Graphics;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\BA;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Images;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Vitals;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Window-Eyes Support Files;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\XuDigSig;P:\vista\TMGCPRS v30A - GOOD\DCU;C:\Source_Code\OR_30_296_SRC\OR_SRC_CREATION\BDK50\BDK32_P50T4\BDK32_P50T4\Source;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool</Directories>
+			<Directories Name="SearchPath">P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart;P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib;P:\vista\TMGCPRS v30A - GOOD\VA;P:\vista\TMGCPRS v30A - GOOD\VA\VA508Accessibility;P:\vista\TMGCPRS v30A - GOOD\WVEHR-Lib;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\DirectXDelphiWebcamCapture;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\DirectXDelphiWebcamCapture\DirectX;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Twain;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\png_Graphics;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\BA;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Images;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Vitals;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Window-Eyes Support Files;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\XuDigSig;P:\vista\TMGCPRS v30A - GOOD\DCU;C:\Source_Code\OR_30_296_SRC\OR_SRC_CREATION\BDK50\BDK32_P50T4\BDK32_P50T4\Source;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults</Directories>
 			<Directories Name="Packages">vcl;vclx;dbrtl;Rave65VCL;bdertl;rtl;vcldb;adortl;dbxcds;dbexpress;vclib;ibxpress;xmlrtl;vclactnband;inet;IntrawebDB_80_100;Intraweb_80_100;vclie;inetdbbde;inetdbxpress;IndyCore;IndySystem;dclOfficeXP;soaprtl;dsnap;IndyProtocols;teeui;teedb;tee;vcldbx;XWB_R2006;VclSmp;TSortStringGrid</Directories>
 			<Directories Name="Conditionals"></Directories>
 			<Directories Name="DebugSourceDirs">P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED\;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\png_Graphics;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\Twain;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\DirectXDelphiWebcamCapture;P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\TSortStringGrid</Directories>
@@ -163,7 +163,7 @@
 		</VersionInfo>
 		<VersionInfoKeys>
 			<VersionInfoKeys Name="CompanyName">Department of Veterans Affairs / Family Physicians of Greeneville, PC</VersionInfoKeys>
-			<VersionInfoKeys Name="FileDescription">2020.09.17</VersionInfoKeys>
+			<VersionInfoKeys Name="FileDescription">2021.07.20</VersionInfoKeys>
 			<VersionInfoKeys Name="FileVersion">1.0.30.16</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">1.0.30.16 server required</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalCopyright">Unauthorized access or misuse of this system and/or its data is a federal crime. Use of all data shall be in accordance with VA policy on security and privacy.</VersionInfoKeys>

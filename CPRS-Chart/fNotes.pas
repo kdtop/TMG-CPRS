@@ -49,13 +49,14 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
-  rFileTransferU, uImages,                            //kt 10/27/20
+  rFileTransferU, uImages,ShellApi,                   //kt 10/27/20
   OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
   TEditModes = (emNone,emText,emHTML);                //kt 9/11
   TViewModes = (vmEdit,vmView,vmText,vmHTML);         //kt 9/11
   TViewModeSet = Set of TViewModes;                   //kt 9/11
+  THandleLooseDoc = (hlMoveToScan,hlDelete,hlMoveToTIU);
 const
   vmHTML_MODE : array [false..true] of TViewModes = (vmText,vmHTML); //kt 9/11
   emHTML_MODE : array [false..true] of TEditModes = (emText,emHTML); //kt 9/11
@@ -269,6 +270,21 @@ type
     mnuLooseInChartDelete: TMenuItem;
     mnuLooseInChartMoveScanned: TMenuItem;
     mnuLooseInChartMoveTIU: TMenuItem;
+    mnuLaunchMDM: TMenuItem;
+    mnuLooseDelete: TMenuItem;
+    mnuLooseDocToScanned: TMenuItem;
+    mnuLooseDocToTIUNote: TMenuItem;
+    popNoteViewInBrowser: TMenuItem;
+    mnuMoveToLoose: TMenuItem;
+    popNoteViewInBrowser2: TMenuItem;
+    mnuViewThisScanInBrowser: TMenuItem;
+    procedure popNoteViewInBrowser2Click(Sender: TObject);
+    procedure mnuMoveToLooseClick(Sender: TObject);
+    procedure popNoteViewInBrowserClick(Sender: TObject);
+    procedure mnuLooseInChartMoveTIUClick(Sender: TObject);
+    procedure mnuLooseInChartMoveScannedClick(Sender: TObject);
+    procedure mnuActClick(Sender: TObject);
+    procedure mnuLaunchMDMClick(Sender: TObject);
     procedure mnuLooseInChartDeleteClick(Sender: TObject);
     procedure popNotePasteHTMLClick(Sender: TObject);
     procedure btnShiftEnterClick(Sender: TObject);
@@ -413,6 +429,7 @@ type
     procedure DoDeleteDocument(DataString : string; ItemIndex : integer;
                              NoPrompt : boolean = false);              //kt 5/15
     function DeleteNodeAndDocAndComps(ANode : TORTreeNode) : boolean;  //kt 5/15
+    procedure HandleMDMClosure(Sender: TObject);             //kt 1/21
   private
     FNavigatingTab : Boolean; //Currently Using tab to navigate
     FEditingIndex: Integer;                      // index of note being currently edited
@@ -508,8 +525,8 @@ type
     procedure SortBtnGroupClick(GroupBy : string);                                 //kt 3/14
     procedure SetSortBtnGroupDisplay(GroupBy : string);                            //kt 3/14
     procedure DoHideTitle;                                                         //kt 5/14
-    procedure FilterTitlesForHidden(TitlesList : TStringList; var HiddenCount:integer);                     //kt 5/14
-    procedure FilterTitlesForAdmin(TitlesList : TStringList; var HiddenCount:integer);               //kt 1/24/17
+    procedure FilterTitlesForHidden(TitlesList : TStringList; var HiddenCount:integer); //kt 5/14
+    procedure FilterTitlesForAdmin(TitlesList : TStringList; var HiddenCount:integer);  //kt 1/24/17
     procedure ResetHideButton;                                                     //kt 5/14
     //procedure SetZoom(Pct : integer);                                            //kt 6/14
     procedure AutoEditCurrent;                                                     //kt 5/15
@@ -528,6 +545,7 @@ type
                             Lines : TStrings = nil) : string;                      //kt 5/15
     function GetEditorHTMLText : string;
     procedure RunMacro(Sender:TObject);                                        //kt 3/16
+    procedure HandleLooseDocument(LooseDocHandler:THandleLooseDoc);      //kt 1/21
   public
     HtmlEditor : THtmlObj;                                                         //kt 9//11
     HtmlViewer : THtmlObj;                                                         //kt 9/11
@@ -574,6 +592,7 @@ type
     function tvIndexOfNode(Node : TORTreeNode) : integer;                          //kt 4/15
     procedure IdentifyAddlSigners(NoteIEN : int64; ARefDate: TFMDateTime);         //kt 2/17
     function WMReplaceHTMLText(TagToReplace,ReplacementText:string):string;        //kt 5/9/19
+    function MoveTIUToLoose(DFN,TIUIEN,Title: string):boolean;                         //kt 3/2/21
   published
     property Drawers: TFrmDrawers read GetDrawers; // Keep Drawers published
     property HTMLEditMode: TEditModes read FHTMLEditMode;
@@ -598,6 +617,7 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fOptionsNotes, fImagePickExisting, fImagesMultiUse, StrUtils, uHTMLTools, fMemoEdit, fTMGPrintList , //kt
      fUploadImages, fPtDocSearch, uTMGOptions, fImages, fConsultLink, uTMGUtil, uHTMLTemplateFields,  //kt
      fTemplateDialog, DateUtils, uInit, uVA508CPRSCompatibility, VA508AccessibilityRouter,
+     MDMHelper,    //kt    12/21/20
   VAUtils;
 
 const
@@ -1881,6 +1901,7 @@ begin
   if EditIsHTML then begin
     HTMLText := GetEditorHTMLText;
     EmptyNote := (HtmlEditor.GetTextLen = 0) or not HTMLContainsVisibleItems(HTMLText);
+    EmptyNote := False;   //This gets set far too often, ignoring HTML for some reason. Turning off this test for HTML for now   2/2/21
   end else begin
     EmptyNote := (memNewNote.GetTextLen = 0) or not ContainsVisibleChar(memNewNote.Text);
   end;
@@ -2479,6 +2500,12 @@ begin
   cmdChangeClick(Sender);
 end;
 
+procedure TfrmNotes.mnuActClick(Sender: TObject);
+begin
+  inherited;
+  mnuLaunchMDM.Enabled := (FEditingIndex>-1);
+end;
+
 procedure TfrmNotes.mnuActLoadBoilerClick(Sender: TObject);
 var
   NoteEmpty: Boolean;
@@ -2627,7 +2654,7 @@ begin
       ShowMsg('TIU LINK TO FLAG: FAILED');
   end;
 
-  if LastTitle <> FEditNote.Title then mnuActLoadBoilerClick(Self);
+  //ELH Don't prompt for boilerplate change 7/20/21  if LastTitle <> FEditNote.Title then mnuActLoadBoilerClick(Self);
 end;
 
 procedure TfrmNotes.memNewNoteChange(Sender: TObject);
@@ -2825,7 +2852,7 @@ begin
   end;
   //Clear the search text. We are done searching
   FCurrentContext.SearchString := '';
-  frmSearchStop.Hide;
+  //frmSearchStop.Hide;
   // Text Search CQ: HDS00002856 --------------------
   //kt changed  5/13/14 lblNotes.hint := lblNotes.Caption;
   lblNotes.hint := 'Click for custom options';
@@ -3324,7 +3351,9 @@ begin
   PromptText := NoteDisplayText + IfThen(NoteIsComponent, TX_DEL2_OK, TX_DEL_OK);  //kt 5/15
   if not NoPrompt and (InfoBox(PromptText, TX_DEL_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES) then Exit;  //kt 5/15
   // Delete attached images  //kt 9/11
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then frmImages.DeleteAll(idmDelete);  //kt 9/11
+  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
+    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, (EditingIndex > -1)); // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
+  end;
   // do the appropriate locking
   if not LockConsultRequestAndNote(IEN) then Exit;
   // retraction notification message
@@ -3414,7 +3443,9 @@ begin
   if ShowMsgOn(not ActionSts.Success, ActionSts.Reason, TX_IN_AUTH) then Exit;
   ReasonForDelete := SelectDeleteReason(IEN);
   if ReasonForDelete = DR_CANCEL then Exit;
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then frmImages.DeleteAll(idmDelete);
+  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
+    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, (EditingIndex > -1)); // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
+  end;
   // do the appropriate locking
   if not LockConsultRequestAndNote(IEN) then Exit;
   // retraction notification message
@@ -3573,6 +3604,7 @@ begin
         if EditingIsChildComp then Changes.Remove(CH_DOC, EditingID); //kt 5/15
         if SignSts.Success then
         begin
+          if fSignItem.PrintAfterSignature then PrintNote(lstNotes.ItemIEN, MakeNoteDisplayText(lstNotes.Items[lstNotes.ItemIndex]));   //TMG 7/1/21
           SendMessage(frmConsults.Handle, UM_NEWORDER, ORDER_SIGN, 0);      {*REV*}
           lstNotesClick(Self);
           if DisplayCosignerDialog(lstNotes.ItemIEN) then mnuActIdentifyAddlSignersClick(Self);  //elh  1/30/14
@@ -3718,6 +3750,7 @@ procedure TfrmNotes.popNoteMemoPopup(Sender: TObject);
 const FORMAT_MODE : array[false..true] of string = ('Formatted Text','Plain Text');  //kt 8/09
 var NoteIsComponent:  boolean;         //kt 5/15
     PopupComp : TObject;               //kt 3/16
+    DisplayingPDF : boolean;
 begin
   inherited;
   {
@@ -3733,7 +3766,7 @@ begin
     FEditCtrl := nil;
   end;
   popNoteMemoViewHTMLSource.Visible := (vmHTML in FViewMode);
-
+  DisplayingPDF := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents') or ContainsText(tvNotes.Selected.Parent.Text,'Scanned records');
   //kt end mod
   if FEditCtrl <> nil then begin
     popNoteMemoCut.Enabled      := FEditCtrl.SelLength > 0;
@@ -3757,9 +3790,26 @@ begin
   popNoteMemoProcess.Enabled := pnlWrite.Visible;
   popNoteMacro.Enabled := pnlWrite.Visible;                                             //kt 5/1/13
   popNotePasteHTML.Enabled := pnlWrite.Visible;  //tmg 1/21/19 //(pnlWrite.Visible and Clipboard.HasFormat(CF_HTML));
+
+  //tmg addition    2/2/21
   mnuLooseInChartDelete.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
   mnuLooseInChartMoveScanned.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
   mnuLooseInChartMoveTIU.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
+  mnuMoveToLoose.Visible := (ContainsText(tvNotes.Selected.Parent.Text,'All unsigned')or(ContainsText(tvNotes.Selected.Parent.Text,'Alert')and(ContainsText(tvNotes.Selected.Text,'Addendum')=False)));
+  popNoteMemoSignList.enabled := not DisplayingPDF;
+  popNoteMemoDelete.enabled := not DisplayingPDF;
+  popNoteMemoEdit.enabled := not DisplayingPDF;
+  popNoteMemoAddend.enabled := not DisplayingPDF;
+  popAddComponent.enabled := not DisplayingPDF;
+  popNoteMemoSave.enabled := not DisplayingPDF;
+  popNoteMemoSign.enabled := not DisplayingPDF;
+  popNoteMemoAddlSign.enabled := not DisplayingPDF;
+  popNoteMemoLinkToConsult.enabled := not DisplayingPDF;
+  popNoteMemoEncounter.enabled := not DisplayingPDF;
+  popNoteViewInBrowser2.Visible := DisplayingPDF;
+  popNoteViewInBrowser.Visible := not DisplayingPDF; //ContainsText(tvNotes.Selected.Parent.Text,'Signed'))or(ContainsText(tvNotes.Selected.Parent.Text,'Alert'));
+  //end tmg addition
+
   if pnlWrite.Visible then begin
     popNoteMemoSpell.Enabled      := not pnlHTMLWrite.Visible; //kt 9/11
     popNoteMemoGrammar.Enabled    := not pnlHTMLWrite.Visible; //kt 9/11
@@ -3975,6 +4025,35 @@ procedure TfrmNotes.popNotePasteHTMLClick(Sender: TObject);
 begin
   inherited;
   HTMLEditor.InsertHTMLAtCaret(Clipboard.AsText);
+end;
+
+procedure TfrmNotes.popNoteViewInBrowser2Click(Sender: TObject);
+var FileString:String;
+begin
+  inherited;
+  FileString := 'http://192.168.3.99:9080'+Piece(TORTreeNode(tvNotes.Selected).StringData, U, 18);
+  ShellExecute(Handle, 'open',PChar(FileString),PChar(''),'', SW_SHOWNORMAL) ;
+end;
+
+procedure TfrmNotes.popNoteViewInBrowserClick(Sender: TObject);
+var
+   MyHTML: TStringList;
+   NoteText: string;
+   TempFile: string;
+begin
+  inherited;
+
+   MyHTML := TStringList.create;
+   TempFile := UniqueCacheFName(GetCurrentNoteIEN+'.html');
+   try
+     NoteText := StringReplace(HtmlViewer.GetFullHTMLText,CacheDir+'\','',[rfReplaceAll, rfIgnoreCase]);
+     MyHTML.add(NoteText);
+     //MyHTML.add(HtmlViewer.GetFullHTMLText);
+     MyHTML.SaveToFile(TempFile);
+    finally
+     MyHTML.Free;
+    end;
+   ShellExecute(Handle, 'open',PChar(TempFile),PChar(''),'', SW_SHOWNORMAL) ;
 end;
 
 procedure TfrmNotes.mnuViewDetailClick(Sender: TObject);
@@ -4344,6 +4423,10 @@ begin
   popNoteListExpandSelected.Visible   := N4.Visible;
   popNoteListCollapseAll.Visible      := N4.Visible;
   popNoteListCollapseSelected.Visible := N4.Visible;
+  mnuLooseDelete.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
+  mnuLooseDocToScanned.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
+  mnuLooseDocToTIUNote.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
+  mnuViewThisScanInBrowser.Visible := (ContainsText(tvNotes.Selected.Parent.Text,'Loose documents') or ContainsText(tvNotes.Selected.Parent.Text,'Scanned records'));
 end;
 
 procedure TfrmNotes.popNoteListExpandAllClick(Sender: TObject);
@@ -4783,7 +4866,7 @@ var
   R1             :          TDownloadResult;  //3/12/19
   CacheFName     :          string;  //3/12/19
 begin
-  fImages.ListBox := frmNotes.lstNotes;
+  SetActiveListBoxForImages(frmNotes.lstNotes);  //fImages.ListBox := frmNotes.lstNotes;  //kt
   if uChanging then Exit;
   //This gives the change a chance to occur when keyboarding, so that WindowEyes
   //doesn't use the old value.
@@ -4791,7 +4874,7 @@ begin
   if (lstNotes.ItemIndex <> -1) and (lstNotes.ItemIndex = EditingIndex) then begin
     DoAutoSave(0); // 5/15
   end;
-  btnZoomNormalClick(Sender);  //kt 6/14 
+  btnZoomNormalClick(Sender);  //kt 6/14
   TVChangePending := true;  //May be used in DoubleClick event handler, as below
   Application.ProcessMessages;  // <--If user Double-Clicked, then handler will be called here.
   TVChangePending := false;
@@ -5024,6 +5107,9 @@ begin
     end;
   end;
   if not assigned(tvNotes.Selected) then exit;
+  if pos('Loose documents (',piece(TORTreeNode(Node).StringData,'^',2))>0 then begin
+       tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
+  end;
   SelectedIEN := piece(TORTreeNode(tvNotes.Selected).StringData, '^', 1);
   ThisIEN := piece(TORTreeNode(Node).StringData, '^', 1);
   if ThisIEN = SelectedIEN then begin
@@ -5371,15 +5457,165 @@ begin
   ShowIconLegend(ilNotes);
 end;
 
-procedure TfrmNotes.mnuLooseInChartDeleteClick(Sender: TObject);
-var IEN,DataStr:string;
-    FilePath:string;
+
+procedure TfrmNotes.HandleMDMClosure(Sender: TObject);
+var
+  s : string;
+  i : integer;
+  SL : TStringList;
+  TotalText : TStringList;
+  Result : string;
+  Response : integer;
+begin
+  if frmMDMGrid.Result = true then begin
+    TotalText := TStringList.Create();
+    SL := frmMDMGrid.TextTable;
+    for i := 0 to SL.Count - 1 do begin
+      TotalText.Add(SL[i]);
+    end;
+    TotalText.Add('<p><DIV name="MDM_Target"></DIV>');  //5/6/21 - Adding another DIV for multiple MDMs
+    Result := WMReplaceHTMLText('[MDM_Target]',TotalText.text);
+    if piece(Result,'^',1)='-1' then begin
+       Response := messagedlg('MDM_Target tag was not found in the note'+#13#10+'Would you like to insert it at the current cursor position?'+#13#10+'Selecting "NO" will copy it to your clipboard',mtError,[mbYes,mbNo,mbCancel],0);
+       if Response=mrYes then begin
+         HTMLEditor.InsertHTMLAtCaret(TotalText.text);
+       end else if Response = mrNo then begin
+         SetClipText(TotalText.Text);
+         ShowMsg('You can paste the MDM Helper text into a note.');
+       end;
+    end;
+  end;
+  FreeAndNil(frmMDMGrid);
+end;
+
+procedure TfrmNotes.mnuLaunchMDMClick(Sender: TObject);
 begin
   inherited;
-  //DataStr := tvNotes.Items.Item[lstNotes.ItemIndex].;
-  //IEN := piece(piece(DataStr,'^',1),'-',2);
-  //FilePath := piece(DataStr,'^',18);
-  messagedlg('To Be Finished'+#13#10,mtInformation,[mbOk],0);
+  if not assigned(frmMDMGrid) then frmMDMGrid := TfrmMDMGrid.Create(Self);
+  frmMDMGrid.OnCloseForm := HandleMDMClosure;
+  frmMDMGrid.Show;
+end;
+
+procedure TfrmNotes.mnuLooseInChartDeleteClick(Sender: TObject);
+begin
+  inherited;
+  HandleLooseDocument(hlDelete);
+end;
+
+procedure TfrmNotes.mnuLooseInChartMoveScannedClick(Sender: TObject);
+begin
+  inherited;
+  HandleLooseDocument(hlMoveToScan);
+end;
+
+procedure TfrmNotes.mnuLooseInChartMoveTIUClick(Sender: TObject);
+begin
+  inherited;
+  HandleLooseDocument(hlMoveToTIU);
+end;
+
+procedure TfrmNotes.mnuMoveToLooseClick(Sender: TObject);
+var Title:string;
+    RPCResult : string;
+    ActionSts : TActionRec;
+    IEN : integer;
+begin
+  inherited;
+  if MoveTIUToLoose(Patient.DFN,FloatTostr(lstNotes.ItemIEN),piece(piece(lstNotes.Items[lstNotes.ItemIndex],'^',2),';',1))=true then begin
+    mnuActDeleteClick(self);
+    Loadnotes;
+  end;
+  {
+  if messagedlg('Are you sure you want to move this unsigned note to loose documents?',mtconfirmation,[mbYes,mbNo],0)<>mrYes then exit;
+  Title := ;
+  Title := inputbox('Move to Loose Documents','What would you like to call this file?',Title);
+  if Title='' then exit;
+  Title := StringReplace(Title,' ','_',[rfReplaceAll]);
+  RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[Patient.DFN,,Title]);
+  if piece(RPCResult,'^',1)='-1' then begin
+    messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
+  end else begin
+
+  end;
+  }
+end;
+
+function TfrmNotes.MoveTIUToLoose(DFN,TIUIEN,Title: string):boolean;
+var RPCResult : string;
+begin
+  Result := False;
+  //Removed per Dr. K's request   5/6/21  if messagedlg('Are you sure you want to move this unsigned note to loose documents?',mtconfirmation,[mbYes,mbNo],0)<>mrYes then exit;
+  Title := inputbox('Move to Loose Documents','What would you like to call this file?',Title);
+  if Title='' then exit;
+  Title := StringReplace(Title,' ','_',[rfReplaceAll]);
+  RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[DFN,TIUIEN,Title]);
+  if piece(RPCResult,'^',1)='-1' then begin
+    messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
+  end else begin
+    Result := True;
+  end;
+end;
+
+procedure TfrmNotes.HandleLooseDocument(LooseDocHandler:THandleLooseDoc);
+var IEN,DataStr,TIUIEN:string;
+    FilePath:string;
+    FPath,FName:string;
+    RPCResult:string;
+    TIUDETAILS:string;
+    Action:string;
+    NewFileName : string;
+    TempNewNote: TEditNoteRec;
+    Result : boolean;
+begin
+  DataStr := TORTreeNode(tvNotes.Selected).StringData;
+  IEN := piece(piece(DataStr,'^',1),'-',2);
+  FilePath := piece(DataStr,'^',18);
+  TIUDETAILS := '0';
+  case LooseDocHandler of
+    hlMoveToScan: begin
+     //Here we will move the document to the scanned section
+       if messagedlg('Are you sure you want to move this document to Scanned Records?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then
+          Action := 'Cancel'
+       else
+          Action := 'Move';
+    end;
+    hlDelete: begin
+     //Here we will delete the document
+       if messagedlg('Are you sure you want to delete this document?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then
+          Action := 'Cancel'
+       else
+          Action := 'Delete';
+    end;
+    hlMoveToTIU: begin
+     //Here we will move the document to a TIU Note
+       if messagedlg('Are you sure you want to move this document to a TIU Note?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then
+          Action := 'Cancel'
+       else begin
+          Action := 'TIU';
+          Result := ExecuteNoteProperties(TempNewNote, CT_NOTES, False, False, '', 0);  //Get the note title to use
+          //Move file to the server
+          FPath := StringReplace(FilePath, '/', '\',[rfReplaceAll, rfIgnoreCase]);
+          //the below line is a temp solution until I find a concrete solution
+          FPath := StringReplace(FPath, '\filesystem\loosedocs\','\\server1\public\FPG CHARTS\Z-LOOSE-IN-CHART\',[rfReplaceAll, rfIgnoreCase]);
+          FName := ExtractFileName(FPath);
+          CopyFile(PChar(FPath),PChar(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName),true);
+          NewFileName := fUploadImages.SingleFile(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName);
+          //Prepare the details for the RPC
+          TIUDETAILS := Patient.DFN+'^'+TempNewNote.TitleName+'^'+TempNewNote.AuthorName+'^'+FloatToStr(TempNewNote.DateTime)+'^'+NewFileName;
+       end;
+    end;
+  end;
+  if Action = 'Cancel' then exit;
+  RPCResult := sCallV('TMG TIU HANDLE LOOSE DOC',[Action,IEN,FilePath,TIUDETAILS]);
+  if piece(RPCResult,'^',1)='-1' then messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0)
+  else begin
+    Loadnotes;
+    if Action = 'TIU' then begin  //set as active note and prompt the user to sign
+       TIUIEN := piece(RPCResult,'^',2);
+       ChangeToNote(TIUIEN);
+       mnuActSignClick(nil);
+    end;
+  end;
 end;
 
 procedure TfrmNotes.mnuActAttachtoIDParentClick(Sender: TObject);
@@ -6791,6 +7027,11 @@ begin
   RPCResultStr.free;
   if piece(RPCResult,'^',1)='1' then begin
     Result := True;
+    Exit;
+  end;
+  //Note: changing RPC so a 0 result allows the user to force a signature
+  if piece(RPCResult,'^',1)='0' then begin
+    Result := (messagedlg(piece(RPCResult,'^',2)+#13#10+#13#10+'Would you like to sign anyway?',mterror,[mbYes,mbNo],0)=mrYes);
     Exit;
   end;
   Result := False;

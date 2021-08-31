@@ -5550,12 +5550,8 @@ begin
   Title := inputbox('Move to Loose Documents','What would you like to call this file?',Title);
   if Title='' then exit;
   Title := StringReplace(Title,' ','_',[rfReplaceAll]);
-<<<<<<< HEAD
   //Title := StringReplace(Title,'/','-',[rfReplaceAll]);
   //Title := StringReplace(Title,'\','-',[rfReplaceAll]);
-
-=======
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
   RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[DFN,TIUIEN,Title]);
   if piece(RPCResult,'^',1)='-1' then begin
     messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
@@ -5572,10 +5568,7 @@ var IEN,DataStr,TIUIEN:string;
     TIUDETAILS:string;
     Action:string;
     NewFileName : string;
-<<<<<<< HEAD
     CopiedFile : Boolean;
-=======
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
     TempNewNote: TEditNoteRec;
     Result : boolean;
 begin
@@ -5604,7 +5597,6 @@ begin
           Action := 'Cancel'
        else begin
           Action := 'TIU';
-<<<<<<< HEAD
           //Move file to the server
           FPath := StringReplace(FilePath, '/', '\',[rfReplaceAll, rfIgnoreCase]);
           //the below line is a temp solution until I find a concrete solution
@@ -5623,16 +5615,6 @@ begin
               exit;
           end;
           Result := ExecuteNoteProperties(TempNewNote, CT_NOTES, False, False, '', 0);  //Get the note title to use
-=======
-          Result := ExecuteNoteProperties(TempNewNote, CT_NOTES, False, False, '', 0);  //Get the note title to use
-          //Move file to the server
-          FPath := StringReplace(FilePath, '/', '\',[rfReplaceAll, rfIgnoreCase]);
-          //the below line is a temp solution until I find a concrete solution
-          FPath := StringReplace(FPath, '\filesystem\loosedocs\','\\server1\public\FPG CHARTS\Z-LOOSE-IN-CHART\',[rfReplaceAll, rfIgnoreCase]);
-          FName := ExtractFileName(FPath);
-          CopyFile(PChar(FPath),PChar(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName),true);
-          NewFileName := fUploadImages.SingleFile(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName);
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
           //Prepare the details for the RPC
           TIUDETAILS := Patient.DFN+'^'+TempNewNote.TitleName+'^'+TempNewNote.AuthorName+'^'+FloatToStr(TempNewNote.DateTime)+'^'+NewFileName;
        end;

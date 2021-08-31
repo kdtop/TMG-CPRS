@@ -555,7 +555,8 @@ begin
       LoadDocumentText(Lines, ItemInfo.intIEN8925);
       Screen.Cursor := crDefault;
       StatusText('');
-      uHTMLTools.ScanForSubs(Lines);      //Ensure download of any media encountered
+      //kt 8/19/21 -- line below not needed, as is called at time of loading document.   
+      //uHTMLTools.ScanForSubs(Lines);      //Ensure download of any media encountered
       //SetDisplayToHTMLvsText(Mode,FViewNote);         NOTE: I am only supporting HTML for now...
       uHTMLTools.FixHTML(Lines);
       ItemInfo.LocalHTMLFile := UniqueFilename(CPRSCacheDir, '.html');

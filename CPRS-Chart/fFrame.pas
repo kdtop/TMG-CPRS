@@ -215,6 +215,8 @@ type
     sbtnFontSmaller: TSpeedButton;
     sbtnFontNormal: TSpeedButton;
     sbtnFontLarger: TSpeedButton;
+    mnuTestGraph: TMenuItem;
+    procedure mnuTestGraphClick(Sender: TObject);
     procedure sbtnFontChangeClick(Sender: TObject);
     procedure mnuClosePatientClick(Sender: TObject);
     procedure mnuExportChartClick(Sender: TObject);
@@ -1571,6 +1573,28 @@ begin
   inherited;
   value := 0;
   DialogOptionsLists(-1, -1, Font.Size, value);
+end;
+
+procedure TfrmFrame.mnuTestGraphClick(Sender: TObject);
+var Cmd:string;
+    Dates : string;
+    TestIEN:string;
+    Location:string;
+    Width,Height:integer;
+    RelativeDates : boolean;
+begin
+  inherited;
+  //Kill this later... testing only for now
+  //DataStr = TYPE (63=LAB)^IEN OF TEST^
+  TestIEN:=InputBox('Graph Test','Enter the IEN of the test you want graphed','5130');
+  Cmd := TestIEN;
+  Width :=  600;
+  Height := 400;
+  Dates := '^^^^T-65;T-21^3210601^3210715';
+  RelativeDates := true;
+  Location := CreateGraph(Cmd,Dates,RelativeDates,Width,Height);  
+  if piece(Location,'^',1)='-1' then messagedlg('Error creating graph',mterror,[mbOk],0);
+  if piece(Location,'^',1)='1' then messagedlg('Graph stored at '+piece(Location,'^',2),mtinformation,[mbOk],0);
 end;
 
 procedure TfrmFrame.mnuTMGTempClick(Sender: TObject);

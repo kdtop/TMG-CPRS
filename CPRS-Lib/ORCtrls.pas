@@ -1564,7 +1564,7 @@ end;
 function TORStrings.GetObject(index: integer): TObject;
 begin
   Verify;
-  result := FPlainText.Objects[index];
+   result := FPlainText.Objects[index];
 end;
 
 function TORStrings.IndexOf(const S: string): Integer;

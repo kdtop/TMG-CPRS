@@ -335,7 +335,6 @@ type
     FViewMode : TViewModeSet;    //kt 9/11  This is the status of the display
     procedure ChangeToNote(IEN : String; ADFN : String = '-1');  //kt added 5/15
     function GetNamedTemplateImageHTML(Name: string): string;
-    function GetInsertHTMLName(Name: string): string;
     procedure InsertNamedImage(FName: string);
     procedure SetHTMLEditMode(HTMLEditMode : boolean; Quiet : boolean);
     procedure ProperRepaint(Editing : Boolean);
@@ -4107,20 +4106,8 @@ procedure TfrmDCSumm.InsertNamedImage(FName: string);
 var
    ImageFName : string;
 begin
-  ImageFName := GetInsertHTMLName(FName);
+  ImageFName := GetInsertImgHTMLName(FName);
   HTMLEditor.InsertHTMLAtCaret(ImageFName+#13#10);
-end;
-
-function TfrmDCSumm.GetInsertHTMLName(Name: string): string;
-//kt 9/11 added function
-var  ImageFName : string;
-     SizeString : string;
-begin
-  if Name = '' then exit;
-  //Should I test for file existence?
-  ImageFName := CPRSDir+'\Cache\' + Name;
-  SizeString := HTMLResize(ImageFName);
-  Result := '<img src="'+ ImageFName + '" ' + ALT_IMG_TAG_CONVERT + ' ' + SizeString + '>';
 end;
 
 procedure TfrmDCSumm.mnuAddNewImageClick(Sender: TObject);
@@ -4170,35 +4157,20 @@ begin
   frmImagesMultiUse := TfrmImagesMultiUse.Create(Self);
   Result2 := frmImagesMultiUse.SelectNamedImage(Name);
   if Result2 = False then exit;
-  Result := GetInsertHTMLName(frmImagesMultiUse.SelectedImage);
+  Result := GetInsertImgHTMLName(frmImagesMultiUse.SelectedImage);
   frmImagesMultiUse.Free;
 end;
 
 
 procedure TfrmDCSumm.mnuSelectExistingImageClick(Sender: TObject);
-//kt 9/11 added function
-var
-  oneImage: string;
-  ImageFName : string;
-  SizeString : string;
-  frmImagePickExisting: TfrmImagePickExisting;
-
+//kt 9/11 added function.  Alterd 8/19/21
+var oneImage: string;
 begin
   inherited;
-  frmImagePickExisting := TfrmImagePickExisting.Create(Self);
-  if frmImagePickExisting.ShowModal = mrOK then begin
-    ImageFName := frmImagePickExisting.SelectedImageFName;
-    SizeString := HTMLResize(ImageFName);
-    if ImageFName <> '' then begin
-      if frmImages.ThumbnailIndexForFName(ImageFName) = IMAGE_INDEX_IMAGE then begin
-        oneImage := '<img src="'+ ImageFName + '" ' + ALT_IMG_TAG_CONVERT + ' ' + SizeString + '>';
-      end else begin
-        oneImage := '<embed src="'+ ImageFName + '" ' + ALT_IMG_TAG_CONVERT + ' ' + SizeString + '>';
-      end;
-      HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10);
-    end;
+  oneImage :=  SelectExistingImageClick();
+  if oneImage <> '' then begin
+    HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10);
   end;
-  FreeAndNil(frmImagePickExisting);
 end;
 
 initialization

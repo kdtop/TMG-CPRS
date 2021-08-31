@@ -52,8 +52,14 @@ interface
 
   CONST
     CPRS_DIR_SIGNAL = '$CPRSDIR$';
-    CPRS_CACHE_DIR_SIGNAL = CPRS_DIR_SIGNAL+'\Cache\';
-    ALT_IMG_TAG_CONVERT = 'alt="convert to ' + CPRS_DIR_SIGNAL +'"';
+    CPRS_GRAPH_REFRESH_ATTR = 'tmg_needs_refresh';
+    CPRS_GRAPH_REFRESH_SIGNAL = CPRS_GRAPH_REFRESH_ATTR+'="1"';
+    CACHE_DIR = '\Cache\';
+    CACHE_DIR_ALT = '/Cache/';
+    CPRS_CACHE_DIR_SIGNAL = CPRS_DIR_SIGNAL+CACHE_DIR;
+    //NOTE: ALT_IMG_TAG_CONVERT is a signal that the <IMG > tag contains an local filesystem path, that needs to be converted before saving to server.
+    ALT_IMG_TAG_CONVERT = 'tmg_alt="convert to ' + CPRS_DIR_SIGNAL +'"';
+    //kt ALT_IMG_TAG_PLACEHOLDER = 'tmg_alt="holder"';  //kt 8/19/21
     NO_BR_TAG = '<NO-BR>';     //was '{{NO-BR}}'  //
     NO_BR_TAG2 = '{{NO-BR}}';
     NOBR_TAG = '<NOBR>';     //was '{{NOBR}}'   // <-- Allow user to enter alternate spellings.
@@ -123,11 +129,15 @@ interface
   procedure StripJavaScript(SL: TStrings; var Modified : boolean);
   function GetWebBrowserHTML(const WebBrowser: TWebBrowser): String;
   procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string);
+  function GetTag(HTMLText : string; TagName : string; var PartA, PartB : string; AttributesSL : TStringList) : string;
 
   function FormatHTMLClipboardHeader(HTMLText: string): string;
   procedure CopyHTMLToClipBoard(const str: AnsiString; const htmlStr: AnsiString = '');
 
   function StripHTMLTags(strHTML: string): string;
+  function HTMLResize(ImageFName: string) : string;
+  function GetInsertImgHTMLName(Name: string; PropSL : TStringList = nil): string;
+  function SelectExistingImageClick() : string;
 
 implementation
 
@@ -136,6 +146,8 @@ implementation
        Messages,
        TMGHTML2,  //kt moved from interface 8/16
        Graphics, //For color constants
+       fGraphs,  //for RefreshGraph
+       fImagePickExisting,
        fTMGPrintingAnimation,
        fMemoEdit,
        fDrawers,
@@ -316,36 +328,42 @@ implementation
   //Purpose: To scan note for constant $CPRS$ and replace with CPRS's actual directory
   var i,p,p2 : integer;
       tempS : String;
+      RefreshSuccess : boolean;
+      RefreshGraphCount : integer;
   begin
+    RefreshGraphCount := 0;
     SubsFoundList.Clear;
     for i := 0 to Lines.Count-1 do begin
-      if (Pos('src="file:',Lines.Strings[i])>0) AND (Pos('file:///',Lines.Strings[i])=0) then begin
-        Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],'file:','file:///');
+      if Pos(CPRS_GRAPH_REFRESH_SIGNAL,Lines[i])>0 then begin
+         Lines[i] := RefreshGraph(Lines[i], RefreshSuccess);
+         if RefreshSuccess then inc(RefreshGraphCount);
       end;
-      p := Pos(CPRS_DIR_SIGNAL,Lines.Strings[i]);
+      if (Pos('src="file:',Lines[i])>0) AND (Pos('file:///',Lines[i])=0) then begin
+        Lines[i] := AnsiReplaceStr(Lines[i],'file:','file:///');
+      end;
+      p := Pos(CPRS_DIR_SIGNAL, Lines[i]);
       if p>0 then begin
-        p := p + Length(CPRS_CACHE_DIR_SIGNAL);
-        p2 := PosEx('"',Lines.Strings[i],p);
-        tempS := MidStr(Lines.Strings[i],p,(p2-p));
-        SubsFoundList.Add(tempS);
-        if Pos(ALT_IMG_TAG_CONVERT,Lines.Strings[i]) > 0 then begin
-          Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],ALT_IMG_TAG_CONVERT,'~~$$~~');
-        end;
-        if Pos('file:///',Lines.Strings[i]) > 0 then begin
-          //Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],CPRS_DIR_SIGNAL,URL_CPRSDir);
-          Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],CPRS_DIR_SIGNAL,CPRSDir);
+        p := p + Length(CPRS_DIR_SIGNAL);  //kt 8/19/21
+        p2 := PosEx('"',Lines[i],p);
+        tempS := MidStr(Lines[i],p,(p2-p));
+        p := Pos(CACHE_DIR, tempS);
+        if p>0 then begin
+          tempS := MidStr(tempS, Length(CACHE_DIR)+1, Length(tempS));
         end else begin
-          Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],CPRS_DIR_SIGNAL,CPRSDir);
+          p := Pos(CACHE_DIR_ALT, tempS);
+          if p>0 then begin
+            tempS := MidStr(tempS, Length(CACHE_DIR_ALT)+1, Length(tempS));
+          end;
         end;
-        Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],'~~$$~~',ALT_IMG_TAG_CONVERT);
-        //elh NOTE TO SELF: Check placement
-        if Pos('IMG IMAGE ',Lines.Strings[i]) > 0 then begin
-          Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],' IMAGE ', ' '+ALT_IMG_TAG_CONVERT+' ');
-        end;
-        //Ensure images are downloaded before passing page to web browser
+        SubsFoundList.Add(tempS);
+        Lines[i] := AnsiReplaceStr(Lines[i],CPRS_DIR_SIGNAL, CPRSDir);  //kt 8/19/21
       end;
     end;
+    //Ensure images are downloaded before passing page to web browser
     uImages.EnsureSLImagesDownloaded(SubsFoundList);
+    if RefreshGraphCount > 0 then begin
+      MessageDlg('Updated '+IntToStr(RefreshGraphCount)+' Auto-Refresh Graph(s)',mtInformation, [mbOK],0);
+    end;
   end;
 
 
@@ -366,11 +384,11 @@ implementation
         Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],'file:','file:///');
       end;
       p := pos(FILEPREFIX,Lines.Strings[i]);
-      if p=0 then p := pos(CPRSDir,Lines.Strings[i]);
+      if p=0 then p := pos(CPRSDir, Lines.Strings[i]);
       if p = 0 then continue;
       TempS := Lines.Strings[i];
-      //Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],URL_CPRSDir,CPRS_DIR_SIGNAL);
-      Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],CPRSDir,CPRS_DIR_SIGNAL);
+      Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],URL_CPRSDir, CPRS_DIR_SIGNAL);  //kt 8/19/21  Reinstating.  Had been commented out prior.  Why?
+      Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],CPRSDir,     CPRS_DIR_SIGNAL);
       if Lines.Strings[i] = TempS then begin  //There is a problem. Replacement failed.
          endPos := pos('Cache/',Lines.Strings[i]);
          //MidStr := AnsiMidStr(Lines.Strings[i],p+13,Length(Lines.Strings[i])-endPos);
@@ -378,15 +396,14 @@ implementation
          MidStr := AnsiMidStr(Lines.Strings[i],p,endPos-p-1);
          Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],MidStr,CPRS_DIR_SIGNAL);
       end;
+      //kt 8/19/21 Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],ALT_IMG_TAG_CONVERT,'IMAGE'); //Remove signal
+      Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],ALT_IMG_TAG_CONVERT, ''); //Remove signal
       //if Pos(URL_CPRSDir,Lines.Strings[i])>0 then begin
       if Lines.Strings[i] = TempS then begin  //There is a problem. Replacement failed.
         MessageDlg('Problem converting image path to $CPRSDIR$',mtWarning,[mbOK],0);
         exit;
       end;
-      //TempS := MidStr(Lines.Strings[i],1,p-1);
-      //TempS := TempS + MidStr(Lines.Strings[i],p+length(ALT_IMG_TAG_CONVERT),length(Lines.Strings[i])+1);
-      //Lines.Strings[i] := TempS;
-      Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],ALT_IMG_TAG_CONVERT,'IMAGE'); //Remove signal
+
     end;
   end;
 
@@ -420,7 +437,8 @@ implementation
     Result := false;
     if Lines = nil then exit;
     Result := TextIsHTML(Lines.Text);
-    if Result = true then ScanForSubs(Lines);
+    //Moving the ScanForSubs upstream into LoadDocumentText, so it is done just once, upon loading document.
+    //if Result = true then ScanForSubs(Lines);
   end;
 
   
@@ -2258,6 +2276,81 @@ begin
   Result := StringReplace(Result, '&nbsp;', ' ',  [rfReplaceAll]);
   Result := StringReplace(Result, '@@BR@@', #13#10,  [rfReplaceAll]);
   {here you may add another symbols from RFC if you need}
+end;
+
+function GetTag(HTMLText : string; TagName : string; var PartA, PartB : string; AttributesSL : TStringList) : string;
+//Input: HTMLText: the HTML formated input string
+//       TagName: the tag name to search for, e.g. 'img' to search for '<img ... >' tag.  NOT case sensitive.
+//       PartA: an OUT parameter.  Returns all text BEFORE (e.g.) '<img ... >'
+//       PartBA: an OUT parameter.  Returns all text AFTER  (e.g.) '<img ... >'
+//       AttributeSL: an OUT parameter.  Optional.  If provided, then will be filled with attributes.
+//             syntax:  <AttributeName>=<value>  Value will not be quotes, ' or "
+//Result:  Result will be the text of the tag, e.g. '<img ... >', including < and >
+begin
+ //finish.
+end;
+
+
+function HTMLResize(ImageFName: string) : string;
+var
+  NewHeight : real;
+  Image: TImage;
+const
+  MaxWidth : integer = 640;
+begin
+  Image := TImage.Create(Application);
+  Image.Picture.LoadFromFile(ImageFName);
+  if Image.Picture.Width > MaxWidth then begin
+    NewHeight := (MaxWidth/Image.Picture.Width)*Image.Picture.Height;
+    Result := 'WIDTH=' + inttostr(MaxWidth) + ' HEIGHT=' + floattostr(NewHeight) + ' ';
+  end else begin
+    Result := '';
+  end;
+  Image.Free;
+end;
+
+function GetInsertImgHTMLName(Name: string; PropSL : TStringList = nil): string;
+//kt 9/11 added function
+//Format of PropSL is '<AttributeName>^<AttributeValue>'  Should not contain " char
+var  ImageFName : string;
+     SizeString : string;
+     i : integer;
+     AttrName, AttrValue : string;
+
+begin
+  if Name = '' then exit;
+  //Should I test for file existence?
+  ImageFName := CPRSCacheDir + Name;
+  SizeString := HTMLResize(ImageFName);
+  Result := '<img src="'+ ImageFName + '" ' + SizeString + ' '; //kt 8/19/21 //+ ALT_IMG_TAG_CONVERT + ' '
+  if assigned(PropSL) then begin
+    for i := 0 to PropSL.Count - 1 do begin
+      AttrName := PropSL.Names[i];  if AttrName='' then continue;
+      AttrValue := PropSL.ValueFromIndex[i];  if AttrValue='' then continue;
+      Result := Result + AttrName+'="'+AttrValue+'" ';
+    end;
+  end;
+  Result := Result + '>';
+end;
+
+
+function SelectExistingImageClick() : string;
+//kt 9/11 added function
+var
+  ImageFName : string;
+  frmImagePickExisting: TfrmImagePickExisting;
+
+begin
+  Result := '';
+  frmImagePickExisting := TfrmImagePickExisting.Create(Application);
+  try
+    if frmImagePickExisting.ShowModal = mrOK then begin
+      ImageFName := frmImagePickExisting.SelectedImageFName;
+      if ImageFName <> '' then Result := GetInsertImgHTMLName(ImageFName);
+    end;
+  finally
+    FreeAndNil(frmImagePickExisting);
+  end;
 end;
 
 

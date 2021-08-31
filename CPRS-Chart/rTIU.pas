@@ -160,6 +160,7 @@ implementation
 
 uses rMisc, fImages,
      rFileTransferU,  //kt added 10/27/20
+     uHTMLTools, //kt 8/19/21
      StrUtils;  //kt added
 
 var
@@ -534,6 +535,9 @@ begin
   //kt 'A' means get note and child components and grandchild etc components. Without 'A', granchild components are ignored.
   CallV('TIU GET RECORD TEXT', [IEN, 'VIEW;A']);
   FastAssign(RPCBrokerV.Results, Dest);
+  if IsHTML(Dest) then begin   //kt 8/19/21
+    ScanForSubs(Dest);
+  end;
 end;
 
 procedure LoadDetailText(Dest: TStrings; IEN: Integer);    //**KCM**

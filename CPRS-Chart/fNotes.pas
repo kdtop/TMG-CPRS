@@ -520,7 +520,7 @@ type
     procedure SetEditorFocus;                                                      //kt 9/11
     function  EditorHasText : boolean;                                             //kt 9/11
     procedure InsertNamedImage(FName: string);                                     //kt 9/11
-    function HTMLResize(ImageFName:string) : string;                               //kt 9/11
+    //kt 8/19/21 function HTMLResize(ImageFName:string) : string;                               //kt 9/11
     function ProcessNote(Lines : TStrings;NoteIEN: String): TStrings;              //kt 4/13
     procedure SortBtnGroupClick(GroupBy : string);                                 //kt 3/14
     procedure SetSortBtnGroupDisplay(GroupBy : string);                            //kt 3/14
@@ -576,7 +576,7 @@ type
     constructor Create(AOwner: TComponent); override;                              //kt 9/11
     destructor Destroy; override;                                                  //kt 9/11
     procedure ExternalSign;                                                        //kt 9/11
-    function  GetInsertHTMLName(Name: string): string;                             //kt 9/11
+    //kt 8/19/21 function  GetInsertHTMLName(Name: string; PropSL : TStringList = nil): string; //kt 9/11, 8/10/12
     function  GetNamedTemplateImageHTML(Name: string): string;                     //kt 9/11
     procedure ChangeToNote(IEN : String; ADFN : String = '-1');                    //kt 9/11
     function  HandleMacro(MacroName : string) : string;                            //kt 10/14
@@ -1829,6 +1829,7 @@ begin
   TMGLoadingForEdit := true;  //kt added 11/15  Signal used in tvNotesDblClick()
   EditingIndex := lstNotes.ItemIndex;
   GetNoteForEdit(FEditNote, lstNotes.ItemIEN);  //kt moved. Was right below Changes.Add() before.
+  ScanForSubs(FEditNote.Lines);  //8/30/21
   if FEditNote.IsComponent then ChangesMode := CH_SIGN_NA else ChangesMode := CH_SIGN_YES;  //kt added
   //kt original --> Changes.Add(CH_DOC, lstNotes.ItemID, GetTitleText(EditingIndex), '', CH_SIGN_YES);
   Changes.Add(CH_DOC, lstNotes.ItemID, GetTitleText(EditingIndex), '', ChangesMode);
@@ -3594,7 +3595,7 @@ begin
     end;
     if(OK) then
     begin
-      with lstNotes do SignatureForItem(Font.Size, MakeNoteDisplayText(Items[ItemIndex]), SignTitle, ESCode);
+      with lstNotes do SignatureForItem(Font.Size, MakeNoteDisplayText(Items[ItemIndex]), SignTitle, ESCode,piece(Items[ItemIndex],'^',16)<>'1');
       if Length(ESCode) > 0 then
       begin
         SignDocument(SignSts, lstNotes.ItemIEN, ESCode);
@@ -5246,6 +5247,7 @@ procedure TfrmNotes.tvNotesDblClick(Sender: TObject);
 //    this function to be called before tvNotesChange() has finished.
 begin
   inherited;
+  if lstNotes.ItemIndex = EditingIndex then Exit;
   if TMGLoadingForEdit then exit;
   if TVChangePending then begin  //Called here from a TVChange event.
     TVDblClickPending := true;
@@ -5548,6 +5550,9 @@ begin
   Title := inputbox('Move to Loose Documents','What would you like to call this file?',Title);
   if Title='' then exit;
   Title := StringReplace(Title,' ','_',[rfReplaceAll]);
+  //Title := StringReplace(Title,'/','-',[rfReplaceAll]);
+  //Title := StringReplace(Title,'\','-',[rfReplaceAll]);
+
   RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[DFN,TIUIEN,Title]);
   if piece(RPCResult,'^',1)='-1' then begin
     messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
@@ -5564,6 +5569,7 @@ var IEN,DataStr,TIUIEN:string;
     TIUDETAILS:string;
     Action:string;
     NewFileName : string;
+    CopiedFile : Boolean;
     TempNewNote: TEditNoteRec;
     Result : boolean;
 begin
@@ -5592,14 +5598,24 @@ begin
           Action := 'Cancel'
        else begin
           Action := 'TIU';
-          Result := ExecuteNoteProperties(TempNewNote, CT_NOTES, False, False, '', 0);  //Get the note title to use
           //Move file to the server
           FPath := StringReplace(FilePath, '/', '\',[rfReplaceAll, rfIgnoreCase]);
           //the below line is a temp solution until I find a concrete solution
-          FPath := StringReplace(FPath, '\filesystem\loosedocs\','\\server1\public\FPG CHARTS\Z-LOOSE-IN-CHART\',[rfReplaceAll, rfIgnoreCase]);
+          FPath := StringReplace(FPath, '\filesystem\loosedocs\','\\server1\private$\FPG CHARTS\Z-LOOSE-IN-CHART\',[rfReplaceAll, rfIgnoreCase]);
           FName := ExtractFileName(FPath);
-          CopyFile(PChar(FPath),PChar(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName),true);
+          CopiedFile := CopyFile(PChar(FPath),PChar(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName),true);
+          if CopiedFile=False then begin
+              Action := 'Cancel';
+              messagedlg('Unknown error during file copy to cache directory. Check filesystem permissions.',mtError,[mbOk],0);
+              exit;
+          end;
           NewFileName := fUploadImages.SingleFile(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName);
+          if NewFileName='' then begin
+              Action := 'Cancel';
+              messagedlg('Unknown error during file upload to server.',mtError,[mbOk],0);
+              exit;
+          end;
+          Result := ExecuteNoteProperties(TempNewNote, CT_NOTES, False, False, '', 0);  //Get the note title to use
           //Prepare the details for the RPC
           TIUDETAILS := Patient.DFN+'^'+TempNewNote.TitleName+'^'+TempNewNote.AuthorName+'^'+FloatToStr(TempNewNote.DateTime)+'^'+NewFileName;
        end;
@@ -6446,28 +6462,14 @@ procedure TfrmNotes.InsertNamedImage(FName: string);
 var
    ImageFName : string;
 begin
-  ImageFName := GetInsertHTMLName(FName);
+  ImageFName := GetInsertImgHTMLName(FName);
   HTMLEditor.InsertHTMLAtCaret(ImageFName+#13#10);
-end;
-
-function TfrmNotes.GetInsertHTMLName(Name: string): string;
-//kt 9/11 added function
-var  ImageFName : string;
-     SizeString : string;
-begin
-  if Name = '' then exit;
-  //Should I test for file existence?
-  ImageFName := CPRSDir+'\Cache\' + Name;
-  SizeString := HTMLResize(ImageFName);
-  Result := '<img src="'+ ImageFName + '" ' + ALT_IMG_TAG_CONVERT + ' ' + SizeString + '>';
 end;
 
 procedure TfrmNotes.mnuAddNewImageClick(Sender: TObject);
 //kt 9/11 added function
 var
    i, AddResult: integer;
-   //oneImage: string;
-   //ImageFName : string;
   frmImageUpload: TfrmImageUpload;
 
 begin
@@ -6509,37 +6511,23 @@ begin
   frmImagesMultiUse := TfrmImagesMultiUse.Create(Self);
   Result2 := frmImagesMultiUse.SelectNamedImage(Name);
   if Result2 = False then exit;
-  Result := GetInsertHTMLName(frmImagesMultiUse.SelectedImage);
+  Result := GetInsertImgHTMLName(frmImagesMultiUse.SelectedImage);
   frmImagesMultiUse.Free;
 end;
 
 
 procedure TfrmNotes.mnuSelectExistingImageClick(Sender: TObject);
-//kt 9/11 added function
-var
-  oneImage: string;
-  ImageFName : string;
-  SizeString : string;
-  frmImagePickExisting: TfrmImagePickExisting;
-
+//kt 9/11 added function.  Alterd 8/19/21
+var oneImage: string;
 begin
   inherited;
-  frmImagePickExisting := TfrmImagePickExisting.Create(Self);
-  if frmImagePickExisting.ShowModal = mrOK then begin
-    ImageFName := frmImagePickExisting.SelectedImageFName;
-    SizeString := HTMLResize(ImageFName);
-    if ImageFName <> '' then begin
-      if frmImages.ThumbnailIndexForFName(ImageFName) = IMAGE_INDEX_IMAGE then begin
-        oneImage := '<img src="'+ ImageFName + '" ' + ALT_IMG_TAG_CONVERT + ' ' + SizeString + '>';
-      end else begin
-        oneImage := '<embed src="'+ ImageFName + '" ' + ALT_IMG_TAG_CONVERT + ' ' + SizeString + '>';
-      end;
-      HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10);
-    end;
+  oneImage :=  SelectExistingImageClick();
+  if oneImage <> '' then begin
+    HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10);
   end;
-  FreeAndNil(frmImagePickExisting);
 end;
 
+{
 function TfrmNotes.HTMLResize(ImageFName: string) : string;
 var
   NewHeight : real;
@@ -6557,6 +6545,7 @@ begin
   end;
   Image.Free;
 end;
+}
 
 procedure TfrmNotes.btnCenterAlignClick(Sender: TObject);
 //kt 9/11 added function
@@ -7051,4 +7040,5 @@ finalization
   if (uPCEShow <> nil) then uPCEShow.Free; //CQ7012 Added test for nil
 
 end.
+
 

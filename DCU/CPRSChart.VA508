@@ -19,11 +19,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.dfm
 113
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.dfm
-96732/1391751574
+96732/1394249996
 159
 92
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.dfm
-55456/1367049915
+55456/1393790401
 251
 71
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.dfm
@@ -79,7 +79,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabTests.dfm
 959
 32
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSignItem.dfm
-8493/1390834970
+8493/1392724253
 991
 23
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRptBox.dfm
@@ -95,7 +95,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxLists.dfm
 1096
 11
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs.dfm
-51111/1199277578
+44199/1392066119
 1107
 62
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAutoSz.dfm
@@ -291,7 +291,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\dShared.dfm
 3324
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDrawers.dfm
-20478/1384683136
+20478/1393783601
 3326
 61
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMedCopy.dfm
@@ -783,7 +783,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.dfm
 8954
 35
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.dfm
-65743/1389924589
+66151/1394171973
 8989
 123
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.dfm
@@ -843,7 +843,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteSTStop.dfm
 10016
 14
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphs.dfm
-37294/1386514113
+38193/1393790402
 10030
 159
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphSettings.dfm
@@ -903,7 +903,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPrintLocation.dfm
 10646
 41
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphData.dfm
-3052/1156545362
+3052/1393593388
 10687
 26
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphOthers.dfm
@@ -955,7 +955,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlan.dfm
 10889
 77
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.dfm
-277122/1380084486
+277122/1393773669
 10966
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AddOneFileEntryU.dfm
@@ -1155,11 +1155,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.pas
 11391
 19
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
-279654/1391751864
+279310/1394250096
 11410
 66
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.pas
-158654/1367050317
+157567/1393790769
 11476
 56
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
@@ -1215,7 +1215,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabTests.pas
 11946
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSignItem.pas
-3239/1390561074
+3543/1392725478
 11956
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRptBox.pas
@@ -1231,7 +1231,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxLists.pas
 11987
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs.pas
-92262/1199288070
+92262/1392066201
 11997
 50
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAutoSz.pas
@@ -1427,7 +1427,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\dShared.pas
 12938
 45
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDrawers.pas
-76177/1384686093
+76192/1393783752
 12983
 61
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMedCopy.pas
@@ -1919,7 +1919,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.pas
 15005
 25
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
-218571/1389924736
+219450/1393201444
 15030
 60
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.pas
@@ -1979,7 +1979,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteSTStop.pas
 15295
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphs.pas
-263953/1386515416
+286060/1393791164
 15305
 52
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphSettings.pas
@@ -2039,7 +2039,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPrintLocation.pas
 15538
 12
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphData.pas
-23296/1156545362
+23301/1393594723
 15550
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphOthers.pas
@@ -2091,7 +2091,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlan.pas
 15706
 65
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.pas
-88418/1380086599
+89567/1393774980
 15771
 98
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AddOneFileEntryU.pas
@@ -2395,11 +2395,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiAlertSign.pas
 18414
 10
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.dfm
-185335/1386640519
+185273/1393783052
 18424
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
-25001/1383500481
+25094/1393783077
 18426
 40
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
@@ -2422,6 +2422,22 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
 37709/1383888141
 18530
 20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame_tabs.dfm
+115755/1392217712
+18550
+139
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs_tabs.dfm
+44199/1392066242
+18689
+62
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame_tabs.pas
+231972/1392075100
+18751
+63
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs_tabs.pas
+92363/1392066856
+18814
+50
 |EOINDEX|
 27
 inherited frmPage: TfrmPage
@@ -3530,7 +3546,7 @@ Data = (
 'Component = frmDbgList'
 'Status = stsDefault'))
 end
-1282
+1186
 inherited frmProblems: TfrmProblems
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -11412,7 +11428,7 @@ Data = (
 'Component = btnClose'
 'Status = stsDefault'))
 end
-1837
+1851
 inherited frmFrame: TfrmFrame
 inherited amgrMain: TVA508AccessibilityManager
 Left = 8
@@ -12453,7 +12469,7 @@ Data = (
 'Component = frmSearchStop'
 'Status = stsDefault'))
 end
-1304
+1333
 inherited frmGraphs: TfrmGraphs
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -20847,7 +20863,7 @@ uses
 
 type
   TForm1 = class(TForm)
-2710
+2708
 object frmMultiTIUSign: TfrmMultiTIUSign
 unit fMultiTIUSign;
 
@@ -20973,3 +20989,317 @@ type
   end;
 
   TfrmMDMGrid = class(TForm)
+2571
+inherited frmFrame: TfrmFrame
+inherited amgrMain: TVA508AccessibilityManager
+Left = 8
+Top = 48
+Data = (
+(
+'Component = frmFrame'
+'Status = stsDefault')
+(
+'Component = pnlNoPatientSelected'
+'Status = stsDefault')
+(
+'Component = pnlPatientSelected'
+'Status = stsDefault')
+(
+'Component = stsArea'
+'Status = stsDefault')
+(
+'Component = pnlMain'
+'Status = stsDefault')
+(
+'Component = pnlMainL'
+'Status = stsDefault')
+(
+'Component = pnlPageL'
+'Status = stsDefault')
+(
+'Component = lstCIRNLocations'
+'Status = stsDefault')
+(
+'Component = tabPageL'
+'Status = stsDefault')
+(
+'Component = pnlMainR'
+'Status = stsDefault')
+(
+'Component = pnlPageR'
+'Status = stsDefault')
+(
+'Component = tabPageR'
+'Status = stsDefault')
+(
+'Component = btnSplitterHandle'
+'Status = stsDefault')
+(
+'Component = pnlToolbar'
+'Status = stsDefault')
+(
+'Component = pnlCCOW'
+'Status = stsDefault')
+(
+'Component = pnlPatient'
+'Status = stsDefault')
+(
+'Component = lblPtName'
+'Status = stsDefault')
+(
+'Component = lblPtSSN'
+'Status = stsDefault')
+(
+'Component = lblPtAge'
+'Status = stsDefault')
+(
+'Component = pnlVisit'
+'Status = stsDefault')
+(
+'Component = lblPtLocation'
+'Status = stsDefault')
+(
+'Component = lblPtProvider'
+'Status = stsDefault')
+(
+'Component = pnlPrimaryCare'
+'Status = stsDefault')
+(
+'Component = lblPtCare'
+'Status = stsDefault')
+(
+'Component = lblPtAttending'
+'Status = stsDefault')
+(
+'Component = lblPtMHTC'
+'Status = stsDefault')
+(
+'Component = pnlReminders'
+'Status = stsDefault')
+(
+'Component = anmtRemSearch'
+'Status = stsDefault')
+(
+'Component = pnlPostings'
+'Status = stsDefault')
+(
+'Component = lblPtPostings'
+'Status = stsDefault')
+(
+'Component = lblPtCWAD'
+'Status = stsDefault')
+(
+'Component = paVAA'
+'Status = stsDefault')
+(
+'Component = laVAA2'
+'Status = stsDefault')
+(
+'Component = laMHV'
+'Status = stsDefault')
+(
+'Component = pnlRemoteData'
+'Status = stsDefault')
+(
+'Component = pnlVistaWeb'
+'Status = stsDefault')
+(
+'Component = pnlCIRN'
+'Status = stsDefault')
+(
+'Component = pnlCVnFlag'
+'Status = stsDefault')
+(
+'Component = btnCombatVet'
+'Status = stsDefault')
+(
+'Component = pnlFlag'
+'Status = stsDefault')
+(
+'Component = pnlPatientImage'
+'Status = stsDefault')
+(
+'Component = pnlTimer'
+'Status = stsDefault')
+(
+'Component = btnTimerReset'
+'Status = stsDefault')
+(
+'Component = pnlSchedule'
+'Status = stsDefault'))
+end
+1186
+inherited frmProblems: TfrmProblems
+inherited amgrMain: TVA508AccessibilityManager
+Data = (
+(
+'Component = pnlButtons'
+'Status = stsDefault')
+(
+'Component = bbOtherProb'
+'Status = stsDefault')
+(
+'Component = bbCancel'
+'Status = stsDefault')
+(
+'Component = pnlView'
+'Status = stsDefault')
+(
+'Component = lstView'
+'Status = stsDefault')
+(
+'Component = bbNewProb'
+'Status = stsDefault')
+(
+'Component = pnlProbEnt'
+'Status = stsDefault')
+(
+'Component = edProbEnt'
+'Status = stsDefault')
+(
+'Component = pnlProbList'
+'Status = stsDefault')
+(
+'Component = pnlProbCats'
+'Status = stsDefault')
+(
+'Component = lstCatPick'
+'Status = stsDefault')
+(
+'Component = pnlProbs'
+'Status = stsDefault')
+(
+'Component = lstProbPick'
+'Status = stsDefault')
+(
+'Component = pnlProbDlg'
+'Status = stsDefault')
+(
+'Component = wgProbData'
+'Status = stsDefault')
+(
+'Component = HeaderControl'
+'Status = stsDefault')
+(
+'Component = pnlLeft'
+'Status = stsDefault')
+(
+'Component = pnlRight'
+'Status = stsDefault')
+(
+'Component = frmProblems'
+'Status = stsDefault'))
+end
+unit fFrame;
+{ This is the main form for the CPRS GUI.  It provides a patient-encounter-user framework
+  which all the other forms of the GUI use. }
+
+ (*
+ NOTE: The original version of this file may be obtained freely from the VA.
+
+ This modified version of the file is Copyright 6/23/2015 Kevin S. Toppenberg, MD
+ --------------------------------------------------------------------
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+ == Alternatively, at user's choice, GPL license below may be used ===
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You may view details of the GNU General Public License at this URL:
+ http://www.gnu.org/licenses/
+ *)
+
+
+
+{$OPTIMIZATION OFF}                              // REMOVE AFTER UNIT IS DEBUGGED
+{$WARN SYMBOL_PLATFORM OFF}
+{$DEFINE CCOWBROKER}
+
+{.$define debug}
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Tabs, ComCtrls,
+  ExtCtrls, Menus, StdCtrls, Buttons, ORFn, fPage, uConst, ORCtrls, Trpcb,
+  OleCtrls, VERGENCECONTEXTORLib_TLB, ComObj, AppEvnts, fBase508Form,
+  StrUtils, Variants, Types,   //eRx 9/4/12
+  rTIU, math,  //TMG
+  uTMGEvent,   //TMG  10/29/20
+  fImagePatientPhotoID, fTMGChartExporter, //kt
+  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, ImgList;
+
+type
+  TControlCracker = class(TControl);  //kt-tabs 7/23/21
+  TTabPageSide = (tpsLeft, tpsRight);  //kt-tabs 7/23/21
+  TTabPageOpenMode = (tpoOpen=0, tpoClosed=1);  //kt-tabs 7/25/21
+  TfrmFrame = class(TfrmBase508Form)
+unit fProbs;
+ (*
+ NOTE: The original version of this file may be obtained freely from the VA.
+
+ This modified version of the file is Copyright 6/23/2015 Kevin S. Toppenberg, MD
+ --------------------------------------------------------------------
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+ == Alternatively, at user's choice, GPL license below may be used ===
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You may view details of the GNU General Public License at this URL:
+ http://www.gnu.org/licenses/
+ *)
+
+
+
+{$O-}
+interface
+
+{$DEFINE VEVA_USE_CP}
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  fHSplit, StdCtrls, ExtCtrls, Menus, ORCtrls, Buttons, uProbs,
+  Grids, Vawrgrid, ORfn, uCore, fProbEdt, uConst, ComCtrls,
+  VA508AccessibilityManager, VAUtils, fBase508Form, ImgList;
+
+type
+  TfrmProblems = class(TfrmHSplit)

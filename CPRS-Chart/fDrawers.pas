@@ -1279,7 +1279,7 @@ begin
   if (pos(CPRS_DIR_SIGNAL, txt)>0) then begin
     tempSL := TStringList.create;
     tempSL.Text := txt;
-    uHTMLTools.IsHTML(tempSL);  //calls ScanForSubs...
+    uHTMLTools.IsHTML(tempSL);  
     txt := AnsiReplaceStr(txt, CPRS_DIR_SIGNAL, CPRSDir);  //kt  Replaces ALL occurances.  Added in case of image being sent 5/22/14
     FreeAndNil(tempSL);
   end;
@@ -1362,6 +1362,7 @@ begin
       FreeAndNil(tempSL);
     end;
     }
+    ScanForSubs(txt);  //kt 8/19/21
     FHtmlEditControl.SelText := txt;
     FHtmlEditControl.SetFocus;
     //FHtmlEditControl.InsertHTMLAtCaret('INSERT 4<P>');//elh

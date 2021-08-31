@@ -45,7 +45,7 @@ type
   end;
 
 var
-  frmGraphData: TfrmGraphData;
+  frmGraphData: TfrmGraphData;     
   GtslData: TStringList;
   GtslItems: TStringList;
   GtslTypes: TStringList;

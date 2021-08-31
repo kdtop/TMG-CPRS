@@ -108,6 +108,8 @@ procedure ExtractText(Dest, Src: TStrings; const Section: string);
 function FilteredString(const x: string; ATabWidth: Integer = 8): string;
 procedure InvertStringList(AList: TStringList);
 procedure LimitStringLength(var AList: TStringList; MaxLength: Integer);
+function EndOfQt(const S : string; StartPos : integer; QuoteCh : char = '"') : integer; //kt 8/17/21
+function InsideQt(const S : string; Pos : integer; QuoteCh : char = '"') : boolean;     //kt 8/17/21
 function MixedCase(const x: string): string;
 procedure MixedCaseList(AList: TStrings);
 procedure MixedCaseByPiece(AList: TStrings; ADelim: Char; PieceNum: Integer);
@@ -120,18 +122,20 @@ function Piece2(const S: string; Delim: string; PieceNum: Integer): string;     
 function PieceNCS(const S: string; Delim: string; PieceNum: Integer): string; overload;    //kt 8/09
 function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string;         //kt 8/09 added 'overload'
 function Pieces2(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string;    //kt 8/09 added
+function PiecesNonQT(const S : string; Delim : string; PieceStart : integer; PieceEnd: Integer = 999999; QuoteCh : char = '"') : string;  //kt 8/17/21
 function FindPiecesNodes(SL : TStringList; Delim : char; NodeA : string = ''; NodeB : string = ''; NodeC : string = ''; nodeD : string = '') : integer;  //kt 5/15 addeed
 function FindPiece(SL : TStringList; Delim : char; PieceNum : Integer; Value : string) : integer;  //kt 6/15 added
 function NumPieces(const s : string; ADelim : char) : integer;                             //kt 11/13
 function PiecesNCS(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string;  //kt 8/09 added
 function LeftMatch(SubStr, Str : string) : boolean;  //kt added 6/15
 function RightMatch(SubStr, Str : string) : boolean;  //kt added 6/15
-
+function PosNonQT(SearchStr, Text : string; StartPos : integer = 1; QuoteCh : char = '"') : integer;  //kt 8/17/21
 
 function ComparePieces(P1, P2: string; Pieces: array of integer; Delim:
                        char = '^'; CaseInsensitive: boolean = FALSE): integer;
 procedure PiecesToList(x: string; ADelim: Char; AList: TStrings);
 procedure PiecesToList2(x: string; ADelim: String; AList: TStrings);  //kt added 2/21/16
+procedure PiecesToListNonQT(x: string; ADelim: string; AList : TStrings; QuoteCh : char = '"'); //kt 8/17/21
 function ListToPieces(AList : TStrings; ADelim: Char = '^') : string; //kt added 1/2/18
 function ReverseStr(const x: string): string;
 procedure SetPiece(var x: string; Delim: Char; PieceNum: Integer; const NewPiece: string);
@@ -907,6 +911,38 @@ begin
   end;
 end;
 
+function PiecesNonQT(const S : string; Delim : string; PieceStart : integer; PieceEnd: Integer = 999999; QuoteCh : char = '"') : string;
+//kt 8/17/21
+//Purpose: Like Pieces2, but NOT matching any Delim that occurs in quotes
+
+var Remainder : String;
+    PieceNum : integer;
+    PieceLen,p : integer;
+begin
+  Remainder := S;
+  Result := '';
+  PieceLen := Length(Delim);
+  PieceNum := PieceStart;
+  while (PieceNum > 1) and (Length(Remainder) > 0) do begin
+    p := PosNonQT(Delim,Remainder, 1, QuoteCh);
+    if p=0 then p := length(Remainder)+1;
+    Result := MidStr(Remainder,1,p-1);
+    Remainder := MidStr(Remainder, p+PieceLen, Length(Remainder));
+    Dec(PieceNum);
+  end;
+  PieceNum := PieceEnd-PieceStart+1;
+  Result := '';
+  while (PieceNum > 0) and (Length(Remainder) > 0) do begin
+    p := PosNonQT(Delim,Remainder,1,QuoteCh);
+    if p=0 then p := length(Remainder)+1;
+    if Result <> '' then Result := Result + Delim;
+    Result := Result + MidStr(Remainder,1,p-1);
+    Remainder := MidStr(Remainder, p+PieceLen, Length(Remainder));
+    Dec(PieceNum);
+  end;
+end;
+
+
 function Piece2(const S: string; Delim: string; PieceNum: Integer): string;
 //kt 11/13 added
 begin
@@ -1037,6 +1073,20 @@ begin
   AList.Clear;
   while Length(x) > 0 do begin
     APiece := Piece2(x, ADelim, 1);
+    AList.Add(APiece);
+    Delete(x, 1, Length(APiece) + length(ADelim));
+  end;
+end;
+
+procedure PiecesToListNonQT(x: string; ADelim: string; AList : TStrings; QuoteCh : char = '"'); //kt 8/17/21
+//kt added 8/17/21
+//Purpose:  Like PiecesToList2, except not matching ADelim if inside quotes
+var
+  APiece: string;
+begin
+  AList.Clear;
+  while Length(x) > 0 do begin
+    APiece := PiecesNonQT(x, ADelim, 1, 1, QuoteCh);
     AList.Add(APiece);
     Delete(x, 1, Length(APiece) + length(ADelim));
   end;
@@ -1378,6 +1428,73 @@ begin
     NewList.Free;
   end;
 end;
+
+function EndOfQt(const S : string; StartPos : integer; QuoteCh : char = '"') : integer;
+//kt 8/17/21
+//Purpose: Find the ENDING quote position in S
+//Input:   S : the string to search
+//         StartPos: This is the index AFTER the opening quote to start the search.  NOTE: NOT the index of the opening quote char
+//         QuoteCh: optional.  The character to use as quote character
+//NOTE:    Example:  "He said we would be ""fine"", right?"  <-- notice double ""
+//           The "" does not count as ending quote position.
+//Result:  Returns index of position of ending quote.  If ending quote not found, then return -1
+//           return index+1 of last character.  E.g.  "Hi  would return 4
+var i, Len : integer;
+begin
+  Len := Length(S);
+  Result := -1;  //default to not found.
+  i := StartPos;
+  while i <= Len do begin
+    if S[i] = QuoteCh then begin
+      if (i < Len) and (S[i+1] = QuoteCh) then begin   //Found double quote chars, e.g.  "He said we would be ""fine"", right?"
+        inc(i);                                           //                                                     ^
+      end else begin
+        Result := i;
+        break;
+      end;
+    end;
+    inc(i);
+  end;
+end;
+
+
+function InsideQt(const S : string; Pos : integer; QuoteCh : char = '"') : boolean;
+//kt 8/17/21
+//Purpose: Determine if character at Pos is inside quotes, taking into account double quotes
+//Input:   S : the string to search
+//         Pos: This position to test.
+//         QuoteCh: optional.  The character to use as quote character
+//Result: True if inside.
+//Example:   Sample string:  S := 'Sample: "He said we would be ""fine"", right?" '
+//                                          111111111122222222223333333333444444444
+//                                 123456789012345678901234567890123456789012345678
+//             InsideQt(S, 5) => false
+//             InsideQt(S, 9) => true  <--- true at opening quote.
+//             InsideQt(S, 20) => true
+//             InsideQt(S, 32) => true
+//             InsideQt(S, 46) => false  <--- false at closing quote.
+var i, Len : integer;
+    InQt : boolean;
+    Ch :char;
+begin
+  InQt := false;
+  Len := Length(S);
+  i := 1;
+  while (i <= Len) and (i <= Pos) do begin
+    Ch := S[i];
+    if Ch = QuoteCh then begin
+      if (i < Len) and (S[i+1] = QuoteCh) then begin   //Found double quote chars, e.g.  "He said we would be ""fine"", right?"
+        inc(i);                                         //                                                     ^
+      end else begin
+        InQt := not InQt;
+      end;
+    end;
+    inc(i);
+  end;
+  Result := InQt;
+end;
+
+
 
 { Display functions }
 
@@ -2727,6 +2844,27 @@ begin
   finally
     if assigned(WordList) then
       WordList.Free;
+  end;
+end;
+
+function PosNonQT(SearchStr, Text : string; StartPos : integer = 1; QuoteCh : char = '"') : integer;
+//kt added 8/17/21
+//Purpose: Find position of SearchCh in Text, but not matching for any text inside quotes
+//Result:  Returns index of start of SearchStr, or 0 if not found.
+var p1, p2, Len : integer;
+begin
+  Result := 0;
+  p1 := StartPos;
+  Len := length(Text);
+  while p1 <= Len do begin
+    p2 := PosEx(SearchStr, Text, p1);
+    if p2=0 then break;
+    if InsideQt(Text, p2, QuoteCh) then begin
+      p1 := p2+1;
+      continue;
+    end;
+    Result := p2;
+    break;
   end;
 end;
 

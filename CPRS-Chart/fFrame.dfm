@@ -2,7 +2,7 @@ inherited frmFrame: TfrmFrame
   Left = 196
   Top = 119
   Caption = 'p'
-  ClientHeight = 723
+  ClientHeight = 778
   ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
@@ -15,14 +15,14 @@ inherited frmFrame: TfrmFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   ExplicitWidth = 888
-  ExplicitHeight = 781
+  ExplicitHeight = 836
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
     Width = 872
-    Height = 723
+    Height = 778
     Align = alClient
     Caption = 'No patient is currently selected'
     Font.Charset = DEFAULT_CHARSET
@@ -33,14 +33,16 @@ inherited frmFrame: TfrmFrame
     ParentFont = False
     TabOrder = 1
     Visible = False
+    ExplicitHeight = 758
   end
   object pnlPatientSelected: TPanel [1]
     Left = 0
     Top = 0
     Width = 872
-    Height = 723
+    Height = 778
     Align = alClient
     TabOrder = 0
+    ExplicitHeight = 758
     object bvlPageTop: TBevel
       Left = 1
       Top = 41
@@ -693,8 +695,8 @@ inherited frmFrame: TfrmFrame
           object lblVistaWeb: TLabel
             Left = 2
             Top = 2
-            Width = 46
-            Height = 13
+            Width = 65
+            Height = 14
             Cursor = crHandPoint
             Align = alClient
             Alignment = taCenter
@@ -707,6 +709,8 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
+            ExplicitWidth = 46
+            ExplicitHeight = 13
           end
         end
         object pnlCIRN: TKeyClickPanel
@@ -735,7 +739,7 @@ inherited frmFrame: TfrmFrame
           object lblCIRN: TLabel
             Left = 2
             Top = 2
-            Width = 63
+            Width = 65
             Height = 13
             Align = alClient
             Alignment = taCenter
@@ -749,11 +753,12 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlCIRNClick
+            ExplicitWidth = 63
           end
           object lblLoadSequelPat: TLabel
             Left = 2
             Top = 2
-            Width = 52
+            Width = 65
             Height = 13
             Hint = 'Load patient who is selected in SequelMed'
             Align = alClient
@@ -767,6 +772,7 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = lblLoadSequelPatClick
+            ExplicitWidth = 52
           end
         end
       end
@@ -812,7 +818,7 @@ inherited frmFrame: TfrmFrame
           object lblFlag: TLabel
             Left = 2
             Top = 22
-            Width = 25
+            Width = 85
             Height = 13
             Cursor = crHandPoint
             Align = alBottom
@@ -830,6 +836,7 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlFlagClick
             OnMouseDown = pnlFlagMouseDown
             OnMouseUp = pnlFlagMouseUp
+            ExplicitWidth = 25
           end
         end
       end
@@ -991,7 +998,7 @@ inherited frmFrame: TfrmFrame
     end
     object stsArea: TStatusBar
       Left = 1
-      Top = 701
+      Top = 756
       Width = 870
       Height = 21
       Panels = <
@@ -1016,10 +1023,11 @@ inherited frmFrame: TfrmFrame
         end>
       PopupMenu = popAlerts
       SizeGrip = False
+      ExplicitTop = 736
     end
     object tabPage: TTabControl
       Left = 1
-      Top = 679
+      Top = 734
       Width = 870
       Height = 22
       Align = alBottom
@@ -1035,12 +1043,13 @@ inherited frmFrame: TfrmFrame
       OnChange = tabPageChange
       OnDrawTab = tabPageDrawTab
       OnMouseUp = tabPageMouseUp
+      ExplicitTop = 714
     end
     object pnlPage: TPanel
       Left = 1
       Top = 42
       Width = 870
-      Height = 637
+      Height = 692
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -1049,6 +1058,7 @@ inherited frmFrame: TfrmFrame
       Font.Style = []
       ParentFont = False
       TabOrder = 2
+      ExplicitHeight = 672
       object sbtnFontSmaller: TSpeedButton
         Tag = -1
         Left = 21
@@ -1696,6 +1706,10 @@ inherited frmFrame: TfrmFrame
         Caption = 'Upload Images'
         Visible = False
         OnClick = mnuUploadImagesClick
+      end
+      object mnuTestGraph: TMenuItem
+        Caption = 'TestGraph'
+        OnClick = mnuTestGraphClick
       end
     end
     object mnuHelp: TMenuItem

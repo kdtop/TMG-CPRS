@@ -159,7 +159,9 @@ type
     tsTopCustom: TTabSheet;
     tsTopItems: TTabSheet;
     tsTopViews: TTabSheet;
-    mnuScrnShot: TMenuItem;  //kt added 3/17
+    mnuScrnShot: TMenuItem;
+    mnuToUpdatableImage: TMenuItem;
+    procedure mnuToUpdatableImageClick(Sender: TObject);  //kt added 3/17
     procedure mnuScrnShotClick(Sender: TObject); //kt added 3/17
     procedure edtSearchChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -230,7 +232,7 @@ type
 
     procedure ChartOnUndoZoom(Sender: TObject);
     procedure ChartOnZoom(Sender: TObject);
-    procedure DateSteps(dateranges: string);
+    procedure DateSteps(dateranges: string; DateTag : integer);
     procedure DisplayData(aSection: string);
     procedure DisplayDataInfo(aScrollBox: TScrollBox; aMemo: TMemo);
     procedure GraphSwap(bottomview, topview: integer);
@@ -324,6 +326,8 @@ type
     FYMinValue: Double;
     FYMaxValue: Double;
 
+    procedure TMGAPIUpdateDisplay(DateRange : string);   //kt 8/5/21
+    procedure UpdateDisplay;  //TMG added 8/3/21
     procedure AddOnLabGroups(aListBox: TORListBox; personien: int64);
     procedure AdjustTimeframe;
     procedure AllTypeDate(aType, aTypeName, firstline, secondline: string; aDate, aDate2: double);
@@ -457,10 +461,13 @@ type
     function TypeString(filenum: string): string;
     function ValueText(Sender: TCustomChart; aSeries: TChartSeries; ValueIndex: Integer): string;
     procedure ClearLvwItems; //kt added
+    function  GetCurrentDateStr : string; //kt 8/9/21
     procedure HandleSearchDelayTimer(Sender: TObject);
   protected
     procedure UpdateAccessibilityActions(var Actions: TAccessibilityActions); override;
   public
+    TMGBackgroundMode : boolean; //kt
+    procedure SetDateRange(DateMode : integer; DateRanges : string; RelDatesMode : boolean=false);  //kt 8/5/21
     procedure CheckContext(var usecontext: boolean);
     procedure DateDefaults;
     procedure DisplayFreeText(aChart: TChart);
@@ -475,14 +482,21 @@ type
     procedure ViewSelections;
 
     function FMToDateTime(FMDateTime: string): TDateTime;
+    constructor Create(AOwner: TComponent); override; //kt added 8/3/21
   end;
 
+  type
+    TExposedPanel = class(TCustomPanel);      //8/3/21
 var
   frmGraphs: TfrmGraphs;
+  frmBGGraphs: TfrmGraphs;  //TMG 8/3/21 background graph
   FHintWin: THintWindow;
   FHintWinActive: boolean;
   FHintStop: boolean;
   uDateStart, uDateStop: double;
+
+function CreateGraph(Cmd: string; DateStr : string; RelativeDatesMode : boolean = false; GraphWidth : integer=500; GraphHeight: integer=500): string; //kt
+function RefreshGraph(Line:String; var Success : boolean):string; //TMG  8/16/21
 
 implementation
 
@@ -499,6 +513,240 @@ type
   public
     Values: string;
 end;
+
+//kt //TMG added entire function
+function CreateGraph(Cmd: string;
+                     DateStr : string;
+                     RelativeDatesMode : boolean = false;
+                     GraphWidth : integer=500; GraphHeight: integer=500): string;
+//Input:  Cmd syntax = '<IEN60>;<IEN60>;<IEN60>...'  Items listed with count > Max allowed, are ignored.
+//                        IEN60 is IEN from file #60 (LABORATORY TEST)
+//        DateStr : Format: ' ^[display text]^^^ FMRelStartDT ; FMRelStopDT ^ FMStartDT ^ FMStopDT'     (FYI: display text is unused)
+//                      e.g. created on 8/5/21 -- '^JUN 1,2021 to JUL 15,2021^^^T-65;T-21^3210601^3210715'
+//        RelativeDatesMode:  If true, then uses relative dates, e.g. T-65;T-21.
+//                            If false, then uses absolute dates, e.g. 3210601^3210715
+//        GraphWidth, GraphHeight : desired size of graph image.
+
+var FName : String;
+    BitMap: TBitMap;
+    Rect : TRect;
+    ImageFName : string;
+begin
+  Result := '-1'; //default to failure
+  try
+    if not assigned(frmBGGraphs) then begin
+      frmBGGraphs := TfrmGraphs.Create(application);
+      frmBGGraphs.TMGBackgroundMode := true;
+      frmBGGraphs.Initialize;
+      frmBGGraphs.BorderIcons := [biSystemMenu, biMaximize, biMinimize];
+      frmBGGraphs.BorderStyle := bsSizeable;
+      frmBGGraphs.BorderWidth := 1;
+      frmBGGraphs.Caption := '';
+    end;
+    frmBGGraphs.Width := GraphWidth +frmBGGraphs.pnlItemsTop.Width +20 ;
+    frmBGGraphs.Height := GraphHeight + frmBGGraphs.pnlHeader.Height  + frmBGGraphs.pnlBottom.Height + frmBGGraphs.pnlFooter.Height + 22;
+    //if dateStr='' then DateStr :=  '^^^^T-65;T-21^3210601^3210715';  //change later... example only.
+    if dateStr <> '' then begin
+      frmBGGraphs.SetDateRange(0, DateStr, RelativeDatesMode);   //0 means to use DateStr.
+    end else begin
+      frmBGGraphs.SetDateRange(8, '');   //8 -> show all data.
+    end;
+    frmBGGraphs.pnlFooter.Hint := '63^'+Cmd;
+    frmBGGraphs.UpdateDisplay;
+    Application.ProcessMessages;
+    Bitmap := TBitmap.create;
+    Bitmap.width := frmBGGraphs.scrlTop.Width;
+    Bitmap.Height := frmBGGraphs.scrlTop.Height;
+    frmBGGraphs.scrlTop.PaintTo(Bitmap.Canvas,0,0);
+    FName := UniqueCacheFName(Patient.DFN+'.jpg');
+    Rect.Left := 0; Rect.Top := 0;
+    Rect.Right := Bitmap.width;
+    Rect.Bottom := Bitmap.Height;
+    if SaveCanvasToFile(Bitmap.Canvas, Rect, FName) then begin
+      Result := '1^'+FName;  //will hold location of output image
+    end;
+    //Bitmap.SaveToFile(FName);
+    Result := '1^'+FName;  //will hold location of output image
+  finally
+    //Bitmap.Free;
+  end;
+end;
+
+function RefreshGraph(Line:String; var Success : boolean): string;
+//Purpose: This function will replace graph images with "tmg_needs_refresh" attribute, creating
+//         a new image and replacing the filename with the new one
+//Input: Line will contain 1 line of HTML code that holds <img tag (and hopefully the ENTIRE tag).
+//Output: The Line should be returned with only the <IMG  > tag part modified.
+const
+     IMG_LEN = length('<IMG');
+     GRAPH_ATTR_CT = 4;
+     GRAPH_ATTRS : ARRAY[1..GRAPH_ATTR_CT] of string[16] = (
+       'TMG_Cmd', 'TMG_DateStr', 'TMG_Width', 'TMG_Height'
+     );
+     GRAPH_CMD     =1;   // these much match order in GRAPH_ATTRS
+     GRAPH_DATESTR =2;
+     GRAPH_WIDTH   =3;
+     GRAPH_HEIGHT  =4;
+var  S, PreStr, PostStr, TagStr, AttrStr : string;
+     i, p : integer;
+     Err : string;
+     Attrs : TStringList;
+     AttrName, AttrValue : string;
+     Cmd, DateStr, Width, Height : string;
+     AttrData : Array[1..GRAPH_ATTR_CT] of string;
+     NowStr : string;
+     FName, VistAFName : string;
+
+begin
+  Success := false; //default to failure.
+  try
+    Attrs := TStringList.Create;
+    Attrs.NameValueSeparator := '=';
+    Result := Line;
+    Err := '';
+    S := Line;
+    //NOTE: Later I need to make this a loop to test for multiple <IMG  > tags in Line.
+    p := Pos('<IMG', UpperCase(S));
+    if p=0 then begin
+      Err := 'Unable to find "<img"';
+      exit; //to finally part
+    end;
+    PreStr := LeftStr(S, p-1);
+    S := MidStr(S, p, Length(S));
+    p := PosNonQT('>', S);
+    if p = 0 then begin
+      Err := 'Unable to find closing ">" in HTML line';
+      exit; //to finally part.
+    end;
+    TagStr := LeftStr(S, p);
+    PostStr := MidStr(S, p+1, Length(S));
+    AttrStr := Trim(MidStr(TagStr, IMG_LEN+1, Length(TagStr)-IMG_LEN-1));  //remove '<IMG'  and '>' to get just attributes
+    PiecesToListNonQT(AttrStr, ' ', Attrs);  //Parse to string list.
+    for i := 1 to GRAPH_ATTR_CT do begin
+      AttrData[i] := AnsiReplaceStr(Attrs.Values[GRAPH_ATTRS[i]],'"','');;
+      if AttrData[i] = '' then begin
+        Err := 'Unable to find data for attribute "'+GRAPH_ATTRS[i]+'"';
+        exit; //to finally part.
+      end;
+    end;
+
+    FName := CreateGraph(AttrData[GRAPH_CMD], AttrData[GRAPH_DATESTR], false,
+                         StrToInt(AttrData[GRAPH_WIDTH]), StrToInt(AttrData[GRAPH_HEIGHT]));
+    if piece(FName,'^',1) <> '1' then begin
+      Err := 'Unable to create updated graph';
+      exit; //to finally part.
+    end;
+    FName := Piece(FName, '^', 2);
+    VistAFName := UploadLocalImageFile(FName, false);
+    //Now to reassemble <img  > tag
+    TagStr := '<IMG alt="graph" ';
+    //TagStr := TagStr + ALT_IMG_TAG_CONVERT + ' ';
+    i := Attrs.IndexOfName('TMG_GraphAsOf'); if i > -1 then Attrs.Delete(i);
+    NowStr := AnsiReplaceStr(DateTimeToStr(Now),' ','_');
+    NowStr := AnsiReplaceStr(NowStr,'/','-');
+    Attrs.Add('tmg_graph_as_of='+NowStr);  //update creation timestamp
+    for i := 0 to Attrs.Count - 1 do begin
+      AttrName := LowerCase(Attrs.Names[i]);
+      AttrValue := AnsiReplaceStr(Attrs.ValueFromIndex[i],'"','');
+      if AttrName = CPRS_GRAPH_REFRESH_ATTR then continue;  //**DON'T include refresh signal!! **
+      if AttrName = 'image' then continue;
+      if AttrName = 'tmg_alt' then continue;
+      if AttrName = 'alt' then continue;
+      if AttrName='src' then begin
+        TagStr := TagStr + 'src="file:'+CPRSCacheDir+VistAFName + '" ';
+        continue;
+      end;
+      if Attrs.Strings[i]='/' then continue;
+      TagStr := TagStr + Attrs.Strings[i] + ' ';
+    end;
+    TagStr := TagStr + '>';
+    Result := PreStr + TagStr + PostStr;
+    Success := true;
+  finally
+    Attrs.Free;
+    if Err <> '' then begin
+      MessageDlg('Error attempting to refresh graph.  '+Err, mtError, [mbOK], 0);
+      Result := Line;
+      Success := false;
+    end;
+  end;
+end;
+
+procedure TfrmGraphs.mnuToUpdatableImageClick(Sender: TObject);
+//kt added entire function 8/9/21
+var Rect : TRect;
+    Canvas : TCanvas;
+    FName, ImageFName : string;
+    Width,Height : integer;
+    aGraphItem: TGraphItem;
+    aListItem: TListItem;
+    DateStr, Cmd : string;
+    HTML : string;
+    TypeItem, ItemValue : string;
+    i : integer;
+    TempSL : TStringList;
+
+begin
+  inherited;
+  if frmNotes.ActiveEditIEN <= 0 then begin
+    MessageDlg('Images must be attached to a note.' + CRLF+
+               'However, no note is currently being edited.'+ CRLF+
+               'Unable to save screenshot to image.' + CRLF +
+               'Please start editing a note and try again.', mtError, [mbOK], 0);
+    exit;
+  end;
+  try
+    TempSL := TStringList.Create;
+    //NOTE: this only supports saving from the top graph image (i.e. not with multiple graphs)
+    Cmd := '';
+    for i := 0 to lvwItemsTop.Items.Count - 1 do begin
+      if not lvwItemsTop.Items[i].Selected then continue;
+      aListItem := lvwItemsTop.Items[i];
+      aGraphItem := TGraphItem(aListItem.SubItems.Objects[3]);
+      TypeItem := UpperCase(aGraphItem.Values);
+      if Piece(TypeItem, '^', 1) <> '63' then continue;
+      ItemValue := Piece(Piece(TypeItem, '^', 2), '.', 1);
+      if TempSL.IndexOf(ItemValue)>-1 then continue;  //avoid duplicate additions.
+      Cmd := Cmd + ItemValue + ';';  //ItemValue should be an IEN in file #60 (LAB TEST)
+      TempSL.Add(ItemValue);
+    end;
+    if TempSL.Count = 0 then begin
+      MessageDlg('No graph items selected.  Please try again.', mtError, [mbOK], 0);
+      exit;
+    end;
+    TempSL.Clear;  //Change use of TempSL below to hold HTML attributes
+    Rect.Left := splItemsTop.Left+splItemsTop.Width;
+    Rect.Top := 0;
+    Rect.Right := pnlMain.Width;
+    Rect.Bottom := pnlMain.Height;
+    Width := Rect.Right - Rect.Left;
+    Height := Rect.Bottom - Rect.Top;
+    Canvas := TExposedPanel(pnlMain).Canvas;
+    FName := UploadFromCanvas(Canvas, Rect, false);  //falose --> not interactive.  Returns VistA name of image, or '' if problem
+    DateStr := GetCurrentDateStr();
+    TempSL.Add('TMG_Cmd='+Cmd); //add HTML attribute
+    TempSL.Add('TMG_Width='+IntToStr(Width)); //add HTML attribute
+    TempSL.Add('TMG_Height='+IntToStr(Height)); //add HTML attribute
+    TempSL.Add('TMG_DateStr='+DateStr); //add HTML attribute
+    TempSL.Add('TMG_GraphAsOf='+DateTimeToStr(Now));
+    if FName <> '' then begin
+      HTML := GetInsertImgHTMLName(FName, TempSL);     //F
+      CopyHTMLToClipBoard('', HTML);
+      MessageDlg('Updateable Graph has been added.  It can now be pasted into a note with Ctrl-V', mtInformation, [mbOK], 0);
+    end;
+  finally
+    TempSL.Free;
+  end;
+end;
+
+
+constructor TfrmGraphs.Create(AOwner: TComponent);
+//kt added 8/3/21
+begin
+  inherited;
+  TMGBackgroundMode := false;
+end;
+
 
 procedure TfrmGraphs.FormCreate(Sender: TObject);
 var
@@ -621,8 +869,7 @@ begin
       GtslSelPrevBottomFloat.Clear;
       rptview1 := Piece(rptviews, '^', 1);
       rptview2 := Piece(rptviews, '^', 2);
-      if length(rptview1) > 0 then
-      begin
+      if length(rptview1) > 0 then begin
         for i := 0 to lstViewsTop.Items.Count - 1 do
         if Piece(lstViewsTop.Items[i], '^', 2) = rptview1 then begin
           lstViewsTop.ItemIndex := i;
@@ -738,7 +985,63 @@ begin
   frmFrame.GraphContext := '';
 end;
 
-procedure TfrmGraphs.FormShow(Sender: TObject);
+procedure TfrmGraphs.TMGAPIUpdateDisplay(DateRange : string);
+//kt added 8/5/21
+//Input: DateRange:  S to indicate Date Range...
+//                   1 to indicate Today
+//                   2 to indicate One Week
+//                   3 to indicate Two Weeks
+//                   4 to indicate One Month
+//                   5 to indicate Six Months
+//                   6 to indicate One Year
+//                   7 to indicate Two Years
+//                   8 to indicate All Results
+
+var
+  context: boolean;
+begin
+  Font := MainFont;
+  ChangeStyle;
+  //mnuPopGraphResetClick(self);
+  FFirstClick := true;
+  GtslZoomHistoryFloat.Clear;
+  FRetainZoom := false;
+  mnuPopGraphZoomBack.Enabled := false;
+  chkItemsTop.Checked := false;
+  chkDualViews.Checked := false;
+  //chkDualViewsClick(self);
+  lvwItemsBottom.ClearSelection;
+  //lvwItemsBottomClick(self);
+  GtslSelPrevBottomFloat.Clear;
+
+  pnlBottom.Height := 1;
+
+  if FCreate then begin
+    FGraphType := GRAPH_FLOAT;
+    FCreate := false;
+    GetSize;
+  end;
+  if length(pnlFooter.Hint) > 1 then begin     // if context use all results
+    cboDateRange.ItemIndex := 8
+  end else begin
+    DateDefaults;
+  end;
+  cboDateRangeChange(self);
+  CheckContext(context);
+  lvwItemsTopClick(self);
+  if lvwItemsTop.Items.Count = 0 then begin
+    lstViewsTop.ItemIndex := -1
+  end;
+  if not mnuPopGraphViewDefinition.Checked then begin
+    mnuPopGraphViewDefinitionClick(self);
+  end;
+  tsTopCustom.TabVisible := false;
+  tsBottomCustom.TabVisible := false;
+end;
+
+
+
+procedure TfrmGraphs.UpdateDisplay;
 var
   context: boolean;
 begin
@@ -747,82 +1050,100 @@ begin
   StayOnTop;
   mnuPopGraphResetClick(self);
   chkItemsTop.Checked := uTMGOptions.ReadBool('TMG CPRS INDIVIDUAL GRAPHS',False); //tmg  9/17/18
-  if pnlFooter.Tag = 1 then  // do not show footer controls on reports tab
-  begin
+  if pnlFooter.Tag = 1 then begin  // do not show footer controls on reports tab
     pnlFooter.Visible := false;
-    if FCreate then
-    begin
+    if FCreate then begin
       FGraphType := GRAPH_REPORT;
       FCreate := false;
       GetSize;
     end;
-  end
-  else
-  begin
+  end else begin
     chkDualViews.Checked := false;
     chkDualViewsClick(self);
-    if FCreate then
-    begin
+    if FCreate then begin
       FGraphType := GRAPH_FLOAT;
       FCreate := false;
       GetSize;
     end;
   end;
-  if length(pnlFooter.Hint) > 1 then      // if context use all results
+  if length(pnlFooter.Hint) > 1 then begin     // if context use all results
     cboDateRange.ItemIndex := 8
-  else
+  end else begin
     DateDefaults;
+  end;
   cboDateRangeChange(self);
   CheckContext(context);
   lvwItemsTopClick(self);
-  if lvwItemsTop.Items.Count = 0 then
-  begin
+  if lvwItemsTop.Items.Count = 0 then begin
     lstViewsTop.ItemIndex := -1
   end;
-  if not mnuPopGraphViewDefinition.Checked then
+  if not mnuPopGraphViewDefinition.Checked then begin
     mnuPopGraphViewDefinitionClick(self);
+  end;
   tsTopCustom.TabVisible := false;
   tsBottomCustom.TabVisible := false;
 end;
 
+procedure TfrmGraphs.FormShow(Sender: TObject);
+begin
+   UpdateDisplay;  //kt split FormShow into UpdateDisplay
+end;
+
 procedure TfrmGraphs.CheckContext(var usecontext: boolean);
+//kt documentation:  Uses pnlFooter.Hint as input.  usecontext is an OUT variable
+//  Format for input:  <TypeCheck>^<ItemCheck>  e.g. 63^5130
+//kt modification, allow ItemCheck to be multiple.  New format:
+//                   <TypeCheck>^<ItemCheck>;<ItemCheck>;<ItemCheck>;  e.g. 63^5130;1234;2345
+//                   If more items provided than FGraphSetting.MaxSelect, then extra items ignored.
 var
   i, topitem: integer;
   contextvalue, itemcheck, itemvalue, typecheck, typeitem: string;
   aGraphItem: TGraphItem;
   aListItem: TListItem;
+  InputSL : TStringList; //kt
 begin
   usecontext := false;
-  if length(pnlFooter.Hint) > 1 then begin
-    lvwItemsBottom.ClearSelection;
-    lvwItemsBottomClick(self);
-    contextvalue := pnlFooter.Hint;
-    //chkItemsTop.Caption := contextvalue;    // testing
-    typecheck := Piece(contextvalue, '^', 1);
-    itemcheck := Piece(contextvalue, '^', 2);
-    lvwItemsTop.ClearSelection;
-    topitem := 0;
-    for i := 0 to lvwItemsTop.Items.Count - 1 do begin
-      aListItem := lvwItemsTop.Items[i];
-      aGraphItem := TGraphItem(aListItem.SubItems.Objects[3]);
-      typeitem := UpperCase(aGraphItem.Values);
-      if Piece(typeitem, '^', 1) = typecheck then begin
-        itemvalue := Piece(Piece(typeitem, '^', 2), '.', 1);
-        if itemvalue = itemcheck then begin
-          lvwItemsTop.Items[i].Selected := true;
-          topitem := i;
+  InputSL := TStringList.Create(); //kt
+  try
+    if length(pnlFooter.Hint) > 1 then begin
+      lvwItemsBottom.ClearSelection;
+      lvwItemsBottomClick(self);
+      contextvalue := pnlFooter.Hint;
+      //chkItemsTop.Caption := contextvalue;    // testing
+      typecheck := Piece(contextvalue, '^', 1);
+      itemcheck := Piece(contextvalue, '^', 2);
+      PiecesToList(itemcheck,';',InputSL);  //kt
+      while InputSL.Count > FGraphSetting.MaxSelect do begin  //kt
+        InputSL.Delete(InputSl.Count-1);  //trim off any inputs > FGraphSetting.MaxSelect
+      end;
+      lvwItemsTop.ClearSelection;
+      topitem := 0;
+      for i := 0 to lvwItemsTop.Items.Count - 1 do begin
+        aListItem := lvwItemsTop.Items[i];
+        aGraphItem := TGraphItem(aListItem.SubItems.Objects[3]);
+        typeitem := UpperCase(aGraphItem.Values);
+        if Piece(typeitem, '^', 1) = typecheck then begin
+          itemvalue := Piece(Piece(typeitem, '^', 2), '.', 1);
+          //kt  if itemvalue = itemcheck then begin
+          if InputSL.IndexOf(itemvalue) > -1 then begin  //kt
+            lvwItemsTop.Items[i].Selected := true;
+            topitem := i;
+          end;
         end;
       end;
+      GtslSelCopyTop.Clear;
+      if lvwItemsTop.SelCount > 0 then
+        usecontext := true;
+      if topitem > 0 then
+        lvwItemsTop.Items[topitem].MakeVisible(true);
     end;
-    GtslSelCopyTop.Clear;
-    if lvwItemsTop.SelCount > 0 then
-      usecontext := true;
-    if topitem > 0 then
-      lvwItemsTop.Items[topitem].MakeVisible(true);
+    pnlFooter.Hint := '';
+    edtSearch.Text := '';
+    if not TMGBackgroundMode then //kt
+      edtSearch.SetFocus;
+  finally
+    InputSL.Free;
   end;
-  pnlFooter.Hint := '';
-  edtSearch.Text := '';
-  edtSearch.SetFocus;
 end;
 
 procedure TfrmGraphs.DateDefaults;
@@ -1067,22 +1388,66 @@ end;
 
 procedure TfrmGraphs.chkDualViewsClick(Sender: TObject);
 begin
-  if chkDualViews.Checked then
-  begin
+  if chkDualViews.Checked then begin
     pnlBottom.Height := pnlMain.Height div 2;
     lvwItemsTopClick(self);
-  end
-  else
-  begin
+  end else begin
     lvwItemsBottom.ClearSelection;
     lvwItemsBottomClick(self);
     pnlBottom.Height := 1;
   end;
   mnuPopGraphDualViews.Checked := chkDualViews.Checked;
-  with pnlMain.Parent do
-    if BorderWidth <> 1 then            // only do on Graph in Reports tab
+  with pnlMain.Parent do begin
+    if BorderWidth <> 1 then begin            // only do on Graph in Reports tab
       frmReports.chkDualViews.Checked := chkDualViews.Checked;
+    end;
+  end;
 end;
+
+function TfrmGraphs.GetCurrentDateStr : string; //kt 8/9/21
+// Format: ' ^[display text]^^^ FMRelStartDT ; FMRelStopDT ^ FMStartDT ^ FMStopDT'
+// e.g. created on 8/5/21 -- '^JUN 1,2021 to JUL 15,2021^^^T-65;T-21^3210601^3210715'
+
+type
+  TDeltaMode = (dmStart, dmEnd);
+
+  function DeltaToStr(Delta : TDateTime; Mode : TDeltaMode) : string;
+  //Delta formed by Now-ATime --> + values mean in the past, and - values mean future.
+  begin
+    if Delta >= 1 then begin   //e.g. 'T-34'
+      if Mode = dmStart then begin
+        Result := 'T-'+IntToStr(Math.Ceil(Delta));  //i.e. if starting 1.5 days ago, treat as starting 2 days ago.
+      end else begin  //dmEnd
+        Result := 'T-'+IntToStr(Math.Floor(Delta));  //i.e. if ending 1.5 days ago, treat as ending 1 days ago.
+      end;
+    end else if Delta < 0 then begin  //e.g. T+12
+      if Mode = dmStart then begin
+        Result := 'T+'+IntToStr(Math.Floor(-Delta));  //i.e. if starting 1.5 days in future, treat as starting 1 days in future.
+      end else begin  //dmEnd
+        Result := 'T+'+IntToStr(Math.Ceil(-Delta));  //i.e. if ending 1.5 days in future, treat as ending 2 days in future.
+      end;
+    end else begin   //0 to (1)
+      Result:= 'T';
+    end;
+  end;
+
+var
+  NowFMDT, StartFMDT, EndFMDT: TFMDateTime;
+  DisplayText : String;
+  StartDelta, EndDelta : TDateTime;
+begin
+  NowFMDT := DateTimeToFMDateTime(Now);
+  StartFMDT := FGraphSetting.FMStartDate;
+  EndFMDT := FGraphSetting.FMStopDate;
+  DisplayText := cboDateRange.Text;
+  StartDelta := FMDateTimeToDateTime(NowFMDT) - FMDateTimeToDateTime(StartFMDT);
+  EndDelta := FMDateTimeToDateTime(NowFMDT) - FMDateTimeToDateTime(EndFMDT);
+
+  Result := '^'+DisplayText+'^^^'+DeltaToStr(StartDelta, dmStart)+';'+DeltaToStr(EndDelta, dmEnd)+'^'+
+            FMDTToStr(StartFMDT)+'^'+FMDTToStr(EndFMDT);
+end;
+
+
 
 procedure TfrmGraphs.ClearLvwItems;
 //kt added function
@@ -3689,24 +4054,25 @@ var
 begin
   OriginalColor := pnlItemsTopInfo.Color;
   ClearColor := clWindow;
-  for i := 0 to scrlTop.ControlCount - 1 do
-  begin
+  for i := 0 to scrlTop.ControlCount - 1 do begin
     ChildControl := scrlTop.Controls[i];
     ChartStyle(ChildControl as TChart);
   end;
-  for i := 0 to scrlBottom.ControlCount - 1 do
-  begin
+  for i := 0 to scrlBottom.ControlCount - 1 do begin
     ChildControl := scrlBottom.Controls[i];
     ChartStyle(ChildControl as TChart);
   end;
-  if pnlDateLineTop.Visible then   // not visible when separate graphs
+  if pnlDateLineTop.Visible then begin   // not visible when separate graphs
     ChartStyle(chartDateLineTop);
-  if pnlDateLineBottom.Visible then
+  end;
+  if pnlDateLineBottom.Visible then begin
     ChartStyle(chartDateLineBottom);
-  if FGraphSetting.ClearBackground then
+  end;
+  if FGraphSetting.ClearBackground then begin
     ChartColor(ClearColor)
-  else
+  end else begin
     ChartColor(OriginalColor);
+  end;
   mnuPopGraphLines.Checked := FGraphSetting.Lines;
   mnuPopGraph3D.Checked := FGraphSetting.View3D;
   mnuPopGraphValues.Checked := FGraphSetting.Values;
@@ -4225,14 +4591,16 @@ begin
     mnuPopGraphIsolate.Caption := 'Move all selections to bottom';
     mnuPopGraphRemove.Caption := 'Remove all selections from top';
     if memTop.Visible then
-      memTop.SetFocus;
+      if not TMGBackgroundMode then //kt
+        memTop.SetFocus;
   end
   else
   begin
     mnuPopGraphIsolate.Caption := 'Move all selections to top';
     mnuPopGraphRemove.Caption := 'Remove all selections from bottom';
     if memBottom.Visible then
-      memBottom.SetFocus;
+      if not TMGBackgroundMode then //kt
+        memBottom.SetFocus;
   end;
   if Button = mbLeft then
     FMouseDown := true;
@@ -4740,10 +5108,88 @@ begin
                                     or (memViewsBottom.Height > 5);
 end;
 
+procedure TfrmGraphs.SetDateRange(DateMode : integer; DateRanges : string; RelDatesMode : boolean=false);
+//kt added, from cboDateRangeChange
+//Input:  DateMode:  1 to indicate Today
+//                   2 to indicate One Week
+//                   3 to indicate Two Weeks
+//                   4 to indicate One Month
+//                   5 to indicate Six Months
+//                   6 to indicate One Year
+//                   7 to indicate Two Years
+//                   8 to indicate All Results
+//             other #'s: daterange holds dates
+//        DateRanges: Optional/unused when DateMode = 1-8
+//                    Format: ' ^[display text]^^^ FMRelStartDT ; FMRelStopDT ^ FMStartDT ^ FMStopDT'
+//                      e.g. created on 8/5/21 -- '^JUN 1,2021 to JUL 15,2021^^^T-65;T-21^3210601^3210715'
+var
+  EndOfDay, tempDT: TFMDateTime;
+  manualstart, manualstop, RelStr,RelDelta: string;
+  iRelDelta : integer;
+const
+  DATE_OFFSETS : array[1..7] of integer = (0, -7, -14, -30, -183, -365, -730);
+
+begin
+  SelCopy(lvwItemsTop, GtslSelCopyTop);
+  SelCopy(lvwItemsBottom, GtslSelCopyBottom);
+  HideGraphs(true);
+  //kt changing to just include here inline -- DateSteps(DateRanges, DateMode); //sets FGraphSetting.FMStartDate and FMStopDate
+  //kt mod ---------------------------
+  EndOfDay := FMDateTimeOffsetBy(FMToday, 1);
+  FGraphSetting.FMStopDate := EndOfDay;
+  if DateMode in [1..7] then begin
+    FGraphSetting.FMStartDate := FMDateTimeOffsetBy(FMToday, DATE_OFFSETS[DateMode]);
+  end else if DateMode = 8 then begin
+    FGraphSetting.FMStartDate := FM_START_DATE;
+  end else if DateRanges <> '' then begin
+    if RelDatesMode then begin
+      //calulate relative start
+      RelStr := Piece(DateRanges, '^' , 5);  //e.g. T-65;T-21
+      manualstart := Piece(RelStr, ';' , 1);
+      RelDelta := Piece(manualstart,'-',2);
+      iRelDelta := -StrToIntDef(RelDelta,0);
+      tempDT := FMDateTimeOffsetBy(FMToday, iRelDelta-1); //-1 to backup up 1 day, then go to END of that day.
+      manualstart := Piece(FMDTToStr(tempDT),'.',1) + '.2359'; //set to end of prior day
+      FGraphSetting.FMStartDate := MakeFMDateTime(manualstart);
+      //calulate relative stop
+      manualstop := Piece(RelStr, ';' , 2);
+      RelDelta := Piece(manualstop,'-',2);
+      iRelDelta := -StrToIntDef(RelDelta,0);
+      tempDT := FMDateTimeOffsetBy(FMToday, iRelDelta);
+      manualstop := Piece(FMDTToStr(tempDT),'.',1) + '.2359'; //set to end of day
+      FGraphSetting.FMStopDate := MakeFMDateTime(manualstop);
+    end else begin
+      manualstart := Piece(DateRanges, '^' , 6);
+      manualstop := Piece(DateRanges, '^' , 7);
+      if (manualstop <> '') and (length(Piece(manualstop, '.', 2)) = 0) then manualstop := manualstop + '.2359';
+      FGraphSetting.FMStartDate := MakeFMDateTime(manualstart);
+      FGraphSetting.FMStopDate := MakeFMDateTime(manualstop);
+      if (manualstart <> '') and (length(Piece(manualstart, '.', 2)) = 0) then begin
+        FGraphSetting.FMStartDate := FMDateTimeOffsetBy(FGraphSetting.FMStartDate, -1);
+        manualstart := floattostr(FGraphSetting.FMStartDate) + '.2359';  //set to end of prior day
+        FGraphSetting.FMStartDate := MakeFMDateTime(manualstart);
+      end;
+    end;
+  end;
+  //kt end mod---------------------------
+  uDateStart := FGraphSetting.FMStartDate;
+  uDateStop  := FGraphSetting.FMStopDate;
+  FilterListView(FGraphSetting.FMStartDate, FGraphSetting.FMStopDate);
+  SelReset(GtslSelCopyTop, lvwItemsTop);
+  SelReset(GtslSelCopyBottom, lvwItemsBottom);
+  DisplayData('top');
+  DisplayData('bottom');
+  if lstViewsTop.ItemIndex > 1 then lstViewsTopChange(self);
+  if lstViewsBottom.ItemIndex > 1 then lstViewsBottomChange(self);
+  HideGraphs(false);
+end;
+
 procedure TfrmGraphs.cboDateRangeChange(Sender: TObject);
 var
   dateranges: string;
+  index : integer;
 begin
+  {  //kt
   SelCopy(lvwItemsTop, GtslSelCopyTop);
   SelCopy(lvwItemsBottom, GtslSelCopyBottom);
   dateranges := '';
@@ -4781,60 +5227,116 @@ begin
   if lstViewsTop.ItemIndex > 1 then lstViewsTopChange(self);
   if lstViewsBottom.ItemIndex > 1 then lstViewsBottomChange(self);
   HideGraphs(false);
+  }
+  dateranges := '';
+  if (cboDateRange.ItemID = 'S') then begin
+    index := -1; //default
+    with calDateRange do begin
+      if Execute then begin
+        if (Length(TextOfStart) > 0) and (Length(TextOfStop) > 0) then begin
+          dateranges :=  // ' ^ [display text] ^^^ FMRelStartDT ; FMRelStopDT ^ FMStartDT ^ FMStopDT'
+            '^' + UpperCase(TextOfStart) + ' to ' + UpperCase(TextOfStop) +
+            '^^^' + RelativeStart + ';' + RelativeStop +
+            '^' + floattostr(FMDateStart) + '^' + floattostr(FMDateStop);
+          cboDateRange.Items.Append(dateranges);
+          index := cboDateRange.Items.Count - 1;
+        end;
+      end;
+    end;
+    cboDateRange.ItemIndex := index;
+  end else begin
+    if cboDateRange.ItemIndex > -1 then dateranges := cboDateRange.Items[cboDateRange.ItemIndex]; //kt added
+  end;
+  SetDateRange(cboDateRange.ItemIEN, dateranges);
 end;
 
-procedure TfrmGraphs.DateSteps(dateranges: string);
+procedure TfrmGraphs.DateSteps(dateranges: string; DateTag : integer);
+//kt  DEPRECIATED ...
+//kt documentation
+//Called by: only SetDateRange() as of this writing.
+//Input:  DateTag:   1 to indicate Today
+//                   2 to indicate One Week
+//                   3 to indicate Two Weeks
+//                   4 to indicate One Month
+//                   5 to indicate Six Months
+//                   6 to indicate One Year
+//                   7 to indicate Two Years
+//                   8 to indicate All Results
+//             other #'s: daterange holds dates (or if '', then from selected cboDateRange)
+//        DateRanges: ' ^[display text]^^^ FMRelStartDT ; FMRelStopDT ^ FMStartDT ^ FMStopDT'
+ //Output: sets FGraphSetting.FMStartDate and FMStopDate
 var
-  datetag: integer;
-  endofday: double;
+  //datetag: integer;
+  endofday: TFMDateTime;
   manualstart, manualstop: string;
+
+  procedure CustomDate;  //kt added to consolidate redundant code.
+  begin
+    if dateranges='' then exit;
+    //kt if dateranges = '' then dateranges := cboDateRange.Items[cboDateRange.ItemIndex];
+    manualstart := Piece(dateranges, '^' , 6);
+    manualstop := Piece(dateranges, '^' , 7);
+    if (manualstop <> '') and (length(Piece(manualstop, '.', 2)) = 0) then manualstop := manualstop + '.2359';
+    FGraphSetting.FMStartDate := MakeFMDateTime(manualstart);
+    FGraphSetting.FMStopDate := MakeFMDateTime(manualstop);
+    if (manualstart <> '') and (length(Piece(manualstart, '.', 2)) = 0) then begin
+      FGraphSetting.FMStartDate := FMDateTimeOffsetBy(FGraphSetting.FMStartDate, -1);
+      manualstart := floattostr(FGraphSetting.FMStartDate) + '.2359';
+      FGraphSetting.FMStartDate := MakeFMDateTime(manualstart);
+    end;
+  end;
+
 begin
   endofday := FMDateTimeOffsetBy(FMToday, 1);
-  datetag := cboDateRange.ItemIEN;
+  //kt datetag := cboDateRange.ItemIEN;
   FGraphSetting.FMStopDate := endofday;
-  with FGraphSetting do
-  case datetag of
-  0:  begin
-        if cboDateRange.ItemIndex > 8 then    // selected date range
-        begin
+  with FGraphSetting do begin
+    case datetag of
+      0:  begin
+            if cboDateRange.ItemIndex > 8 then begin    // selected date range
+              CustomDate;
+              {  //kt
+              if dateranges = '' then dateranges := cboDateRange.Items[cboDateRange.ItemIndex];
+              manualstart := Piece(dateranges, '^' , 6);
+              manualstop := Piece(dateranges, '^' , 7);
+              if (manualstop <> '') and (length(Piece(manualstop, '.', 2)) = 0) then begin
+                manualstop := manualstop + '.2359';
+              end;
+              FMStartDate := MakeFMDateTime(manualstart);
+              FMStopDate := MakeFMDateTime(manualstop);
+              if (manualstart <> '') and (length(Piece(manualstart, '.', 2)) = 0) then begin
+                FMStartDate := FMDateTimeOffsetBy(FMStartDate, -1);
+                manualstart := floattostr(FMStartDate) + '.2359';
+                FMStartDate := MakeFMDateTime(manualstart);
+              end;
+              }
+            end;
+          end;
+      1:  FMStartDate := FMToday;
+      2:  FMStartDate := FMDateTimeOffsetBy(FMToday, -7);
+      3:  FMStartDate := FMDateTimeOffsetBy(FMToday, -14);
+      4:  FMStartDate := FMDateTimeOffsetBy(FMToday, -30);
+      5:  FMStartDate := FMDateTimeOffsetBy(FMToday, -183);
+      6:  FMStartDate := FMDateTimeOffsetBy(FMToday, -365);
+      7:  FMStartDate := FMDateTimeOffsetBy(FMToday, -730);
+      8:  FMStartDate := FM_START_DATE;   // earliest recorded values
+      else begin
+          { //kt
           if dateranges = '' then dateranges := cboDateRange.Items[cboDateRange.ItemIndex];
           manualstart := Piece(dateranges, '^' , 6);
           manualstop := Piece(dateranges, '^' , 7);
-          if (manualstop <> '') and (length(Piece(manualstop, '.', 2)) = 0) then
-            manualstop := manualstop + '.2359';
+          if (manualstop <> '') and (length(Piece(manualstop, '.', 2)) = 0) then manualstop := manualstop + '.2359';
           FMStartDate := MakeFMDateTime(manualstart);
           FMStopDate := MakeFMDateTime(manualstop);
-          if (manualstart <> '') and (length(Piece(manualstart, '.', 2)) = 0) then
-          begin
+          if (manualstart <> '') and (length(Piece(manualstart, '.', 2)) = 0) then begin
             FMStartDate := FMDateTimeOffsetBy(FMStartDate, -1);
             manualstart := floattostr(FMStartDate) + '.2359';
             FMStartDate := MakeFMDateTime(manualstart);
           end;
+          }
+          CustomDate;
         end;
-      end;
-  1:  FMStartDate := FMToday;
-  2:  FMStartDate := FMDateTimeOffsetBy(FMToday, -7);
-  3:  FMStartDate := FMDateTimeOffsetBy(FMToday, -14);
-  4:  FMStartDate := FMDateTimeOffsetBy(FMToday, -30);
-  5:  FMStartDate := FMDateTimeOffsetBy(FMToday, -183);
-  6:  FMStartDate := FMDateTimeOffsetBy(FMToday, -365);
-  7:  FMStartDate := FMDateTimeOffsetBy(FMToday, -730);
-  8:  FMStartDate := FM_START_DATE;   // earliest recorded values
-  else
-      begin
-        if dateranges = '' then dateranges := cboDateRange.Items[cboDateRange.ItemIndex];
-        manualstart := Piece(dateranges, '^' , 6);
-        manualstop := Piece(dateranges, '^' , 7);
-        if (manualstop <> '') and (length(Piece(manualstop, '.', 2)) = 0) then manualstop := manualstop + '.2359';
-        FMStartDate := MakeFMDateTime(manualstart);
-        FMStopDate := MakeFMDateTime(manualstop);
-        if (manualstart <> '') and (length(Piece(manualstart, '.', 2)) = 0) then
-        begin
-          FMStartDate := FMDateTimeOffsetBy(FMStartDate, -1);
-          manualstart := floattostr(FMStartDate) + '.2359';
-          FMStartDate := MakeFMDateTime(manualstart);
-        end;
-      end;
+    end; //case
   end;
 end;
 
@@ -5122,61 +5624,59 @@ begin
   end;
 end;
 
-procedure TfrmGraphs.ItemsClick(Sender: TObject; aListView, aOtherListView: TListView;
-  aCheckBox: TCheckBox; aListBox: TORListBox; aList: TStrings; aSection: string);
+procedure TfrmGraphs.ItemsClick(Sender: TObject;
+                                aListView, aOtherListView: TListView;
+                                aCheckBox: TCheckBox;
+                                aListBox: TORListBox;
+                                aList: TStrings;
+                                aSection: string);
 begin
   FRetainZoom := (GtslZoomHistoryFloat.Count > 0);
   FWarning := false;
   Screen.Cursor := crHourGlass;
-  if aListView.SelCount > 0 then
+  if aListView.SelCount > 0 then begin
     CheckExpandedLabs(aListView);
+  end;
   HideGraphs(true);
-  if Sender = aListView then
-  begin
+  if Sender = aListView then begin
     aListBox.Tag := BIG_NUMBER;                   // avoids recurssion
     aListBox.ItemIndex := -1;
     aListBox.ClearSelection;
   end;
-  if (Sender is TListView) then           // clear out selcopy list
+  if (Sender is TListView) then begin           // clear out selcopy list
     aList.Clear;
-  if aOtherListView.SelCount < 1 then
-  begin
+  end;
+  if aOtherListView.SelCount < 1 then begin
     FGraphSetting.HighTime := 0;
     FGraphSetting.LowTime := BIG_NUMBER;
-  end
-  else if (FBHighTime <> 0) and (aSection = 'top') then
-  begin
+  end else if (FBHighTime <> 0) and (aSection = 'top') then begin
     if FBHighTime < FTHighTime then FGraphSetting.HighTime := FBHighTime;
     if FBLowTime > FTLowTime then FGraphSetting.LowTime := FBLowTime;
-  end
-  else if (FTHighTime <> 0) and (aSection = 'bottom') then
-  begin
+  end else if (FTHighTime <> 0) and (aSection = 'bottom') then begin
     if FTHighTime < FBHighTime then FGraphSetting.HighTime := FTHighTime;
     if FTLowTime > FBLowTime then FGraphSetting.LowTime := FTLowTime;
   end;
-  if aSection = 'top' then
-  begin
+  if aSection = 'top' then begin
     FTHighTime := 0;
     FTLowTime := BIG_NUMBER;
-  end
-  else if aSection = 'bottom' then
-  begin
+  end else if aSection = 'bottom' then begin
     FBHighTime := 0;
     FBLowTime := BIG_NUMBER;
   end;
   CheckToAddData(aListView, aSection, 'SELECT');
   DisplayData(aSection);
-  if (aListView.SelCount = 1) and (aOtherListView.SelCount = 0) then
-  begin
+  if (aListView.SelCount = 1) and (aOtherListView.SelCount = 0) then begin
     GtslZoomHistoryFloat.Clear;
     FRetainZoom := false;
     mnuPopGraphZoomBack.Enabled := false;
   end
-  else if FRetainZoom and (GtslZoomHistoryFloat.Count > 0) then
+  else if FRetainZoom and (GtslZoomHistoryFloat.Count > 0) then begin
     ZoomUpdate;
+  end;
   HideGraphs(false);
-  if FWarning then
+  if FWarning then begin
     FWarning := false;
+  end;
   Screen.Cursor := crDefault;
 end;
 
@@ -6203,20 +6703,23 @@ var
   displayheight, displaynum, i: integer;
 begin
   ChartOnZoom(chartDatelineTop);
-  with aScrollBox do
-  begin
-    if ControlCount < FGraphSetting.MaxGraphs then
+  with aScrollBox do begin
+    if ControlCount < FGraphSetting.MaxGraphs then begin
       displaynum := ControlCount
-    else
+    end else begin
       displaynum := FGraphSetting.MaxGraphs;
+    end;
     displayheight := FGraphSetting.MinGraphHeight;
-    if displaynum > 0 then
-      if (Height div displaynum) < FGraphSetting.MinGraphHeight then
+    if displaynum > 0 then begin
+      if (Height div displaynum) < FGraphSetting.MinGraphHeight then begin
         displayheight := FGraphSetting.MinGraphHeight
-      else
+      end else begin
         displayheight := (Height div displaynum);
-    for i := 0 to aScrollBox.ControlCount - 1 do
+      end;
+    end;
+    for i := 0 to aScrollBox.ControlCount - 1 do begin
       Controls[i].height := displayheight;
+    end;
   end;
 end;
 
@@ -7309,9 +7812,9 @@ begin
   else ZoomUpdate;
 end;
 
-type
+//type
   //kt added 3/28/17
-  TExposedPanel = class(TCustomPanel);
+//  TExposedPanel = class(TCustomPanel);
 
 procedure TfrmGraphs.mnuScrnShotClick(Sender: TObject);
 //kt added entire function 3/28/17
@@ -7335,9 +7838,9 @@ begin
   Rect.Right := pnlMain.Width;
   Rect.Bottom := pnlMain.Height;
   Canvas := TExposedPanel(pnlMain).Canvas;
-  FName := UploadFromCanvas(Canvas, Rect);  //returns VistA name of image
+  FName := UploadFromCanvas(Canvas, Rect, false);  //returns VistA name of image
   if FName <> '' then begin
-    ImageFName := frmNotes.GetInsertHTMLName(FName);
+    ImageFName := GetInsertImgHTMLName(FName);
     CopyHTMLToClipBoard('', ImageFname);
     MessageDlg('Image has been added.  It can now be pasted into a note' + CRLF +
                'with Ctrl-V or inserted later via SELECT EXISTING IMAGE.', mtInformation, [mbOK], 0);
@@ -7579,24 +8082,26 @@ var
   i: integer;
 begin
   FFirstClick := true;
-  if not FFastTrack then
-    if GraphTurboOn then
+  if not FFastTrack then begin
+    if GraphTurboOn then begin
       Switch;
-  if lvwItemsTop.SelCount > FGraphSetting.MaxSelect then
-  begin
+    end;
+  end;
+  if lvwItemsTop.SelCount > FGraphSetting.MaxSelect then begin
     pnlItemsTopInfo.Tag := 1;
     lvwItemsTop.ClearSelection;
     ShowMsg('Too many items to graph');
-    for i := 0 to GtslSelPrevTopFloat.Count - 1 do
+    for i := 0 to GtslSelPrevTopFloat.Count - 1 do begin
       lvwItemsTop.Items[strtoint(GtslSelPrevTopFloat[i])].Selected := true;
+    end;
     pnlItemsTopInfo.Tag := 0;
-  end
-  else
-  begin
+  end else begin
     GtslSelPrevTopFloat.Clear;
-    for i := 0 to lvwItemsTop.Items.Count - 1 do
-    if lvwItemsTop.Items[i].Selected then
-      GtslSelPrevTopFloat.Add(inttostr(i));
+    for i := 0 to lvwItemsTop.Items.Count - 1 do begin
+      if lvwItemsTop.Items[i].Selected then begin
+        GtslSelPrevTopFloat.Add(inttostr(i));
+      end;
+    end;
     ItemsClick(Sender, lvwItemsTop, lvwItemsBottom, chkItemsTop, lstViewsTop, GtslSelCopyTop, 'top');
   end;
 end;
@@ -7664,7 +8169,8 @@ procedure TfrmGraphs.chkItemsBottomEnter(Sender: TObject);
 begin
   if not chkDualViews.Checked then
     if pnlFooter.Visible then
-      cboDateRange.SetFocus
+      if not TMGBackgroundMode then //kt
+        cboDateRange.SetFocus
     else
       SelectNext(ActiveControl as TWinControl, True, True);
 end;
@@ -7731,4 +8237,5 @@ end;
 
 initialization
   CoInitialize (nil);
+  frmBGGraphs := nil;
 end.

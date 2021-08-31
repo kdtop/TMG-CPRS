@@ -31,7 +31,7 @@ type
 
 var PrintAfterSignature : boolean;
 
-procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string);
+procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string; UncheckSign : boolean = false);
 
 implementation
 
@@ -44,8 +44,9 @@ const
   TX_INVAL_MSG = 'Not a valid electronic signature code.  Enter a valid code or press Cancel.';
   TX_INVAL_CAP = 'Unrecognized Signature Code';
 
-
-procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string);
+//tmg added UncheckSign, which will override the user's parameter. This is used when the user signs a note that shouldn't
+//    prompt for a signature, even if the parameter is set
+procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string; UncheckSign : boolean = false);
 var
   frmSignItem: TfrmSignItem;
 begin
@@ -61,6 +62,7 @@ begin
       txtESCode.Text := SavedSignature.Value; //kt added 11/15 -- returns '' unless saved in past few minutes.
       imgPWSaved.Visible := (Trim(txtESCode.Text) <> '');  //kt added 11/15
       TMGAutoPrintCKBox.Checked := uTMGOptions.ReadBool('Print Note On Signature Checked',True);
+      if UncheckSign then TMGAutoPrintCKBox.Checked:=False;
       ShowModal;
       fSignItem.PrintAfterSignature := TMGAutoPrintCKBox.checked;  //TMG 7/1/21
       ESCode := FESCode;

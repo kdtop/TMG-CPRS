@@ -74,7 +74,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblAlerts: TLabel
           Left = 1
           Top = 1
-          Width = 183
+          Width = 89
           Height = 18
           Align = alClient
           Alignment = taCenter
@@ -86,7 +86,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Style = []
           ParentFont = False
           Layout = tlCenter
-          ExplicitWidth = 89
         end
       end
     end
@@ -1839,7 +1838,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblSignList: TLabel
           Left = 1
           Top = 1
-          Width = 273
+          Width = 56
           Height = 18
           Align = alClient
           Alignment = taCenter
@@ -1851,7 +1850,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Style = []
           ParentFont = False
           Layout = tlCenter
-          ExplicitWidth = 56
         end
       end
     end

@@ -188,10 +188,12 @@ type
     PolInterval : integer;
     FileExt : string;
     Picture : TPicture;
+    InteractiveMode : boolean;
     UploadedDocs : TStringList;
     procedure DoScanAndUpload(ErrLog : TStringList = nil); //kt added 8/3/20
     procedure SetScanDir(NewDir : string);
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;
+    procedure PrepForm();
   published
     DragAndDropFNames : TStringList;
     property ScanDir : String read FScanDir write SetScanDir;
@@ -208,7 +210,8 @@ const
 
 
   function SaveCanvasToFile(Canvas : TCanvas; Rect: TRect; FilePath : String) : boolean; //forward.  Returns success of save
-  function UploadFromCanvas(Canvas : TCanvas; Rect: TRect) : string;  //Forward.  Returns VistA name of image, or '' if abort
+  function UploadFromCanvas(Canvas : TCanvas; Rect: TRect; InteractiveMode : boolean = true) : string;  //Forward.  Returns VistA name of image, or '' if abort
+  function UploadLocalImageFile(FilePathName : string; InteractiveMode : boolean = true) : string;  //Returns VistA name of image, or '' if problem
   function UniqueTempSaveFilePath (RootName : string = 'temp_file'; FileType : string = 'jpg') : string;
   function SingleFile(FilePathName:string): string;  //2/2/21
 var
@@ -296,10 +299,9 @@ implementation
     until not FileExists(Result);
   end;
 
-  function UploadFromCanvas(Canvas : TCanvas; Rect: TRect) : string;  //returns a modal type result Returns VistA name of image, or '' if abort
+  function UploadFromCanvas(Canvas : TCanvas; Rect: TRect; InteractiveMode : boolean = true) : string;
+  //returns VistA name of image, or '' if abort
   var FilePath : string;
-      ModalResult : integer;
-      frmImageUpload :  TfrmImageUpload;
   begin
     Result := '';
     FilePath := UniqueTempSaveFilePath ('Screenshot', 'jpg');
@@ -307,14 +309,29 @@ implementation
       MessageDlg('Unable to save screenshot to file.', mtError, [mbOK], 0);
       exit;
     end;
+    Result := UploadLocalImageFile(FilePath, InteractiveMode);
+    if (Result = '') then begin
+      MessageDlg('Unable to upload screenshot to server.', mtError, [mbOK], 0);
+      if FileExists(FilePath) then DeleteFile(FilePath);
+    end;
+  end;
+
+  function UploadLocalImageFile(FilePathName : string; InteractiveMode : boolean = true) : string;  //Returns VistA name of image, or '' if problem
+  //returns VistA name of image, or '' if abort
+  var ModalResult : integer;
+      frmImageUpload :  TfrmImageUpload;
+  begin
+    Result := '';
     frmImageUpload := TfrmImageUpload.Create(Application);
     try
       frmImageUpload.Mode := umImagesOnly;
-      frmImageUpload.DragAndDropFNames.Add(FilePath);
-      ModalResult := frmImageUpload.ShowModal;
-      if IsAbortResult(ModalResult) then begin
-        if FileExists(FilePath) then DeleteFile(FilePath);
-        exit;
+      frmImageUpload.InteractiveMode := InteractiveMode;
+      frmImageUpload.DragAndDropFNames.Add(FilePathName);
+      frmImageUpload.PrepForm();
+      if not InteractiveMode then begin
+        frmImageUpload.UploadButtonClick(nil);
+      end else begin
+        ModalResult := frmImageUpload.ShowModal;
       end;
       if frmImageUpload.UploadedImages.Count > 0 then begin
         Result := frmImageUpload.UploadedImages.Strings[0]
@@ -323,6 +340,7 @@ implementation
       frmImageUpload.Free;
     end;
   end;
+
 
   //-------------------------------------------------------------------------
   //-------------------------------------------------------------------------
@@ -1045,8 +1063,10 @@ implementation
   procedure TfrmImageUpload.UploadButtonClick(Sender: TObject);
   begin
     try
-      WebBrowser.Navigate(frmImages.NullImageName);
-      sleep(500); //Give Webbrowser time to release any browsed document.
+      if InteractiveMode then begin
+        WebBrowser.Navigate(frmImages.NullImageName);
+        sleep(500); //Give Webbrowser time to release any browsed document.
+      end;
     except
       on E: Exception do exit;
     end;
@@ -1125,6 +1145,12 @@ implementation
   end;
 
   procedure TfrmImageUpload.FormShow(Sender: TObject);
+  begin
+    PrepForm;  //kt 8/9/21
+  end;
+
+  procedure TfrmImageUpload.PrepForm();
+  //kt 8/9/21
   var i : integer;
   begin
     FormRefresh(self);
@@ -1175,6 +1201,7 @@ implementation
 
   procedure TfrmImageUpload.FormCreate(Sender: TObject);
   begin
+    InteractiveMode := true; //default
     DragAndDropFNames := TStringList.Create;
     Bitmap := TBitmap.Create;
     Bitmap.Height := 64;
@@ -1241,7 +1268,9 @@ implementation
       btnConfigEditor.Enabled := False;
     end;
     try
-      WebBrowser.Navigate(FileName);
+      if InteractiveMode then begin
+        WebBrowser.Navigate(FileName);
+      end;
     except
       on E: Exception do exit;
     end;
@@ -1269,7 +1298,9 @@ implementation
   procedure TfrmImageUpload.FormRefresh(Sender: TObject);
   begin
     try
-      WebBrowser.Navigate(frmImages.NullImageName);
+      if InteractiveMode then begin
+        WebBrowser.Navigate(frmImages.NullImageName);
+      end;
     except
       on E: Exception do exit;
     end;
@@ -2010,7 +2041,8 @@ AbortPoint:
     //Run the selected program then refresh the preview
     messagedlg(ExtractFileName(ProgramName) + ' is now going to be opened for you to edit. Please save and close it when you finish editing.',mtInformation,[mbOK],0);
     RunModal(ProgramName,FilesToUploadList.Items[FilesToUploadList.ItemIndex]);
-    WebBrowser.Navigate(FilesToUploadList.Items[FilesToUploadList.ItemIndex]);
+    if InteractiveMode then
+      WebBrowser.Navigate(FilesToUploadList.Items[FilesToUploadList.ItemIndex]);
   end;
 
   function TfrmImageUpload.GetWindowsFolder: string;

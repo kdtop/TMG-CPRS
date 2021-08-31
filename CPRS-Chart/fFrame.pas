@@ -215,8 +215,11 @@ type
     sbtnFontSmaller: TSpeedButton;
     sbtnFontNormal: TSpeedButton;
     sbtnFontLarger: TSpeedButton;
+<<<<<<< HEAD
     mnuTestGraph: TMenuItem;
     procedure mnuTestGraphClick(Sender: TObject);
+=======
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
     procedure sbtnFontChangeClick(Sender: TObject);
     procedure mnuClosePatientClick(Sender: TObject);
     procedure mnuExportChartClick(Sender: TObject);

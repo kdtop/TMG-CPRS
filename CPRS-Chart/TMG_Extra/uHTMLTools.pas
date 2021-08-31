@@ -129,15 +129,21 @@ interface
   procedure StripJavaScript(SL: TStrings; var Modified : boolean);
   function GetWebBrowserHTML(const WebBrowser: TWebBrowser): String;
   procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string);
+<<<<<<< HEAD
   function GetTag(HTMLText : string; TagName : string; var PartA, PartB : string; AttributesSL : TStringList) : string;
+=======
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 
   function FormatHTMLClipboardHeader(HTMLText: string): string;
   procedure CopyHTMLToClipBoard(const str: AnsiString; const htmlStr: AnsiString = '');
 
   function StripHTMLTags(strHTML: string): string;
+<<<<<<< HEAD
   function HTMLResize(ImageFName: string) : string;
   function GetInsertImgHTMLName(Name: string; PropSL : TStringList = nil): string;
   function SelectExistingImageClick() : string;
+=======
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 
 implementation
 
@@ -2278,6 +2284,7 @@ begin
   {here you may add another symbols from RFC if you need}
 end;
 
+<<<<<<< HEAD
 function GetTag(HTMLText : string; TagName : string; var PartA, PartB : string; AttributesSL : TStringList) : string;
 //Input: HTMLText: the HTML formated input string
 //       TagName: the tag name to search for, e.g. 'img' to search for '<img ... >' tag.  NOT case sensitive.
@@ -2353,6 +2360,8 @@ begin
   end;
 end;
 
+=======
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 
 
 initialization

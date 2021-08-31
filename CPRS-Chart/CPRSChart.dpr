@@ -414,10 +414,14 @@ uses
   uTMGEvent in 'TMG_Extra\uTMGEvent.pas',
   uImages in 'TMG_Extra\uImages.pas',
   MDMHelper in 'TMG_Extra\MDM grid\MDMHelper.pas' {frmMDMGrid},
+<<<<<<< HEAD
   CollapsablePanelU in 'TMG_Extra\MDM grid\CollapsablePanelU.pas',
   fFrame in 'fFrame.pas' {frmFrame},
   fProbs in 'fProbs.pas' {frmProblems},
   uVA508CPRSCompatibility in 'uVA508CPRSCompatibility.pas';
+=======
+  CollapsablePanelU in 'TMG_Extra\MDM grid\CollapsablePanelU.pas';
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 
 {$R *.TLB}
 
@@ -438,6 +442,10 @@ begin
     Application.HelpFile := 'cprs.hlp';
     Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
+<<<<<<< HEAD
+=======
+  Application.CreateForm(TfrmSearchStop, frmSearchStop);
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;

@@ -19,11 +19,19 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.dfm
 113
 46
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.dfm
+<<<<<<< HEAD
 96732/1394249996
 159
 92
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.dfm
 55456/1393790401
+=======
+96731/1388536211
+159
+92
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.dfm
+55456/1367049915
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 251
 71
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.dfm
@@ -79,6 +87,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabTests.dfm
 959
 32
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSignItem.dfm
+<<<<<<< HEAD
 8493/1392724253
 991
 23
@@ -2438,6 +2447,2351 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs_tabs.pas
 92363/1392066856
 18814
 50
+=======
+8146/1315734693
+991
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRptBox.dfm
+2500/1156545363
+1011
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAbout.dfm
+120417/1223377819
+1031
+62
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxLists.dfm
+696/1156545364
+1093
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs.dfm
+51111/1199277578
+1104
+62
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAutoSz.dfm
+510/1156545362
+1166
+8
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxServer.dfm
+2031/1319269966
+1174
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtCWAD.dfm
+2627/1156545363
+1194
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fVitals.dfm
+10370/1156545364
+1214
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbFlt.dfm
+7461/1156545363
+1267
+50
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbCmt.dfm
+1545/1156545363
+1317
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteCslt.dfm
+2853/1156545363
+1334
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotePrt.dfm
+4410/1357276461
+1357
+41
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.dfm
+32977/1367184443
+1398
+89
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLkUpLocation.dfm
+1846/1156545363
+1487
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRename.dfm
+1263/1156545363
+1504
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDateRange.dfm
+1999/1156545362
+1521
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRenewOutMed.dfm
+3326/1156545363
+1541
+29
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsult513Prt.dfm
+4339/1156545361
+1570
+41
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultAct.dfm
+10993/1156545361
+1611
+68
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultAlertTo.dfm
+3311/1156545361
+1679
+29
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultBD.dfm
+2487/1156545361
+1708
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultBS.dfm
+2744/1156545361
+1734
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultBSt.dfm
+2097/1156545361
+1760
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultsView.dfm
+5276/1156545361
+1783
+38
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fTimeout.dfm
+17579/1156545363
+1821
+34
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteDR.dfm
+1753/1156545363
+1855
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSplash.dfm
+113126/1251302247
+1878
+28
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fCsltNote.dfm
+2081/1156545361
+1906
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fEditConsult.dfm
+13754/1156545361
+1926
+95
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fEditProc.dfm
+14846/1156545361
+2021
+98
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.dfm
+14587/1156545362
+2119
+33
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAddlSigners.dfm
+6725/1156545362
+2152
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabPrint.dfm
+3615/1156545363
+2199
+32
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReportsPrint.dfm
+3607/1156545363
+2231
+32
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fvit.dfm
+13027/1156545364
+2263
+122
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.dfm
+1700/1221870522
+2385
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBase.dfm
+1123/1156545362
+2402
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCELex.dfm
+9726/1196179208
+2416
+74
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEOther.dfm
+1615/1156545362
+2490
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fProcedure.dfm
+6322/1352891766
+2507
+63
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fSkinTest.dfm
+5278/1156545362
+2570
+69
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.dfm
+13000/1156545362
+2639
+136
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fDiagnoses.dfm
+5709/1196122290
+2775
+56
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPatientEd.dfm
+3601/1156545362
+2831
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fExam.dfm
+3448/1156545362
+2884
+54
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fHealthFactor.dfm
+5236/1229756563
+2938
+57
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fImmunization.dfm
+5030/1156545362
+2995
+61
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncVitals.dfm
+13586/1156545362
+3056
+137
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fEffectDate.dfm
+1955/1156545362
+3193
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelDemog.dfm
+4826/1195877062
+3216
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelOptns.dfm
+5845/1377991959
+3269
+52
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\dShared.dfm
+365100/1221870521
+3321
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDrawers.dfm
+20478/1384683136
+3323
+61
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMedCopy.dfm
+7021/1156545363
+3384
+59
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReminderTree.dfm
+5201/1156545363
+3443
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReminderDialog.dfm
+8289/1384683136
+3466
+50
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReportsAdhocSubItem1.dfm
+8372/1156545363
+3516
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReportsAdhocComponent1.dfm
+14318/1156545363
+3569
+89
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelMsg.dfm
+1321/1194892688
+3658
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMHTest.dfm
+1894/1156545363
+3672
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fGAF.dfm
+5395/1156545362
+3695
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEProvider.dfm
+2634/1156545362
+3739
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBaseGrid.dfm
+1495/1156545362
+3762
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBaseMain.dfm
+4986/1221361839
+3785
+52
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteProps.dfm
+12683/1320979673
+3837
+64
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotesBP.dfm
+2056/1156545363
+3901
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabInfo.dfm
+2172/1156545363
+3924
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fPreReq.dfm
+2645/1156545362
+3944
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSummProps.dfm
+9499/1156545362
+3967
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fHFSearch.dfm
+3226/1156545362
+4020
+24
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsMedRslt.dfm
+4764/1156545361
+4044
+32
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Vitals\fVitalsDate.dfm
+1779/1156545366
+4076
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateDialog.dfm
+3892/1353021903
+4096
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateEditor.dfm
+59356/1280609500
+4140
+248
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateFieldEditor.dfm
+29153/1245204054
+4388
+167
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateFields.dfm
+6264/1219994231
+4555
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateObjects.dfm
+2493/1156545366
+4602
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateView.dfm
+2613/1219993796
+4625
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\mTemplateFieldButton.dfm
+1250/1156545366
+4648
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateAutoGen.dfm
+3474/1156545366
+4650
+29
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\mVisitRelated.dfm
+4222/1156545362
+4679
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRemVisitInfo.dfm
+3934/1156545363
+4681
+80
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fIconLegend.dfm
+130373/1156545362
+4761
+227
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateImport.dfm
+1663/1156545366
+4988
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRemCoverSheet.dfm
+64907/1156545363
+5005
+141
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRemCoverPreview.dfm
+1648/1156545363
+5146
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEEdit.dfm
+2330/1229757647
+5163
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSurgeryView.dfm
+4471/1156545363
+5189
+38
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSurgery.dfm
+25735/1220385419
+5227
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteIDParents.dfm
+1551/1156545363
+5280
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteCPFields.dfm
+3565/1156545363
+5297
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelOptSave.dfm
+2098/1156545363
+5320
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOCSession.dfm
+6238/1156545364
+5343
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODAuto.dfm
+922/1219996497
+5378
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODBase.dfm
+2953/1284136707
+5401
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODDiet.dfm
+31635/1156545365
+5427
+224
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODDietLT.dfm
+2592/1156545365
+5651
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODGen.dfm
+1554/1156545365
+5686
+27
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLab.dfm
+17373/1156545365
+5713
+110
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLabImmedColl.dfm
+2411/1156545365
+5823
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLabOthCollSamp.dfm
+1923/1156545365
+5846
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLabOthSpec.dfm
+1883/1156545365
+5866
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedComplex.dfm
+5986/1156545365
+5886
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedFA.dfm
+1853/1156545365
+5930
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedIn.dfm
+6275/1156545365
+5950
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedIV.dfm
+15363/1156545365
+5997
+104
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedOIFA.dfm
+2291/1156545365
+6101
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedOut.dfm
+11204/1156545365
+6124
+71
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMeds.dfm
+28783/1156545365
+6195
+172
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMessage.dfm
+1095/1156545365
+6367
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMisc.dfm
+2986/1156545365
+6378
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRad.dfm
+16279/1156545365
+6413
+105
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRadApproval.dfm
+2062/1156545365
+6518
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRadConShRes.dfm
+2419/1156545365
+6538
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRadImType.dfm
+2116/1156545365
+6561
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODSaveQuick.dfm
+3501/1156545365
+6581
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODText.dfm
+2759/1280134116
+6604
+36
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODVitals.dfm
+7486/1156545365
+6640
+74
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMAction.dfm
+305/1156545365
+6714
+8
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMHTML.dfm
+2558/1156545365
+6722
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMNavA.dfm
+4609/1156545365
+6748
+25
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMProgress.dfm
+922/1156545365
+6773
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMSet.dfm
+1176/1156545365
+6787
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMVerify.dfm
+2199/1156545365
+6801
+21
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderComment.dfm
+1678/1156545365
+6822
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderFlag.dfm
+2818/1156545365
+6842
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrders.dfm
+18185/1382652092
+6865
+29
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersAlert.dfm
+2315/1156545365
+6894
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderSaveQuick.dfm
+6331/1156545365
+6914
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersComplete.dfm
+1820/1156545365
+6958
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersCopy.dfm
+7455/1156545365
+6978
+62
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersDC.dfm
+2894/1156545365
+7040
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersHold.dfm
+1384/1156545365
+7066
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersOnChart.dfm
+2470/1156545365
+7083
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersPrint.dfm
+7273/1321164359
+7106
+65
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersRefill.dfm
+3005/1156545365
+7171
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersRelease.dfm
+3291/1156545365
+7206
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersRenew.dfm
+3213/1156545365
+7241
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersSign.dfm
+22724/1324375654
+7267
+154
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersTS.dfm
+7613/1156545365
+7421
+62
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersUnhold.dfm
+1410/1156545365
+7483
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersVerify.dfm
+2655/1156545365
+7500
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderUnflag.dfm
+1852/1156545365
+7526
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderVw.dfm
+6508/1156545365
+7549
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOCAccept.dfm
+2081/1156545364
+7602
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fODConsult.dfm
+19248/1284137230
+7625
+92
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fODProc.dfm
+14525/1266770086
+7717
+98
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsCombinations.dfm
+5210/1156545364
+7815
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsDays.dfm
+7429/1156545364
+7850
+59
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsLists.dfm
+10907/1194437537
+7909
+68
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsNewList.dfm
+2664/1156545364
+7977
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsNotes.dfm
+4699/1229745380
+8000
+32
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsOther.dfm
+10599/1195012405
+8032
+73
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsPatientSelection.dfm
+15819/1156545364
+8105
+89
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsPrimaryList.dfm
+2098/1156545364
+8194
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsReminders.dfm
+4874/1156545364
+8214
+38
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsReportsCustom.dfm
+4848/1156545364
+8252
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsReportsDefault.dfm
+3731/1156545364
+8296
+32
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsSubscribe.dfm
+1511/1156545364
+8328
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsSurrogate.dfm
+4772/1156545364
+8345
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsTeams.dfm
+5644/1156545364
+8380
+38
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsTitles.dfm
+7062/1156545364
+8418
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptions.dfm
+89869/1367177394
+8471
+239
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mCoPayDesc.dfm
+9292/1156545364
+8710
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersCV.dfm
+2546/1156545365
+8712
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODReleaseEvent.dfm
+2255/1156545365
+8735
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODActive.dfm
+3015/1156545364
+8758
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDefaultEvent.dfm
+2401/1156545362
+8781
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mEvntDelay.dfm
+1870/1156545364
+8804
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersEvntRelease.dfm
+5398/1156545365
+8806
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODChangeEvtDisp.dfm
+2220/1156545364
+8850
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODValidateAction.dfm
+3561/1156545365
+8876
+29
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODChild.dfm
+2410/1156545364
+8905
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDupPts.dfm
+2633/1156545362
+8928
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.dfm
+6026/1156545363
+8951
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.dfm
+65904/1386044113
+8986
+123
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.dfm
+4619/1156545362
+9109
+41
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedNVA.dfm
+12665/1156545365
+9150
+82
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPrintList.dfm
+1550/1156545363
+9232
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODChangeUnreleasedRenew.dfm
+3986/1156545364
+9249
+38
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\BA\fBALocalDiagnoses.dfm
+6826/1156545361
+9287
+61
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReview.dfm
+19139/1195202352
+9348
+187
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fARTFreeTextMsg.dfm
+2170/1156545362
+9535
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyBox.dfm
+2009/1156545362
+9555
+29
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fARTAllgy.dfm
+23017/1331520611
+9584
+133
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\BA\fBAOptionsDiagnoses.dfm
+9450/1156545361
+9717
+68
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOtherSchedule.dfm
+9768/1156545365
+9785
+86
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODBBank.dfm
+29442/1156545364
+9871
+125
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteST.dfm
+1875/1156545363
+9996
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteSTStop.dfm
+1063/1216247561
+10013
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphs.dfm
+37294/1386514113
+10027
+159
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphSettings.dfm
+12041/1156545362
+10186
+71
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphProfiles.dfm
+16801/1156545362
+10257
+121
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fClinicWardMeds.dfm
+1651/1156545362
+10378
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fActivateDeactivate.dfm
+1627/1156545362
+10401
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAResize.dfm
+354/1156545362
+10421
+8
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODAllgy.dfm
+9527/1156545364
+10429
+62
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDeviceSelect.dfm
+3754/1156545362
+10491
+35
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabCollTimes.dfm
+2572/1156545363
+10526
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPostings.dfm
+619/1156545363
+10552
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fTIUView.dfm
+9335/1156545364
+10563
+68
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORDtTm.dfm
+5780/1162964565
+10631
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORDtTmRng.dfm
+1172/1162964566
+10633
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fBase508Form.dfm
+584/1229756048
+10635
+8
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPrintLocation.dfm
+4412/1156545363
+10643
+41
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphData.dfm
+3052/1156545362
+10684
+26
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphOthers.dfm
+5537/1156545362
+10710
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fIVRoutes.dfm
+2203/1156545364
+10754
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fFindingTemplates.dfm
+1436/1156545366
+10777
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSpellNotify.dfm
+1543/1194692737
+10779
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fCombatVet.dfm
+4861/1156545362
+10781
+33
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOCMonograph.dfm
+2125/1156545364
+10814
+16
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fCSRemaining.dfm
+1487/1156545364
+10830
+7
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\XuDigSig\fPINPrompt.dfm
+1671/1156545366
+10837
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbFreetext.dfm
+4761/1194955696
+10839
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mImgText.dfm
+540/1156545364
+10882
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mTreeGrid.dfm
+3687/1156545364
+10884
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlan.dfm
+40270/1220118308
+10886
+77
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.dfm
+277122/1380084486
+10963
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AddOneFileEntryU.dfm
+1209/1133882278
+10965
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditDateTimeU.dfm
+7673/1188537677
+10967
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditFreeText.dfm
+7313/1188537677
+10969
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditNumberU.dfm
+7493/1188537677
+10971
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditTextU.dfm
+6508/1188537677
+10973
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fADT.dfm
+8659/1194958573
+10975
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fBillableItems.dfm
+3782/1295151778
+10977
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fComponentView.dfm
+23931/1188537772
+10979
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fConsultLink.dfm
+10494/1362008534
+10981
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fGUIEditFMFile.dfm
+12224/1133880976
+10983
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePatientPhotoID.dfm
+37448/1379044609
+10985
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.dfm
+7184/1367049892
+10987
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickPDF.dfm
+9994/1380084801
+10989
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImages.dfm
+704844/1367973272
+10991
+34
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultAddDlg.dfm
+7460/1190815554
+11025
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultiUse.dfm
+56550/1367571136
+11027
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImageTransferProgress.dfm
+17301/1367046997
+11029
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePrintPreview.dfm
+877/1194935242
+11031
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePtLbl.dfm
+2151/1194935975
+11033
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\flabComments.dfm
+8110/1188537883
+11035
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabDateEdit.dfm
+4977/1188537883
+11037
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.dfm
+35714/1320979884
+11039
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntryDetails.dfm
+10990/1280137927
+11041
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSpecimenEdit.dfm
+5507/1188537883
+11043
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMemoEdit.dfm
+6482/1286964288
+11045
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\FMErrorU.dfm
+1005/1194934824
+11047
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiRecEditU.dfm
+28881/1194942010
+11049
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteCompParentPick.dfm
+7125/1198871372
+11051
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fOneRecEditU.dfm
+18851/1194940755
+11053
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fProbAutoAdd.dfm
+40886/1199470406
+11055
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAdd.dfm
+15222/1278173684
+11057
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAuditDetail.dfm
+979/1232028272
+11059
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAuditLog.dfm
+1996/1188537958
+11061
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDemoEdit.dfm
+52384/1197318434
+11063
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDocSearch.dfm
+13426/1223658888
+11065
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtHTMLDemo.dfm
+1777/1285134666
+11067
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtQuery.dfm
+41964/1194939427
+11069
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGServerSearch.dfm
+7429131/1194939484
+11071
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSearchResults.dfm
+15100/1194939411
+11073
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\PostU.dfm
+3183/1194940647
+11075
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbEdt.dfm
+33726/1199390248
+11077
+159
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbLex.dfm
+9722/1199274899
+11236
+69
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtLabelPrint.dfm
+23885/1366858264
+11305
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlanSignDialog.dfm
+1234/1195860935
+11307
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPage.pas
+6188/1195860015
+11309
+48
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fHSplit.pas
+401/1156545362
+11357
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fHP.pas
+607/1156545362
+11367
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fCover.pas
+36550/1246203136
+11377
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMeds.pas
+73303/1156545363
+11388
+19
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
+279451/1388536723
+11407
+66
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.pas
+158654/1367050317
+11473
+56
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
+208382/1381141212
+11529
+70
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
+139021/1384214960
+11599
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas
+61768/1368296517
+11646
+55
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSens.pas
+1251/1156545363
+11701
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fEncnt.pas
+21112/1296597524
+11711
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fVisit.pas
+7877/1156545364
+11764
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtDemo.pas
+14101/1194934555
+11775
+77
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxBroker.pas
+7133/1194934450
+11852
+49
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteBA.pas
+3267/1156545363
+11901
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteBD.pas
+3745/1156545363
+11912
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabTest.pas
+3264/1156545363
+11923
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabTestGroups.pas
+13203/1156545363
+11933
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabTests.pas
+4256/1156545363
+11943
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSignItem.pas
+2719/1315734524
+11953
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRptBox.pas
+8153/1156545363
+11963
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAbout.pas
+2524/1195008852
+11974
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxLists.pas
+1161/1156545364
+11984
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbs.pas
+92262/1199288070
+11994
+50
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAutoSz.pas
+3400/1156545362
+12044
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fxServer.pas
+1222/1156545364
+12057
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtCWAD.pas
+2673/1156545363
+12067
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fVitals.pas
+25656/1156545364
+12077
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbFlt.pas
+13483/1156545363
+12120
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbCmt.pas
+2058/1156545363
+12130
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteCslt.pas
+2130/1156545363
+12140
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotePrt.pas
+15865/1357283629
+12150
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.pas
+202139/1367186422
+12195
+63
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLkUpLocation.pas
+2288/1156545363
+12258
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRename.pas
+1467/1156545363
+12268
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDateRange.pas
+3097/1156545362
+12278
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRenewOutMed.pas
+3750/1156545363
+12288
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsult513Prt.pas
+5402/1156545361
+12299
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultAct.pas
+23706/1156545361
+12310
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultAlertTo.pas
+4299/1156545361
+12321
+9
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultBD.pas
+3645/1156545361
+12330
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultBS.pas
+5513/1156545361
+12341
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultBSt.pas
+3419/1156545361
+12352
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsultsView.pas
+8215/1156545361
+12363
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fTimeout.pas
+2551/1156545363
+12374
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteDR.pas
+1837/1156545363
+12384
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSplash.pas
+3279/1195202671
+12394
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fCsltNote.pas
+5560/1156545361
+12441
+9
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fEditConsult.pas
+23985/1156545361
+12450
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fEditProc.pas
+23553/1156545361
+12461
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.pas
+15257/1156545362
+12472
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAddlSigners.pas
+10921/1156545362
+12483
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabPrint.pas
+19722/1156545363
+12493
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReportsPrint.pas
+25557/1156545363
+12504
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fvit.pas
+15345/1156545364
+12515
+73
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas
+27799/1221870639
+12588
+59
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBase.pas
+12206/1156545362
+12647
+22
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCELex.pas
+20718/1196137482
+12669
+49
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEOther.pas
+2295/1156545362
+12718
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fProcedure.pas
+16040/1352891813
+12728
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fSkinTest.pas
+6488/1156545362
+12741
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.pas
+14534/1156545362
+12752
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fDiagnoses.pas
+25662/1196002217
+12763
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPatientEd.pas
+3110/1156545362
+12776
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fExam.pas
+2651/1156545362
+12787
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fHealthFactor.pas
+3842/1229756576
+12798
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fImmunization.pas
+4566/1156545362
+12810
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncVitals.pas
+17611/1156545362
+12821
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fEffectDate.pas
+1546/1156545362
+12832
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelDemog.pas
+8554/1195877120
+12843
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelOptns.pas
+22445/1377993080
+12887
+48
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\dShared.pas
+30387/1221870552
+12935
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDrawers.pas
+76177/1384686093
+12980
+61
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMedCopy.pas
+11223/1156545363
+13041
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReminderTree.pas
+22406/1156545363
+13052
+24
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReminderDialog.pas
+68971/1384685617
+13076
+46
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReportsAdhocSubItem1.pas
+10566/1156545363
+13122
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReportsAdhocComponent1.pas
+26731/1156545363
+13132
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelMsg.pas
+3550/1194892701
+13143
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fMHTest.pas
+31230/1156545363
+13153
+50
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fGAF.pas
+5357/1156545362
+13203
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEProvider.pas
+4943/1156545362
+13214
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBaseGrid.pas
+5450/1156545362
+13225
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBaseMain.pas
+18410/1221365257
+13236
+16
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteProps.pas
+41257/1320979735
+13252
+63
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotesBP.pas
+1567/1156545363
+13315
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabInfo.pas
+1736/1156545363
+13325
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fPreReq.pas
+5793/1156545362
+13335
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSummProps.pas
+21203/1156545362
+13346
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fHFSearch.pas
+5706/1156545362
+13357
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsMedRslt.pas
+7248/1156545361
+13368
+18
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Vitals\fVitalsDate.pas
+828/1156545366
+13386
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateDialog.pas
+48078/1353022535
+13396
+49
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateEditor.pas
+152031/1280609500
+13445
+64
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateFieldEditor.pas
+41138/1245204803
+13509
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateFields.pas
+6369/1219997303
+13520
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateObjects.pas
+5116/1194420983
+13530
+46
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateView.pas
+4036/1219997493
+13576
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\mTemplateFieldButton.pas
+4311/1156545366
+13587
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateAutoGen.pas
+4218/1156545366
+13597
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\mVisitRelated.pas
+8943/1156545362
+13607
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRemVisitInfo.pas
+944/1156545363
+13617
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fIconLegend.pas
+6017/1156545362
+13627
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fTemplateImport.pas
+1959/1156545366
+13640
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRemCoverSheet.pas
+59141/1156545363
+13650
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fRemCoverPreview.pas
+1861/1156545363
+13663
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEEdit.pas
+4515/1229757680
+13673
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSurgeryView.pas
+4165/1156545363
+13683
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSurgery.pas
+100403/1220385514
+13694
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteIDParents.pas
+2469/1156545363
+13741
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteCPFields.pas
+4850/1156545363
+13751
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSelOptSave.pas
+1995/1156545363
+13761
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOCSession.pas
+33803/1156545364
+13771
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODAuto.pas
+8205/1219996590
+13782
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODBase.pas
+69146/1280134568
+13793
+158
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODDiet.pas
+80928/1156545365
+13951
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODDietLT.pas
+9778/1156545365
+13962
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODGen.pas
+25711/1156545365
+13972
+22
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLab.pas
+73443/1156545365
+13994
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLabImmedColl.pas
+2912/1156545365
+14005
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLabOthCollSamp.pas
+2504/1156545365
+14016
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODLabOthSpec.pas
+2550/1156545365
+14026
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedComplex.pas
+19108/1156545365
+14036
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedFA.pas
+2767/1156545365
+14047
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedIn.pas
+12477/1156545365
+14057
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedIV.pas
+94130/1156545365
+14070
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedOIFA.pas
+3999/1156545365
+14081
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedOut.pas
+21307/1156545365
+14091
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMeds.pas
+209742/1156545365
+14102
+16
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMessage.pas
+1346/1156545365
+14118
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMisc.pas
+3808/1156545365
+14128
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRad.pas
+30692/1156545365
+14139
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRadApproval.pas
+2003/1156545365
+14150
+9
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRadConShRes.pas
+3352/1156545365
+14159
+9
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODRadImType.pas
+2265/1156545365
+14168
+9
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODSaveQuick.pas
+675/1156545365
+14177
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODText.pas
+4366/1280134262
+14187
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODVitals.pas
+4552/1156545365
+14198
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMAction.pas
+1214/1156545365
+14209
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMHTML.pas
+14600/1156545365
+14222
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMNavA.pas
+23665/1156545365
+14235
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMProgress.pas
+898/1156545365
+14248
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMSet.pas
+13508/1156545365
+14258
+20
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOMVerify.pas
+5497/1156545365
+14278
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderComment.pas
+2459/1156545365
+14288
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderFlag.pas
+2902/1156545365
+14298
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrders.pas
+132214/1382652527
+14308
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersAlert.pas
+2892/1156545365
+14322
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderSaveQuick.pas
+9406/1156545365
+14332
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersComplete.pas
+2471/1156545365
+14343
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersCopy.pas
+10860/1156545365
+14353
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersDC.pas
+8724/1156545365
+14364
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersHold.pas
+1961/1156545365
+14374
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersOnChart.pas
+6741/1156545365
+14384
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersPrint.pas
+12649/1321164360
+14394
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersRefill.pas
+3453/1156545365
+14405
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersRelease.pas
+9902/1156545365
+14415
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersRenew.pas
+18852/1156545365
+14426
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersSign.pas
+72944/1324377488
+14437
+15
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersTS.pas
+9937/1156545365
+14452
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersUnhold.pas
+2003/1156545365
+14463
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersVerify.pas
+4548/1156545365
+14473
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderUnflag.pas
+1577/1156545365
+14483
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrderVw.pas
+9209/1156545365
+14493
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOCAccept.pas
+2707/1156545364
+14504
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fODConsult.pas
+56400/1266775922
+14514
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fODProc.pas
+31620/1266775932
+14528
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsCombinations.pas
+10204/1156545364
+14539
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsDays.pas
+12245/1156545364
+14550
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsLists.pas
+23843/1194307823
+14561
+48
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsNewList.pas
+2647/1156545364
+14609
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsNotes.pas
+11748/1194307865
+14619
+81
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsOther.pas
+15298/1195012405
+14700
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsPatientSelection.pas
+15389/1156545364
+14744
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsPrimaryList.pas
+1196/1156545364
+14755
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsReminders.pas
+7499/1156545364
+14765
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsReportsCustom.pas
+20213/1156545364
+14775
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsReportsDefault.pas
+12881/1156545364
+14786
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsSubscribe.pas
+1093/1156545364
+14797
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsSurrogate.pas
+6888/1156545364
+14807
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsTeams.pas
+8320/1156545364
+14818
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptionsTitles.pas
+11674/1156545364
+14829
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Options\fOptions.pas
+40144/1367177411
+14839
+46
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mCoPayDesc.pas
+5517/1156545364
+14885
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersCV.pas
+14217/1156545365
+14895
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODReleaseEvent.pas
+9523/1156545365
+14906
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODActive.pas
+10521/1156545364
+14917
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDefaultEvent.pas
+3601/1156545362
+14928
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mEvntDelay.pas
+9977/1156545364
+14939
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersEvntRelease.pas
+10762/1156545365
+14949
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODChangeEvtDisp.pas
+2942/1156545364
+14960
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODValidateAction.pas
+8506/1156545365
+14970
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODChild.pas
+3627/1156545365
+14981
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDupPts.pas
+1809/1156545362
+14991
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPatientFlagMulti.pas
+9369/1156545363
+15002
+25
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
+218571/1386044194
+15027
+60
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAlertForward.pas
+5458/1156545362
+15087
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODMedNVA.pas
+75972/1156545365
+15097
+17
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPrintList.pas
+3964/1156545363
+15114
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODChangeUnreleasedRenew.pas
+5468/1156545364
+15124
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\BA\fBALocalDiagnoses.pas
+48847/1156545361
+15135
+19
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReview.pas
+122855/1195202352
+15154
+53
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fARTFreeTextMsg.pas
+2142/1156545362
+15207
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyBox.pas
+4793/1156545362
+15218
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fARTAllgy.pas
+44525/1156545362
+15229
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\BA\fBAOptionsDiagnoses.pas
+18180/1156545361
+15241
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOtherSchedule.pas
+21668/1156545365
+15253
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODBBank.pas
+170408/1156545364
+15267
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteST.pas
+3122/1156545363
+15277
+15
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNoteSTStop.pas
+952/1216247868
+15292
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphs.pas
+263953/1386515416
+15302
+52
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphSettings.pas
+29008/1156545362
+15354
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphProfiles.pas
+54837/1156545362
+15365
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fClinicWardMeds.pas
+6505/1156545362
+15376
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fActivateDeactivate.pas
+5310/1156545362
+15387
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAResize.pas
+2396/1156545362
+15398
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODAllgy.pas
+19580/1194308002
+15408
+47
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDeviceSelect.pas
+4635/1156545362
+15455
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabCollTimes.pas
+2825/1156545363
+15465
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPostings.pas
+420/1156545363
+15476
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fTIUView.pas
+9472/1156545364
+15486
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORDtTm.pas
+40050/1162964565
+15497
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORDtTmRng.pas
+6732/1162964566
+15510
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fBase508Form.pas
+10818/1229755812
+15520
+15
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPrintLocation.pas
+19645/1156545363
+15535
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphData.pas
+23296/1156545362
+15547
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fGraphOthers.pas
+2770/1156545362
+15557
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fIVRoutes.pas
+2142/1156545364
+15568
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Templates\fFindingTemplates.pas
+4160/1156545366
+15578
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fSpellNotify.pas
+1910/1194699299
+15588
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fCombatVet.pas
+1914/1156545362
+15598
+15
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOCMonograph.pas
+2474/1156545364
+15613
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fCSRemaining.pas
+3254/1156545364
+15623
+11
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\XuDigSig\fPINPrompt.pas
+862/1156545366
+15634
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbFreetext.pas
+2717/1194955824
+15644
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mImgText.pas
+389/1156545364
+15654
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\mTreeGrid.pas
+13131/1156545364
+15664
+39
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlan.pas
+46619/1220118376
+15703
+65
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fUploadImages.pas
+88418/1380086599
+15768
+98
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AddOneFileEntryU.pas
+6381/1188537721
+15866
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditDateTimeU.pas
+2214/1188537710
+15909
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditFreeText.pas
+2210/1188537702
+15951
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditNumberU.pas
+2579/1188537698
+15993
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\EditTextU.pas
+5608/1188537681
+16035
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fADT.pas
+17486/1194953332
+16079
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fBillableItems.pas
+9601/1230538939
+16121
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fComponentView.pas
+7424/1188537841
+16163
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fConsultLink.pas
+9385/1362011880
+16207
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fGUIEditFMFile.pas
+7768/1188537848
+16250
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePatientPhotoID.pas
+15982/1379045037
+16294
+63
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.pas
+7236/1367052651
+16357
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickPDF.pas
+4037/1380084801
+16400
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImages.pas
+30122/1367974555
+16443
+74
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultAddDlg.pas
+2484/1190815554
+16517
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagesMultiUse.pas
+12823/1367239766
+16562
+46
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImageTransferProgress.pas
+3541/1367047016
+16608
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePrintPreview.pas
+6697/1194936110
+16651
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fIntracarePtLbl.pas
+19626/1194936148
+16695
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\flabComments.pas
+1823/1188537905
+16739
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabDateEdit.pas
+3066/1188537909
+16782
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.pas
+29149/1320979589
+16826
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntryDetails.pas
+7986/1280138467
+16870
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSpecimenEdit.pas
+3274/1188537924
+16913
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMemoEdit.pas
+2552/1258769049
+16955
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\FMErrorU.pas
+2433/1194934864
+16999
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiRecEditU.pas
+23555/1194942109
+17041
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteCompParentPick.pas
+4558/1198871813
+17085
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fOneRecEditU.pas
+17804/1194942076
+17130
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fProbAutoAdd.pas
+31055/1199729906
+17175
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAdd.pas
+25153/1278173687
+17218
+73
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAuditDetail.pas
+4004/1188537971
+17291
+42
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtAuditLog.pas
+7138/1188537973
+17333
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDemoEdit.pas
+66783/1197318593
+17377
+52
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDocSearch.pas
+12563/1194934728
+17429
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtHTMLDemo.pas
+8032/1285134676
+17473
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtQuery.pas
+9581/1194939570
+17518
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGServerSearch.pas
+5627/1194939505
+17563
+43
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSearchResults.pas
+15501/1194939432
+17606
+45
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\PostU.pas
+6722/1194940695
+17651
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbEdt.pas
+60430/1199288828
+17695
+49
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fProbLex.pas
+21824/1199275092
+17744
+51
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtLabelPrint.pas
+15842/1366858336
+17795
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Careplan-Letters\fCarePlanSignDialog.pas
+509/1195860922
+17839
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fESEdit.dfm
+5613/1216247574
+17849
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fESEdit.pas
+4050/1216247860
+17851
+18
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTest_RW_HTML.dfm
+16316/1221477368
+17869
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTest_RW_HTML.pas
+7431/1221477528
+17871
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDiscreteData.dfm
+6412/1221494614
+17883
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPtDiscreteData.pas
+6499/1221494583
+17885
+33
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.dfm
+2085/1224713265
+17918
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\WinMsgLog.pas
+19451/1224713635
+17920
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSMSLabText.dfm
+1491/1244302528
+17934
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSMSLabText.pas
+1315/1244302798
+17936
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSingleNote.dfm
+235047/1368296634
+17946
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fSingleNote.pas
+45302/1368296661
+17948
+16
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabPicker.dfm
+20692/1281471182
+17964
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabPicker.pas
+4630/1281471182
+17966
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fAlertSender.dfm
+4934/1248957047
+17978
+38
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fAlertSender.pas
+6400/1248958147
+18016
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMPOTP.dfm
+347/1265720986
+18028
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMPOTP.pas
+334/1265721002
+18030
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMGOTP.dfm
+729/1265723650
+18040
+23
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMGOTP.pas
+414/1265723652
+18063
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool\fAnticoagulator.dfm
+140079/1328189587
+18073
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas
+101612/1295152573
+18075
+33
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGPrintList.dfm
+6887/1357276556
+18108
+33
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGPrintList.pas
+7735/1357276556
+18141
+13
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSelector.dfm
+5632/1324110091
+18154
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabSelector.pas
+3970/1324110102
+18156
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.dfm
+27291/1320057614
+18166
+44
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMailbox.pas
+12426/1320057675
+18210
+12
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.dfm
+256766/1383293621
+18222
+187
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiAlertSign.dfm
+329/1361612657
+18409
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiAlertSign.pas
+320/1361612808
+18411
+10
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.dfm
+185335/1386640519
+18421
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
+25001/1383500481
+18423
+40
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
+27570/1383293785
+18463
+14
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.dfm
+69651/1368366609
+18477
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.pas
+12390/1368366801
+18479
+46
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.dfm
+81798/1388018486
+18525
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
+37709/1383888141
+18527
+20
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 |EOINDEX|
 27
 inherited frmPage: TfrmPage
@@ -11428,7 +13782,11 @@ Data = (
 'Component = btnClose'
 'Status = stsDefault'))
 end
+<<<<<<< HEAD
 1851
+=======
+1842
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 inherited frmFrame: TfrmFrame
 inherited amgrMain: TVA508AccessibilityManager
 Left = 8
@@ -12469,7 +14827,11 @@ Data = (
 'Component = frmSearchStop'
 'Status = stsDefault'))
 end
+<<<<<<< HEAD
 1333
+=======
+1304
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 inherited frmGraphs: TfrmGraphs
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -20863,7 +23225,11 @@ uses
 
 type
   TForm1 = class(TForm)
+<<<<<<< HEAD
 2708
+=======
+2710
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
 object frmMultiTIUSign: TfrmMultiTIUSign
 unit fMultiTIUSign;
 
@@ -20989,6 +23355,7 @@ type
   end;
 
   TfrmMDMGrid = class(TForm)
+<<<<<<< HEAD
 2571
 inherited frmFrame: TfrmFrame
 inherited amgrMain: TVA508AccessibilityManager
@@ -21303,3 +23670,5 @@ uses
 
 type
   TfrmProblems = class(TfrmHSplit)
+=======
+>>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268

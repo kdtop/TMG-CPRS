@@ -2,11 +2,7 @@ inherited frmFrame: TfrmFrame
   Left = 196
   Top = 119
   Caption = 'p'
-<<<<<<< HEAD
   ClientHeight = 778
-=======
-  ClientHeight = 723
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
   ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
@@ -19,22 +15,14 @@ inherited frmFrame: TfrmFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   ExplicitWidth = 888
-<<<<<<< HEAD
   ExplicitHeight = 836
-=======
-  ExplicitHeight = 781
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
     Width = 872
-<<<<<<< HEAD
     Height = 778
-=======
-    Height = 723
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
     Align = alClient
     Caption = 'No patient is currently selected'
     Font.Charset = DEFAULT_CHARSET
@@ -51,11 +39,7 @@ inherited frmFrame: TfrmFrame
     Left = 0
     Top = 0
     Width = 872
-<<<<<<< HEAD
     Height = 778
-=======
-    Height = 723
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
     Align = alClient
     TabOrder = 0
     ExplicitHeight = 758
@@ -1014,11 +998,7 @@ inherited frmFrame: TfrmFrame
     end
     object stsArea: TStatusBar
       Left = 1
-<<<<<<< HEAD
       Top = 756
-=======
-      Top = 701
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
       Width = 870
       Height = 21
       Panels = <
@@ -1047,11 +1027,7 @@ inherited frmFrame: TfrmFrame
     end
     object tabPage: TTabControl
       Left = 1
-<<<<<<< HEAD
       Top = 734
-=======
-      Top = 679
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
       Width = 870
       Height = 22
       Align = alBottom
@@ -1073,11 +1049,7 @@ inherited frmFrame: TfrmFrame
       Left = 1
       Top = 42
       Width = 870
-<<<<<<< HEAD
       Height = 692
-=======
-      Height = 637
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -1086,10 +1058,7 @@ inherited frmFrame: TfrmFrame
       Font.Style = []
       ParentFont = False
       TabOrder = 2
-<<<<<<< HEAD
       ExplicitHeight = 672
-=======
->>>>>>> 2178469270f2a94f44fc9e33d94e0c2eb7e0b268
       object sbtnFontSmaller: TSpeedButton
         Tag = -1
         Left = 21

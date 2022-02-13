@@ -37,11 +37,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  fDrawers,fNotes,fReminderDialog,uReminders,
+  fDrawers,fNotes,fReminderDialog,uReminders,uTMGOptions,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons;
 
 type
-  TSearchMode = (TsmTemplate, TsmDialog);
+  TSearchMode = (TsmTemplate, TsmDialog, TsmAll);
 
   TfrmTemplateSearch = class(TForm)
     Timer: TTimer;
@@ -53,6 +53,7 @@ type
     btnTemCancel: TBitBtn;
     lbTemMatches: TListBox;
     StatusBar: TStatusBar;
+    tsAll: TTabSheet;
     procedure FormShow(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure btnTemAcceptClick(Sender: TObject);
@@ -67,8 +68,10 @@ type
     { Private declarations }
     SavedResults : TStringList;
     CaseSensitiveStr : string;  //should be "0" or "1"
-    procedure DoTemplateSearch;
-    procedure DoDialogSearch;
+    procedure DoTemplateSearch(AllSearch:Boolean = False);
+    procedure DoDialogSearch(AllSearch:Boolean = False);
+    procedure DoAllSearch;
+    procedure GetSearchResults();
   public
     { Public declarations }
     SelectedInfo : string;  //  topIEN^childIEN^grandchildIEN^... etc
@@ -193,17 +196,21 @@ const
   begin
     fTemplateSearch.SearchMode := Mode;
     frmTemplateSearch := TfrmTemplateSearch.Create(frmFrame);
-    if Mode=TsmDialog then
-      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsReminders
-    else
-      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTemplates;
+    if uTMGOptions.ReadBool('TemplateReminder Search Begins With All',False) then begin
+      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsAll;
+    end else begin
+      if Mode=TsmDialog then
+        frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsReminders
+      else
+        frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTemplates;
+    end;
     frmTemplateSearch.PageControl1Change(nil);
     ModalResult := frmTemplateSearch.ShowModal;
     //Check mode here and add functionality for dialogs
     SelectedInfo := frmTemplateSearch.SelectedInfo;
     frmTemplateSearch.Free;
     if ModalResult = mrOK then begin
-      if fTemplateSearch.SearchMode = TsmTemplate then begin      
+      if fTemplateSearch.SearchMode = TsmTemplate then begin
         if (Drawers.TheOpenDrawer <> odTemplates) then Drawers.sbTemplatesClick(nil); //Ensure Templates drawer is open
         SelNode := SelectTemplateNodePath(Drawers, SelectedInfo);
         if SelNode <> nil then begin
@@ -263,7 +270,15 @@ const
           //So as long as user keeps changing search terms, search will not launch
           //until there has been a 0.5 second pause.
         end;
-
+      end else if fTemplateSearch.SearchMode = TsmAll then begin
+        if LastChar=' ' then begin
+          DoAllSearch; //Launch search directly after every space
+        end else begin
+          Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
+          Timer.Enabled := true;
+          //So as long as user keeps changing search terms, search will not launch
+          //until there has been a 0.5 second pause.
+        end;
       end;
     end;
   end;
@@ -287,22 +302,106 @@ const
     SavedResults.Free
   end;
 
-  procedure TfrmTemplateSearch.FormShow(Sender: TObject);
+procedure TfrmTemplateSearch.FormShow(Sender: TObject);
 begin
   edtTemSearchTerms.SetFocus;
 end;
 
 procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
+  var SelType:string;
   begin
+    if SearchMode=TsmAll then begin
+      SelType := piece2(SavedResults.Strings[lbTemMatches.ItemIndex],'#@@#',3);
+      if SelType='DIALOG' then SearchMode := TsmDialog;
+      if SelType='TEMPLATE' then SearchMode := TsmTemplate;
+    end;
+    if SearchMode=TsmAll then begin  //Shouldn't be needed but just in case
+      messagedlg('There was an unknown error determining the type of selection.'+#13#10+'Try changing to the appropriate tab and select from there.',mtError,[mbOk],0);
+      exit;
+    end;
     Self.ModalResult := mrOK;
   end;
 
-  procedure TfrmTemplateSearch.DoDialogSearch;
+  procedure TfrmTemplateSearch.GetSearchResults();
+  //This will run the appropriate searchs and load results
+      procedure GetTemplateResults(SearchString:string;User:Int64;var SavedResults:TStringList);
+      var cmd,OneLine  : string;
+        RPCSuccess : string;
+        i : integer;
+        TempResults:TStringList;
+      begin
+        TempResults := TStringList.create();
+        RPCSuccess := TMGSearchTemplates(TempResults, SearchString, User, '0');
+        if piece(RPCSuccess,'^',1) <> '1' then exit;
+
+        for i := 0 to TempResults.Count - 1 do begin
+          OneLine := TempResults.Strings[i];
+          OneLine := piece(OneLine,'^',1);
+          OneLine := piece(OneLine,';',2);
+          SavedResults.Add(OneLine+'#@@#'+TempResults.Strings[i]+'#@@#TEMPLATE');
+        end;
+        TempResults.Free;
+        //if SavedResults.Count = 1 then begin  //autoselect if only 1 option
+        //  lbTemMatchesEnter(nil);
+        //end;
+      end;
+
+      procedure GetDialogResults(SearchString:string;var SavedResults:TStringList);
+        var i : integer;
+            TempResults:TStringList;
+            OneLine:string;
+        begin
+          TempResults := TStringList.create();
+          frmNotes.Drawers.ReminderSearch(TempResults,SearchString);
+          for i := 0 to TempResults.Count - 1 do begin
+            OneLine := TempResults.Strings[i];
+            OneLine := piece(OneLine,'^',1);
+            OneLine := piece(OneLine,';',2);
+            SavedResults.Add(OneLine+'#@@#'+TempResults.Strings[i]+'#@@#DIALOG');
+          end;
+          TempResults.free;
+      end;
+  var
+    OneLine:string;
+    i:integer;
+  begin
+    Timer.Enabled := false;
+    SavedResults.Clear;
+    lbTemMatches.Items.Clear;
+    case SearchMode of
+      TsmTemplate: begin
+        GetTemplateResults(edtTemSearchTerms.Text,User.DUZ,SavedResults);
+      end;
+      TsmDialog: begin
+        GetDialogResults(edtTemSearchTerms.Text,SavedResults);
+      end;
+      TsmAll: begin
+        GetTemplateResults(edtTemSearchTerms.Text,User.DUZ,SavedResults);
+        GetDialogResults(edtTemSearchTerms.Text,SavedResults);
+      end;
+    end;
+    //NowLoadTheResultsHere
+    SavedResults.Sort;
+    for I := 0 to SavedResults.Count - 1 do begin
+      OneLine := piece2(SavedResults.Strings[i],'#@@#',1);
+      //OneLine := piece(OneLine,'^',1);
+      //OneLine := piece(OneLine,';',2);
+      if SearchMode=TsmAll then OneLine:=OneLine+' ('+piece2(SavedResults.Strings[i],'#@@#',3)+')';
+      lbTemMatches.Items.Add(OneLine);
+    end;
+    if SavedResults.Count = 1 then begin  //autoselect if only 1 option
+        lbTemMatchesEnter(nil);
+    end;
+  end;
+
+  procedure TfrmTemplateSearch.DoDialogSearch(AllSearch:Boolean = False);
   var OneLine:string;
       i : integer;
   begin
+    GetSearchResults;
+    {
     Timer.Enabled := false;
-    lbTemMatches.Items.Clear;
+    if AllSearch=False then lbTemMatches.Items.Clear;
     frmNotes.Drawers.ReminderSearch(SavedResults,edtTemSearchTerms.Text);
     for i := 0 to SavedResults.Count - 1 do begin
       OneLine := SavedResults.Strings[i];
@@ -310,16 +409,19 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       OneLine := piece(OneLine,';',2);
       lbTemMatches.Items.Add(OneLine);
     end;
+    }
   end;
 
-  procedure TfrmTemplateSearch.DoTemplateSearch;
+  procedure TfrmTemplateSearch.DoTemplateSearch(AllSearch:Boolean = False);
   var cmd  : string;
       RPCSuccess : string;
       i : integer;
       OneLine : string;
   begin
+    GetSearchResults;
+    {
     Timer.Enabled := false;
-    lbTemMatches.Items.Clear;
+    if AllSearch = False then lbTemMatches.Items.Clear;
     RPCSuccess := TMGSearchTemplates(SavedResults, edtTemSearchTerms.Text, User.DUZ, CaseSensitiveStr);
     if piece(RPCSuccess,'^',1) <> '1' then exit;
     {
@@ -331,6 +433,7 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       if piece(RPCSuccess,'^',1) <> '1' then exit;
     end;
     }
+    {
     for i := 0 to SavedResults.Count - 1 do begin
       OneLine := SavedResults.Strings[i];
       OneLine := piece(OneLine,'^',1);
@@ -340,6 +443,19 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
     if SavedResults.Count = 1 then begin  //autoselect if only 1 option
       lbTemMatchesEnter(nil);
     end;
+    }
+  end;
+
+  procedure TfrmTemplateSearch.DoAllSearch;
+  var OneLine:string;
+      i : integer;
+  begin
+    GetSearchResults;
+  {
+    lbTemMatches.Items.Clear;
+    DoTemplateSearch(True);
+    DoDialogSearch(True);
+    }
   end;
 
   procedure TfrmTemplateSearch.lbTemMatchesClick(Sender: TObject);
@@ -347,7 +463,7 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       i : integer;
   begin
     StatusBar.Panels[0].Text := '';
-    SourceLine := SavedResults.Strings[lbTemMatches.ItemIndex];
+    SourceLine := piece2(SavedResults.Strings[lbTemMatches.ItemIndex],'#@@#',2);
     SelectedInfo := '';
     if lbTemMatches.ItemIndex > -1 then begin
       for i := NumPieces(SourceLine,'^') downto 1 do begin
@@ -388,16 +504,24 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       Caption := 'Search Reminder Dialogs';
       DoDialogSearch;
       end;
+    2: begin
+      fTemplateSearch.SearchMode := TsmAll;
+      Caption := 'Search Both Reminder Dialogs and Templates';
+      DoAllSearch;
+      end;
     end;
 
   end;
 
 procedure TfrmTemplateSearch.TimerTimer(Sender: TObject);
   begin
-  if SearchMode=TsmDialog then
-    DoDialogSearch
-  else
-    DoTemplateSearch;
+    if SearchMode=TsmDialog then begin
+      DoDialogSearch;
+    end else if SearchMode=TsmTemplate then begin
+      DoTemplateSearch;
+    end else begin
+      DoAllSearch;
+    end;
   end;
 
   end.

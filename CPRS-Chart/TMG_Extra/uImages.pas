@@ -699,6 +699,9 @@ begin
               ActiveTIUIENForImagesInt, DeleteMode, HtmlEditor, EditIsActive,
               RefreshNeeded, User, ReasonForDelete);
 
+  //Delete the cached image and thumbnail     10/22/21
+  DeleteFile(ImageInfo.CacheThumbFName);
+  DeleteFile(ImageInfo.CacheFName);
 end;
 
 

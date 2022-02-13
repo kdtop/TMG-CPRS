@@ -41,7 +41,7 @@ uses
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Grids, Buttons, fLabTest,
   fLabTests, fLabTestGroups, ORFn, TeeProcs, TeEngine, Chart, Series, Menus,
   uConst, ORDtTmRng, OleCtrls, SHDocVw, Variants, StrUtils, fBase508Form,
-  ORNet,    //tmg
+  ORNet,ShellAPI,    //tmg
   fImagePickPDF,rFileTransferU,Trpcb,       //tmg
   VA508AccessibilityManager, rWVEHR;
 
@@ -179,6 +179,8 @@ type
     mnuViewLabReports: TMenuItem;
     btnViewReport: TBitBtn;
     mnuUploadLabPDF: TMenuItem;
+    mnuViewInBrowser: TMenuItem;
+    procedure mnuViewInBrowserClick(Sender: TObject);
     procedure mnuUploadLabPDFClick(Sender: TObject);
     procedure Action1Click(Sender: TObject);
     procedure mnuViewLabReportsClick(Sender: TObject);
@@ -309,6 +311,7 @@ type
     procedure CommonComponentVisible(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12: Boolean);
     procedure BlankWeb;
     procedure CheckForHiddenRows();   //tmg  3/12/19
+    function GridVisibleHeight(aGrid : TStringGrid) : integer;  //TMG 10/25/21
   public
     procedure ClearPtData; override;
     function AllowContextChange(var WhyNot: string): Boolean; override;
@@ -320,6 +323,7 @@ type
     //procedure ExtlstReportsClick(Sender: TObject; Ext: boolean);
     function GetCurrentLabs : tLabsInfoRec;
     function GetCurrentDate : string;                           //kt added 5/19
+    function GetCurrentDateTime: string;                        //kt added 11/21
     function InfoToHTMLTable(LabInfo: tLabsInfoRec) : string;   //kt added 2/17
     function GetCurrentLabsHTMLTable : string;                  //kt added 2/17
     function GetAbnormalCurrentLabsHTMLTable : string;          //kt added 2/17
@@ -561,6 +565,7 @@ var
   i: integer;
 begin
   Result := inherited AllowContextChange(WhyNot);  // sets result = true
+
   if Timer1.Enabled = true then
     case BOOLCHAR[frmFrame.CCOWContextChanging] of
       '1': begin
@@ -749,7 +754,8 @@ procedure TfrmLabs.SetFontSize(NewFontSize: Integer);
 var
   pnlRightTopPct: Real;
   frmLabsHeight, pnlRightHeight: Integer;
-
+  TMGHeight:integer;
+  TMGMinHeight:integer;
 begin
   pnlRightTopPct := (pnlRightTop.Height / (pnlRight.Height - (sptHorzRight.Height + pnlRightTopHeader.Height)));
   pnlRightTop.Constraints.MaxHeight := 20;
@@ -767,7 +773,11 @@ begin
   frmLabsHeight := frmFrame.pnlPatientSelectedHeight - (frmFrame.pnlToolbar.Height + frmFrame.stsArea.Height + frmFrame.tabPage.Height + 2);
   pnlRightHeight := frmLabsHeight;
   pnlRightTop.Constraints.MaxHeight := 0;
-  pnlRightTop.Height := (Round((pnlRight.Height - (sptHorzRight.Height + pnlRightTopHeader.Height)) * pnlRightTopPct) - 14);
+  pnlRightTop.Height := (Round((pnlRight.Height - (sptHorzRight.Height + pnlRightTopHeader.Height)) * pnlRightTopPct) - 14);  //TMG added below  10/22/21
+  TMGHeight := GridVisibleHeight(grdLab);
+  if pnlRightTop.Height > TMGHeight then pnlRightTop.Height := TMGHeight;  //kt added 12/15
+  TMGMinHeight := round((grdLab.font.size * 12.5)+2); //TMG 10/25/21
+  if pnlRightTop.Height<TMGMinHeight then pnlRightTop.Height:=TMGMinHeight;  //TMG 10/25/21
   if frmFrame.Height <> frmFrame.frmFrameHeight then
   begin
     pnlRight.Height := pnlRightHeight;
@@ -2232,6 +2242,18 @@ begin
   amemo.SelStart := 0;
 end;
 
+function TfrmLabs.GridVisibleHeight(aGrid : TStringGrid) : integer;
+//kt added this subfunction  12/23/15
+//moved to stand alone function 10/25/21
+var i : integer;
+begin
+  Result := 0;
+  for i := 0 to aGrid.RowCount - 1 do begin
+    //Result := Result + aGrid.RowHeights[i] + ((aGrid.DefaultRowHeight-15)*2); //aGrid.GridLineWidth;
+    Result := Result + aGrid.RowHeights[i] + aGrid.GridLineWidth;
+  end;
+end;
+
 procedure TfrmLabs.GetInterimGrid(adatetime: TFMDateTime; direction: integer);
 var
   tmpList: TStringList;
@@ -2239,16 +2261,8 @@ var
   newest, oldest, DisplayDate, aCollection, aSpecimen, aX: string;
   i,ix: integer;
   TMGHeight : integer;
-
-  function GridVisibleHeight(aGrid : TStringGrid) : integer;
-  //kt added this subfunction  12/23/15
-  var i : integer;
-  begin
-    Result := 0;
-    for i := 0 to aGrid.RowCount - 1 do begin
-      Result := Result + aGrid.RowHeights[i] + aGrid.GridLineWidth;
-    end;
-  end;
+  TMGMinHeight:integer;
+  pnlRightTopPct : Real;
 begin
   tmpList := TStringList.Create;
   GetNewestOldest(Patient.DFN, newest, oldest);  //****** PATCH
@@ -2369,6 +2383,9 @@ begin
         FillComments(memLab, tmpList);
         pnlRightTop.Height := pnlRight.Height - (pnlRight.Height div 5);
         if pnlRightTop.Height > TMGHeight then pnlRightTop.Height := TMGHeight;  //kt added 12/15
+        TMGMinHeight := round((grdLab.font.size * 12.5)+2); //TMG 10/25/21
+        if pnlRightTop.Height<TMGMinHeight then pnlRightTop.Height:=TMGMinHeight;  //TMG 10/25/21
+        //if pnlRightTop.Height<TMGMinHeight then pnlRightTop.Height := TMGMinHeight; //10/25/21
         sptHorzRight.Top := pnlRightTop.Height;
         uScreenSplitLoc := sptHorzRight.Top;
         pnlRightBottom.Height := pnlLeft.Height div 5;
@@ -2430,6 +2447,7 @@ begin
     else if cmdPrev.Enabled then cmdPrev.SetFocus
     else tvReports.SetFocus;
   end;
+  if assigned(frmSingleNote) then frmSingleNote.UpdateButtons;  
 end;
 
 procedure TfrmLabs.cmdPrevClick(Sender: TObject);
@@ -2446,6 +2464,7 @@ begin
     else if cmdNext.Enabled then cmdNext.SetFocus
     else tvReports.Setfocus;  
   end;
+  if assigned(frmSingleNote) then frmSingleNote.UpdateButtons; 
 end;
 
 procedure TfrmLabs.WorksheetChart(test: string; aitems: TStrings);
@@ -2589,6 +2608,7 @@ begin
   GetInterimGrid(FMToday + 0.2359, 1);
   StatusText('');
   if HadFocus and cmdPrev.Enabled then cmdPrev.SetFocus;
+  if assigned(frmSingleNote) then frmSingleNote.UpdateButtons;
 end;
 
 procedure TfrmLabs.cmdOldClick(Sender: TObject);
@@ -2602,6 +2622,7 @@ begin
   GetInterimGrid(2700101, -1);
   if HadFocus and cmdNext.Enabled then cmdNext.SetFocus;
   StatusText('');
+  if assigned(frmSingleNote) then frmSingleNote.UpdateButtons;
 end;
 
 procedure TfrmLabs.FormResize(Sender: TObject);
@@ -3230,7 +3251,7 @@ var
   DT, AlertData : string;  //kt added
   FMDT : TFMDateTime;  //kt added
 begin
-  AlertData := Notifications.AlertData;  //kt
+  AlertData := Notifications.AlertData;  //kt   e.g. '0@OR|;3211101.0755;0;CH;6788897.9245@LRCH'
   //kt OrderIFN                := Piece(Notifications.AlertData, '@', 1);
   OrderIFN                := Piece(AlertData, '@', 1);
   if StrToIntDef(OrderIFN,0) > 0 then begin
@@ -5234,6 +5255,31 @@ begin
   InFile.Free;
 end;
 
+procedure TfrmLabs.mnuViewInBrowserClick(Sender: TObject);
+var
+   TableHTML: TStringList;
+   ReportText: string;
+   TempFile: string;
+begin
+  inherited;
+
+   TableHTML := TStringList.create;
+   TempFile := UniqueCacheFName('Labs-('+Patient.DFN+').html');
+   try
+      ReportText := '<font face="Consolas">'+GetCurrentLabsHTMLTable+'</font>';
+      //ReportText := StringReplace(ReportText, #$D#$A,'<BR>', [rfReplaceAll]);
+      //ReportText := StringReplace(ReportText, '<pre>','', [rfReplaceAll]);
+      //ReportText := StringReplace(ReportText, '</pre>','', [rfReplaceAll]);
+     //NoteText := StringReplace(HtmlViewer.GetFullHTMLText,CacheDir+'\','',[rfReplaceAll, rfIgnoreCase]);
+     TableHTML.add(ReportText);
+     //MyHTML.add(HtmlViewer.GetFullHTMLText);
+     TableHTML.SaveToFile(TempFile);
+    finally
+     TableHTML.Free;
+    end;
+   ShellExecute(Handle, 'open',PChar(TempFile),PChar(''),'', SW_SHOWNORMAL) ;
+end;
+
 procedure TfrmLabs.mnuViewLabReportsClick(Sender: TObject);
 var InitFMDateTime : TFMDateTime;
 begin
@@ -5264,6 +5310,14 @@ begin
   Result := piece(LabInfo.Date,' ',1);
 end;
 
+function TfrmLabs.GetCurrentDateTime: string;  //TMG 11/9/21
+var
+  LabInfo: tLabsInfoRec;
+begin
+  LabInfo := GetCurrentLabs;
+  Result := LabInfo.Date;
+  if ansipos('00:00:00',Result)>1 then Result := piece(Result,' ',1);
+end;
 
 function TfrmLabs.InfoToHTMLTable(LabInfo: tLabsInfoRec) : string;
 //kt added 2/17
@@ -5287,13 +5341,13 @@ function TfrmLabs.InfoToHTMLTable(LabInfo: tLabsInfoRec) : string;
 }
 
 var
-  i,j : integer;
+  i,j,k : integer;
   s : string;
   HasData, HasNotes : boolean;
 const
  BG_COLOR = '#ffffe6';
 begin
-  result := '';
+  result := '<font face="Consolas">';
   HasNotes := (LabInfo.Notes.Count>0);
   HasData := (LabInfo.Data.Count>0);
   //Build the header
@@ -5313,12 +5367,14 @@ begin
     result := result+'</table>';  //end table
   end;
   if HasNotes then begin
-    result := result+'<table border=1 bgcolor='+BG_COLOR+'><tr><td><pre>';
-    result := result + LabInfo.Notes.Text;
-    result := result+'</pre></td></tr></table>';
+    result := result+'<table border=1 RULES=NONE FRAME=BOX CELLSPACING=0 bgcolor='+BG_COLOR+'><tr><td>';  //<pre>';
+    for k := 0 to LabInfo.Notes.Count - 1 do
+      result := result + StringReplace(LabInfo.Notes[k],' ','&nbsp;',[rfReplaceAll]) + '<br>';
+      //result := result + '<tr><td><pre>' + LabInfo.Notes[k] + '</pre></td></tr>';
+    result := result+'</td></tr></table>';
   end;
   if (HasNotes and HasData) then result := result+'</tr></td></table>';
-  if result <> '' then result := result + '<BR>'
+  if result <> '' then result := result + '</font><BR>'
 end;
 
 

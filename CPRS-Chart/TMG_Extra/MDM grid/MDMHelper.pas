@@ -3,8 +3,8 @@ unit MDMHelper;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Buttons, ExtCtrls, Math, StrUtils, rTemplates,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, VAUtils,
+  Dialogs, StdCtrls, Buttons, ExtCtrls, Math, StrUtils, rTemplates, ORNet, uCore,
   CollapsablePanelU;
 
 type
@@ -84,6 +84,13 @@ type
     pnlOldCPE: TPanel;
     rgOldCPE: TRadioGroup;
     memOldCPE: TMemo;
+    btnRefreshTime1: TButton;
+    Button1: TButton;
+    Button2: TButton;
+    lblChargeDetails: TLabel;
+    procedure Button2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure btnRefreshTime1Click(Sender: TObject);
     procedure rgOldCPEClick(Sender: TObject);
     procedure rgNewCPEClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
@@ -153,6 +160,11 @@ type
     cpComplexity : TCollapsablePanel;
     cpTestsData : TCollapsablePanel;
     cpRisk : TCollapsablePanel;
+    CPTAvgPayments : TStringList;
+    ChargeStr99212 : String;
+    ChargeStr99213 : String;
+    ChargeStr99214 : String;
+    ChargeStr99215 : String;
     procedure FreePanel(var APanel: TCollapsablePanel);
     procedure ClearMDMView;
     procedure ClearTimeView;
@@ -179,6 +191,7 @@ type
     procedure MakeTextTable(SL : TStringList);
     procedure MakeHTMLTable(SL : TStringList);
     function HTMLSpc(n : integer  = 1) : string;
+    procedure LoadPaymentInformation(CPTAvgPayments:TStringList);
   public
     { Public declarations }
     property CPT : string read GetCPTOutput;
@@ -279,6 +292,13 @@ begin
   Result := NumOf3(Bool1, Bool2, false);
 end;
 
+procedure TfrmMDMGrid.btnRefreshTime1Click(Sender: TObject);
+begin
+  memNewPtTimeInfo.Lines.Clear;
+  memNewPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
+  GetTemplateText(memNewPtTimeInfo.Lines);
+end;
+
 procedure TfrmMDMGrid.btnReviewDocsHelpClick(Sender: TObject);
 begin
   MessageDlg('An “external” note includes records, notes, ' + CRLF +
@@ -290,6 +310,20 @@ begin
   MessageDlg('A single “unique test” for coding purposes includes panels.' + CRLF +
              'E.g., a basic metabolic panel is considered a single unique test.',
              mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmMDMGrid.Button1Click(Sender: TObject);
+begin
+  memOldPtTimeInfo.Lines.Clear;
+  memOldPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE W MSG|');
+  GetTemplateText(memOldPtTimeInfo.Lines);
+end;
+
+procedure TfrmMDMGrid.Button2Click(Sender: TObject);
+begin
+  memTelemedTimeAmount.Lines.Clear;
+  memTelemedTimeAmount.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
+  GetTemplateText(memTelemedTimeAmount.Lines);
 end;
 
 procedure TfrmMDMGrid.btnCancelClick(Sender: TObject);
@@ -399,9 +433,65 @@ begin
 
   cpPanelNewOrOldPt.OpenState := OpenPanel;
 
+  {
   memBillingModeHint.lines.add('|TMG MDM HELPER TEXT|');
   GetTemplateText(memBillingModeHint.Lines);
+  if pos('NOTE',memBillingModeHint.Lines.Text)>0 then memBillingModeHint.Color := clRed
+  else memBillingModeHint.Color := clSkyBlue;
+  }
 
+  CPTAvgPayments := TStringList.Create();
+  tCallV(CPTAvgPayments,'TMG CPRS GET AVG INS CHARGES',[Patient.DFN]);
+  LoadPaymentInformation(CPTAvgPayments);
+  CPTAvgPayments.Free;
+end;
+
+procedure TfrmMDMGrid.LoadPaymentInformation(CPTAvgPayments:TStringList);
+   procedure ReplaceControlText(Control:TRadioGroup; Text:string);
+   var CPT,Avg,High,Low,Charge : string;
+       i : integer;
+   begin
+      CPT := piece(Text,'^',1);
+      Charge := piece(Text,'^',2);
+      Avg := piece(Text,'^',3);
+      High := piece(Text,'^',4);
+      Low := piece(Text,'^',5);
+      for i := 0 to Control.ControlCount-1 do begin
+         if pos(CPT,TRadioButton(Control.Controls[i]).Caption)>0 then begin
+            if pos('99417',TRadioButton(Control.Controls[i]).Caption)>0 then continue;
+            TRadioButton(Control.Controls[i]).Caption := piece2(TRadioButton(Control.Controls[i]).Caption,CPT,1)+CPT+' [Avg $'+Avg+'] '+piece2(TRadioButton(Control.Controls[i]).Caption,CPT,2);
+            TRadioButton(Control.Controls[i]).Hint := 'Charge: $'+Charge+' Avg: $'+Avg+' High: $'+High+' Low: $'+Low;
+            TRadioButton(Control.Controls[i]).ShowHint := True;
+         end;
+      end;
+   end;
+
+   function AddChargeStrToVariable(Text:string):string;
+   var CPT,Avg,High,Low,Charge : string;
+   begin
+     CPT := piece(Text,'^',1);
+     Charge := piece(Text,'^',2);
+     Avg := piece(Text,'^',3);
+     High := piece(Text,'^',4);
+     Low := piece(Text,'^',5);
+     Result := 'Charge: $'+Charge+' Avg: $'+Avg+' High: $'+High+' Low: $'+Low;
+   end;
+var
+  i : integer;
+  CPT:string;
+begin
+  for I := 0 to CPTAvgPayments.Count - 1 do begin
+      CPT := piece(CPTAvgPayments[i],'^',1);
+      if CPT='99212' then ChargeStr99212 := AddChargeStrToVariable(CPTAvgPayments[i]);
+      if CPT='99213' then ChargeStr99213 := AddChargeStrToVariable(CPTAvgPayments[i]);
+      if CPT='99214' then ChargeStr99214 := AddChargeStrToVariable(CPTAvgPayments[i]);
+      if CPT='99215' then ChargeStr99215 := AddChargeStrToVariable(CPTAvgPayments[i]);
+      ReplaceControlText(rgOldCPE,CPTAvgPayments[i]);
+      ReplaceControlText(rgNewCPE,CPTAvgPayments[i]);
+      ReplaceControlText(rgTelemedTimeAmount,CPTAvgPayments[i]);
+      ReplaceControlText(rgNewPtTimeAmount,CPTAvgPayments[i]);
+      ReplaceControlText(rgOldPtTimeAmount,CPTAvgPayments[i]);
+  end;
 end;
 
 procedure TfrmMDMGrid.FormDestroy(Sender: TObject);
@@ -784,6 +874,11 @@ begin
   MakeHTMLTable(FTableStrings);
 
   FOverallCPTOutput := TempResult;
+  lblChargeDetails.Caption := '';
+  if TempResult = '99212' then lblChargeDetails.Caption := ChargeStr99212;
+  if TempResult = '99213' then lblChargeDetails.Caption := ChargeStr99213;
+  if TempResult = '99214' then lblChargeDetails.Caption := ChargeStr99214;
+  if TempResult = '99215' then lblChargeDetails.Caption := ChargeStr99215;
   FOverallNarrative := Narrative;
   lblResultValue.Caption := TempResult;
   btnOK.Enabled := (TempResult <> '');
@@ -1062,7 +1157,7 @@ begin
 end;
 
 procedure TfrmMDMGrid.rgNewOrOldPatientClick(Sender: TObject);
-var s : string;
+var s,TiuTemplate : string;
 begin
   if not assigned(cpBillingMode) then begin
     cpBillingMode := TCollapsablePanel.Create(sbMain, cpPanelNewOrOldPt, OpensUpDown, pnlBillingMode);
@@ -1082,6 +1177,15 @@ begin
   s := NEW_OR_OLD_PATIENT_NAMES[FPatientType];
   FPatientTypeText := s;
   cpPanelNewOrOldPt.ClosedCaption := s;
+
+  if FPatientType=ptNew then TiuTemplate := 'TMG MDM NEW HELPER TEXT'
+  else TiuTemplate := 'TMG MDM HELPER TEXT';
+
+  memBillingModeHint.Lines.Clear;
+  memBillingModeHint.lines.add('|'+TiuTemplate+'|');
+  GetTemplateText(memBillingModeHint.Lines);
+  if pos('NOTE',memBillingModeHint.Lines.Text)>0 then memBillingModeHint.Color := clRed
+  else memBillingModeHint.Color := clSkyBlue;
 
   cpPanelNewOrOldPt.OpenState := ClosedPanel;
   if assigned(cpPanelNewOrOldPt.UnitAfter) then cpPanelNewOrOldPt.UnitAfter.OpenState := OpenPanel;

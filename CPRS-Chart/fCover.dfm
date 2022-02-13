@@ -9,8 +9,9 @@ inherited frmCover: TfrmCover
   HelpFile = 'overvw'
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 648
-  ExplicitHeight = 388
+  ExplicitTop = -38
+  ExplicitWidth = 640
+  ExplicitHeight = 384
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -32,8 +33,6 @@ inherited frmCover: TfrmCover
     BevelOuter = bvNone
     Constraints.MinHeight = 10
     TabOrder = 0
-    ExplicitWidth = 640
-    ExplicitHeight = 356
     object sptBottom: TSplitter
       Left = 0
       Top = 226
@@ -54,8 +53,6 @@ inherited frmCover: TfrmCover
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitWidth = 640
-      ExplicitHeight = 237
       object sptTop: TSplitter
         Left = 0
         Top = 120
@@ -75,7 +72,6 @@ inherited frmCover: TfrmCover
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 640
         object spt_2: TSplitter
           Left = 416
           Top = 0
@@ -94,7 +90,6 @@ inherited frmCover: TfrmCover
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 424
           object spt_1: TSplitter
             Left = 211
             Top = 0
@@ -155,7 +150,6 @@ inherited frmCover: TfrmCover
             BevelOuter = bvNone
             TabOrder = 1
             Visible = False
-            ExplicitWidth = 208
             object lbl_2: TOROffsetLabel
               Left = 0
               Top = 0
@@ -198,7 +192,6 @@ inherited frmCover: TfrmCover
           BevelOuter = bvNone
           TabOrder = 1
           Visible = False
-          ExplicitLeft = 429
           object lbl_3: TOROffsetLabel
             Left = 0
             Top = 57
@@ -299,8 +292,6 @@ inherited frmCover: TfrmCover
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 640
-        ExplicitHeight = 112
         object spt_3: TSplitter
           Left = 318
           Top = 0
@@ -319,7 +310,6 @@ inherited frmCover: TfrmCover
           BevelOuter = bvNone
           TabOrder = 0
           Visible = False
-          ExplicitHeight = 112
           object lbl_4: TOROffsetLabel
             Left = 0
             Top = 0
@@ -350,7 +340,8 @@ inherited frmCover: TfrmCover
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '35'
-            ExplicitHeight = 99
+            ExplicitLeft = -1
+            ExplicitTop = 19
           end
         end
         object pnl_5: TPanel
@@ -362,8 +353,6 @@ inherited frmCover: TfrmCover
           BevelOuter = bvNone
           TabOrder = 1
           Visible = False
-          ExplicitWidth = 317
-          ExplicitHeight = 112
           object lbl_5: TOROffsetLabel
             Left = 0
             Top = 0
@@ -395,8 +384,6 @@ inherited frmCover: TfrmCover
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '34,44'
-            ExplicitWidth = 317
-            ExplicitHeight = 99
           end
         end
       end
@@ -409,8 +396,6 @@ inherited frmCover: TfrmCover
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitTop = 242
-      ExplicitWidth = 640
       object spt_5: TSplitter
         Left = 372
         Top = 0
@@ -429,7 +414,6 @@ inherited frmCover: TfrmCover
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 380
         object spt_4: TSplitter
           Left = 255
           Top = 0
@@ -488,7 +472,6 @@ inherited frmCover: TfrmCover
           BevelOuter = bvNone
           TabOrder = 1
           Visible = False
-          ExplicitWidth = 120
           object lbl_7: TOROffsetLabel
             Left = 0
             Top = 0
@@ -519,7 +502,6 @@ inherited frmCover: TfrmCover
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '4,13,15,24'
-            ExplicitWidth = 120
           end
         end
       end
@@ -532,7 +514,6 @@ inherited frmCover: TfrmCover
         BevelOuter = bvNone
         TabOrder = 1
         Visible = False
-        ExplicitLeft = 385
         object lbl_8: TOROffsetLabel
           Left = 0
           Top = 0

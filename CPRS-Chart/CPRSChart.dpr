@@ -417,7 +417,8 @@ uses
   CollapsablePanelU in 'TMG_Extra\MDM grid\CollapsablePanelU.pas',
   fFrame in 'fFrame.pas' {frmFrame},
   fProbs in 'fProbs.pas' {frmProblems},
-  uVA508CPRSCompatibility in 'uVA508CPRSCompatibility.pas';
+  uVA508CPRSCompatibility in 'uVA508CPRSCompatibility.pas',
+  fConfirmTimer in 'TMG_Extra\fConfirmTimer.pas' {frmConfirmTimer};
 
 {$R *.TLB}
 
@@ -437,9 +438,10 @@ begin
     Application.Title := 'CPRS - Patient Chart';
     Application.HelpFile := 'cprs.hlp';
     Application.CreateForm(TdmodShared, dmodShared);
-    Application.CreateForm(TfrmFrame, frmFrame);
-    Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
-    if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
+  Application.CreateForm(TfrmFrame, frmFrame);
+  Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
+  Application.CreateForm(TfrmConfirmTimer, frmConfirmTimer);
+  if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;
   end;
 end.

@@ -12,6 +12,7 @@ object frmViewLabPDF: TfrmViewLabPDF
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -123,6 +124,7 @@ object frmViewLabPDF: TfrmViewLabPDF
       Caption = '     &Done'
       ModalResult = 1
       TabOrder = 0
+      OnClick = btnDoneClick
       Glyph.Data = {
         42240000424D4224000000000000420000002800000030000000300000000100
         20000300000000240000130B0000130B000000000000000000000000FF0000FF

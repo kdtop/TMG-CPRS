@@ -49,7 +49,9 @@ uses
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
   uNoteComponents,                                    //kt 4/15
+  pngimage,                                           //kt 12/28/21
   rFileTransferU, uImages,ShellApi,                   //kt 10/27/20
+  TMG_WIA_TLB,
   OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
@@ -278,6 +280,11 @@ type
     mnuMoveToLoose: TMenuItem;
     popNoteViewInBrowser2: TMenuItem;
     mnuViewThisScanInBrowser: TMenuItem;
+    btnRotateCW: TSpeedButton;
+    btnRotateCCW: TSpeedButton;
+    Label1: TLabel;
+    procedure btnRotateCCWClick(Sender: TObject);
+    procedure btnRotateCWClick(Sender: TObject);
     procedure popNoteViewInBrowser2Click(Sender: TObject);
     procedure mnuMoveToLooseClick(Sender: TObject);
     procedure popNoteViewInBrowserClick(Sender: TObject);
@@ -592,7 +599,11 @@ type
     function tvIndexOfNode(Node : TORTreeNode) : integer;                          //kt 4/15
     procedure IdentifyAddlSigners(NoteIEN : int64; ARefDate: TFMDateTime);         //kt 2/17
     function WMReplaceHTMLText(TagToReplace,ReplacementText:string):string;        //kt 5/9/19
-    function MoveTIUToLoose(DFN,TIUIEN,Title: string):boolean;                         //kt 3/2/21
+    function MoveTIUToLoose(DFN,TIUIEN,Title: string; AskReTitle : boolean = true):boolean;                         //kt 3/2/21
+    procedure CheckForLock();    //kt   11/11/21
+    procedure RotateAllImages(TIUIEN:string;Degrees:integer;var HTML:string);  //kt 12/28/21
+    procedure RotateImage(FileName,NewFileName:string;Degrees: integer);   //kt 12/28/21
+    procedure RotateImagesInOneNote(Degrees:integer);  //kt 12/28/21
   published
     property Drawers: TFrmDrawers read GetDrawers; // Keep Drawers published
     property HTMLEditMode: TEditModes read FHTMLEditMode;
@@ -1325,7 +1336,7 @@ var
   tempPos : integer;            //kt 9/11
   Mode : TViewModeSet;          //kt 9/11
   BoilerplateIsHTML : boolean;  //kt 9/11
-
+  Highlight : string; //11/4/21
 begin
   if frmFrame.Timedout then Exit;
 
@@ -1412,9 +1423,10 @@ begin
         //x := $$RESOLVE^TIUSRVLO formatted string
         //7348^Note Title^3000913^NERD, YOURA  (N0165)^1329;Rich Vertigan;VERTIGAN,RICH^8E REHAB MED^complete^Adm: 11/05/98;2981105.095547^        ;^^0^^^2
         with FEditNote do begin
+          HighLight    := sCallV('TMG TIU GET HIGHLIGHT',[FEditNote.Title]);  //11/4/21
           x := IntToStr(CreatedNote.IEN) + U + TitleName + U + FloatToStr(FEditNote.DateTime) + U +
                Patient.Name + U + IntToStr(Author) + ';' + AuthorName + U + LocationName + U + 'new' + U +
-               U + U + U + U + U + U + U;
+               U + U + U + U + U + U + U + U + '' + Highlight;   //Added Highlight  11/4/21  //TMG
           //Link Note to PRF Action
           if PRF_IEN <> 0 then begin
             if sCallV('TIU LINK TO FLAG', [CreatedNote.IEN,PRF_IEN,ActionIEN,Patient.DFN]) = '0' then begin
@@ -5542,19 +5554,21 @@ begin
   }
 end;
 
-function TfrmNotes.MoveTIUToLoose(DFN,TIUIEN,Title: string):boolean;
+function TfrmNotes.MoveTIUToLoose(DFN,TIUIEN,Title: string; AskReTitle : boolean = true) : boolean;
 var RPCResult : string;
 begin
-  Result := False;
+  Result := False;  //default failure result.
   //Removed per Dr. K's request   5/6/21  if messagedlg('Are you sure you want to move this unsigned note to loose documents?',mtconfirmation,[mbYes,mbNo],0)<>mrYes then exit;
-  Title := inputbox('Move to Loose Documents','What would you like to call this file?',Title);
+  if AskReTitle then begin
+    Title := InputBox('Move to Loose Documents','What would you like to call this file?',Title);
+  end;
   if Title='' then exit;
   Title := StringReplace(Title,' ','_',[rfReplaceAll]);
   //Title := StringReplace(Title,'/','-',[rfReplaceAll]);
   //Title := StringReplace(Title,'\','-',[rfReplaceAll]);
   RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[DFN,TIUIEN,Title]);
   if piece(RPCResult,'^',1)='-1' then begin
-    messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
+    Messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
   end else begin
     Result := True;
   end;
@@ -6337,6 +6351,43 @@ begin
   HtmlEditor.AlignRight;
 end;
 
+procedure TfrmNotes.btnRotateCCWClick(Sender: TObject);
+begin
+  inherited;
+  btnRotateCCW.enabled := false;
+  RotateImagesInOneNote(-90);
+  btnRotateCCW.enabled := true;
+end;
+
+procedure TfrmNotes.btnRotateCWClick(Sender: TObject);
+begin
+  btnRotateCW.enabled := false;
+  RotateImagesInOneNote(90);
+  btnRotateCW.enabled := true;
+end;
+
+procedure TfrmNotes.RotateImagesInOneNote(Degrees:integer);
+var
+  DataStr,IEN:string;
+  HTML:string;
+begin
+  inherited;
+  DataStr := TORTreeNode(tvNotes.Selected).StringData;
+  IEN := piece(DataStr,'^',1);
+  HTML := HTMLViewer.GetFullHTMLText;
+  RotateAllImages(IEN,Degrees,HTML);
+  if pos('width=640',HTML)>0 then begin
+    HTML := stringreplace(HTML,'width=640','width=836',[rfReplaceAll,rfIgnoreCase]);
+    HTML := stringreplace(HTML,'height=836','height=640',[rfReplaceAll,rfIgnoreCase]);
+  end else if pos('width=836',HTML)>0 then begin
+    HTML := stringreplace(HTML,'width=836','width=640',[rfReplaceAll,rfIgnoreCase]);
+    HTML := stringreplace(HTML,'height=640','height=836',[rfReplaceAll,rfIgnoreCase]);
+  end;
+  HTMLViewer.HTMLText := HTML;
+  HTMLViewer.Repaint;         //repaint so position can be set properly
+  Application.Processmessages;
+end;
+
 procedure TfrmNotes.btnSaveClick(Sender: TObject);
 begin
   inherited;
@@ -7026,7 +7077,118 @@ begin
   messagedlg(piece(RPCResult,'^',2),mterror,[mbOK],0);
 end;
 
+procedure TfrmNotes.CheckForLock();    //kt
+var NoteUnlocked:boolean;
+begin
+  //NoteUnlocked := Changes.Exist(CH_DOC, lstNotes.ItemID);
+  //if not NoteUnlocked then
+  //if EditingIndex <> -1 then
+  if lstNotes.ItemIEN>0 then UnlockDocument(lstNotes.ItemIEN);
+end;
 
+procedure TfrmNotes.RotateAllImages(TIUIEN:string;Degrees:integer;var HTML:string);   //12/28/21
+    function UniqueFilename(FolderPath,FileName : string) : string;
+    var Index: integer;
+        IndexStr : string;
+        FileSuffix : string;
+    begin
+      FileSuffix := piece(FileName,'.',2);
+      FileName := piece(FileName,'.',1);
+      FileName := stringreplace(FileName,'_','',[rfReplaceAll,rfIgnoreCase]);
+      index := 0;
+      IndexStr := '';
+      repeat
+        Result := FolderPath + '\' + FileName + IndexStr + '.' + FileSuffix;
+        inc(index);
+        IndexStr := '_' + IntToStr(index);
+      until not FileExists(Result);
+    end;
+var
+  i,j  : integer;
+  NumOfPieces,Piece:integer;
+  FileName : string;
+  FilePathName : string;
+  TempFileName : string;
+  Rec  : TImageInfo;
+  BrokerResults: TStringList;
+  CacheDir:string;
+begin
+  CacheDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
+  //CallV('MAG3 CPRS TIU NOTE', [TIUIEN]);
+  //BrokerResults := TStringList.Create;
+  //BrokerResults.Assign(RPCBrokerV.Results);
+  //for i:=1 to (BrokerResults.Count-1) do begin
+  Piece := 2;
+  FileName := piece2(piece2(HTML,'src="',Piece),'"',1);
+  repeat
+    //FileName := piece(BrokerResults.Strings[i],'^',3);
+    //NumOfPieces := NumPieces(FileName,'/');
+    //FileName := piece(FileName,'/',NumOfPieces);
+    FileName := stringreplace(FileName,'/','\',[rfReplaceAll,rfIgnoreCase]);
+    FileName := extractfilename(FileName);
+    FilePathName := CacheDir+'\'+FileName;
+    if fileexists(FilePathName) then begin
+      TempFileName := UniqueFileName(CacheDir,FileName);
+      RotateImage(FilePathName,TempFileName,Degrees);
+      TempFileName := extractfilename(TempFileName);
+      HTML := stringreplace(HTML,FileName,TempFileName,[rfReplaceAll,rfIgnoreCase]);
+    end;
+    piece := piece+1;
+    FileName := piece2(piece2(HTML,'src="',Piece),'"',1);
+  until FileName = '';
+  //end;
+  HtmlViewer.Repaint;
+end;
+
+procedure TfrmNotes.RotateImage(FileName,NewFileName:string;Degrees: integer);    //12/28/21
+    procedure AddFilter(IP : IImageProcess; Name : string; Index : integer=0);
+    var  FilterID : WideString;
+         v : OleVariant;
+    begin
+      v := Name;
+      FilterID := IP.FilterInfos[v].FilterID;  //v has to be an OleVariant
+      IP.Filters.Add(FilterID,Index);
+    end;
+
+    procedure SetProperty2(IP : IImageProcess; Name, Value : string; Index : integer=1);
+    var  AProperty : IProperty;
+         v : OleVariant;
+    begin
+      v := Name;
+      AProperty := IP.Filters.Item[Index].Properties.Item[v]; //v has to be an OleVariant
+      v := Value;
+      AProperty.Value := v;  //v has to be an OleVariant
+    end;
+
+    procedure SetProperty(IP : IImageProcess; Name : String; Value : Integer; Index : integer=1);
+    var ValueStr : string;
+    begin
+      ValueStr :=IntToStr(Value);
+      SetProperty2(IP, Name, ValueStr, Index);
+    end;
+
+  var
+    Image : IImageFile;
+    ImageProcess : IImageProcess;
+    AProperty : IProperty;
+    FilterID : WideString;
+    v : OleVariant;
+
+  begin
+    While Degrees < 0 do Degrees := Degrees + 360;
+    Image := CoImageFile.Create;
+    ImageProcess := CoImageProcess.Create;
+    Image.LoadFile(FileName);
+
+    AddFilter(ImageProcess, 'RotateFlip');
+    SetProperty(ImageProcess, 'RotationAngle', Degrees);
+
+    Image := ImageProcess.Apply(Image);
+
+    //DeleteFile(FileName);
+    Image.SaveFile(NewFileName);
+
+end;
 
 initialization
   SpecifyFormIsNotADialog(TfrmNotes);
@@ -7039,5 +7201,6 @@ finalization
   if (uPCEShow <> nil) then uPCEShow.Free; //CQ7012 Added test for nil
 
 end.
+
 
 

@@ -535,7 +535,7 @@ begin
   Result := '-1'; //default to failure
   try
     if not assigned(frmBGGraphs) then begin
-      frmBGGraphs := TfrmGraphs.Create(application);
+      frmBGGraphs := TfrmGraphs.Create(application);     //note: Initialization from OnShow called via UpdateDisplay below.
       frmBGGraphs.TMGBackgroundMode := true;
       frmBGGraphs.Initialize;
       frmBGGraphs.BorderIcons := [biSystemMenu, biMaximize, biMinimize];
@@ -565,10 +565,8 @@ begin
     if SaveCanvasToFile(Bitmap.Canvas, Rect, FName) then begin
       Result := '1^'+FName;  //will hold location of output image
     end;
-    //Bitmap.SaveToFile(FName);
-    Result := '1^'+FName;  //will hold location of output image
   finally
-    //Bitmap.Free;
+    Bitmap.Free;  //kt removed comment out 8/31/21.  Why was this commented out before??
   end;
 end;
 
@@ -685,7 +683,7 @@ var Rect : TRect;
     TypeItem, ItemValue : string;
     i : integer;
     TempSL : TStringList;
-
+    BackgroundColor,TableHeader:string;
 begin
   inherited;
   if frmNotes.ActiveEditIEN <= 0 then begin
@@ -731,6 +729,9 @@ begin
     TempSL.Add('TMG_GraphAsOf='+DateTimeToStr(Now));
     if FName <> '' then begin
       HTML := GetInsertImgHTMLName(FName, TempSL);     //F
+      TableHeader := uTMGOptions.ReadString('Graph Header Text','AUTO REFRESHING GRAPH');
+      BackgroundColor := uTMGOptions.ReadString('Graph Outline Color','#FFFFE0');
+      HTML := '<table id="TMGAutoGraph" style="background-color:'+BackgroundColor+';"><th>'+TableHeader+'</th><tr><td>'+HTML+'</td></tr></table>';  //ELH added
       CopyHTMLToClipBoard('', HTML);
       MessageDlg('Updateable Graph has been added.  It can now be pasted into a note with Ctrl-V', mtInformation, [mbOK], 0);
     end;
@@ -1086,7 +1087,7 @@ end;
 
 procedure TfrmGraphs.FormShow(Sender: TObject);
 begin
-   UpdateDisplay;  //kt split FormShow into UpdateDisplay
+  UpdateDisplay;  //kt split FormShow into UpdateDisplay
 end;
 
 procedure TfrmGraphs.CheckContext(var usecontext: boolean);

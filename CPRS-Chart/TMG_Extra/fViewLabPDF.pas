@@ -62,6 +62,8 @@ type
     ORDateTimeDlg: TORDateTimeDlg;
     btnPrev: TBitBtn;
     btnNext: TBitBtn;
+    procedure btnDoneClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnPrevClick(Sender: TObject);
@@ -93,8 +95,8 @@ type
     { Public declarations }
   end;
 
- //var
- // frmViewLabPDF: TfrmViewLabPDF;  //not auto-intantiated.
+ var
+  frmViewLabPDF: TfrmViewLabPDF;  //not auto-intantiated.
 
 procedure ShowLabReport(InitFMDateTime : TFMDateTime);
 
@@ -115,14 +117,13 @@ tDatePick = (tdpOneDate=0,   //NOTE: These MUST match sequence if ITEMS of cboDi
 {$R *.dfm}
 
 procedure ShowLabReport(InitFMDateTime : TFMDateTime);
-var
-  frmViewLabPDF: TfrmViewLabPDF;
 begin
   frmViewLabPDF := TfrmViewLabPDF.Create(Application);
   frmViewLabPDF.Initialize(InitFMDateTime);
   frmViewLabPDF.InitialFMDateTime := InitFMDateTime;
-  frmViewLabPDF.ShowModal;
-  frmViewLabPDF.Free;
+  //frmViewLabPDF.ShowModal;
+  frmViewLabPDF.Show;
+  //frmViewLabPDF.Free;
 end;
 
 //=====================================================================
@@ -242,6 +243,11 @@ end;
 function TfrmViewLabPDF.LatestDate : TFMDateTime;
 begin
   Result := DateTimeToFMDateTime(EncodeDate(2200, 12, 30));
+end;
+
+procedure TfrmViewLabPDF.btnDoneClick(Sender: TObject);
+begin
+  Self.Close;
 end;
 
 procedure TfrmViewLabPDF.btnNextClick(Sender: TObject);
@@ -392,6 +398,12 @@ begin
   end;
 end;
 
+
+procedure TfrmViewLabPDF.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  frmViewLabPDF := nil;
+end;
 
 procedure TfrmViewLabPDF.FormShow(Sender: TObject);
 begin

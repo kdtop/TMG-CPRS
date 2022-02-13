@@ -11,7 +11,7 @@ uses
   Menus, ORCtrls, ActnList;
 
 type
-  tSNModes = (snmNone, snmLab, snmReport);
+  tSNModes = (snmNone, snmLab, snmReport, snmNurse);
 
   TfrmSingleNote = class(TForm)
     pnlButton: TPanel;
@@ -57,6 +57,16 @@ type
     NotePopupMenu: TPopupMenu;
     mnuSignNote: TMenuItem;
     popNoteMacro: TMenuItem;
+    cmdOld: TButton;
+    cmdPrev: TButton;
+    cmdNext: TButton;
+    cmdRecent: TButton;
+    lblMostRecent: TLabel;
+    lblThisDate: TLabel;
+    procedure cmdRecentClick(Sender: TObject);
+    procedure cmdPrevClick(Sender: TObject);
+    procedure cmdOldClick(Sender: TObject);
+    procedure cmdNextClick(Sender: TObject);
     procedure mnuSignNoteClick(Sender: TObject);
     procedure Action1Execute(Sender: TObject); //TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -118,7 +128,7 @@ type
     function VerifyNoteTitle: Boolean;
     function FontSize : integer;
     function LockNote(AnIEN : integer) : boolean;
-    procedure SignNote();
+    function SignNote():boolean;
     //procedure IdentifyAddlSigners();
     function EditorHasText : boolean;
     //function GetCurrentLabs : tLabsInfoRec;
@@ -139,6 +149,7 @@ type
     procedure HandleInsertDate(Sender: TObject);
     function AllowContextChange(var WhyNot: string): Boolean;
     procedure Initialize(Mode : tSNModes = snmNone);
+    procedure UpdateButtons;
   end;
 
 var
@@ -158,10 +169,11 @@ uses fImages, fSignItem, uConst, rSurgery, uTMGUtil, uCore,
 {$R *.dfm}
 
 const
-  DEFAULT_NOTE_TYPE : array[snmNone .. snmReport] of string = (
+  DEFAULT_NOTE_TYPE : array[snmNone .. snmNurse] of string = (
     '',
     'SINGLE NOTE LAB DEFAULT TYPE^1397|LAB/XRAYS/STUDIES RESULTS',
-    'SINGLE NOTE RAB DEFAULT TYPE^1397|LAB/XRAYS/STUDIES RESULTS'
+    'SINGLE NOTE RAB DEFAULT TYPE^1397|LAB/XRAYS/STUDIES RESULTS',
+    'SINGLE NOTE NURSE DEFAULT TYPE^2207|BRIEF NURSE NOTE'
   );
 
 
@@ -361,8 +373,9 @@ begin
       HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
     end else if frmSingleNote.FMode= snmReport then begin
       HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.');
-    end;  
+    end;
   end;
+  if FMode=snmLab then UpdateButtons;
 end;
 
 procedure TfrmSingleNote.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -396,10 +409,15 @@ end;
 function TfrmSingleNote.HandleClosing(FormClosing : boolean):boolean;   //changed to function in case of cancel response from user
 var Response:integer;
     EmptyNote : boolean;
+    Signed : boolean;
 begin
   result := True;
   if FSaveAndCloseTriggered then begin
-    SignNote;
+    Signed := SignNote;
+    if Signed=false then begin
+      result := false;
+      exit;
+    end;  
   end else begin
     EmptyNote := (HtmlEditor.GetTextLen = 0) or not HTMLContainsVisibleItems(HtmlEditor.HTMLText);
     if not EmptyNote then begin
@@ -705,8 +723,9 @@ begin
   end;
 end;
 
-procedure TfrmSingleNote.SignNote();
+function TfrmSingleNote.SignNote():boolean;
 { sign the currently selected note, save first if necessary }
+{returns success status}
 const
   SIG_COSIGN   = 'COSIGNATURE';
   SIG_SIGN     = 'SIGNATURE';
@@ -721,6 +740,7 @@ var
   NoteDisplayTitle : string;
 
 begin
+  result := false;
   NoteLocked := false;
   NoteDisplayTitle := GetEditNoteDisplay;
   HTMLText := HtmlEditor.HTMLText;
@@ -751,10 +771,11 @@ begin
       SignatureForItem(FontSize, NoteDisplayTitle, SignTitle, ESCode);
       SignSts.Success := false;
       if Length(ESCode) > 0 then SignDocument(SignSts, FEditIEN, ESCode);
+      result := (SignSts.Success=true);
       if SignSts.Success then begin
         if DisplayCosignerDialog(FEditIEN) then frmNotes.IdentifyAddlSigners(FEditIEN, FEditNote.DateTime);
       end else begin
-        InfoBox(SignSts.Reason, TX_SIGN_ERR, MB_OK);
+        //InfoBox(SignSts.Reason, TX_SIGN_ERR, MB_OK);
       end;
     end else begin
       InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
@@ -1137,6 +1158,12 @@ procedure TfrmSingleNote.Initialize(Mode : tSNModes = snmNone);
 begin
   //tSNModes = (snmNone, snmLab, snmReport);
   FMode := Mode;
+  lblMostRecent.Visible := (Mode=snmLab);
+  cmdOld.Visible := (Mode=snmLab);
+  cmdPrev.Visible := (Mode=snmLab);
+  lblThisDate.Visible := (Mode=snmLab);
+  cmdNext.Visible := (Mode=snmLab);
+  cmdRecent.Visible := (Mode=snmLab);
   case Mode of
     snmLab: begin
       btnFunc1.Caption := 'Copy Labs';
@@ -1147,6 +1174,7 @@ begin
       btnFunc3.Visible := true;
       btnFunc4.Caption := 'Pick Labs';
       btnFunc4.Visible := true;
+      pnlButton.height := 84;
     end;
     snmReport: begin
       btnFunc1.Caption := 'Copy Reports';
@@ -1154,6 +1182,15 @@ begin
       btnFunc2.Visible := false;
       btnFunc3.Visible := false;
       btnFunc4.Visible := false;
+      pnlButton.height := 57;
+    end;
+    snmNurse: begin
+      btnFunc1.Caption := 'Nurse Note';
+      btnFunc1.Visible := false;
+      btnFunc2.Visible := false;
+      btnFunc3.Visible := false;
+      btnFunc4.Visible := false;
+      pnlButton.height := 0;
     end;
   end;
 end;
@@ -1172,7 +1209,7 @@ begin
     end;
     snmReport: begin
       //for Reports: copy current report.
-      TableHTML := frmReports.GetCurrentReportHTMLTable;
+      TableHTML := '<font face="Consolas">'+frmReports.GetCurrentReportHTMLTable+'</font>';
       TableHTML := StringReplace(TableHTML, #$D#$A,'<BR>', [rfReplaceAll]);
       TableHTML := StringReplace(TableHTML, '<pre>','', [rfReplaceAll]);
       TableHTML := StringReplace(TableHTML, '</pre>','', [rfReplaceAll]);
@@ -1264,6 +1301,39 @@ begin
   HTMLEditor.FontSize := FontSizes[cbFontSize.ItemIndex];
 end;
 
+procedure TfrmSingleNote.cmdNextClick(Sender: TObject);
+begin
+   frmLabs.cmdNextClick(Sender);
+   UpdateButtons;
+end;
+
+procedure TfrmSingleNote.cmdOldClick(Sender: TObject);
+begin
+   frmLabs.cmdOldClick(Sender);
+   UpdateButtons;
+end;
+
+procedure TfrmSingleNote.cmdPrevClick(Sender: TObject);
+begin
+  frmLabs.cmdPrevClick(Sender);
+  UpdateButtons;
+end;
+
+procedure TfrmSingleNote.cmdRecentClick(Sender: TObject);
+begin
+  frmLabs.cmdRecentClick(Sender);
+  UpdateButtons;
+end;
+
+procedure TfrmSingleNote.UpdateButtons;
+begin
+   lblThisDate.Caption := 'Date: '+frmLabs.GetCurrentDateTime;
+   cmdRecent.Enabled := frmLabs.cmdRecent.Enabled;
+   cmdPrev.Enabled := frmLabs.cmdPrev.Enabled;
+   cmdOld.Enabled := frmLabs.cmdOld.Enabled;
+   cmdNext.Enabled := frmLabs.cmdNext.Enabled;
+end;
+
 procedure TfrmSingleNote.cbFontNamesChange(Sender: TObject);
 //kt 9/11 added function
 var i :  integer;
@@ -1302,4 +1372,5 @@ end;
 
 
 end.
+
 

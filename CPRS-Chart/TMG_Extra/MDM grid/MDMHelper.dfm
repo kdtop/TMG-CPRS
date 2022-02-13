@@ -139,13 +139,23 @@ object frmMDMGrid: TfrmMDMGrid
         Left = 279
         Top = 8
         Width = 354
-        Height = 135
+        Height = 121
         Anchors = [akLeft, akTop, akRight]
         BevelInner = bvNone
         BevelOuter = bvNone
         Color = clSkyBlue
         ReadOnly = True
         TabOrder = 1
+      end
+      object btnRefreshTime1: TButton
+        Left = 558
+        Top = 135
+        Width = 75
+        Height = 16
+        Anchors = [akTop, akRight]
+        Caption = 'Refresh'
+        TabOrder = 2
+        OnClick = btnRefreshTime1Click
       end
     end
     object pnlOldPtTimeAmount: TPanel
@@ -189,13 +199,23 @@ object frmMDMGrid: TfrmMDMGrid
         Left = 287
         Top = 8
         Width = 338
-        Height = 145
+        Height = 126
         Anchors = [akLeft, akTop, akRight]
         BevelInner = bvNone
         BevelOuter = bvNone
         Color = clSkyBlue
         ReadOnly = True
         TabOrder = 1
+      end
+      object Button1: TButton
+        Left = 550
+        Top = 140
+        Width = 75
+        Height = 16
+        Anchors = [akTop, akRight]
+        Caption = 'Refresh'
+        TabOrder = 2
+        OnClick = Button1Click
       end
     end
     object pnlComplexity: TPanel
@@ -884,6 +904,18 @@ object frmMDMGrid: TfrmMDMGrid
         Font.Style = []
         ParentFont = False
       end
+      object lblChargeDetails: TLabel
+        Left = 34
+        Top = 45
+        Width = 3
+        Height = 14
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
       object btnOK: TBitBtn
         Left = 1049
         Top = 8
@@ -1527,13 +1559,23 @@ object frmMDMGrid: TfrmMDMGrid
         Left = 279
         Top = 8
         Width = 354
-        Height = 89
+        Height = 73
         Anchors = [akLeft, akTop, akRight]
         BevelInner = bvNone
         BevelOuter = bvNone
         Color = clSkyBlue
         ReadOnly = True
         TabOrder = 1
+      end
+      object Button2: TButton
+        Left = 558
+        Top = 87
+        Width = 75
+        Height = 16
+        Anchors = [akTop, akRight]
+        Caption = 'Refresh'
+        TabOrder = 2
+        OnClick = Button2Click
       end
     end
     object pnlNewCPE: TPanel

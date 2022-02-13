@@ -26,16 +26,29 @@ object frmTemplateSearch: TfrmTemplateSearch
     Top = 0
     Width = 540
     Height = 25
-    ActivePage = tsTemplates
+    ActivePage = tsReminders
     Align = alTop
     TabOrder = 0
     OnChange = PageControl1Change
     object tsTemplates: TTabSheet
       Caption = '&Templates'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object tsReminders: TTabSheet
       Caption = '&Reminders'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+    end
+    object tsAll: TTabSheet
+      Caption = '&All'
+      ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
   end
   object edtTemSearchTerms: TEdit

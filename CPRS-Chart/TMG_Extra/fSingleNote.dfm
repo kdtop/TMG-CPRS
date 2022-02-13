@@ -2135,8 +2135,8 @@ object frmSingleNote: TfrmSingleNote
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 177
-    Top = 75
-    Height = 477
+    Top = 102
+    Height = 450
     ExplicitLeft = 232
     ExplicitTop = 296
     ExplicitHeight = 100
@@ -2145,14 +2145,44 @@ object frmSingleNote: TfrmSingleNote
     Left = 0
     Top = 0
     Width = 870
-    Height = 57
+    Height = 84
     Align = alTop
     TabOrder = 0
+    DesignSize = (
+      870
+      84)
+    object lblMostRecent: TLabel
+      Left = 5
+      Top = 12
+      Width = 64
+      Height = 13
+      Caption = 'Copy Source:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+    end
+    object lblThisDate: TLabel
+      Left = 255
+      Top = 12
+      Width = 26
+      Height = 13
+      Caption = 'Date:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+    end
     object btnFunc1: TBitBtn
       Left = 5
-      Top = 5
+      Top = 34
       Width = 140
       Height = 40
+      Anchors = [akLeft, akBottom]
       Caption = 'Copy Labs'
       TabOrder = 0
       Visible = False
@@ -2292,9 +2322,10 @@ object frmSingleNote: TfrmSingleNote
     end
     object btnFunc2: TBitBtn
       Left = 151
-      Top = 5
+      Top = 34
       Width = 140
       Height = 40
+      Anchors = [akLeft, akBottom]
       Caption = 'Copy Abnormal Labs'
       TabOrder = 1
       Visible = False
@@ -2434,9 +2465,10 @@ object frmSingleNote: TfrmSingleNote
     end
     object btnFunc3: TBitBtn
       Left = 297
-      Top = 5
+      Top = 34
       Width = 140
       Height = 40
+      Anchors = [akLeft, akBottom]
       Caption = 'Copy Notes'
       TabOrder = 2
       Visible = False
@@ -2576,9 +2608,10 @@ object frmSingleNote: TfrmSingleNote
     end
     object btnFunc4: TBitBtn
       Left = 443
-      Top = 5
+      Top = 34
       Width = 140
       Height = 40
+      Anchors = [akLeft, akBottom]
       Caption = 'Pick and Copy'
       TabOrder = 3
       Visible = False
@@ -2627,9 +2660,10 @@ object frmSingleNote: TfrmSingleNote
     end
     object btnFunc5: TBitBtn
       Left = 589
-      Top = 5
+      Top = 34
       Width = 140
       Height = 40
+      Anchors = [akLeft, akBottom]
       Caption = 'Button1'
       TabOrder = 4
       Visible = False
@@ -2639,7 +2673,7 @@ object frmSingleNote: TfrmSingleNote
       Left = 688
       Top = 1
       Width = 181
-      Height = 55
+      Height = 82
       Cursor = crHandPoint
       Hint = 'Click for more patient information.'
       Align = alRight
@@ -2707,10 +2741,70 @@ object frmSingleNote: TfrmSingleNote
         TabOrder = 2
       end
     end
+    object cmdOld: TButton
+      Left = 84
+      Top = 10
+      Width = 76
+      Height = 17
+      Caption = '<< Oldest'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBtnText
+      Font.Height = -12
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 6
+      OnClick = cmdOldClick
+    end
+    object cmdPrev: TButton
+      Left = 166
+      Top = 10
+      Width = 82
+      Height = 17
+      Caption = '< Previous'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBtnText
+      Font.Height = -12
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 7
+      OnClick = cmdPrevClick
+    end
+    object cmdNext: TButton
+      Left = 418
+      Top = 10
+      Width = 82
+      Height = 17
+      Caption = 'Next >'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBtnText
+      Font.Height = -12
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 8
+      OnClick = cmdNextClick
+    end
+    object cmdRecent: TButton
+      Left = 507
+      Top = 10
+      Width = 76
+      Height = 17
+      Caption = 'Newest >>'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBtnText
+      Font.Height = -12
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 9
+      OnClick = cmdRecentClick
+    end
   end
   object ToolBar: TToolBar
     Left = 0
-    Top = 57
+    Top = 84
     Width = 870
     Height = 18
     AutoSize = True
@@ -2722,8 +2816,8 @@ object frmSingleNote: TfrmSingleNote
       Left = 0
       Top = 0
       Width = 145
-      Height = 18
-      ItemHeight = 0
+      Height = 21
+      ItemHeight = 13
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
@@ -3291,9 +3385,9 @@ object frmSingleNote: TfrmSingleNote
   end
   object pnlHTMLEdit: TPanel
     Left = 180
-    Top = 75
+    Top = 102
     Width = 690
-    Height = 477
+    Height = 450
     Align = alClient
     TabOrder = 2
   end
@@ -3592,14 +3686,14 @@ object frmSingleNote: TfrmSingleNote
   end
   object pnlDrawers: TPanel
     Left = 0
-    Top = 75
+    Top = 102
     Width = 177
-    Height = 477
+    Height = 450
     Align = alLeft
     TabOrder = 4
     object splDrawers: TSplitter
       Left = 1
-      Top = 473
+      Top = 446
       Width = 175
       Height = 3
       Cursor = crVSplit

@@ -66,6 +66,7 @@ procedure CallRPCWhenIdle(CallProc: TORIdleCallProc; Msg: String);
 function ShowRPCList: Boolean;
 
 procedure RPCCallsClear;  //kt 9/11 added
+function RPCBrokerBusy : boolean; //kt added 11/4/21
 procedure EnsureBroker;
 
 (*
@@ -85,7 +86,6 @@ var
 
   AppStartedCursorForm: TForm = nil;
   FilteredRPCCalls : TStringList;  //kt 9/11 Any RPC calls with names held in this list held will not be logged
-  TMGRPCCallInProcess : boolean; //kt 7/2018 //Globally scoped variable to signal busy status.  
 
 implementation
 
@@ -104,6 +104,13 @@ var
   uShowRPCs: Boolean;
   uBaseContext: string = '';
   uCurrentContext: string = '';
+  TMGRPCCallInProcess : boolean; //kt 7/2018 //Variable to signal busy status.  Access via RPCBrokerBusy
+
+function RPCBrokerBusy : boolean;
+//kt added 11/4/21
+begin
+  Result := TMGRPCCallInProcess;
+end;
 
 { private procedures and functions ---------------------------------------------------------- }
 

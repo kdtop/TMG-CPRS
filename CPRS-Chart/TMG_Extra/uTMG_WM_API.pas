@@ -228,7 +228,7 @@ implementation
   //     ... finish...
   begin
     //---------------------------------
-    if TMGRPCCallInProcess then begin //<--- Copy and use this block if handler depends on RPCBroker.
+    if RPCBrokerBusy then begin //<--- Copy and use this block if handler depends on RPCBroker.
       ScheduleCallbackForHandleCommand(Command, DataStr, DestHandle);
       Result := NO_REPLY;
       exit;

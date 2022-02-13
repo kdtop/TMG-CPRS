@@ -3,24 +3,24 @@ inherited frmLabs: TfrmLabs
   Top = 237
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
-  ClientHeight = 794
+  ClientHeight = 594
   ClientWidth = 876
   HelpFile = 'qnoback'
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 892
-  ExplicitHeight = 852
+  ExplicitWidth = 884
+  ExplicitHeight = 648
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 789
+    Top = 589
     Width = 876
     ExplicitTop = 748
     ExplicitWidth = 714
   end
   inherited sptHorz: TSplitter
-    Height = 789
+    Height = 589
     ExplicitHeight = 748
   end
   object Label1: TLabel [2]
@@ -38,12 +38,12 @@ inherited frmLabs: TfrmLabs
     Visible = False
   end
   inherited pnlLeft: TPanel
-    Height = 789
+    Height = 589
     Constraints.MinWidth = 37
-    ExplicitHeight = 789
+    ExplicitHeight = 589
     object Splitter1: TSplitter
       Left = 0
-      Top = 529
+      Top = 329
       Width = 97
       Height = 10
       Cursor = crVSplit
@@ -58,7 +58,7 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 0
       Width = 97
-      Height = 529
+      Height = 329
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 30
@@ -80,7 +80,7 @@ inherited frmLabs: TfrmLabs
         Left = 0
         Top = 19
         Width = 97
-        Height = 510
+        Height = 310
         Align = alClient
         HideSelection = False
         Indent = 18
@@ -96,7 +96,7 @@ inherited frmLabs: TfrmLabs
     end
     object pnlLeftBottom: TPanel
       Left = 0
-      Top = 539
+      Top = 339
       Width = 97
       Height = 250
       Align = alBottom
@@ -228,11 +228,11 @@ inherited frmLabs: TfrmLabs
   end
   inherited pnlRight: TPanel
     Width = 775
-    Height = 789
+    Height = 589
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
     ExplicitWidth = 775
-    ExplicitHeight = 789
+    ExplicitHeight = 589
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -249,7 +249,7 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 300
       Width = 775
-      Height = 469
+      Height = 269
       Align = alClient
       TabOrder = 0
       object Memo1: TMemo
@@ -277,7 +277,7 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 773
-        Height = 448
+        Height = 248
         Align = alClient
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -298,15 +298,14 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 773
-        Height = 448
+        Height = 248
         TabStop = False
         Align = alClient
         TabOrder = 2
         OnDocumentComplete = WebBrowser1DocumentComplete
-        ExplicitWidth = 618
-        ExplicitHeight = 412
+        ExplicitHeight = 448
         ControlData = {
-          4C000000E44F00004D2E00000000000000000000000000000000000000000000
+          4C000000E44F0000A21900000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -431,13 +430,12 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 773
+            Width = 367
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
-            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162
@@ -948,7 +946,7 @@ inherited frmLabs: TfrmLabs
     end
     object pnlFooter: TORAutoPanel
       Left = 0
-      Top = 769
+      Top = 569
       Width = 775
       Height = 20
       Align = alBottom
@@ -1283,6 +1281,11 @@ inherited frmLabs: TfrmLabs
       Caption = 'Copy Results Table'
       ShortCut = 16468
       OnClick = mnuCopyResultsTableClick
+    end
+    object mnuViewInBrowser: TMenuItem
+      Caption = 'View In Browser'
+      ShortCut = 16450
+      OnClick = mnuViewInBrowserClick
     end
   end
   object mnuLabs: TMainMenu

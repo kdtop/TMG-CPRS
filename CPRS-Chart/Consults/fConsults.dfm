@@ -3,18 +3,18 @@ inherited frmConsults: TfrmConsults
   Top = 80
   HelpContext = 6000
   Caption = 'Consults Page'
-  ClientHeight = 421
+  ClientHeight = 441
   ClientWidth = 715
   Menu = mnuConsults
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnShow = FormShow
   ExplicitWidth = 723
-  ExplicitHeight = 475
+  ExplicitHeight = 495
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 416
+    Top = 436
     Width = 715
     ExplicitTop = 416
     ExplicitWidth = 715
@@ -22,7 +22,7 @@ inherited frmConsults: TfrmConsults
   inherited sptHorz: TSplitter
     Left = 83
     Width = 2
-    Height = 416
+    Height = 436
     OnCanResize = sptHorzCanResize
     ExplicitLeft = 83
     ExplicitWidth = 2
@@ -31,7 +31,7 @@ inherited frmConsults: TfrmConsults
   inherited pnlRight: TPanel [2]
     Left = 85
     Width = 630
-    Height = 416
+    Height = 436
     OnExit = pnlRightExit
     OnResize = pnlRightResize
     ExplicitLeft = 85
@@ -39,20 +39,22 @@ inherited frmConsults: TfrmConsults
     ExplicitHeight = 416
     object sptVert: TSplitter
       Left = 0
-      Top = 350
+      Top = 370
       Width = 630
       Height = 4
       Cursor = crVSplit
       Align = alBottom
+      ExplicitTop = 350
     end
     object pnlRead: TPanel
       Left = 0
       Top = 0
       Width = 630
-      Height = 350
+      Height = 370
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitHeight = 350
       object lblTitle: TOROffsetLabel
         Left = 0
         Top = 0
@@ -77,7 +79,7 @@ inherited frmConsults: TfrmConsults
         Left = 0
         Top = 19
         Width = 630
-        Height = 331
+        Height = 351
         Align = alClient
         Color = clCream
         Ctl3D = True
@@ -99,43 +101,46 @@ inherited frmConsults: TfrmConsults
         TabOrder = 0
         WantReturns = False
         WordWrap = False
+        ExplicitHeight = 331
       end
       object pnlHtmlResultViewer: TPanel
         Left = 0
         Top = 19
         Width = 630
-        Height = 331
+        Height = 351
         Align = alClient
         BevelOuter = bvNone
         Color = clBtnShadow
         TabOrder = 1
-        ExplicitHeight = 371
+        ExplicitHeight = 331
       end
     end
     object memPCEShow: TRichEdit
       Left = 0
-      Top = 354
+      Top = 374
       Width = 630
       Height = 62
       Align = alBottom
       Color = clCream
       TabOrder = 2
       WantReturns = False
+      ExplicitTop = 354
     end
     object pnlResults: TPanel
       Left = 0
       Top = 0
       Width = 630
-      Height = 350
+      Height = 370
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
       OnResize = pnlResultsResize
+      ExplicitHeight = 350
       object memResults: TRichEdit
         Left = 0
         Top = 67
         Width = 630
-        Height = 283
+        Height = 303
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -149,6 +154,7 @@ inherited frmConsults: TfrmConsults
         WantTabs = True
         OnChange = memResultChange
         OnKeyDown = memResultsKeyDown
+        ExplicitHeight = 283
       end
       object pnlFields: TPanel
         Left = 0
@@ -276,7 +282,7 @@ inherited frmConsults: TfrmConsults
   end
   inherited pnlLeft: TPanel [3]
     Width = 83
-    Height = 416
+    Height = 436
     OnExit = pnlLeftExit
     OnResize = pnlLeftResize
     ExplicitWidth = 83
@@ -293,17 +299,19 @@ inherited frmConsults: TfrmConsults
       Left = 0
       Top = 164
       Width = 83
-      Height = 231
+      Height = 251
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitHeight = 231
       object splDrawers: TSplitter
         Left = 0
-        Top = 228
+        Top = 248
         Width = 83
         Height = 3
         Cursor = crVSplit
         Align = alBottom
+        ExplicitTop = 228
       end
       object cmdNewConsult: TORAlignButton
         Left = 0
@@ -370,7 +378,7 @@ inherited frmConsults: TfrmConsults
         Left = 0
         Top = 63
         Width = 83
-        Height = 165
+        Height = 185
         Align = alClient
         Constraints.MinWidth = 30
         HideSelection = False
@@ -389,11 +397,12 @@ inherited frmConsults: TfrmConsults
         OnStartDrag = tvCsltNotesStartDrag
         Caption = 'Consult Notes'
         NodePiece = 0
+        ExplicitHeight = 165
       end
     end
     object cmdPCE: TORAlignButton
       Left = 0
-      Top = 395
+      Top = 415
       Width = 83
       Height = 21
       Align = alBottom
@@ -402,6 +411,7 @@ inherited frmConsults: TfrmConsults
       TabOrder = 2
       Visible = False
       OnClick = cmdPCEClick
+      ExplicitTop = 395
     end
     object pnlConsultList: TPanel
       Left = 0

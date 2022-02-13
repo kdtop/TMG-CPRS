@@ -39,6 +39,7 @@ interface
 uses Windows, SysUtils, Classes, ORNet, ORFn, ComCtrls, Chart,
      Forms,  //kt 9/11 added
      TRPCB,  //kt 2/17
+     StrUtils,   //TMG  11/5/21
      graphics;
 //uses Windows, SysUtils, Classes, ORNet, ORFn, ComCtrls, Chart, graphics, rWVEHR;
 
@@ -52,12 +53,14 @@ procedure ListLabReports(Dest: TStrings);
 procedure ListReportDateRanges(Dest: TStrings);
 procedure ListHealthSummaryTypes(Dest: TStrings);
 procedure ListImagingExams(Dest: TStrings);
+procedure ListImagingExamsForDFN(Dest: TStrings; DFN : string); //kt 11/1/21
 procedure ListProcedures(Dest: TStrings);
 procedure ListNutrAssessments(Dest: TStrings);
 procedure ListSurgeryReports(Dest: TStrings);
 procedure ColumnHeaders(Dest: TStrings; AReportType: String);
 procedure SaveColumnSizes(aColumn: String);
 procedure LoadReportText(Dest: TStrings; ReportType: string; const Qualifier: string; ARpc, AHSTag: string);
+procedure LoadReportTextForDFN(Dest: TStrings; ADFN : string; ReportType: string; const Qualifier: string; ARpc, AHSTag: string);   //kt added 11/1/21
 procedure RemoteQueryAbortAll;
 procedure RemoteQuery(Dest: TStrings; AReportType: string; AHSType, ADaysback,
             AExamID: string; Alpha, AOmega: Double; ASite, ARemoteRPC, AHSTag: String);
@@ -256,6 +259,11 @@ begin
 end;
 
 procedure ListImagingExams(Dest: TStrings);
+//kt 11/1/21 moved bulk of this original function to ListImagingExamsForDFN
+//   to allow getting report for any DFN
+begin
+  ListImagingExamsForDFN(Dest, Patient.DFN);
+{
 var
   x: string;
   i: Integer;
@@ -271,7 +279,31 @@ begin
         x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
              + U + Piece(x,U,6)  + Piece(x,U,7) + U
              + MixedCase(Piece(Piece(x,U,9),'~',2)) + U + Piece(x,U,5) +  U + '[+]'
-             + U + Pieces(x, U, 15,17);                                                 
+             + U + Pieces(x, U, 15,17);
+(*      x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
+        + U + Piece(x,U,6) + Piece(x,U,7) + U + Piece(x,U,5) +  U + '[+]' + U + Piece(x, U, 15);*)
+      Results[i] := x;
+    end;
+    FastAssign(Results, Dest);
+  end;
+}
+end;
+
+procedure ListImagingExamsForDFN(Dest: TStrings; DFN : string); //kt 11/1/21 split from ListImagingExams above.
+var
+  x: string;
+  i: Integer;
+begin
+  CallV('ORWRA IMAGING EXAMS1', [DFN]);
+  with RPCBrokerV do begin
+    SetListFMDateTime('mm/dd/yyyy hh:nn', TStringList(Results), U, 3);
+    for i := 0 to Results.Count - 1 do begin
+      x := Results[i];
+      if Piece(x,U,7) = 'Y' then SetPiece(x,U,7, ' - Abnormal');
+      x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
+             + U + Piece(x,U,6)  + Piece(x,U,7) + U
+             + MixedCase(Piece(Piece(x,U,9),'~',2)) + U + Piece(x,U,5) +  U + '[+]'
+             + U + Pieces(x, U, 15,17);
 (*      x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
         + U + Piece(x,U,6) + Piece(x,U,7) + U + Piece(x,U,5) +  U + '[+]' + U + Piece(x, U, 15);*)
       Results[i] := x;
@@ -344,6 +376,10 @@ begin
 end;
 
 procedure LoadReportText(Dest: TStrings; ReportType: string; const Qualifier: string; ARpc, AHSTag: string);
+//kt 11/1/21 split out function below to allow calling for other DFN's
+begin
+  LoadReportTextForDFN(Dest, Patient.DFN, ReportType, Qualifier, ARpc, AHSTag);
+{
 var
   HSType, DaysBack, ExamID, MaxOcc, AReport, x: string;
   Alpha, Omega, Trans: double;
@@ -386,6 +422,75 @@ begin
       Dest.Add('RPC is missing from report definition (file 101.24).');
       Dest.Add('Please contact Technical Support.');
     end;
+}
+end;
+
+procedure LoadReportTextForDFN(Dest: TStrings; ADFN : string; ReportType: string; const Qualifier: string; ARpc, AHSTag: string);
+//kt added procedure 11/1/21.  The only difference here is that Patient.DFN was changed to ADFN
+//kt added documentation below.
+//Inputs:  Dest -- OUT object for loading report into
+//         ADFN -- patient IEN
+//         ReportType: Combined with AHSTag and passed to server as ReportID:  ReportType~AHSTag
+//           Server code comments:
+//             <Unique report ID>;<Remote ID>~<HSComponent for listview> (ent;rtn;0;MaxOcc) or text (ent;rtn;#component;MaxOcc)
+//           ReportID is .02 field (ID) in OE/RR REPORT file.   Format:
+//             [L:]IDEntry[:IgnoredText]    Note: [...] means optional part
+//             Optional prefix with "L:" forces TAB to L (for LABS)
+//         Qualifier: Format:  Code+Data.
+//           <T><StartDT>;<EndDT>;<MaxOcc>
+//           <d><DaysBack>;<MaxOcc>
+//           <h><HSType>
+//           <i><ExamID>
+//         ARpc -- RPC name of report to get
+//         AHSTag -- "HS" = Health Summary
+var
+  HSType, DaysBack, ExamID, MaxOcc, AReport, x: string;
+  Alpha, Omega, Trans: double;
+begin
+  HSType := '';
+  DaysBack := '';
+  ExamID := '';
+  Alpha := 0;
+  Omega := 0;
+  if CharAt(Qualifier, 1) = 'T' then begin
+    Alpha := StrToFMDateTime(piece(Qualifier,';',1));
+    Omega := StrToFMDateTime(Piece(Qualifier,';',2));
+    if Alpha > Omega then begin
+      Trans := Omega;
+      Omega := Alpha;
+      Alpha := Trans;
+    end;
+    MaxOcc := Piece(Qualifier,';',3);
+    SetPiece(AHSTag,';',4,MaxOcc);
+  end;
+  if CharAt(Qualifier, 1) = 'd' then begin
+    MaxOcc := Piece(Qualifier,';',2);
+    SetPiece(AHSTag,';',4,MaxOcc);
+    x := Piece(Qualifier,';',1);
+    DaysBack := Copy(x, 2, Length(x));
+  end;
+  if LeftStr(Qualifier, 3) = 'TMG' then begin
+    Alpha := StrToFloat(piece2(piece(Qualifier,';',1),'TMG',2));
+    Omega := StrToFloat(Piece(Qualifier,';',2));
+  end;
+  if CharAt(Qualifier, 1) = 'h' then HSType   := Copy(Qualifier, 2, Length(Qualifier));
+  if CharAt(Qualifier, 1) = 'i' then ExamID   := Copy(Qualifier, 2, Length(Qualifier));
+  AReport := ReportType + '~' + AHSTag;
+  if Length(ARpc) > 0 then begin
+    //Server RPC documentation:  (//kt added)
+    // DFN=Patient DFN ; ICN for remote sites
+    // RPTID=Unique report ID_";"_Remote ID_"~"_HSComponent for listview (ent;rtn;0;MaxOcc) or text (ent;rtn;#component;MaxOcc)
+    // HSTYPE=Health Sum Type
+    // DTRANGE=# days back from today
+    // EXAMID=Rad exam ID
+    // ALPHA=Start date
+    // OMEGA=End date
+    CallV(ARpc, [ADFN, AReport, HSType, DaysBack, ExamID, Alpha, Omega]); //kt Patient.DFN changed to ADFN 11/1/21
+    QuickCopy(RPCBrokerV.Results,Dest);
+  end else begin
+    Dest.Add('RPC is missing from report definition (file 101.24).');
+    Dest.Add('Please contact Technical Support.');
+  end;
 end;
 
 procedure RemoteQueryAbortAll;

@@ -1,9 +1,9 @@
 object frmMultiTIUSign: TfrmMultiTIUSign
   Left = 0
   Top = 0
-  Caption = 'frmMultiTIUSign'
-  ClientHeight = 665
-  ClientWidth = 1214
+  Caption = 'Sign Multiple Documents'
+  ClientHeight = 564
+  ClientWidth = 1156
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,61 +20,48 @@ object frmMultiTIUSign: TfrmMultiTIUSign
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 1214
-    Height = 579
+    Width = 1156
+    Height = 475
     Align = alTop
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelEdges = []
     BevelOuter = bvNone
     TabOrder = 0
     object Splitter1: TSplitter
-      Left = 185
+      Left = 232
       Top = 0
-      Height = 579
-      ExplicitLeft = 360
-      ExplicitTop = 160
-      ExplicitHeight = 100
+      Width = 9
+      Height = 475
     end
     object Splitter2: TSplitter
-      Left = 936
+      Left = 989
       Top = 0
-      Height = 579
-      ExplicitLeft = 720
-      ExplicitTop = 216
-      ExplicitHeight = 100
+      Width = 9
+      Height = 475
+      ExplicitLeft = 990
     end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 185
-      Height = 579
+      Width = 232
+      Height = 475
       Align = alLeft
       BevelEdges = []
       BevelOuter = bvNone
       Color = clMoneyGreen
       TabOrder = 0
-      object lbUnSelected: TListBox
-        Left = 0
-        Top = 20
-        Width = 185
-        Height = 559
-        Align = alClient
-        ItemHeight = 13
-        TabOrder = 0
-        OnClick = lbUnSelectedClick
-      end
       object pnlLeftTop: TPanel
         Left = 0
         Top = 0
-        Width = 185
+        Width = 232
         Height = 20
         Align = alTop
         BevelOuter = bvLowered
-        TabOrder = 1
+        TabOrder = 0
         object lblAlerts: TLabel
           Left = 1
           Top = 1
-          Width = 183
+          Width = 230
           Height = 18
           Align = alClient
           Alignment = taCenter
@@ -89,12 +76,45 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           ExplicitWidth = 89
         end
       end
+      object lvUnSelected: TCaptionListView
+        Left = 0
+        Top = 20
+        Width = 232
+        Height = 455
+        Align = alClient
+        Columns = <
+          item
+            Caption = 'Date'
+            Width = 75
+          end
+          item
+            Caption = 'Patient'
+            Tag = 1
+            Width = 100
+          end
+          item
+            Caption = 'Title'
+            Tag = 2
+            Width = 250
+          end>
+        HideSelection = False
+        ReadOnly = True
+        RowSelect = True
+        TabOrder = 1
+        ViewStyle = vsReport
+        OnChange = lvUnSelectedChange
+        OnClick = lvUnSelectedClick
+        OnColumnClick = lvUnSelectedColumnClick
+        OnCompare = lvUnSelectedCompare
+        OnResize = lvUnSelectedResize
+        Caption = 'lvUnSelected'
+      end
     end
     object pnlCenter: TPanel
-      Left = 188
+      Left = 241
       Top = 0
       Width = 748
-      Height = 579
+      Height = 475
       Align = alLeft
       Anchors = [akLeft, akTop, akRight, akBottom]
       BevelEdges = []
@@ -105,7 +125,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         Left = 0
         Top = 46
         Width = 748
-        Height = 465
+        Height = 361
         Align = alClient
         BevelOuter = bvLowered
         Color = clSkyBlue
@@ -114,13 +134,14 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Left = 1
           Top = 1
           Width = 746
-          Height = 463
+          Height = 359
           Align = alClient
           TabOrder = 0
           ExplicitLeft = -63
           ExplicitTop = -4
+          ExplicitHeight = 463
           ControlData = {
-            4C0000001A4D0000DA2F00000000000000000000000000000000000000000000
+            4C0000001A4D00001B2500000000000000000000000000000000000000000000
             000000004C000000000000000000000001000000E0D057007335CF11AE690800
             2B2E126208000000000000004C0000000114020000000000C000000000000046
             8000000000000000000000000000000000000000000000000000000000000000
@@ -129,7 +150,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       end
       object pnlCenterBottom: TPanel
         Left = 0
-        Top = 511
+        Top = 407
         Width = 748
         Height = 68
         Align = alBottom
@@ -1638,24 +1659,41 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             ParentFont = False
             Layout = tlCenter
           end
+          object lblNextAppt: TLabel
+            Left = 589
+            Top = 0
+            Width = 111
+            Height = 25
+            Align = alRight
+            Caption = '[Patient Name Here]'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -12
+            Font.Name = 'Microsoft Sans Serif'
+            Font.Style = []
+            ParentFont = False
+            ExplicitHeight = 15
+          end
         end
       end
     end
     object pnlRight: TPanel
-      Left = 939
+      Left = 998
       Top = 0
-      Width = 275
-      Height = 579
+      Width = 158
+      Height = 475
       Align = alClient
+      Alignment = taLeftJustify
       BevelEdges = []
       BevelOuter = bvNone
       Color = clMoneyGreen
       TabOrder = 2
+      OnCanResize = pnlRightCanResize
       object pnlRightCenter: TPanel
         Left = 0
         Top = 20
-        Width = 275
-        Height = 507
+        Width = 158
+        Height = 403
         Align = alClient
         BevelEdges = []
         BevelOuter = bvNone
@@ -1664,8 +1702,8 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lbSelected: TListBox
           Left = 0
           Top = 0
-          Width = 275
-          Height = 507
+          Width = 158
+          Height = 403
           Align = alClient
           ItemHeight = 13
           TabOrder = 0
@@ -1674,20 +1712,20 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       end
       object pnlRightBottom: TPanel
         Left = 0
-        Top = 527
-        Width = 275
+        Top = 423
+        Width = 158
         Height = 52
         Align = alBottom
         BevelEdges = []
         BevelOuter = bvLowered
         TabOrder = 1
         DesignSize = (
-          275
+          158
           52)
         object btnRemove: TBitBtn
           Left = 6
           Top = 6
-          Width = 267
+          Width = 150
           Height = 38
           Anchors = [akLeft, akTop, akRight]
           Caption = '&Remove Doc'
@@ -1831,7 +1869,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlRightTop: TPanel
         Left = 0
         Top = 0
-        Width = 275
+        Width = 158
         Height = 20
         Align = alTop
         BevelOuter = bvLowered
@@ -1839,11 +1877,11 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblSignList: TLabel
           Left = 1
           Top = 1
-          Width = 273
+          Width = 156
           Height = 18
           Align = alClient
           Alignment = taCenter
-          Caption = 'Sign List'
+          Caption = 'Action List'
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -15
@@ -1851,29 +1889,29 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Style = []
           ParentFont = False
           Layout = tlCenter
-          ExplicitWidth = 56
+          ExplicitWidth = 68
         end
       end
     end
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 579
-    Width = 1214
-    Height = 86
+    Top = 475
+    Width = 1156
+    Height = 89
     Align = alClient
     BevelOuter = bvLowered
     TabOrder = 1
     DesignSize = (
-      1214
-      86)
+      1156
+      89)
     object btnSignAll: TBitBtn
-      Left = 950
+      Left = 897
       Top = 6
       Width = 257
       Height = 73
       Anchors = [akTop, akRight]
-      Caption = '&Sign All Items'
+      Caption = 'Proce&ss All Items'
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -16

@@ -649,6 +649,7 @@ begin
            begin
              tmp := ActiveReminders[i];
              SetPiece(tmp, U, 3, FormatFMDateTimeStr('mmm dd,yy', Piece(tmp, U, 3)));
+             SetPiece(tmp, U, 4, FormatFMDateTimeStr('mmm dd,yy', Piece(tmp, U, 4)));   //TMG  10/26/21
              lb.Items.Add(tmp);
            end;
         if Piece(ActiveReminders.Strings[i],U,6)='3' then

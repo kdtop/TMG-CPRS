@@ -841,10 +841,10 @@ begin
            if Response=mrYes then DeleteAlert(XQAID);  //TMG  8/22/19
         end;
       end else if Piece(XQAID, ',', 1) = 'OR' then begin
-        //e.g.  OR,16,50;1311;2980626.100756
+        //e.g.  OR,16,50;1311;2980626.100756  or 'OR,75214,3;168;3211104.07122'
         ADFN := Piece(XQAID, ',', 2);  //*DFN*
         AFollowUp := StrToIntDef(Piece(Piece(XQAID, ';', 1), ',', 3), 0);  //kt Matches Notification types in uConst, e.g. NF_NOTES_UNSIGNED_NOTE
-        Notifications.Add(ADFN, AFollowUp, RecordID, Items[i].SubItems[3]); //CB
+        Notifications.Add(ADFN, AFollowUp, RecordID, Items[i].SubItems[3]); //CB     Add(ADFN, AFollowUp, ARecordID, AHighLightSection)
         enableclose := true;
       end else if Copy(XQAID, 1, 6) = 'TIUERR' then begin
         InfoBox(Piece(RecordID, U, 1) + #13#10#13#10 +

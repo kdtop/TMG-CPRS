@@ -216,6 +216,13 @@ type
     sbtnFontNormal: TSpeedButton;
     sbtnFontLarger: TSpeedButton;
     mnuTestGraph: TMenuItem;
+    mnuResetTimerSetting: TMenuItem;
+    menuNurseNote: TMenuItem;
+    mnuResetTimerPrompt: TMenuItem;
+    procedure mnuResetTimerPromptClick(Sender: TObject);
+    procedure menuNurseNoteClick(Sender: TObject);
+    procedure lblPtProviderClick(Sender: TObject);
+    procedure mnuResetTimerSettingClick(Sender: TObject);
     procedure mnuTestGraphClick(Sender: TObject);
     procedure sbtnFontChangeClick(Sender: TObject);
     procedure mnuClosePatientClick(Sender: TObject);
@@ -480,6 +487,7 @@ type
     EnduringPtSelColumns: string;
     NoteTitleDateFormat: string;           //tmg 7//25/19
     TurnOnUploads:boolean;                 //tmg  8/27/19
+    StartTimer : integer;  //TMG 11/2/21
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;  //kt 4/15/14
     procedure SetBADxList;
     procedure SetActiveTab(PageID: Integer);
@@ -512,6 +520,8 @@ type
     procedure SetOneWebTabPerServer(WebTabNum: integer; URLMsg : string);               //kt 9/11 added
     property ActiveTab : integer read GetActiveTab write SetActiveTab;                  //kt added 6/15
     property NoPatientSelected : boolean read FNoPatientSelected;                       //kt added 11/16/20
+    procedure ClickOneAppointment(Sender:TObject);  //TMG added 1/24/22
+    procedure OpenAPatient(NewDFN:string);  //TMG added 1/24/22
   end;
 
 var
@@ -562,6 +572,8 @@ uses
   fAnticoagulator, uTMG_WM_API,  //kt
   fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
   fTest_RW_HTML  //kt TEMP, KILL LATER...
+  , fViewLabPDF   //12/7/21
+  , fConfirmTimer  //11/2/21
   , fMailbox, fUploadImages;
 
 var                                 //  RV 05/11/04
@@ -861,7 +873,8 @@ begin
     end;
   end;
   if Result then Result := TEPrescribeForm.AllowContextChange(reason);  //eRx  9/4/12
-  if Result then if Assigned(frmSingleNote) then Result := frmSingleNote.AllowContextChange(Reason);  //kt 2/10/17
+  if Result then if Assigned(frmSingleNote) then Result := frmSingleNote.AllowContextChange(Reason);  //kt 2/10  if Assigned(frmViewLabPDF) then frmViewLabPDF.close;
+  
 
   FContextChanging := False;
 end;
@@ -927,9 +940,15 @@ end;
 
 procedure TfrmFrame.mnuClosePatientClick(Sender: TObject);
 //kt added fnction
+  var Reason:string;
 begin
   inherited;
+  if not AllowContextChangeAll(Reason) then begin
+    messagedlg('Cannot close patient'+#13#10+Reason,mtError,[mbOk],0);
+    exit;
+  end;
   SetActiveTab(0); //12/28/20
+  frmNotes.CheckForLock;    //kt  11/11/21
   HideEverything();
 end;
 
@@ -1259,6 +1278,8 @@ begin
   timSchedule.Enabled := true;
   TurnOnUploads := False;
   SetUpResizeButtons; //kt 4/28/21
+  StartTimer := 0;  //11/2/21
+  menuNurseNote.Visible := uTMGOptions.ReadBool('Use Quick Nurse Note',false);
   //timCheckSequel.Enabled := True;
   //Application.OnMessage := AppMessage;
   //kt end mod ------------------- /
@@ -2306,6 +2327,7 @@ var
   ok, OldRemindersStarted, PtSelCancelled: boolean;
   //i: smallint;
   CCOWResponse: UserResponse;
+  StartTimerOrigSetting : integer;
 begin
   pnlPatient.Enabled := false;
   if (Sender = mnuFileOpen) or (FRefreshing) then PTSwitchRefresh := True
@@ -2468,9 +2490,27 @@ begin
  frmImages.HandlePatientChanged();  //11/29/20
  CheckForOpenEvent('',0);   //TMG  11/2/20
  if uTMGOptions.ReadBool('CPRS TIMER PROMPT',False)=True then begin    //TMG  11/2/20
-   if messagedlg('Would you like to start the chart timer?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin    //TMG  11/2/20
-     btnTimerClick(nil);       //TMG  11/2/20
+   //StartTimer is 1 for "Turn On", 0 for "unset" which prompts, and -1 for "Don't Turn On"
+   StartTimerOrigSetting := StartTimer;
+   if StartTimer=1 then begin
+     btnTimerClick(nil);
+   end else if StartTimer=0 then begin
+     if ConfirmTimerStart(StartTimer)=True then btnTimerClick(nil);
+   end else begin
+     //Do nothing here for now
    end;
+   if StartTimerOrigSetting<>StartTimer then begin   //Timer setting was changed. Change Reset option
+     mnuResetTimerSetting.visible:=(StartTimer<>0);
+     if StartTimer=-1 then
+        mnuResetTimerSetting.caption := 'Reset Chart Timer Prompt.'
+     else
+        mnuResetTimerSetting.caption := 'Reset Chart Timer Prompt.';
+     mnuResetTimerPrompt.Visible := mnuResetTimerSetting.visible;
+
+   end;
+   {if messagedlg('Would you like to start the chart timer?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin    //TMG  11/2/20
+     btnTimerClick(nil);       //TMG  11/2/20
+   end;}
  end;
  if fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '' then begin
    SwitchToPage(frmNotes);
@@ -5028,6 +5068,12 @@ begin
   frmBillableItems.Free;
 end;
 
+procedure TfrmFrame.menuNurseNoteClick(Sender: TObject);
+begin
+  inherited;
+  fSingleNote.CreateSingleNote(snmNurse,False);
+end;
+
 procedure TfrmFrame.mnuAlertForwardClick(Sender: TObject);
 var
   XQAID, AlertMsg: string;
@@ -5257,6 +5303,16 @@ begin
   end;
            
   CurSequelPat.Free;
+end;
+
+procedure TfrmFrame.lblPtProviderClick(Sender: TObject);
+var ReturnArr:TStringList;
+begin
+  inherited;
+  ReturnArr := TStringList.create();
+  tCallV(ReturnArr,'TMG CPRS GET PCP WHY',[Patient.DFN,User.DUZ]);
+  messagedlg(ReturnArr.Text,mtInformation,[mbOk],0);
+  ReturnArr.free;
 end;
 
 procedure TfrmFrame.ViewAuditTrail1Click(Sender: TObject);
@@ -5634,6 +5690,22 @@ begin
   frmPtLabelPrint.Free;  //kt 10/15
 end;
 
+procedure TfrmFrame.mnuResetTimerPromptClick(Sender: TObject);
+begin
+  inherited;
+  StartTimer := 0;
+  mnuResetTimerSetting.visible := False;
+  mnuResetTimerPrompt.Visible := false;
+end;
+
+procedure TfrmFrame.mnuResetTimerSettingClick(Sender: TObject);
+begin
+  inherited;
+  StartTimer := 0;
+  mnuResetTimerSetting.visible := False;
+  mnuResetTimerPrompt.Visible := false;
+end;
+
 procedure TfrmFrame.mnuPrintAdmissionLabelClick(Sender: TObject);
 //kt 9/11 added
 var
@@ -5778,6 +5850,36 @@ begin
   //msg.result := 2006;
 end;
 
+procedure TfrmFrame.ClickOneAppointment(Sender:TObject);
+var messagetext,DFN,Name:string;
+    response:integer;
+begin
+  messagetext := TProgressBarWithText(Sender).HelpKeyword;
+  DFN := piece(messagetext,'~',1);
+  Name := piece(messagetext,'~',2);
+  response := messagedlg('Do you want to open the chart for '+Name+'?',mtConfirmation,[mbYes,mbNo],0);
+  if response=mrYes then OpenAPatient(DFN);
+  
+end;
+
+procedure TfrmFrame.OpenAPatient(NewDFN:string);  //TMG added 1/24/22
+begin
+  if NewDFN=Patient.DFN then exit;
+  Patient.DFN := NewDFN;     // The patient object in uCore must have been created already!
+  FRefreshing := TRUE;
+  try
+    Encounter.Clear;
+    Changes.Clear;
+    //frmFrame.UpdatePtInfoOnRefresh;
+    if Patient.Inpatient then Encounter.VisitCategory := 'H';
+
+    mnuFileOpenClick(Self);
+    //DisplayEncounterText;
+  finally
+    FRefreshing := FALSE;
+    OrderPrintForm := FALSE;
+  end;
+end;
 
 initialization
   SpecifyFormIsNotADialog(TfrmFrame);

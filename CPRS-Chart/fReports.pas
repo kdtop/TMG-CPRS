@@ -41,6 +41,7 @@ uses
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Menus, uConst, ORDtTmRng,
   OleCtrls, SHDocVw, Buttons, ClipBrd, rECS, Variants, StrUtils, fBase508Form,
   uTMGOptions, //kt 4/1/21
+  ShellAPI, //kt 12/21/21
   VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR;
 
 type
@@ -101,6 +102,8 @@ type
     mnuNotifyOK: TMenuItem;
     mnuNotifyOk1: TMenuItem;
     mnuCopyResultsTable1: TMenuItem;
+    mnuViewInBrowser: TMenuItem;
+    procedure mnuViewInBrowserClick(Sender: TObject);
     procedure sptHorzRightMoved(Sender: TObject);
     procedure lvReportsDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
     procedure mnuCopyResultsTable1Click(Sender: TObject);
@@ -1252,6 +1255,7 @@ begin
     mnuSendAlert.Enabled := EnabledImagingMenuOptions;
     mnuCreateResultNote.Enabled := EnabledImagingMenuOptions;
   end;
+  mnuViewInBrowser.Visible := (tvReports.Selected.Text='Imaging (local only)');
   //kt end addition
 end;
 
@@ -2820,8 +2824,7 @@ begin
   CheckForHiddenRows;
 end;
 
-procedure TfrmReports.lvReportsSelectItem(Sender: TObject; Item: TListItem;
-  Selected: Boolean);
+procedure TfrmReports.lvReportsSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 var
   aID, aMoreID, aSID: string;
   i,j,k: integer;
@@ -3288,6 +3291,31 @@ begin
   end; //case
 end;
 
+
+procedure TfrmReports.mnuViewInBrowserClick(Sender: TObject);
+var
+   TableHTML: TStringList;
+   ReportText: string;
+   TempFile: string;
+begin
+  inherited;
+
+   TableHTML := TStringList.create;
+   TempFile := UniqueCacheFName('RadReport-('+Patient.DFN+').html');
+   try
+      ReportText := '<font face="Consolas">'+GetCurrentReportHTMLTable+'</font>';
+      ReportText := StringReplace(ReportText, #$D#$A,'<BR>', [rfReplaceAll]);
+      ReportText := StringReplace(ReportText, '<pre>','', [rfReplaceAll]);
+      ReportText := StringReplace(ReportText, '</pre>','', [rfReplaceAll]);
+     //NoteText := StringReplace(HtmlViewer.GetFullHTMLText,CacheDir+'\','',[rfReplaceAll, rfIgnoreCase]);
+     TableHTML.add(ReportText);
+     //MyHTML.add(HtmlViewer.GetFullHTMLText);
+     TableHTML.SaveToFile(TempFile);
+    finally
+     TableHTML.Free;
+    end;
+   ShellExecute(Handle, 'open',PChar(TempFile),PChar(''),'', SW_SHOWNORMAL) ;
+end;
 
 function TfrmReports.GetCurrentReportHTMLTable : string;
 //kt added 2/17

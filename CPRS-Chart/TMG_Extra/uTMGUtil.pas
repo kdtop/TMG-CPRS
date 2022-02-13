@@ -35,7 +35,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, StrUtils, CommCtrl,math,
+  Dialogs, StdCtrls, StrUtils, CommCtrl,math,fFrame,
   ORNet, ORFn, ComCtrls, Grids, ORCtrls, ExtCtrls, Buttons,
   uTMGTypes, SortStringGrid;
 
@@ -314,6 +314,7 @@ implementation
       newPGBar := TProgressBarWithText.Create(pnl);
       newPGBar.Parent := pnl;
       newPGBar.Top := nexttop;
+      newPGBar.OnClick := frmFrame.ClickOneAppointment;
       nexttop := nexttop+newPGBar.height+2;
       newPGBar.Left := nextleft;
       if nexttop>pnl.height then begin
@@ -356,7 +357,8 @@ implementation
             //Brush.Color := bgColor;
             //SendMessage(Handle,PBM_SETBKCOLOR,0,clwhite);
             SendMessage(Handle,PBM_SETBARCOLOR, 0,bgColor);
-            Hint := piece(PtArray[int],'^',3); 
+            Hint := piece(PtArray[int],'^',3);
+            HelpKeyword := piece(PtArray[int],'^',4);            
           end;
         end;
       end;
@@ -365,6 +367,7 @@ implementation
   function GetCurrentPatientLoad(pnl:TPanel):string;
   var SchArray:TStringList;
   begin
+    if RPCBrokerBusy then exit; //kt 11/4/21
     SchArray := TStringList.Create();
     tCallV(SchArray,'TMG CPRS GET PATIENT LOAD',[nil]);
     FillPGBars(pnl,SchArray);

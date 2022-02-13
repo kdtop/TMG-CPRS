@@ -2,8 +2,8 @@ object frmLabSelector: TfrmLabSelector
   Left = 0
   Top = 0
   Caption = 'Select Labs For Report'
-  ClientHeight = 392
-  ClientWidth = 510
+  ClientHeight = 385
+  ClientWidth = 519
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,8 +13,8 @@ object frmLabSelector: TfrmLabSelector
   OldCreateOrder = False
   OnShow = FormShow
   DesignSize = (
-    510
-    392)
+    519
+    385)
   PixelsPerInch = 96
   TextHeight = 13
   object lblListName: TLabel
@@ -37,17 +37,19 @@ object frmLabSelector: TfrmLabSelector
   object cklbTitles: TCheckListBox
     Left = 8
     Top = 38
-    Width = 496
-    Height = 307
+    Width = 505
+    Height = 300
     Anchors = [akLeft, akTop, akRight, akBottom]
     Columns = 2
     ItemHeight = 13
     TabOrder = 1
     OnClick = cklbTitlesClick
+    ExplicitWidth = 496
+    ExplicitHeight = 307
   end
   object btnOK: TBitBtn
-    Left = 278
-    Top = 359
+    Left = 287
+    Top = 352
     Width = 113
     Height = 25
     Anchors = [akRight, akBottom]
@@ -83,10 +85,12 @@ object frmLabSelector: TfrmLabSelector
       FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
       FFFF00FFFF00FF3EB961FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    ExplicitLeft = 278
+    ExplicitTop = 359
   end
   object btnCancel: TBitBtn
-    Left = 397
-    Top = 359
+    Left = 406
+    Top = 352
     Width = 107
     Height = 25
     Anchors = [akRight, akBottom]
@@ -120,12 +124,15 @@ object frmLabSelector: TfrmLabSelector
       FF00FFFF00FFFF00FF808080000000000000000000000000000000808080FF00
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    ExplicitLeft = 397
+    ExplicitTop = 359
   end
   object ListView1: TListView
     Left = 8
     Top = 38
-    Width = 494
-    Height = 307
+    Width = 503
+    Height = 300
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Checkboxes = True
     Columns = <
       item
@@ -143,5 +150,7 @@ object frmLabSelector: TfrmLabSelector
     TabOrder = 4
     ViewStyle = vsReport
     OnClick = ListView1Click
+    ExplicitWidth = 494
+    ExplicitHeight = 307
   end
 end

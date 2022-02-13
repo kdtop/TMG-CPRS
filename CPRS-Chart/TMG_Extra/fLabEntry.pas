@@ -565,6 +565,11 @@ begin
   LabNode.Data := Pointer(IEN60);  //NOTE: could cause problems if IEN > 4294967295 (32-bit pointer vs 64 bit IEN)
   Result := LabNode;
   IsPanel := (Store='');
+
+  //10/22/21    Check to see if lab has children in spite of having a store
+  ChildList.Assign(GetComponentLabs(IEN60));
+  if (pos('PROFILE',name)>0) and (assigned(ChildList)) and (ChildList.Count>0) then IsPanel:=True;
+
   //Add labs into table.
   if not ((sgLabValues.RowCount=2) and (sgLabValues.Cells[0,1]='')) then begin
     sgLabValues.RowCount := sgLabValues.RowCount + 1;
@@ -581,11 +586,13 @@ begin
   sgLabValues.Cells[LAB_DATE_COL,Row] := DefaultDate;
   sgLabValues.Cells[LAB_SPEC_COL,Row] := SpecimenName;  //DefaultSpec;
   sgLabValues.Objects[LAB_SPEC_COL, Row] := pointer(SpecimenIEN);  //pointer(DefaultSpecIEN);
+
+
   if IsPanel then begin  //This happens when lab is a panel.  So need to then add child tests
     for i := VALUE_COL to REFHI_COL do begin
       sgLabValues.Cells[i, Row] := BLANK_LINES;
     end;
-    ChildList.Assign(GetComponentLabs(IEN60));
+    //ChildList.Assign(GetComponentLabs(IEN60));
     if assigned(ChildList) then for i := 0 to ChildList.Count-1 do begin
       DataInfo := ChildList.Strings[i];
       IEN60 := StrToIntDef(piece(DataInfo, '^',1),-1);

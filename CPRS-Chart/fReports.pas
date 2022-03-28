@@ -3216,9 +3216,9 @@ begin
       ListItem := lvReports.Items[i];
       line := '';
       //for j := 1 to 3 do begin
-        if (lvReports.Column[j].Width <> 0) and (j < (ListItem.SubItems.Count + 1)) then begin
+        // Is this needed? Above was commented outif (lvReports.Column[j].Width <> 0) and (j < (ListItem.SubItems.Count + 1)) then begin
           line := ListItem.SubItems[2]+' done on '+ListItem.SubItems[1];
-        end;
+        //end;
       //end;
       if (length(line) > 0) and (lvReports.Column[0].Width <> 0) then begin
         line := ListItem.Caption + '  ' + line;

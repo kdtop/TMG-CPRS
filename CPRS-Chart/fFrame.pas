@@ -949,6 +949,7 @@ begin
   end;
   SetActiveTab(0); //12/28/20
   frmNotes.CheckForLock;    //kt  11/11/21
+  if bTimerOn then btnTimerResetClick(nil);    //3/21/22
   HideEverything();
 end;
 

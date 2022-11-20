@@ -239,6 +239,8 @@ var
   PINResult : TPinResult;
   PINLock : string;
   DEACheck: string;
+  WarnForMemoryIssues:boolean;  //TMG 11/4/22
+  WarnMemoryIssuesResult:string;
   //ChangeItem: TChangeItem;
 
   function FindOrderText(const AnID: string): string;
@@ -339,6 +341,7 @@ begin
   //DigSigErr := True;
   CSSelectedList := SelectedList;
   Result := False;
+  WarnForMemoryIssues := False;   //TMG 11/4/22
   PrintLoc := 0;
   EncLocIEN := 0;
   DoNotPrint := False;
@@ -379,6 +382,7 @@ begin
     end;
     with CSSelectedList do for i := 0 to Count - 1 do begin
       obj := TOrder(Items[i]);
+      if obj.DGroupName='Consults' then WarnForMemoryIssues := True;    //TMG  11/4/22
       if (obj.IsControlledSubstance and obj.IsOrderPendDC) then begin
         cidx := frmSignOrders.clstOrders.Items.AddObject(Obj.Text,Obj);
         SigItems.Add(CH_ORD,Obj.ID, cidx);
@@ -510,7 +514,16 @@ begin
       WardList := TStringList.Create;
       ContainsIMOOrders := false;
       try
+        //TMG begin addition  11/6/22
+        if WarnForMemoryIssues then begin   //TMG ADDED ENTIRE IF   11/4/22
+           WarnMemoryIssuesResult := sCallV('TMG CPRS PT IS ON MEMORY MED',[Patient.DFN]);
+           if piece(WarnMemoryIssuesResult,'^',1)='1' then
+             ShowMessage(piece(WarnMemoryIssuesResult,'^',2));
+        end;
+        //TMG end addition   11/6/22
         with SelectedList do for i := 0 to Count - 1 do with TOrder(Items[i]) do begin
+          CallV('TMG CPRS COMPLETE ORDER HFS',[Patient.DFN,TOrder(Items[i]).Text]);  //TMG 11/8/22
+          //EDDIE -- The above RPC needs parameter 2 filled with the newly signed order text. Then tested and it is DONE
           CSOrder := False;
           cErr := '';
           cidx := frmSignOrders.clstOrders.Items.IndexOfObject(TOrder(Items[i]));

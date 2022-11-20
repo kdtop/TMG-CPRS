@@ -38,11 +38,13 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, OleCtrls, SHDocVw, ExtCtrls, ComCtrls, ORCtrls,
-  ORFn, uCore, DateUtils,
-  rFileTransferU, uHTMLTools, ORDtTm, ORDtTmRng
+  ORFn, uCore, DateUtils, ORNet, uTMGOptions,
+  rFileTransferU, uHTMLTools, ORDtTm, ORDtTmRng, Menus
   ;
 
 type
+  TViewModes = (vmPDF,vmHL7,vmHL7Lab,vmHL7Rad,vmTimerReport);
+
   TfrmViewLabPDF = class(TForm)
     pnlTopLeft: TPanel;
     pnlTopRight: TPanel;
@@ -62,6 +64,9 @@ type
     ORDateTimeDlg: TORDateTimeDlg;
     btnPrev: TBitBtn;
     btnNext: TBitBtn;
+    PopupMenu1: TPopupMenu;
+    mnuReprocessOne: TMenuItem;
+    procedure mnuReprocessOneClick(Sender: TObject);
     procedure btnDoneClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
@@ -77,6 +82,8 @@ type
     ChangingORDateBox : boolean;
     ChangingDispDates : boolean;
     InitialFMDateTime : TFMDateTime;
+    ViewMode : TViewModes;
+    OptionStr : string;
     function EarliestDate : TFMDateTime;
     function LatestDate : TFMDateTime;
     function BeginningOfDay(FMDateTime : TFMDateTime) : TFMDateTime;
@@ -98,7 +105,8 @@ type
  var
   frmViewLabPDF: TfrmViewLabPDF;  //not auto-intantiated.
 
-procedure ShowLabReport(InitFMDateTime : TFMDateTime);
+procedure ShowLabReport(InitFMDateTime : TFMDateTime; ViewMode : TViewModes);
+procedure ShowTimerReport();
 
 implementation
   uses fFrame;
@@ -116,14 +124,36 @@ tDatePick = (tdpOneDate=0,   //NOTE: These MUST match sequence if ITEMS of cboDi
 
 {$R *.dfm}
 
-procedure ShowLabReport(InitFMDateTime : TFMDateTime);
+procedure ShowLabReport(InitFMDateTime : TFMDateTime; ViewMode : TViewModes);
 begin
   frmViewLabPDF := TfrmViewLabPDF.Create(Application);
+  frmViewLabPDF.OptionStr := '0^0^0';
+  case ViewMode of
+    vmHL7Lab: begin
+      frmViewLabPDF.OptionStr := '1^1^0';
+      ViewMode := vmHL7;
+    end;
+    vmHL7Rad: begin
+      frmViewLabPDF.OptionStr := '1^0^1';
+      ViewMode := vmHL7;
+    end;
+  end;
+  if (ViewMode=vmHL7) and (uTMGOptions.ReadBool('Allow HL7 Reprocessing',False)) then frmViewLabPDF.ListBox.PopupMenu := frmViewLabPDF.PopupMenu1;
+
+  frmViewLabPDF.ViewMode := ViewMode;
   frmViewLabPDF.Initialize(InitFMDateTime);
   frmViewLabPDF.InitialFMDateTime := InitFMDateTime;
   //frmViewLabPDF.ShowModal;
   frmViewLabPDF.Show;
   //frmViewLabPDF.Free;
+end;
+
+procedure ShowTimerReport();
+begin
+  frmViewLabPDF := TfrmViewLabPDF.Create(Application);
+  frmViewLabPDF.ViewMode:=vmTimerReport;
+  frmViewLabPDF.ShowModal;
+  frmViewLabPDF.Free;
 end;
 
 //=====================================================================
@@ -146,7 +176,7 @@ begin
     ListBox.ItemIndex := 0;
     ListBoxClick(nil);
   end;
-  
+
 end;
 
 procedure TfrmViewLabPDF.Initialize(InitFMDateTime : TFMDateTime = 0);
@@ -219,7 +249,11 @@ begin
       ORDateBoxED.FMDateTime := EndDate;
     ChangingORDateBox := false;
 
-    GetAvailLabPDFs(InfoList, Patient.DFN, StartDate, EndDate);
+    if ViewMode = vmPDF then
+      GetAvailLabPDFs(InfoList, Patient.DFN, StartDate, EndDate)
+    else
+      GetAvailLabHL7s(InfoList, Patient.DFN, StartDate, EndDate,OptionStr);
+
     if InfoList.Count > 0 then begin
       ResultStr := InfoList.Strings[0];
       if piece(ResultStr,'^',1) = '-1' then begin
@@ -298,18 +332,45 @@ end;
 
 
 procedure TfrmViewLabPDF.ListBoxClick(Sender: TObject);
+  procedure WBLoadHTML(WebBrowser: TWebBrowser; HTMLCode: string) ;
+    var
+       MyHTML: TStringList;
+       TempFile: string;
+    begin
+       MyHTML := TStringList.create;
+       //TempFile := ExtractFilePath(ParamStr(0))+ 'Cache'+'\Temp.html';
+       TempFile := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\Temp.html';
+       try
+         MyHTML.add(HTMLCode);
+         MyHTML.SaveToFile(TempFile);
+        finally
+         MyHTML.Free;
+        end;
+       WebBrowser.Navigate(TempFile) ;
+
+       while WebBrowser.ReadyState < READYSTATE_INTERACTIVE do
+        Application.ProcessMessages;
+    end;  {WBLoadHTML}
 var
   InfoObj : TPDFInfo;
   i : integer;
+  HL7Message : TStringList;
 begin
   i := ListBox.ItemIndex;
   if i = -1 then exit;
   InfoObj := TPDFInfo(ListBox.Items.Objects[i]);
-  if EnsurePDFLocal(InfoObj) = drSuccess then begin
-    DisplayPDF(InfoObj);
-  end else begin
-    //Clear PDF from browser.
-    WebBrowser.Navigate('about:blank');
+  if ViewMode=vmPDF then begin
+    if EnsurePDFLocal(InfoObj) = drSuccess then begin
+      DisplayPDF(InfoObj);
+    end else begin
+      //Clear PDF from browser.
+      WebBrowser.Navigate('about:blank');
+    end;
+  end else if ViewMode=vmHL7 then begin
+    HL7Message := TStringList.Create();
+    tCallV(HL7Message,'TMG CPRS LAB HL7 MSG',[InfoObj.RelPath,InfoObj.FName]);
+    WBLoadHTML(WebBrowser,HL7Message.Text);
+    HL7Message.Free;
   end;
 end;
 
@@ -325,14 +386,35 @@ begin
   for i := 1 to InfoList.Count - 1 do begin
     InfoObj := TPDFInfo.Create;
     s := InfoList.Strings[i];  //format SUBIEN^<RELATIVE PATH>^<FILE NAME>^FMDATE
-    InfoObj.IEN := piece(s, '^',1);
-    InfoObj.RelPath := piece(s, '^',2);
-    InfoObj.FName := piece(s, '^',3);
-    InfoObj.LabDate := StrToFloatDef(piece(s, '^',4),0);
-    DispText := FormatFMDateTime('mmm dd, yyyy hh:nn', InfoObj.LabDate);
+    if ViewMode=vmHL7 then begin
+      InfoObj.IEN := piece(s, '^',4);
+      InfoObj.RelPath := piece(s, '^',2);
+      InfoObj.FName := piece(s, '^',3);
+      InfoObj.LabDate := StrToFloatDef(piece(s, '^',1),0);
+      DispText := InfoObj.FName;  //FormatFMDateTime('mmm dd, yyyy hh:nn', InfoObj.LabDate);
+    end else begin
+      InfoObj.IEN := piece(s, '^',1);
+      InfoObj.RelPath := piece(s, '^',2);
+      InfoObj.FName := piece(s, '^',3);
+      InfoObj.LabDate := StrToFloatDef(piece(s, '^',4),0);
+      DispText := FormatFMDateTime('mmm dd, yyyy hh:nn', InfoObj.LabDate);
+    end;
     ListBox.Items.AddObject(DispText,InfoObj);
   end;
   SetNextPrevBtnEnable();
+end;
+
+procedure TfrmViewLabPDF.mnuReprocessOneClick(Sender: TObject);
+var
+  InfoObj : TPDFInfo;
+  i : integer;
+  Result : string;
+begin
+  i := ListBox.ItemIndex;
+  if i = -1 then exit;
+  InfoObj := TPDFInfo(ListBox.Items.Objects[i]);
+  Result := sCallV('TMG CPRS LAB HL7 REPROCESS',[InfoObj.RelPath,InfoObj.FName]);
+  messagedlg(Result,mtInformation,[mbOk],0);
 end;
 
 procedure TfrmViewLabPDF.ORDateBoxEDChange(Sender: TObject);
@@ -406,8 +488,31 @@ begin
 end;
 
 procedure TfrmViewLabPDF.FormShow(Sender: TObject);
+var FileName : string;
+    MyHTML:TStringList;
 begin
   SetDate(InitialFMDateTime);
+  if ViewMode=vmHL7 then begin
+     frmViewLabPDF.Caption := 'View Lab HL7';
+     lblLabsToShow.Caption := 'HL7 Messages to Display:';
+  end;
+  if ViewMode=vmTimerReport then begin
+     FileName := CacheDir + '\TimerReport.html';
+     Caption := 'View Timer Events For Today';
+     Width := round(Width/2);
+     pnlTopLeft.Visible := False;
+     pnlTop.Align := alClient;
+     pnlBottom.visible := False;
+     MyHTML := TStringList.create;
+    try
+      tCallV(MyHTML,'ORWRP REPORT TEXT',[Patient.DFN,'1610:PROVIDER CHART EVENTS~;;0;101','','0','','0','0']);
+      MyHTML.SaveToFile(FileName);
+    finally
+      MyHTML.Free;
+      WebBrowser.Navigate(FileName);
+      BorderStyle := bsToolWindow;
+    end;  
+  end;
 end;
 
 end.

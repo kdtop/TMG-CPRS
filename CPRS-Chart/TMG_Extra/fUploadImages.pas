@@ -1406,11 +1406,6 @@ implementation
         Text.Add('<img WIDTH=640 HEIGHT=836 src="'+oneImage+'">');
         Text.Add('<p>');
       end;
-      //Text.Add('<small>');
-      //Text.Add('If images don''t display, first view them in IMAGES tab.<br>');
-      //Text.Add('Then return here, click on note and press [F5] key to refresh.');
-      //Text.Add('</small>');
-      //Text.Add('<p>');
       Text.Add('</body>');
       Text.Add('</html>');
       Text.Add(' ');

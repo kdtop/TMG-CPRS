@@ -105,6 +105,8 @@ type
     btnCompletedLoad: TSpeedButton;
     popOrderComplete: TMenuItem;
     mnuSendOrders: TMenuItem;
+    popCopyOrderText: TMenuItem;
+    procedure popCopyOrderTextClick(Sender: TObject);
     procedure mnuSendOrdersClick(Sender: TObject);
     procedure popOrderCompleteClick(Sender: TObject);
     procedure btnActiveLoadClick(Sender: TObject);
@@ -287,6 +289,7 @@ uses fFrame, fEncnt, fOrderVw, fRptBox, fLkUpLocation, fOrdersDC, fOrdersCV, fOr
      fOrdersCopy, fOMVerify, fODAuto, rODBase, uODBase, rMeds,fODValidateAction, fMeds, uInit, fBALocalDiagnoses,
      fODConsult, fClinicWardMeds, fActivateDeactivate, VA2006Utils, rodMeds,
      uTMGOptions,  //TMG 12/14/17
+     uHTMLTools, //TMG 5/19/22
      fTMGChartExporter,  //TMG 3/9/21
      VA508AccessibilityRouter, VAUtils;
 
@@ -3244,6 +3247,25 @@ begin
   lstSheets.Repaint;
   lstWrite.Repaint;
   btnDelayedOrder.Repaint;
+end;
+
+procedure TfrmOrders.popCopyOrderTextClick(Sender: TObject);
+//TMG added entire procedure. It takes the current order text, puts inside an HTML table, then copies to Clipboard 5/19/22
+var OrderText:string;
+    i : integer;
+    pData:  DWORD;
+    dwSize: DWORD;
+begin
+  inherited;
+  with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
+      StatusText('Copying order details...');
+      OrderText := TOrder(Items.Objects[i]).Text;
+      if pos('>>',OrderText)>0 then OrderText := piece2(OrderText,'>>',2);  //Get rid of the leading >>
+      OrderText := '<TABLE BORDER=1><TR><TD><PRE>'+ORDERTEXT+'</PRE></TD></TR></TABLE>';
+      CopyHTMLToClipboard('',OrderText);
+      ShowMessage('Order text has been copied to the clipboard.');
+      StatusText('');
+  end;
 end;
 
 procedure TfrmOrders.popOrderCompleteClick(Sender: TObject);

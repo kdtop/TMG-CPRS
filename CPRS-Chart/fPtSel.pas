@@ -665,7 +665,6 @@ var
   NewDFN: string;  //*DFN*
   DateDied: TFMDateTime;
   AccessStatus: integer;
-  RPCResult : string;  //kt
 begin
 // vwpt enhanced   on click or double clck set mode back to normal to a.) not allow change event
 //erroniously checked with false lookup, and b.0 immedicately put back into normal mode
@@ -789,14 +788,14 @@ end;
 procedure TfrmPtSel.cmdProcessClick(Sender: TObject);
 var
   AFollowUp, i, infocount: Integer;
-  enableclose: boolean;
+  EnableClose: boolean;
   ADFN, x, RecordID, XQAID: string;  //*DFN*
   Response: integer;
+  P2 : string; //kt
 begin
   if FAlertsNotReady then exit;
-  enableclose := false;
-  with lstvAlerts do
-  begin
+  EnableClose := false;
+  with lstvAlerts do begin
     if SelCount <= 0 then Exit;
 
     // Count information-only selections for gauge
@@ -821,6 +820,7 @@ begin
             "   .    "   [5] =  Forwarded by/when
             "   .    "   [6] =  XQAID ('OR,66,50;1416;3021231.121024')
                                        'TIU6028;1423;3021203.09')
+                                       TMG,<SUBTYPE>,<DATA....>  //kt added
             "   .    "   [7] =  Remove without processing flag ('YES')
             "   .    "   [8] =  Forwarding comments (if applicable) }
       XQAID := Items[i].SubItems[6];
@@ -834,10 +834,10 @@ begin
            ADFN := uTMGOptions.ReadString('Mailbox Patient','74592');
            AFollowUp := NF_MAILBOX;   //StrToIntDef(Piece(Piece(XQAID, ';', 1), ',', 3), 0);  //kt Matches Notification types in uConst, e.g. NF_NOTES_UNSIGNED_NOTE
            Notifications.Add(ADFN, AFollowUp, RecordID, Items[i].SubItems[3]); //CB
-           enableclose := true;
+           EnableClose := true;
            DeleteAlert(XQAID);
         end else begin
-           Response := messagedlg(piece(RecordID,'^',1)+#13#10+#13#10+'Do you want to remove this alert?',mtConfirmation,[mbYes,mbNo],0); //TMG  8/22/19
+           Response := MessageDlg(piece(RecordID,'^',1)+#13#10+#13#10+'Do you want to remove this alert?',mtConfirmation,[mbYes,mbNo],0); //TMG  8/22/19
            if Response=mrYes then DeleteAlert(XQAID);  //TMG  8/22/19
         end;
       end else if Piece(XQAID, ',', 1) = 'OR' then begin
@@ -845,7 +845,20 @@ begin
         ADFN := Piece(XQAID, ',', 2);  //*DFN*
         AFollowUp := StrToIntDef(Piece(Piece(XQAID, ';', 1), ',', 3), 0);  //kt Matches Notification types in uConst, e.g. NF_NOTES_UNSIGNED_NOTE
         Notifications.Add(ADFN, AFollowUp, RecordID, Items[i].SubItems[3]); //CB     Add(ADFN, AFollowUp, ARecordID, AHighLightSection)
-        enableclose := true;
+        EnableClose := true;
+      end else if Piece(XQAID, ',', 1) = 'TMG' then begin  //kt added block 11/16/22
+        //format for XQAID to be used:   TMG,<SUBTYPE>,<DATA....>
+        //NOTE: After this form is closed, fFrame will use notification type to determine which tab to switch to, via TfrmFrame.mnuFileNextClick()
+        //      Each tab will then further process notification, e.g. TfrmNotes.ProcessNotifications via DisplayPage()
+        P2 := Piece(XQAID, ',', 2);
+        if P2 = 'TASKEVENT' then begin
+          //format  'TMG,TASKEVENT,<DFN>,<IEN22750>;DUZ;FMDT'
+          ADFN := Piece(XQAID, ',', 3);
+          //Notifications.Add(ADFN, NF_TASKEVENT, Piece(Piece(XQAID, ',', 4),';',1));  //--> TfrmFrame.mnuFileNextClick() --> Reports tab display page --> popping up TaskEvent editor over that,
+          Notifications.Add(ADFN, NF_TASKEVENT, RecordID);  //--> TfrmFrame.mnuFileNextClick() --> Reports tab display page --> popping up TaskEvent editor over that,
+          EnableClose := true;
+        end;
+        //note: Can extend to other TMG notification types in the future....
       end else if Copy(XQAID, 1, 6) = 'TIUERR' then begin
         InfoBox(Piece(RecordID, U, 1) + #13#10#13#10 +
            'The CPRS GUI cannot yet process this type of alert.  Please use List Manager.',
@@ -857,7 +870,7 @@ begin
           ADFN := Piece(x, U, 2);  //*DFN*
           AFollowUp := StrToIntDef(Piece(Piece(x, U, 3), ';', 1), 0);  //kt Matches Notification types in uConst, e.g. NF_NOTES_UNSIGNED_NOTE
           Notifications.Add(ADFN, AFollowUp, RecordID + '^^' + Piece(x, U, 3));
-          enableclose := true;
+          EnableClose := true;
         end else begin
           DeleteAlert(XQAID);
         end;
@@ -865,7 +878,7 @@ begin
         InfoBox('This alert cannot be processed by the CPRS GUI.', Items[i].SubItems[0] + ': ' + Items[i].SubItems[4], MB_OK);
       end;
     end;
-    if enableclose = true then
+    if EnableClose = true then
       Close
     else begin
       ggeInfo.Visible := False;
@@ -1269,41 +1282,50 @@ begin
   List := TStringList.Create;
   NewItem := nil;
   try
-     LoadNotifications(List);
-     for I := 0 to List.Count - 1 do
-       begin
-    //   List[i] := ConvertDate(List, i);  //cla commented out 8/9/04 CQ #4749
-
-         if Piece(List[I], U, 1) <> 'Forwarded by: ' then
-           begin
-              NewItem := lstvAlerts.Items.Add;
-              NewItem.Caption := Piece(List[I], U, 1);
-              for J := 2 to DelimCount(List[I], U) + 1 do
-                 NewItem.SubItems.Add(Piece(List[I], U, J));
-           end
-         else   //this list item is forwarding information
-           begin
-             NewItem.SubItems[5] := Piece(List[I], U, 2);
-             Comment := Piece(List[I], U, 3);
-             if Length(Comment) > 0 then NewItem.SubItems[8] := 'Fwd Comment: ' + Comment;
-           end;
-       end;
-   finally
-      List.Free;
-   end;
-   with lstvAlerts do
-     begin
-        Columns[0].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 1), 40);          //Info                 Caption
-        Columns[1].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 2), 195);         //Patient              SubItems[0]
-        Columns[2].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 3), 75);          //Location             SubItems[1]
-        Columns[3].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 4), 95);          //Urgency              SubItems[2]
-        Columns[4].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 5), 150);         //Alert Date/Time      SubItems[3]
-        Columns[5].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 6), 310);         //Message Text         SubItems[4]
-        Columns[6].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 7), 290);         //Forwarded By/When    SubItems[5]
-     //Items not displayed in Columns:     XQAID                SubItems[6]
-     //                                    Remove w/o process   SubItems[7]
-     //                                    Forwarding comments  SubItems[8]
-     end;
+    LoadNotifications(List);
+    for I := 0 to List.Count - 1 do begin
+      //List[i] := ConvertDate(List, i);  //cla commented out 8/9/04 CQ #4749
+      {kt added doc's:  e.g. '^BRA,PAT (B9898)^^Moderate^11/16/2022@10:31^COMPLETED Addendum available for ADD'L SIGNATURE.^^TIU733632;83;3221116.103117^^'
+       Items[i].Caption      =  Info flag ('I')                                From piece #1, e.g. ''
+            "   .SubItems[0] =  Patient ('ABC,PATIE (A4321)')                  from piece #2  e.g. 'BRA,PAT (B998)'
+            "   .    "   [1] =  Patient location ('[2B]')                      from piece #3  e.g. ''
+            "   .    "   [2] =  Alert urgency level ('HIGH, Moderate, low')    from piece #4  e.g. 'Moderate'
+            "   .    "   [3] =  Alert date/time ('2002/12/31@12:10')           from piece #5  e.g. '11/16/2022@10:31'
+            "   .    "   [4] =  Alert message ('New order(s) placed.')         from piece #6  e.g. 'COMPLETED Addendum available for ADD'L SIGNATURE.'
+            "   .    "   [5] =  Forwarded by/when                              from piece #7  e.g. ''
+            "   .    "   [6] =  XQAID ('OR,66,50;1416;3021231.121024')         from piece #8  e.g. 'TIU733632;83;3221116.103117'
+                                       'TIU6028;1423;3021203.09')
+                                       TMG,<SUBTYPE>,<DATA....>  //kt added
+            "   .    "   [7] =  Remove without processing flag ('YES')         from piece #9  e.g. ''
+            "   .    "   [8] =  Forwarding comments (if applicable)            from piece #10 e.g. ''
+      }
+      if Piece(List[I], U, 1) <> 'Forwarded by: ' then begin
+        NewItem := lstvAlerts.Items.Add;
+        NewItem.Caption := Piece(List[I], U, 1);
+        for J := 2 to DelimCount(List[I], U) + 1 do begin
+          NewItem.SubItems.Add(Piece(List[I], U, J));
+        end;
+      end else begin   //this list item is forwarding information
+        NewItem.SubItems[5] := Piece(List[I], U, 2);
+        Comment := Piece(List[I], U, 3);
+        if Length(Comment) > 0 then NewItem.SubItems[8] := 'Fwd Comment: ' + Comment;
+      end;
+    end;
+  finally
+    List.Free;
+  end;
+  with lstvAlerts do begin
+    Columns[0].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 1), 40);          //Info                 Caption
+    Columns[1].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 2), 195);         //Patient              SubItems[0]
+    Columns[2].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 3), 75);          //Location             SubItems[1]
+    Columns[3].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 4), 95);          //Urgency              SubItems[2]
+    Columns[4].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 5), 150);         //Alert Date/Time      SubItems[3]
+    Columns[5].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 6), 310);         //Message Text         SubItems[4]
+    Columns[6].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 7), 290);         //Forwarded By/When    SubItems[5]
+   //Items not displayed in Columns:     XQAID                SubItems[6]
+   //                                    Remove w/o process   SubItems[7]
+   //                                    Forwarding comments  SubItems[8]
+  end;
 end;
 
 procedure TfrmPtSel.lstvAlertsColumnClick(Sender: TObject; Column: TListColumn);

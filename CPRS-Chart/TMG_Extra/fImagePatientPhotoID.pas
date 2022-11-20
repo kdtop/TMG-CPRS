@@ -245,6 +245,8 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
   var SetTop,SetLeft:integer;
       lPoint:TPoint;
   begin
+    {WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
+    Application.Processmessages;}
     lblDateOfPhoto.Visible := false;
     btnLeft.Visible := false;
     btnRight.Visible := false;
@@ -358,7 +360,7 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
   begin
     i := cboDateOfPhoto.ItemIndex;
     count := cboDateOfPhoto.Items.Count;
-    if i < count-2 then cboDateOfPhoto.ItemIndex := i+1;
+    if i < count-1 then cboDateOfPhoto.ItemIndex := i+1;  //was -2
     cboDateOfPhotoChange(Self);
   end;
 
@@ -382,7 +384,7 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     end;
     i := cboDateOfPhoto.ItemIndex;
     btnRight.Enabled := (i > 0);
-    btnLeft.Enabled := (i < cboDateOfPhoto.Items.Count-2);
+    btnLeft.Enabled := (i < cboDateOfPhoto.Items.Count-1);     //did have -2 on Count
   end;
 
 
@@ -489,6 +491,7 @@ procedure TfrmPatientPhotoID.FormShow(Sender: TObject);
     FUploadMode := True;
     FDragAndDropFile := '';
     WebBrowser.Navigate(frmImages.NullImageName);
+    Application.Processmessages;
     //END FROM CREATE
     UserCancelledUpload := False;
     if FDFN = '' then begin

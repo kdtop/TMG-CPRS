@@ -167,10 +167,14 @@ var i : integer;
     Rec  : TImageInfo;
 
 begin
-  EnsureLinkedImagesDownloaded;
+  EnsureLinkedImagesDownloadedForced;
   ImagesListClear;
   for i := 0 to uImages.GetImagesCount - 1 do begin
     Rec := uImages.GetImageInfo(i);
+    if Rec=nil then begin
+      ShowMessage('Image index '+inttostr(i)+' was blank.');
+      continue;
+    end;
     Image := TImage.Create(Self);
     ShownImagesList.Add(Image);  //index will match Image.Tag below
     Image.Visible := false;

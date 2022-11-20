@@ -14,7 +14,7 @@ inherited frmMeds: TfrmMeds
   OnResize = FormResize
   OnShow = FormShow
   ExplicitWidth = 709
-  ExplicitHeight = 717
+  ExplicitHeight = 725
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape

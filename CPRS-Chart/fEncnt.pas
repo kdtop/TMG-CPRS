@@ -47,7 +47,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ORDtTm, ORFn, ExtCtrls, ComCtrls, ORDtTmRng, fAutoSz, rOptions, fBase508Form,
-  VA508AccessibilityManager, fFrame;
+  VA508AccessibilityManager, fFrame,
+  ORNet;  //TMG added 6/6/22
 
 type
   TfrmEncounter = class(TfrmBase508Form)
@@ -77,6 +78,18 @@ type
     lblClinic: TLabel;
     Panel3: TPanel;
     lblAdmit: TLabel;
+    tabVisits: TTabSheet;
+    tabAppointments: TTabSheet;
+    lstVisits: TORListBox;
+    Panel4: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    lstAppointments: TORListBox;
+    Panel5: TPanel;
+    Label3: TLabel;
+    Label4: TLabel;
+    procedure lstAppointmentsChange(Sender: TObject);
+    procedure lstVisitsChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure pgeVisitChange(Sender: TObject);
     procedure cmdOKClick(Sender: TObject);
@@ -133,6 +146,7 @@ implementation
 {$R *.DFM}
 
 uses rCore, uCore, uConst, fReview, uPCE, rPCE, VA508AccessibilityRouter,
+  uTMGOptions,    //TMG 6/6/22
   VAUtils;
 
 const
@@ -266,13 +280,17 @@ begin
   end
   else Text := '< Select a location from the tabs below.... >';
   OKPressed := False;
+  {   //TMG commented. RPC will now decide the first tab
   pgeVisit.ActivePage := tabClinic;
+  pgeVisit.ActivePage := tabAppointments;
   pgeVisitChange(Self);
   if lstClinic.Items.Count = 0 then
   begin
     pgeVisit.ActivePage := tabNewVisit;
     pgeVisitChange(Self);
-  end;
+  end;}
+  pgeVisit.ActivePageIndex := strtoint(sCallV('TMG ENCOUNTER FIRST TAB',[Patient.DFN,User]));
+  pgeVisitChange(Self);
   ckbHistorical.Hint := 'A historical visit or encounter is a visit that occurred at some time' + CRLF +
                         'in the past or at some other location (possibly non-VA).  Although these' + CRLF +
                         'are not used for workload credit, they can be used for setting up the' + CRLF +
@@ -312,6 +330,18 @@ begin
     ListAdmitAll(lstAdmit.Items, Patient.DFN);
     if AllowAutoFocusChange then
       ActiveControl := lstAdmit;
+  end;
+  if (pgeVisit.ActivePage = tabVisits) and (lstVisits.Items.Count = 0) then   //TMG 5/26/22
+  begin
+    ListVisitsAll(lstVisits.Items, Patient.DFN, FFromDate, FThruDate);
+    if AllowAutoFocusChange then
+      ActiveControl := lstVisits;
+  end;
+  if (pgeVisit.ActivePage = tabAppointments) and (lstAppointments.Items.Count = 0) then   //TMG 5/26/22
+  begin
+    ListSequelApptsAll(lstAppointments.Items, Patient.DFN, FThruDate-7, FThruDate);
+    if AllowAutoFocusChange then
+      ActiveControl := lstAppointments;
   end;
   if pgeVisit.ActivePage = tabNewVisit then
   begin
@@ -438,10 +468,25 @@ begin
 end;
 
 procedure TfrmEncounter.cmdOKClick(Sender: TObject);
+
+  //TMG added entire subfunction
+  function MessageDlg(const AOwner: TForm; const Msg: string; DlgType: TMsgDlgType;
+                      Buttons: TMsgDlgButtons; HelpCtx: Integer = 0): Integer;
+  begin
+    with CreateMessageDialog(Msg, DlgType, Buttons) do
+      try
+         Left := AOwner.Left + (AOwner.Width - Width) div 2;
+         Top := AOwner.Top;
+         Result := ShowModal;
+      finally
+         Free;
+      end;
+    end;
 var
   msg: string;
   ADate, AMaxDate: TDateTime;
-
+  datemsg : string;  //TMG 6/6/22
+  response : integer;  //TMG 6/6/22
 begin
   inherited;
   msg := '';
@@ -458,6 +503,15 @@ begin
       else
         begin
           ADate := FMDateTimeToDateTime(Trunc(FDateTime));
+          //elh added if here to test date   6/6/22
+          if uTMGOptions.ReadBool('OldVisitDateAlert',false) then begin
+             if Piece(FloatToStr(FDateTime),'.',1)<>FloatToStr(FMToday) then begin
+                datemsg := uTMGOptions.ReadString('OldVisitDateMessage','Note: Selected date is in the past. Continue?');
+                response := messagedlg(self,datemsg,mterror,[mbYes,mbNo],0);
+                if response = mrNo then exit;
+             end;
+          end;
+          //end elh addition
           AMaxDate := FMDateTimeToDateTime(FMToday) + StrToIntDef(FEncFutureLimit, 0);
           if ADate > AMaxDate then
               if InfoBox(TX_FUTURE_WARNING, TC_FUTURE_WARNING, MB_YESNO or MB_ICONQUESTION) = MRNO then exit;
@@ -558,11 +612,50 @@ begin
   end;
 end;
 
+procedure TfrmEncounter.lstAppointmentsChange(Sender: TObject);
+// V|A;DateTime;LocIEN^DateTime^LocName^Status
+begin
+  inherited;
+  with lstAppointments do
+  begin
+    FLocation := StrToIntDef(Piece(ItemID, ';', 3), 0);
+    FLocationName := Piece(Items[ItemIndex], U, 3);
+    FDateTime := MakeFMDateTime(Piece(ItemID,';', 2));
+    if FDateTime>FMDTNow then FDateTime:=FMDTNow;  //If future date, set to now
+    FVisitCategory := 'A';
+    FStandAlone := CharAt(ItemID, 1) = 'V';
+    with txtLocation do
+    begin
+      Text := FLocationName + '  ';
+      if FDateTime <> 0 then Text := Text + FormatFMDateTime('mmm dd,yy hh:nn', FDateTime);
+    end;
+  end;
+end;
+
 procedure TfrmEncounter.lstClinicChange(Sender: TObject);
 // V|A;DateTime;LocIEN^DateTime^LocName^Status
 begin
   inherited;
   with lstClinic do
+  begin
+    FLocation := StrToIntDef(Piece(ItemID, ';', 3), 0);
+    FLocationName := Piece(Items[ItemIndex], U, 3);
+    FDateTime := MakeFMDateTime(Piece(ItemID,';', 2));
+    FVisitCategory := 'A';
+    FStandAlone := CharAt(ItemID, 1) = 'V';
+    with txtLocation do
+    begin
+      Text := FLocationName + '  ';
+      if FDateTime <> 0 then Text := Text + FormatFMDateTime('mmm dd,yy hh:nn', FDateTime);
+    end;
+  end;
+end;
+
+procedure TfrmEncounter.lstVisitsChange(Sender: TObject);
+// V|A;DateTime;LocIEN^DateTime^LocName^Status
+begin
+  inherited;
+  with lstVisits do
   begin
     FLocation := StrToIntDef(Piece(ItemID, ';', 3), 0);
     FLocationName := Piece(Items[ItemIndex], U, 3);

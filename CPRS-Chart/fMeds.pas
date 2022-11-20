@@ -1060,7 +1060,7 @@ var
   i: integer;
 begin
   inherited;
- 
+
   //if PatientStatusChanged then exit;
   with lstMedsIn do for i := 0 to Items.Count -1 do
     Selected[i] := false;

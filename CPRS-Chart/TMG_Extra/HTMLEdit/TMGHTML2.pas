@@ -30,6 +30,7 @@ interface
 uses SysUtils, WinTypes, Dialogs, StdCtrls, Menus,
      EmbeddedED,
      WinMsgLog,  //kt 8/16
+     ORNet, TRPCB, //ELH 10/6/22
      ActiveX, MSHTMLEvents, SHDocVw, {MSHTML,} MSHTML_EWB,
      AppEvnts, controls, ExtCtrls,
      IeConst,Messages,Classes,Forms,Graphics;
@@ -160,6 +161,7 @@ type
     procedure Indent;
     procedure Outdent;
     procedure Paste;
+    procedure PasteEvent(Sender : TObject; var AllowPaste : boolean);
     procedure AlignLeft;
     procedure AlignRight;
     procedure AlignCenter;
@@ -249,7 +251,7 @@ implementation
 
 uses
   WinProcs,Variants,Clipbrd, StrUtils, Math, ORFn,
-  uHTMLTools, 
+  uHTMLTools, uTMGOptions,
   Windows;
 
 const
@@ -299,7 +301,8 @@ begin
     end;
   end;
   WinMessageLog := nil;
-  FOnPasteEvent := nil; //kt 8/16
+  //FOnPasteEvent := nil; //kt 8/16
+  FOnPasteEvent := PasteEvent;  //<-- This one works, just need to figure out how to properly use it when the user needs it    9/15/22
   if (CF_HTML = -1) then begin
     CF_HTML  := RegisterClipboardFormat('HTML Format');
   end;
@@ -605,6 +608,81 @@ end;
 procedure THtmlObj.Paste;
 begin
    Showmessage('test');
+end;
+
+procedure THtmlObj.PasteEvent(Sender : TObject; var AllowPaste : boolean);
+   //This procedure is triggered when the user pastes something into the
+   //    TIU editor. It gets the HTML from the clipboard44. If there isn't
+   //    any HTML, it passes back and lets Windows handle it. If there is
+   //    it sends the HTML to the server to alter as needed then inserts it
+   //    into the note
+
+      function StripOutNonAscii(const s: string): string;
+      var
+        i, Count: Integer;
+      begin
+        SetLength(Result, Length(s));
+        Count := 0;
+        for i := 1 to Length(s) do begin
+          if ((s[i] >= #32) and (s[i] <= #127)) or (s[i] in [#10, #13]) then begin
+            inc(Count);
+            Result[Count] := s[i];
+          end else begin
+            //if s[i]=#194 then begin
+              //ShowMessage(inttostr(Ord(s[i])));   //REMOVE THIS. TESTING ONLY
+            inc(Count);
+            Result[Count] := ' ';
+            //end;
+          end;
+        end;
+        SetLength(Result, Count);
+      end;
+
+      procedure StrToStringList(const aSource:String;
+                                const aList :TStringList;
+                                const aFixedLen: integer);
+      var idx,srclen:integer;
+      begin
+         aList.Capacity := (Length(aSource) div aFixedLen) + 1;
+         idx := 1;
+         srclen := Length(aSource);
+         while idx <= srclen do begin
+           aList.Add(Copy(aSource,idx,aFixedLen));
+           Inc(idx,aFixedLen);
+        end;
+      end;
+
+var
+    TrimmedHTML:TStringList;
+    HTML:string;
+    TEXT:string;
+    HTMLArray :TStringList;
+begin
+   AllowPaste := True;
+   HTML := GetClipboardHTML;
+   //HTML := GetClipHTMLText;
+   if uTMGOptions.ReadBool('AlterPastedHTML',false)=false then exit;
+   if HTML='' then begin
+     if Clipboard.HasFormat(CF_TEXT) then begin
+       TEXT := Clipboard.AsText;
+       TEXT := StringReplace(TEXT, #$D#$A,'<BR>', [rfReplaceAll]);
+       //TEXT := StringReplace(TEXT,' ','&nbsp;', [rfReplaceAll]);
+       InsertHTMLAtCaret(TEXT);
+     //  InsertHTMLAtCaret(Clipboard.AsText);
+       AllowPaste := False;
+     end;
+     exit;
+   end;
+   HTML := StripOutNonAscii(HTML);
+   HTMLArray := TStringList.Create;
+   StrToStringList(HTML,HTMLArray,100);
+   TrimmedHTML := TStringList.create;
+   //HTML := sCallV('TMG CPRS HTML PASTE EVENT',[HTMLArray]);
+   tCallV(TrimmedHTML,'TMG CPRS HTML PASTE EVENT',[HTMLArray]);
+   InsertHTMLAtCaret(TrimmedHTML.text);
+   HTMLArray.free;
+   TrimmedHTML.free;
+   AllowPaste := False;
 end;
 
 procedure THtmlObj.AlignLeft;
@@ -952,7 +1030,7 @@ begin
   try
     TextRange:=GetTextRange;
     if TextRange=nil then exit;
-    TextRange.PasteHTML(HTML); 
+    TextRange.PasteHTML(HTML);
     //Modified:=true;   //kt 9/4/15
     SetAsModified;   //kt 9/4/15
   except
@@ -1242,6 +1320,7 @@ begin
   if not ((Msg.Msg=WM_KEYDOWN) or
           (Msg.Msg=WM_KEYUP) or
           (Msg.Msg=WM_COMMAND) or  //kt added 8/16
+          (Msg.Msg=WM_LBUTTONUP) or  //tmg 5/23/22
           (Msg.Msg=WM_RBUTTONUP) ) then exit;  //Speedy exit of non-handled messages
   case Msg.Msg of
     WM_RBUTTONUP : begin
@@ -1252,6 +1331,9 @@ begin
                      if assigned(PopupMenu) then PopupMenu.Popup(Mouse.CursorPos.X,Mouse.CursorPos.Y);
                      Msg.Result := 1; //Handled
                      exit;
+                   end;
+    WM_LBUTTONUP : begin
+                     if Assigned(OnClick) then OnClick(self);
                    end;
     WM_KEYDOWN :   begin
                      GetSystemTimeAsFileTime(KeyPressTime);
@@ -1474,7 +1556,7 @@ begin
                      exit;
                    end; //WM_KEYUP
     WM_COMMAND :   begin
-                     if Msg.WParamHi = 1 then begin  //1 means accelerator key
+                    if Msg.WParamHi = 1 then begin  //1 means accelerator key
                        if Msg.WParamLo = 26 then begin //26 happens with Ctrl-V / paste
                          AllowPaste := true;
                          Msg.Result := 0;  //0 = default is not handled, so passed to WebBrowser for action

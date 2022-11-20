@@ -52,6 +52,7 @@ type
   TProgressCallback = function(CurrentValue, TotalValue : integer; Msg : string=''): boolean;  //result: TRUE = CONTINUE, FALSE = USER ABORTED.
 
 procedure GetAvailLabPDFs(OutList : TStringList; DFN : string; StartDate: TFMDateTime = 0; EndDate : TFMDateTime = 9999999);
+procedure GetAvailLabHL7s(OutList : TStringList; DFN : string; StartDate: TFMDateTime = 0; EndDate : TFMDateTime = 9999999; OptionStr:string='0^0^0');
 
 function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: AnsiString;
                             RPCName : string;
@@ -87,6 +88,14 @@ procedure GetAvailLabPDFs(OutList : TStringList; DFN : string; StartDate: TFMDat
 begin
   if not Assigned(OutList) then exit;
   tCallV(OutList,'TMG CPRS LAB PDF LIST',[DFN, StartDate, EndDate]);
+end;
+
+procedure GetAvailLabHL7s(OutList : TStringList; DFN : string; StartDate: TFMDateTime = 0; EndDate : TFMDateTime = 9999999; OptionStr:string='0^0^0');
+//OptionStr is optional, but is used to filter OUT results (1=filter out). The Format is ADT^RAD^LAB.
+//For example, to filter out ADT and RAD (returning only LABS) you would send 1^1^0
+begin
+  if not Assigned(OutList) then exit;
+  tCallV(OutList,'TMG CPRS LAB HL7 LIST',[DFN, StartDate, EndDate,OptionStr]);
 end;
 
 

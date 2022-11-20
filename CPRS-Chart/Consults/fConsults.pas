@@ -48,7 +48,7 @@ uses
   fHSplit, stdCtrls, ExtCtrls, Menus, ComCtrls, ORCtrls, ORFn, uConsults, rOrders, uPCE,
   ORClasses, uConst, fDrawers, rTIU, uTIU, uDocTree, RichEdit, fPrintList,
   TMGHTML2, fNotes, SHDocVw, ActiveX, //kt
-  VA508AccessibilityManager, fBase508Form, VA508ImageListLabeler;
+  VA508AccessibilityManager, fBase508Form, VA508ImageListLabeler, Buttons;
 
 {
 type
@@ -226,7 +226,11 @@ type
     imgLblImages: TVA508ImageListLabeler;
     imgLblConsults: TVA508ImageListLabeler;
     pnlHtmlResultViewer: TPanel;
-    popNoteMemoViewCslt: TMenuItem;   //wat cq 17586
+    popNoteMemoViewCslt: TMenuItem;
+    btnPendingLoad: TSpeedButton;
+    btnActiveLoad: TSpeedButton;
+    procedure btnPendingLoadClick(Sender: TObject);
+    procedure btnActiveLoadClick(Sender: TObject);   //wat cq 17586
     procedure mnuChartTabClick(Sender: TObject);
     procedure lstConsultsClick(Sender: TObject);
     procedure pnlRightResize(Sender: TObject);
@@ -2846,6 +2850,25 @@ begin
     end;
   end;
   ImageList.Free;
+end;
+
+procedure TfrmConsults.btnActiveLoadClick(Sender: TObject);
+begin
+  inherited;
+  ViewContext := 1;
+  UpdateList;
+  //with tvConsults do Selected := FindPieceNode(IntToStr(AConsult), 1, U, Items.GetFirstNode);
+  //tvConsultsClick(Self);
+end;
+
+procedure TfrmConsults.btnPendingLoadClick(Sender: TObject);
+begin
+  inherited;
+  ViewContext := 2;
+  StsCtxt.Status := '5';
+  StsCtxt.Changed := True;
+  StsCtxt.StatusName := 'Pending';
+  UpdateList;
 end;
 
 procedure TfrmConsults.popNoteMemoPopup(Sender: TObject);

@@ -395,6 +395,7 @@ procedure TfrmSingleNote.btnCloseClick(Sender: TObject);
 var Response:integer;
 begin
   inherited;
+  FSaveAndCloseTriggered := false;
   Self.Close;  //FormClose event will trigger call to HandleClosing.
 end;
 

@@ -42,6 +42,7 @@ unit uCore;
 interface
 
 uses SysUtils, Windows, Classes, Forms, ORFn, rCore, uConst, ORClasses, uCombatVet
+     ,Dialogs,Controls    //tmg   8/2/22
      ,Graphics,ORNet,VAUtils //kt Added
      ;
 
@@ -138,6 +139,7 @@ type
     FAssociate:  string;                         // if inpatient, name of associate
     FInProvider:  string;                        // if inpatient, name of inpatient provider
     FMHTC:       string;                         // name of Mental Health Treatment Coordinator
+    FNickName:   string;                         // Patient's nickname TMG added 8/29/22
     FDateDied: TFMDateTime;                      // Date of Patient Death (<=0 or still alive)
     FDateDiedLoaded: boolean;                    // Used to determine of DateDied has been loaded
     FCombatVet : TCombatVet;                     // Object Holding CombatVet Data
@@ -162,6 +164,7 @@ type
     property DFN:              string      read FDFN write SetDFN;  //*DFN*
     property ICN:              string      read FICN;
     property Name:             string      read FName;
+    property NickName:         string      read FNickName;   //TMG added 8/29/22
     property SSN:              string      read FSSN;
     property DOB:              TFMDateTime read FDOB;
     property Age:              Integer     read FAge;
@@ -230,6 +233,7 @@ type
     procedure CreateSaved(Reason: string);
     function GetICDVersion: String;
     function NeedVisit: Boolean;
+    function NeedVisitWVerification: Boolean;     //TMG added entire function 8/2/22
     property DateTime:        TFMDateTime read FDateTime  write SetDateTime;
     property Inpatient:       Boolean     read FInpatient write SetInpatient;
     property Location:        Integer     read FLocation  write SetLocation;
@@ -987,6 +991,7 @@ begin
   FHRN         := '';
   FAltHRN      := '';
   //end vwpt
+  FNickName      := '';    //TMG 8/29/22
 end;
 
 destructor TPatient.Destroy;
@@ -1065,6 +1070,7 @@ begin
   FHRN        := PtSelect.HRN;
   FAltHRN     := PtSelect.AltHRN;
   //end vwpt
+  FNickName   := PtSelect.NickName;
   FInProvider := PtSelect.InProvider;
   FMHTC       := PtSelect.MHTC    ;
   if FSyncWebPages = True then frmFrame.SetWebTabsPerServer;  //kt 4/19/15
@@ -1193,6 +1199,48 @@ function TEncounter.NeedVisit: Boolean;
 begin
   // added "<" to FDateTime check to trap "-1" visit dates - v23.12 (RV)
   if (FDateTime <= 0) or (FLocation = 0) then Result := True else Result := False;
+end;
+
+function TEncounter.NeedVisitWVerification: Boolean;   //TMG added function  8/2/22, used to test encounter date for prior date
+  function MessageDlg(const AOwner: TForm; const Msg: string; DlgType: TMsgDlgType;
+                      Buttons: TMsgDlgButtons; HelpCtx: Integer = 0): Integer;
+  begin
+    with CreateMessageDialog(Msg, DlgType, Buttons) do
+      try
+         Left := AOwner.Left + (AOwner.Width - Width) div 2;
+         //Top := AOwner.Top;
+         Top := (AOwner.Height-(Height div 2)) div 2;
+         Result := ShowModal;
+      finally
+         Free;
+      end;
+    end;
+var
+  msg: string;
+  ADate, AMaxDate: TDateTime;
+  datemsg : string;  //TMG 6/6/22
+  response : integer;  //TMG 6/6/22
+begin
+  if (FDateTime <= 0) or (FLocation = 0) then begin
+    Result := True;
+    Exit;
+  end;
+  Result := False;
+  ADate := FMDateTimeToDateTime(Trunc(FDateTime));
+  if uTMGOptions.ReadBool('OldVisitDateAlert',false) then begin
+    if Piece(FloatToStr(FDateTime),'.',1)<>FloatToStr(FMToday) then begin
+      datemsg := uTMGOptions.ReadString('OldVisitDateMessage','Note: Selected date is in the past. ('+FormatFMDateTime('mm/dd/yy',FDateTime)+')');
+      datemsg := datemsg+#13#10+'Use past date?';
+      response := messagedlg(frmframe,datemsg,mterror,[mbYes,mbNo],0);
+      if response = mrNo then begin
+        FDateTime := 0;
+        FLocation := 0;
+        FLocationText := '';
+        frmFrame.DisplayEncounterText;
+        Result := True;
+      end;
+    end;
+  end;
 end;
 
 procedure TEncounter.SetDateTime(Value: TFMDateTime);

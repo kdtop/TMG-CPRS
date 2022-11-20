@@ -2,7 +2,7 @@ inherited frmFrame: TfrmFrame
   Left = 196
   Top = 119
   Caption = 'p'
-  ClientHeight = 614
+  ClientHeight = 694
   ClientWidth = 872
   FormStyle = fsMDIForm
   Menu = mnuFrame
@@ -14,15 +14,15 @@ inherited frmFrame: TfrmFrame
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  ExplicitWidth = 880
-  ExplicitHeight = 668
+  ExplicitWidth = 888
+  ExplicitHeight = 752
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNoPatientSelected: TPanel [0]
     Left = 0
     Top = 0
     Width = 872
-    Height = 614
+    Height = 694
     Align = alClient
     Caption = 'No patient is currently selected'
     Font.Charset = DEFAULT_CHARSET
@@ -33,16 +33,32 @@ inherited frmFrame: TfrmFrame
     ParentFont = False
     TabOrder = 1
     Visible = False
-    ExplicitHeight = 594
+    object wbNoPatientSelected: TWebBrowser
+      Left = 1
+      Top = 1
+      Width = 870
+      Height = 692
+      Align = alClient
+      TabOrder = 0
+      ExplicitLeft = 80
+      ExplicitTop = 232
+      ExplicitWidth = 300
+      ExplicitHeight = 150
+      ControlData = {
+        4C000000EB590000854700000000000000000000000000000000000000000000
+        000000004C000000000000000000000001000000E0D057007335CF11AE690800
+        2B2E126208000000000000004C0000000114020000000000C000000000000046
+        8000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000100000000000000000000000000000000000000}
+    end
   end
   object pnlPatientSelected: TPanel [1]
     Left = 0
     Top = 0
     Width = 872
-    Height = 614
+    Height = 694
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 594
     object bvlPageTop: TBevel
       Left = 1
       Top = 41
@@ -695,8 +711,8 @@ inherited frmFrame: TfrmFrame
           object lblVistaWeb: TLabel
             Left = 2
             Top = 2
-            Width = 65
-            Height = 14
+            Width = 46
+            Height = 13
             Cursor = crHandPoint
             Align = alClient
             Alignment = taCenter
@@ -709,8 +725,6 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
-            ExplicitWidth = 46
-            ExplicitHeight = 13
           end
         end
         object pnlCIRN: TKeyClickPanel
@@ -739,7 +753,7 @@ inherited frmFrame: TfrmFrame
           object lblCIRN: TLabel
             Left = 2
             Top = 2
-            Width = 65
+            Width = 63
             Height = 13
             Align = alClient
             Alignment = taCenter
@@ -753,12 +767,11 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = pnlCIRNClick
-            ExplicitWidth = 63
           end
           object lblLoadSequelPat: TLabel
             Left = 2
             Top = 2
-            Width = 65
+            Width = 52
             Height = 13
             Hint = 'Load patient who is selected in SequelMed'
             Align = alClient
@@ -772,7 +785,6 @@ inherited frmFrame: TfrmFrame
             ParentFont = False
             Layout = tlCenter
             OnClick = lblLoadSequelPatClick
-            ExplicitWidth = 52
           end
         end
       end
@@ -818,7 +830,7 @@ inherited frmFrame: TfrmFrame
           object lblFlag: TLabel
             Left = 2
             Top = 22
-            Width = 85
+            Width = 25
             Height = 13
             Cursor = crHandPoint
             Align = alBottom
@@ -836,7 +848,6 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlFlagClick
             OnMouseDown = pnlFlagMouseDown
             OnMouseUp = pnlFlagMouseUp
-            ExplicitWidth = 25
           end
         end
       end
@@ -998,7 +1009,7 @@ inherited frmFrame: TfrmFrame
     end
     object stsArea: TStatusBar
       Left = 1
-      Top = 592
+      Top = 672
       Width = 870
       Height = 21
       Panels = <
@@ -1023,11 +1034,10 @@ inherited frmFrame: TfrmFrame
         end>
       PopupMenu = popAlerts
       SizeGrip = False
-      ExplicitTop = 572
     end
     object tabPage: TTabControl
       Left = 1
-      Top = 570
+      Top = 650
       Width = 870
       Height = 22
       Align = alBottom
@@ -1043,13 +1053,12 @@ inherited frmFrame: TfrmFrame
       OnChange = tabPageChange
       OnDrawTab = tabPageDrawTab
       OnMouseUp = tabPageMouseUp
-      ExplicitTop = 550
     end
     object pnlPage: TPanel
       Left = 1
       Top = 42
       Width = 870
-      Height = 528
+      Height = 608
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -1058,7 +1067,8 @@ inherited frmFrame: TfrmFrame
       Font.Style = []
       ParentFont = False
       TabOrder = 2
-      ExplicitHeight = 508
+      ExplicitLeft = 0
+      ExplicitTop = 43
       object sbtnFontSmaller: TSpeedButton
         Tag = -1
         Left = 21
@@ -1354,6 +1364,9 @@ inherited frmFrame: TfrmFrame
         'Status = stsDefault')
       (
         'Component = pnlSchedule'
+        'Status = stsDefault')
+      (
+        'Component = wbNoPatientSelected'
         'Status = stsDefault'))
   end
   object mnuFrame: TMainMenu
@@ -1720,6 +1733,14 @@ inherited frmFrame: TfrmFrame
         Caption = 'TestGraph'
         OnClick = mnuTestGraphClick
       end
+      object mnuSendMessage: TMenuItem
+        Caption = 'Messager Demo'
+        OnClick = mnuSendMessageClick
+      end
+      object mnuTaskEvent: TMenuItem
+        Caption = 'Launch Task Event'
+        OnClick = mnuTaskEventClick
+      end
     end
     object mnuHelp: TMenuItem
       Caption = '&Help'
@@ -1847,6 +1868,10 @@ inherited frmFrame: TfrmFrame
       Caption = 'Reset Chart Timer Prompt'
       Visible = False
       OnClick = mnuResetTimerPromptClick
+    end
+    object mnuShowTodaysReport: TMenuItem
+      Caption = 'Show Today'#39's Timer Report'
+      OnClick = mnuShowTodaysReportClick
     end
   end
   object timSchedule: TTimer

@@ -126,6 +126,7 @@ type
     HRN : string;
     AltHRN : string;
     InProvider: string;
+    NickName: string;   //TMG added 8/29/22
   end;
 
   TEncounterText = record                         // record for ORWPT ENCTITL
@@ -252,6 +253,10 @@ function GetICD10ImplementationDate: TFMDateTime;
 procedure ListApptAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
                                                          Thru: TFMDateTime = 0);
 procedure ListAdmitAll(Dest: TStrings; const DFN: string);
+procedure ListVisitsAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
+                                                         Thru: TFMDateTime = 0);   //TMG  5/26/22
+procedure ListSequelApptsAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
+                                                         Thru: TFMDateTime = 0);   //TMG  5/26/22
 function SubSetOfLocations(const StartFrom: string; Direction: Integer): TStrings;
 function SubSetOfNewLocs(const StartFrom: string; Direction: Integer): TStrings;
 function SubSetOfInpatientLocations(const StartFrom: string; Direction: Integer): TStrings;
@@ -1304,6 +1309,7 @@ begin
     //VWPT ADD HRN   AltHRN (future)
     HRN := Piece(x, U, 17);
     AltHRN := Piece(x, U, 18);
+    NickName := Piece(x,U,19);   //tmg 8/29/22
   end;
   x := sCallV('ORWPT1 PRCARE', [DFN]);
   with PtSelect do
@@ -1459,6 +1465,40 @@ begin
       SetPiece(x, U, 5, ATime);
       Results[i] := x;
     end;
+    FastAssign(Results, Dest);
+  end;
+end;
+
+procedure ListVisitsAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
+                                                         Thru: TFMDateTime = 0);  //*DFN*
+{ lists all admissions for a patient: MovementTime^LocIEN^LocName^Type }
+var
+  i: Integer;
+  ATime, x: string;
+begin
+  CallV('TMG ORWCV VISITS', [DFN, From, Thru]);
+  with RPCBrokerV do
+  begin
+    InvertStringList(TStringList(Results));
+    MixedCaseList(Results);
+    SetListFMDateTime('mmm dd,yyyy hh:nn', TStringList(Results), U, 2);
+    FastAssign(Results, Dest);
+  end;
+end;
+
+procedure ListSequelApptsAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
+                                                         Thru: TFMDateTime = 0);  //*DFN*
+{ lists all admissions for a patient: MovementTime^LocIEN^LocName^Type }
+var
+  i: Integer;
+  ATime, x: string;
+begin
+  CallV('TMG ORWCV APPTS', [DFN, From, Thru]);
+  with RPCBrokerV do
+  begin
+    InvertStringList(TStringList(Results));
+    MixedCaseList(Results);
+    SetListFMDateTime('mmm dd,yyyy hh:nn', TStringList(Results), U, 2);
     FastAssign(Results, Dest);
   end;
 end;

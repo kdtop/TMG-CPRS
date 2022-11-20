@@ -147,7 +147,7 @@ inherited frmEncounter: TfrmEncounter
       Top = 5
       Width = 452
       Height = 232
-      ActivePage = tabNewVisit
+      ActivePage = tabAppointments
       Anchors = [akLeft, akTop, akRight, akBottom]
       Constraints.MinHeight = 150
       RaggedRight = True
@@ -156,6 +156,11 @@ inherited frmEncounter: TfrmEncounter
       OnMouseDown = pgeVisitMouseDown
       object tabClinic: TTabSheet
         Caption = 'Clinic Appointments'
+        TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object lstClinic: TORListBox
           Left = 0
           Top = 20
@@ -201,6 +206,11 @@ inherited frmEncounter: TfrmEncounter
       end
       object tabAdmit: TTabSheet
         Caption = 'Hospital Admissions'
+        TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object lstAdmit: TORListBox
           Left = 0
           Top = 17
@@ -236,7 +246,11 @@ inherited frmEncounter: TfrmEncounter
         end
       end
       object tabNewVisit: TTabSheet
-        Caption = 'New Visit'
+        Caption = 'New Encounter'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object lblVisitDate: TLabel
           Left = 220
           Top = 4
@@ -248,9 +262,9 @@ inherited frmEncounter: TfrmEncounter
         object lblNewVisit: TLabel
           Left = 4
           Top = 4
-          Width = 63
+          Width = 41
           Height = 13
-          Caption = 'Visit Location'
+          Caption = 'Location'
         end
         object calVisitDate: TORDateBox
           Left = 220
@@ -305,6 +319,106 @@ inherited frmEncounter: TfrmEncounter
           OnDblClick = cmdOKClick
           OnNeedData = cboNewVisitNeedData
           CharsNeedMatch = 1
+        end
+      end
+      object tabVisits: TTabSheet
+        Caption = 'Prior Encounters'
+        ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object lstVisits: TORListBox
+          Left = 0
+          Top = 20
+          Width = 444
+          Height = 184
+          Align = alClient
+          Constraints.MinHeight = 21
+          ItemHeight = 13
+          ParentShowHint = False
+          ScrollWidth = 353
+          ShowHint = True
+          TabOrder = 0
+          OnDblClick = cmdOKClick
+          Caption = 'Clinic Appointments / Visits (T-30 thru T+1)'
+          ItemTipColor = clWindow
+          LongList = False
+          Pieces = '3,2,4'
+          TabPositions = '30,50'
+          OnChange = lstVisitsChange
+        end
+        object Panel4: TPanel
+          Left = 0
+          Top = 0
+          Width = 444
+          Height = 20
+          Align = alTop
+          TabOrder = 2
+          object Label1: TLabel
+            Left = 138
+            Top = 4
+            Width = 77
+            Height = 13
+            Caption = '(T-365 thru T+1)'
+          end
+          object Label2: TLabel
+            Left = 4
+            Top = 4
+            Width = 63
+            Height = 13
+            Caption = 'Existing Visits'
+          end
+        end
+      end
+      object tabAppointments: TTabSheet
+        Caption = 'Appointments'
+        ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object lstAppointments: TORListBox
+          Left = 0
+          Top = 20
+          Width = 444
+          Height = 184
+          Align = alClient
+          Constraints.MinHeight = 21
+          ItemHeight = 13
+          ParentShowHint = False
+          ScrollWidth = 353
+          ShowHint = True
+          TabOrder = 0
+          OnDblClick = cmdOKClick
+          Caption = 'Clinic Appointments / Visits (T-30 thru T+1)'
+          ItemTipColor = clWindow
+          LongList = False
+          Pieces = '3,2,4'
+          TabPositions = '30,50'
+          OnChange = lstAppointmentsChange
+        end
+        object Panel5: TPanel
+          Left = 0
+          Top = 0
+          Width = 444
+          Height = 20
+          Align = alTop
+          TabOrder = 2
+          object Label3: TLabel
+            Left = 138
+            Top = 4
+            Width = 65
+            Height = 13
+            Caption = '(T-7 thru T+1)'
+          end
+          object Label4: TLabel
+            Left = 4
+            Top = 4
+            Width = 121
+            Height = 13
+            Caption = 'SequelMed Appointments'
+          end
         end
       end
     end
@@ -365,6 +479,24 @@ inherited frmEncounter: TfrmEncounter
         'Status = stsDefault')
       (
         'Component = frmEncounter'
+        'Status = stsDefault')
+      (
+        'Component = tabVisits'
+        'Status = stsDefault')
+      (
+        'Component = tabAppointments'
+        'Status = stsDefault')
+      (
+        'Component = lstVisits'
+        'Status = stsDefault')
+      (
+        'Component = Panel4'
+        'Status = stsDefault')
+      (
+        'Component = lstAppointments'
+        'Status = stsDefault')
+      (
+        'Component = Panel5'
         'Status = stsDefault'))
   end
   object dlgDateRange: TORDateRangeDlg

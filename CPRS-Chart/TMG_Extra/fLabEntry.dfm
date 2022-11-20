@@ -239,14 +239,25 @@ object frmLabEntry: TfrmLabEntry
         00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
     end
     object btnAddComments: TBitBtn
-      Left = 586
+      Left = 598
       Top = 5
-      Width = 137
+      Width = 125
       Height = 25
       Anchors = [akRight, akBottom]
       Caption = 'Add Lab &Comments'
       TabOrder = 2
       OnClick = btnAddCommentsClick
+      Layout = blGlyphRight
+    end
+    object btnLinkToTIU: TBitBtn
+      Left = 466
+      Top = 5
+      Width = 125
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Link To &Note'
+      TabOrder = 3
+      OnClick = btnLinkToTIUClick
       Layout = blGlyphRight
     end
   end

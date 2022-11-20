@@ -64,6 +64,7 @@ function GetLabGridColor(DFN,Date,User:string; var DateSeen:string):integer; //k
 
 function TMGSendLabAlert(Recipients : TStringList; Info1 : string; Info2 : string = ''; Level : string = '') : string;  ////kt 2/17
 function TMGHasLabReport(DFN,DisplayDate:string):boolean;  //kt 10/23/20
+function TMGHasHL7Report(DFN,DisplayDate:string):boolean;  //kt 3/28/22
 ///
 
 implementation
@@ -280,6 +281,17 @@ begin
   Results := TStringList.create();
   //SDT := strtoint(piece(DisplayDate,'.',1))-1;  //Back up a day
   tCallV(Results,'TMG CPRS LAB PDF LIST',[DFN,piece(DisplayDate,'.',1)+'.0001',piece(DisplayDate,'.',1)+'.9999']);
+  result := (Results.Count>1);  //the [0] is "1^OK" etc.
+  Results.Free;
+end;
+
+function TMGHasHL7Report(DFN,DisplayDate:string):boolean;  //kt 3/28/22
+var Results:TStringList;
+    SDT:integer;
+begin
+  Results := TStringList.create();
+  //SDT := strtoint(piece(DisplayDate,'.',1))-1;  //Back up a day
+  tCallV(Results,'TMG CPRS LAB HL7 LIST',[DFN,piece(DisplayDate,'.',1)+'.0001',piece(DisplayDate,'.',1)+'.9999',1]);
   result := (Results.Count>1);  //the [0] is "1^OK" etc.
   Results.Free;
 end;

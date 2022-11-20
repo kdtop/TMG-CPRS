@@ -31,6 +31,7 @@ type
     DeferredMoveToLooseTitle : String;
     DeferredConsultItemIEN : integer;
     DeferredConsultCompletionDesired : boolean;
+    DeferredToDelete : boolean;
     ProcessDeferredConsultAfterSignature : boolean;
     PromptForAdditionalSigners : boolean;
     ProcessDeferredAdditonalSigners : boolean;
@@ -80,6 +81,8 @@ type
     btnMoveToLoose: TBitBtn;
     lvUnSelected: TCaptionListView;
     lblNextAppt: TLabel;
+    btnDelete: TBitBtn;
+    procedure btnDeleteClick(Sender: TObject);
     procedure lvUnSelectedChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure lvUnSelectedResize(Sender: TObject);
     procedure lvUnSelectedClick(Sender: TObject);
@@ -128,6 +131,7 @@ type
     function UniqueFilename(FolderPath : string; FileSuffix : string) : string;
     function ProcessOne(ItemInfo : TItemInfo; ESCode : string) : boolean;  //result TRUE if successful sign.
     function SignOneTIU(ItemInfo : TItemInfo; ESCode : string) : boolean;  //result TRUE if successful sign.
+    function DeleteOneTIU(ItemInfo : TItemInfo): boolean;  //result TRUE if note deleted
     function AllowSignature(ItemInfo : TItemInfo): Boolean;
     function SelectedItemInfoFromLB(LB : TListBox) : TItemInfo;
     function SelectedItemInfoFromLV(LV : TListView) : TItemInfo;
@@ -205,6 +209,7 @@ begin
   DeferredMoveToLooseTitle := '';
   DeferredConsultItemIEN := 0;
   DeferredConsultCompletionDesired := false;
+  DeferredToDelete := false;
   ProcessDeferredConsultAfterSignature := false;
   PromptForAdditionalSigners := false;
   ProcessDeferredConsultAfterSignature := false;
@@ -369,7 +374,7 @@ begin
             ItemInfo := TItemInfo.Create; //owned by ItemInfoList
             ItemInfo.ItemType := tiitLab;
             // Save enough info to call: rReports.LoadReportTextForDFN()
-            ItemInfo.RptType := '1612:LAB RESULTS REPORT';  //Note: Only 1612 part is used on server.
+            ItemInfo.RptType := '612:LAB RESULTS REPORT';  //Note: Only 612 part is used on server.
             DT := piece(piece(XQData,'|',2),';',2);
             SDT := piece(DT,'.',1)+'.000000';
             EDT := piece(DT,'.',1)+'.999999';
@@ -420,6 +425,7 @@ end;
 procedure TfrmMultiTIUSign.TransferCurrentFromUnselectedToActionList();
 var j : integer;
 begin
+  WebBrowser.Navigate('about:blank');
   j := lvUnSelected.ItemIndex;
   MoveItemBetweenLists(j, lvUnSelected, lbSelected);
   while j >= lvUnSelected.Items.Count do dec(j);
@@ -479,6 +485,7 @@ begin
   end;
   ItemInfo.DeferredMoveToLoose := false;
   ItemInfo.DeferredMoveToLooseTitle := '';
+  ItemInfo.DeferredToDelete := false;
   j := lbSelected.ItemIndex;
   MoveItemBetweenLists(j, lbSelected, lvUnSelected);
   lvUnSelected.AlphaSort;
@@ -525,6 +532,20 @@ begin
   Close;
 end;
 
+procedure TfrmMultiTIUSign.btnDeleteClick(Sender: TObject);
+var ItemInfo : TItemInfo;
+    Title : string;
+    Suggestion : string;
+begin
+  if messagedlg('Are you sure you want to delete this note?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then exit;
+  ItemInfo := SelectedItemInfoFromLV(lvUnSelected);
+  if not assigned(ItemInfo) then exit;
+
+  ItemInfo.DeferredToDelete := true;
+
+  TransferCurrentFromUnselectedToActionList();
+end;
+
 procedure TfrmMultiTIUSign.btnEditNormalZoomClick(Sender: TObject);
 begin
   ZoomReset;  //handle restore size
@@ -550,16 +571,18 @@ var //j : integer;
     //RPCResult,Reason : string;
     //Result : boolean;
     //ImageInfo : TImageInfo;
+    Answered : boolean;
     Title : string;
     Suggestion : string;
 begin
   ItemInfo := SelectedItemInfoFromLV(lvUnSelected);
   if not assigned(ItemInfo) then exit;
 
-  Suggestion := pieces(ItemInfo.AlertMsg,' ',2,999);
-  Suggestion := piece2(Suggestion,'available',1);
-  Title := InputBox('Move to Loose Documents','What would you like to call this file?',Suggestion);
-  if Title = '' then exit;
+  Title := Trim(pieces(ItemInfo.AlertMsg,' ',2,999));
+  Title := piece2(Title,'available',1);
+  Answered := InputQuery('Move to Loose Documents','What would you like to call this file?',Title);
+  //Title := InputBox('Move to Loose Documents','What would you like to call this file?',Suggestion);
+  if (Title = '')or(Answered<>True) then exit;
   ItemInfo.DeferredMoveToLoose := true;
   ItemInfo.DeferredMoveToLooseTitle := Title;
 
@@ -778,7 +801,18 @@ end;
 procedure TfrmMultiTIUSign.pnlCenterBottomResize(Sender: TObject);
 var btnWidth:integer;
 begin
-   btnWidth := round((pnlCenterBottom.Width-23)/4);
+   btnWidth := round((pnlCenterBottom.Width-11-btnPrev.Width-btnNext.Width-24)/3);
+   //btnPrev.width := btnWidth;
+   //btnNext.width := btnWidth;
+   btnPrev.left := 5;
+   btnAddToSign.width := btnWidth;
+   btnMoveToLoose.width := btnWidth;
+   btnDelete.width := btnWidth;
+   btnDelete.Left := 5+6+btnPrev.width;
+   btnAddToSign.Left := btnDelete.Left+btnWidth+6;  //5+12+btnWidth+btnPrev.width;
+   btnMoveToLoose.Left := btnAddToSign.Left+btnWidth+6;//5+18+(btnWidth*2)+btnPrev.width;
+   btnNext.Left := pnlCenterBottom.Width-6-btnNext.Width;
+{   btnWidth := round((pnlCenterBottom.Width-23)/4);
    btnPrev.width := btnWidth;
    btnAddToSign.width := btnWidth;
    btnMoveToLoose.width := btnWidth;
@@ -786,7 +820,7 @@ begin
    btnPrev.left := 5;
    btnAddToSign.Left := 5+6+btnWidth;
    btnMoveToLoose.Left := 5+12+(btnWidth*2);
-   btnNext.Left := 5+18+(btnWidth*3);
+   btnNext.Left := 5+18+(btnWidth*3);}
 end;
 
 procedure TfrmMultiTIUSign.pnlRightCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
@@ -939,21 +973,41 @@ procedure TfrmMultiTIUSign.btnSignAllClick(Sender: TObject);
 //handle the actual signing of the documents here...
 var
   count, i : integer;
+  MessageStr:string;
   Index: integer;
   ItemInfo : TItemInfo;
   AllOK : boolean;
   Success : boolean;
   SuccessCt : integer;
-
+  OkToDelete:boolean;
+  DeleteCount:integer;
 begin
-  count := lbSelected.Items.Count;
-  SignatureForItem(Font.Size, 'Enter Signature Code to Sign ' + IntToStr(count) + ' Notes', 'Sign Multiple Documents', ESCode);
+  //Deletion verification
+  DeleteCount:=0;OkToDelete:=False;count:=0;MessageStr:='';
+  for i := lbSelected.Items.Count - 1 downto 0 do begin
+    Index := Integer(lbSelected.Items.Objects[i]);
+    ItemInfo := TItemInfo(ItemInfoList[Index]);
+    if ItemInfo.DeferredToDelete=True then DeleteCount := DeleteCount+1
+    else count:=count+1;
+  end;
+  if DeleteCount>0 then begin
+    OkToDelete := (messagedlg('You have '+inttostr(DeleteCount)+' marked to delete.'+#13#10+#13#10+'Are you sure you want to delete these?',mtconfirmation,[mbYes,mbNo],0)=mrYes);
+  end;
+  //
+  //Get count above now count := lbSelected.Items.Count;
+  if count>0 then MessageStr := 'Sign '+IntToStr(count)+' Notes';
+  if DeleteCount>0 then begin
+     if MessageStr<>'' then MessageStr := MessageStr+' and'+#13#10;
+     MessageStr := MessageStr+'Delete '+IntToStr(DeleteCount)+' Notes';
+  end;
+  SignatureForItem(Font.Size, 'Enter Signature Code to: '+MessageStr, 'Handle Multiple Documents', ESCode);
   if length(ESCode)=0 then exit;
   AllOK := true;
   SuccessCt := 0;
   for i := lbSelected.Items.Count - 1 downto 0 do begin
     Index := Integer(lbSelected.Items.Objects[i]);
     ItemInfo := TItemInfo(ItemInfoList[Index]);
+    if (ItemInfo.DeferredToDelete=True)and(OkToDelete=False) then continue;
     Success := ProcessOne(ItemInfo, ESCode);
     AllOK := AllOK or Success;
     if Success then begin
@@ -963,7 +1017,7 @@ begin
   end;
   MessageDlg('Successfully signed ' + IntToStr(SuccessCt) + ' items.', mtInformation, [mbOK], 0);
   //TO DO ... show problems.
-  if SuccessCt = count then self.ModalResult := mrOK;
+  if SuccessCt = (count+DeleteCount) then self.ModalResult := mrOK;
 end;
 
 
@@ -975,6 +1029,8 @@ begin
     tiitTIU: begin
       if ItemInfo.DeferredMoveToLoose then begin
         Result := ProcessMoveToLoose(ItemInfo);
+      end else if ItemInfo.DeferredToDelete then begin
+        Result := DeleteOneTIU(ItemInfo);
       end else begin
         Result := SignOneTIU(ItemInfo, ESCode);
       end;
@@ -992,6 +1048,27 @@ begin
     end;
   end; {case}
 
+end;
+
+function TfrmMultiTIUSign.DeleteOneTIU(ItemInfo : TItemInfo): boolean;  //result TRUE if note deleted
+var ActionSts:TActionRec;
+    x : String;
+begin
+    if ItemInfo.DeferredToDelete <> True then begin
+        ShowMsg('NOTE: A note not set for deletion got to the Delete Function!');
+        exit;
+    end;
+    ActOnDocument(ActionSts, ItemInfo.intIEN8925, 'DELETE RECORD');
+    if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
+        ExtDeleteAllAttachedImages(ItemInfo.IEN8925, idmDelete, nil, False);
+        ActOnDocument(ActionSts, ItemInfo.intIEN8925, 'DELETE RECORD');
+    end;
+    if ActionSts.Success <>True then begin
+        ShowMsg(ActionSts.Reason);
+        exit;
+    end;
+    x := sCallV('TIU DELETE RECORD', [ItemInfo.intIEN8925, 'Deleted via MultiTIUSign']);
+    result := Piece(x, U, 1) = '0';
 end;
 
 function TfrmMultiTIUSign.SignOneTIU(ItemInfo : TItemInfo; ESCode : string) : boolean;  //result TRUE if successful sign.

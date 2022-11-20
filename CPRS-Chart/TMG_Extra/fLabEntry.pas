@@ -67,6 +67,8 @@ type
     Timer1: TTimer;
     Label1: TLabel;
     cmbLabGroups: TORComboBox;
+    btnLinkToTIU: TBitBtn;
+    procedure btnLinkToTIUClick(Sender: TObject);
     procedure cmbLabGroupsChange(Sender: TObject);
     procedure LabsORComboBoxDblClick(Sender: TObject);
     procedure sgLabValuesKeyPress(Sender: TObject; var Key: Char);
@@ -97,6 +99,7 @@ type
     LabData : TStringList;
     DefaultSpec, DefaultDate : string;
     DefaultSpecIEN : int64;
+    LinkedTIUNote:string;
     function AddToTV(Parent : TTreeNode; Name : string; IEN60 : int64;
                      Store : string; DisplayIndent : string = '') : TTreeNode;
     function GetComponentLabs(IEN : int64) : TStrings;
@@ -128,7 +131,7 @@ implementation
 
 uses fLabEntryDetails, flabComments,
      fLabDateEdit, fLabSpecimenEdit,
-     uCore,
+     uCore, fNoteSelector,
      TRPCB, FMErrorU;
 
 var
@@ -152,6 +155,7 @@ begin
   LabComments := TStringList.Create;
   frmLabEntryDetails := TfrmLabEntryDetails.Create(Self);
   LabData := TStringList.Create;
+  LinkedTIUNote := '';
 
   sgLabValues.ColWidths[0] := 100;  //May need to fix.
   sgLabValues.Cells[0,0] := 'Lab Name';
@@ -227,6 +231,11 @@ begin
   if Result = true then begin
     Self.Close;
   end;
+end;
+
+procedure TfrmLabEntry.btnLinkToTIUClick(Sender: TObject);
+begin
+  LinkedTIUNote := SelectNote('');
 end;
 
 //========================================================================
@@ -865,6 +874,10 @@ begin
   Data.Add(' ');
   for i := 0 to LabComments.Count-1 do begin
     Data.Add(LabComments.Strings[i]);
+  end;
+  if LinkedTIUNote<>'' then begin //Added 11/15/22
+    Data.Add('<LINKEDNOTE>');
+    Data.Add(LinkedTIUNote);
   end;
 end;
 

@@ -12,7 +12,7 @@ unit CPRSChart_TLB;
 // ************************************************************************ //
 
 // PASTLWTR : 1.2
-// File generated on 3/21/2022 3:50:37 PM from Type Library described below.
+// File generated on 11/20/2022 11:44:53 AM from Type Library described below.
 
 // ************************************************************************  //
 // Type Lib: P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\CPRSChart.tlb (1)
@@ -21,7 +21,7 @@ unit CPRSChart_TLB;
 // Helpfile: 
 // HelpString: CPRSChart Library
 // DepndLst: 
-//   (1) v2.0 stdole, (C:\WINDOWS\system32\stdole2.tlb)
+//   (1) v2.0 stdole, (C:\Windows\system32\stdole2.tlb)
 // ************************************************************************ //
 {$TYPEDADDRESS OFF} // Unit must be compiled without type-checked pointers. 
 {$WARN SYMBOL_PLATFORM OFF}

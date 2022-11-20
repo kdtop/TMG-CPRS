@@ -286,6 +286,10 @@ inherited frmGraphs: TfrmGraphs
           TabOrder = 1
           object tsTopItems: TTabSheet
             Caption = 'Items'
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object lvwItemsTop: TListView
               Left = 0
               Top = 0
@@ -645,7 +649,7 @@ inherited frmGraphs: TfrmGraphs
           Top = 22
           Width = 148
           Height = 76
-          ActivePage = tsBottomViews
+          ActivePage = tsBottomItems
           Align = alClient
           TabOrder = 1
           object tsBottomItems: TTabSheet
@@ -701,6 +705,10 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object splViewsBottom: TSplitter
               Left = 0
               Top = 45

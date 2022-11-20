@@ -285,6 +285,7 @@ const
   NF_SURGERY_UNSIGNED_NOTE         = 904;
   NF_MAILBOX                       = 22710;   //TMG 8/26/19
   NF_HL7MESSAGES                   = 22711;   //TMG 8/26/19
+  NF_TASKEVENT                     = 22712;   //tmg 11/16/22
   NF_ERX_REFILL_NEEDED             = 11305;   //ERx 4/22/11
   NF_ERX_INCOMPLETE_ORDER          = 11306;   //ERx 4/22/11
 

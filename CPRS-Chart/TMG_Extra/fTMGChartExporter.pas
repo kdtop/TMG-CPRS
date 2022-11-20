@@ -94,6 +94,9 @@ type
     Label13: TLabel;
     Label14: TLabel;
     Label15: TLabel;
+    chkStoreData: TCheckBox;
+    procedure edtREChange(Sender: TObject);
+    procedure chkStoreDataClick(Sender: TObject);
     procedure edtToFaxChange(Sender: TObject);
     procedure edtToChange(Sender: TObject);
     procedure btnOrderDatesApplyClick(Sender: TObject);
@@ -171,6 +174,9 @@ var
   HLDPageID: Integer;
   PersistBeginDate:TFMDateTime;
   PersistEndDate:TFMDateTime;
+  PersistCoverSheet : boolean;
+  PersistTo,PersistFax,PersistRE : string;
+  PersistCoverIndex : integer;
   AFrmTMGChartExporter: TfrmTMGChartExporter;
 
 
@@ -205,6 +211,15 @@ procedure ExportOneChart(InitialTab:integer);
     AFrmTMGChartExporter.dtRadEndDt.FMDateTime := PersistEndDate;
     AFrmTMGChartExporter.dtOrderStartDt.FMDateTime := PersistBeginDate;
     AFrmTMGChartExporter.dtOrderEndDt.FMDateTime := PersistEndDate;
+    if PersistCoverSheet then begin
+      AFrmTMGChartExporter.edtTo.Text := PersistTo;
+      AFrmTMGChartExporter.edtToFax.Text := PersistFax;
+      AFrmTMGChartExporter.edtRE.Text := PersistRE;
+      AFrmTMGChartExporter.chkStoreData.checked := PersistCoverSheet;
+      AFrmTMGChartExporter.radCoverGroup.ItemIndex := PersistCoverIndex;
+    end else begin
+      AFrmTMGChartExporter.RadCoverGroup.ItemIndex := 1;
+    end;
     //AFrmTMGChartExporter.ATree := ATree;
     AFrmTMGChartExporter.PageID := CT_Notes;
     //AFrmTMGChartExporter.btnApply.Enabled := False;
@@ -214,7 +229,6 @@ procedure ExportOneChart(InitialTab:integer);
     AFrmTMGChartExporter.LoadOrderListbox;
     AFrmTMGChartExporter.LoadScannedListbox;
     AFrmTMGChartExporter.ExportPageControl.ActivePageIndex := 0;
-    AFrmTMGChartExporter.RadCoverGroup.ItemIndex := 1;
     AFrmTMGChartExporter.RadCoverGroupClick(nil);
     AFrmTMGChartExporter.ExportPageControlChange(nil);
     AFrmTMGChartExporter.lstExtraFiles.Drive := 'C';
@@ -484,6 +498,12 @@ begin
   WBLoadHTML(ViewScan,HTML);
 end;
 
+procedure TfrmTMGChartExporter.chkStoreDataClick(Sender: TObject);
+begin
+  inherited;
+  PersistCoverSheet := chkStoreData.Checked;
+end;
+
 procedure TfrmTMGChartExporter.ckbxAllClick(Sender: TObject);
 const
   CKBTN_LABEL : array [false .. true] of string = ('Select','Deselect');
@@ -544,16 +564,24 @@ begin
   //btnApply.Enabled := true;
 end;
 
+procedure TfrmTMGChartExporter.edtREChange(Sender: TObject);
+begin
+  inherited;
+  PersistRE := edtRe.Text;
+end;
+
 procedure TfrmTMGChartExporter.edtToChange(Sender: TObject);
 begin
   inherited;
   edtTo.Color := clWindow;
+  PersistTo := edtTo.Text;
 end;
 
 procedure TfrmTMGChartExporter.edtToFaxChange(Sender: TObject);
 begin
   inherited;
   edtToFax.color := clWindow;
+  PersistFax := edtToFax.Text;
 end;
 
 //----PROCEDURES TO LOAD THE LISTBOXES
@@ -639,7 +667,7 @@ begin
   lstLabs.Sorted := FALSE;
   RPCResults := TStringList.Create();
   //tCallV(RPCResults,'TMG CPRS LAB GET DATES',[Patient.DFN,'1']);
-  tCallV(RPCResults,'TMG CPRS LAB PDF LIST',[Patient.DFN,dtNotesStart.FMDateTime,dtNotesEnd.FMDateTime]);
+  tCallV(RPCResults,'TMG CPRS LAB PDF LIST',[Patient.DFN,dtLabsStartDt.FMDateTime,dtLabsEndDt.FMDateTime]);
   RPCResults.Delete(0);
   for i := 0 to RPCResults.Count - 1 do begin
    x := RPCResults[i];
@@ -775,6 +803,7 @@ begin
   end;
   SetCoversheetVisibility();
   cklbTitlesClick(Sender);
+  PersistCoverIndex := radCoverGroup.ItemIndex;
 end;
 
 procedure TfrmTMGChartExporter.SetCoversheetVisibility();

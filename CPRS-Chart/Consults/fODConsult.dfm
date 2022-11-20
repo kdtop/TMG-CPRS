@@ -28,7 +28,6 @@ inherited frmODCslt: TfrmODCslt
     Font.Style = []
     ParentFont = False
     TabOrder = 0
-    ExplicitWidth = 598
     object txtCombatVet: TVA508StaticText
       Name = 'txtCombatVet'
       Left = 1
@@ -41,7 +40,6 @@ inherited frmODCslt: TfrmODCslt
       Enabled = False
       TabOrder = 0
       ShowAccelChar = True
-      ExplicitWidth = 596
     end
   end
   inherited memOrder: TCaptionMemo
@@ -57,7 +55,7 @@ inherited frmODCslt: TfrmODCslt
       'An order message may be displayed here.')
     TabOrder = 2
     ExplicitLeft = 3
-    ExplicitTop = 384
+    ExplicitTop = 408
     ExplicitWidth = 417
     ExplicitHeight = 41
   end
@@ -69,8 +67,6 @@ inherited frmODCslt: TfrmODCslt
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 598
-    ExplicitHeight = 380
     DesignSize = (
       607
       404)
@@ -126,7 +122,6 @@ inherited frmODCslt: TfrmODCslt
       Caption = 'Latest appropriate date:'
       TabOrder = 17
       Visible = False
-      ExplicitLeft = 454
     end
     object lblEarliest: TStaticText
       Left = 318
@@ -136,7 +131,6 @@ inherited frmODCslt: TfrmODCslt
       Anchors = [akTop, akRight]
       Caption = 'Earliest appropriate date:'
       TabOrder = 14
-      ExplicitLeft = 309
     end
     object pnlReason: TPanel
       Left = 3
@@ -147,7 +141,6 @@ inherited frmODCslt: TfrmODCslt
       BevelOuter = bvNone
       Constraints.MinHeight = 53
       TabOrder = 13
-      ExplicitWidth = 587
       object lblReason: TLabel
         Left = 0
         Top = 0
@@ -181,7 +174,6 @@ inherited frmODCslt: TfrmODCslt
         OnKeyDown = memReasonKeyDown
         OnKeyPress = memReasonKeyPress
         OnKeyUp = memReasonKeyUp
-        ExplicitWidth = 587
       end
     end
     object cboService: TORComboBox
@@ -212,7 +204,6 @@ inherited frmODCslt: TfrmODCslt
       OnKeyDown = cboServiceKeyDown
       OnKeyUp = cboServiceKeyUp
       CharsNeedMatch = 1
-      ExplicitWidth = 274
     end
     object cboUrgency: TORComboBox
       Left = 318
@@ -239,7 +230,6 @@ inherited frmODCslt: TfrmODCslt
       TabStop = True
       OnChange = ControlChange
       CharsNeedMatch = 1
-      ExplicitLeft = 309
     end
     object cboPlace: TORComboBox
       Left = 466
@@ -265,7 +255,6 @@ inherited frmODCslt: TfrmODCslt
       TabOrder = 9
       OnChange = ControlChange
       CharsNeedMatch = 1
-      ExplicitLeft = 457
     end
     object txtProvDiag: TCaptionEdit
       Left = 321
@@ -280,7 +269,6 @@ inherited frmODCslt: TfrmODCslt
       TabOrder = 11
       OnChange = txtProvDiagChange
       Caption = 'Provisional Diagnosis'
-      ExplicitLeft = 312
     end
     object txtAttn: TORComboBox
       Left = 463
@@ -307,7 +295,6 @@ inherited frmODCslt: TfrmODCslt
       OnChange = ControlChange
       OnNeedData = txtAttnNeedData
       CharsNeedMatch = 1
-      ExplicitLeft = 454
     end
     object treService: TORTreeView
       Left = 0
@@ -335,8 +322,6 @@ inherited frmODCslt: TfrmODCslt
       OnMouseDown = treServiceMouseDown
       Caption = 'object lblService: TLabel'
       NodePiece = 0
-      ExplicitWidth = 298
-      ExplicitHeight = 220
     end
     object cboCategory: TORComboBox
       Left = 225
@@ -381,7 +366,6 @@ inherited frmODCslt: TfrmODCslt
       OnClick = btnServiceTreeClick
       OnEnter = pnlServiceTreeButtonEnter
       OnExit = pnlServiceTreeButtonExit
-      ExplicitLeft = 274
       object btnServiceTree: TSpeedButton
         Left = 2
         Top = 2
@@ -442,7 +426,6 @@ inherited frmODCslt: TfrmODCslt
       Anchors = [akTop, akRight]
       Caption = 'Patient will be seen as an:'
       TabOrder = 8
-      ExplicitLeft = 309
       object radInpatient: TRadioButton
         Left = 3
         Top = 20
@@ -471,7 +454,6 @@ inherited frmODCslt: TfrmODCslt
       Caption = 'Diagnosis'
       TabOrder = 10
       OnClick = btnDiagnosisClick
-      ExplicitLeft = 541
     end
     object cmdLexSearch: TButton
       Left = 550
@@ -482,7 +464,6 @@ inherited frmODCslt: TfrmODCslt
       Caption = 'Lexicon'
       TabOrder = 12
       OnClick = cmdLexSearchClick
-      ExplicitLeft = 541
     end
     object calEarliest: TORDateBox
       Left = 318
@@ -494,7 +475,6 @@ inherited frmODCslt: TfrmODCslt
       OnChange = ControlChange
       DateOnly = True
       RequireTime = False
-      ExplicitLeft = 309
     end
     object calLatest: TORDateBox
       Left = 463
@@ -507,7 +487,6 @@ inherited frmODCslt: TfrmODCslt
       OnChange = ControlChange
       DateOnly = True
       RequireTime = False
-      ExplicitLeft = 454
     end
     object servicelbl508: TVA508StaticText
       Name = 'servicelbl508'
@@ -529,7 +508,7 @@ inherited frmODCslt: TfrmODCslt
     Anchors = [akLeft, akBottom]
     TabOrder = 3
     ExplicitLeft = 427
-    ExplicitTop = 394
+    ExplicitTop = 418
   end
   inherited cmdQuit: TButton
     Left = 531
@@ -538,7 +517,7 @@ inherited frmODCslt: TfrmODCslt
     Anchors = [akLeft, akBottom]
     TabOrder = 4
     ExplicitLeft = 531
-    ExplicitTop = 394
+    ExplicitTop = 418
     ExplicitWidth = 61
   end
   inherited pnlMessage: TPanel
@@ -548,8 +527,8 @@ inherited frmODCslt: TfrmODCslt
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 6
     ExplicitLeft = 13
-    ExplicitTop = 374
-    ExplicitWidth = 377
+    ExplicitTop = 398
+    ExplicitWidth = 386
     inherited memMessage: TRichEdit
       Width = 292
       ExplicitWidth = 292

@@ -54,7 +54,7 @@ uses
   rTIU,   //TM
   uTMGEvent,   //TMG  10/29/20
   fImagePatientPhotoID, fTMGChartExporter, //kt
-  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS;
+  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw;
 
 type
   TfrmFrame = class(TfrmBase508Form)
@@ -219,6 +219,13 @@ type
     mnuResetTimerSetting: TMenuItem;
     menuNurseNote: TMenuItem;
     mnuResetTimerPrompt: TMenuItem;
+    mnuShowTodaysReport: TMenuItem;
+    wbNoPatientSelected: TWebBrowser;
+    mnuSendMessage: TMenuItem;
+    mnuTaskEvent: TMenuItem;
+    procedure mnuTaskEventClick(Sender: TObject);
+    procedure mnuSendMessageClick(Sender: TObject);
+    procedure mnuShowTodaysReportClick(Sender: TObject);
     procedure mnuResetTimerPromptClick(Sender: TObject);
     procedure menuNurseNoteClick(Sender: TObject);
     procedure lblPtProviderClick(Sender: TObject);
@@ -564,17 +571,27 @@ uses
   {$IFDEF CCOWBROKER}
   , CCOW_const
   {$ENDIF}
-  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uImages, uTMGOptions,   //kt added
-  fIntracarePtLbl, fPtAuditLog, fBillableItems, ColorUtil,       //kt added
-  fMemoEdit,                               //kt  testing purposes only can be removed later
-  fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule, fSMSLabText,      //kt
-  VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit, fSingleNote,    //kt
-  fAnticoagulator, uTMG_WM_API,  //kt
-  fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
-  fTest_RW_HTML  //kt TEMP, KILL LATER...
-  , fViewLabPDF   //12/7/21
-  , fConfirmTimer  //11/2/21
-  , fMailbox, fUploadImages;
+  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uImages,
+  fIntracarePtLbl, fPtAuditLog, fBillableItems,
+  fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule,
+  VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit,
+  fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet
+  , ColorUtil        //kt added
+  , uTMGOptions      //kt added
+  , fSMSLabText      //kt
+  , fSingleNote      //kt
+  , fAnticoagulator  //kt
+  , uTMG_WM_API      //kt
+  , fTest_RW_HTML    //kt TEMP, KILL LATER...
+  , fMemoEdit        //kt  testing purposes only can be removed later
+  , fViewLabPDF      //tmg 12/7/21
+  , fConfirmTimer    //tmg 11/2/21
+  , uHTMLTools       //tmg 7/14/22
+  , fMessageDemo     //tmg 9/20/22
+  , fTaskEvents      //tmg 11/1/22
+  , fMailbox         //kt
+  , fUploadImages    //kt
+  ;
 
 var                                 //  RV 05/11/04
   IsRunExecuted: Boolean = FALSE;           //  RV 05/11/04
@@ -950,7 +967,12 @@ begin
   SetActiveTab(0); //12/28/20
   frmNotes.CheckForLock;    //kt  11/11/21
   if bTimerOn then btnTimerResetClick(nil);    //3/21/22
-  HideEverything();
+   HideEverything();
+  if assigned(frmPatientPhotoID) then begin
+     frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
+     Application.Processmessages;
+  end;
+  FContextChanging := False;  //5/2/22, ELH added because this got set to TRUE and Consults wouldn't load afterwards
 end;
 
 procedure TfrmFrame.DigitalSigningSetup1Click(Sender: TObject);
@@ -1587,6 +1609,12 @@ begin
   FreeAndNil(uToolMenuItems);
 end;
 
+procedure TfrmFrame.mnuTaskEventClick(Sender: TObject);
+begin
+  inherited;
+  LaunchTaskEvent;
+end;
+
 procedure TfrmFrame.mnuTeamsClick(Sender: TObject);
 // display Personal Lists Option
 //kt added entire function
@@ -1890,6 +1918,10 @@ procedure TfrmFrame.tabPageChange(Sender: TObject);
 var
   PageID : integer;
 begin
+  if frmNotes.frmNotesLoading<>nil then begin  //tmg 5/12/20
+     frmNotes.frmNotesLoading.Free;
+     frmNotes.frmNotesLoading := nil;
+  end;
   PageID := TabToPageID((sender as TTabControl).TabIndex);
   if (PageID <> CT_NOPAGE) and (TabPage.CanFocus) and Assigned(FLastPage) and
      (not TabPage.Focused) then begin
@@ -2045,9 +2077,9 @@ begin
     Visible := True;
     Application.ProcessMessages;
     if AtFPGLoc then begin  //kt 10/15 remove status from display when at FPG site.
-      lblPtName.Caption := Name;
+      lblPtName.Caption := Name + NickName;     //tmg added nickname 8/29/22
     end else begin
-      lblPtName.Caption := Name + Status; //CQ #17491: Allow for the display of the patient status indicator in header bar.
+      lblPtName.Caption := Name + NickName + Status; //CQ #17491: Allow for the display of the patient status indicator in header bar.              //tmg added nickname 8/29/22
     end;
     //agp //kt prior --> lblPtSSN.Caption := SSN;
     //agp WV BEGIN CHANGE  //kt
@@ -2151,9 +2183,9 @@ begin
         Encounter.Clear;
         Changes.Clear;
         if Assigned(FlagList) then begin
-         FlagList.Clear;
-         HasFlag := False;
-         HasActiveFlg(FlagList, HasFlag, NewDFN);
+          FlagList.Clear;
+          HasFlag := False;
+          HasActiveFlg(FlagList, HasFlag, NewDFN);
         end;
         if FCCOWInstalled and (ctxContextor.State = csParticipating) then begin
           if (AllowCCOWContextChange(CCOWResponse, Patient.DFN)) then
@@ -2258,6 +2290,7 @@ begin
       NF_DCSUMM_UNSIGNED_NOTE          : NextIndex := PageIDToTab(CT_DCSUMM);
       NF_NOTES_UNSIGNED_NOTE           : NextIndex := PageIDToTab(CT_NOTES);
       NF_MAILBOX                       : NextIndex := PageIDToTab(CT_MAILBOX);  //TMG  8/26/19
+      NF_TASKEVENT                     : NextIndex := PageIDToTab(CT_REPORTS);  //TMG  11/16/22.  Will show TaskEvent editor on top of Reports tab.
       NF_CONSULT_REQUEST_UPDATED       : NextIndex := PageIDToTab(CT_CONSULTS);
       NF_FLAGGED_OI_EXP_INPT           : NextIndex := PageIDToTab(CT_ORDERS);
       NF_FLAGGED_OI_EXP_OUTPT          : NextIndex := PageIDToTab(CT_ORDERS);
@@ -2325,9 +2358,10 @@ procedure TfrmFrame.mnuFileOpenClick(Sender: TObject);
 var
   SaveDFN, Reason: string;
   //NextTab: Integer;     // moved up for visibility - v23.4  rV
-  ok, OldRemindersStarted, PtSelCancelled: boolean;
+  ok, OldRemindersStarted, PtSelCancelled, OkToStartTimer: boolean;
   //i: smallint;
   CCOWResponse: UserResponse;
+  InitialTime:string;
   StartTimerOrigSetting : integer;
 begin
   pnlPatient.Enabled := false;
@@ -2406,7 +2440,7 @@ begin
         if PtSelCancelled then begin
           //This was causing CPRS to crash. Commented out for the time being. -> If (Patient.DFN <> '') then NotifyContextChangeCancelledAll;  //kt added
          // begin
-            //pnlPatient.Enabled := True;
+            pnlPatient.Enabled := True;
             exit;
         end;
         ShowEverything;
@@ -2487,14 +2521,21 @@ begin
  //frmCover.UpdateVAAButton; //VAA CQ7525   CQ#7933 - moved to SetupPatient, before event hook execution (RV)
 
  //kt  BEGIN MOD 11/1/13 ---------------------------------------------------------
+ if assigned(frmPatientPhotoID) then begin    //TMG added 6/7/22
+    frmPatientPhotoID.hide;
+    frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
+    Application.Processmessages;
+  end;
  frmOrders.TMGLoadColors;   //12/14/17
  frmImages.HandlePatientChanged();  //11/29/20
- CheckForOpenEvent('',0);   //TMG  11/2/20
+ OkToStartTimer := CheckForOpenEvent('',0);   //TMG  11/2/20
+ InitialTime := sCallV('TMG CPRS GET CURRENT PAT TIME',[Patient.DFN]);
+ if InitialTime<>'0' then pnlTimer.Caption := InitialTime+':00';
  if uTMGOptions.ReadBool('CPRS TIMER PROMPT',False)=True then begin    //TMG  11/2/20
    //StartTimer is 1 for "Turn On", 0 for "unset" which prompts, and -1 for "Don't Turn On"
    StartTimerOrigSetting := StartTimer;
    if StartTimer=1 then begin
-     btnTimerClick(nil);
+     if OkToStartTimer then btnTimerClick(nil);
    end else if StartTimer=0 then begin
      if ConfirmTimerStart(StartTimer)=True then btnTimerClick(nil);
    end else begin
@@ -2549,7 +2590,8 @@ end;
 procedure TfrmFrame.mnuFileEncounterClick(Sender: TObject);
 { displays encounter window and updates encounter display in case encounter was updated }
 begin
-  UpdateEncounter(NPF_ALL); {*KCM*}
+  //UpdateEncounter(NPF_ALL); {*KCM*}
+  UpdateEncounter(NPF_SUPPRESS); //TMG 6/6/22 changed since the PC has already been pulled
   DisplayEncounterText;
 end;
 
@@ -4240,7 +4282,7 @@ begin
     Encounter.Location := 0;
     FPrevInPatient := False;
     lblPtName.Caption := '';
-    lblPtName.Caption := Patient.Name + Patient.Status; //CQ #17491: Refresh patient status indicator in header bar on discharge.
+    lblPtName.Caption := Patient.Name + Patient.NickName + Patient.Status; //CQ #17491: Refresh patient status indicator in header bar on discharge.     //TMG added nickname 8/29/22
   end else if ((not FPrevInPatient) and Patient.Inpatient) then begin     //patient was admitted
     Encounter.Inpatient := True;
     uCore.TempEncounterLoc := Encounter.Location;  //hds7591  Clinic/Ward movement.
@@ -4249,7 +4291,7 @@ begin
     uCore.TempEncounterDateTime := Encounter.DateTime;
     uCore.TempEncounterVistCat := Encounter.VisitCategory;
     lblPtName.Caption := '';
-    lblPtName.Caption := Patient.Name + Patient.Status; //CQ #17491: Refresh patient status indicator in header bar on admission.
+    lblPtName.Caption := Patient.Name + Patient.NickName + Patient.Status; //CQ #17491: Refresh patient status indicator in header bar on admission.    //tmg added nickanem 8/29/22
     if (FReviewClick = False) and (encounter.Location <> patient.Location) and (OrderPrintForm = false) then begin
       frmPrintLocation.SwitchEncounterLoction(Encounter.Location, Encounter.locationName, Encounter.LocationText,
                                             Encounter.DateTime, Encounter.VisitCategory);
@@ -4310,11 +4352,11 @@ procedure TfrmFrame.FormActivate(Sender: TObject);
 var Location: string;
 begin
   //kt begin mod ------------------
-  if PersonHasKey(user.DUZ,'VEFA ADT ACCESS') then begin
-    mnuADT.enabled := True;
-  end else begin
+  //if PersonHasKey(user.DUZ,'VEFA ADT ACCESS') then begin
+  //  mnuADT.enabled := True;
+  //end else begin
    // mnuADT.enabled := false;
-  end;
+  //end;
   //Location := uTMGOptions.ReadString('SpecialLocation','');
   Location := TMGSpecialLocation;  //kt 10/15
   if Location='INTRACARE' then begin  //kt 9/11
@@ -4947,9 +4989,14 @@ begin
 end;
 
 procedure TfrmFrame.HideEverything(AMessage: string = 'No patient is currently selected.');
+var MessageArr:TStringList;
 begin
   FNoPatientSelected := TRUE;
-  pnlNoPatientSelected.Caption := AMessage;
+  //pnlNoPatientSelected.Caption := AMessage;
+  MessageArr := TStringList.Create();
+  tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[]);
+  WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT);
+  MessageArr.Free;
   pnlNoPatientSelected.Visible := True;
   pnlNoPatientSelected.BringToFront;
   mnuFileReview.Enabled := False;
@@ -4973,7 +5020,7 @@ begin
   mnuPrintLabels.Enabled := false; //kt 11/16/20
   mnuPrintAdmissionLabel.Enabled := false; //kt 11/16/20
   if assigned(mnuPrintFormLetters) then mnuPrintFormLetters.Enabled := false; //kt 11/16/20
-  
+  if assigned(frmPatientPhotoID) then frmPatientPhotoID.hide;  //6/7/22
 end;
 
 procedure TfrmFrame.ShowEverything;
@@ -5705,6 +5752,20 @@ begin
   StartTimer := 0;
   mnuResetTimerSetting.visible := False;
   mnuResetTimerPrompt.Visible := false;
+end;
+
+procedure TfrmFrame.mnuSendMessageClick(Sender: TObject);
+var InitialMsg:string;
+begin
+  inherited;
+  InitialMsg := sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]);
+  SendMessenger(InitialMsg);
+end;
+
+procedure TfrmFrame.mnuShowTodaysReportClick(Sender: TObject);
+begin
+  inherited;
+  ShowTimerReport;
 end;
 
 procedure TfrmFrame.mnuPrintAdmissionLabelClick(Sender: TObject);

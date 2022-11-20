@@ -36,7 +36,8 @@ unit uDocTree;
 
 interface
 
-uses SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, ORCtrls, ComCtrls, uTIU; 
+uses SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, ORCtrls, ComCtrls, uTIU
+     ,Forms;  //tmg  5/6/22
 
 
 type
@@ -87,6 +88,7 @@ implementation
 
 uses
   StrUtils, //kt added
+  fNotes,fNotesLoading, uTMGOptions,     //tmg  5/6/22
   rConsults, uDCSumm, uConsults;
 
 {==============================================================
@@ -155,7 +157,21 @@ begin
         Dest.Insert(0, IntToStr(Context) + NO_MATCHES);
         Exit;
       end;
+      if Count>frmNotes.MinDocsForProgressBar then begin
+        if frmNotes.frmNotesLoading=nil then begin
+          frmNotes.frmNotesLoading := TfrmNotesLoading.create(frmNotes);
+          frmNotes.frmNotesLoading.show;
+          application.processmessages;
+        end;
+      end;
       for i := 0 to Count - 1 do begin
+        //if assigned(frmNotes.frmNotesLoading) then begin
+        if frmNotes.frmNotesLoading<>nil then begin
+           //frmNotes.frmNotesLoading.Label1.Caption := inttostr(i)+' out of '+inttostr(srclist.count);
+           frmNotes.frmNotesLoading.ProgressBar1.Max := srclist.count;
+           frmNotes.frmNotesLoading.ProgressBar1.Position := i;
+           application.processmessages;
+        end;
         x := Strings[i];
         MyParent   := Piece(x, U, 14);
         MyTitle    := Piece(x, U, 2);
@@ -249,6 +265,12 @@ begin
         if (not Ascending) then InvertStringList(AList);
       for i := 0 to AList.Count-1 do begin
         Dest.Insert(0, IntToStr(Context) + Piece(AList[i], U, 1) + '^' + Piece(AList[i], U, 2) + '^^^^^^^^^^^%^' + Piece(AList[i], U, 3));
+        if frmNotes.frmNotesLoading<>nil then begin
+           //frmNotes.frmNotesLoading.Label1.Caption := inttostr(i)+' out of '+inttostr(alist.count);
+           frmNotes.frmNotesLoading.ProgressBar1.Max := alist.count;
+           frmNotes.frmNotesLoading.ProgressBar1.Position := i;
+           application.processmessages;
+        end;
       end;
     end; {with}
   finally
@@ -270,6 +292,13 @@ begin
     tmpNode := nil;
     MyParent := Piece(Strings[i], U, 14);
     if (MyParent = Parent) then begin
+       if frmNotes.frmNotesLoading<>nil then begin
+        //frmNotes.frmNotesLoading.Label1.Caption := inttostr(i)+' out of '+inttostr(count);
+        //frmNotes.frmNotesLoading.ProgressBar1.Max := count;
+        frmNotes.frmNotesLoading.ProgressBar1.Position := frmNotes.frmNotesLoading.ProgressBar1.Position+1; 
+        //frmNotes.frmNotesLoading.label2.caption := Piece(Strings[i], U, 2); //Piece(Strings[i], U, 14);
+        application.processmessages;
+      end;
       MyID := Piece(Strings[i], U, 1);
       if Piece(Strings[i], U, 13) <> '%' then
         case TabIndex of
@@ -295,7 +324,10 @@ begin
         ChildNode := TORTreeNode(Tree.Items.AddChildObject(TORTreeNode(Node), Name, AnObject));
         ChildNode.StringData := Strings[i];
         SetTreeNodeImagesAndFormatting(ChildNode, TIUContext, TabIndex);
-        if DocHasChildren then BuildDocumentTree(DocList, MyID, Tree, ChildNode, TIUContext, TabIndex);
+        if DocHasChildren then begin
+           BuildDocumentTree(DocList, MyID, Tree, ChildNode, TIUContext, TabIndex);
+           if frmNotes.frmNotesLoading<>nil then frmNotes.frmNotesLoading.label2.caption := Piece(DocList.Strings[i], U, 2);
+        end;
       end;
     end;
   end;

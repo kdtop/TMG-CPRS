@@ -41,10 +41,13 @@ uses
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Menus, uConst, ORDtTmRng,
   OleCtrls, SHDocVw, Buttons, ClipBrd, rECS, Variants, StrUtils, fBase508Form,
   uTMGOptions, //kt 4/1/21
+  fNoteSelector, //kt 9/20/22
   ShellAPI, //kt 12/21/21
   VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR;
 
 type
+  TNoteVerbs = (nvNone,nvNoteSelect);  //kt 9/20/22
+
   TfrmReports = class(TfrmHSplit)
     PopupMenu1: TPopupMenu;
     GotoTop1: TMenuItem;
@@ -103,6 +106,10 @@ type
     mnuNotifyOk1: TMenuItem;
     mnuCopyResultsTable1: TMenuItem;
     mnuViewInBrowser: TMenuItem;
+    mnuViewHL7: TMenuItem;
+    procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName,
+      PostData, Headers: OleVariant; var Cancel: WordBool);
+    procedure mnuViewHL7Click(Sender: TObject);
     procedure mnuViewInBrowserClick(Sender: TObject);
     procedure sptHorzRightMoved(Sender: TObject);
     procedure lvReportsDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
@@ -221,7 +228,8 @@ implementation
 
 uses ORFn, rCore, rReports, fFrame, uCore, uReports, fReportsPrint,
      fReportsAdhocComponent1, activex, mshtml, dShared, fGraphs, fGraphData, rGraphs,
-     fSingleNote, fAlertSender, uHTMLTools,    //kt
+     fSingleNote, fAlertSender, uHTMLTools, fViewLabPDF,   //kt
+     fTaskEvents, //kt
      VA508AccessibilityRouter, VAUtils;
 
 const
@@ -1283,6 +1291,8 @@ var
   SelectID: string;
   ListItem: TListItem;
   tmpRptID: string;
+  ModalResult : integer; //kt
+  temp : string; //kt
 
   function FindReport(QualType: integer; var AnIndex: integer): boolean; overload;
   var
@@ -1416,10 +1426,9 @@ begin //ProcessNotifications;
         if tvReports.Selected <> tvReports.Items[AnIndex] then
           tvReports.Selected := tvReports.Items[AnIndex];
       end;
-    NF_HL7MESSAGES:
+    NF_HL7MESSAGES:  //tmg added
       begin
         //kt doc.  Find report in left Treeview with Qualifer = 3 (imaging) --> only 1 standard report has that.
-        //EDDIE - PICK UP HERE.... REWRITE SO THAT IT OPENS HL7 MESSAGES REPORT
         if not FindReport(QT_IMAGING, AnIndex) then exit; //kt docn AnIndex is OUT parameter.
         tvReports.Selected := tvReports.Items[AnIndex];
         //kt doc Notifications.AlertData -->  RPC 'ORWORB GETDATA' with (XQAID) --> returns XQDATA
@@ -1431,6 +1440,15 @@ begin //ProcessNotifications;
         if tvReports.Selected <> tvReports.Items[AnIndex] then
           tvReports.Selected := tvReports.Items[AnIndex];
       end;
+    NF_TASKEVENT:  //tmg 11/16/22
+      begin
+        //'ZZT,BA (Z4297): Task/Event due as of 11/15/22, [Test inside ]^TMG,TASKEVENT,74592,16;150;3221118.163637'
+        //temp := Notifications.AlertData;  //triggers a separate RPC to get data
+        ModalResult := LaunchTaskEvent(piece(piece(piece(Notifications.RecordID,'^',2),';',1),',',4));  //shows form modally.
+        if ModalResult <> mrCancel then begin
+          Notifications.Delete;
+        end;
+      end
     else with tvReports do if Items.Count > 0 then Selected := Items[0];
   end;
   if tvReports.Selected <> nil then begin
@@ -1932,6 +1950,30 @@ begin
     Newsize := 50;
 end;
 
+procedure TfrmReports.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+  TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+var MsgType:string;
+  MsgVerb:TNoteVerbs;
+  ItemIEN:string;
+begin
+  inherited;
+  MsgType := piece(piece(URL,'@',1),':',2);  //trim out the about: and the command
+  MsgVerb := nvNone;
+  if MsgType='NoteSelect' then MsgVerb := nvNoteSelect;   //<--this needs to be changed to convert the string to a type or nvNone
+  case MsgVerb of
+    nvNoteSelect: begin
+      ItemIEN := piece(URL,'@',2);
+      Cancel := True;
+      //if pos(',',ItemIEN)>0 then begin
+        ItemIEN := SelectNote(ItemIEN);
+        if ItemIEN='-1' then exit;
+      //end;
+      //ChangeToNote(ItemIEN);
+    end;
+  end;
+  //if MsgType<>'TIUIEN' then exit;
+end;
+
 procedure TfrmReports.WebBrowser1DocumentComplete(Sender: TObject;
   const pDisp: IDispatch; var URL: OleVariant);
 var
@@ -2326,7 +2368,8 @@ begin
         end;
         if TabControl1.TabIndex > 0 then TabControl1.TabIndex := 0;
         if uLocalReportData.Count > 0 then
-          x := #13#10 + 'Select an imaging exam...'
+          //original linex := #13#10 + 'Select an imaging exam...'
+          x := #13#10
         else
           x := #13#10 + 'No imaging reports found...';
         uReportInstruction := PChar(x);
@@ -3291,6 +3334,27 @@ begin
   end; //case
 end;
 
+
+procedure TfrmReports.mnuViewHL7Click(Sender: TObject);
+var
+  InitFMDateTime : TFMDateTime;
+    i,j: integer;
+  Date : TDateTime;
+  ListItem: TListItem;
+  aText: String;
+begin
+  inherited;
+  InitFMDateTime:=FMDTNow;
+  for i := 0 to lvReports.Items.Count - 1 do begin
+    if lvReports.Items[i].Selected then begin
+      ListItem := lvReports.Items[i];
+      Date := strtoDate(piece(ListItem.SubItems[1],' ',1));
+      InitFMDateTime := DateTimeToFMDateTime(Date);
+    end;
+  end;
+  if InitFMDateTime<1 then InitFMDateTime:=FMDTNow;
+  ShowLabReport(InitFMDateTime,vmHL7Rad);
+end;
 
 procedure TfrmReports.mnuViewInBrowserClick(Sender: TObject);
 var

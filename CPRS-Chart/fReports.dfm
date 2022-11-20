@@ -383,6 +383,7 @@ inherited frmReports: TfrmReports
         TabStop = False
         Align = alClient
         TabOrder = 1
+        OnBeforeNavigate2 = WebBrowser1BeforeNavigate2
         OnDocumentComplete = WebBrowser1DocumentComplete
         ExplicitHeight = 377
         ControlData = {
@@ -614,6 +615,11 @@ inherited frmReports: TfrmReports
       Caption = 'View In Browser'
       ShortCut = 16450
       OnClick = mnuViewInBrowserClick
+    end
+    object mnuViewHL7: TMenuItem
+      Caption = 'View HL7 Messages'
+      ShortCut = 16456
+      OnClick = mnuViewHL7Click
     end
   end
   object calApptRng: TORDateRangeDlg

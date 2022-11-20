@@ -418,7 +418,11 @@ uses
   fFrame in 'fFrame.pas' {frmFrame},
   fProbs in 'fProbs.pas' {frmProblems},
   uVA508CPRSCompatibility in 'uVA508CPRSCompatibility.pas',
-  fConfirmTimer in 'TMG_Extra\fConfirmTimer.pas' {frmConfirmTimer};
+  fConfirmTimer in 'TMG_Extra\fConfirmTimer.pas' {frmConfirmTimer},
+  fNotesLoading in 'TMG_Extra\fNotesLoading.pas' {frmNotesLoading},
+  fNoteSelector in 'TMG_Extra\fNoteSelector.pas' {frmNoteSelector},
+  fMessageDemo in 'TMG_Extra\fMessageDemo.pas' {frmMessageDemo},
+  fTaskEvents in 'TMG_Extra\fTaskEvents.pas' {frmEditTaskEvents};
 
 {$R *.TLB}
 
@@ -441,7 +445,9 @@ begin
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
   Application.CreateForm(TfrmConfirmTimer, frmConfirmTimer);
+  Application.CreateForm(TfrmNoteSelector, frmNoteSelector);
+  Application.CreateForm(TfrmMessageDemo, frmMessageDemo);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
-    Application.Run;
-  end;
+      Application.Run;
+    end;
 end.

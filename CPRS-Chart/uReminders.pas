@@ -2649,7 +2649,7 @@ begin
     begin
       temp := PrintName;
       StripScreenReaderCodes(temp);
-      Lst.Insert(idx, '  ' + temp + ':')
+      //Lst.Insert(idx, '  ' + temp + ':')
     end;
   end;
 end;
@@ -5488,6 +5488,14 @@ begin
           while (dte > 2000000) and (dte > FMToday) do begin
             dte := dte - 10000;
             NeedRedraw := TRUE;
+            //SetValue(FloatToStr(dte));
+            //(Sender as TORDateCombo).FMDate := dte;
+            //NOTE TO FUTURE EDDIE: When we were changing the month field, we noticed that occasionally it
+            //    would lose focus. I traced it down to here and found that if the date field is in the future
+            //    it would decrease the year until it wasn't. Then it sets NeedRedraw and that is what was causing the
+            //    lost focus. I tried a few things such as setting the focus downstream, and manually changing the
+            //    date on the control here... but nothing worked. I am thinking that the data object might be
+            //    destroyed and the objects recreated. Will need more research downstream      ELH  4/19/22
           end;
           TmpValue := FloatToStr(dte);
           if(TmpValue = '1000000') then begin
@@ -6298,7 +6306,7 @@ begin
   end;
   if(not NeedRefresh) then
     NeedRefresh := (GetValue <> Value);
-  if(NeedRefresh and assigned(FCurrentControl) and FParent.FReminder.Visible) then
+if(NeedRefresh and assigned(FCurrentControl) and FParent.FReminder.Visible) then
   begin
     case pt of
       ptComment:

@@ -37,7 +37,7 @@ uses
   uTMGOptions;
 
 procedure SaveEvent(Data:string;Event:integer);
-procedure CheckForOpenEvent(Data:string;Event:integer);
+function CheckForOpenEvent(Data:string;Event:integer):boolean;
 
 implementation
 
@@ -59,11 +59,12 @@ begin
    RPCResults.free;
 end;
 
-procedure CheckForOpenEvent(Data:string;Event:integer);
+function CheckForOpenEvent(Data:string;Event:integer):boolean;
 var RPCResults : TStringList;
     EventData:string;
     DateTime : TDateTime;
 begin
+   result := True;
    RPCResults := TStringList.Create;
    EventData := 'CHKOPEN^'+inttostr(User.DUZ)+'^'+Patient.DFN+'^'+inttostr(Event)+'^'+DateTimeToFMDTStr(Now)+'^'+Data;
    tCallV(RPCResults,'TMG EVENT CHANNEL',[EventData]);
@@ -73,7 +74,9 @@ begin
          DateTime := strToDateTime(InputBox('Please enter the time','Enter the time for the last event to stop',DateTimeToStr(now)));
          EventData := 'SAVE^'+inttostr(User.DUZ)+'^'+Patient.DFN+'^2^'+DateTimeToFMDTStr(DateTime)+'^'+Data;
          tCallV(RPCResults,'TMG EVENT CHANNEL',[EventData]);
-      end;
+      end else begin
+         result := false;
+      end;   
    end;
    RPCResults.free;
 end;

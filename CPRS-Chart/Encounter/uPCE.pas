@@ -40,6 +40,10 @@ interface
 uses Windows, SysUtils, Classes, ORFn, uConst, ORCtrls, ORClasses,UBAGlobals
      ,Dialogs  //kt;
      ;
+
+{var
+   OtherVisitStr : string;   //TMG added 6/6/22}
+        
 type
   TPCEProviderRec = record
     IEN: int64;
@@ -369,9 +373,11 @@ type
 type
   TPCEType = (ptEncounter, ptReminder, ptTemplate);
 
+  
 const
   PCETypeText: array[TPCEType] of string = ('encounter', 'reminder', 'template');
 
+  
 function InvalidPCEProviderTxt(AIEN: Int64; ADate: TFMDateTime): string;
 function MissingProviderInfo(PCEEdit: TPCEData; PCEType: TPCEType = ptEncounter): boolean;
 function IsOK2Sign(const PCEData: TPCEData; const IEN: integer) :boolean;
@@ -481,12 +487,13 @@ const
   pnumWHNotPurp      =12;
 
   USE_CURRENT_VISITSTR = -2;
+  //USE_OTHER_VISITSTR = -4;    //TMG added  6/6/22
 
 implementation
 
 uses uCore, rPCE, rCore, rTIU, fEncounterFrame, uVitals, fFrame,
      fPCEProvider, rVitals, uReminders;
-
+     
 const
   FN_NEW_PERSON = 200;
 
@@ -1850,7 +1857,7 @@ var
 begin
 (*  if DCSummAdmitString <> '' then
     TmpVStr := DCSummAdmitString
-  else*) if(NoteIEN < 1) then
+  else*)if(NoteIEN < 1) then
     TmpVStr := Encounter.VisitStr
   else
   begin

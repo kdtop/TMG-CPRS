@@ -41,6 +41,7 @@ interface
        ShDocVw, {//kt added ShDocVw 5-2-05 for TWebBrowser access}
        Dialogs,
        Forms,
+       Clipbrd, //10/7/22
        Registry, {elh   6/19/09}
        ORFn;    {//kt for RedrawActivate}
 
@@ -116,6 +117,8 @@ interface
   function  HTMLDecode(const AStr: String): String;
   procedure MakeWrapperHTMLFile(FullFilePathName, TargetSaveFilePathName : string; Parent:TControl; FileType: TFileType);
   function  UniqueCacheFName(FName : string) : AnsiString;
+  function GetClipboardHTML:string;
+  function GetClipHTMLText:string;
 
   procedure StripTags(var S : string);
   procedure StripQuotes(SL : TStrings; QtChar: char);
@@ -289,6 +292,83 @@ implementation
       FreeAndNil(frmTMGPrinting);
     end;
   end;
+
+  function GetClipboardHTML:string;
+  var
+    CF_HTML: Word;
+    Data: THandle;
+    Ptr: Pointer;
+    Error: DWord;
+    Size: NativeUInt;
+    utf8: UTF8String;
+  begin
+     result := '';
+     CF_HTML := RegisterClipboardFormat('HTML Format');
+     Clipboard.Open;
+     try
+       Data := Clipboard.GetAsHandle(CF_HTML);
+       if Data=0 then begin
+         //something here
+         Exit;
+       end;
+
+       Ptr := GlobalLock(Data);
+       if not Assigned(Ptr) then begin
+         Error := GetLastError;
+         Writeln('GlobalLock failed: '+SysErrorMessage(Error));
+         Exit;
+       end;
+       try
+          Size := GlobalSize(Data);
+          if Size=0 then begin
+            Error := GetLastError;
+            Writeln('GlobalLock failed: '+SysErrorMessage(Error));
+            Exit;
+          end;
+          SetString(utf8, PAnsiChar(Ptr), Size-1);
+          result := string(utf8);
+          //HTMLArray := TStringList.Create;
+          //HTMLArray.Text := HTML;
+         // StrToStringList(HTML,HTMLArray,100);
+       finally
+         GlobalUnlock(Data);
+       end;
+     finally
+       Clipboard.Close;
+     end;
+  end;
+
+  function GetClipHTMLText:string;
+  //kt added entire function 8/16
+  //from: http://www.delphibasics.info/home/delphibasicssnippets/operateclipboardwithoutclipboardunit
+  var hData:  DWORD;
+      pData:  Pointer;
+      dwSize: DWORD;
+  begin
+    Result := '';
+    //original if OpenClipBoard(0) <> 0 then begin
+    if OpenClipBoard(0) then begin
+      try
+        hData := GetClipBoardData(CF_HTML);
+        if hData <> 0 then begin
+          pData := GlobalLock(hData);
+          if pData <> nil then begin
+            dwSize := GlobalSize(hData);
+            if dwSize <> 0 then begin
+              SetLength(result, dwSize);
+              CopyMemory(@result[1], pData, dwSize);
+            end;
+            GlobalUnlock(DWORD(pData));
+          end;
+        end;
+      finally
+        CloseClipBoard;
+      end;
+    end else begin
+      result:='';
+    end;
+  end;
+
 
   (*
   function WaitForBrowserOK(MaxSecDelay: integer; Application : TApplication) : boolean;
@@ -691,7 +771,7 @@ implementation
     OutBefore.Clear;
     OutAfter.Clear;
     OutMiddle.Clear;
-    EndHTMLLine := IndexOfHoldingLine(Lines,'</HTML>',false, true);
+    EndHTMLLine := IndexOfHoldingLine(Lines,'</HTML>',false, false);   //last param was TRUE originally   7/25/22
     for i := 0 to EndHTMLLine do OutBefore.Add(Lines.Strings[i]);
     DocTypeLine := IndexOfHoldingLine(Lines,'<!DOCTYPE HTML', false, true);
     if (DocTypeLine>-1) then for i := DocTypeLine to Lines.count-1 do OutAfter.Add(Lines.Strings[i]);

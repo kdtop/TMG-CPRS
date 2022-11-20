@@ -31,7 +31,7 @@ type
 
 var PrintAfterSignature : boolean;
 
-procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string; UncheckSign : boolean = false);
+procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string; UncheckSign : boolean = false; ForceSign : boolean = False);
 
 implementation
 
@@ -46,7 +46,8 @@ const
 
 //tmg added UncheckSign, which will override the user's parameter. This is used when the user signs a note that shouldn't
 //    prompt for a signature, even if the parameter is set
-procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string; UncheckSign : boolean = false);
+//tmg added ForceSign, which will override all other checks, if the user has that note title assigned as always check to sign
+procedure SignatureForItem(FontSize: Integer; const AText, ACaption: string; var ESCode: string; UncheckSign : boolean = false; ForceSign : boolean = False);
 var
   frmSignItem: TfrmSignItem;
 begin
@@ -61,8 +62,12 @@ begin
       lblText.Text := AText;
       txtESCode.Text := SavedSignature.Value; //kt added 11/15 -- returns '' unless saved in past few minutes.
       imgPWSaved.Visible := (Trim(txtESCode.Text) <> '');  //kt added 11/15
-      TMGAutoPrintCKBox.Checked := uTMGOptions.ReadBool('Print Note On Signature Checked',True);
-      if UncheckSign then TMGAutoPrintCKBox.Checked:=False;
+      if ForceSign then begin
+        TMGAutoPrintCKBox.Checked := True;
+      end else begin
+        TMGAutoPrintCKBox.Checked := uTMGOptions.ReadBool('Print Note On Signature Checked',True);
+        if UncheckSign then TMGAutoPrintCKBox.Checked:=False;
+      end;
       ShowModal;
       fSignItem.PrintAfterSignature := TMGAutoPrintCKBox.checked;  //TMG 7/1/21
       ESCode := FESCode;

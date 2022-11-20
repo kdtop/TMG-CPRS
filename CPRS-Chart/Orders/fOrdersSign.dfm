@@ -15,7 +15,6 @@ inherited frmSignOrders: TfrmSignOrders
   OnPaint = FormPaint
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitTop = -109
   ExplicitWidth = 700
   ExplicitHeight = 533
   PixelsPerInch = 96
@@ -65,8 +64,8 @@ inherited frmSignOrders: TfrmSignOrders
     object lblDEAText: TStaticText
       Left = 0
       Top = 0
-      Width = 1574
-      Height = 17
+      Width = 692
+      Height = 43
       Margins.Left = 6
       Align = alClient
       Caption = 

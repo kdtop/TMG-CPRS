@@ -14,6 +14,8 @@ type
     lblNote: TMemo;
     btnCancel: TButton;
     Label1: TStaticText;
+    Button1: TButton;
+    procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -120,7 +122,36 @@ begin
     //kt UpdatePCE(NoteData);
     UpdatePCE(NoteData, True, InitialPageIndex);  //kt 5/16
     Result := TRUE;
+  {end else if ans = mrAll then begin  //TMG added 6/6/22
+    uPCETemp := TPCEData.Create;
+    uPCETemp.UseEncounter := True;
+    if not CanEditPCE(uPCETemp) then begin
+      if FutureEncounter(uPCETemp) then begin
+        txt := TX_NOPCE_TXT1
+      end else begin
+        txt := TX_NOPCE_TXT2;
+      end;
+      InfoBox(TX_NOPCE_TXT + txt, TX_NOPCE_HDR, MB_OK or MB_ICONWARNING);
+      Exit;
+    end;
+    uPCETemp.PCEForNote(USE_OTHER_VISITSTR, uPCETempOld);
+    UpdatePCE(uPCETemp);
+    if not assigned(uPCETempOld) then begin
+      uPCETempOld := TPCEData.Create;
+    end;
+    uPCETemp.CopyPCEData(uPCETempOld);  }
   end;
+end;
+
+procedure TfrmPCEEdit.Button1Click(Sender: TObject);
+begin
+  inherited;
+  //Allow user to select from all visits
+
+  //Set visit string
+  //uPCE.OtherVisitStr := '6;3210122.131657;A';
+  //Set ModalResult
+  //modalresult := mrAll;
 end;
 
 procedure TfrmPCEEdit.FormCreate(Sender: TObject);

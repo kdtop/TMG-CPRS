@@ -3,15 +3,15 @@ inherited frmPCEEdit: TfrmPCEEdit
   Top = 107
   BorderStyle = bsDialog
   Caption = 'Edit Encounter'
-  ClientHeight = 128
+  ClientHeight = 135
   ClientWidth = 543
   Position = poScreenCenter
   OnCreate = FormCreate
   ExplicitWidth = 549
-  ExplicitHeight = 156
+  ExplicitHeight = 167
   DesignSize = (
     543
-    128)
+    135)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TStaticText [0]
@@ -74,7 +74,7 @@ inherited frmPCEEdit: TfrmPCEEdit
   end
   object btnCancel: TButton [5]
     Left = 465
-    Top = 104
+    Top = 111
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -82,6 +82,17 @@ inherited frmPCEEdit: TfrmPCEEdit
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
+    ExplicitTop = 104
+  end
+  object Button1: TButton [6]
+    Left = 8
+    Top = 108
+    Width = 121
+    Height = 21
+    Caption = 'Edit Other Encounter'
+    TabOrder = 6
+    Visible = False
+    OnClick = Button1Click
   end
   inherited amgrMain: TVA508AccessibilityManager
     Data = (
@@ -105,6 +116,9 @@ inherited frmPCEEdit: TfrmPCEEdit
         'Status = stsDefault')
       (
         'Component = frmPCEEdit'
+        'Status = stsDefault')
+      (
+        'Component = Button1'
         'Status = stsDefault'))
   end
 end

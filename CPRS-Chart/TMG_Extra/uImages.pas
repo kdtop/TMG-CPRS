@@ -105,6 +105,9 @@ procedure AddNoteImagesToList(ImagesInHTMLNote: TStringList; AImageInfoList: TLi
 function  FillImageList(TIUIEN : string; AImageInfoList : TList) : integer;
 procedure EmptyCache();
 procedure DeleteAllAttachedImages(TIUIEN : string; DeleteMode: TImgDelMode; HtmlEditor : THtmlObj; EditIsActive : boolean);
+procedure ExtDeleteAllAttachedImages(TIUIEN : string; DeleteMode: TImgDelMode;
+                                  HtmlEditor : THtmlObj; EditIsActive : boolean);
+procedure ExtEnsureImageListLoaded(AImageInfoList : TList; TIUIEN:string ; ForceReload : boolean = false);
 procedure DeleteImage(var DeleteSts: TActionRec; ImageFileName: String;
                       ImageIEN, DocIEN: Integer; DeleteMode : TImgDelMode;
                       HtmlEditor : THtmlObj; EditActive: Boolean; var RefreshNeeded : boolean;
@@ -125,6 +128,7 @@ function  ProcessDownloadCue(HideProgress : boolean = false) : TDownloadResult;
 function  EnsureRecDownloaded(Rec : TImageInfo; HideProgress : boolean = false) : TDownloadResult;
 procedure EnsureSLImagesDownloaded(ImagesInHTMLNote : TStringList; HideProgress : boolean = false);
 procedure EnsureLinkedImagesDownloaded;
+procedure EnsureLinkedImagesDownloadedForced;  //Added 11/14/22
 procedure EnsureImageListLoaded(AImageInfoList : TList; ForceReload : boolean = false);
 function  GetImagesCount : integer;
 function  GetImageInfo(Index : integer) : TImageInfo; overload;
@@ -1004,6 +1008,12 @@ begin
   ProcessDownloadCue(); //ignore TDownloadResult result
 end;
 
+procedure EnsureLinkedImagesDownloadedForced;
+begin
+  EnsureImageListLoaded(DownloadQueInfoList,True);
+  ProcessDownloadCue(); //ignore TDownloadResult result
+end;
+
 procedure EnsureImageListLoaded(AImageInfoList : TList; ForceReload : boolean = false);
 begin
   if (NumImagesAvailableOnServer = NOT_YET_CHECKED_SERVER) or ForceReload then begin
@@ -1103,7 +1113,7 @@ function GetImagesCount : integer;
 //TO DO.  This function needs sanity check after refactoring...
 
 begin
-  EnsureImageListLoaded(DownloadQueInfoList);
+  EnsureImageListLoaded(DownloadQueInfoList,True);   //Added forced recheck on 11/14/22
   Result := NumImagesAvailableOnServer;
 end;
 
@@ -1185,6 +1195,29 @@ begin
       on E: Exception do exit;
     end;
   end;
+end;
+
+procedure ExtEnsureImageListLoaded(AImageInfoList : TList; TIUIEN:string ; ForceReload : boolean = false);
+begin
+  if (NumImagesAvailableOnServer = NOT_YET_CHECKED_SERVER) or ForceReload then begin
+    NumImagesAvailableOnServer := FillImageList(TIUIEN, AImageInfoList);
+  end;
+end;
+
+procedure ExtDeleteAllAttachedImages(TIUIEN : string; DeleteMode: TImgDelMode;
+                                  HtmlEditor : THtmlObj; EditIsActive : boolean);
+var TempImageInfoList : TList;
+    i : integer;
+
+begin
+  TempImageInfoList := TList.Create();
+  ExtEnsureImageListLoaded(TempImageInfoList, TIUIEN, true);
+  for i := TempImageInfoList.Count-1 downto 0 do begin
+    DeleteImageIndexCommon(TempImageInfoList, i, DeleteMode, false, HtmlEditor, EditIsActive);
+  end;
+  ClearImageList(TempImageInfoList);
+  TempImageInfoList.Free;
+  //to do -- force reload of displayed images...
 end;
 
 initialization

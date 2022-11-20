@@ -702,7 +702,7 @@ begin
       aListItem := lvwItemsTop.Items[i];
       aGraphItem := TGraphItem(aListItem.SubItems.Objects[3]);
       TypeItem := UpperCase(aGraphItem.Values);
-      if Piece(TypeItem, '^', 1) <> '63' then continue;
+      // Will this cause an issue if it something other than a lab value?   if Piece(TypeItem, '^', 1) <> '63' then continue;
       ItemValue := Piece(Piece(TypeItem, '^', 2), '.', 1);
       if TempSL.IndexOf(ItemValue)>-1 then continue;  //avoid duplicate additions.
       Cmd := Cmd + ItemValue + ';';  //ItemValue should be an IEN in file #60 (LAB TEST)
@@ -733,7 +733,8 @@ begin
       BackgroundColor := uTMGOptions.ReadString('Graph Outline Color','#FFFFE0');
       HTML := '<table id="TMGAutoGraph" style="background-color:'+BackgroundColor+';"><th>'+TableHeader+'</th><tr><td>'+HTML+'</td></tr></table>';  //ELH added
       CopyHTMLToClipBoard('', HTML);
-      MessageDlg('Updateable Graph has been added.  It can now be pasted into a note with Ctrl-V', mtInformation, [mbOK], 0);
+      //MessageDlg('Updateable Graph has been added.  It can now be pasted into a note with Ctrl-V', mtInformation, [mbOK], 0);
+      MessageDlg('Updateable Graph has been added.  It can now be pasted into a note by right clicking and selecting PASTE TEXT AS HTML', mtInformation, [mbOK], 0);
     end;
   finally
     TempSL.Free;
@@ -5190,7 +5191,7 @@ var
   dateranges: string;
   index : integer;
 begin
-  {  //kt
+  { //kt
   SelCopy(lvwItemsTop, GtslSelCopyTop);
   SelCopy(lvwItemsBottom, GtslSelCopyBottom);
   dateranges := '';
@@ -5217,7 +5218,7 @@ begin
     end;
   end;
   HideGraphs(true);
-  DateSteps(dateranges);
+  DateSteps(dateranges,1);
   uDateStart := FGraphSetting.FMStartDate;
   uDateStop  := FGraphSetting.FMStopDate;
   FilterListView(FGraphSetting.FMStartDate, FGraphSetting.FMStopDate);
@@ -5228,7 +5229,8 @@ begin
   if lstViewsTop.ItemIndex > 1 then lstViewsTopChange(self);
   if lstViewsBottom.ItemIndex > 1 then lstViewsBottomChange(self);
   HideGraphs(false);
-  }
+   }
+
   dateranges := '';
   if (cboDateRange.ItemID = 'S') then begin
     index := -1; //default
@@ -6945,7 +6947,7 @@ procedure TfrmGraphs.NonNumSave(aChart: TChart; aTitle, aSection: string; adatet
 var
   astring: string;
 begin
-  noncnt := noncnt + 1;
+  //comment out since we are using i   TMG   6/20/22  noncnt := noncnt + 1;
   astring := floattostr(adatetime) + '^' + inttostr(aChart.Tag) + '^'
            + inttostr(newcnt) + '^' + inttostr(noncnt) + '^^' + aTitle + '^'
            + aSection + '^^' + GtslTemp[aIndex];
@@ -7000,6 +7002,7 @@ begin
     BPCheck(aChart, aFileType, serLine, serBPDiastolic, serBPMean);
   for i := GtslTemp.Count - 1 downto 0 do         // go from oldest first
   begin
+    noncnt := i+1;    //TMG 6/20/22
     checkdata := GtslTemp[i];
     fmtime := FMCorrectedDate(Piece(checkdata, '^', 3));
     if IsFMDateTime(fmtime) then
@@ -7299,6 +7302,7 @@ begin
   datestart := strtofloat(date1);
   resultdate := FormatDateTime('mmm d, yyyy  h:nn am/pm', datestart);
   otherdate := FormatDateTime('mm/dd/yy hh:nn', datestart);
+  //showmsg(resultdate);
   moreinfo := itemnum + '^' +
               Piece(nonvalue, '^', 11) + '^' +  //date
               value + '^' +

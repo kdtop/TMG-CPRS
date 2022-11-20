@@ -52,6 +52,8 @@ uses
   pngimage,                                           //kt 12/28/21
   rFileTransferU, uImages,ShellApi,                   //kt 10/27/20
   TMG_WIA_TLB,
+  fNotesLoading, //tmg   5/6/22
+  MSHTML_EWB, //TMG 5/20/22
   OleCtrls, ToolWin, VA508ImageListLabeler;
 
 type
@@ -59,6 +61,7 @@ type
   TViewModes = (vmEdit,vmView,vmText,vmHTML);         //kt 9/11
   TViewModeSet = Set of TViewModes;                   //kt 9/11
   THandleLooseDoc = (hlMoveToScan,hlDelete,hlMoveToTIU);
+  TNoteVerbs = (nvNone,nvNoteSelect);
 const
   vmHTML_MODE : array [false..true] of TViewModes = (vmText,vmHTML); //kt 9/11
   emHTML_MODE : array [false..true] of TEditModes = (emText,emHTML); //kt 9/11
@@ -283,6 +286,8 @@ type
     btnRotateCW: TSpeedButton;
     btnRotateCCW: TSpeedButton;
     Label1: TLabel;
+    mnuViewLast100: TMenuItem;
+    procedure mnuViewLast100Click(Sender: TObject);
     procedure btnRotateCCWClick(Sender: TObject);
     procedure btnRotateCWClick(Sender: TObject);
     procedure popNoteViewInBrowser2Click(Sender: TObject);
@@ -478,7 +483,7 @@ type
     FDesiredPCEInitialPageEditIndex : byte;         //kt 5/16
     frmWinMessageLog: TfrmWinMessageLog;            //kt 8/16 -- debugging tool
     clTMGHighlight : TColor;                        //elh   8/4/16
-    clTMGHospitalColor : TColor;                    //elh   4/30/19  
+    clTMGHospitalColor : TColor;                    //elh   4/30/19
     boolAutosaving : Boolean;                       //elh  11/18/16
     procedure HandleInsertDate(Sender: TObject);    //kt
     procedure HandleHTMLObjPaste(Sender : TObject; var AllowPaste : boolean); //kt 8/16
@@ -553,10 +558,14 @@ type
     function GetEditorHTMLText : string;
     procedure RunMacro(Sender:TObject);                                        //kt 3/16
     procedure HandleLooseDocument(LooseDocHandler:THandleLooseDoc);      //kt 1/21
+    procedure WebBrowserBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);  //TMG  4/12/22
+    procedure HtmlEditorClick(Sender: TObject);  //TMG 5/20/22
   public
     HtmlEditor : THtmlObj;                                                         //kt 9//11
     HtmlViewer : THtmlObj;                                                         //kt 9/11
     TMGForceSaveSwitchEdit : boolean;                                              //kt 4/17/15
+    frmNotesLoading : TfrmNotesLoading;  //tmg 5/6/22
+    MinDocsForProgressBar : integer;    //tmg 5/27/22
     function InsertText(TextToInsert:string):string;    //kt
     procedure UpdateTreeView(DocList: TStringList; Tree: TORTreeView);             //kt moved from private 5/15
     procedure ReloadNotes;                                                         //kt added 4/15
@@ -629,6 +638,7 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fUploadImages, fPtDocSearch, uTMGOptions, fImages, fConsultLink, uTMGUtil, uHTMLTemplateFields,  //kt
      fTemplateDialog, DateUtils, uInit, uVA508CPRSCompatibility, VA508AccessibilityRouter,
      MDMHelper,    //kt    12/21/20
+     fNoteSelector,   //tmg  5/22/22
   VAUtils;
 
 const
@@ -736,6 +746,7 @@ begin
   inherited Create(AOwner);
   FViewNote := TStringList.Create;
   TMGLoadingForEdit := false;
+  MinDocsForProgressBar := uTMGOptions.ReadInteger('Threshold For TIU ProgressBar',100);
 end;
 
 destructor TfrmNotes.Destroy;
@@ -907,8 +918,7 @@ begin
   frmFrame.mnuFilePrint.Enabled := True;
   frmFrame.mnuFilePrintSetup.Enabled := True;
   frmFrame.mnuFilePrintSelectedItems.Enabled := True;
-  if InitPage then
-  begin
+  if InitPage then begin
     EnableDisableIDNotes;
     FDefaultContext := GetCurrentTIUContext;
     FCurrentContext := FDefaultContext;
@@ -919,15 +929,13 @@ begin
     SetEqualTabStops(memNewNote);
   end;
   // to indent the right margin need to set Paragraph.RightIndent for each paragraph?
-  if InitPatient and not (CallingContext = CC_NOTIFICATION) then
-    begin
-      SetViewContext(FDefaultContext);
-    end;
+  if InitPatient and not (CallingContext = CC_NOTIFICATION) then begin
+    SetViewContext(FDefaultContext);
+  end;
   case CallingContext of
-    CC_INIT_PATIENT: if not InitPatient then
-                       begin
-                         SetViewContext(FDefaultContext);
-                       end;
+    CC_INIT_PATIENT:  if not InitPatient then begin
+                        SetViewContext(FDefaultContext);
+                      end;
     CC_NOTIFICATION:  ProcessNotifications;
   end;
 end;
@@ -1883,6 +1891,14 @@ begin
 
   uPCEEdit.NoteDateTime := MakeFMDateTime(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3));
   uPCEEdit.PCEForNote(lstNotes.ItemIEN, uPCEShow);
+  //If no encounter is currently selected, load the note's encounter
+  if Encounter.NeedVisit then begin   //TMG added if block  5/27/22
+     Encounter.Location      := uPCEEdit.Location;
+     Encounter.DateTime      := uPCEEdit.DateTime;
+     Encounter.VisitCategory := uPCEEdit.VisitCategory;
+     Encounter.StandAlone    := uPCEEdit.StandAlone;
+     frmFrame.DisplayEncounterText;
+  end;      //TMG addition
   FEditNote.NeedCPT := uPCEEdit.CPTRequired;
   txtSubject.Text := FEditNote.Subject;
   SetSubjectVisible(AskSubjectForNotes);
@@ -2024,6 +2040,7 @@ begin
   HtmlEditor := THtmlObj.Create(pnlHTMLEdit,Application);
   TWinControl(HtmlViewer).Parent:=pnlHTMLViewer;
   TWinControl(HtmlViewer).Align:=alClient;
+  HtmlViewer.OnBeforeNavigate2 := WebBrowserBeforeNavigate2;
   HtmlEditor.PrevControl := cmdPCE;
   HtmlEditor.NextControl := cmdChange;
   //Note: A 'loaded' function will initialize the THtmlObj's, but it can't be
@@ -2078,6 +2095,7 @@ begin
   HtmlEditor.OnLaunchTemplateSearch := frmDrawers.HandleLaunchTemplateQuickSearch;
   HtmlEditor.OnLaunchDialogSearch := frmDrawers.HandleLaunchDialogQuickSearch;
   HtmlEditor.OnLaunchConsole := frmDrawers.HandleLaunchConsole;
+  HTMLEditor.OnClick := HTMLEditorClick;
   HtmlEditor.OnInsertDate := HandleInsertDate;  //kt
   FImageFlag := TBitmap.Create;
   FDocList := TStringList.Create;
@@ -2104,6 +2122,31 @@ begin
       popNoteMacro.Insert(i,NewItem);
     end;
   end;
+end;
+
+procedure TfrmNotes.WebBrowserBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+  TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);  //TMG   4/12/22
+var MsgType:string;
+    MsgVerb:TNoteVerbs;
+    ItemIEN:string;
+
+begin
+  MsgType := piece(piece(URL,'^',1),':',2);  //trim out the about: and the command
+  MsgVerb := nvNone;
+  if MsgType='NoteSelect' then MsgVerb := nvNoteSelect;   //<--this needs to be changed to convert the string to a type or nvNone
+  case MsgVerb of
+    nvNoteSelect: begin
+      ItemIEN := piece(URL,'^',2);
+      Cancel := True;
+      //if pos(',',ItemIEN)>0 then begin
+        //ItemIEN := SelectNote(ItemIEN);
+      ViewNotes(ItemIEN);  
+        //if ItemIEN='-1' then exit;
+      //end;
+      //ChangeToNote(ItemIEN);
+    end;
+  end;
+  //if MsgType<>'TIUIEN' then exit;
 end;
 
 procedure TfrmNotes.RunMacro(Sender:TObject);
@@ -2947,7 +2990,7 @@ begin
   if not StartNewEdit(NT_ACT_NEW_NOTE) then Exit;
   //LoadNotes;
   // make sure a visit (time & location) is available before creating the note
-  if Encounter.NeedVisit then
+  if Encounter.NeedVisitWVerification then        //TMG changed from NeedVisit  8/2/22
   begin
     UpdateVisit(Font.Size, DfltTIULocation);
     frmFrame.DisplayEncounterText;
@@ -3544,6 +3587,7 @@ var
   tmpNode: TTreeNode;
   ChildNode : TTreeNode; //kt 5/15
   EditingIsChildComp : boolean;   //kt 5/15  Default is FALSE
+  ForceSignPrompt : boolean;  //TMG 4/1/22
 begin
   inherited;
   if AllowSignature = False then exit;
@@ -3607,7 +3651,8 @@ begin
     end;
     if(OK) then
     begin
-      with lstNotes do SignatureForItem(Font.Size, MakeNoteDisplayText(Items[ItemIndex]), SignTitle, ESCode,piece(Items[ItemIndex],'^',16)<>'1');
+      ForceSignPrompt := uTMGOptions.ReadBool('Prompt '+Trim(piece(piece(lstNotes.Items[lstNotes.ItemIndex],'^',2),';',1)),False);
+      with lstNotes do SignatureForItem(Font.Size, MakeNoteDisplayText(Items[ItemIndex]), SignTitle, ESCode,piece(Items[ItemIndex],'^',16)<>'1',ForceSignPrompt);
       if Length(ESCode) > 0 then
       begin
         SignDocument(SignSts, lstNotes.ItemIEN, ESCode);
@@ -4035,8 +4080,11 @@ begin
 end;
 
 procedure TfrmNotes.popNotePasteHTMLClick(Sender: TObject);
+var TEXT:string;
 begin
   inherited;
+  //TEXT := Clipboard.AsText;
+  //TEXT := StringReplace(TEXT,'  ','&nbsp;&nbsp;', [rfReplaceAll]);
   HTMLEditor.InsertHTMLAtCaret(Clipboard.AsText);
 end;
 
@@ -4307,8 +4355,7 @@ var
   tmpNode: TTreeNode;
   AnObject: PDocTreeObject;
 begin
-  if EditingIndex <> -1 then
-  begin
+  if EditingIndex <> -1 then begin
     SaveCurrentNote(Saved);
     if not Saved then Exit;
   end;
@@ -4320,11 +4367,10 @@ begin
   //  show ALL unsigned/uncosigned for a patient, not just the alerted one
   //  what about cosignature?  How to get correct list?  ORB FOLLOWUP TYPE = OR alerts only
   x := Notifications.AlertData;
-  if StrToIntDef(Piece(x, U, 1), 0) = 0 then
-    begin
-      InfoBox(TX_NO_ALERT, TX_CAP_NO_ALERT, MB_OK);
-      Exit;
-    end;
+  if StrToIntDef(Piece(x, U, 1), 0) = 0 then begin
+    InfoBox(TX_NO_ALERT, TX_CAP_NO_ALERT, MB_OK);
+    Exit;
+  end;
   uChanging := True;
   tvNotes.Items.BeginUpdate;
   lstNotes.Clear;
@@ -4348,6 +4394,14 @@ begin
   end;
   if Copy(Piece(Notifications.RecordID, U, 2), 1, 6) = 'TIUADD' then Notifications.Delete;
   if Copy(Piece(Notifications.RecordID, U, 2), 1, 5) = 'TIUID' then Notifications.Delete;
+  //uncheck all sort button
+  //btnSortNone.Down := false;
+  //btnSortDate.Down := false;
+  //btnSortTitle.Down := false;
+  //btnSortLocation.Down := false;
+  //btnSortAuthor.Down := true;
+  FCurrentContext.GroupBy := 'None';   //setting to author for alert notes
+  //
 end;
 
 procedure TfrmNotes.SetViewContext(AContext: TTIUContext);
@@ -4598,6 +4652,11 @@ var
   HiddenCount: integer;      //tmg 5/20/19
 begin
   tmpList := TStringList.Create;
+  {if frmNotes.frmNotesLoading=nil then begin
+       frmNotesLoading := TfrmNotesLoading.create(nil);
+       frmNotesLoading.show;
+       application.processmessages;
+  end;  }
   try
     HiddenCount := 0;
     FDocList.Clear;
@@ -4784,6 +4843,8 @@ begin
     end;                                  //kt 9/11
     RedrawActivate(lvNotes.Handle);
     tmpList.Free;
+    frmNotesLoading.free;
+    frmNotesLoading := nil;
   end;
 end;
 
@@ -4794,6 +4855,10 @@ begin
     uChanging := True;
     Items.BeginUpdate;
     FastAddStrings(DocList, lstNotes.Items);
+    if frmNotes.frmNotesLoading<>nil then begin
+       frmNotes.frmNotesLoading.ProgressBar1.Max := lstNotes.Items.count;   //count;
+       frmNotes.frmNotesLoading.ProgressBar1.Position := 0;
+    end;
     BuildDocumentTree(DocList, '0', Tree, nil, FCurrentContext, CT_NOTES);
     Items.EndUpdate;
     UnsignedDocsNode := Tree.FindPieceNode(IntToStr(NC_UNSIGNED), U);  //kt 5/15 added
@@ -6064,6 +6129,7 @@ begin
   //kt if uTMGOptions.ReadString('SpecialLocation','')<>'FPG' then
   popNoteMemoProcess.Visible := AtFPGLoc();  //Process Notes is FPG specific
   if sptHorz.Left=0 then sptHorz.Left := pnlLeft.Left + pnlLeft.Width + 1; //kt added block 6/13/15 to fix misplaced splitter...
+  //Moved MinDocsForProgressBar := uTMGOptions.ReadInteger('Threshold For TIU ProgressBar',100);
 end;
 
 procedure TfrmNotes.frmDrawerEdtSearchExit(Sender: TObject);
@@ -6442,12 +6508,17 @@ end;
 
 procedure TfrmNotes.btnSortTitleClick(Sender: TObject);
 //kt added function
+var PreviousMaxDocs : integer;
 begin
   inherited;
+  PreviousMaxDocs := FCurrentContext.MaxDocs;
+  if PreviousMaxDocs<1 then PreviousMaxDocs := 100;
+  FCurrentContext.MaxDocs := 0;
   if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
   FSortBtnGroupBy := 'T';
   SortBtnGroupClick(FSortBtnGroupBy);
+  FCurrentContext.MaxDocs := PreviousMaxDocs;    
 end;
 
 procedure TfrmNotes.SortBtnGroupClick(GroupBy : string);
@@ -6941,6 +7012,14 @@ begin
   mnuViewPostings.Enabled := frmFrame.pnlPostings.Enabled;
 end;
 
+procedure TfrmNotes.mnuViewLast100Click(Sender: TObject);
+begin
+  inherited;
+  FCurrentContext.MaxDocs := 100;
+  btnSortNone.Down := True;
+  btnSortNoneClick(Sender);
+end;
+
 procedure TfrmNotes.mnuSearchNotesClick(Sender: TObject);
 //kt 9/11 added
 var   ModalResult: integer;
@@ -7188,6 +7267,38 @@ procedure TfrmNotes.RotateImage(FileName,NewFileName:string;Degrees: integer);  
     //DeleteFile(FileName);
     Image.SaveFile(NewFileName);
 
+end;
+
+procedure TfrmNotes.HtmlEditorClick(Sender: TObject);
+var
+   CursorPos: TPoint;
+   HTMLElement: IHTMLElement;
+   iHTMLDoc: IHtmlDocument2;
+   MsgType:string;
+   MsgVerb:TNoteVerbs;
+   ItemIEN:string;
+begin
+  if Supports(HTMLEditor.Document, IHtmlDocument2, iHtmlDoc) then begin
+     Windows.GetCursorPos(CursorPos);
+     Windows.ScreenToClient(HtmlEditor.Handle,CursorPos);
+     HtmlElement := iHtmlDoc.ElementFromPoint(CursorPos.X, CursorPos.Y);
+     if HtmlElement<> NIL then begin
+       //ShowMessage(HTMLElement.toString);
+       MsgType := piece(piece(HTMLElement.toString,'^',1),':',2);  //trim out the about: and the command
+       MsgVerb := nvNone;
+       if MsgType='NoteSelect' then MsgVerb := nvNoteSelect;   //<--this needs to be changed to convert the string to a type or nvNone
+       case MsgVerb of
+         nvNoteSelect: begin
+           ItemIEN := piece(HTMLElement.toString,'^',2);
+           if pos(',',ItemIEN)>0 then begin
+              ItemIEN := SelectNote(ItemIEN);
+              if ItemIEN='-1' then exit;
+           end;
+           ChangeToNote(ItemIEN);
+         end;
+       end;
+    end;
+  end;
 end;
 
 initialization

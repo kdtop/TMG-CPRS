@@ -3,35 +3,34 @@ inherited frmOrders: TfrmOrders
   Top = 177
   HelpContext = 4000
   Caption = 'Orders Page'
-  ClientHeight = 611
+  ClientHeight = 671
   ClientWidth = 766
   HelpFile = 'overvw'
   Menu = mnuOrders
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitTop = -246
   ExplicitWidth = 774
-  ExplicitHeight = 665
+  ExplicitHeight = 725
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 606
+    Top = 666
     Width = 766
     ExplicitTop = 528
     ExplicitWidth = 766
   end
   inherited sptHorz: TSplitter
     Left = 117
-    Height = 606
+    Height = 666
     OnMoved = sptHorzMoved
     ExplicitLeft = 117
     ExplicitHeight = 528
   end
   inherited pnlLeft: TPanel
     Width = 117
-    Height = 606
+    Height = 666
     ExplicitWidth = 117
-    ExplicitHeight = 606
+    ExplicitHeight = 646
     object OROffsetLabel1: TOROffsetLabel
       Left = 0
       Top = 0
@@ -131,7 +130,7 @@ inherited frmOrders: TfrmOrders
       Left = 0
       Top = 116
       Width = 117
-      Height = 490
+      Height = 550
       Align = alClient
       ItemHeight = 13
       ParentShowHint = False
@@ -142,6 +141,7 @@ inherited frmOrders: TfrmOrders
       ItemTipColor = clWindow
       LongList = False
       Pieces = '2'
+      ExplicitHeight = 530
     end
     object btnDelayedOrder: TORAlignButton
       Left = 0
@@ -158,14 +158,14 @@ inherited frmOrders: TfrmOrders
   inherited pnlRight: TPanel
     Left = 121
     Width = 645
-    Height = 606
+    Height = 666
     ParentColor = True
     ParentCtl3D = False
     ParentFont = False
     OnResize = pnlRightResize
     ExplicitLeft = 121
     ExplicitWidth = 645
-    ExplicitHeight = 606
+    ExplicitHeight = 646
     object lblOrders: TOROffsetLabel
       Left = 0
       Top = 0
@@ -272,7 +272,7 @@ inherited frmOrders: TfrmOrders
       Left = 0
       Top = 36
       Width = 645
-      Height = 570
+      Height = 630
       Style = lbOwnerDrawVariable
       Align = alClient
       Color = clCream
@@ -286,6 +286,7 @@ inherited frmOrders: TfrmOrders
       OnDrawItem = lstOrdersDrawItem
       OnMeasureItem = lstOrdersMeasureItem
       Caption = 'Active Orders'
+      ExplicitHeight = 610
     end
   end
   inherited amgrMain: TVA508AccessibilityManager
@@ -630,6 +631,10 @@ inherited frmOrders: TfrmOrders
     object mnuChgEvnt: TMenuItem
       Caption = 'Change Release Event'
       OnClick = mnuActChgEvntClick
+    end
+    object popCopyOrderText: TMenuItem
+      Caption = 'Copy Order Text'
+      OnClick = popCopyOrderTextClick
     end
     object popOrderCopy: TMenuItem
       Tag = 1

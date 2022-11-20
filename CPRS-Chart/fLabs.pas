@@ -180,6 +180,12 @@ type
     btnViewReport: TBitBtn;
     mnuUploadLabPDF: TMenuItem;
     mnuViewInBrowser: TMenuItem;
+    btnViewHL7: TBitBtn;
+    btnViewLinkedNote: TBitBtn;
+    mnuLinkToNote: TMenuItem;
+    procedure mnuLinkToNoteClick(Sender: TObject);
+    procedure btnViewLinkedNoteClick(Sender: TObject);
+    procedure btnViewHL7Click(Sender: TObject);
     procedure mnuViewInBrowserClick(Sender: TObject);
     procedure mnuUploadLabPDFClick(Sender: TObject);
     procedure Action1Click(Sender: TObject);
@@ -351,6 +357,7 @@ var
   uReportType: string;
   uSortOrder: string;
   uMaxOcc: string;
+  LinkedNote:string;                 //TMG added 11/15/22
   UpdatingLvReports: Boolean;        //Currently updating lvReports
   uColumns: TStringList;
   uNewColumn: TListColumn;
@@ -369,7 +376,7 @@ implementation
 uses uCore, rLabs, rCore, rCover, rOrders, fLabPrint, fFrame, fRptBox, Printers, fReportsPrint,
      clipbrd, rReports, rGraphs, activex, mshtml, VA508AccessibilityRouter, uReports, fLabEntry,
      uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools,
-     fLabSelector, fViewLabPDF,//kt
+     fLabSelector, fViewLabPDF,fNoteSelector,//kt
      VAUtils;
 
 const
@@ -1812,7 +1819,7 @@ begin
       memLab.Lines.Delete(0);
       memLab.SelStart := 0;
     end
-  else if aID = '1606' then
+  else if aID = '606' then
     begin           // HTML REPORT
       //memLab.Clear;
       //WebBrowser1.Navigate('http://www.yahoo.com');
@@ -2278,6 +2285,9 @@ begin
     begin
       lblDateFloat.Caption := Piece(tmpList[0], '^', 3);
       uFormat := strtointdef(Piece(tmpList[0], '^', 9), 1);
+      LinkedNote := Piece(tmpList[0], '^', 11);
+      btnViewLinkedNote.Enabled := (LinkedNote<>'');
+      mnuLinkToNote.Enabled := (LinkedNote='');
       //------------------------------------------------------------------------------------------
       //v27.1 - RV - PSI-05-118 / Remedy HD0000000123277 - don't show "00:00" if no time present
       if LabPatchInstalled then        // Requires lab patch in const "PSI_05_118"
@@ -2361,6 +2371,7 @@ begin
     cmdPrev.Enabled := prevon;
     cmdOld.Enabled := prevon;
     btnViewReport.enabled := TMGHasLabReport(Patient.DFN,DisplayDate);  //kt    10/23/20
+    btnViewHL7.enabled := TMGHasHL7Report(Patient.DFN,DisplayDate);  //kt    10/23/20
     if cmdOld.Enabled and cmdRecent.Enabled then
       lblMostRecent.Visible := false
     else
@@ -4097,7 +4108,7 @@ begin
                     end;
                   end
 
-             else if aID = '1606:SELECTED LAB REPORT BY DATE' then
+             else if aID = '606:SELECTED LAB REPORT BY DATE' then
                   begin               // TMG added this else    11/5/18
                     if uPrevReportNode <> tvReports.Selected then
                     begin
@@ -5058,13 +5069,28 @@ begin
   end;
 end;
                   
+procedure TfrmLabs.btnViewHL7Click(Sender: TObject);
+var
+  InitFMDateTime : TFMDateTime;
+begin
+  inherited;
+  InitFMDateTime := StrToFMdatetime(lblDateFloat.Caption);
+  ShowLabReport(InitFMDateTime,vmHL7Lab);
+end;
+
+procedure TfrmLabs.btnViewLinkedNoteClick(Sender: TObject);
+begin
+  inherited;
+  ViewNotes(LinkedNote);
+end;
+
 procedure TfrmLabs.btnViewReportClick(Sender: TObject);
 var
   InitFMDateTime : TFMDateTime;
 begin
   inherited;
   InitFMDateTime := StrToFMdatetime(lblDateFloat.Caption);
-  ShowLabReport(InitFMDateTime);
+  ShowLabReport(InitFMDateTime,vmPDF);
 end;
 
 procedure TfrmLabs.ShowTabControl;
@@ -5143,8 +5169,19 @@ begin
   inherited;
   HTMLTable := GetPickedLabNotesHTMLTable;
   CopyHTMLToClipBoard('',HTMLTable);
-  //MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
-    //         'with Ctrl-V.', mtInformation, [mbOK], 0);
+  MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
+             'with Ctrl-V.', mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmLabs.mnuLinkToNoteClick(Sender: TObject);
+var NoteToLink,RPCResult:string;
+begin
+  inherited;
+  NoteToLink := SelectNote('');  //TMG added entire Procedure
+  if NoteToLink<>'' then begin
+    RPCResult := sCallV('TMG CPRS LINK LAB TO NOTE',[Patient.DFN,lblDateFloat.Caption,NoteToLink]);
+    if piece(RPCResult,'^',1)='-1' then ShowMessage(piece(RPCResult,'^',2));
+  end;
 end;
 
 procedure TfrmLabs.mnuSendLabAlertClick(Sender: TObject);
@@ -5285,7 +5322,7 @@ var InitFMDateTime : TFMDateTime;
 begin
   inherited;
   InitFMDateTime := 0;  //TO DO: SET THIS TO CURRENT LAB
-  ShowLabReport(InitFMDateTime);
+  ShowLabReport(InitFMDateTime,vmPDF);
 end;
 
 procedure TfrmLabs.NotifyOKClick(Sender: TObject);
@@ -5431,8 +5468,6 @@ begin
     if LabPicker.ShowModal <> mrCancel then begin
       LabPicker.GetResults(LabInfo);
       Result := InfoToHTMLTable(LabInfo);
-      MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
-             'with Ctrl-V.', mtInformation, [mbOK], 0);
     end;
   finally
     LabPicker.Free;

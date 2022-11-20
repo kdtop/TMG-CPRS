@@ -1092,4 +1092,12 @@ object frmViewLabPDF: TfrmViewLabPDF
     Left = 208
     Top = 488
   end
+  object PopupMenu1: TPopupMenu
+    Left = 784
+    Top = 504
+    object mnuReprocessOne: TMenuItem
+      Caption = 'Reprocess This Message'
+      OnClick = mnuReprocessOneClick
+    end
+  end
 end

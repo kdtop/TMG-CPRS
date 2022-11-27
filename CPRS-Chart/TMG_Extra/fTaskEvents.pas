@@ -121,7 +121,7 @@ type
 //  frmEditTaskEvents: TfrmEditTaskEvents;
 
 function LaunchTaskEvent(InitialIEN: string = '') : integer; //returns modal result
-function AddTaskEvent(EditMode : boolean; Description: String; ActionDate: TFMDateTime=0) : integer;  //returns modal result or mrOK
+function AddTaskEvent(EditMode : boolean; Description: String; ActionDate: TFMDateTime=0;InitialIEN: string = '') : integer;  //returns modal result or mrOK
 
 implementation
 
@@ -147,7 +147,8 @@ implementation
 
   function AddTaskEvent(EditMode : boolean;
                         Description: String;
-                        ActionDate: TFMDateTime=0
+                        ActionDate: TFMDateTime=0;
+                        InitialIEN: string = ''
                        ) : integer;
   //EditMode: if true, then form will be opened for further editing.  If false, then task is added silently.
   //NOTE: If ActionData is not passed, then default value of 0 will be changed to NOW
@@ -163,7 +164,7 @@ implementation
     frmEditTaskEvents := TfrmEditTaskEvents.create(nil);
     try
       frmEditTaskEvents.Initialize(InitialIEN);
-      AData := frmEditTaskEvents.AddTE(nil)
+      AData := frmEditTaskEvents.AddTE(nil);
       if ActionDate = 0 then ActionDate := FMDTNow;
       AData.ActionDate := ActionDate;
       AData.Description := Description;
@@ -774,7 +775,7 @@ begin
 end;
 
 procedure TfrmEditTaskEvents.btnAddClick(Sender: TObject);
-var AData := TTaskEventData;
+var AData : TTaskEventData;
 begin
   AData := AddTE(nil);
   LoadTreeView(DataList);
@@ -783,7 +784,7 @@ begin
 end;
 
 procedure TfrmEditTaskEvents.btnAddFollowupClick(Sender: TObject);
-var AData := TTaskEventData;
+var AData : TTaskEventData;
 begin
   AData := AddTE(DataInGUI);
   LoadTreeView(DataList);

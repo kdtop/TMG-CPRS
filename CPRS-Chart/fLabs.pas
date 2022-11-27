@@ -5181,6 +5181,9 @@ begin
   if NoteToLink<>'' then begin
     RPCResult := sCallV('TMG CPRS LINK LAB TO NOTE',[Patient.DFN,lblDateFloat.Caption,NoteToLink]);
     if piece(RPCResult,'^',1)='-1' then ShowMessage(piece(RPCResult,'^',2));
+  end else begin
+    ShowMessage('Note has been linked to the lab results');
+    btnLinkToNote.enabled := true;
   end;
 end;
 

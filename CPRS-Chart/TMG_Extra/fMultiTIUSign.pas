@@ -7,7 +7,7 @@ interface
 uses
   Windows, Messages, SysUtils, DateUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, rCore, fFrame, fAddlSigners, Math,fImagePatientPhotoID, fNotes, uCore,
-  TMGHTML2, StdCtrls, Buttons, ORCtrls, ORNet, ExtCtrls, OleCtrls, SHDocVw,
+  TMGHTML2, StdCtrls, Buttons, ORCtrls, ORNet, ExtCtrls, OleCtrls, SHDocVw, rMisc,
   rReports;
 
 type
@@ -82,6 +82,7 @@ type
     lvUnSelected: TCaptionListView;
     lblNextAppt: TLabel;
     btnDelete: TBitBtn;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnDeleteClick(Sender: TObject);
     procedure lvUnSelectedChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure lvUnSelectedResize(Sender: TObject);
@@ -171,11 +172,19 @@ function ShowMultiAlertsSign(Items : TListItems) : boolean;
 //Input: Items is really lstvAlerts.Items
 var
   frmMultiTIUSign: TfrmMultiTIUSign;
+  InitialBounds:string;
 begin
   result := false;
+  InitialBounds := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign']);
   frmMultiTIUSign := TfrmMultiTIUSign.Create(Application);
   try
     frmMultiTIUSign.Initialize(Items);
+    if InitialBounds<>'' then begin
+      frmMultiTIUSign.Left := strtoint(piece(InitialBounds,',',1));
+      frmMultiTIUSign.Top := strtoint(piece(InitialBounds,',',2));
+      frmMultiTIUSign.Width := strtoint(piece(InitialBounds,',',3));
+      frmMultiTIUSign.Height := strtoint(piece(InitialBounds,',',4));
+    end;
     if frmMultiTIUSign.ShowModal = mrOK then begin
       result := true;
     end;
@@ -238,6 +247,14 @@ end;
 
 
 //===========================================================
+
+procedure TfrmMultiTIUSign.FormClose(Sender: TObject; var Action: TCloseAction);
+var Bounds,SaveResults:string;
+begin
+   Bounds := inttostr(Self.Left)+','+inttostr(Self.Top);
+   Bounds := Bounds+','+inttostr(Self.Width)+','+ inttostr(Self.Height);
+   SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign',Bounds]);
+end;
 
 procedure TfrmMultiTIUSign.FormCreate(Sender: TObject);
 begin

@@ -27,7 +27,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.dfm
 251
 71
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.dfm
-47521/1433569563
+47355/1434036599
 322
 154
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.dfm
@@ -1183,7 +1183,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.dfm
 11310
 190
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.dfm
-203863/1429170224
+203886/1433818745
 11500
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.dfm
@@ -1231,7 +1231,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fDCSumm.pas
 11863
 56
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
-212382/1433569721
+212497/1434038739
 11919
 70
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
@@ -2387,7 +2387,7 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
 18339
 14
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
-42421/1429177515
+43244/1433819586
 18353
 50
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fViewLabPDF.pas
@@ -2447,11 +2447,11 @@ P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\frmTaskEvents.pas
 18633
 52
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.dfm
-37363/1433689370
+37363/1433817185
 18685
 2
 P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.pas
-37446/1433698804
+37519/1433818396
 18687
 54
 |EOINDEX|
@@ -2777,7 +2777,7 @@ Data = (
 'Component = frmDCSumm'
 'Status = stsDefault'))
 end
-1497
+1491
 inherited frmLabs: TfrmLabs
 inherited amgrMain: TVA508AccessibilityManager
 Data = (
@@ -13955,7 +13955,7 @@ Data = (
 'Component = chkStoreData'
 'Status = stsDefault'))
 end
-2981
+2982
 object frmMultiTIUSign: TfrmMultiTIUSign
 1103
 object frmViewLabPDF: TfrmViewLabPDF
@@ -20817,7 +20817,7 @@ interface
 uses
   Windows, Messages, SysUtils, DateUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, rCore, fFrame, fAddlSigners, Math,fImagePatientPhotoID, fNotes, uCore,
-  TMGHTML2, StdCtrls, Buttons, ORCtrls, ORNet, ExtCtrls, OleCtrls, SHDocVw,
+  TMGHTML2, StdCtrls, Buttons, ORCtrls, ORNet, ExtCtrls, OleCtrls, SHDocVw, rMisc,
   rReports;
 
 type

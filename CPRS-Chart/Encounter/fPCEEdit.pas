@@ -28,7 +28,8 @@ function EditPCEData(NoteData: TPCEData; InitialPageIndex : byte = 0): boolean; 
 
 implementation
 
-uses uCore, rCore, fEncnt, fFrame, fEncounterFrame;
+uses uCore, rCore, fEncnt, fFrame, fEncounterFrame
+     ,uTMGOptions;   //3/17/23;
 
 {$R *.DFM}
 
@@ -71,23 +72,27 @@ begin
   end else if (NoteData.VisitString = Encounter.VisitStr) then begin
     Ans := mrNo
   end else begin
-    frmPCEEdit := TfrmPCEEdit.Create(Application);
-    try
-      if Encounter.NeedVisit then begin
-        NewTxt := 'Create New Encounter';
-        BtnTxt := 'New Encounter';
-      end else begin
-        NewTxt := 'Edit Encounter for ' + Encounter.LocationName + ' on ' +
-                  FormatFMDateTime('mmm dd yyyy hh:nn', Encounter.DateTime);
-        BtnTxt := 'Edit Current Encounter';
+    if uTMGOptions.ReadBool('AlwaysUseNoteEnc',False) then begin   //kt 3/17/23 added this if to force the form to always use note encounter by returning mrNo
+      ans := mrNo;
+    end else begin
+      frmPCEEdit := TfrmPCEEdit.Create(Application);
+      try
+        if Encounter.NeedVisit then begin
+          NewTxt := 'Create New Encounter';
+          BtnTxt := 'New Encounter';
+        end else begin
+          NewTxt := 'Edit Encounter for ' + Encounter.LocationName + ' on ' +
+                    FormatFMDateTime('mmm dd yyyy hh:nn', Encounter.DateTime);
+          BtnTxt := 'Edit Current Encounter';
+        end;
+        frmPCEEdit.lblNew.Text := NewTxt;
+        frmPCEEdit.btnNew.Caption := BtnTxt;
+        frmPCEEdit.lblNote.Text := 'Edit Note Encounter for ' + ExternalName(NoteData.Location, 44) + ' on ' +
+                    FormatFMDateTime('mmm dd yyyy hh:nn', NoteData.VisitDateTime);
+        ans := frmPCEEdit.ShowModal;   //kt documentation: mrYes = btnNew, mrNo = btnNote, mrCancel = btnCancel
+      finally
+        frmPCEEdit.Free;
       end;
-      frmPCEEdit.lblNew.Text := NewTxt;
-      frmPCEEdit.btnNew.Caption := BtnTxt;
-      frmPCEEdit.lblNote.Text := 'Edit Note Encounter for ' + ExternalName(NoteData.Location, 44) + ' on ' +
-                  FormatFMDateTime('mmm dd yyyy hh:nn', NoteData.VisitDateTime);
-      ans := frmPCEEdit.ShowModal;   //kt documentation: mrYes = btnNew, mrNo = btnNote, mrCancel = btnCancel
-    finally
-      frmPCEEdit.Free;
     end;
   end;
   if ans = mrYes then begin

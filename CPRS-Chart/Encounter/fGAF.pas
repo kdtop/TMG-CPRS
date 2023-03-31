@@ -37,6 +37,8 @@ type
   public
     procedure AllowTabChange(var AllowChange: boolean); override;
     procedure GetGAFScore(var Score: integer; var Date: TFMDateTime; var Staff: Int64);
+    procedure InitTab();  //kt added
+    procedure SendData(); //kt added
   end;
 
 function ValidGAFData(Score: integer; Date: TFMDateTime; Staff: Int64): boolean;
@@ -96,22 +98,23 @@ var
 begin
   GAFDate := dteGAF.FMDateTime;
   msg := ValidateGAFDate(GAFDate);
-  if(dteGAF.FMDateTime <> GAFDate) then
+  if(dteGAF.FMDateTime <> GAFDate) then begin
     dteGAF.FMDateTime := GAFDate;
+  end;
 
-  if(cboGAFProvider.ItemID = '') then
-  begin
-    if(msg <> '') then
+  if(cboGAFProvider.ItemID = '') then begin
+    if(msg <> '') then begin
       msg := msg + CRLF;
+    end;
     msg := msg + 'A determining party is required to enter a GAF score.';
-    UIEN := uProviders.PCEProvider;
-    if(UIEN <> 0) then
-    begin
-      PName := uProviders.PCEProviderName;
+    UIEN := FProviders.PCEProvider;  //kt
+    //kt UIEN := uProviders.PCEProvider;
+    if(UIEN <> 0) then begin
+      //kt PName := uProviders.PCEProviderName;
+      PName := FProviders.PCEProviderName;  //kt
       msg := msg + '  Determined By changed to ' + PName + '.';
       cboGAFProvider.SelectByIEN(UIEN);
-      if(cboGAFProvider.ItemID = '') then
-      begin
+      if(cboGAFProvider.ItemID = '') then begin
         cboGAFProvider.InitLongList(PName);
         cboGAFProvider.SelectByIEN(UIEN);
       end;
@@ -194,6 +197,25 @@ procedure TfrmGAF.btnURLClick(Sender: TObject);
 begin
   inherited;
   GotoWebPage(GAFURL);
+end;
+
+procedure TfrmGAF.SendData(); //kt added
+//kt moved code here from fEncounterFrame.SendData
+var
+  GAFScore: integer;
+  GAFDate: TFMDateTime;
+  GAFStaff: Int64;
+
+begin
+  GetGAFScore(GAFScore, GAFDate, GAFStaff);
+  if (GAFScore > 0) then begin
+    SaveGAFScore(GAFScore, GAFDate, GAFStaff);
+  end;
+end;
+
+procedure TfrmGAF.InitTab();  //kt added
+begin
+  //if needed....
 end;
 
 procedure TfrmGAF.FormCreate(Sender: TObject);

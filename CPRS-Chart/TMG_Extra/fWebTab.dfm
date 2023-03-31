@@ -7,8 +7,9 @@ inherited frmWebTab: TfrmWebTab
   Menu = mnuMain
   Position = poScreenCenter
   OnDestroy = FormDestroy
-  ExplicitWidth = 481
-  ExplicitHeight = 399
+  OnShow = FormShow
+  ExplicitWidth = 473
+  ExplicitHeight = 395
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -25,6 +26,19 @@ inherited frmWebTab: TfrmWebTab
     Align = alClient
     Color = clSkyBlue
     TabOrder = 0
+    object WebBrowser: TWebBrowser
+      Left = 104
+      Top = 72
+      Width = 300
+      Height = 150
+      TabOrder = 0
+      ControlData = {
+        4C000000021F0000810F00000000000000000000000000000000000000000000
+        000000004C000000000000000000000001000000E0D057007335CF11AE690800
+        2B2E126208000000000000004C0000000114020000000000C000000000000046
+        8000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000100000000000000000000000000000000000000}
+    end
   end
   inherited amgrMain: TVA508AccessibilityManager
     Left = 192
@@ -35,6 +49,9 @@ inherited frmWebTab: TfrmWebTab
         'Status = stsDefault')
       (
         'Component = pnlWBHolder'
+        'Status = stsDefault')
+      (
+        'Component = WebBrowser'
         'Status = stsDefault'))
   end
   object mnuMain: TMainMenu

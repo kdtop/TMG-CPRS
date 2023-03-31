@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs,uTMGOptions, StdCtrls, ORNet, VAUtils;
+  Dialogs,uTMGOptions, StdCtrls, ORNet, VAUtils, Trpcb;
 
 type
   TfrmMessageDemo = class(TForm)
@@ -19,6 +19,7 @@ type
     procedure LoadUsers;
   public
     { Public declarations }
+    function SendOneMessage(ToUser,FromUser:string;MsgArr:TStrings):string;
   end;
 
 var
@@ -47,30 +48,40 @@ var Users:TStringList;
     i :integer;
 begin
   Users := TStringList.Create;
-  Users.LoadFromFile('\\server1\Public\NetworkMessenger\NetworkMessengerUsers.ini');
+  //Users.LoadFromFile('\\server1\Public\NetworkMessenger\NetworkMessengerUsers.ini');
   ComboBox1.Items.Clear;
+  tCallV(Users,'TMG MESSENGER GETUSERS',[]);
   for I := 1 to Users.Count - 1 do begin
-    ComboBox1.Items.Add(piece(Users[i],'=',1));
+    ComboBox1.Items.Add(piece(Users[i],'^',1));
   end;
   Users.Free;
+  ComboBox1.ItemIndex := 0;
 end;
 
 procedure TfrmMessageDemo.Button1Click(Sender: TObject);
-var //MyMsg : TStringList;
-  FileName:string;
+var FileName:string;
 begin
-  //MyMsg := TStringList.Create;
-  //try
-  //  MyMsg.Add('Here is a test message');
-  //  MyMsg.Add('From');
-  //  MyMsg.Add('CPRS');
-  //  MyMsg.SaveToFile('\\server1\Public\NetworkMessenger\Eddie-CPRS.mgr');
-  FileName := '\\server1\Public\NetworkMessenger\'+ComboBox1.Text+'-CPRS.mgr';
-  Memo1.Lines.SaveToFile(FileName);
-  //finally
-  //  MyMsg.free;
-  //end;
+  //FileName := '\\server1\Public\NetworkMessenger\'+ComboBox1.Text+'-CPRS.mgr';
+  //Memo1.Lines.SaveToFile(FileName);
+  SendOneMessage(ComboBox1.Text,'CPRS',Memo1.Lines);
   Modalresult := mrok;
+end;
+
+function TfrmMessageDemo.SendOneMessage(ToUser,FromUser:string;MsgArr:TStrings):string;
+var
+  i : integer;
+begin
+  RPCBrokerV.remoteprocedure := 'TMG MESSENGER SEND MESSAGE';
+  RPCBrokerV.Param[0].Value := ToUser;  // not used
+  RPCBrokerV.param[0].ptype := literal;
+  RPCBrokerV.Param[1].Value := FromUser;  // not used
+  RPCBrokerV.param[1].ptype := literal;
+  RPCBrokerV.param[2].ptype := list;
+  for I := 0 to MsgArr.Count - 1 do begin
+    RPCBrokerV.Param[2].Mult[inttostr(i)] := MsgArr.Strings[i];
+  end;
+  CallBroker;
+  Result := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
 end;
 
 end.

@@ -399,26 +399,24 @@ begin
     try
       DoChk := FALSE;
       Add := (lbMods.Checked[Index]);
-      ModIEN := piece(lbMods.Items[Index],U,1) + ';';
+      //kt ModIEN := piece(lbMods.Items[Index],U,1) + ';';
+      ModIEN := piece(lbMods.Items[Index],U,1); //kt
       for i := 0 to lbGrid.Items.Count-1 do
       begin
-        if(lbGrid.Selected[i]) then
-        begin
+        if(lbGrid.Selected[i]) then begin
           PCEObj := TPCEProc(lbGrid.Items.Objects[i]);
-          idx := pos(';' + ModIEN, ';' + PCEObj.Modifiers);
-          if(idx > 0) then
-          begin
-            if not Add then
-            begin
-              delete(PCEObj.Modifiers, idx, length(ModIEN));
+          if PCEObj.HasModifierIEN(ModIEN) then begin //kt
+          //kt idx := pos(';' + ModIEN, ';' + PCEObj.Modifiers);
+          //kt if(idx > 0) then begin
+            if not Add then begin
+              //kt original --> delete(PCEObj.Modifiers, idx, length(ModIEN));
+              PCEObj.RemoveModifierIEN(ModIEN); //kt
               DoChk := TRUE;
             end;
-          end
-          else
-          begin
-            if Add then
-            begin
-              PCEObj.Modifiers := PCEObj.Modifiers + ModIEN;
+          end else begin
+            if Add then begin
+              //kt PCEObj.Modifiers := PCEObj.Modifiers + ModIEN;
+              PCEObj.EnsureModifierIEN(ModIEN); //kt
               DoChk := TRUE;
             end;
           end;

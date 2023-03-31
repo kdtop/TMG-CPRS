@@ -1,10 +1,14 @@
 unit MDMHelper;
 
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, VAUtils,
-  Dialogs, StdCtrls, Buttons, ExtCtrls, Math, StrUtils, rTemplates, ORNet, uCore,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  {$IFNDEF STAND_ALONE_APP}
+  VAUtils,  ORNet, uCore,  rTemplates,
+  {$ENDIF}
+  Dialogs, StdCtrls, Buttons, ExtCtrls, Math, StrUtils,
   CollapsablePanelU;
 
 type
@@ -84,13 +88,13 @@ type
     pnlOldCPE: TPanel;
     rgOldCPE: TRadioGroup;
     memOldCPE: TMemo;
-    btnRefreshTime1: TButton;
-    Button1: TButton;
-    Button2: TButton;
+    btnNewPtRefreshTime: TButton;
+    btnOldPtRefresh: TButton;
+    btnTeleMedRefresh: TButton;
     lblChargeDetails: TLabel;
-    procedure Button2Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure btnRefreshTime1Click(Sender: TObject);
+    procedure btnTeleMedRefreshClick(Sender: TObject);
+    procedure btnOldPtRefreshClick(Sender: TObject);
+    procedure btnNewPtRefreshTimeClick(Sender: TObject);
     procedure rgOldCPEClick(Sender: TObject);
     procedure rgNewCPEClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
@@ -115,7 +119,9 @@ type
   private
     { Private declarations }
     FOnCloseForm : TNotifyEvent;
+    FOnFrameSize : TNotifyEvent;
     FFormSuccess : boolean;
+    FEmbeddedMode : boolean;
     InHandleReviewTestsChange : boolean;
     FNumIssuesScore: TComplexityLevel;
     FNumIssuesNarrrative : string;
@@ -156,7 +162,7 @@ type
     cpNewCPE : TCollapsablePanel;
     cpOldCPE : TCollapsablePanel;
     cpTelemedTimeAmount : TCollapsablePanel;
-    cpMDM : TCollapsablePanel;
+    cpMDM3ColHolder : TCollapsablePanel;
     cpComplexity : TCollapsablePanel;
     cpTestsData : TCollapsablePanel;
     cpRisk : TCollapsablePanel;
@@ -165,8 +171,8 @@ type
     ChargeStr99213 : String;
     ChargeStr99214 : String;
     ChargeStr99215 : String;
-    procedure FreePanel(var APanel: TCollapsablePanel);
-    procedure ClearMDMView;
+    procedure FreeCollapsablePanel(var ACollapsablePanel: TCollapsablePanel);
+    procedure ClearMDM3ColView;
     procedure ClearTimeView;
     procedure ClearTelemedTimeView;
     procedure ClearCPEView;
@@ -191,15 +197,25 @@ type
     procedure MakeTextTable(SL : TStringList);
     procedure MakeHTMLTable(SL : TStringList);
     function HTMLSpc(n : integer  = 1) : string;
+    {$IFNDEF STAND_ALONE_APP}
     procedure LoadPaymentInformation(CPTAvgPayments:TStringList);
+    {$ENDIF}
+    procedure LogEvent(S : string);
+    procedure SetEmbeddedMode(value : boolean);
+    procedure InitVars;
   public
     { Public declarations }
+    CommonLog : TStrings;
+    procedure Reset;
     property CPT : string read GetCPTOutput;
     property Narrative : string read GetNarrative;
     property TextTable : TStringList read FTextTable;
     property HTMLTable : TStringList read FHTMLTable;
     property OnCloseForm : TNotifyEvent read FOnCloseForm write FOnCloseForm;
-    property Result : boolean read FFormSuccess;
+    property OnFrameSize : TNotifyEvent read FOnFrameSize write FOnFrameSize;
+    property Result : boolean read FFormSuccess write FFormSuccess;
+    property EmbeddedMode : boolean read FEmbeddedMode write SetEmbeddedMode;
+
   end;
 
 var
@@ -292,11 +308,13 @@ begin
   Result := NumOf3(Bool1, Bool2, false);
 end;
 
-procedure TfrmMDMGrid.btnRefreshTime1Click(Sender: TObject);
+procedure TfrmMDMGrid.btnNewPtRefreshTimeClick(Sender: TObject);
 begin
+  {$IFNDEF STAND_ALONE_APP}
   memNewPtTimeInfo.Lines.Clear;
   memNewPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
   GetTemplateText(memNewPtTimeInfo.Lines);
+  {$ENDIF}
 end;
 
 procedure TfrmMDMGrid.btnReviewDocsHelpClick(Sender: TObject);
@@ -312,18 +330,22 @@ begin
              mtInformation, [mbOK], 0);
 end;
 
-procedure TfrmMDMGrid.Button1Click(Sender: TObject);
+procedure TfrmMDMGrid.btnOldPtRefreshClick(Sender: TObject);
 begin
+  {$IFNDEF STAND_ALONE_APP}
   memOldPtTimeInfo.Lines.Clear;
   memOldPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE W MSG|');
   GetTemplateText(memOldPtTimeInfo.Lines);
+  {$ENDIF}
 end;
 
-procedure TfrmMDMGrid.Button2Click(Sender: TObject);
+procedure TfrmMDMGrid.btnTeleMedRefreshClick(Sender: TObject);
 begin
+  {$IFNDEF STAND_ALONE_APP}
   memTelemedTimeAmount.Lines.Clear;
   memTelemedTimeAmount.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
   GetTemplateText(memTelemedTimeAmount.Lines);
+  {$ENDIF}
 end;
 
 procedure TfrmMDMGrid.btnCancelClick(Sender: TObject);
@@ -367,18 +389,9 @@ begin
   end;
 end;
 
-procedure TfrmMDMGrid.FormCreate(Sender: TObject);
+procedure TfrmMDMGrid.InitVars;
 begin
-  FFormSuccess := false;
-
-  //Later allow initialization...
-  InHandleReviewTestsChange := false;
-  FTableStrings := TStringList.Create;
-  FTextTable := TStringList.Create; //formatted version of FTableStrings
-  FHTMLTable := TStringList.Create;
-
   FPatientType := ptUndef;
-  FOnCloseForm := nil;
 
   FNumIssuesScore := clUndef;
   FNumIssuesNarrrative := '';
@@ -405,6 +418,23 @@ begin
   FOverallComplexityNarrative := '';
   CurrentDisplayState.PatientType := ptUndef;
   CurrentDisplayState.BillingMode := tcUndef;
+end;
+
+procedure TfrmMDMGrid.FormCreate(Sender: TObject);
+begin
+  FFormSuccess := false;
+  CommonLog := nil;
+  FEmbeddedMode := false;
+
+  //Later allow initialization...
+  InHandleReviewTestsChange := false;
+  FTableStrings := TStringList.Create;
+  FTextTable := TStringList.Create; //formatted version of FTableStrings
+  FHTMLTable := TStringList.Create;
+
+  FOnCloseForm := nil;
+
+  InitVars;
 
   cpNewPtTimeAmount := nil;
   cpOldPtTimeAmount := nil;
@@ -420,7 +450,7 @@ begin
   Cat1CheckBoxes.Add(ckbReview2ExtDocs);
   Cat1CheckBoxes.Add(ckbReview3ExtDocs);
 
-  cpPanelNewOrOldPt := TCollapsablePanel.Create(sbMain, nil, OpensUpDown, pnlNewOrOldPatient);
+  cpPanelNewOrOldPt := TCollapsablePanel.Create('cpNewOrOldPt', sbMain, nil, OpensUpDown, pnlNewOrOldPatient, CommonLog);
   cpPanelNewOrOldPt.Top := 0;
   cpPanelNewOrOldPt.Left := 0;
   cpPanelNewOrOldPt.Width := 600;
@@ -440,12 +470,15 @@ begin
   else memBillingModeHint.Color := clSkyBlue;
   }
 
+  {$IFNDEF STAND_ALONE_APP}
   CPTAvgPayments := TStringList.Create();
   tCallV(CPTAvgPayments,'TMG CPRS GET AVG INS CHARGES',[Patient.DFN]);
   LoadPaymentInformation(CPTAvgPayments);
   CPTAvgPayments.Free;
+  {$ENDIF}
 end;
 
+{$IFNDEF STAND_ALONE_APP}
 procedure TfrmMDMGrid.LoadPaymentInformation(CPTAvgPayments:TStringList);
    procedure ReplaceControlText(Control:TRadioGroup; Text:string);
    var CPT,Avg,High,Low,Charge : string;
@@ -493,6 +526,7 @@ begin
       ReplaceControlText(rgOldPtTimeAmount,CPTAvgPayments[i]);
   end;
 end;
+{$ENDIF}
 
 procedure TfrmMDMGrid.FormDestroy(Sender: TObject);
 begin
@@ -503,7 +537,7 @@ begin
   FreeAndNil(cpComplexity);
   FreeAndNil(cpTestsData);
   FreeAndNil(cpRisk);
-  FreeAndNil(cpMDM);
+  FreeAndNil(cpMDM3ColHolder);
   FTableStrings.Free;
   FTextTable.Free;
   FHTMLTable.Free;
@@ -516,100 +550,126 @@ end;
 
 procedure TfrmMDMGrid.HandleEndOpenStateChange(Sender : TObject);
 begin
+  //LogEvent('HandleEndOpenStateChange');
   SizeFrame;
 end;
 
 
 procedure TfrmMDMGrid.SizeFrame();
-var  MaxRight, MaxBottom : integer;
+var
+  MaxRight  : integer;
+  MaxBottom : integer;
   cp : TCollapsablePanel;
   ARect : TRect;
 begin
-  MaxRight := 0;
+  //MaxRight := 0;
   MaxBottom := 0;
   cp := cpFirst;
+  LogEvent('In SizeFrame');
   repeat
     ARect := cp.CurrentRect;
     MaxRight := Max(ARect.Right, MaxRight);
     MaxBottom := Max(ARect.Bottom, MaxBottom);
+    LogEvent('  After considering panel ['+cp.name+'], MaxBottom='+IntToStr(MaxBottom)+'.');
     cp := cp.UnitAfter;
   until cp = nil;
   Self.Height := MaxBottom + pnlBottom.Height + 28 + 6;
+  //Self.Width := MaxRight + 6;
+  LogEvent('  Setting self Height: '+ IntToStr(MaxBottom)+'+ pnlBottom.Height + 28 + 6 = ' + IntToStr(Self.Height));
+  if assigned(FOnFrameSize) then FOnFrameSize(Self);
 end;
 
 
-procedure TfrmMDMGrid.FreePanel(var APanel: TCollapsablePanel);
+procedure TfrmMDMGrid.FreeCollapsablePanel(var ACollapsablePanel: TCollapsablePanel);
 begin
-  if assigned(APanel) then begin
-    if APanel.OwnsPanel = false then begin
-      APanel.DisplayPanel.Visible := false;
-      APanel.DisplayPanel.Parent := sbMain;
-    end;
-    if assigned(APanel.UnitBefore) then APanel.UnitBefore.UnitAfter := nil;
+  if assigned(ACollapsablePanel) then begin
+    LogEvent('FreeCollapsablePanel for Collapsable Panel: '+ACollapsablePanel.Name);
+    if ACollapsablePanel.OwnsPanel = false then begin
+      ACollapsablePanel.DisplayPanel.Visible := false;
+      ACollapsablePanel.DisplayPanel.Parent := sbMain;
+      ACollapsablePanel.DisplayPanel.Width := ACollapsablePanel.DisplayPanelOriginalSize.X;
+      ACollapsablePanel.DisplayPanel.Height := ACollapsablePanel.DisplayPanelOriginalSize.Y;
+    end; //note: if ACollapsablePanel.OwnsPanel = true, it will be freed in the destructor for ACollapsablePanel
+    if assigned(ACollapsablePanel.UnitBefore) then ACollapsablePanel.UnitBefore.UnitAfter := nil;
+    //FreeAndNil(ACollapsablePanel);
+    //ACollapsablePanel.Free;
+    ACollapsablePanel.Destroy;  //<-- for some reason, Destructor wasn't being called with either .Free or FreeAndNil().  ??Compiler bug??  Try again later...
+    ACollapsablePanel := nil;
   end;
-  FreeAndNil(APanel);
 end;
 
-procedure TfrmMDMGrid.ClearMDMView;
+procedure TfrmMDMGrid.ClearMDM3ColView;
 begin
-  FreePanel(cpRisk);
-  FreePanel(cpTestsData);
-  FreePanel(cpComplexity);
-  FreePanel(cpMDM);
+  //LogEvent('ClearMDMVeiw');
+  FreeCollapsablePanel(cpRisk);
+  FreeCollapsablePanel(cpTestsData);
+  FreeCollapsablePanel(cpComplexity);
+  FreeCollapsablePanel(cpMDM3ColHolder);
 end;
 
 procedure TfrmMDMGrid.ClearOldTimeAmountView;
 begin
-  FreePanel(cpOldPtTimeAmount);
+  //LogEvent('ClearOldTimeAmountView');
+  FreeCollapsablePanel(cpOldPtTimeAmount);
 end;
 
 procedure TfrmMDMGrid.ClearNewTimeAmountView;
 begin
-  FreePanel(cpNewPtTimeAmount);
+  LogEvent('ClearNewTimeAmountView');
+  FreeCollapsablePanel(cpNewPtTimeAmount);
 end;
 
 procedure TfrmMDMGrid.ClearTimeView;
-
 begin
+  //LogEvent('ClearTimeView');
   ClearOldTimeAmountView;
   ClearNewTimeAmountView;
 end;
 
 procedure TfrmMDMGrid.ClearTelemedTimeView;
 begin
-  FreePanel(cpTelemedTimeAmount);
+  //LogEvent('ClearTelemedTimeView');
+  FreeCollapsablePanel(cpTelemedTimeAmount);
 end;
 
 procedure TfrmMDMGrid.ClearCPEView;
 begin
-  FreePanel(cpNewCPE);
-  FreePanel(cpOldCPE);
+  LogEvent('ClearCPEView');
+  FreeCollapsablePanel(cpNewCPE);
+  FreeCollapsablePanel(cpOldCPE);
 end;
 
 procedure TfrmMDMGrid.SetupTimeView(AUnitBefore : TCollapsablePanel);
 begin
+  LogEvent('SetupTimeView');
   if FPatientType = ptNew then begin
     ClearOldTimeAmountView;
     if cpNewPtTimeAmount<>nil then FreeAndNil(cpNewPtTimeAmount);
-    cpNewPtTimeAmount := TCollapsablePanel.Create(sbMain, AUnitBefore, OpensUpDown, pnlNewPtTimeAmount);
+    cpNewPtTimeAmount := TCollapsablePanel.Create('cpNewPtTimeAmount', sbMain, AUnitBefore, OpensUpDown, pnlNewPtTimeAmount, CommonLog);
+    cpNewPtTimeAmount.CommonLog := CommonLog;
     cpNewPtTimeAmount.RefreshHandler := rgNewPtTimeAmountClick;
     cpNewPtTimeAmount.OnStartOpenStateClick := HandleStartOpenStateChange;
     cpNewPtTimeAmount.OnEndOpenStateClick := HandleEndOpenStateChange;
     memNewPtTimeInfo.Lines.Clear;
     memNewPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
+    {$IFNDEF STAND_ALONE_APP}
     GetTemplateText(memNewPtTimeInfo.Lines);
+    {$ENDIF}
     cpNewPtTimeAmount.Initialize(OpenPanel);
     rgNewPtTimeAmountClick(self);
   end else begin
     ClearNewTimeAmountView;
     if cpOldPtTimeAmount<>nil then FreeAndNil(cpOldPtTimeAmount);
-    cpOldPtTimeAmount := TCollapsablePanel.Create(sbMain, AUnitBefore, OpensUpDown, pnlOldPtTimeAmount);
+    cpOldPtTimeAmount := TCollapsablePanel.Create('cpOldPtTimeAmount', sbMain, AUnitBefore, OpensUpDown, pnlOldPtTimeAmount, CommonLog);
+    cpOldPtTimeAmount.CommonLog := CommonLog;
     cpOldPtTimeAmount.RefreshHandler := rgOldPtTimeAmountClick;
     cpOldPtTimeAmount.OnStartOpenStateClick := HandleStartOpenStateChange;
     cpOldPtTimeAmount.OnEndOpenStateClick := HandleEndOpenStateChange;
     memOldPtTimeInfo.Lines.Clear;
     memOldPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE W MSG|');
+   {$IFNDEF STAND_ALONE_APP}
     GetTemplateText(memOldPtTimeInfo.Lines);
+    {$ENDIF}
     cpOldPtTimeAmount.Initialize(OpenPanel);
     rgOldPtTimeAmountClick(Self);
   end;
@@ -617,48 +677,54 @@ end;
 
 procedure TfrmMDMGrid.SetupTelemedTimeView(AUnitBefore : TCollapsablePanel);
 begin
+  LogEvent('SetupTelemedTimeView');
   FreeAndNil(cpTelemedTimeAmount);
-  cpTelemedTimeAmount := TCollapsablePanel.Create(sbMain, AUnitBefore, OpensUpDown, pnlTelemedTimeAmount);
+  cpTelemedTimeAmount := TCollapsablePanel.Create('cpTelemedTimeAmount', sbMain, AUnitBefore, OpensUpDown, pnlTelemedTimeAmount, CommonLog);
+  cpTelemedTimeAmount.CommonLog := CommonLog;
   cpTelemedTimeAmount.RefreshHandler := rgTelemedTimeAmountClick;
   cpTelemedTimeAmount.OnStartOpenStateClick := HandleStartOpenStateChange;
   cpTelemedTimeAmount.OnEndOpenStateClick := HandleEndOpenStateChange;
   memTelemedTimeAmount.Lines.Clear;
   memTelemedTimeAmount.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
+  {$IFNDEF STAND_ALONE_APP}
   GetTemplateText(memTelemedTimeAmount.Lines);
+  {$ENDIF}
   cpTelemedTimeAmount.Initialize(OpenPanel);
   rgTelemedTimeAmountClick(self);
 end;
 
 procedure TfrmMDMGrid.SetupComplexityView(AUnitBefore : TCollapsablePanel);
 begin
-  FreeAndNil(cpMDM);
-  cpMDM := TCollapsablePanel.Create(sbMain, AUnitBefore, OpensUpDown, nil);
-  cpMDM.RefreshHandler := rgNewPtTimeAmountClick;
-  cpMDM.OnStartOpenStateClick := HandleStartOpenStateChange;
-  cpMDM.OnEndOpenStateClick := HandleEndOpenStateChange;
-  cpMDM.Initialize(OpenPanel);
+  LogEvent('SetupComplexityView');
+  FreeAndNil(cpMDM3ColHolder);
+  cpMDM3ColHolder := TCollapsablePanel.Create('cpMDM3ColHolder', sbMain, AUnitBefore, OpensUpDown, nil, CommonLog);
+  cpMDM3ColHolder.RefreshHandler := rgNewPtTimeAmountClick;
+  cpMDM3ColHolder.OnStartOpenStateClick := HandleStartOpenStateChange;
+  cpMDM3ColHolder.OnEndOpenStateClick := HandleEndOpenStateChange;
+  cpMDM3ColHolder.Initialize(OpenPanel);
 
   FreeAndNil(cpComplexity);
-  cpComplexity := TCollapsablePanel.Create(cpMDM.DisplayPanel, ZERO_POINT, OpensLeftRight, pnlComplexity);
+  cpComplexity := TCollapsablePanel.Create('cpComplexity', cpMDM3ColHolder.DisplayPanel, ZERO_POINT, OpensLeftRight, pnlComplexity, CommonLog);
   cpComplexity.Initialize(OpenPanel);
   cpComplexity.RefreshHandler := rgComplexityLevelClick;
 
   FreeAndNil(cpTestsData);
-  cpTestsData := TCollapsablePanel.Create(cpMDM.DisplayPanel, cpComplexity, OpensLeftRight, pnlTestsDocs);
+  cpTestsData := TCollapsablePanel.Create('cpTestsData', cpMDM3ColHolder.DisplayPanel, cpComplexity, OpensLeftRight, pnlTestsDocs, CommonLog);
   cpTestsData.Initialize(ClosedPanel);
   cpTestsData.RefreshHandler := HandleReviewTestsChange;
 
   FreeAndNil(cpRisk);
-  cpRisk := TCollapsablePanel.Create(cpMDM.DisplayPanel, cpTestsData, OpensLeftRight, pnlRisk);
+  cpRisk := TCollapsablePanel.Create('cpRisk', cpMDM3ColHolder.DisplayPanel, cpTestsData, OpensLeftRight, pnlRisk, CommonLog);
   cpRisk.Initialize(ClosedPanel);
   cpRisk.RefreshHandler := rgRiskClick;
 end;
 
 procedure TfrmMDMGrid.SetupCPEView(AUnitBefore : TCollapsablePanel);
 begin
+  LogEvent('SetupCPEView');
   if FPatientType = ptNew then begin
     if cpNewCPE <> nil then FreeAndNil(cpNewCPE);
-    cpNewCPE := TCollapsablePanel.Create(sbMain, AUnitBefore, OpensUpDown, pnlNewCPE);
+    cpNewCPE := TCollapsablePanel.Create('cpNewCPE', sbMain, AUnitBefore, OpensUpDown, pnlNewCPE, CommonLog);
     cpNewCPE.RefreshHandler := rgNewCPEClick;
     cpNewCPE.OnStartOpenStateClick := HandleStartOpenStateChange;
     cpNewCPE.OnEndOpenStateClick := HandleEndOpenStateChange;
@@ -666,7 +732,7 @@ begin
     rgNewCPEClick(self);
   end else begin
     if cpOldCPE <> nil then FreeAndNil(cpOldCPE);
-    cpOldCPE := TCollapsablePanel.Create(sbMain, AUnitBefore, OpensUpDown, pnlOldCPE);
+    cpOldCPE := TCollapsablePanel.Create('cpOldCPE', sbMain, AUnitBefore, OpensUpDown, pnlOldCPE, CommonLog);
     cpOldCPE.RefreshHandler := rgOldCPEClick;
     cpOldCPE.OnStartOpenStateClick := HandleStartOpenStateChange;
     cpOldCPE.OnEndOpenStateClick := HandleEndOpenStateChange;
@@ -675,12 +741,26 @@ begin
   end;
 end;
 
+procedure TfrmMDMGrid.Reset;
+begin
+  ClearTelemedTimeView;
+  ClearTimeView;
+  ClearMDM3ColView;
+  ClearCPEView;
+  FreeCollapsablePanel(cpBillingMode);
+  rgNewOrOldPatient.ItemIndex := -1;
+  cpPanelNewOrOldPt.OpenState := OpenPanel;
+  InitVars;
+  RefreshOutput();
+end;
+
 procedure TfrmMDMGrid.SetupBasedOnBillingMode(AUnitBefore : TCollapsablePanel);
 begin
+  LogEvent('SetupBasedOnBillingMode');
   //RedrawSuspend(sbMain.Handle);
   ClearTelemedTimeView;
   ClearTimeView;
-  ClearMDMView;
+  ClearMDM3ColView;
   ClearCPEView;
 
   case FBillingMode of
@@ -703,13 +783,16 @@ begin
 end;
 
 
-procedure TfrmMDMGrid.MakeHTMLTable(SL : TStringList);
+procedure TfrmMDMGrid.MakeHTMLTable(SL : TStringList);  //NOTE: This is to output HTML table.  For ASCII text table, see MakeTextTable
+//SL is source input.
+//    for SL input, every other line will be right vs left column.
+//Output is FHTMLTable
 var
     i : integer;
     StrL, StrR : string;
     s : string;
 begin
-  FTextTable.Clear;
+  FHTMLTable.Clear;
 
   i := 0;
   while i< SL.count do begin
@@ -718,25 +801,27 @@ begin
     inc(i, 2);
   end;
 
-  FTextTable.Add('<table border=1>');
+  FHTMLTable.Add('<table border=1>');
 
-  FTextTable.Add('<TR><th>MEDICAL DECISION MAKING ITEM</th> <th>VALUE</th></TR>');
+  FHTMLTable.Add('<TR><th>MEDICAL DECISION MAKING ITEM</th> <th>VALUE</th></TR>');
 
   i := 0;
   while i< SL.count do begin
     StrL := ItemDef(SL, i);
     StrR := ItemDef(SL, i+1);
     s := '<tr><td>' + strL + '</td><td>' + strR + '</td></tr>';
-    FTextTable.Add(s);
+    FHTMLTable.Add(s);
     inc(i, 2);
   end;
 
-  FTextTable.Add('</table>');
+  FHTMLTable.Add('</table>');
 end;
 
 
-procedure TfrmMDMGrid.MakeTextTable(SL : TStringList);
-//for SL input, every other line will be right vs left column.
+procedure TfrmMDMGrid.MakeTextTable(SL : TStringList);  //NOTE: This is to output ASCII text table.  For HTML table, see MakeHTMLTable
+//SL is source input.
+//    for SL input, every other line will be right vs left column.
+//Output is FTextTable
   function padCh(ch : char; ct : integer) : string;
   var i : integer;
   begin
@@ -751,6 +836,10 @@ procedure TfrmMDMGrid.MakeTextTable(SL : TStringList);
     Result := s + padCh(ch, width - w);
   end;
 
+  function AsciiStr(s : string) : string;
+  begin
+    Result := ReplaceStr(s, '&nbsp;',' ');
+  end;
 
 var MaxWLeft, MaxWRight : integer;
     i : integer;
@@ -764,8 +853,8 @@ begin
   MaxWRight := 0;
   i := 0;
   while i< SL.count do begin
-    StrL := ItemDef(SL, i);
-    StrR := ItemDef(SL, i+1);
+    StrL := AsciiStr(ItemDef(SL, i));
+    StrR := AsciiStr(ItemDef(SL, i+1));
     MaxWLeft := Max(MaxWLeft, Length(StrL));
     MaxWright:= Max(MaxWRight, Length(StrR));
     inc(i, 2);
@@ -776,8 +865,8 @@ begin
 
   i := 0;
   while i< SL.count do begin
-    StrL := ItemDef(SL, i);
-    StrR := ItemDef(SL, i+1);
+    StrL := AsciiStr(ItemDef(SL, i));
+    StrR := AsciiStr(ItemDef(SL, i+1));
     s := '|' + padCh2Len(strL, MaxWLeft) + '|' + padCh2Len(strR, MaxWRight) + '|';
     FTextTable.Add(s);
     FTextTable.Add(DivLine);
@@ -818,7 +907,7 @@ begin
         if Text <> '' then begin
           indent := 3;
           FTableStrings.Add(HTMLSpc(indent)+'DETAIL:');
-            FTableStrings.Add(HTMLSpc(indent)+Text);
+          FTableStrings.Add(HTMLSpc(indent)+Text);
         end;
       end;
     tcTelemedTime :
@@ -831,7 +920,7 @@ begin
         if Text <> '' then begin
           indent := 3;
           FTableStrings.Add(HTMLSpc(indent)+'DETAIL:');
-            FTableStrings.Add(HTMLSpc(indent)+Text);
+          FTableStrings.Add(HTMLSpc(indent)+Text);
         end;
       end;
     tcComplexity :
@@ -870,8 +959,8 @@ begin
     end;
   end;
 
-  MakeTextTable(FTableStrings);
-  MakeHTMLTable(FTableStrings);
+  MakeTextTable(FTableStrings);  //Output is info FTextTable
+  MakeHTMLTable(FTableStrings);  //Output is info FHTMLTable
 
   FOverallCPTOutput := TempResult;
   lblChargeDetails.Caption := '';
@@ -880,6 +969,7 @@ begin
   if TempResult = '99214' then lblChargeDetails.Caption := ChargeStr99214;
   if TempResult = '99215' then lblChargeDetails.Caption := ChargeStr99215;
   FOverallNarrative := Narrative;
+  if TempResult = 'undefined' then TempResult := '';  //kt 1/16/23
   lblResultValue.Caption := TempResult;
   btnOK.Enabled := (TempResult <> '');
 end;
@@ -895,7 +985,6 @@ begin
   RefreshOutput;
   Result := FOverallNarrative;
 end;
-
 
 procedure TfrmMDMGrid.RecalcOverallComplexity();
   function Highest2of3(n1, n2, n3 : TComplexityLevel) : TComplexityLevel;
@@ -1030,6 +1119,7 @@ end;
 
 procedure TfrmMDMGrid.btnNextSectionClick(Sender: TObject);
 begin
+  LogEvent('btnNextSectionClick');
   cpTestsData.OpenState := ClosedPanel;
   if assigned(cpTestsData.UnitAfter) then begin
     cpTestsData.UnitAfter.OpenState := OpenPanel;
@@ -1039,12 +1129,20 @@ end;
 procedure TfrmMDMGrid.btnOKClick(Sender: TObject);
 begin
   FFormSuccess := true;
-  self.Close;
+  if FEmbeddedMode then begin
+    if assigned(FOnCloseForm) then begin
+      FOnCloseForm(self);
+    end;
+    //Reset;  //Consider resetting form to initial state....
+  end else begin
+    self.Close;
+  end;
 end;
 
 procedure TfrmMDMGrid.rgNewPtTimeAmountClick(Sender: TObject);
 var i : integer;
 begin
+  LogEvent('rgNewPtTimeAmountClick');
   i := rgNewPtTimeAmount.ItemIndex;
   FTimeAmountNarrative := ItemDef(rgNewPtTimeAmount.Items, i, UNDEFINED);
   if assigned(cpNewPtTimeAmount) then cpNewPtTimeAmount.ClosedCaption := FTimeAmountNarrative;
@@ -1056,6 +1154,7 @@ end;
 procedure TfrmMDMGrid.rgOldCPEClick(Sender: TObject);
 var i : integer;
 begin
+  LogEvent('rgOldCPEClick');
   i := rgOldCPE.ItemIndex;
   FCPENarrative := ItemDef(rgOldCPE.Items, i, UNDEFINED);
   if assigned(cpOldCPE) then cpOldCPE.ClosedCaption := FCPENarrative;
@@ -1066,6 +1165,7 @@ end;
 procedure TfrmMDMGrid.rgOldPtTimeAmountClick(Sender: TObject);
 var i : integer;
 begin
+  LogEvent('rgOldPtTimeAmountClick');
   i := rgOldPtTimeAmount.ItemIndex;
   FTimeAmountNarrative := ItemDef(rgOldPtTimeAmount.Items, i, UNDEFINED);
   if assigned(cpOldPtTimeAmount) then cpOldPtTimeAmount.ClosedCaption := FTimeAmountNarrative;
@@ -1076,6 +1176,7 @@ end;
 
 procedure TfrmMDMGrid.rgRiskClick(Sender: TObject);
 begin
+  LogEvent('rgRiskClick');
   memExampleRiskMod.Visible := rgRisk.ItemIndex = 2;
   memExampleRiskHigh.Visible := rgRisk.ItemIndex = 3;
   memExampleRiskHigh.Top := memExampleRiskMod.Top;
@@ -1088,6 +1189,7 @@ end;
 procedure TfrmMDMGrid.rgTelemedTimeAmountClick(Sender: TObject);
 var i : integer;
 begin
+  LogEvent('rgTelemedTimeAmountClick');
   i := rgTelemedTimeAmount.ItemIndex;
   FTelemedTimeAmountNarrative := ItemDef(rgTelemedTimeAmount.Items, i, UNDEFINED);
   if assigned(cpTelemedTimeAmount) then cpTelemedTimeAmount.ClosedCaption := FTelemedTimeAmountNarrative;
@@ -1107,6 +1209,7 @@ begin
   if not assigned(Sender) then exit;
   if not (Sender is TRadioGroup) then exit;
 
+  LogEvent('rgComplexityLevelClick');
   FNumIssuesNarrrative := '';
   Narrative := '';
 
@@ -1149,6 +1252,7 @@ end;
 procedure TfrmMDMGrid.rgNewCPEClick(Sender: TObject);
 var i : integer;
 begin
+  LogEvent('rgNewCPEClick');
   i := rgNewCPE.ItemIndex;
   FCPENarrative := ItemDef(rgNewCPE.Items, i, UNDEFINED);
   if assigned(cpNewCPE) then cpNewCPE.ClosedCaption := FCPENarrative;
@@ -1159,8 +1263,9 @@ end;
 procedure TfrmMDMGrid.rgNewOrOldPatientClick(Sender: TObject);
 var s,TiuTemplate : string;
 begin
+  LogEvent('rgNewOrOldPatientClick');
   if not assigned(cpBillingMode) then begin
-    cpBillingMode := TCollapsablePanel.Create(sbMain, cpPanelNewOrOldPt, OpensUpDown, pnlBillingMode);
+    cpBillingMode := TCollapsablePanel.Create('cpBillingMode', sbMain, cpPanelNewOrOldPt, OpensUpDown, pnlBillingMode, CommonLog);
     cpBillingMode.RefreshHandler := rgBillingModeClick;
     cpBillingMode.OnStartOpenStateClick := HandleStartOpenStateChange;
     cpBillingMode.OnEndOpenStateClick := HandleEndOpenStateChange;
@@ -1168,8 +1273,8 @@ begin
     rgBillingMode.ItemIndex := -1;
   end;
 
-  //in case these had been opened.  
-  ClearMDMView;
+  //in case these had been opened.
+  ClearMDM3ColView;
   ClearTimeView;
   ClearTelemedTimeView;
 
@@ -1183,7 +1288,9 @@ begin
 
   memBillingModeHint.Lines.Clear;
   memBillingModeHint.lines.add('|'+TiuTemplate+'|');
+  {$IFNDEF STAND_ALONE_APP}
   GetTemplateText(memBillingModeHint.Lines);
+  {$ENDIF}
   if pos('NOTE',memBillingModeHint.Lines.Text)>0 then memBillingModeHint.Color := clRed
   else memBillingModeHint.Color := clSkyBlue;
 
@@ -1208,6 +1315,35 @@ begin
   SetupBasedOnBillingMode(cpBillingMode);
   RefreshOutput;
 end;
+
+procedure TfrmMDMGrid.LogEvent(S : string);
+begin
+  if Assigned(CommonLog) then begin
+    CommonLog.Add('MDMHelper: ' + S);
+  end;
+end;
+
+procedure TfrmMDMGrid.SetEmbeddedMode(value : boolean);
+begin
+  if value = FEmbeddedMode then exit;
+  FEmbeddedMode := value;
+  if FEmbeddedMode then begin
+    btnOK.Caption := '&Use Code';
+    //btnOK.Enabled := true;
+    //btnOK.Visible := true;
+    btnOK.ModalResult := mrNone;
+    btnCancel.Visible := false;
+    BorderStyle := bsNone;
+  end else begin
+    btnOK.Caption := '&OK';
+    btnOK.ModalResult := mrOK;
+    btnCancel.Visible := true;
+    BorderStyle := bsToolWindow;
+  end;
+
+
+end;
+
 
 
 initialization

@@ -179,7 +179,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
       Top = 1
       Width = 533
       Height = 544
-      ActivePage = tsCover
+      ActivePage = Notes
       Align = alTop
       Anchors = [akTop, akRight]
       Font.Charset = ANSI_CHARSET
@@ -431,7 +431,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object ckbxAll: TCheckBox
           Left = 6
-          Top = 44
+          Top = 43
           Width = 97
           Height = 17
           Anchors = []
@@ -441,7 +441,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkHighlightOnly: TCheckBox
           Left = 131
-          Top = 44
+          Top = 43
           Width = 174
           Height = 17
           Anchors = []
@@ -476,9 +476,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object cklbTitles: TCheckListBox
           Left = 0
-          Top = 67
+          Top = 76
           Width = 525
-          Height = 440
+          Height = 431
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -639,9 +639,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstRad: TCheckListBox
           Left = 0
-          Top = 67
+          Top = 76
           Width = 525
-          Height = 440
+          Height = 431
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -802,9 +802,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstOrders: TCheckListBox
           Left = 0
-          Top = 142
+          Top = 151
           Width = 525
-          Height = 365
+          Height = 356
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13

@@ -90,7 +90,7 @@ inherited frmProcedures: TfrmProcedures
     TabOrder = 2
   end
   object spnProcQty: TUpDown [11]
-    Left = 353
+    Left = 348
     Top = 371
     Width = 15
     Height = 21

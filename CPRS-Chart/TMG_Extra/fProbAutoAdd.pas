@@ -240,7 +240,7 @@ begin
   for i := 0 to lbTopics.Count - 1 do begin
     Input.Add('GET^'+Patient.DFN+'^TOPIC='+lbTopics.Items[i]);
   end;
-  ProblemTopicLink(Results, Input);
+  TMGTopicLinks(Results, Input);
   if Results.Count > 0 then Results.Delete(0);
   for i := 0 to Results.Count - 1 do begin
     line := Results.Strings[i];
@@ -511,7 +511,7 @@ begin
   for i := lbTopics.Items.count-1 downto 0 do begin
     if not lbTopics.Selected[i] then continue;
     lbTopics.Items.Delete(i);
-    TopicProblemLinkCache.Delete(i);    
+    TopicProblemLinkCache.Delete(i);
   end;
   lbTopicsClick(Self);
 end;
@@ -533,7 +533,7 @@ begin
     end;
     if Req.Count <= 0 then exit;
     if MessageDlg(DispText, mtConfirmation, [mbOK, mbCancel],0) <> mrOK then exit;
-    ProblemTopicLink(Results, Req);
+    TMGTopicLinks(Results, Req);
     LoadTopicProblemLinkCache;
     if Results.Count = 0 then Exit;
     if piece(Results.Strings[0],'^',1) = '-1' then begin
@@ -560,7 +560,7 @@ begin
   Results := TStringList.Create;
   try
     Req.Add('SET^' + Patient.DFN + '^' + TopicName + '^' + ProbIEN);
-    ProblemTopicLink(Results, Req);
+    TMGTopicLinks(Results, Req);
     LoadTopicProblemLinkCache;
     if Results.Count = 0 then Exit;
     if piece(Results.Strings[0],'^',1) = '-1' then begin
@@ -603,7 +603,7 @@ begin
       Input.Add('KILL^'+Patient.DFN+'^TOPIC='+lbTopics.Items[i]);
     end;
     if Input.count = 0 then exit;
-    ProblemTopicLink(Results, Input);
+    TMGTopicLinks(Results, Input);
     if Results.Count = 0 then Exit;
     if piece(Results.Strings[0],'^',1) = '-1' then begin
       Results.Delete(0);

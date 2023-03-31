@@ -34,16 +34,16 @@ unit uPCE;
  http://www.gnu.org/licenses/
  *)
 
-                                                                       
+
 interface
 
 uses Windows, SysUtils, Classes, ORFn, uConst, ORCtrls, ORClasses,UBAGlobals
-     ,Dialogs  //kt;
+     ,Dialogs, StrUtils  //kt;
      ;
 
 {var
    OtherVisitStr : string;   //TMG added 6/6/22}
-        
+
 type
   TPCEProviderRec = record
     IEN: int64;
@@ -92,10 +92,10 @@ type
     FDelete:   Boolean;                          //flag for deletion
     FSend:     Boolean;                          //flag to send to broker
     FComment:  String;
+    FInactive: boolean;  //kt added.  Default value will be FALSE
   protected
     procedure SetComment(const Value: String);
   public
-//    Provider:  Int64;
     Provider:  Int64;
     Code:      string;
     Category:  string;
@@ -113,34 +113,67 @@ type
     function HasCPTStr: string; virtual;
     property Comment: String read FComment write SetComment;
     property GecRem: string read FGecRem write FGecRem;
+    property Deleted : boolean read FDelete;  //kt added READ ONLY access to FDelete, but didn't add FDelete
+    property Inactive : boolean read FInactive write FInactive;  //kt added entire variable.
+    constructor Create; virtual;  //kt added 2/12/23 so that descendent objects can call their own constructors.  TObject.create is empty (doesn't do anything)
   end;
 
   TPCEItemClass = class of TPCEItem;
 
   TPCEProc = class(TPCEItem)
   {class for procedures}
+  protected
+    ModifiersList : TStringList; //kt added.  format: ModifiersList[i] = <ModifierIEN>
+    function GetModifiers : string;  //kt added
+    procedure SetModifiers(Value : string); //kt added
   public
     FIsOldProcedure: boolean;
     Quantity:  Integer;
-    Modifiers: string; // Format Modifier1IEN;Modifier2IEN;Modifier3IEN; Trailing ; needed
-//    Provider: Int64; {jm 9/8/99}
+    //kt removed to make a property -->Modifiers: string; // Format Modifier1IEN;Modifier2IEN;Modifier3IEN;   NOTE: Trailing ';' needed
     Provider: Int64; {jm 9/8/99}
     procedure Assign(Src: TPCEItem); override;
     procedure Clear; override;
     function DelimitedStr: string; override;
 //    function DelimitedStrC: string;
-//    function Match(AnItem: TPCEProc): Boolean;
+    function Match(AnItem: TPCEProc): Boolean;   //kt removed comments.  Initially this was commented out.
     function ModText: string;
+    function ModCodes: string;                   //kt added
     function ItemStr: string; override;
     procedure SetFromString(const x: string); override;
-    procedure CopyProc(Dest: TPCEProc);
+    //procedure CopyProc(Dest: TPCEProc);
+    function HasModifierIEN(IEN : string) : boolean; //kt added
+    procedure EnsureModifierIEN(IEN : string);       //kt added
+    procedure RemoveModifierIEN(IEN : string);       //kt added
+    function HasModifier(IEN : string) : boolean;    //kt added
     function Empty: boolean;
+    constructor Create; override;                    //kt added
+    destructor Destroy; override;                    //kdt added
+    property Modifiers : string read GetModifiers write SetModifiers; //kt added
+  end;
+
+  TPCEProcList = class(TList) //kt added
+  private
+    function GetProc(index : integer) : TPCEProc;
+  public
+    procedure FreeAndClearItems;
+    function EnsureProc(Proc : TPCEProc) : TPCEProc;
+    function EnsureFromString(x : string) : TPCEProc;
+    function MaxQuantity : integer;
+    function IndexOfMatch(MatchProc : TPCEProc) : integer;
+    function IndexOfCodeUNarr(CodeUNarr : string) : integer;
+    function ProcForCodeUNarr(CodeUNarr : string) : TPCEProc;
+    function FirstNonEmptyCode : string;
+    function ValidIndex(AnIndex : integer) : boolean;
+    procedure SetProvider(AProvider : Int64);
+    procedure Assign(Src : TPCEProcList);
+    function Empty : boolean;
+    property Proc[index : integer] : TPCEProc read GetProc;
   end;
 
   TPCEDiag = class(TPCEItem)
   {class for diagnosis}
   public
-    fProvider: Int64; 
+    fProvider: Int64;
     Primary:   Boolean;
     AddProb:   Boolean;
     OldComment: string;
@@ -149,7 +182,7 @@ type
     procedure Clear; override;
     function DelimitedStr: string; override;
     function DelimitedStr2: string; override;
-//    function delimitedStrC: string;        
+//    function delimitedStrC: string;
     function ItemStr: string; override;
     procedure SetFromString(const x: string); override;
     procedure Send;
@@ -184,7 +217,7 @@ type
     function HasCPTStr: string; override;
   end;
 
-  TPCEImm = class(TPCEItem)  
+  TPCEImm = class(TPCEItem)
   {class for immunizations}
   public
 //    Provider:        Int64; {jm 9/8/99}
@@ -209,7 +242,7 @@ type
     procedure Assign(Src: TPCEItem); override;
     procedure Clear; override;
     function DelimitedStr: string; override;
-//    function delimitedStrC: string;        
+//    function delimitedStrC: string;
     function ItemStr: string; override;
     procedure SetFromString(const x: string); override;
     function HasCPTStr: string; override;
@@ -259,11 +292,12 @@ type
     FMSTRelated:   Integer;                        //
     FHNCRelated:   Integer;                        //
     FCVRelated:    Integer;                        //
-    FSHADRelated:   Integer;                        //
-    FVisitType:    TPCEProc;                       //
+    FSHADRelated:   Integer;                       //
+    //kt FVisitType:    TPCEProc;                       //
     FProviders:    TPCEProviderList;
-    FDiagnoses:    TList;                          //pointer list for diagnosis
-    FProcedures:   TList;                          //pointer list for Procedures
+    FVisitTypesList: TPCEProcList;                 //list for TPCEProc visits.  //kt added
+    FDiagnoses:     TList;                         //pointer list for diagnosis
+    FProcedures:    TList;                         //pointer list for Procedures
     FImmunizations: TList;                         //pointer list for Immunizations
     FSkinTests:     TList;                         //pointer list for skin tests
     FPatientEds:    TList;
@@ -281,7 +315,8 @@ type
     function GetCPTRequired: Boolean;
     function getDocCount: Integer;
     function MatchItem(AList: TList; AnItem: TPCEItem): Integer;
-    procedure MarkDeletions(PreList: TList; PostList: TStrings);
+    procedure MarkDeletions(PreList: TList; PostList: TStrings); overload;
+    procedure MarkDeletions(PreList: TList; PostList: TList);    overload; //kt added
     procedure SetSCRelated(Value: Integer);
     procedure SetAORelated(Value: Integer);
     procedure SetIRRelated(Value: Integer);
@@ -303,6 +338,7 @@ type
     procedure PCEForNote(NoteIEN: Integer; EditObj: TPCEData);(* overload;
     procedure PCEForNote(NoteIEN: Integer; EditObj: TPCEData; DCSummAdmitString: string); overload;*)
     procedure Save;
+    procedure CopyVisits(Dest: TPCEProcList);        //kt added
     procedure CopyDiagnoses(Dest: TStrings);     // ICDcode^P|S^Category^Narrative^P|S Text
     procedure CopyProcedures(Dest: TStrings);    // CPTcode^Qty^Category^Narrative^Qty Text
     procedure CopyImmunizations(Dest: TStrings); //
@@ -311,15 +347,18 @@ type
     procedure CopyHealthFactors(Dest: TStrings);
     procedure CopyExams(Dest: TStrings);
 
+    procedure SetVisits(Src : TPCEProcList; FromForm: boolean = TRUE);     //kt added
     procedure SetDiagnoses(Src: TStrings; FromForm: boolean = TRUE);       // ICDcode^P|S^Category^Narrative^P|S Text
     procedure SetExams(Src: TStrings; FromForm: boolean = TRUE);
     Procedure SetHealthFactors(Src: TStrings; FromForm: boolean = TRUE);
     procedure SetImmunizations(Src: TStrings; FromForm: boolean = TRUE);   // IMMcode^
     Procedure SetPatientEds(Src: TStrings; FromForm: boolean = TRUE);
-    procedure SetSkinTests(Src: TStrings; FromForm: boolean = TRUE);        //
+    procedure SetSkinTests(Src: TStrings; FromForm: boolean = TRUE);       //
     procedure SetProcedures(Src: TStrings; FromForm: boolean = TRUE);      // CPTcode^Qty^Category^Narrative^Qty Text
+    procedure SetVisitType(index : integer; Value: TPCEProc);     // CPTcode^1^Category^Narrative    //kt added index
+    function  GetVisitType(index : integer) : TPCEProc; //kt added
+    procedure SetExtraVisitTypes(Src: TStrings; FromForm: boolean = TRUE); //kt
 
-    procedure SetVisitType(Value: TPCEProc);     // CPTcode^1^Category^Narrative
     function StrDiagnoses: string;               // Diagnoses: ...
     function StrImmunizations: string;           // Immunizzations: ...
     function StrProcedures: string;              // Procedures: ...
@@ -329,7 +368,8 @@ type
     function StrExams: string;
     function StrVisitType(const ASCRelated, AAORelated, AIRRelated, AECRelated,
                                 AMSTRelated, AHNCRelated, ACVRelated, ASHADRelated: Integer): string; overload;
-    function StrVisitType: string; overload;
+    //kt function StrVisitType: string; overload;
+    function StrVisitType(AVisitType : TPCEProc) : string; overload; //kt added
     function StandAlone: boolean;
     procedure AddStrData(List: TStrings);
     procedure AddVitalData(Data, List: TStrings);
@@ -353,14 +393,16 @@ type
     property ECRelated:    Integer  read FECRelated   write SetECRelated;
     property MSTRelated:   Integer  read FMSTRelated  write SetMSTRelated;
     property HNCRelated:   Integer  read FHNCRelated  write SetHNCRelated;
-    property CVRelated:    Integer  read FCVRelated  write SetCVRelated;
-    property SHADRelated:   Integer  read FSHADRelated write SetSHADRelated;
-    property VisitType:    TPCEProc read FVisitType   write SetVisitType;
+    property CVRelated:    Integer  read FCVRelated   write SetCVRelated;
+    property SHADRelated:  Integer  read FSHADRelated write SetSHADRelated;
+    //kt property VisitType:    TPCEProc read FVisitType   write SetVisitType;
+    property VisitType[index : integer] : TPCEProc read GetVisitType   write SetVisitType;  //kt added
+    property VisitTypesList: TPCEProcList read FVisitTypesList; //kt added
     property VisitString:  string   read GetVisitString;
     property VisitCategory:char     read FEncSvcCat   write FEncSvcCat;
     property DateTime:     TFMDateTime read FEncDateTime write FEncDateTime;
     property NoteDateTime: TFMDateTime read FNoteDateTime write FNoteDateTime;
-    property Location:     Integer  Read FencLocation;
+    property Location:     Integer  Read FEncLocation;
     property NoteTitle:    Integer read FNoteTitle write FNoteTitle;
     property NoteIEN:      Integer read FNoteIEN write FNoteIEN;
     property DocCOunt:     Integer read GetDocCount;
@@ -373,11 +415,11 @@ type
 type
   TPCEType = (ptEncounter, ptReminder, ptTemplate);
 
-  
+
 const
   PCETypeText: array[TPCEType] of string = ('encounter', 'reminder', 'template');
 
-  
+
 function InvalidPCEProviderTxt(AIEN: Int64; ADate: TFMDateTime): string;
 function MissingProviderInfo(PCEEdit: TPCEData; PCEType: TPCEType = ptEncounter): boolean;
 function IsOK2Sign(const PCEData: TPCEData; const IEN: integer) :boolean;
@@ -492,7 +534,7 @@ const
 implementation
 
 uses uCore, rPCE, rCore, rTIU, fEncounterFrame, uVitals, fFrame,
-     fPCEProvider, rVitals, uReminders;
+     fPCEProvider, rVitals, uReminders, fODTMG1;
      
 const
   FN_NEW_PERSON = 200;
@@ -942,6 +984,12 @@ end;
 
 { TPCEItem methods ------------------------------------------------------------------------- }
 
+constructor TPCEItem.Create;
+//kt added 2/12/23 so that descendent objects can call their own constructors.  
+begin
+  inherited;  //not really needed at ancestor TObject.Create doesn't do anything.
+end;
+
 //function TPCEItem.DelimitedStr2: string;
 //added: 6/17/98
 //By: Robert Bott
@@ -970,7 +1018,8 @@ begin
   Category  := Src.Category;
   Narrative := Src.Narrative;
   Provider  := Src.Provider;
-  Comment   := Src.Comment;                            
+  Comment   := Src.Comment;
+  FInactive := Src.FInactive; //kt added
 end;
 
 procedure TPCEItem.SetComment(const Value: String);
@@ -995,7 +1044,8 @@ begin
   Category  := '';
   Narrative := '';
   Provider  := 0;
-  Comment   := '';                                     
+  Comment   := '';
+  FInactive := false; //kt added
 end;
 
 //function TPCEItem.DelimitedStr: string;
@@ -1022,8 +1072,11 @@ function TPCEItem.Match(AnItem: TPCEItem): Boolean;
 {checks for match of Code, Category. and Item}
 begin
   Result := False;
-  if (Code = AnItem.Code) and (Category = AnItem.Category) and (Narrative = AnItem.Narrative)
-    then Result := True;
+  if (Code = AnItem.Code) and
+     (Category = AnItem.Category) and
+     (Narrative = AnItem.Narrative) then begin
+    Result := True;
+  end;
 end;
 
 function TPCEItem.HasCPTStr: string;
@@ -1039,11 +1092,11 @@ end;
 procedure TPCEItem.SetFromString(const x: string);
 { sets fields to pieces passed from server:  TYP ^ Code ^ Category ^ Narrative }
 begin
-  Code      := Piece(x, U, pnumCode);
-  Category  := Piece(x, U, pnumCategory);
-  Narrative := Piece(x, U, pnumNarrative);
-  Provider  := StrToInt64Def(Piece(x, U, pnumProvider), 0);
-  Comment   := Piece(x, U, pnumComment);
+  Code      := Piece(x, U, pnumCode);      //pnumCode      = 2;
+  Category  := Piece(x, U, pnumCategory);  //pnumCategory  = 3;
+  Narrative := Piece(x, U, pnumNarrative); //pnumNarrative = 4;
+  Provider  := StrToInt64Def(Piece(x, U, pnumProvider), 0);  //pnumProvider = 6;
+  Comment   := Piece(x, U, pnumComment);   //pnumComment   = 10;
 end;
 
 
@@ -1148,7 +1201,7 @@ begin
   Result := inherited DelimitedStr;
   //Result := 'SK' + Result + U + results + U + IntToStr(Provider) + U +
   Result := 'SK' + Result + U + results + U + U +
-   IntToStr(Reading) + U + U + U + IntToStr(UNxtCommSeqNum); 
+   IntToStr(Reading) + U + U + U + IntToStr(UNxtCommSeqNum);
     //+ FloatToStr(DTRead) + U + FloatToStr(DTGiven);
 end;
 
@@ -1364,12 +1417,43 @@ end;
 
 { TPCEProc methods ------------------------------------------------------------------------- }
 
+constructor TPCEProc.Create;    //kt added
+begin
+  inherited;
+  ModifiersList := TStringList.Create;
+  FIsOldProcedure:= false;  //kt wasn't initialized before
+  Quantity := 0;            //kt wasn't initialized before
+end;
+
+destructor TPCEProc.Destroy;  //kt added
+begin
+  ModifiersList.Free;
+  inherited;
+end;
+
+function TPCEProc.GetModifiers : string;  //kt added
+var i : integer;
+begin
+  Result:= '';
+  for i := 0 to ModifiersList.Count - 1 do begin
+    Result := Result  + ModifiersList.Strings[i] + ';'
+  end;
+end;
+
+procedure TPCEProc.SetModifiers(Value : string); //kt added
+begin
+  PiecesToList(Value,';', ModifiersList);
+end;
+
+
 procedure TPCEProc.Assign(Src: TPCEItem);
+var ProcSrc : TPCEProc; //kt
 begin
   inherited Assign(Src);
-  Quantity := TPCEProc(Src).Quantity;
-  Modifiers := TPCEProc(Src).Modifiers;
-  Provider := TPCEProc(Src).Provider;
+  ProcSrc   := TPCEProc(Src); //kt
+  Quantity  := ProcSrc.Quantity;
+  Modifiers := ProcSrc.Modifiers;
+  Provider  := ProcSrc.Provider;
 end;
 
 procedure TPCEProc.Clear;
@@ -1382,11 +1466,11 @@ begin
   Provider := 0;
 end;
 
+{
 procedure TPCEProc.CopyProc(Dest: TPCEProc);
 begin
-  Dest.FDelete    :=  FDelete;
-  Dest.FSend      :=  Fsend;                          //flag to send to broker
-//  Dest.Provider   := Provider;
+  Dest.FDelete    := FDelete;
+  Dest.FSend      := Fsend;                          //flag to send to broker
   Dest.Provider   := Provider;
   Dest.Code       := Code;
   Dest.Category   := Category;
@@ -1394,6 +1478,7 @@ begin
   Dest.Comment    := Comment;
   Dest.Modifiers  := Modifiers;
 end;
+}
 
 //function TPCEProc.DelimitedStr: string;
 //modified: 6/17/98
@@ -1427,6 +1512,31 @@ begin
   if Length(Result) > 250 then SetPiece(Result, U, 4, '');
 end;
 
+function TPCEProc.HasModifierIEN(IEN : string) : boolean; //kt added
+var p : integer;
+begin
+  p := Pos(';', IEN); if p>0 then IEN := Piece(IEN,';',1);    // e.g. '16;'
+  Result := (ModifiersList.IndexOf(IEN) > -1);
+end;
+
+procedure TPCEProc.EnsureModifierIEN(IEN : string); //kt added
+begin
+  if HasModifierIEN(IEN) then exit;
+  ModifiersList.Add(IEN);
+end;
+
+procedure TPCEProc.RemoveModifierIEN(IEN : string); //kt added
+var i : integer;
+begin
+  i := ModifiersList.IndexOf(IEN);
+  if i > -1 then ModifiersList.Delete(i);
+end;
+
+function TPCEProc.HasModifier(IEN : string) : boolean;  //kt added
+begin
+  Result := (ModifiersList.IndexOf(IEN) > -1 );
+end;
+
 (*function TPCEProc.delimitedStrC: string;
 begin
   Result := inherited DelimitedStr;
@@ -1441,10 +1551,11 @@ begin
             (Comment = '') and (Quantity = 0) and (Provider = 0) and (Modifiers = '');
 end;
 
-(*function TPCEProc.Match(AnItem: TPCEProc): Boolean;        {NEW CODE - v20 testing only - RV}
+//kt removed comments.  Previously this function was commented out.
+function TPCEProc.Match(AnItem: TPCEProc): Boolean;        {NEW CODE - v20 testing only - RV}
 begin
   Result := inherited Match(AnItem) and (Modifiers = AnItem.Modifiers);
-end;*)
+end;
 
 function TPCEProc.ModText: string;
 var
@@ -1453,13 +1564,11 @@ var
 
 begin
   Result := '';
-  if(Modifiers <> '') then
-  begin
+  if(Modifiers <> '') then begin
     i := 1;
     repeat
       tmp := Piece(Modifiers,';',i);
-      if(tmp <> '') then
-      begin
+      if(tmp <> '') then begin
         tmp := ModifierName(tmp);
         Result := Result + ' - ' + tmp;
       end;
@@ -1468,33 +1577,238 @@ begin
   end;
 end;
 
+function TPCEProc.ModCodes: string;  //kt added
+var i: integer;
+    tmp: string;
+begin
+  Result := '';
+  for i := 1 to NumPieces(Modifiers,';') do begin
+    tmp := Piece(Modifiers,';',i);
+    if tmp = '' then continue;
+    if Result <> '' then Result := Result + ',';
+    Result := Result + ModifierCode(tmp);
+  end;
+end;
+
+
 function TPCEProc.ItemStr: string;
 {returns string to be assigned to Tlist in PCEData object}
+var Mods : string;
 begin
+  //kt mod ---
+  Result := Ifthen(Quantity > 1, IntToStr(Quantity)+' times', '');
+  Mods := ModCodes;
+  if Mods <> '' then Mods := ' -- Mod: ' + Mods;
+  Result := Result + U + inherited ItemStr + Mods;
+  //kt end mod ---
+  {  //kt original below
   if(Quantity > 1) then
     Result := IntToStr(Quantity) + ' times'
   else
     Result := '';
   Result := Result + U + inherited ItemStr + ModText;
+  }
 end;
 
 procedure TPCEProc.SetFromString(const x: string);
+//x format:
+//  piece  2  -> Code
+//         3  -> Category
+//         4  -> Narrative
+//         5  -> Quantity
+//         6  -> Provider
+//         9  -> Modifiers
+//         10 -> Comment
 var
   i, cnt: integer;
   Mods: string;
-{ sets fields to pieces passed from server:  TYP ^ Code ^ Category ^ Narrative ^ Qty ^ Prov }
+
 begin
   inherited SetFromString(x);
   Quantity := StrToIntDef(Piece(x, U, pnumProcQty), 1);
-//  Provider := StrToInt64Def(Piece(x, U, pnumProvider), 0);
   Provider := StrToInt64Def(Piece(x, U, pnumProvider), 0);
   Modifiers := '';
   Mods := Piece(x, U, pnumCPTMods);
   cnt := StrToIntDef(Piece(Mods, ';', 1), 0);
-  if(cnt > 0) then
-   for i := 1 to cnt do
+  //kt old --> if(cnt > 0) then for i := 1 to cnt do begin   //kt no need for if test
+  for i := 1 to cnt do begin  //kt
      Modifiers := Modifiers + Piece(Piece(Mods, ';' , i+1), '/', 2) + ';';
+  end;
 end;
+
+{ TPCEProcList methods ------------------------------------------------------------------------- }
+
+  function TPCEProcList.GetProc(index : integer) : TPCEProc;
+  //kt added
+  begin
+    if ValidIndex(index) then begin
+      Result := TPCEProc(Self.Items[index]);
+    end else begin
+      Result := nil;
+    end;
+  end;
+
+  procedure TPCEProcList.FreeAndClearItems;
+  //kt added
+  var i : integer;
+  begin
+    for i := 0 to Self.Count - 1 do begin
+      Self.GetProc(i).Free;
+    end;
+    Self.Clear;
+  end;
+
+  function TPCEProcList.ValidIndex(AnIndex : integer) : boolean;
+  //kt added
+  begin
+    Result := ((AnIndex > -1) and (AnIndex < self.count));
+  end;
+
+  function TPCEProcList.IndexOfMatch(MatchProc : TPCEProc) : integer;
+  //kt added
+  var i : integer;
+      AProc : TPCEProc;
+  begin
+    Result := -1;
+    for i := 0 to Self.Count - 1 do begin
+      AProc := Self.GetProc(i);
+      if AProc.Deleted then continue;
+      if not AProc.Match(MatchProc) then continue;
+      Result := i;
+      break;
+    end;
+  end;
+
+  function TPCEProcList.MaxQuantity : integer;     //kt added
+  var i,Q : integer;
+      AProc : TPCEProc;
+  begin
+    Result := 0;
+    for i := 0 to Self.Count - 1 do begin
+      AProc := Self.GetProc(i);
+      if AProc.Deleted then continue;
+      Q := AProc.Quantity;
+      if Q > Result then Result := Q;
+    end;
+  end;
+
+
+  function TPCEProcList.IndexOfCodeUNarr(CodeUNarr : string) : integer;   //kt added
+  //Look for matching AProc.Code + U + AProc.Narrative
+  var i : integer;
+      AProc : TPCEProc;
+  begin
+    Result := -1;
+    for i := 0 to Self.Count - 1 do begin
+      AProc := Self.GetProc(i);
+      if AProc.Deleted then continue;
+      if AProc.Code + U + AProc.Narrative <> CodeUNarr then continue;
+      Result := i;
+      break;
+    end;
+  end;
+
+  function TPCEProcList.ProcForCodeUNarr(CodeUNarr : string) : TPCEProc;
+  var i : integer;
+  begin
+    i := IndexOfCodeUNarr(CodeUNarr);
+    if i > -1 then Result := Self.Proc[i] else Result := nil;
+  end;
+
+
+  function TPCEProcList.Empty : boolean;  //kt added
+  var i : integer;
+      AProc : TPCEProc;
+  begin
+    Result := true;
+    for i := 0 to Self.Count - 1 do begin
+      AProc := Self.GetProc(i);
+      if AProc.Deleted then continue;
+      Result := AProc.Empty;
+      if Result = false then break;
+    end;
+  end;
+
+  function TPCEProcList.FirstNonEmptyCode : string; //kt added
+  var i : integer;
+      AProc : TPCEProc;
+  begin
+    Result := '';
+    for i := 0 to Self.Count - 1 do begin
+      AProc := Self.GetProc(i);
+      if AProc.Deleted then continue;
+      Result := AProc.Code;
+      if Result <> '' then break;
+    end;
+  end;
+
+  function TPCEProcList.EnsureProc(Proc : TPCEProc) : TPCEProc;
+  //kt added
+  var
+    i     : integer;
+    AProc : TPCEProc;
+  begin
+    i := IndexOfMatch(Proc);
+    if i > -1 then begin
+      Result := Self.Proc[i];
+    end else begin
+      AProc := TPCEProc.Create;
+      AProc.Assign(Proc);
+      Self.Add(AProc);
+      Result := AProc;
+    end;
+  end;
+
+  function TPCEProcList.EnsureFromString(x : string) : TPCEProc;   //kt added
+  //x format: TYP ^ Code ^ Category ^ Narrative ^ Qty ^ Prov   (TYP is not used)
+  //x format detail:
+  //  piece  2  -> Code
+  //         3  -> Category
+  //         4  -> Narrative
+  //         5  -> Quantity
+  //         6  -> Provider
+  //         9  -> Modifiers
+  //         10 -> Comment
+
+  var
+    AProc : TPCEProc;
+  begin
+    AProc := TPCEProc.Create;
+    try
+      AProc.SetFromString(x);
+      Result := EnsureProc(AProc); //might return a different object than AProc, if match already present
+    finally
+      AProc.Free;
+    end;
+  end;
+
+
+  procedure TPCEProcList.Assign(Src : TPCEProcList);
+  //kt added
+  var i : integer;
+      SrcProc, AProc : TPCEProc;
+  begin
+    Self.FreeAndClearItems;
+    for i := 0 to Src.Count - 1 do begin
+      SrcProc := Src.Proc[i];
+      AProc := TPCEProc.Create;
+      AProc.Assign(SrcProc);
+      Self.Add(AProc);
+    end;
+
+  end;
+
+  procedure TPCEProcList.SetProvider(AProvider : Int64);   //kt added
+  //Set provider for all Procs that have not been deleted.
+  var i : integer;
+      AProc : TPCEProc;
+  begin
+    for i := 0 to Self.Count - 1 do begin
+      AProc := Self.Proc[i];
+      if AProc.Deleted then continue;
+      AProc.Provider := AProvider;
+    end;
+  end;
 
 
 { TPCEPat methods ------------------------------------------------------------------------- }
@@ -1525,7 +1839,7 @@ begin
   Result := inherited DelimitedStr;
   //Result := 'PED' + Result + U + Level + U + IntToStr(Provider) + U + U + U +
   Result := 'PED' + Result + U + Level + U+ U + U + U +
-   U + IntToStr(UNxtCommSeqNum); 
+   U + IntToStr(UNxtCommSeqNum);
 end;
 
 (*function TPCEPat.delimitedStrC: string;
@@ -1670,11 +1984,13 @@ end;
 
 constructor TPCEData.Create;
 begin
+  FVisitTypesList := TPCEProcList.Create;  //kt added
+  FVisitTypesList.Add(TPCEProc.Create); //ensure a [0] entry
   FDiagnoses   := TList.Create;
   FProcedures  := TList.Create;
   FImmunizations := TList.Create;
   FSkinTests   := TList.Create;
-  FVisitType   := TPCEProc.Create;
+  //FVisitType   := TPCEProc.Create;
   FPatientEds  := TList.Create;
   FHealthFactors := TList.Create;
   fExams       := TList.Create;
@@ -1694,14 +2010,16 @@ destructor TPCEData.Destroy;
 var
   i: Integer;
 begin
-  with FDiagnoses  do for i := 0 to Count - 1 do TPCEDiag(Items[i]).Free;
-  with FProcedures do for i := 0 to Count - 1 do TPCEProc(Items[i]).Free;
-  with FImmunizations do for i := 0 to Count - 1 do TPCEImm(Items[i]).Free;
-  with FSkinTests do for i := 0 to Count - 1 do TPCESkin(Items[i]).Free;
-  with FPatientEds do for i := 0 to Count - 1 do TPCEPat(Items[i]).Free;
-  with FHealthFactors do for i := 0 to Count - 1 do TPCEHealth(Items[i]).Free;
-  with FExams do for i := 0 to Count - 1 do TPCEExams(Items[i]).Free;
-  FVisitType.Free;
+  with FDiagnoses        do for i := 0 to Count - 1 do TPCEDiag(Items[i]).Free;
+  with FProcedures       do for i := 0 to Count - 1 do TPCEProc(Items[i]).Free;
+  with FImmunizations    do for i := 0 to Count - 1 do TPCEImm(Items[i]).Free;
+  with FSkinTests        do for i := 0 to Count - 1 do TPCESkin(Items[i]).Free;
+  with FPatientEds       do for i := 0 to Count - 1 do TPCEPat(Items[i]).Free;
+  with FHealthFactors    do for i := 0 to Count - 1 do TPCEHealth(Items[i]).Free;
+  with FExams            do for i := 0 to Count - 1 do TPCEExams(Items[i]).Free;
+  //kt FVisitType.Free;
+  FVisitTypesList.FreeAndClearItems;
+  FVisitTypesList.Free; //kt added
   FDiagnoses.Free;
   FProcedures.Free;
   FImmunizations.Free;  
@@ -1716,9 +2034,7 @@ end;
 procedure TPCEData.Clear;
 
   procedure ClearList(AList: TList);
-  var
-    i: Integer;
-
+  var i: Integer;
   begin
     for i := 0 to AList.Count - 1 do
       TObject(AList[i]).Free;
@@ -1754,12 +2070,14 @@ begin
   ClearList(FHealthFactors);
   ClearList(FExams);
 
-  FVisitType.Clear;
+  //kt FVisitType.Clear;
+  FVisitTypesList.FreeAndClearItems;
   FProviders.Clear;
-  FSCChanged   := False;
+  FSCChanged := False;
   FNoteIEN := 0;
   FNoteTitle := 0;
 end;
+
 
 procedure TPCEData.CopyDiagnoses(Dest: TStrings);
 begin
@@ -1769,6 +2087,11 @@ end;
 procedure TPCEData.CopyProcedures(Dest: TStrings);
 begin
   CopyPCEItems(FProcedures, Dest, TPCEProc);
+end;
+
+procedure TPCEData.CopyVisits(Dest: TPCEProcList);  //kt added
+begin
+  CopyPCEItems(FVisitTypesList, Dest, TPCEProc);
 end;
 
 procedure TPCEData.CopyImmunizations(Dest: TStrings);
@@ -1807,19 +2130,13 @@ begin
 end;
 
 procedure TPCEData.PCEForNote(NoteIEN: Integer; EditObj: TPCEData);
-(*const
-  NULL_STR = '';
-begin
-  PCEForNote(NoteIEN, EditObj, NULL_STR);
-end;
-
-procedure TPCEData.PCEForNote(NoteIEN: Integer; EditObj: TPCEData; DCSummAdmitString: string);*)
 var
   i, j: Integer;
   TmpCat, TmpVStr: string;
   x: string;
   DoCopy, IsVisit: Boolean;
-  PCEList, VisitTypeList: TStringList;
+  PCEList:       TStringList;
+  ListOfPotentialVisitCodes: TPieceStringList; //kt Fmt:  <CPT Code>^<Section Name>^<Narrative>   This is a list of all visit-type CPT's that could be chosen between  RENAMED.  Was VisitTypeList  //kt was TStringList
   ADiagnosis:    TPCEDiag;
   AProcedure:    TPCEProc;
   AImmunization: TPCEImm;
@@ -1832,6 +2149,9 @@ var
   GetCat, DoRestore: boolean;
   FRestDate: TFMDateTime;
 //  AProvider:     TPCEProvider;  {6/9/99}
+  tempCPTInfo : string; //kt
+  TempS,CPTStr : string; //kt
+  MsgType,MsgOpt1 : string; //kt
 
   function SCCValue(x: string): Integer;
   begin
@@ -1842,7 +2162,7 @@ var
 
   function AppendComment(x: string): String;
   begin
-    //check for comment append string if a comment exists   
+    //check for comment append string if a comment exists
     If (((i+1) <= (PCEList.Count - 1)) and (Copy(PCEList[(i+1)], 1, 3) = 'COM')) then
     begin
       //remove last piece (comment sequence number) from x.
@@ -1854,47 +2174,40 @@ var
     result := x;
   end;
 
-begin
-(*  if DCSummAdmitString <> '' then
-    TmpVStr := DCSummAdmitString
-  else*)if(NoteIEN < 1) then
+begin //TPCEData.PCEForNote
+  if(NoteIEN < 1) then begin
     TmpVStr := Encounter.VisitStr
-  else
-  begin
+  end else begin
     TmpVStr := VisitStrForNote(NoteIEN);
-    if(FEncSvcCat = #0) then
+    if(FEncSvcCat = #0) then begin
       GetCat :=TRUE
-    else
-    if(GetVisitString = '0;0;A') then
-    begin
+    end else if(GetVisitString = '0;0;A') then begin
       FEncLocation := StrToIntDef(Piece(TmpVStr, ';', 1), 0);
       FEncDateTime := StrToFloatDef(Piece(TmpVStr, ';', 2),0);
       GetCat :=TRUE
-    end
-    else
+    end else begin
       GetCat := FALSE;
-    if(GetCat) then
-    begin
+    end;
+    if (GetCat) then begin
       TmpCat := Piece(TmpVStr, ';', 3);
-      if(TmpCat <> '') then
+      if(TmpCat <> '') then begin
         FEncSvcCat := TmpCat[1];
+      end;
     end;
   end;
 
-  if(assigned(EditObj)) then
-  begin
+  if(assigned(EditObj)) then begin
     if(copy(TmpVStr,1,2) <> '0;') and   // has location
       (pos(';0;',TmpVStr) = 0) and     // has time
       (EditObj.GetVisitString = TmpVStr) then
     begin
-      if(FEncSvcCat = 'H') and (FEncInpatient) then
+      if(FEncSvcCat = 'H') and (FEncInpatient) then begin
         DoCopy := (FNoteDateTime = EditObj.FNoteDateTime)
-      else
+      end else begin
         DoCopy := TRUE;
-      if(DoCopy) then
-      begin
-        if(EditObj <> Self) then
-        begin
+      end;
+      if(DoCopy) then begin
+        if(EditObj <> Self) then begin
           EditObj.CopyPCEData(Self);
           FNoteTitle := 0;
           FNoteIEN := 0;
@@ -1905,176 +2218,215 @@ begin
   end;
 
   TmpCat := Piece(TmpVStr, ';', 3);
-  if(TmpCat <> '') then
+  if(TmpCat <> '') then begin
     FEncSvcCat := TmpCat[1]
-  else
+  end else begin
     FEncSvcCat := ' ';
-    //TMG changed below because in certain instances #0 was being sent to a
-    //health factor save, causing a crash. This is an attempt to keep the value from being
-    //null.
-    //FEncSvcCat := #0;
+  end;
+  //TMG changed below because in certain instances #0 was being sent to a
+  //health factor save, causing a crash. This is an attempt to keep the value from being
+  //null.
+  //FEncSvcCat := #0;
   FEncLocation := StrToIntDef(Piece(TmpVStr,';',1),0);
   FEncDateTime := StrToFloatDef(Piece(TmpVStr, ';', 2),0);
 
-  if(IsSecondaryVisit and (FEncLocation > 0)) then
-  begin
+  if(IsSecondaryVisit and (FEncLocation > 0)) then begin
     FileIEN := USE_CURRENT_VISITSTR;
     FileVStr := IntToStr(FEncLocation) + ';' + FloatToStr(FNoteDateTime) + ';' +
                                                GetLocSecondaryVisitCode(FEncLocation);
     DoRestore := TRUE;
     FRestDate := FEncDateTime;
-  end
-  else
-  begin
+  end else begin
     DoRestore := FALSE;
-    FRestDate := 0; 
+    FRestDate := 0;
     FileIEN := NoteIEN;
-(*    if DCSummAdmitString <> '' then
-      FileVStr := DCSummAdmitString
-    else*) if(FileIEN < 0) then
+    if(FileIEN < 0) then begin
       FileVStr := Encounter.VisitStr
-    else
+    end else begin
       FileVStr := '';
+    end;
   end;
 
   Clear;
-  PCEList       := TStringList.Create;
-  VisitTypeList := TStringList.Create;
+  PCEList                   := TStringList.Create;
+  ListOfPotentialVisitCodes := TPieceStringList.Create;
   try
     LoadPCEDataForNote(PCEList, FileIEN, FileVStr);        // calls broker RPC to load data
     FNoteIEN := NoteIEN;
-    for i := 0 to PCEList.Count - 1 do
-    begin
+    for i := 0 to PCEList.Count - 1 do begin
       x := PCEList[i];
-      if Copy(x, 1, 4) = 'HDR^' then             // HDR ^ Inpatient ^ ProcReq ^ VStr ^ Provider
+      MsgType := piece(x, U ,1); //kt added
+
       {header information-------------------------------------------------------------}
-      begin
+      //kt if Copy(x, 1, 4) = 'HDR^' then begin          // HDR ^ Inpatient ^ ProcReq ^ VStr ^ Provider
+      if MsgType = 'HDR' then begin          // HDR ^ Inpatient ^ ProcReq ^ VStr ^ Provider
         FEncInpatient := Piece(x, U, 2) = '1';
-        //FCPTRequired  := Piece(x, U, 3) = '1';  
+        //FCPTRequired  := Piece(x, U, 3) = '1';
         //FNoteHasCPT   := Piece(x, U, 6) = '1';    //4/21/99 error! PIECE 3 = cptRequired, not HasCPT!
         FEncLocation  := StrToIntDef(Piece(Piece(x, U, 4), ';', 1), 0);
-        if DoRestore then
-        begin
+        if DoRestore then begin
           FEncSvcCat := 'H';
           FEncDateTime := FRestDate;
           FNoteDateTime := MakeFMDateTime(Piece(Piece(x, U, 4), ';', 2));
-        end
-        else
-        begin
+        end else begin
           FEncDateTime  := MakeFMDateTime(Piece(Piece(x, U, 4), ';', 2));
           FEncSvcCat    := CharAt(Piece(Piece(x, U, 4), ';', 3), 1);
         end;
         //FEncProvider  := StrToInt64Def(Piece(x, U, 5), 0);
-        ListVisitTypeByLoc(VisitTypeList, FEncLocation, FEncDateTime);
+        ListVisitTypeByLoc(ListOfPotentialVisitCodes, FEncLocation, FEncDateTime);
         //set the values needed fot the RPCs
         SetRPCEncLocation(FEncLocation);
 //        SetRPCEncDateTime(FEncDateTime);
+        continue; //kt
       end;
+
       {visit information--------------------------------------------------------------}
-      if Copy(x, 1, 7) = 'VST^DT^' then
-      begin
-        if DoRestore then
-        begin
+      if MsgType = 'VST' then begin
+        MsgOpt1 := piece(x, U, 2); //kt
+        if MsgOpt1 = 'DT' then begin
+          if DoRestore then begin
+            FEncDateTime := FRestDate;
+            FNoteDateTime := MakeFMDateTime(Piece(x, U, 3));
+          end else begin
+            FEncDateTime := MakeFMDateTime(Piece(x, U, 3));
+          end;
+        end
+        else if MsgOpt1 = 'HL'  then FEncLocation := StrToIntDef(Piece(x, U, 3), 0)
+        else if MsgOpt1 = 'VC'  then begin
+          if DoRestore then begin
+            FEncSvcCat := 'H'
+          end else begin
+            FEncSvcCat := CharAt(x, 8);
+          end;
+        end
+        else if MsgOpt1 = 'PS'  then FEncInpatient := CharAt(x, 8) = '1'
+        else if MsgOpt1 = 'SC'  then FSCRelated := SCCValue(x)
+        else if MsgOpt1 = 'AO'  then FAORelated := SCCValue(x)
+        else if MsgOpt1 = 'IR'  then FIRRelated := SCCValue(x)
+        else if MsgOpt1 = 'EC'  then FECRelated := SCCValue(x)
+        else if MsgOpt1 = 'MST' then FMSTRelated := SCCValue(x)
+        else if MsgOpt1 = 'HNC' then FHNCRelated := SCCValue(x)
+        else if MsgOpt1 = 'CV'  then FCVRelated := SCCValue(x);
+        continue; //kt
+      end;
+
+      { //kt orginal code below
+      if Copy(x, 1, 7) = 'VST^DT^' then begin
+        if DoRestore then begin
           FEncDateTime := FRestDate;
           FNoteDateTime := MakeFMDateTime(Piece(x, U, 3));
-        end
-        else
+        end else begin
           FEncDateTime := MakeFMDateTime(Piece(x, U, 3));
+        end;
       end;
       if Copy(x, 1, 7) = 'VST^HL^' then FEncLocation := StrToIntDef(Piece(x, U, 3), 0);
-      if Copy(x, 1, 7) = 'VST^VC^' then
-      begin
-        if DoRestore then
+      if Copy(x, 1, 7) = 'VST^VC^' then begin
+        if DoRestore then begin
           FEncSvcCat := 'H'
-        else
+        end else begin
           FEncSvcCat := CharAt(x, 8);
+        end;
       end;
-      if Copy(x, 1, 7) = 'VST^PS^' then FEncInpatient := CharAt(x, 8) = '1';
-      {6/10/99}//if Copy(x, 1, 4) = 'PRV^'    then FEncProvider := StrToInt64Def(Piece(x, U, 2), 0);
+      if Copy(x, 1, 7) = 'VST^PS^'  then FEncInpatient := CharAt(x, 8) = '1';
       if Copy(x, 1, 7) = 'VST^SC^'  then FSCRelated := SCCValue(x);
       if Copy(x, 1, 7) = 'VST^AO^'  then FAORelated := SCCValue(x);
       if Copy(x, 1, 7) = 'VST^IR^'  then FIRRelated := SCCValue(x);
       if Copy(x, 1, 7) = 'VST^EC^'  then FECRelated := SCCValue(x);
       if Copy(x, 1, 8) = 'VST^MST^' then FMSTRelated := SCCValue(x);
-//      if HNCOK and (Copy(x, 1, 8) = 'VST^HNC^') then
       if Copy(x, 1, 8) = 'VST^HNC^' then FHNCRelated := SCCValue(x);
-      if Copy(x, 1, 7) = 'VST^CV^' then FCVRelated := SCCValue(x);
-      if (Copy(x, 1, 3) = 'PRV') and (CharAt(x, 4) <> '-') then
+      if Copy(x, 1, 7) = 'VST^CV^'  then FCVRelated := SCCValue(x);
+      }
       {Providers---------------------------------------------------------------------}
-      begin
+      if (Copy(x, 1, 3) = 'PRV') and (CharAt(x, 4) <> '-') then begin
         FProviders.Add(x);
+        continue; //kt
       end;
 
-      if (Copy(x, 1, 3) = 'POV') and (CharAt(x, 4) <> '-') then
       {'POV'=Diagnosis--------------------------------------------------------------}
-      begin
-        //check for comment append string if a comment exists   
-        x := AppendComment(x);                         
+      if (Copy(x, 1, 3) = 'POV') and (CharAt(x, 4) <> '-') then begin
+        //check for comment append string if a comment exists
+        x := AppendComment(x);
         ADiagnosis := TPCEDiag.Create;
         ADiagnosis.SetFromString(x);
         FDiagnoses.Add(ADiagnosis);
+        continue; //kt
       end;
-      if (Copy(x, 1, 3) = 'CPT') and (CharAt(x, 4) <> '-') then
-      {CPT (procedure) information--------------------------------------------------}
-      begin
-        x := AppendComment(x);                         
 
-        IsVisit := False;
-        with VisitTypeList do for j := 0 to Count - 1 do
-          if Pieces(x, U, 2, 4) = Strings[j] then IsVisit := True;
-        if IsVisit and (FVisitType.Code = '') then FVisitType.SetFromString(x) else
-        begin
+      {CPT (procedure) information--------------------------------------------------}
+      if (Copy(x, 1, 3) = 'CPT') and (CharAt(x, 4) <> '-') then begin
+        x := AppendComment(x);
+
+        tempCPTInfo := Pieces(x, U, 2, 4);
+        CPTStr := piece(x, U, 2);
+        IsVisit := (ListOfPotentialVisitCodes.IndexOfPiece(1, CPTStr) >= 0); //kt replacement
+        //IsVisit := False;
+        //with VisitTypeList do for j := 0 to Count - 1 do begin
+        //  if Pieces(x, U, 2, 4) = Strings[j] then IsVisit := True;
+        //end;
+        //kt end mod ---
+
+        //kt original --> if IsVisit and (FVisitType.Code = '') then begin
+        //kt original -->   FVisitType.SetFromString(x)
+        if IsVisit then begin
+          FVisitTypesList.EnsureFromString(x); //kt added
+        end else begin
           AProcedure := TPCEProc.Create;
           AProcedure.SetFromString(x);
           AProcedure.fIsOldProcedure := TRUE;
           FProcedures.Add(AProcedure);
         end; {if IsVisit}
-      end; {if Copy}
-      if (Copy(x, 1, 3) = 'IMM') and (CharAt(x, 4) <> '-') then
+        continue; //kt
+      end; {if Copy .. 'CPT'}
+
       {Immunizations ---------------------------------------------------------------}
-      begin
-        x := AppendComment(x);                         
+      if (Copy(x, 1, 3) = 'IMM') and (CharAt(x, 4) <> '-') then begin
+        x := AppendComment(x);
         AImmunization := TPCEImm.Create;
         AImmunization.SetFromString(x);
         FImmunizations.Add(AImmunization);
+        continue; //kt
       end;
-      if (Copy(x, 1, 2) = 'SK') and (CharAt(x, 3) <> '-') then
+
       {Skin Tests-------------------------------------------------------------------}
-      begin
-        x := AppendComment(x);                         
+      if (Copy(x, 1, 2) = 'SK') and (CharAt(x, 3) <> '-') then begin
+        x := AppendComment(x);
         ASkinTest := TPCESkin.Create;
         ASkinTest.SetFromString(x);
         FSkinTests.Add(ASkinTest);
+        continue; //kt
       end;
-      if (Copy(x, 1, 3) = 'PED') and (CharAt(x, 3) <> '-') then
+
       {Patient Educations------------------------------------------------------------}
-      begin
-        x := AppendComment(x);                         
+      if (Copy(x, 1, 3) = 'PED') and (CharAt(x, 4) <> '-') then begin
+        x := AppendComment(x);
         APatientEd := TPCEpat.Create;
         APatientEd.SetFromString(x);
         FpatientEds.Add(APatientEd);
+        continue; //kt
       end;
-      if (Copy(x, 1, 2) = 'HF') and (CharAt(x, 3) <> '-') then
+
       {Health Factors----------------------------------------------------------------}
-      begin
-        x := AppendComment(x);                         
+      if (Copy(x, 1, 2) = 'HF') and (CharAt(x, 3) <> '-') then begin
+        x := AppendComment(x);
         AHealthFactor := TPCEHealth.Create;
         AHealthFactor.SetFromString(x);
         FHealthFactors.Add(AHealthFactor);
+        continue; //kt
       end;
-      if (Copy(x, 1, 3) = 'XAM') and (CharAt(x, 3) <> '-') then
+
       {Exams ------------------------------------------------------------------------}
-      begin
+      if (Copy(x, 1, 3) = 'XAM') and (CharAt(x, 3) <> '-') then begin
         x := AppendComment(x);
         AExam := TPCEExams.Create;
         AExam.SetFromString(x);
         FExams.Add(AExam);
+        continue; //kt
       end;
 
     end;
   finally
     PCEList.Free;
-    VisitTypeList.Free;
+    ListOfPotentialVisitCodes.Free;
   end;
 end;
 
@@ -2095,23 +2447,21 @@ var
   FileNoteIEN: integer;
   dstring1,dstring2: pchar; //used to separate former DelimitedStr variable
                              // into two strings, the second being for the comment.
-
+  APCEDx: TPCEDiag; //kt
+  AVisitType : TPCEProc; //kt
 begin
   PCEList := TStringList.Create;
-  UNxtCommSeqNum := 1;                                 
+  UNxtCommSeqNum := 1;
   try
-    with PCEList do
-    begin
-      if(IsSecondaryVisit) then
-      begin
+    with PCEList do begin
+      if(IsSecondaryVisit) then begin
         FileCat := GetLocSecondaryVisitCode(FEncLocation);
         FileDate := FNoteDateTime;
         FileNoteIEN := NoteIEN;
-        if((NoteIEN > 0) and ((FParent = '') or (FParent = '0'))) then
+        if((NoteIEN > 0) and ((FParent = '') or (FParent = '0'))) then begin
           FParent := GetVisitIEN(NoteIEN);
-      end
-      else
-      begin
+        end;
+      end else begin
         FileCat := FEncSvcCat;
         FileDate := FEncDateTime;
         FileNoteIEN := 0;
@@ -2136,179 +2486,231 @@ begin
         Add('VST^OL^' + FHistoricalLocation);     // Outside Location
       FastAddStrings(FProviders, PCEList);
 
-      if FSCChanged then
-      begin
-        if FSCRelated  <> SCC_NA then  Add('VST^SC^'  + IntToStr(FSCRelated));
-        if FAORelated  <> SCC_NA then  Add('VST^AO^'  + IntToStr(FAORelated));
-        if FIRRelated  <> SCC_NA then  Add('VST^IR^'  + IntToStr(FIRRelated));
-        if FECRelated  <> SCC_NA then  Add('VST^EC^'  + IntToStr(FECRelated));
-        if FMSTRelated <> SCC_NA then  Add('VST^MST^' + IntToStr(FMSTRelated));
-        if FHNCRelated  <> SCC_NA then Add('VST^HNC^'+ IntToStr(FHNCRelated));
-        if FCVRelated   <> SCC_NA then Add('VST^CV^' + IntToStr(FCVRelated));
-        if FSHADRelated <> SCC_NA then Add('VST^SHD^'+ IntToStr(FSHADRelated));
+      if FSCChanged then begin
+        if FSCRelated   <> SCC_NA then Add('VST^SC^'  + IntToStr(FSCRelated));
+        if FAORelated   <> SCC_NA then Add('VST^AO^'  + IntToStr(FAORelated));
+        if FIRRelated   <> SCC_NA then Add('VST^IR^'  + IntToStr(FIRRelated));
+        if FECRelated   <> SCC_NA then Add('VST^EC^'  + IntToStr(FECRelated));
+        if FMSTRelated  <> SCC_NA then Add('VST^MST^' + IntToStr(FMSTRelated));
+        if FHNCRelated  <> SCC_NA then Add('VST^HNC^' + IntToStr(FHNCRelated));
+        if FCVRelated   <> SCC_NA then Add('VST^CV^'  + IntToStr(FCVRelated));
+        if FSHADRelated <> SCC_NA then Add('VST^SHD^' + IntToStr(FSHADRelated));
       end;
-     with FDiagnoses  do for i := 0 to Count - 1 do with TPCEDiag(Items[i]) do
-        if FSend then
-        begin
+{
+      with FDiagnoses  do for i := 0 to Count - 1 do with TPCEDiag(Items[i]) do begin
+        if FSend then begin
           Temp2 := DelimitedStr2; // Call first to make sure SaveComment is set.
-          if(SaveComment) then
+          if SaveComment then begin
             dec(UNxtCommSeqNum);
+          end;
           fProvider := FProviders.PCEProvider;
           // Provides user with list of dx when signing orders - Billing Aware
           PCEList.Add(DelimitedStr);
-          if(SaveComment) then
-          begin
+          if SaveComment then begin
             inc(UNxtCommSeqNum);
-            if(Temp2 <> '') then
+            if Temp2 <> '' then begin
               PCEList.Add(Temp2);
+            end;
           end;
+        end;
       end;
-      with FProcedures do for i := 0 to Count - 1 do with TPCEProc(Items[i]) do
-        if FSend then
-        begin
-          PCEList.Add(DelimitedStr);
-          PCEList.Add(DelimitedStr2);
+}
+      for i := 0 to FDiagnoses.Count - 1 do begin
+        APCEDx := TPCEDiag(FDiagnoses.Items[i]);
+        with APCEDx do begin
+          if FSend then begin
+            Temp2 := DelimitedStr2; // Call first to make sure SaveComment is set.
+            if SaveComment then begin
+              dec(UNxtCommSeqNum);
+            end;
+            fProvider := FProviders.PCEProvider;
+            // Provides user with list of dx when signing orders - Billing Aware
+            PCEList.Add(DelimitedStr);
+            if SaveComment then begin
+              inc(UNxtCommSeqNum);
+              if Temp2 <> '' then begin
+                PCEList.Add(Temp2);
+              end;
+            end;
+          end;
         end;
-      with FImmunizations do for i := 0 to Count - 1 do with TPCEImm(Items[i]) do
-        if FSend then
-        begin
-          PCEList.Add(DelimitedStr);
-          PCEList.Add(DelimitedStr2);
-        end;
-      with FSkinTests do for i := 0 to Count - 1 do with TPCESkin(Items[i]) do
-        if FSend then
-        begin
-          PCEList.Add(DelimitedStr);
-          PCEList.Add(DelimitedStr2);
-        end;
-      with FPatientEds do for i := 0 to Count - 1 do with TPCEPat(Items[i]) do
-        if FSend then
-        begin
-          PCEList.Add(DelimitedStr);
-          PCEList.Add(DelimitedStr2);
-        end;
-      with FHealthFactors do for i := 0 to Count - 1 do with TPCEHealth(Items[i]) do
-        if FSend then
-        begin
-          PCEList.Add(DelimitedStr);
-          PCEList.Add(DelimitedStr2);
-        end;
-      with FExams do for i := 0 to Count - 1 do with TPCEExams(Items[i]) do
-        if FSend then
-        begin
-          PCEList.Add(DelimitedStr);
-          PCEList.Add(DelimitedStr2);
-        end;
+      end;
 
-      with FVisitType  do
-      begin
-        if Code = '' then Fsend := false;
-        if FSend then
-        begin
+      with FProcedures do for i := 0 to Count - 1 do with TPCEProc(Items[i]) do begin
+        if FSend then begin
           PCEList.Add(DelimitedStr);
           PCEList.Add(DelimitedStr2);
         end;
       end;
+      with FImmunizations do for i := 0 to Count - 1 do with TPCEImm(Items[i]) do begin
+        if FSend then begin
+          PCEList.Add(DelimitedStr);
+          PCEList.Add(DelimitedStr2);
+        end;
+      end;
+      with FSkinTests do for i := 0 to Count - 1 do with TPCESkin(Items[i]) do begin
+        if FSend then begin
+          PCEList.Add(DelimitedStr);
+          PCEList.Add(DelimitedStr2);
+        end;
+      end;
+      with FPatientEds do for i := 0 to Count - 1 do with TPCEPat(Items[i]) do begin
+        if FSend then begin
+          PCEList.Add(DelimitedStr);
+          PCEList.Add(DelimitedStr2);
+        end;
+      end;
+      with FHealthFactors do for i := 0 to Count - 1 do with TPCEHealth(Items[i]) do begin
+        if FSend then begin
+          PCEList.Add(DelimitedStr);
+          PCEList.Add(DelimitedStr2);
+        end;
+      end;
+      with FExams do for i := 0 to Count - 1 do with TPCEExams(Items[i]) do begin
+        if FSend then begin
+          PCEList.Add(DelimitedStr);
+          PCEList.Add(DelimitedStr2);
+        end;
+      end;
+      //kt added this block
+      for i := 0 to FVisitTypesList.Count-1 do begin
+        AVisitType := FVisitTypesList.Proc[i];
+        with AVisitType do begin
+          if Code = '' then FSend := false;
+          if FSend then begin
+            PCEList.Add(DelimitedStr);
+            PCEList.Add(DelimitedStr2);
+          end;
+        end;
+      end;
+      {//kt original code
+      with FVisitType  do begin
+        if Code = '' then Fsend := false;
+        if FSend then begin
+          PCEList.Add(DelimitedStr);
+          PCEList.Add(DelimitedStr2);
+        end;
+      end;
+      }
+
       // call DATA2PCE (in background)
       SavePCEData(PCEList, FileNoteIEN, FEncLocation);
+      //kt moved to fEncounterLabs.SendData -->  TMGLabOrderAutoPopulateIfActive; //kt added
 
       // turn off 'Send' flags and remove items that were deleted
-      with FDiagnoses  do for i := Count - 1 downto 0 do with TPCEDiag(Items[i]) do
-      begin
+      with FDiagnoses  do for i := Count - 1 downto 0 do with TPCEDiag(Items[i]) do begin
         FSend := False;
         // for diags, toggle off AddProb flag as well
         AddProb := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCEDiag(Items[i]).Free;
           Delete(i);
         end;
       end;
-      with FProcedures do for i := Count - 1 downto 0 do with TPCEProc(Items[i]) do
-      begin
+      with FProcedures do for i := Count - 1 downto 0 do with TPCEProc(Items[i]) do begin
         FSend := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCEProc(Items[i]).Free;
           Delete(i);
         end;
       end;
-      with FImmunizations do for i := Count - 1 downto 0 do with TPCEImm(Items[i]) do
-      begin
+      with FImmunizations do for i := Count - 1 downto 0 do with TPCEImm(Items[i]) do begin
         FSend := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCEImm(Items[i]).Free;
           Delete(i);
         end;
       end;
-      with FSkinTests do for i := Count - 1 downto 0 do with TPCESkin(Items[i]) do
-      begin
+      with FSkinTests do for i := Count - 1 downto 0 do with TPCESkin(Items[i]) do begin
         FSend := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCESkin(Items[i]).Free;
           Delete(i);
         end;
       end;
-      with FPatientEds do for i := Count - 1 downto 0 do with TPCEPat(Items[i]) do
-      begin
+      with FPatientEds do for i := Count - 1 downto 0 do with TPCEPat(Items[i]) do begin
         FSend := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCEPat(Items[i]).Free;
           Delete(i);
         end;
       end;
-      with FHealthFactors do for i := Count - 1 downto 0 do with TPCEHealth(Items[i]) do
-      begin
+      with FHealthFactors do for i := Count - 1 downto 0 do with TPCEHealth(Items[i]) do begin
         FSend := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCEHealth(Items[i]).Free;
           Delete(i);
         end;
       end;
-      with FExams do for i := Count - 1 downto 0 do with TPCEExams(Items[i]) do
-      begin
+      with FExams do for i := Count - 1 downto 0 do with TPCEExams(Items[i]) do begin
         FSend := False;
-        if FDelete then
-        begin
+        if FDelete then begin
           TPCEExams(Items[i]).Free;
           Delete(i);
         end;
       end;
-      
-      for i := FProviders.Count - 1 downto 0 do
-      begin
-        if(FProviders.ProviderData[i].Delete) then
+      for i := FProviders.Count - 1 downto 0 do begin
+        if(FProviders.ProviderData[i].Delete) then begin
           FProviders.Delete(i);
+        end;
       end;
 
-      if FVisitType.FDelete then FVisitType.Clear else FVisitType.FSend := False;
+      //kt added block below
+      for i := 0 to FVisitTypesList.Count-1 do begin
+        AVisitType := FVisitTypesList.Proc[i];
+        AVisitType.FSend := False;
+        if AVisitType.FDelete then begin
+          AVisitType.Free;
+          FVisitTypesList.Delete(i);
+        end;
+      end;
+      //kt added block below
+      if FVisitTypesList.Count = 0 then begin
+        FVisitTypesList.EnsureFromString('');
+        AVisitType := FVisitTypesList.Proc[0];
+        AVisitType.Clear;
+        AVisitType.FSend := false;
+      end;
+      //kt original --> if FVisitType.FDelete then FVisitType.Clear else FVisitType.FSend := False;
+
     end; {with PCEList}
-    //if (FProcedures.Count > 0) or (FVisitType.Code <> '') then FCPTRequired := False;  
+    //if (FProcedures.Count > 0) or (FVisitType.Code <> '') then FCPTRequired := False;
 
     // update the Changes object
     EncName := FormatFMDateTime('mmm dd,yy hh:nn', FileDate);
+
+    //kt added block
+    for i := 0 to FVisitTypesList.Count - 1 do begin
+      AVisitType := FVisitTypesList.Proc[i];
+      x := StrVisitType(AVisitType);
+      if Length(x) > 0 then Changes.Add(CH_PCE, 'V' + AVisitStr, x, EncName, CH_SIGN_NA);
+    end;
+    {//kt original code
     x := StrVisitType;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'V' + AVisitStr, x, EncName, CH_SIGN_NA);
+    }
+
     x := StrProcedures;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'P' + AVisitStr, x, EncName, CH_SIGN_NA);
+
     x := StrDiagnoses;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'D' + AVisitStr, x, EncName, CH_SIGN_NA,
        Parent, User.DUZ, '', False, False, ProblemAdded);
+
     x := StrImmunizations;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'I' + AVisitStr, x, EncName, CH_SIGN_NA);
+
     x := StrSkinTests;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'S' + AVisitStr, x, EncName, CH_SIGN_NA);
+
     x := StrPatientEds;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'A' + AVisitStr, x, EncName, CH_SIGN_NA);
+
     x := StrHealthFactors;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'H' + AVisitStr, x, EncName, CH_SIGN_NA);
+
     x := StrExams;
     if Length(x) > 0 then Changes.Add(CH_PCE, 'E' + AVisitStr, x, EncName, CH_SIGN_NA);
-
 
   finally
     PCEList.Free;
@@ -2335,38 +2737,55 @@ var
   MatchFound: Boolean;
   PreItem, PostItem: TPCEItem;
 begin
-  with PreList do for i := 0 to Count - 1 do
-  begin
+  with PreList do for i := 0 to Count - 1 do begin
     PreItem := TPCEItem(Items[i]);
     MatchFound := False;
-    with PostList do for j := 0 to Count - 1 do
-    begin
+    with PostList do for j := 0 to Count - 1 do begin
       PostItem := TPCEItem(Objects[j]);
       if (PreItem.Match(PostItem) and (PreItem.MatchProvider(PostItem))) then MatchFound := True;
     end;
-    if not MatchFound then
-    begin
+    if not MatchFound then begin
       PreItem.FDelete := True;
       PreItem.FSend   := True;
     end;
   end;
 end;
 
+procedure TPCEData.MarkDeletions(PreList: TList; PostList: TList);  //kt added
+{mark items that need deleted}
+var
+  i, j: Integer;
+  MatchFound: Boolean;
+  PreItem, PostItem: TPCEItem;
+begin
+  with PreList do for i := 0 to Count - 1 do begin
+    PreItem := TPCEItem(Items[i]);
+    MatchFound := False;
+    with PostList do for j := 0 to Count - 1 do begin
+      PostItem := TPCEItem(Items[j]);
+      if (PreItem.Match(PostItem) and (PreItem.MatchProvider(PostItem))) then MatchFound := True;
+    end;
+    if not MatchFound then begin
+      PreItem.FDelete := True;
+      PreItem.FSend   := True;
+    end;
+  end;
+end;
+
+
 procedure TPCEData.SetDiagnoses(Src: TStrings; FromForm: boolean = TRUE);
 { load diagnoses for this encounter into TPCEDiag records, assumes all diagnoses for the
-  encounter will be listed in Src and marks those that are not in Src for deletion }
+  encounter will be listed in Src and marks those that are not in Src for deletion -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcDiagnosis, CurDiagnosis, PrimaryDiag: TPCEDiag;
 begin
   if FromForm then MarkDeletions(FDiagnoses, Src);
   PrimaryDiag := nil;
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcDiagnosis := TPCEDiag(Src.Objects[i]);
     MatchIndex := MatchItem(FDiagnoses, SrcDiagnosis);
-    if MatchIndex > -1 then    //found in fdiagnoses
-    begin
+    if MatchIndex > -1 then begin   //found in fdiagnoses
       CurDiagnosis := TPCEDiag(FDiagnoses.Items[MatchIndex]);
       if ((SrcDiagnosis.Primary <> CurDiagnosis.Primary) or
        (SrcDiagnosis.Comment <> CurDiagnosis.Comment) or
@@ -2377,9 +2796,7 @@ begin
         CurDiagnosis.AddProb    := SrcDiagnosis.AddProb;
         CurDiagnosis.FSend := True;
       end;
-    end
-    else
-    begin
+    end else begin
       CurDiagnosis := TPCEDiag.Create;
       CurDiagnosis.Assign(SrcDiagnosis);
       CurDiagnosis.FSend := True;
@@ -2390,13 +2807,10 @@ begin
     if (CurDiagnosis.AddProb) then
       FProblemAdded := True;
   end; {for}
-  if(assigned(PrimaryDiag)) then
-  begin
-    for i := 0 to FDiagnoses.Count - 1 do
-    begin
+  if(assigned(PrimaryDiag)) then begin
+    for i := 0 to FDiagnoses.Count - 1 do begin
       CurDiagnosis := TPCEDiag(FDiagnoses[i]);
-      if(CurDiagnosis.Primary) and (CurDiagnosis <> PrimaryDiag) then
-      begin
+      if(CurDiagnosis.Primary) and (CurDiagnosis <> PrimaryDiag) then begin
         CurDiagnosis.Primary := FALSE;
         CurDiagnosis.FSend := True;
       end;
@@ -2406,18 +2820,16 @@ end;
 
 procedure TPCEData.SetProcedures(Src: TStrings; FromForm: boolean = TRUE);
 { load Procedures for this encounter into TPCEProc records, assumes all Procedures for the
-  encounter will be listed in Src and marks those that are not in Src for deletion }
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcProcedure, CurProcedure, OldProcedure: TPCEProc;
 begin
   if FromForm then MarkDeletions(FProcedures, Src);
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcProcedure := TPCEProc(Src.Objects[i]);
     MatchIndex := MatchItem(FProcedures, SrcProcedure);
-    if MatchIndex > -1 then
-    begin
+    if MatchIndex > -1 then begin
       CurProcedure := TPCEProc(FProcedures.Items[MatchIndex]);
 (*      if (SrcProcedure.Provider <> CurProcedure.Provider) then
       begin
@@ -2443,8 +2855,7 @@ begin
         CurProcedure.Modifiers := SrcProcedure.Modifiers;
         CurProcedure.FSend := True;
       end;
-    end else
-    begin
+    end else begin
       CurProcedure := TPCEProc.Create;
       CurProcedure.Assign(SrcProcedure);
       CurProcedure.FSend := True;
@@ -2454,21 +2865,55 @@ begin
 end;
 
 
+procedure TPCEData.SetVisits(Src : TPCEProcList; FromForm: boolean = TRUE); //kt added
+var
+  i, MatchIndex: Integer;
+  SrcVisit, CurVisit, OldVisit: TPCEProc;
+begin
+  //Code copied and modified from SetProcedures
+  if FromForm then MarkDeletions(FVisitTypesList, Src);
+  for i := 0 to Src.Count - 1 do begin
+    SrcVisit := Src.Proc[i];
+    MatchIndex := MatchItem(FVisitTypesList, SrcVisit);
+    if MatchIndex > -1 then begin
+      CurVisit := FVisitTypesList.Proc[MatchIndex];
+      if (SrcVisit.Quantity <> CurVisit.Quantity) or
+         (SrcVisit.Provider <> CurVisit.Provider) or
+         (CurVisit.Comment <> SrcVisit.Comment) or
+         (CurVisit.Modifiers <> SrcVisit.Modifiers)then
+      begin
+        OldVisit := TPCEProc.Create;
+        OldVisit.Assign(CurVisit);
+        OldVisit.FDelete := TRUE;
+        OldVisit.FSend := TRUE;
+        FVisitTypesList.Add(OldVisit);
+        CurVisit.Quantity := SrcVisit.Quantity;
+        CurVisit.Provider := SrcVisit.Provider;
+        CurVisit.Comment := SrcVisit.Comment;
+        CurVisit.Modifiers := SrcVisit.Modifiers;
+        CurVisit.FSend := True;
+      end;
+    end else begin
+      CurVisit := TPCEProc.Create;
+      CurVisit.Assign(SrcVisit);
+      CurVisit.FSend := True;
+      FVisitTypesList.Add(CurVisit);
+    end; {if MatchIndex}
+  end; {for}
+end;
 
 procedure TPCEData.SetImmunizations(Src: TStrings; FromForm: boolean = TRUE);
 { load Immunizations for this encounter into TPCEImm records, assumes all Immunizations for the
-  encounter will be listed in Src and marks those that are not in Src for deletion }
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcImmunization, CurImmunization: TPCEImm;
 begin
   if FromForm then MarkDeletions(FImmunizations, Src);
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcImmunization := TPCEImm(Src.Objects[i]);
     MatchIndex := MatchItem(FImmunizations, SrcImmunization);
-    if MatchIndex > -1 then
-    begin
+    if MatchIndex > -1 then begin
       CurImmunization := TPCEImm(FImmunizations.Items[MatchIndex]);
 
       //set null strings to NoPCEValue
@@ -2481,17 +2926,16 @@ begin
         (SrcImmunization.Reaction <> CurImmunization.Reaction) or
         (SrcImmunization.Refused <> CurImmunization.Refused) or
         (SrcImmunization.Contraindicated <> CurImmunization.Contraindicated) or
-        (CurImmunization.Comment <> SrcImmunization.Comment)then  
+        (CurImmunization.Comment <> SrcImmunization.Comment)then
       begin
         CurImmunization.Series          := SrcImmunization.Series;
         CurImmunization.Reaction        := SrcImmunization.Reaction;
         CurImmunization.Refused         := SrcImmunization.Refused;
         CurImmunization.Contraindicated := SrcImmunization.Contraindicated;
-        CurImmunization.Comment         := SrcImmunization.Comment;  
+        CurImmunization.Comment         := SrcImmunization.Comment;
         CurImmunization.FSend := True;
       end;
-    end else
-    begin
+    end else begin
       CurImmunization := TPCEImm.Create;
       CurImmunization.Assign(SrcImmunization);
       CurImmunization.FSend := True;
@@ -2502,18 +2946,16 @@ end;
 
 procedure TPCEData.SetSkinTests(Src: TStrings; FromForm: boolean = TRUE);
 { load SkinTests for this encounter into TPCESkin records, assumes all SkinTests for the
-  encounter will be listed in Src and marks those that are not in Src for deletion }
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcSkinTest, CurSkinTest: TPCESkin;
 begin
   if FromForm then MarkDeletions(FSKinTests, Src);
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcSkinTest := TPCESkin(Src.Objects[i]);
     MatchIndex := MatchItem(FSKinTests, SrcSkinTest);
-    if MatchIndex > -1 then
-    begin
+    if MatchIndex > -1 then begin
       CurSkinTest := TPCESKin(FSkinTests.Items[MatchIndex]);
       if CurSkinTest.Results = '' then CurSkinTest.Results := NoPCEValue;
       if SrcSkinTest.Results = '' then SrcSkinTest.Results := NoPCEValue;
@@ -2528,8 +2970,7 @@ begin
         CurSkinTest.Comment := SrcSkinTest.Comment;
         CurSkinTest.FSend := True;
       end;
-    end else
-    begin
+    end else begin
       CurSKinTest := TPCESkin.Create;
       CurSkinTest.Assign(SrcSkinTest);
       CurSkinTest.FSend := True;
@@ -2539,17 +2980,17 @@ begin
 end;
 
 procedure TPCEData.SetPatientEds(Src: TStrings; FromForm: boolean = TRUE);
+{ load PatientEds for this encounter into TPCEDiag records, assumes all PatientEds for the
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcPatientEd, CurPatientEd: TPCEPat;
 begin
   if FromForm then MarkDeletions(FPatientEds, Src);
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcPatientEd := TPCEPat(Src.Objects[i]);
     MatchIndex := MatchItem(FPatientEds, SrcPatientEd);
-    if MatchIndex > -1 then
-    begin
+    if MatchIndex > -1 then begin
       CurPatientEd := TPCEPat(FPatientEds.Items[MatchIndex]);
 
       if CurPatientEd.level = '' then CurPatientEd.level := NoPCEValue;
@@ -2558,11 +2999,10 @@ begin
         (CurPatientEd.Comment <> SrcPatientEd.Comment) then
       begin
         CurPatientEd.Level  := SrcPatientEd.Level;
-        CurPatientEd.Comment := SrcPatientEd.Comment;  
+        CurPatientEd.Comment := SrcPatientEd.Comment;
         CurPatientEd.FSend := True;
       end;
-    end else
-    begin
+    end else begin
       CurPatientEd := TPCEPat.Create;
       CurPatientEd.Assign(SrcPatientEd);
       CurPatientEd.FSend := True;
@@ -2573,33 +3013,31 @@ end;
 
 
 procedure TPCEData.SetHealthFactors(Src: TStrings; FromForm: boolean = TRUE);
-
+{ load HealthFactors for this encounter into TPCEDiag records, assumes all HealthFactors for the
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcHealthFactor, CurHealthFactor: TPCEHealth;
 begin
   if FromForm then MarkDeletions(FHealthFactors, Src);
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcHealthFactor := TPCEHealth(Src.Objects[i]);
     MatchIndex := MatchItem(FHealthFactors, SrcHealthFactor);
-    if MatchIndex > -1 then
-    begin
+    if MatchIndex > -1 then begin
       CurHealthFactor := TPCEHealth(FHealthFactors.Items[MatchIndex]);
-
       if CurHealthFactor.level = '' then CurHealthFactor.level := NoPCEValue;
       if SrcHealthFactor.level = '' then SrcHealthFactor.level := NoPCEValue;
       if(SrcHealthFactor.Level <> CurHealthFactor.Level) or
-        (CurHealthFactor.Comment <> SrcHealthFactor.Comment) then  
+        (CurHealthFactor.Comment <> SrcHealthFactor.Comment) then
       begin
         CurHealthFactor.Level  := SrcHealthFactor.Level;
-        CurHealthFactor.Comment := SrcHealthFactor.Comment;  
+        CurHealthFactor.Comment := SrcHealthFactor.Comment;
         CurHealthFactor.FSend := True;
       end;
-       if(SrcHealthFactor.GecRem <> CurHealthFactor.GecRem) then
-          CurHealthFactor.GecRem := SrcHealthFactor.GecRem;
-    end else
-    begin
+      if(SrcHealthFactor.GecRem <> CurHealthFactor.GecRem) then begin
+        CurHealthFactor.GecRem := SrcHealthFactor.GecRem;
+      end;
+    end else begin
       CurHealthFactor := TPCEHealth.Create;
       CurHealthFactor.Assign(SrcHealthFactor);
       CurHealthFactor.FSend := True;
@@ -2611,30 +3049,28 @@ end;
 
 
 procedure TPCEData.SetExams(Src: TStrings; FromForm: boolean = TRUE);
-
+{ load Exams for this encounter into TPCEDiag records, assumes all Exams for the
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
 var
   i, MatchIndex: Integer;
   SrcExam, CurExam: TPCEExams;
 begin
   if FromForm then MarkDeletions(FExams, Src);
-  for i := 0 to Src.Count - 1 do
-  begin
+  for i := 0 to Src.Count - 1 do begin
     SrcExam := TPCEExams(Src.Objects[i]);
     MatchIndex := MatchItem(FExams, SrcExam);
-    if MatchIndex > -1 then
-    begin
+    if MatchIndex > -1 then begin
       CurExam := TPCEExams(FExams.Items[MatchIndex]);
       if CurExam.Results = '' then CurExam.Results := NoPCEValue;
       if SrcExam.Results = '' then SrcExam.Results := NoPCEValue;
       if(SrcExam.Results <> CurExam.Results) or
-        (CurExam.Comment <> SrcExam.Comment) then  
+        (CurExam.Comment <> SrcExam.Comment) then
       begin
         CurExam.Results  := SrcExam.Results;
-        CurExam.Comment := SrcExam.Comment;  
+        CurExam.Comment := SrcExam.Comment;
         CurExam.Fsend := True;
       end;
-    end else
-    begin
+    end else begin
       CurExam := TPCEExams.Create;
       CurExam.Assign(SrcExam);
       CurExam.FSend := True;
@@ -2644,15 +3080,61 @@ begin
 end;
 
 
-procedure TPCEData.SetVisitType(Value: TPCEProc);
+function  TPCEData.GetVisitType(index : integer) : TPCEProc; //kt added
+begin
+  if (index > -1) and (index < FVisitTypesList.count) then begin
+    Result := FVisitTypesList.Proc[index];
+  end else begin
+    Result := nil;
+  end;
+end;
+
+//kt original --> procedure TPCEData.SetVisitType(Value: TPCEProc);
+procedure TPCEData.SetVisitType(index : integer; Value: TPCEProc);
+
+{//kt NOTES:
+
+  This system seems to be set up such that there is only ONE allowed visit-type CPT.
+  It is stored in FVisitType.  All other CPT's are stored in FProcedures.  I
+  believe on the server these will all be stored together as CPT's.
+
+  I need to modify the system such that MULTIPLE visit-type CPT's can be tracked.
+  This is because sometimes an office visit (medical recheck) and a CPE are done
+  at the same time.
+
+  When a new value is sent here to store in FVisitType, previously the code creates
+  a new entry to be added into FProcedures to store the prior value.  But this
+  entry is a DELETE message.
+
+  I will change this system to be as follows:
+  1) Setting a particult VisitType[index] will cause creation of a new entry
+     which is a copy of the old, and marked for deletion.  Then the prior value
+     will be overwritten with passed Value.
+  2) If index is outside bounds of existing VisitTypes, it will be IGNORED.
+}
 var
   VisitDelete: TPCEProc;
+  PriorValue : TPCEProc; //kt added
 begin
+  //kt rewrote code below
+  if (index < 0) or (index >= FVisitTypesList.count) then exit;
+  PriorValue := TPCEProc(FVisitTypesList[index]);
+  if PriorValue.Match(Value) then exit;
+  if PriorValue.Code <> '' then begin
+    VisitDelete := TPCEProc.Create;
+    VisitDelete.Assign(PriorValue);
+    VisitDelete.FDelete := true;  //<-- signal for deletion
+    VisitDelete.FSend   := True;
+    FVisitTypesList.Add(VisitDelete);
+  end;
+  PriorValue.Assign(Value);
+  PriorValue.Quantity := 1;
+  PriorValue.FSend := True;
+  { //kt -- original below
   if (not FVisitType.Match(Value)) or
-  (FVisitType.Modifiers <> Value.Modifiers) then  {causes CPT delete/re-add}
-  begin
-    if FVisitType.Code <> '' then                // add old visit to procedures for deletion
-    begin
+  (FVisitType.Modifiers <> Value.Modifiers) then begin //causes CPT delete/re-add
+    if FVisitType.Code <> '' then begin
+      // add old visit to procedures for deletion
       VisitDelete := TPCEProc.Create;
       VisitDelete.Assign(FVisitType);
       VisitDelete.FDelete := True;
@@ -2663,7 +3145,16 @@ begin
     FVisitType.Quantity := 1;
     FVisitType.FSend := True;
   end;
+  }
 end;
+
+procedure TPCEData.SetExtraVisitTypes(Src: TStrings; FromForm: boolean = TRUE); //kt
+{ load ExtraVisitTypes for this encounter into TPCEDiag records, assumes all ExtraVisitTypes for the
+  encounter will be listed in Src and marks those that are not in Src for deletion  -- if FromForm}
+begin
+  //kt NOTE: This function will actually not be needed.  See comments in SetVisitType(Value: TPCEProc);
+end;
+
 
 procedure TPCEData.SetSCRelated(Value: Integer);
 begin
@@ -2873,18 +3364,40 @@ begin
 //  Result := Trim(Result);
 end;
 
+{
 function TPCEData.StrVisitType: string;
+// returns as a string the type of encounter (according to CPT) & related contitions treated
+begin
+  result := StrVisitType(FVisitType);
+  //kt moved to separate function StrVisitType(AVisitType) below
+
+  //Result := '';
+  //with FVisitType do begin
+  //  Result := GetPCEDataText(pdcVisit, Code, Category, Narrative);
+  //  if Length(ModText) > 0 then Result := Result + ModText + ', ';
+  //end;
+  //Result := Trim(Result + StrVisitType(FSCRelated, FAORelated, FIRRelated,
+  //                                     FECRelated, FMSTRelated, FHNCRelated, FCVRelated, FSHADRelated));
+end;
+}
+
+function TPCEData.StrVisitType(AVisitType : TPCEProc) : string;
 { returns as a string the type of encounter (according to CPT) & related contitions treated }
+//kt added, splitting from above.
+var
+  ModTextStr : string;
 begin
   Result := '';
-  with FVisitType do
-    begin
-      Result := GetPCEDataText(pdcVisit, Code, Category, Narrative);
-      if Length(ModText) > 0 then Result := Result + ModText + ', ';
-    end;
+  with AVisitType do begin
+    Result := GetPCEDataText(pdcVisit, Code, Category, Narrative);
+    ModTextStr := AVisitType.ModText; //kt added
+    if Length(ModTextStr) > 0 then Result := Result + ModTextStr + ', ';
+    //kt original --> if Length(ModText) > 0 then Result := Result + ModText + ', ';
+  end;
   Result := Trim(Result + StrVisitType(FSCRelated, FAORelated, FIRRelated,
                                        FECRelated, FMSTRelated, FHNCRelated, FCVRelated, FSHADRelated));
 end;
+
 
 function TPCEData.StandAlone: boolean;
 var
@@ -2903,16 +3416,10 @@ end;
 
 function TPCEData.getDocCount: Integer;
 begin
-  rESULT := 1;
+  Result := 1;
 //  result := DocCount(vISIT);
 end;
 
-{function TPCEItem.MatchProvider(AnItem: TPCEItem): Boolean;
-begin
-  Result := False;
-  if (Provider = AnItem.Provider) then Result := True;
-end;
-}
 function TPCEItem.MatchProvider(AnItem: TPCEItem): Boolean;
 begin
   Result := False;
@@ -2929,7 +3436,8 @@ begin
      and (FPatientEds.count = 0)
      and (FHealthFactors.count = 0)
      and (fExams.count = 0) and
-     (FvisitType.Quantity = 0))then
+     (FVisitTypesList.MaxQuantity = 0)) then  //kt
+     //kt original --> (FvisitType.Quantity = 0))then
       result := False;
 end;
 
@@ -2953,16 +3461,18 @@ begin
   Dest.FHNCRelated   := FHNCRelated;
   Dest.FCVRelated    := FCVRelated;
   Dest.FSHADRelated  := FSHADRelated;
-  FVisitType.CopyProc(Dest.VisitType);
   Dest.FProviders.Assign(FProviders);
+  //kt  FVisitType.CopyProc(Dest.VisitType);
+  //kt  FVisitType.CopyProc(Dest.VisitType);
+  Dest.FVisitTypesList.Assign(FVisitTypesList); //kt  Don't copy again via CopyPCEItems below.
 
-  CopyPCEItems(FDiagnoses,     Dest.FDiagnoses,     TPCEDiag);
-  CopyPCEItems(FProcedures,    Dest.FProcedures,    TPCEProc);
-  CopyPCEItems(FImmunizations, Dest.FImmunizations, TPCEImm);
-  CopyPCEItems(FSkinTests,     Dest.FSkinTests,     TPCESkin);
-  CopyPCEItems(FPatientEds,    Dest.FPatientEds,    TPCEPat);
-  CopyPCEItems(FHealthFactors, Dest.FHealthFactors, TPCEHealth);
-  CopyPCEItems(FExams,         Dest.FExams,         TPCEExams);
+  CopyPCEItems(FDiagnoses,       Dest.FDiagnoses,       TPCEDiag);
+  CopyPCEItems(FProcedures,      Dest.FProcedures,      TPCEProc);
+  CopyPCEItems(FImmunizations,   Dest.FImmunizations,   TPCEImm);
+  CopyPCEItems(FSkinTests,       Dest.FSkinTests,       TPCESkin);
+  CopyPCEItems(FPatientEds,      Dest.FPatientEds,      TPCEPat);
+  CopyPCEItems(FHealthFactors,   Dest.FHealthFactors,   TPCEHealth);
+  CopyPCEItems(FExams,           Dest.FExams,           TPCEExams);
 
   Dest.FNoteTitle := FNoteTitle;
   Dest.FNoteIEN := FNoteIEN;
@@ -2978,14 +3488,13 @@ var
 
 begin
   Result := [];
-  if(not FutureEncounter(Self)) then
-  begin
-    if(PromptForWorkload(FNoteIEN, FNoteTitle, FEncSvcCat, StandAlone)) then
-    begin
-      if(fdiagnoses.count <= 0) then
+  if(not FutureEncounter(Self)) then begin
+    if(PromptForWorkload(FNoteIEN, FNoteTitle, FEncSvcCat, StandAlone)) then begin
+      if(fdiagnoses.count <= 0) then begin
         Include(Result, ndDiag);
-      if((fprocedures.count <= 0) and (fVisitType.Code = '')) then
-      begin
+      end;
+      //kt if((fprocedures.count <= 0) and (fVisitType.Code = '')) then begin
+      if((fprocedures.count <= 0) and (FVisitTypesList.FirstNonEmptyCode = '')) then begin
         TmpLst := TStringList.Create;
         try
           GetHasCPTList(TmpLst);
@@ -2995,14 +3504,12 @@ begin
           TmpLst.Free;
         end;
       end;
-      if(RequireExposures(FNoteIEN, FNoteTitle)) then
-      begin
+      if(RequireExposures(FNoteIEN, FNoteTitle)) then begin
         NeedSC := FALSE;
         EC :=  EligbleConditions;
-        if (EC.SCAllow and (SCRelated = SCC_NA)) then
+        if (EC.SCAllow and (SCRelated = SCC_NA)) then begin
           NeedSC := TRUE
-        else   if(SCRelated <> SCC_YES) then  //if screlated = yes, the others are not asked.
-        begin
+        end else if(SCRelated <> SCC_YES) then  begin //if screlated = yes, the others are not asked.
                if(EC.AOAllow and (AORelated = SCC_NA)) then NeedSC := TRUE
           else if(EC.IRAllow and (IRRelated = SCC_NA)) then NeedSC := TRUE
           else if(EC.ECAllow and (ECRelated = SCC_NA)) then NeedSC := TRUE
@@ -3011,8 +3518,9 @@ begin
 //        if HNCOK and (EC.HNCAllow and (HNCRelated = SCC_NA)) then NeedSC := TRUE;
         if(EC.HNCAllow and (HNCRelated = SCC_NA)) then NeedSC := TRUE;
         if(EC.CVAllow and (CVRelated = SCC_NA) and (SHADRelated = SCC_NA)) then NeedSC := TRUE;
-        if(NeedSC) then
+        if(NeedSC) then begin
           Include(Result, ndSC);
+        end;
       end;
 (*      if(Result = []) and (FNoteIEN > 0) then   //  **** block removed in v19.1  {RV} ****
         ClearCPTRequired(FNoteIEN);*)
@@ -3163,8 +3671,10 @@ procedure TPCEData.AddStrData(List: TStrings);
     if(length(Txt) > 0) then List.Add(Txt);
   end;
 
+var i : integer;
 begin
-  Add(StrVisitType);
+  for i := 0 to FVisitTypesList.Count - 1 do Add(StrVisitType(FVisitTypesList.Proc[i])); //kt
+  //kt Add(StrVisitType);
   Add(StrDiagnoses);
   Add(StrProcedures);
   Add(StrImmunizations);
@@ -3291,25 +3801,28 @@ var
   AItem: TPCEItem;
   i: Integer;
   IsStrings: boolean;
-  
+  Obj : TObject;
+  SrcPCEItem : TPCEItem; //kt added, replacing TPCEItem(Src[i]) -> SrcPCEItem
+
 begin
-  if(Dest is TStrings) then
+  if (Dest is TStrings) then begin
     IsStrings := TRUE
-  else
-  if(Dest is TList) then
+  end else if (Dest is TList) then begin
     IsStrings := FALSE
-  else
+  end else begin
     exit;
-  for i := 0 to Src.Count - 1 do
-  begin
-    if(not TPCEItem(Src[i]).FDelete) then
-    begin
+  end;
+  for i := 0 to Src.Count - 1 do begin
+    //kt  Obj := TObject(Src[i]);
+    SrcPCEItem := TPCEItem(Src[i]); //kt
+    if not SrcPCEItem.FDelete then begin
       AItem := ItemClass.Create;
-      AItem.Assign(TPCEItem(Src[i]));
-      if(IsStrings) then
+      AItem.Assign(SrcPCEItem);
+      if (IsStrings) then begin
         TStrings(Dest).AddObject(AItem.ItemStr, AItem)
-      else
+      end else begin
         TList(Dest).Add(AItem);
+      end;
     end;
   end;
 end;
@@ -3333,7 +3846,9 @@ begin
   if(Result) then Result := (FPatientEds.Count = 0);
   if(Result) then Result := (FHealthFactors.Count = 0);
   if(Result) then Result := (fExams.Count = 0);
-  if(Result) then Result := (FVisitType.Empty);
+  //kt  if(Result) then Result := (FVisitType.Empty);
+  if(Result) then Result := (FVisitTypesList.Empty);  //kt
+
 end;
 
 { TPCEProviderList }

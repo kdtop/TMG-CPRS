@@ -32,6 +32,7 @@ unit fWebTab;
  http://www.gnu.org/licenses/
  *)
 
+ //NOTE: Due to some irregular behavior, I am switching the WebBrowser from a THTMLObj to a TWebBrowser  12/6/22
 
 interface
 
@@ -48,6 +49,8 @@ type
     mnuViewHTMLSource: TMenuItem;
     mnuToggleRecordHTML_DOMs: TMenuItem;
     TimerRecordDOM: TTimer;
+    WebBrowser: TWebBrowser;
+    procedure FormShow(Sender: TObject);     // added back 12/6/22
     procedure mnuToggleRecordHTML_DOMsClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure TimerRecordDOMTimer(Sender: TObject);
@@ -60,7 +63,7 @@ type
   public
     { Public declarations }
     LastURL : string;
-    WebBrowser : THtmlObj; //kt 8/5/17
+    //WebBrowser : THtmlObj; //kt 8/5/17
     Procedure RequestPrint; override;
     Procedure NagivateTo(URL: Widestring);
   end;
@@ -122,6 +125,7 @@ var HTMLText : string;
     frmView : TfrmMemoEdit;
 begin
   inherited;
+  {    REMOVED FOR NOW
   try
     HTMLText := WebBrowser.GetFullHTMLText;
     frmView := TfrmMemoEdit.Create(self);
@@ -133,24 +137,30 @@ begin
     frmView.ShowModal;
   finally
     frmView.Free;
-  end;
+  end;}
 end;
 
 procedure TfrmWebTab.FormCreate(Sender: TObject);
 begin
   inherited;
-  WebBrowser := THtmlObj.Create(pnlWBHolder,Application);
+  //12/6/22 WebBrowser := THtmlObj.Create(pnlWBHolder,Application);
   TWinControl(WebBrowser).Parent:=pnlWBHolder;
   TWinControl(WebBrowser).Align:=alClient;
   WebBrowser.Silent := false; //should prevent page popups....
-  DiffRecorder := TDiffRecorder.Create(WebBrowser, CPRSDir+'\Cache\');
+  //DiffRecorder := TDiffRecorder.Create(WebBrowser, CPRSDir+'\Cache\');
 end;
 
 procedure TfrmWebTab.FormDestroy(Sender: TObject);
 begin
   DiffRecorder.Free;
-  WebBrowser.Free;
+  //WebBrowser.Free;
   inherited;
+end;
+
+procedure TfrmWebTab.FormShow(Sender: TObject);
+begin
+  inherited;
+  WebBrowser.Navigate(LastURL);
 end;
 
 Procedure TfrmWebTab.NagivateTo(URL: WideString);

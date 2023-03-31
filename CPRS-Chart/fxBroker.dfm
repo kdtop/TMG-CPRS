@@ -3,28 +3,29 @@ inherited frmBroker: TfrmBroker
   Top = 235
   BorderIcons = [biSystemMenu]
   Caption = 'Broker Calls'
-  ClientHeight = 273
-  ClientWidth = 491
+  ClientHeight = 571
+  ClientWidth = 979
   OldCreateOrder = True
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
   OnResize = FormResize
-  ExplicitWidth = 499
-  ExplicitHeight = 307
+  ExplicitWidth = 995
+  ExplicitHeight = 609
   PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TORAutoPanel [0]
     Left = 0
     Top = 0
-    Width = 491
+    Width = 979
     Height = 75
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
     DesignSize = (
-      491
+      979
       75)
     object lblMaxCalls: TLabel
       Left = 8
@@ -59,7 +60,7 @@ inherited frmBroker: TfrmBroker
       Caption = 'Max Calls Retained'
     end
     object cmdPrev: TBitBtn
-      Left = 386
+      Left = 874
       Top = 8
       Width = 50
       Height = 37
@@ -87,7 +88,7 @@ inherited frmBroker: TfrmBroker
       Layout = blGlyphTop
     end
     object cmdNext: TBitBtn
-      Left = 436
+      Left = 924
       Top = 8
       Width = 50
       Height = 37
@@ -119,7 +120,7 @@ inherited frmBroker: TfrmBroker
       TabOrder = 3
     end
     object btnRLT: TButton
-      Left = 349
+      Left = 837
       Top = 23
       Width = 31
       Height = 21
@@ -131,7 +132,7 @@ inherited frmBroker: TfrmBroker
     object cboJumpTo: TComboBox
       Left = 8
       Top = 50
-      Width = 478
+      Width = 966
       Height = 21
       Hint = 'Jump to a prior stored call'
       Anchors = [akLeft, akTop, akRight]
@@ -203,17 +204,189 @@ inherited frmBroker: TfrmBroker
         77777777777777770000}
     end
   end
-  object memData: TRichEdit [1]
+  object pnlBottom: TPanel [1]
     Left = 0
     Top = 75
-    Width = 491
-    Height = 198
+    Width = 979
+    Height = 496
     Align = alClient
-    HideScrollBars = False
-    ReadOnly = True
-    ScrollBars = ssBoth
+    BevelOuter = bvNone
+    Color = clActiveCaption
     TabOrder = 1
-    WantReturns = False
+    object Splitter1: TSplitter
+      Left = 252
+      Top = 0
+      Height = 496
+      ExplicitLeft = 232
+      ExplicitTop = 48
+      ExplicitHeight = 100
+    end
+    object PanelBottomLeft: TPanel
+      Left = 0
+      Top = 0
+      Width = 252
+      Height = 496
+      Align = alLeft
+      BevelOuter = bvNone
+      TabOrder = 0
+      object tabRPCViewMode: TTabControl
+        Left = 0
+        Top = 28
+        Width = 252
+        Height = 25
+        Align = alTop
+        TabOrder = 0
+        Tabs.Strings = (
+          'Time'
+          'Name'
+          'Tree')
+        TabIndex = 0
+        OnChange = tabRPCViewModeChange
+        ExplicitLeft = 8
+        ExplicitTop = 64
+        ExplicitWidth = 250
+      end
+      object lbRPCList: TListBox
+        Left = 24
+        Top = 216
+        Width = 121
+        Height = 97
+        ItemHeight = 13
+        TabOrder = 1
+        OnClick = lbRPCListClick
+      end
+      object tvRPC: TTreeView
+        Left = 24
+        Top = 344
+        Width = 121
+        Height = 97
+        Indent = 19
+        ParentShowHint = False
+        ReadOnly = True
+        ShowHint = True
+        TabOrder = 2
+        OnClick = tvRPCClick
+        OnCollapsing = tvRPCCollapsing
+        OnDblClick = tvRPCDblClick
+      end
+      object pnlBanner: TPanel
+        Left = 0
+        Top = 0
+        Width = 252
+        Height = 28
+        Align = alTop
+        BevelOuter = bvNone
+        TabOrder = 3
+        DesignSize = (
+          252
+          28)
+        object edtSearch: TEdit
+          Left = 2
+          Top = 1
+          Width = 202
+          Height = 21
+          Anchors = [akLeft, akTop, akRight]
+          TabOrder = 0
+        end
+        object btnSearch: TBitBtn
+          Left = 230
+          Top = 1
+          Width = 20
+          Height = 20
+          Anchors = [akTop, akRight]
+          TabOrder = 1
+          OnClick = btnSearchClick
+          Glyph.Data = {
+            3E020000424D3E0200000000000036000000280000000D0000000D0000000100
+            1800000000000802000000000000000000000000000000000000FFFFFFFFFFFF
+            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF606060FFFF
+            FF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF
+            606060A0A0A060606000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFFBFBFBF606060A0A0A0606060BFBFBF00FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFFFFFFFFFFFFBFBFBF606060A0A0A0606060BFBFBFFFFFFF00FFFFFFFFFFFF
+            FFBFBFFF7F7FFF7F7FFFBFBFBFBFBF606060A0A0A0606060BFBFBFFFFFFFFFFF
+            FF00FFFFFFFF3F3FFF0000FF7F7FFF7F7FFF0000DF2020A0A0A0606060BFBFBF
+            FFFFFFFFFFFFFFFFFF00FFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFF3F3F7F
+            4040BFBFBFFFFFFFFFFFFFFFFFFFFFFFFF00FF3F3FFFBFBFFFFFFFFFFFFFFFFF
+            FFFFFFFFFFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FF0000FFFFFF
+            7F7F7FBFBFBFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FF00FF0000BFBFBFBFBFBFBFBFBFBFBFBFFFFFFFFFFFFFFF0000FFFFFFFFFFFF
+            FFFFFFFFFFFFFFFFFF00FF7F7FFF7F7FBFBFBFBFBFBF7F7F7FFFFFFFFF7F7FFF
+            7F7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFF0000FF7F7FBFBFBFFFFF
+            FFFF7F7FFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFBFBF
+            FF3F3FFF0000FF0000FF3F3FFFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FF00}
+        end
+        object btnClearSrch: TBitBtn
+          Left = 208
+          Top = 1
+          Width = 20
+          Height = 20
+          Anchors = [akTop, akRight]
+          TabOrder = 2
+          OnClick = btnClearSrchClick
+          Glyph.Data = {
+            36040000424D3604000000000000360000002800000010000000100000000100
+            20000000000000040000130B0000130B00000000000000000000D8E9ECFFD8E9
+            ECFFD8E9ECFFD8E9ECFFD8E9ECFF808080FF808080FF808080FF808080FF8080
+            80FF808080FF808080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+            ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
+            80FF000080FF808080FF808080FF808080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+            ECFF000080FF000080FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+            FFFF0000FFFF000080FF000080FF808080FF808080FFD8E9ECFFD8E9ECFF0000
+            80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+            FFFF0000FFFF0000FFFF0000FFFF000080FF808080FFD8E9ECFFD8E9ECFF0000
+            80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+            FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFF0000FFFF0000FFFF0000FFFFFFFF
+            FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF
+            FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFF0000FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
+            FFFF0000FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFF0000FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF
+            FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+            FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFF0000FFFF0000FFFF0000FFFFFFFF
+            FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FFD8E9ECFFD8E9ECFF0000
+            80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+            FFFF0000FFFF0000FFFF0000FFFF000080FFD8E9ECFFD8E9ECFFD8E9ECFF0000
+            80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+            FFFF0000FFFF0000FFFF0000FFFF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+            ECFF000080FF000080FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+            FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+            ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
+            80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+        end
+      end
+    end
+    object pnlbottomRight: TPanel
+      Left = 255
+      Top = 0
+      Width = 724
+      Height = 496
+      Align = alClient
+      Caption = 'pnlbottomRight'
+      TabOrder = 1
+      ExplicitLeft = 253
+      ExplicitWidth = 726
+      object memData: TRichEdit
+        Left = 1
+        Top = 1
+        Width = 722
+        Height = 494
+        Align = alClient
+        HideScrollBars = False
+        ReadOnly = True
+        ScrollBars = ssBoth
+        TabOrder = 0
+        WantReturns = False
+        ExplicitWidth = 724
+      end
+    end
   end
   inherited amgrMain: TVA508AccessibilityManager
     Left = 8
@@ -254,6 +427,36 @@ inherited frmBroker: TfrmBroker
         'Status = stsDefault')
       (
         'Component = btnFilter'
+        'Status = stsDefault')
+      (
+        'Component = pnlBottom'
+        'Status = stsDefault')
+      (
+        'Component = PanelBottomLeft'
+        'Status = stsDefault')
+      (
+        'Component = pnlbottomRight'
+        'Status = stsDefault')
+      (
+        'Component = tabRPCViewMode'
+        'Status = stsDefault')
+      (
+        'Component = lbRPCList'
+        'Status = stsDefault')
+      (
+        'Component = tvRPC'
+        'Status = stsDefault')
+      (
+        'Component = pnlBanner'
+        'Status = stsDefault')
+      (
+        'Component = edtSearch'
+        'Status = stsDefault')
+      (
+        'Component = btnSearch'
+        'Status = stsDefault')
+      (
+        'Component = btnClearSrch'
         'Status = stsDefault'))
   end
 end

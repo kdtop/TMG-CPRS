@@ -5183,7 +5183,7 @@ begin
     if piece(RPCResult,'^',1)='-1' then ShowMessage(piece(RPCResult,'^',2));
   end else begin
     ShowMessage('Note has been linked to the lab results');
-    btnLinkToNote.enabled := true;
+    //kt commented out to achieve compile -- btnLinkToNote.enabled := true;
   end;
 end;
 

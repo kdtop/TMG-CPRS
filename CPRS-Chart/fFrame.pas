@@ -51,17 +51,19 @@ uses
   ExtCtrls, Menus, StdCtrls, Buttons, ORFn, fPage, uConst, ORCtrls, Trpcb,
   OleCtrls, VERGENCECONTEXTORLib_TLB, ComObj, AppEvnts, fBase508Form,
   StrUtils, Variants, Types,   //eRx 9/4/12
-  rTIU,   //TM
-  uTMGEvent,   //TMG  10/29/20
+  rTIU, math,                  //TMG
+  uTMGEvent,                   //TMG  10/29/20
   fImagePatientPhotoID, fTMGChartExporter, //kt
-  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw;
+  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw, ImgList;
 
 type
+  TControlCracker = class(TControl);                  //kt-tabs 11/26/22
+  TTabPageSide = (tpsUnspecified, tpsLeft, tpsRight); //kt-tabs 11/26/22
+  TTabPageOpenMode = (tpoOpen=0, tpoClosed=1);        //kt-tabs 11/26/22
+  TPageID = integer;                                  //kt-tabs 11/26/22  //NOTE: integer values defined to be same as CT_COVER, CT_PROBLEMS, etc., defined in uConst.pas
   TfrmFrame = class(TfrmBase508Form)
     pnlToolbar: TPanel;
     stsArea: TStatusBar;
-    tabPage: TTabControl;
-    pnlPage: TPanel;
     bvlPageTop: TBevel;
     bvlToolTop: TBevel;
     pnlPatient: TKeyClickPanel;
@@ -126,7 +128,6 @@ type
     imgReminder: TImage;
     mnuViewReminders: TMenuItem;
     anmtRemSearch: TAnimate;
-    lstCIRNLocations: TORListBox;
     popCIRN: TPopupMenu;
     popCIRNSelectAll: TMenuItem;
     popCIRNSelectNone: TMenuItem;
@@ -212,9 +213,6 @@ type
     btnEditNormalZoom: TSpeedButton;
     btnEditZoomOut: TSpeedButton;
     btnEditZoomIn: TSpeedButton;
-    sbtnFontSmaller: TSpeedButton;
-    sbtnFontNormal: TSpeedButton;
-    sbtnFontLarger: TSpeedButton;
     mnuTestGraph: TMenuItem;
     mnuResetTimerSetting: TMenuItem;
     menuNurseNote: TMenuItem;
@@ -222,7 +220,30 @@ type
     mnuShowTodaysReport: TMenuItem;
     wbNoPatientSelected: TWebBrowser;
     mnuSendMessage: TMenuItem;
-    mnuTaskEvent: TMenuItem;
+    mnuTaskEvent: TMenuItem;                                 //kt-tabs 11/26/22
+    timHideSplitterHandle: TTimer;                           //kt-tabs 11/26/22
+    ImageListSplitterHandle: TImageList;                     //kt-tabs 11/26/22
+    btnSplitterHandle: TBitBtn;                              //kt-tabs 11/26/22
+    mnuToggleSidePanel: TMenuItem;
+    pnlMain: TPanel;                                         //kt-tabs 11/26/22
+    frameLRSplitter: TSplitter;                              //kt-tabs 11/26/22
+    pnlMainL: TPanel;                                        //kt-tabs 11/26/22
+    pnlPageL: TPanel;                                        //kt-tabs 11/26/22
+    sbtnFontSmaller: TSpeedButton;
+    sbtnFontNormal: TSpeedButton;
+    sbtnFontLarger: TSpeedButton;
+    lstCIRNLocations: TORListBox;
+    tabPageL: TTabControl;                                   //kt-tabs renamed.  Was tabPage
+    tabPageR: TTabControl;                                   //kt-tabs 11/26/22
+    pnlMainR: TPanel;                                        //kt-tabs 11/26/22
+    pnlPageR: TPanel;
+    procedure pnlMainRResize(Sender: TObject);                                        //kt-tabs 11/26/22
+    procedure mnuToggleSidePanelClick(Sender: TObject);      //kt-tabs 11/26/22
+    procedure timHideSplitterHandleTimer(Sender: TObject);   //kt-tabs 11/26/22
+    procedure btnSplitterHandleClick(Sender: TObject);       //kt-tabs 11/26/22
+    procedure frameLRSplitterMoved(Sender: TObject);         //kt-tabs 11/26/22
+    procedure btnSplitterHandleMouseLeave(Sender: TObject);  //kt-tabs 11/26/22
+    procedure btnSplitterHandleMouseEnter(Sender: TObject);  //kt-tabs 11/26/22
     procedure mnuTaskEventClick(Sender: TObject);
     procedure mnuSendMessageClick(Sender: TObject);
     procedure mnuShowTodaysReportClick(Sender: TObject);
@@ -247,7 +268,6 @@ type
     procedure mnuLabTextClick(Sender: TObject);
     procedure mnuTMGTempClick(Sender: TObject);
     procedure mnuChangeESClick(Sender: TObject);
-    procedure mnuFrameChange(Sender: TObject; Source: TMenuItem; Rebuild: Boolean);
     procedure mnuTeamsClick(Sender: TObject);
     procedure pnlTimerMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure timerStopwatchTimer(Sender: TObject);
@@ -256,24 +276,18 @@ type
     procedure mnuBillableItemsClick(Sender: TObject);
     procedure mnuOpenADTClick(Sender: TObject);
     procedure PatientImageClick(Sender: TObject);       //kt added 4/14/14
-    procedure ViewAuditTrail1Click(Sender: TObject);  //kt 9/11
+    procedure ViewAuditTrail1Click(Sender: TObject);    //kt 9/11
     procedure EPrescribing1Click(Sender: TObject);
     procedure tabPageChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure pnlPatientMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlPatientMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlVisitMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlVisitMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure pnlPatientMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlPatientMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlVisitMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlVisitMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure mnuFileExitClick(Sender: TObject);
-    procedure pnlPostingsMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlPostingsMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure pnlPostingsMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlPostingsMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure mnuFontSizeClick(Sender: TObject);
     procedure mnuChartTabClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -296,14 +310,10 @@ type
     procedure mnuFilePrintClick(Sender: TObject);
     procedure mnuGECStatusClick(Sender: TObject);
     procedure mnuFileNextClick(Sender: TObject);
-    procedure pnlPrimaryCareMouseDown(Sender: TObject;
-      Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure pnlPrimaryCareMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlRemindersMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlRemindersMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure pnlPrimaryCareMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlPrimaryCareMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlRemindersMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlRemindersMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure pnlCIRNClick(Sender: TObject);
     procedure lstCIRNLocationsClick(Sender: TObject);
     procedure popCIRNCloseClick(Sender: TObject);
@@ -315,8 +325,7 @@ type
     procedure mnuFileNotifRemoveClick(Sender: TObject);
     procedure mnuToolsOptionsClick(Sender: TObject);
     procedure mnuFileRefreshClick(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormActivate(Sender: TObject);
     procedure pnlPrimaryCareEnter(Sender: TObject);
     procedure pnlPrimaryCareExit(Sender: TObject);
@@ -327,47 +336,37 @@ type
     procedure pnlPostingsClick(Sender: TObject);
     procedure ctxContextorCanceled(Sender: TObject);
     procedure ctxContextorCommitted(Sender: TObject);
-    procedure ctxContextorPending(Sender: TObject;
-      const aContextItemCollection: IDispatch);
+    procedure ctxContextorPending(Sender: TObject; const aContextItemCollection: IDispatch);
     procedure mnuFileBreakContextClick(Sender: TObject);
     procedure mnuFileResumeContextGetClick(Sender: TObject);
     procedure mnuFileResumeContextSetClick(Sender: TObject);
-    procedure pnlFlagMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlFlagMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure pnlFlagMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlFlagMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure pnlFlagClick(Sender: TObject);
     procedure mnuFilePrintSelectedItemsClick(Sender: TObject);
     procedure mnuAlertRenewClick(Sender: TObject);
     procedure mnuAlertForwardClick(Sender: TObject);
     procedure pnlFlagEnter(Sender: TObject);
     procedure pnlFlagExit(Sender: TObject);
-    procedure tabPageMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure tabPageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure tabPageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure lstCIRNLocationsExit(Sender: TObject);
     procedure AppEventsActivate(Sender: TObject);
     procedure ScreenActiveFormChange(Sender: TObject);
     procedure AppEventsShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure mnuToolsGraphingClick(Sender: TObject);
-    procedure pnlCIRNMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlCIRNMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure pnlCIRNMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlCIRNMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure laMHVClick(Sender: TObject);
     procedure laVAA2Click(Sender: TObject);
     procedure ViewInfo(Sender: TObject);
     procedure mnuViewInformationClick(Sender: TObject);
-    procedure compAccessTabPageCaptionQuery(Sender: TObject;
-      var Text: string);
+    procedure compAccessTabPageCaptionQuery(Sender: TObject; var Text: string);
     procedure btnCombatVetClick(Sender: TObject);
     procedure pnlVistaWebClick(Sender: TObject);
-    procedure pnlVistaWebMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure pnlVistaWebMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure pnlVistaWebMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure pnlVistaWebMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure mnuEditRedoClick(Sender: TObject);
-    procedure tabPageMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
     procedure mnuEditDemographicsClick(Sender: TObject);                                                            //kt 9/11
     procedure tabPageDrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect; Active: Boolean); //kt 9/11
     procedure mnuPrintLabelsClick(Sender: TObject);                                                                //kt 9/11
@@ -389,7 +388,8 @@ type
     FChangeSource: Integer;
     FCreateProgress: Integer;
     FEditCtrl: TCustomEdit;
-    FLastPage: TfrmPage;
+    //kt FLastPage: TfrmPage;
+    FLastPageL, FLastPageR: TfrmPage;  //kt-tabs 11/26/22
     FNextButtonL: Integer;
     FNextButtonR: Integer;
     FNextButtonActive: Boolean;
@@ -411,17 +411,27 @@ type
     FOrderPrintForm: boolean;
     FReviewclick: boolean;
     FCtrlTabUsed: boolean;
-    FDragAndDropFName : String;            //kt 4/15/14
-    bTimerOn : boolean;                    //kt 4/14/15
-    colorTimerOn : TColor;                 //kt 4/14/15
-    colorTimerOnMax : TColor;              //kt 4/17/15
-    intTimerMaxTime : integer;             //kt 4/17/15
-    colorTimerPaused : Tcolor;             //kt 4/14/15
-    colorTimerOff : TColor;                //kt 4/14/15
-    OriginalPanelWindowProc :TWndMethod;   //kt 4/16/14
-    frmPatientPhotoID : TfrmPatientPhotoID;  //kt  7/10/18
-    TMGInitialFontSize : integer;          //kt 4/28/21
-    procedure PanelWindowProc(var Msg: TMessage); //kt   4/16/14
+    FDragAndDropFName : String;                           //kt 4/15/14
+    bTimerOn : boolean;                                   //kt 4/14/15
+    colorTimerOn : TColor;                                //kt 4/14/15
+    colorTimerOnMax : TColor;                             //kt 4/17/15
+    intTimerMaxTime : integer;                            //kt 4/17/15
+    colorTimerPaused : Tcolor;                            //kt 4/14/15
+    colorTimerOff : TColor;                               //kt 4/14/15
+    OriginalPanelWindowProc :TWndMethod;                  //kt 4/16/14
+    frmPatientPhotoID : TfrmPatientPhotoID;               //kt 7/10/18
+    TMGInitialFontSize : integer;                         //kt 4/28/21
+    FfrmPagesList : TStringList;                          //kt-tabs 11/26/22  //doesn't own objects
+    FTabPages : array[tpsLeft..tpsRight] of TTabControl;  //kt-tabs 11/26/22
+    //kt original --> uTabList: TStringList;              //kt doc:  used as uTabList[TabIndex] = '<PageID>'  e.g. uTabList.IndexOf(CT_COVER) --> 0 (PageControl tab index 0 is CT_COVER)
+    FTabList: array[tpsLeft..tpsRight] of TStringList;    //kt doc:  used as FTabList[ASide].string[] = <PageID>, and object FTabList[ASide].objects[] = <TabIndex>  e.g. FTabList[ASide].IndexOf(CT_NOTES) --> E.g. 5, FTabList[ASide].objects[5] is tab index of CT_NOTES)
+    PnlPages : array[tpsLeft..tpsRight] of TPanel;        //kt-tabs 11/26/22
+    FNextTabL, FLastTabL, FChangingTabL: Integer;         //kt-tabs 11/26/22
+    FNextTabR, FLastTabR, FChangingTabR: Integer;         //kt-tabs 11/26/22
+    FTabPageOpenMode : TTabPageOpenMode;                  //kt-tabs 11/26/22
+    procedure frameLRSplitterMouseEnter(Sender: TObject); //kt-tabs 11/26/22
+    procedure frameLRSplitterMouseLeave(Sender: TObject); //kt-tabs 11/26/22
+    procedure PanelWindowProc(var Msg: TMessage);         //kt   4/16/14
     procedure RefreshFixedStatusWidth;
     procedure FocusApplicationTopForm;
     procedure AppActivated(Sender: TObject);
@@ -433,17 +443,28 @@ type
     procedure ChangeFont(NewFontSize: Integer);
     procedure LoadTabColors(ColorsList : TStringList);  //kt 9/11
     procedure SaveTabColors(ColorsList : TStringList);  //kt 9/11
-    //procedure CreateTab(var AnInstance: TObject; AClass: TClass; ATabID: integer; ALabel: string);
-    procedure CreateTab(ATabID: integer; ALabel: string);
-    procedure DetermineNextTab;
-    function ExpandCommand(x: string): string;
+    procedure CreateTab(ASide: TTabPageSide; APageID: integer; ALabel: string; visible : boolean = true); //kt-tabs
+    procedure tabPagesChange(ASide: TTabPageSide);                                        //kt-tabs
+    procedure DetermineNextTab(ASide: TTabPageSide = tpsLeft);                            //kt-tabs
+    function  GetLastTabs(Index : TTabPageSide) : integer;                                //kt-tabs
+    procedure SetLastTabs(Index : TTabPageSide; value : integer);                         //kt-tabs
+    function  GetNextTabs(Index : TTabPageSide) : integer;                                //kt-tabs
+    procedure SetNextTab(Index : TTabPageSide; value : integer);                          //kt-tabs
+    function  GetChangingTab(Index : TTabPageSide) : integer;                             //kt-tabs
+    procedure SetChangingTab(Index : TTabPageSide; value : integer);                      //kt-tabs
+    function  GetFLastPage(Index : TTabPageSide) : TFrmPage;                              //kt-tabs
+    procedure SetFLastPage(Index : TTabPageSide; value : TFrmPage);                       //kt-tabs
+    function  OtherPageSide(ASide : TTabPageSide) : TTabPageSide;                         //kt-tabs
+    function  TabSide(ATabPage : TTabControl) : TTabPageSide;                             //kt-tabs;
+    function  ExpandCommand(x: string): string;
     procedure FitToolbar;
     procedure LoadSizesForUser;
     procedure SaveSizesForUser;
     procedure LoadUserPreferences;
     procedure SaveUserPreferences;
-    procedure SwitchToPage(NewForm: TfrmPage);
-    function TabToPageID(Tab: Integer): Integer;
+    //procedure SwitchToPage0(NewForm: TfrmPage); overload;
+    procedure SwitchToPage(ASide: TTabPageSide; NewForm: TfrmPage); overload; //kt-tabs
+    function  TabIndexToPageID(ASide : TTabPageSide; TabIndex: Integer): TPageID;         //kt renamed.  Was TabToPageID() : integer;
     function TimeoutCondition: boolean;
     function GetTimedOut: boolean;
     procedure TimeOutAction;
@@ -485,27 +506,42 @@ type
     procedure CallERx(action: Integer);   //ERx 9/4/12
     procedure OpenChartByDFN(NewDFN:string);  //TMG 6/11/18
     procedure WMCopyData(var Msg : TWMCopyData) ; message WM_COPYDATA;  //TMG added 7/9/18
+    function  MainSideTabWidthTarget(Mode: TTabPageOpenMode) : integer;           //kt-tabs
+    procedure SetTabOpenMode(Mode: TTabPageOpenMode);                   //kt-tabs 7/25/21
+    procedure PositionSplitterHandle;                                   //kt-tabs  7/25/21
+    function  ToggleTabPageOpenMode(Mode: TTabPageOpenMode) : TTabpageOpenMode; //kt-tabs  7/25/21
+    procedure ResizeTabs(AutoFixSideTab: boolean = true);                       //kt-tabs 7/25/21
+    property  NextTabs[Index : TTabPageSide] : integer read GetNextTabs write SetNextTab;   //kt-tabs
+    property  LastTabPageID[Index : TTabPageSide] : integer read GetLastTabs write SetLastTabs;  //kt-tabs
+    property  FLastPages[Index : TTabPageSide] : TFrmPage read GetFLastPage write SetFLastPage;  //kt-tabs
   public
-    FProccessingNextClick : boolean;    //kt    8/28/12
+    FProccessingNextClick : boolean;        //kt    8/28/12
     EnduringPtSelSplitterPos, frmFrameHeight, pnlPatientSelectedHeight: integer;
-    TMGAbort : boolean;  //kt 9/11 added
-    WebServerIP : string;  //kt 4/7/15
-    WebServerPort: string; //kt 4/7/15
+    TMGAbort : boolean;                    //kt 9/11 added
+    WebServerIP : string;                  //kt 4/7/15
+    WebServerPort: string;                 //kt 4/7/15
     EnduringPtSelColumns: string;
     NoteTitleDateFormat: string;           //tmg 7//25/19
     TurnOnUploads:boolean;                 //tmg  8/27/19
-    StartTimer : integer;  //TMG 11/2/21
+    StartTimer : integer;                  //TMG 11/2/21
+    TabCtrlClicked: Boolean;               //kt-tabs 11/26/22  used in fProbs
+    TabCtrlClickedSide : TTabPageSide;     //kt-tabs 11/26/22 -- When TabCtrlClicked = true, then this will show which side.
+    ProbTabClicked: boolean;               //kt-tabs 11/26/22
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;  //kt 4/15/14
     procedure SetBADxList;
-    procedure SetActiveTab(PageID: Integer);
-    function  GetActiveTab: integer;  //kt added 6/15
-    function CheckForRPC(RPCName: string): boolean;  //kt 9/11
-    procedure SelectChartTab(PageID : integer); //kt 12/10/20
-
-    function PageIDToTab(PageID: Integer): Integer;
+    procedure SetActiveTab(PageID: TPageID);
+    function  GetActiveTab: TPageID;                                             //kt added 6/15
+    function  CheckForRPC(RPCName: string): boolean;                             //kt 9/11
+    procedure SelectChartTab(PageID : TPageID);  overload;                       //kt 12/10/20 //kt-tabs
+    procedure SelectChartTab(ASide : TTabPageSide; PageID : TPageID);  overload; //kt-tabs
+    procedure SelectChartTabByIndex(ASide : TTabPageSide; TabIndex : integer);   //kt-tabs
+    function  PageIDToTabIndex(ASide : TTabPageSide; PageID : TPageID): Integer; //kt renamed.  Was: PageIDToTab()
+    function  TabPageID(ASide : TTabPageSide = tpsUnspecified) : TPageID;        //kt-tabs 12/1/22
+    function  TabPage(ASide : TTabPageSide = tpsUnspecified) : TTabControl;      //kt-tabs
+    procedure PositionSideTabTextOrderDialog(Dialog : TForm);                            //kt-tabs
     procedure ShowHideChartTabMenus(AMenuItem: TMenuItem);
     procedure UpdatePtInfoOnRefresh;
-    function  TabExists(ATabID: integer): boolean;
+    function  TabExists(APageID: TPageID): boolean;
     procedure DisplayEncounterText;
     function DLLActive: boolean;
     property ChangeSource:    Integer read FChangeSource;
@@ -522,18 +558,22 @@ type
     procedure SetUpCIRN;
     property DoNotChangeEncWindow: boolean read FDoNotChangeEncWindow write FDoNotChangeEncWindow;
     property OrderPrintForm: boolean read FOrderPrintForm write FOrderPrintForm;
-    procedure SetATabVisibility(ATabID: integer; Visible: boolean; ALabel:string='x');  //kt 9/11 added
-    procedure SetWebTabsPerServer;                                                      //kt 9/11 added
-    procedure SetOneWebTabPerServer(WebTabNum: integer; URLMsg : string);               //kt 9/11 added
-    property ActiveTab : integer read GetActiveTab write SetActiveTab;                  //kt added 6/15
-    property NoPatientSelected : boolean read FNoPatientSelected;                       //kt added 11/16/20
-    procedure ClickOneAppointment(Sender:TObject);  //TMG added 1/24/22
-    procedure OpenAPatient(NewDFN:string);  //TMG added 1/24/22
+    procedure SetATabVisibility(APageID: integer; Visible: boolean; ALabel:string='x'); //kt 9/11 added
+    procedure SetWebTabsPerServer;                                                                   //kt 9/11 added
+    procedure SetOneWebTabPerServer(WebTabNum: integer; URLMsg : string);                            //kt 9/11 added
+    property ActiveTab : TPageID read GetActiveTab write SetActiveTab;                               //kt added 6/15
+    property NoPatientSelected : boolean read FNoPatientSelected;                                    //kt added 11/16/20
+    property  ChangingTabs[Index : TTabPageSide] : integer read GetChangingTab write SetChangingTab; //kt-tabs 11/26/22
+    procedure ClickOneAppointment(Sender:TObject);                                                   //TMG added 1/24/22
+    procedure OpenAPatient(NewDFN:string);                                                           //TMG added 1/24/22
+    property TabPageOpenMode : TTabPageOpenMode read FTabPageOpenMode;                               //kt-tabs 1/16/23
+    property LastPages[Index : TTabPageSide] : TFrmPage read GetFLastPage;                           //kt-tabs 1/16/23
+    function PageName(APage : TFrmPage) : string;                                                    //kt-tabs 1/16/23
   end;
 
 var
   frmFrame: TfrmFrame;
-  uTabList: TStringList;
+  //kt-tabs 12/4/22 moved into TfrmFram -- uTabList: TStringList;
   TabColorsEnabled : Boolean;                   //kt 9/11 added
   TabColorsList : TStringList;                  //kt 9/11 added
   TMGShuttingDownDueToCrash : boolean = FALSE;  //kt added 2/17
@@ -541,11 +581,11 @@ var
   uRemoteType, uReportID, uLabRepID : string;
   FlaggedPTList: TStringList;
   ctxContextor : TContextorControl;
-  NextTab, LastTab, ChangingTab: Integer;
+  //NextTab, LastTab, ChangingTab: Integer;
   uUseVistaWeb: boolean;
   PTSwitchRefresh: boolean = FALSE;  //flag for patient refresh or switch of patients
-  ProbTabClicked: boolean = FALSE;
-  TabCtrlClicked: Boolean = FALSE;
+  //kt-tabs 11/26/22 moved into TfrmFrame -- ProbTabClicked: boolean = FALSE;
+  //kt-tabs 11/26/22 moved into TfrmFrame --  TabCtrlClicked: Boolean = FALSE;  //used in fProbs
   DEAContext: Boolean = False;
   DelayReviewChanges: Boolean = False;
 
@@ -575,23 +615,27 @@ uses
   fIntracarePtLbl, fPtAuditLog, fBillableItems,
   fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule,
   VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit,
-  fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet
-  , ColorUtil        //kt added
-  , uTMGOptions      //kt added
-  , fSMSLabText      //kt
-  , fSingleNote      //kt
-  , fAnticoagulator  //kt
-  , uTMG_WM_API      //kt
-  , fTest_RW_HTML    //kt TEMP, KILL LATER...
-  , fMemoEdit        //kt  testing purposes only can be removed later
-  , fViewLabPDF      //tmg 12/7/21
-  , fConfirmTimer    //tmg 11/2/21
-  , uHTMLTools       //tmg 7/14/22
-  , fMessageDemo     //tmg 9/20/22
-  , fTaskEvents      //tmg 11/1/22
-  , fMailbox         //kt
-  , fUploadImages    //kt
-  ;
+  fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
+  ColorUtil,        //kt added
+  uTMGOptions,      //kt added
+  fSMSLabText,      //kt
+  fSingleNote,      //kt
+  fAnticoagulator,  //kt
+  uTMG_WM_API,      //kt
+  fTest_RW_HTML,    //kt TEMP, KILL LATER...
+  fMemoEdit,        //kt  testing purposes only can be removed later
+  fViewLabPDF,      //tmg 12/7/21
+  fConfirmTimer,    //tmg 11/2/21
+  uHTMLTools,       //tmg 7/14/22
+  fMessageDemo,     //tmg 9/20/22
+  fTaskEvents,      //tmg 11/1/22
+  fMailbox,         //kt
+  fUploadImages,    //kt
+  fODDiet, fODMisc, fODGen, fODMedIn, fODMedOut, fODText, fODConsult, fODProc, fODRad,   //kt added line
+  fODLab, fODBBank, fODMeds, fODMedIV, fODVitals, fODAuto, fOMNavA,                      //kt added line
+  fOMSet, uODBase, rODMeds, fOMAction, fARTAllgy, fOMHTML, fODChild, fODMedNVA,          //kt added line
+  fODChangeUnreleasedRenew;
+
 
 var                                 //  RV 05/11/04
   IsRunExecuted: Boolean = FALSE;           //  RV 05/11/04
@@ -599,21 +643,6 @@ var                                 //  RV 05/11/04
   GraphFloat: TfrmGraphs;
 
 const
- //  moved to uConst - RV v16
-(*  CT_NOPAGE   = -1;                             // chart tab - none selected
-  CT_UNKNOWN  =  0;                             // chart tab - unknown (shouldn't happen)
-  CT_COVER    =  1;                             // chart tab - cover sheet
-  CT_PROBLEMS =  2;                             // chart tab - problem list
-  CT_MEDS     =  3;                             // chart tab - medications screen
-  CT_ORDERS   =  4;                             // chart tab - doctor's orders
-  CT_HP       =  5;                             // chart tab - history & physical
-  CT_NOTES    =  6;                             // chart tab - progress notes
-  CT_CONSULTS =  7;                             // chart tab - consults
-  CT_DCSUMM   =  8;                             // chart tab - discharge summaries
-  CT_LABS     =  9;                             // chart tab - laboratory results
-  CT_REPORTS  = 10;                             // chart tab - reports
-  CT_SURGERY  = 11;                             // chart tab - surgery*)
-
   FCP_UPDATE  = 10;                             // form create about to check auto-update
   FCP_SETHOOK = 20;                             // form create about to set timeout hooks
   FCP_SERVER  = 30;                             // form create about to connect to server
@@ -898,6 +927,8 @@ end;
 
 procedure TfrmFrame.ClearPatient;
 { call all pages to make sure patient related information is cleared (when switching patients) }
+var
+  ASide : TTabPageSide;  //kt-tabs 11/26/22
 begin
   //if frmFrame.Timedout then Exit; // added to correct Access Violation when "Refresh Patient Information" selected
   lblPtName.Caption     := '';
@@ -928,8 +959,8 @@ begin
   frmLabs.ClearPtData;
   frmGraphData.ClearPtData;
   frmReports.ClearPtData;
-  tabPage.TabIndex := PageIDToTab(CT_NOPAGE);       // to make sure DisplayPage gets called
-  tabPageChange(tabPage);
+  for ASide := tpsLeft to tpsRight do SelectChartTab(ASide, CT_NOPAGE);  // to make sure DisplayPage gets called  //kt-tabs
+  //kt-tabs end mod
   ClearReminderData;
   SigItems.Clear;
   Changes.Clear;
@@ -1019,16 +1050,20 @@ procedure TfrmFrame.FormCreate(Sender: TObject);
 var
   //ClientVer, ServerVer, ServerReq: string;
   tempS : string;                 //kt 9/11
-  i : integer;                    //kt 9/11
+  APageID : TPageID;              //kt 9/11
   ImagesEnabled : boolean;        //kt 9/11
   Connected : boolean;            //kt 9/11
   RetryConnect : integer;         //kt 9/11
   ClientVer, ServerVer, ServerReq, SAN: string;
+  ASide : TTabPageSide;           //kt-tabs 11/26/22
 begin
   FJustEnteredApp := false;
   SizeHolder := TSizeHolder.Create;
   FOldActiveFormChange := Screen.OnActiveFormChange;
   Screen.OnActiveFormChange := ScreenActiveFormChange;
+  TabCtrlClicked := FALSE;        //kt-tabs 11/26/22
+  TabCtrlClickedSide := tpsLeft;  //kt-tabs 11/26/22  Default
+  ProbTabClicked := FALSE;        //kt-tabs 11/26/22
   //kt begin mod 4/7/15
   WebServerIP := ParamSearch('WS');
   if WebServerIP = '' then WebServerIP := ParamSearch('S');
@@ -1201,7 +1236,7 @@ begin
   Notifications := TNotifications.Create;
   RemoteSites := TRemoteSiteList.Create;
   RemoteReports := TRemoteReportList.Create;
-  uTabList := TStringList.Create;
+  for ASide := tpsLeft to tpsRight do FTabList[ASide] := TStringList.Create;
   TabColorsList := TStringList.Create; //kt added 9/11
   FlaggedPTList := TStringList.Create;
   HasFlag  := False;
@@ -1213,30 +1248,30 @@ begin
     NotifyWhenRemindersChange(RemindersChanged);
   // load all the tab pages
   FCreateProgress := FCP_FORMS;
-  //CreateTab(TObject(frmProblems), TfrmProblems, CT_PROBLEMS, 'Problems');
-  CreateTab(CT_PROBLEMS, 'Problems');
-  CreateTab(CT_MEDS,     'Meds');
-  CreateTab(CT_ORDERS,   'Orders');
-  CreateTab(CT_NOTES,    'Notes');
-  CreateTab(CT_CONSULTS, 'Consults');
-  if ShowSurgeryTab then CreateTab(CT_SURGERY,  'Surgery');
-  CreateTab(CT_DCSUMM,   'D/C Summ');
-  CreateTab(CT_LABS,     'Labs');
-  CreateTab(CT_REPORTS,  'Reports');
-  CreateTab(CT_COVER,    'Cover Sheet');
-
-  CreateTab(CT_IMAGES,   'Images');  //kt 9/11
-  CreateTab(CT_MAILBOX,  'Mailbox');  //kt 9/11
+  FTabPages[tpsLeft] := tabPageL;   //kt-tabs
+  FTabPages[tpsRight]:= tabPageR;   //kt-tabs
+  PnlPages[tpsLeft]  := pnlPageL;   //kt-tabs
+  PnlPages[tpsRight] := pnlPageR;   //kt-tabs
+  FfrmPagesList := nil;             //kt-tabs
   ImagesEnabled := uTMGOptions.ReadBool('EnableImages',false);           //kt 9/11
-  if not ImagesEnabled then SetATabVisibility(CT_IMAGES, ImagesEnabled); //kt 9/11
 
-  for i := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                         //kt 9/11
-    CreateTab(i, IntToStr(i-CT_WEBTAB1+1));                              //kt 9/11
-    SetATabVisibility(i, false); //Hide until activated by RPC           //kt 9/11
+  CreateTab(tpsLeft, CT_COVER,    'Cover Sheet');
+  CreateTab(tpsLeft, CT_PROBLEMS, 'Problems');
+  CreateTab(tpsLeft, CT_MEDS,     'Meds');
+  CreateTab(tpsLeft, CT_ORDERS,   'Orders');
+  CreateTab(tpsLeft, CT_NOTES,    'Notes');
+  CreateTab(tpsLeft, CT_CONSULTS, 'Consults');
+  CreateTab(tpsLeft, CT_SURGERY,  'Surgery');
+  CreateTab(tpsLeft, CT_DCSUMM,   'D/C Summ');
+  CreateTab(tpsLeft, CT_LABS,     'Labs');
+  CreateTab(tpsLeft, CT_REPORTS,  'Reports');
+  CreateTab(tpsLeft, CT_IMAGES,   'Images', ImagesEnabled);  //kt 9/11
+  CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
+  for APageID := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                   //kt 9/11
+    CreateTab(tpsLeft, APageID, 'WebTab ' + IntToStr(integer(APageID)-CT_WEBTAB1+1), false);  //Hide until activated by RPC     //kt 9/11
   end;
-
   LoadTabColors(TabColorsList);                                          //kt 9/11
-  TabPage.OwnerDraw := TabColorsEnabled;                                 //kt 9/11
+  for ASide := tpsLeft to tpsRight do FTabPages[ASide].OwnerDraw := TabColorsEnabled;  //kt 9/11  //kt-tabs
 
   ShowHideChartTabMenus(mnuViewChart);
   //  We defer calling LoadUserPreferences to UMInitiate, so that the font sizing
@@ -1285,7 +1320,7 @@ begin
   FDragAndDropFName := '';  //kt 4/15/14
   DragAcceptFiles(pnlPatientImage.Handle, True); //kt 4/15/14
   OriginalPanelWindowProc := pnlPatientImage.WindowProc;  //kt   4/16/14
-  pnlPatientImage.WindowProc := PanelWindowProc;            //kt   4/16/14
+  pnlPatientImage.WindowProc := PanelWindowProc;          //kt   4/16/14
   //kt 4/14/15 begin mod ----------
   bTimerOn := False;
   colorTimerOn := StringToColor(uTMGOptions.ReadString('colorTimerOn','$FFFF00'));
@@ -1303,8 +1338,15 @@ begin
   SetUpResizeButtons; //kt 4/28/21
   StartTimer := 0;  //11/2/21
   menuNurseNote.Visible := uTMGOptions.ReadBool('Use Quick Nurse Note',false);
+
+  TControlCracker(frameLRSplitter).OnMouseEnter := frameLRSplitterMouseEnter;  //kt-tabs 11/26/22
+  TControlCracker(frameLRSplitter).OnMouseLeave := frameLRSplitterMouseLeave;  //kt-tabs 11/26/22
+  SetTabOpenMode(tpoClosed);
+  ResizeTabs(false);
+
   //timCheckSequel.Enabled := True;
   //Application.OnMessage := AppMessage;
+  //self.OnResize := FormResize;  //kt 11/26/22  <-- is this needed??
   //kt end mod ------------------- /
 end;
 
@@ -1340,7 +1382,6 @@ begin
   end;
 end;
 
-
 procedure TfrmFrame.ShowLetterWriterClick(Sender: TObject);
 //kt 9/11 Added entire function
 begin
@@ -1349,29 +1390,77 @@ begin
   frmLetterWriter.Free;
 end;
 
-
-procedure TfrmFrame.SetATabVisibility(ATabID: integer; Visible: boolean; ALabel:string='x');
+procedure TfrmFrame.SetATabVisibility(APageID: integer; Visible: boolean; ALabel:string='x');
 //kt 9/11 added entire function;
 //kt Note: if Visible=True, then ALabel is expected to contain label for tab. (Not remembered from before setting visible=false)
 //Note: This presumes that CreateTab has already been called prior to setting visiblity.
-var index : integer;
+var //index : integer;
+    //tempTabPage : TTabControl;
+    ATabPage      : TTabControl;
+    ASide         : TTabPageSide;
+    TabIndex      : integer;
+    PriorIndex, i : integer;
+
 begin
-  index := uTabList.IndexOf(IntToStr(ATabID));
+  for ASide := tpsLeft to tpsRight do begin
+    ATabPage := FTabPages[ASide];
+    TabIndex := PageIDToTabIndex(ASide, APageID);
+    if Visible = true then begin
+      if TabIndex > -1 then exit; //already visible.
+      FTabList[ASide].AddObject(IntToStr(APageID), pointer(ATabPage.Tabs.Count));
+      ATabPage.Tabs.Add(ALabel);
+    end else begin
+      if TabIndex = -1 then exit; //nothing to hide.
+      ATabPage.Tabs.Delete(TabIndex);
+      //Delete reference in FTabList, and reorder other elements
+      //NOTE: if there are 12 tabs, and [10] is deleted, then any references
+      //      to [11] and [12] must be renumbered to [10] and [11]
+      i := 0;
+      while i < FTabList[ASide].Count do begin
+        PriorIndex := integer(FTabList[ASide].Objects[i]);
+        if PriorIndex = TabIndex then begin
+          FTabList[ASide].Delete(i);
+          continue;
+        end;
+        if PriorIndex > TabIndex then begin
+          FTabList[ASide].Objects[i] := pointer(PriorIndex - 1);
+        end;
+        inc(i);
+      end;
+    end;
+  end;
+  {
+  //kt note (12/1/22) -- I am suspicious that uTabList is not being kept in proper order after a tab is hidden and then shown again....
+  //                     I haven't yet fully investigated...
+  index := uTabList.IndexOf(IntToStr(APageID));
   if (index > -1) and (Visible=false) then begin
     uTabList.Delete(index);
-    tabPage.Tabs.Delete(index);
+    for ASide := tpsLeft to tpsRight do begin
+      tempTabPage := FTabPages[ASide];
+      tempTabPage.Tabs.Delete(index);
+    end;
   end else if (index < 0) and (Visible=true) then begin
-    if ATabID = CT_COVER then begin
-      uTabList.Insert(0, IntToStr(ATabID));
-      tabPage.Tabs.Insert(0, ALabel);
-      tabPage.TabIndex := 0;
+    if APageID = CT_COVER then begin
+      uTabList.Insert(0, IntToStr(APageID));
+      for ASide := tpsLeft to tpsRight do begin //kt-tabs
+        tempTabPage := FTabPages[ASide];
+        tempTabPage.Tabs.Insert(0, ALabel);
+        tempTabPage.TabIndex := 0;
+      end;
     end else begin
-      uTabList.Add(IntToStr(ATabID));
-      tabPage.Tabs.Add(ALabel);
+      uTabList.Add(IntToStr(APageID));
+      for ASide := tpsLeft to tpsRight do begin  //kt-tabs
+        tempTabPage := FTabPages[ASide];
+        tempTabPage.Tabs.Add(ALabel);
+      end;
     end;
   end else if (index > -1) and (Visible=true) then begin
-    tabPage.Tabs.Strings[index] := ALabel;  //ensure label is correct.
+    for ASide := tpsLeft to tpsRight do begin //kt-tabs
+      tempTabPage := FTabPages[ASide];
+      tempTabPage.Tabs.Strings[index] := ALabel;  //ensure label is correct.
+    end;
   end;
+  }
 end;
 
 
@@ -1396,7 +1485,6 @@ begin
         SetOneWebTabPerServer(i, URLList[i]);
       end;
     end;
-
   finally
     URLList.Free;
   end;
@@ -1409,11 +1497,11 @@ procedure TfrmFrame.SetOneWebTabPerServer(WebTabNum: integer; URLMsg : string);
 //            ^<!HIDE!>     <-- will make tab invisible
 //WebTabNum must be 1..(CT_LAST_WEBTAB-CT_WEBTAB1+1)
 var
-  ATabID : integer;
+  APageID : integer;
   TabLabel,URL : string;
 begin
-  ATabID := WebTabNum + CT_WEBTAB1 - 1;
-  if (ATabID < CT_WEBTAB1) or (ATabID > CT_LAST_WEBTAB) then exit;
+  APageID := WebTabNum + CT_WEBTAB1 - 1;
+  if (APageID < CT_WEBTAB1) or (APageID > CT_LAST_WEBTAB) then exit;
   TabLabel := piece (URLMsg,'^',1);
   URL := pieces (URLMsg,'^',2,32);
   //returns e.g. 'www.yahoo.com^^^^^^^^^^' etc,
@@ -1422,9 +1510,9 @@ begin
     Delete(URL,Length(URL),1);
   end;
   if URL='<!HIDE!>' then begin
-    SetATabVisibility(ATabID, false);
+    SetATabVisibility(APageID, false);
   end else if URL<>'<!NOCHANGE!>' then begin
-    SetATabVisibility(ATabID, true, TabLabel);
+    SetATabVisibility(APageID, true, TabLabel);
     tempFrmWebTab := TfrmWebTab(WebTabsList[WebTabNum-1]);
     if tempFrmWebTab <> nil then tempFrmWebTab.NagivateTo(URL);
   end;
@@ -1496,12 +1584,14 @@ end;
 
 procedure TfrmFrame.FormDestroy(Sender: TObject);
 { free core objects used by CPRS }
-begiN
+var
+  ASide : TTabPageSide;
+begin
   Application.OnActivate := FOldActivate;
   Screen.OnActiveFormChange := FOldActiveFormChange;
   FNextButtonBitmap.Free;
   if FNextButton <> nil then FNextButton.Free;
-  uTabList.Free;
+  for ASide := tpsLeft to tpsRight do FTabList[ASide].Free;
   TabColorsList.Free;  //kt 9/11 added
   FlaggedPTList.Free;
   RemoteSites.Free;
@@ -1513,6 +1603,7 @@ begiN
   User.Free;
   SizeHolder.Free;
   ctxContextor.Free;
+  FfrmPagesList.Free; //kt-tabs  Doesn't own objects
   DragAcceptFiles(pnlPatientImage.Handle, False); //kt 4/15/14
 end;
 
@@ -1784,8 +1875,7 @@ procedure TfrmFrame.UMNewOrder(var Message: TMessage);
 var
   OrderAct: string;
 begin
-  with Message do
-  begin
+  with Message do begin
     frmCover.NotifyOrder(WParam, TOrder(LParam));
     frmProblems.NotifyOrder(WParam, TOrder(LParam));
     frmMeds.NotifyOrder(WParam, TOrder(LParam));
@@ -1817,32 +1907,45 @@ end;
 { Tab Selection (navigate between pages) --------------------------------------------------- }
 
 procedure TfrmFrame.WMSetFocus(var Message: TMessage);
+var ALastPage : TfrmPage;  //kt-tabs 11/26/22
 begin
-  if (FLastPage <> nil) and (not TimedOut) and
-     (not (csDestroying in FLastPage.ComponentState)) and FLastPage.Visible
-    then FLastPage.FocusFirstControl;
+  //kt tabs mod
+  ALastPage := FLastPages[TabCtrlClickedSide];
+  if (ALastPage <> nil) and (not TimedOut) and
+ (not (csDestroying in ALastPage.ComponentState)) and ALastPage.Visible
+  then ALastPage.FocusFirstControl;
 end;
 
 procedure TfrmFrame.UMShowPage(var Message: TMessage);
 { shows a page when the UM_SHOWPAGE message is received }
 begin
   if FCCOWDrivedChange then FCCOWDrivedChange := False;
-  if FLastPage <> nil then FLastPage.DisplayPage;
+  //kt-tabs mod
+  if Assigned(FLastPages[TabCtrlClickedSide]) then FLastPages[TabCtrlClickedSide].DisplayPage;
+
   FChangeSource := CC_CLICK;  // reset to click so we're only dealing with exceptions to click
   if assigned(FTabChanged) then
     FTabChanged(Self);
 end;
 
-procedure TfrmFrame.SwitchToPage(NewForm: TfrmPage);
+
+procedure TfrmFrame.SwitchToPage(ASide: TTabPageSide; NewForm: TfrmPage);
+//kt-tabs 11/26/22  NOTE: This is overloaded version of code above.  Later, try to combine to avoid duplicate code.
 { unmerge/merge menus, bring page to top of z-order, call form-specific OnDisplay code }
+var
+  APnlPage : TPanel;
+  PriorForm : TfrmPage;
 begin
-  if FLastPage = NewForm then begin
+  APnlPage := PnlPages[ASide];
+  PriorForm := FLastPages[ASide];
+  if PriorForm = NewForm then begin
     if Notifications.Active and Assigned(NewForm) then PostMessage(Handle, UM_SHOWPAGE, 0, 0);
     Exit;
   end;
-  if (FLastPage <> nil) then begin
-    mnuFrame.Unmerge(FLastPage.Menu);
-    FLastPage.Hide;
+  if Assigned(PriorForm) then begin
+    mnuFrame.Unmerge(FLastPages[ASide].Menu);
+    PriorForm.Align := alNone;
+    PriorForm.Hide;
   end;
   if Assigned(NewForm) then begin
     {if ((FLastPage = frmOrders) and (NewForm.Name <> frmMeds.Name))
@@ -1851,7 +1954,9 @@ begin
       if not CloseOrdering then
         Exit;
     end;}
+    NewForm.Parent := APnlPage;  //kt-tabs.  This will set it to appear on right vs left side
     mnuFrame.Merge(NewForm.Menu);
+    NewForm.Align := alClient; //kt-tabs
     NewForm.Show;
   end;
   lstCIRNLocations.Visible := False;
@@ -1860,32 +1965,51 @@ begin
   mnuFilePrint.Enabled := False;           // let individual page enable this
   mnuFilePrintSetup.Enabled := False;      // let individual page enable this
   mnuFilePrintSelectedItems.Enabled := False;
-  FLastPage := NewForm;
-  if NewForm <> nil then begin
-    if NewForm.Name = frmNotes.Name then frmNotes.Align := alClient
-      else frmNotes.Align := alNone;
-    if NewForm.Name = frmConsults.Name then frmConsults.Align := alClient
-      else frmConsults.Align := alNone;
-    if NewForm.Name = frmReports.Name then frmReports.Align := alClient
-      else frmReports.Align := alNone;
-    if NewForm.Name = frmDCSumm.Name then frmDCSumm.Align := alClient
-      else frmDCSumm.Align := alNone;
-    if Assigned(frmSurgery) then
-      if NewForm.Name = frmSurgery.Name then frmSurgery.Align := alclient
-        else frmSurgery.Align := alNone;
+  FLastPages[ASide] := NewForm;
+  if not Assigned(NewForm) then exit;
 
-    //kt 9/11 -- start addition
-    if Assigned (frmImages) and (NewForm.Name = frmImages.Name) then begin
-      frmImages.Align := alClient;
-    end else begin
-      frmImages.Align := alNone;
-    end;
-    //kt 9/11 -- end addition
-    NewForm.BringToFront;                    // to cause tab switch to happen immediately
-//CQ12232 NewForm.FocusFirstControl;
-    Application.ProcessMessages;
-    PostMessage(Handle, UM_SHOWPAGE, 0, 0);  // this calls DisplayPage for the form
+  {
+  //kt removed 12/2/22.  I don't know why this is needed.  And if other form is visible on
+  //                     other side, then changing it's align would not be appropriate
+  //           If I end up needing this, then I should cycle through list of all
+  //           forms, and see if they equal NewForm, and if NOT, and is also NOT
+  //           on other side, THEN change align to alNone
+
+  if NewForm.Name = frmNotes.Name then frmNotes.Align := alClient
+    else frmNotes.Align := alNone;
+  if NewForm.Name = frmConsults.Name then frmConsults.Align := alClient
+    else frmConsults.Align := alNone;
+  if NewForm.Name = frmReports.Name then frmReports.Align := alClient
+    else frmReports.Align := alNone;
+  if NewForm.Name = frmDCSumm.Name then frmDCSumm.Align := alClient
+    else frmDCSumm.Align := alNone;
+  if Assigned(frmSurgery) then
+    if NewForm.Name = frmSurgery.Name then frmSurgery.Align := alclient
+      else frmSurgery.Align := alNone;
+
+  //kt 9/11 -- start addition
+  if Assigned (frmImages) and (NewForm.Name = frmImages.Name) then begin
+    frmImages.Align := alClient;
+  end else begin
+    frmImages.Align := alNone;
   end;
+  }
+
+  if Assigned (frmNotes) and (NewForm.Name = frmNotes.Name) and (ASide = tpsRight) then begin  //kt-tabs
+  //kt debug if working later...
+    //kt Note: The following two lines must be done **AFTER**
+    //         the assigment of Parent to a Panel.  Otherwise
+    //         the ActiveX object looses its attachement point
+    //         or something and the document objects turns nil.
+    frmNotes.HtmlViewer.Loaded;  //kt 9/11
+    frmNotes.HtmlEditor.Loaded;  //kt 9/11
+  end;
+
+  //kt 9/11 -- end addition
+  NewForm.BringToFront;                    // to cause tab switch to happen immediately
+//CQ12232 NewForm.FocusFirstControl;
+  Application.ProcessMessages;
+  PostMessage(Handle, UM_SHOWPAGE, 0, 0);  // this calls DisplayPage for the form
 end;
 
 procedure TfrmFrame.mnuChangeESClick(Sender: TObject);
@@ -1895,38 +2019,227 @@ end;
 
 procedure TfrmFrame.mnuChartTabClick(Sender: TObject);
 { use the Tag property of the menu item to switch to proper page }
+var APageID : TPageID;
 begin
- SelectChartTab(TMenuItem(Sender).Tag);
- //kt with Sender as TMenuItem do tabPage.TabIndex := PageIDToTab(Tag);
- //kt LastTab := TabToPageID(tabPage.TabIndex) ;
- //kt tabPageChange(tabPage);
+  APageID := TMenuItem(Sender).Tag;  //values for .Tag are the same as CT_COVER, CT_PROBLEMS, etc., defined in uConst.pas
+  SelectChartTab(APageID);
 end;
 
 
-procedure TfrmFrame.SelectChartTab(PageID : integer);
+function TfrmFrame.MainSideTabWidthTarget(Mode: TTabPageOpenMode) : integer;
+const
+  PCT_SIZE : array[tpoOpen .. tpoClosed] of integer = (40, 2); //RIGHT side will be this % of total form width based on mode
+var LPct : real;
+begin
+  LPct := (100-PCT_SIZE[Mode])/100;
+  Result  := Floor(pnlMain.Width * LPct);
+end;
+
+procedure TfrmFrame.SetTabOpenMode(Mode: TTabPageOpenMode); //kt-tabs
+begin
+  FTabPageOpenMode := Mode;
+  case Mode of
+    tpoClosed : begin
+                  SelectChartTab(tpsRight, CT_NOPAGE);
+                  frameLRSplitter.Color := clBtnFace;
+                end;
+    tpoOpen :   begin
+                  SelectChartTab(tpsRight, CT_ORDERS); //change to default page ....  ? set by param?
+                  frameLRSplitter.Color := clSkyBlue; //clBtnHighlight;
+                end;
+  end; //case
+  pnlMainL.Width := MainSideTabWidthTarget(FTabPageOpenMode);
+end;
+
+procedure TfrmFrame.SelectChartTab(PageID : TPageID);
+begin
+  SelectChartTab(TabCtrlClickedSide, PageID);  //kt-tabs mod
+end;
+
+procedure TfrmFrame.SelectChartTab(ASide : TTabPageSide; PageID : TPageID);
 //kt added 12/10/20, taken from mnuChartTabClick above
 //kt NOTE PageID example:  CT_NOTES    =  6;  defined in uConst
+var
+  ATabPage : TTabControl;
 begin
-  tabPage.TabIndex := PageIDToTab(PageID);
-  LastTab := TabToPageID(tabPage.TabIndex) ;
-  tabPageChange(tabPage);
+  ATabPage := FTabPages[ASide];
+  ATabPage.TabIndex := PageIDToTabIndex(ASide, PageID);
+  LastTabPageID[ASide] := PageID; //kt TabIndexToPageID(ATabPage.TabIndex);
+  tabPagesChange(ASide);
 end;
 
+
+procedure TfrmFrame.SelectChartTabByIndex(ASide : TTabPageSide; TabIndex : integer);   //kt-tabs added
+var
+  ATabPage : TTabControl;
+begin
+  ATabPage := FTabPages[ASide];
+  ATabPage.TabIndex := TabIndex;
+  LastTabPageID[ASide] := TabIndexToPageID(ASide, ATabPage.TabIndex);
+  tabPagesChange(ASide);
+end;
+
+
+function  TfrmFrame.GetLastTabs(Index : TTabPageSide) : integer;   //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : Result := FLastTabL;
+    tpsRight : Result := FLastTabR;
+    else       Result := FLastTabL;
+  end;
+end;
+
+procedure TfrmFrame.SetLastTabs(Index : TTabPageSide; value : integer);  //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : FLastTabL := value;
+    tpsRight : FLastTabR := value;
+  end;
+end;
+
+function  TfrmFrame.GetNextTabs(Index : TTabPageSide) : integer;   //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft : Result := FNextTabL;
+    tpsRight : Result := FNextTabR;
+    else       Result := 0;
+  end;
+end;
+
+procedure TfrmFrame.SetNextTab(Index : TTabPageSide; value : integer);  //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : FNextTabL := value;
+    tpsRight : FNextTabR := value;
+  end;
+end;
+
+function  TfrmFrame.GetChangingTab(Index : TTabPageSide) : integer;  //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : Result := FChangingTabL;
+    tpsRight : Result := FChangingTabR;
+    else       Result := 0;
+  end;
+end;
+
+procedure TfrmFrame.SetChangingTab(Index : TTabPageSide; value : integer);  //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : FChangingTabL := value;
+    tpsRight : FChangingTabR := value;
+  end;
+end;
+
+function TfrmFrame.OtherPageSide(ASide : TTabPageSide) : TTabPageSide;  //kt-tabs 11/26/22
+begin
+  case ASide of
+    tpsLeft  : Result := tpsRight;
+    tpsRight : Result := tpsLeft;
+    else       Result := tpsLeft;
+  end;
+end;
+
+function TfrmFrame.TabSide(ATabPage : TTabControl) : TTabPageSide;  //kt-tabs;
+begin
+  if ATabPage = tabPageR then begin
+    Result := tpsRight;
+  end else begin
+    Result := tpsLeft;
+  end;
+end;
+
+function TfrmFrame.GetFLastPage(Index : TTabPageSide) : TFrmPage;      //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : Result := FLastPageL;
+    tpsRight : Result := FLastPageR;
+    else       Result := nil;
+  end;
+end;
+
+procedure TfrmFrame.SetFLastPage(Index : TTabPageSide; value : TFrmPage);    //kt-tabs 11/26/22
+begin
+  case index of
+    tpsLeft  : FLastPageL := value;
+    tpsRight : FLastPageR := value;
+  end;
+end;
+
+function TfrmFrame.TabPage(ASide : TTabPageSide = tpsUnspecified) : TTabControl; //kt-tabs added 12/1/22
+begin
+  if ASide = tpsUnspecified then ASide := TabCtrlClickedSide;
+  Result := FTabPages[ASide];
+end;
+
+procedure TfrmFrame.tabPagesChange(ASide: TTabPageSide);  //kt-tabs
+{ switches to form linked to NewTab }
+var
+  PageID, OtherPageID : TPageID;
+  ATabPage, OtherTabPage : TTabControl;
+  OtherSide : TTabPageSide;
+
+begin
+  ATabPage := FTabPages[ASide];
+  OtherSide := OtherPageSide(ASide);
+  OtherTabPage := TabPage(OtherSide);
+  PageID := TabIndexToPageID(ASide, ATabPage.TabIndex);
+  if PageID = CT_PROBLEMS then ProbTabClicked := true; //needed in fProbs
+  if User.IsReportsOnly then PageID := CT_REPORTS;  // Reports Only tab.
+  OtherPageID := TabIndexToPageID(Otherside, OtherTabPage.TabIndex);
+  if (PageID = OtherPageID) and (PageID <> CT_NOPAGE) then begin   //kt-tabs
+    if User.IsReportsOnly then begin
+      OtherPageID := CT_NOPAGE;
+    end else if OtherSide = tpsLeft then begin
+      if PageID <> CT_COVER then begin
+        OtherPageID := CT_COVER;
+      end else begin
+        OtherPageID := CT_NOTES;
+      end;
+    end;
+    SelectChartTab(OtherSide, OtherPageID);
+  end;
+  TabCtrlClickedSide := ASide;  //Should be done AFTER other side is changed.
+  if (PageID <> CT_NOPAGE) and (ATabPage.CanFocus) and Assigned(FLastPages[ASide]) and (not ATabPage.Focused) then begin
+    try       //eRx  9/4/12   SetFocus caused as error if eRx alert was selected before the first patient
+      ATabPage.SetFocus;  //CQ: 14854
+    except
+      //Do Nothing
+    end;
+  end;
+  case PageID of
+    CT_NOPAGE:   SwitchToPage(Aside,nil);
+    CT_COVER:    SwitchToPage(Aside,frmCover);
+    CT_PROBLEMS: SwitchToPage(Aside,frmProblems);
+    CT_MEDS:     SwitchToPage(Aside,frmMeds);
+    CT_ORDERS:   SwitchToPage(Aside,frmOrders);
+    CT_NOTES:    SwitchToPage(Aside,frmNotes);
+    CT_CONSULTS: SwitchToPage(Aside,frmConsults);
+    CT_DCSUMM:   SwitchToPage(Aside,frmDCSumm);
+    CT_SURGERY:  SwitchToPage(Aside,frmSurgery);
+    CT_LABS:     SwitchToPage(Aside,frmLabs);
+    CT_REPORTS:  SwitchToPage(Aside,frmReports);
+    CT_IMAGES:   SwitchToPage(Aside,frmImages);     //kt 9/11
+    CT_MAILBOX:  SwitchToPage(Aside,frmMailbox);    //tmg
+    CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
+  end; {case}
+  if ScreenReaderSystemActive and FCtrlTabUsed then
+    SpeakPatient;
+  ChangingTabs[ASide] := PageID;
+end;
 
 procedure TfrmFrame.tabPageChange(Sender: TObject);
 { switches to form linked to NewTab }
-var
-  PageID : integer;
+//var
+//  PageID   : integer;
 begin
-  if frmNotes.frmNotesLoading<>nil then begin  //tmg 5/12/20
-     frmNotes.frmNotesLoading.Free;
-     frmNotes.frmNotesLoading := nil;
-  end;
-  PageID := TabToPageID((sender as TTabControl).TabIndex);
-  if (PageID <> CT_NOPAGE) and (TabPage.CanFocus) and Assigned(FLastPage) and
-     (not TabPage.Focused) then begin
+  tabPagesChange(TabSide(TTabControl(sender))); //kt
+  {
+  //kt ----------
+  PageID := TabIndexToPageID(ATabPage.TabIndex);
+  if (PageID <> CT_NOPAGE) and (TabPage.CanFocus) and Assigned(FLastPage) and (not TabPage.Focused) then begin
     try       //eRx  9/4/12   SetFocus caused as error if eRx alert was selected before the first patient
-    TabPage.SetFocus;  //CQ: 14854
+      TabPage.SetFocus;  //CQ: 14854
     except
       //Do Nothing
     end;
@@ -1946,41 +2259,17 @@ begin
       CT_REPORTS:  SwitchToPage(frmReports);
       CT_IMAGES:   SwitchToPage(frmImages);     //kt 9/11
       CT_MAILBOX:  SwitchToPage(frmMailbox);
-      CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(WebTabsList[PageID-CT_WEBTAB1]);  //kt 9/11
-    end; {case}
-  end
-  else // Reports Only tab.
+      CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
+    end; //case
+  end else begin // Reports Only tab.
     SwitchToPage(frmReports);
-  if ScreenReaderSystemActive and FCtrlTabUsed then
+  end;
+  if ScreenReaderSystemActive and FCtrlTabUsed then begin
     SpeakPatient;
+  end;
   ChangingTab := PageID;
+  }
 end;
-
-function TfrmFrame.PageIDToTab(PageID: Integer): Integer;
-{ returns the tab index that corresponds to a given PageID }
-VAR
-  i: integer;
-begin
-  i :=  uTabList.IndexOf(IntToStr(PageID));
-  Result := i;
-  //Result := uTabList.IndexOf(IntToStr(PageID));
-  (*
-  Result := -1;
-  case PageID of
-    CT_NOPAGE:   Result := -1;
-    CT_COVER:    Result :=  0;
-    CT_PROBLEMS: Result :=  1;
-    CT_MEDS:     Result :=  2;
-    CT_ORDERS:   Result :=  3;
-   {CT_HP:       Result :=  4;}
-    CT_NOTES:    Result :=  4;
-    CT_CONSULTS: Result :=  5;
-    CT_DCSUMM:   Result :=  6;
-    CT_LABS:     Result :=  7;
-    CT_REPORTS:  Result :=  8;
-  end;*)
-end;
-
 
 procedure TfrmFrame.PatientImageClick(Sender: TObject);
 //kt added 4/14/14
@@ -2004,7 +2293,6 @@ begin
 end;
 
 procedure TfrmFrame.PatientImageMouseEnter(Sender: TObject);
-var refresh : boolean;
 begin
   inherited;
   try
@@ -2026,28 +2314,43 @@ begin
 
 end;
 
-function TfrmFrame.TabToPageID(Tab: Integer): Integer;
-{ returns the constant that identifies the page given a TabIndex }
+function  TfrmFrame.TabPageID(ASide : TTabPageSide = tpsUnspecified) : TPageID;
+//kt-tabs 12/1/22
+//Return ID (e.g. CT_COVER) of active tab page.
+var tabIndex : integer;
 begin
-  if (Tab > -1) and (Tab < uTabList.Count) then
-    Result := StrToIntDef(uTabList[Tab], CT_UNKNOWN)
-  else
-    Result := CT_NOPAGE;
-(*  case Tab of
-   -1: Result := CT_NOPAGE;
-    0: Result := CT_COVER;
-    1: Result := CT_PROBLEMS;
-    2: Result := CT_MEDS;
-    3: Result := CT_ORDERS;
-   {4: Result := CT_HP;}
-    4: Result := CT_NOTES;
-    5: Result := CT_CONSULTS;
-    6: Result := CT_DCSUMM;
-    7: Result := CT_LABS;
-    8: Result := CT_REPORTS;
-  end;*)
+  if ASide=tpsUnspecified then begin    //THIS IS JUST A TEST 12/6/22
+    Result :=-1;
+    exit;
+  end;
+  TabIndex := TabPage(ASide).TabIndex;
+  Result := TabIndexToPageID(ASide, TabIndex);
 end;
 
+function TfrmFrame.PageIDToTabIndex(ASide : TTabPageSide; PageID : TPageID): Integer;
+// FTabList used as FTabList.strings[] = <PageID>, and object FTabList.objects[] = <TabIndex>
+//       e.g. FTabList.IndexOf(CT_NOTES) --> E.g. 5, FTabList[5].object is tab index of CT_NOTES)
+var i : integer;
+begin
+  Result := -1;
+  i := FTabList[ASide].IndexOf(IntToStr(PageID));
+  if i > -1 then result := integer(FTabList[ASide].Objects[i]);
+end;
+
+
+function TfrmFrame.TabIndexToPageID(ASide : TTabPageSide; TabIndex: Integer): TPageID;
+// FTabList used as FTabList.strings[] = <PageID>, and object FTabList.objects[] = <TabIndex>
+//       e.g. FTabList.IndexOf(CT_NOTES) --> E.g. 5, FTabList[5].object is tab index of CT_NOTES)
+var i : integer;
+begin
+  Result := CT_NOPAGE;
+  for i := 0 to FTabList[ASide].Count - 1 do begin
+    if integer(FTabList[ASide].Objects[i]) = TabIndex then begin
+      Result := StrToIntDef(FTabList[ASide].Strings[i], CT_UNKNOWN);
+      break;
+    end;
+  end;
+end;
 
 
 procedure TfrmFrame.timCheckSequelTimer(Sender: TObject);
@@ -2143,7 +2446,8 @@ end;
 procedure TfrmFrame.mnuFileNextClick(Sender: TObject);
 var
   SaveDFN, NewDFN: string; // *DFN*
-  NextIndex: Integer;
+  //kt NextIndex: Integer;
+  NextPage : TPageID; //kt
   Reason: string;
   CCOWResponse: UserResponse;
   AccessStatus: integer;
@@ -2240,9 +2544,14 @@ begin
     end;
     stsArea.Panels.Items[1].Text := Notifications.Text;
     FChangeSource := CC_NOTIFICATION;
-    NextIndex := PageIDToTab(CT_COVER);
-    tabPage.TabIndex := CT_NOPAGE;
-    tabPageChange(tabPage);
+    NextPage := CT_COVER;
+
+    //kt-tabs mod
+    //TabPage(tpsLeft).TabIndex := CT_NOPAGE;
+    //tabPagesChange(tpsLeft);
+    SelectChartTab(tpsLeft, CT_NOPAGE);
+    SelectChartTab(tpsRight, CT_NOPAGE);
+
     mnuFileNotifRemove.Enabled := Notifications.Followup in [NF_FLAGGED_ORDERS,
                                                              NF_ORDER_REQUIRES_ELEC_SIGNATURE,
                                                              NF_MEDICATIONS_EXPIRING_INPT,
@@ -2252,79 +2561,75 @@ begin
                                                              NF_FLAGGED_OI_EXP_INPT,
                                                              NF_FLAGGED_OI_EXP_OUTPT];
     case Notifications.FollowUp of
-      NF_LAB_RESULTS                   : NextIndex := PageIDToTab(CT_LABS);
-      NF_FLAGGED_ORDERS                : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_ORDER_REQUIRES_ELEC_SIGNATURE : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_ABNORMAL_LAB_RESULTS          : NextIndex := PageIDToTab(CT_LABS);
-      NF_IMAGING_RESULTS               : NextIndex := PageIDToTab(CT_REPORTS);
-      NF_CONSULT_REQUEST_RESOLUTION    : NextIndex := PageIDToTab(CT_CONSULTS);
-      NF_ABNORMAL_IMAGING_RESULTS      : NextIndex := PageIDToTab(CT_REPORTS);
-      NF_IMAGING_REQUEST_CANCEL_HELD   : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_NEW_SERVICE_CONSULT_REQUEST   : NextIndex := PageIDToTab(CT_CONSULTS);
-      NF_CONSULT_REQUEST_CANCEL_HOLD   : NextIndex := PageIDToTab(CT_CONSULTS);
-      NF_SITE_FLAGGED_RESULTS          : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_ORDERER_FLAGGED_RESULTS       : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_ORDER_REQUIRES_COSIGNATURE    : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_LAB_ORDER_CANCELED            : NextIndex := PageIDToTab(CT_ORDERS);
+      NF_LAB_RESULTS                   : NextPage := CT_LABS;
+      NF_FLAGGED_ORDERS                : NextPage := CT_ORDERS;
+      NF_ORDER_REQUIRES_ELEC_SIGNATURE : NextPage := CT_ORDERS;
+      NF_ABNORMAL_LAB_RESULTS          : NextPage := CT_LABS;
+      NF_IMAGING_RESULTS               : NextPage := CT_REPORTS;
+      NF_CONSULT_REQUEST_RESOLUTION    : NextPage := CT_CONSULTS;
+      NF_ABNORMAL_IMAGING_RESULTS      : NextPage := CT_REPORTS;
+      NF_IMAGING_REQUEST_CANCEL_HELD   : NextPage := CT_ORDERS;
+      NF_NEW_SERVICE_CONSULT_REQUEST   : NextPage := CT_CONSULTS;
+      NF_CONSULT_REQUEST_CANCEL_HOLD   : NextPage := CT_CONSULTS;
+      NF_SITE_FLAGGED_RESULTS          : NextPage := CT_ORDERS;
+      NF_ORDERER_FLAGGED_RESULTS       : NextPage := CT_ORDERS;
+      NF_ORDER_REQUIRES_COSIGNATURE    : NextPage := CT_ORDERS;
+      NF_LAB_ORDER_CANCELED            : NextPage := CT_ORDERS;
       NF_STAT_RESULTS                  :
         if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'LRCH' then
-          NextIndex := PageIDToTab(CT_LABS)
+          NextPage := CT_LABS
         else if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'GMRC' then
-          NextIndex := PageIDToTab(CT_CONSULTS)
+          NextPage := CT_CONSULTS
         else if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'RA' then
-          NextIndex := PageIDToTab(CT_REPORTS);
-      NF_DNR_EXPIRING                  : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_MEDICATIONS_EXPIRING_INPT     : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_MEDICATIONS_EXPIRING_OUTPT    : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_UNVERIFIED_MEDICATION_ORDER   : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_NEW_ORDER                     : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_IMAGING_RESULTS_AMENDED       : NextIndex := PageIDToTab(CT_REPORTS);
-      NF_CRITICAL_LAB_RESULTS          : NextIndex := PageIDToTab(CT_LABS);
-      NF_UNVERIFIED_ORDER              : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_FLAGGED_OI_RESULTS            : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_FLAGGED_OI_ORDER              : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_DC_ORDER                      : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_DEA_AUTO_DC_CS_MED_ORDER      : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_DEA_CERT_REVOKED              : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_CONSULT_UNSIGNED_NOTE         : NextIndex := PageIDToTab(CT_CONSULTS);
-      NF_DCSUMM_UNSIGNED_NOTE          : NextIndex := PageIDToTab(CT_DCSUMM);
-      NF_NOTES_UNSIGNED_NOTE           : NextIndex := PageIDToTab(CT_NOTES);
-      NF_MAILBOX                       : NextIndex := PageIDToTab(CT_MAILBOX);  //TMG  8/26/19
-      NF_TASKEVENT                     : NextIndex := PageIDToTab(CT_REPORTS);  //TMG  11/16/22.  Will show TaskEvent editor on top of Reports tab.
-      NF_CONSULT_REQUEST_UPDATED       : NextIndex := PageIDToTab(CT_CONSULTS);
-      NF_FLAGGED_OI_EXP_INPT           : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_FLAGGED_OI_EXP_OUTPT          : NextIndex := PageIDToTab(CT_ORDERS);
-      NF_CONSULT_PROC_INTERPRETATION   : NextIndex := PageIDToTab(CT_CONSULTS);
+          NextPage := CT_REPORTS;
+      NF_DNR_EXPIRING                  : NextPage := CT_ORDERS;
+      NF_MEDICATIONS_EXPIRING_INPT     : NextPage := CT_ORDERS;
+      NF_MEDICATIONS_EXPIRING_OUTPT    : NextPage := CT_ORDERS;
+      NF_UNVERIFIED_MEDICATION_ORDER   : NextPage := CT_ORDERS;
+      NF_NEW_ORDER                     : NextPage := CT_ORDERS;
+      NF_IMAGING_RESULTS_AMENDED       : NextPage := CT_REPORTS;
+      NF_CRITICAL_LAB_RESULTS          : NextPage := CT_LABS;
+      NF_UNVERIFIED_ORDER              : NextPage := CT_ORDERS;
+      NF_FLAGGED_OI_RESULTS            : NextPage := CT_ORDERS;
+      NF_FLAGGED_OI_ORDER              : NextPage := CT_ORDERS;
+      NF_DC_ORDER                      : NextPage := CT_ORDERS;
+      NF_DEA_AUTO_DC_CS_MED_ORDER      : NextPage := CT_ORDERS;
+      NF_DEA_CERT_REVOKED              : NextPage := CT_ORDERS;
+      NF_CONSULT_UNSIGNED_NOTE         : NextPage := CT_CONSULTS;
+      NF_DCSUMM_UNSIGNED_NOTE          : NextPage := CT_DCSUMM;
+      NF_NOTES_UNSIGNED_NOTE           : NextPage := CT_NOTES;
+      NF_MAILBOX                       : NextPage := CT_MAILBOX;
+      NF_TASKEVENT                     : NextPage := CT_REPORTS;  //TMG  11/16/22.  Will show TaskEvent editor on top of Reports tab.
+      NF_CONSULT_REQUEST_UPDATED       : NextPage := CT_CONSULTS;
+      NF_FLAGGED_OI_EXP_INPT           : NextPage := CT_ORDERS;
+      NF_FLAGGED_OI_EXP_OUTPT          : NextPage := CT_ORDERS;
+      NF_CONSULT_PROC_INTERPRETATION   : NextPage := CT_CONSULTS;
       NF_IMAGING_REQUEST_CHANGED       :
           begin
              ReportBox(GetNotificationFollowUpText(Patient.DFN, Notifications.FollowUp, Notifications.AlertData), Pieces(Piece(Notifications.RecordID, U, 1), ':', 2, 3), True);
              Notifications.Delete;
           end;
-      NF_LAB_THRESHOLD_EXCEEDED        : NextIndex := PageIDToTab(CT_LABS);
-      NF_MAMMOGRAM_RESULTS             : NextIndex := PageIDToTab(CT_REPORTS);
-      NF_PAP_SMEAR_RESULTS             : NextIndex := PageIDToTab(CT_REPORTS);
-      NF_ANATOMIC_PATHOLOGY_RESULTS    : NextIndex := PageIDToTab(CT_REPORTS);
-      NF_SURGERY_UNSIGNED_NOTE         : if TabExists(CT_SURGERY) then
-                                           NextIndex := PageIDToTab(CT_SURGERY)
-                                         else
-                                           InfoBox(TX_NO_SURG_NOTIF, TC_NO_SURG_NOTIF, MB_OK);
-                                           //NextIndex := PageIDToTab(CT_NOTES);
+      NF_LAB_THRESHOLD_EXCEEDED        : NextPage := CT_LABS;
+      NF_MAMMOGRAM_RESULTS             : NextPage := CT_REPORTS;
+      NF_PAP_SMEAR_RESULTS             : NextPage := CT_REPORTS;
+      NF_ANATOMIC_PATHOLOGY_RESULTS    : NextPage := CT_REPORTS;
+      NF_SURGERY_UNSIGNED_NOTE         : if TabExists(CT_SURGERY) then NextPage := CT_SURGERY
+                                         else InfoBox(TX_NO_SURG_NOTIF, TC_NO_SURG_NOTIF, MB_OK);
       //eRx  9/4/12      begin
       NF_ERX_REFILL_NEEDED             : begin
-                                           NextIndex := PageIDToTab(CT_MEDS);
+                                           NextPage := CT_MEDS;
                                            CallERx(ERX_ACTION_ALERT);
                                            Notifications.Delete;
                                          end;
       NF_ERX_INCOMPLETE_ORDER          : begin
-                                           NextIndex := PageIDToTab(CT_MEDS);
+                                           NextPage := CT_MEDS;
                                            CallERx(ERX_ACTION_ORDER);
                                            Notifications.Delete;
                                          end;
       //eRx  9/4/12      end
       else InfoBox(TX_UNK_NOTIF, TC_UNK_NOTIF, MB_OK);
     end;  //case
-    tabPage.TabIndex := NextIndex;
-    tabPageChange(tabPage);
+    SelectChartTab(tpsLeft, NextPage);
   end else mnuFileOpenClick(mnuFileNext);
 end;
 
@@ -2369,7 +2674,8 @@ begin
   else PTSwitchRefresh := False;  //part of a change to CQ #11529
   PtSelCancelled := FALSE;
   if not FRefreshing then mnuFile.Tag := 0 else mnuFile.Tag := 1;
-  DetermineNextTab;
+  DetermineNextTab(tpsLeft);  //kt-mod
+
 (*  if (FRefreshing or User.UseLastTab) and (not FFirstLoad) then
     NextTab := TabToPageID(tabPage.TabIndex)
   else
@@ -2412,7 +2718,7 @@ begin
     SaveDFN := Patient.DFN;
 
   if bTimerOn then btnTimerResetClick(nil);    //10/29/20
-    
+
   OldRemindersStarted := RemindersStarted;
   RemindersStarted := FALSE;
   try
@@ -2477,8 +2783,7 @@ begin
       if FCCOWInstalled and (ctxContextor.State = csParticipating) and (not FRefreshing) then begin
         if (AllowCCOWContextChange(CCOWResponse, Patient.DFN)) then begin
           SetupPatient;
-          tabPage.TabIndex := PageIDToTab(NextTab);
-          tabPageChange(tabPage);
+          SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
         end else begin
           case CCOWResponse of
             urCancel: UpdateCCOWContext;
@@ -2486,20 +2791,17 @@ begin
                        // do not revert to old DFN if context was manually broken by user - v26 (RV)
                        if (ctxContextor.State = csParticipating) then Patient.DFN := SaveDFN;
                        SetupPatient;
-                       tabPage.TabIndex := PageIDToTab(NextTab);
-                       tabPageChange(tabPage);
+                       SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
                      end;
             else     begin
                        SetupPatient;
-                       tabPage.TabIndex := PageIDToTab(NextTab);
-                       tabPageChange(tabPage);
+                       SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
                      end;
           end; //case
         end;
       end else begin
         SetupPatient;
-        tabPage.TabIndex := PageIDToTab(NextTab);
-        tabPageChange(tabPage);
+        SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
       end;
     end;
   finally
@@ -2555,30 +2857,31 @@ begin
    end;}
  end;
  if fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '' then begin
-   SwitchToPage(frmNotes);
+   //SwitchToPage(tpsLeft, frmNotes); //kt-tabs mod
+   SelectChartTab(tpsLeft, CT_NOTES);
    Application.ProcessMessages;
    frmNotes.ChangeToNote(fSearchResults.TMGSearchResultsLastSelectedTIUIEN);
  end;
  //kt  END MOD 11/1/13 -----------------------------------------------------------
 end;
 
-procedure TfrmFrame.DetermineNextTab;
+procedure TfrmFrame.DetermineNextTab(ASide: TTabPageSide);  //kt-tabs 11/26/22
 begin
   if (FRefreshing or User.UseLastTab) and (not FFirstLoad) then begin
-    if (tabPage.TabIndex < 0) then begin
-      NextTab := LastTab
+    if (FTabPages[ASide].TabIndex < 0) then begin
+      NextTabs[ASide] := LastTabPageID[ASide];
     end else begin
-      NextTab := TabToPageID(tabPage.TabIndex);
+      NextTabs[ASide] := TabIndexToPageID(ASide, FTabPages[ASide].TabIndex);
     end;
   end else begin
-    NextTab := User.InitialTab;
+    NextTabs[ASide] := User.InitialTab;
   end;
-  if NextTab = CT_NOPAGE then NextTab := User.InitialTab;
+  if NextTabs[ASide] = CT_NOPAGE then NextTabs[ASide] := User.InitialTab;
   if User.IsReportsOnly then // Reports Only tab.
-    NextTab := CT_REPORTS; // Only one tab should exist by this point in "REPORTS ONLY" mode.
-  if not TabExists(NextTab) then NextTab := CT_COVER;
-  if NextTab = CT_NOPAGE then NextTab := User.InitialTab;
-  if NextTab = CT_ORDERS then begin
+    NextTabs[ASide] := CT_REPORTS; // Only one tab should exist by this point in "REPORTS ONLY" mode.
+  if not TabExists(NextTabs[ASide]) then NextTabs[ASide] := CT_COVER;
+  if NextTabs[ASide] = CT_NOPAGE then NextTabs[ASide] := User.InitialTab;
+  if NextTabs[ASide] = CT_ORDERS then begin
     if frmOrders <> nil then with frmOrders do begin
       if (lstSheets.ItemIndex > -1 ) and (TheCurrentView <> nil) and (theCurrentView.EventDelay.PtEventIFN>0) then begin
         PtEvtCompleted(TheCurrentView.EventDelay.PtEventIFN, TheCurrentView.EventDelay.EventName);
@@ -2586,6 +2889,7 @@ begin
     end;
   end;
 end;
+
 
 procedure TfrmFrame.mnuFileEncounterClick(Sender: TObject);
 { displays encounter window and updates encounter display in case encounter was updated }
@@ -2600,6 +2904,7 @@ procedure TfrmFrame.mnuFileReviewClick(Sender: TObject);
 var
   EventChanges: boolean;
   NameNeedLook: string;
+  ASide: TTabPageSide; //kt
 begin
   FReviewClick := True;
   mnuFile.Tag := 1;
@@ -2613,8 +2918,11 @@ begin
       frmOrders.PtEvtCompleted(frmOrders.TheCurrentView.EventDelay.PtEventIFN, frmOrders.TheCurrentView.EventDelay.EventName);
     end;
     ReviewChanges(TimedOut, EventChanges);
-    if TabToPageID(tabPage.TabIndex)= CT_MEDS then begin
-      frmOrders.InitOrderSheets2(NameNeedLook);
+    for ASide := tpsLeft to tpsRight do begin
+      //kt if TabIndexToPageID(tabPage.TabIndex)= CT_MEDS then begin
+      if TabPageID(ASide) = CT_MEDS then begin  //kt
+        frmOrders.InitOrderSheets2(NameNeedLook);
+      end;
     end;
   end else InfoBox('No new changes to review/sign.', 'Review Changes', MB_OK);
   //CQ #17491: Moved UpdatePtInfoOnRefresh here to allow for the updating of the patient status indicator
@@ -2935,8 +3243,7 @@ begin
   pnlVistaWeb.BevelOuter := bvLowered;
 end;
 
-procedure TfrmFrame.pnlVistaWebMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
+procedure TfrmFrame.pnlVistaWebMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited;
   pnlVistaWeb.BevelOuter := bvRaised;
@@ -3121,33 +3428,46 @@ begin
   end;
 end;
 
-procedure TfrmFrame.FormResize(Sender: TObject);
-{ need to resize tab forms specifically since they don't inherit resize event (because they
-  are derived from TForm itself) }
-var i,index : integer; //kt 9/11
+procedure TfrmFrame.ResizeTabs(AutoFixSideTab: boolean = true);  //kt-tabs 11/26/22
+//kt-tabs 7/25/21  - split out of Resize event handler FormResize()
+var i,index : integer;
+   // width, height : integer;
+
+  procedure DoMove(APage : TFrmpage);
+  var height, width: integer;
+  begin
+    if not assigned(APage) then exit;
+    height := APage.Parent.ClientHeight;
+    width := APage.Parent.ClientWidth;
+    MoveWindow(APage.Handle, 0, 0, width, height, True);
+  end;
+
 begin
   if FTerminate or FClosing then Exit;
   if csDestroying in ComponentState then Exit;
-  MoveWindow(frmCover.Handle,    0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmProblems.Handle, 0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmMeds.Handle,     0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmOrders.Handle,   0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmNotes.Handle,    0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmConsults.Handle, 0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmDCSumm.Handle,   0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  if Assigned(frmSurgery) then MoveWindow(frmSurgery.Handle,     0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmLabs.Handle,     0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmReports.Handle,  0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-  MoveWindow(frmMailbox.Handle,  0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
+  if AutoFixSideTab then begin //kt
+    pnlMainL.Width := MainSideTabWidthTarget(FTabPageOpenMode);
+  end;
+
+  DoMove(frmCover);
+  DoMove(frmProblems);
+  DoMove(frmMeds);
+  DoMove(frmOrders);
+  DoMove(frmNotes);
+  DoMove(frmConsults);
+  DoMove(frmDCSumm);
+  DoMove(frmSurgery);
+  DoMove(frmLabs);
+  DoMove(frmReports);
+  DoMove(frmMailbox);
+
   //kt 9/11 -- start addition --
   for i := CT_WEBTAB1 to CT_LAST_WEBTAB do begin
     index := i-CT_WEBTAB1;
-    if WebTabsList[index]=nil then continue;
     tempFrmWebTab := TfrmWebTab(WebTabsList[index]);
-    if tempFrmWebTab <> nil then begin
-      MoveWindow(tempFrmWebTab.Handle,  0, 0, pnlPage.ClientWidth, pnlPage.ClientHeight, True);
-    end;
+    DoMove(tempFrmWebTab);
   end;
+  PositionSplitterHandle;
   //kt 9/11 -- end addition --
   with stsArea do begin
     Panels[1].Width := stsArea.Width - FFixedStatusWidth;
@@ -3163,7 +3483,124 @@ begin
     FNextButton.Left := FNextButtonL;
     FNextButton.Top := stsArea.Top;
   end;
+  FitToolBar;  //kt added 11/26/22
+  if (TabPageID(tpsRight) = CT_ORDERS) then PositionSideTabTextOrderDialog(uOrderDialog);
   Self.Repaint;
+end;
+
+procedure TfrmFrame.PositionSideTabTextOrderDialog(Dialog : TForm);
+var
+  PosPt : TPoint;  //kt-tabs added
+
+begin
+  if not Assigned(Dialog) then exit;
+  Dialog.borderStyle := bsSizeToolWin;
+  //overlap frmOrders.lstOrders object.
+  PosPt := frmOrders.lstOrders.ClientToScreen(Point(0,0));
+  Dialog.Top := Abs(PosPt.Y);
+  Dialog.Left := Abs(PosPt.X);
+  Dialog.Width := frmOrders.lstOrders.Width;
+  Dialog.Height := frmOrders.lstOrders.Height;
+end;
+
+procedure TfrmFrame.FormResize(Sender: TObject);
+{ need to resize tab forms specifically since they don't inherit resize event (because they
+  are derived from TForm itself) }
+begin
+  ResizeTabs;
+end;
+
+procedure TfrmFrame.frameLRSplitterMoved(Sender: TObject);//kt-tabs
+begin
+  //kt-tabs added 7/23/21
+  inherited;
+  ResizeTabs(false);
+end;
+
+procedure TfrmFrame.PositionSplitterHandle;  //kt-tabs
+
+  procedure SetBtnBitmap(index : integer);
+  var BMP : TBitmap;
+  begin
+    BMP := TBitmap.Create;
+    try
+      BMP.SetSize(ImageListSplitterHandle.Width, ImageListSplitterHandle.Height);
+      ImageListSplitterHandle.GetBitmap(index, BMP);
+      btnSplitterHandle.Glyph.Assign(BMP);
+    finally
+      BMP.free
+    end;
+  end;
+
+begin
+  btnSplitterHandle.Left := frameLRSplitter.Left;
+  {case FTabPageOpenMode of
+    tpoOpen :  begin
+                 btnSplitterHandle.Left := frameLRSplitter.Left;
+               end;
+    tpoClosed: begin
+                 btnSplitterHandle.Left := frameLRSplitter.Left - btnSplitterHandle.Width + frameLRSplitter.Width;
+               end;
+  end; }
+  SetBtnBitmap(ord(FTabPageOpenMode));
+  btnSplitterHandle.Top := Floor((pnlPageL.Height - btnSplitterHandle.Height)/2);
+end;
+
+procedure TfrmFrame.frameLRSplitterMouseEnter(Sender: TObject);  //kt-tabs
+//kt-tabs added 7/23/21
+begin
+  inherited;
+  btnSplitterHandle.Visible := true;
+  frameLRSplitter.Color := clSkyBlue; //clBtnHighlight;
+end;
+
+procedure TfrmFrame.frameLRSplitterMouseLeave(Sender: TObject);  //kt-tabs
+//kt-tabs added 7/23/21
+begin
+  inherited;
+  timHideSplitterHandle.Enabled := false;
+  timHideSplitterHandle.Enabled := true;  //reset timer
+end;
+
+function TfrmFrame.ToggleTabPageOpenMode(Mode: TTabPageOpenMode) : TTabpageOpenMode; //kt-tabs
+begin
+  if Mode = tpoOpen then Result := tpoClosed else Result := tpoOpen;
+end;
+
+procedure TfrmFrame.btnSplitterHandleClick(Sender: TObject);  //kt-tabs
+//kt-tabs added 7/23/21
+var NewMode: TTabPageOpenMode;
+begin
+  inherited;
+  NewMode := ToggleTabPageOpenMode(FTabPageOpenMode);
+  SetTabOpenMode(NewMode);
+  ResizeTabs(false);
+end;
+
+procedure TfrmFrame.timHideSplitterHandleTimer(Sender: TObject);  //kt-tabs
+begin
+  inherited;
+  btnSplitterHandle.Visible := false;
+  timHideSplitterHandle.Enabled := false;
+  if FTabPageOpenMode = tpoClosed then begin
+    frameLRSplitter.Color := clBtnFace;
+  end;
+  tabPageR.Visible := (FTabPageOpenMode = tpoOpen) or (pnlMainL.Width < MainSideTabWidthTarget(tpoClosed));
+end;
+
+procedure TfrmFrame.btnSplitterHandleMouseEnter(Sender: TObject);  //kt-tabs
+begin
+  inherited;
+  timHideSplitterHandle.Enabled := false;
+  frameLRSplitter.Color := clSkyBlue; //clBtnHighlight;
+  tabPageR.Visible := true;
+end;
+
+procedure TfrmFrame.btnSplitterHandleMouseLeave(Sender: TObject);
+begin
+  inherited;
+  timHideSplitterHandle.Enabled := false;
+  timHideSplitterHandle.Enabled := true;  //reset timer
 end;
 
 procedure TfrmFrame.ChangeFont(NewFontSize: Integer);
@@ -3174,6 +3611,7 @@ const
   TAB_VOFFSET = 7;
 var
   OldFont: TFont;
+  ASide: TTabPageSide;  //kt-tabs
 begin
 // Ho ho!  ResizeAnchoredFormToFont(self) doesn't work here because the
 // Form size is aliased with MainFormSize.
@@ -3200,13 +3638,16 @@ begin
         Font.Size := NewFontSize;
         ItemHeight := NewFontSize + 6;
       end;
-      with tabPage        do Font.Size := NewFontSize;
+      for ASide := tpsLeft to tpsRight do begin  //kt-tabs mod
+        with FTabPages[ASide] do Font.Size := NewFontSize;
+        FTabPages[ASide].Height := MainFontHeight + TAB_VOFFSET;   // resize tab selector
+      end;
+
       with laMHV          do Font.Size := NewFontSize; //VAA
       with laVAA2         do Font.Size := NewFontSize; //VAA
 
       frmFrameHeight := frmFrame.Height;
       pnlPatientSelectedHeight := pnlPatientSelected.Height;
-      tabPage.Height := MainFontHeight + TAB_VOFFSET;   // resize tab selector
       FitToolbar;                                       // resize toolbar
       stsArea.Font.Size := NewFontSize;
       stsArea.Height := MainFontHeight + TAB_VOFFSET;
@@ -3276,8 +3717,11 @@ const
   M_NVERT       = 4;
   M_WVERT       = 6;
   TINY_MARGIN   = 2;
-//var
+var
   //WidthNeeded: integer;
+  LeftWidthUsed, RightWidthUsed, CenterWidth  : integer; //tmg
+  AControl : TControl; //tmg
+  i : integer; //tmg
 begin
   if lblPtMHTC.caption = '' then begin
     lblPtMHTC.Visible := false;
@@ -3325,13 +3769,13 @@ begin
   if pnlPrimaryCare.Width < HigherOf( lblPtCare.Left + lblPtCare.Width, HigherOf(lblPtAttending.Left + lblPtAttending.Width,lblPtMHTC.Left + lblPtMHTC.Width)) + TINY_MARGIN then
   //if pnlPrimaryCare.Width < HigherOf( lblPtCare.Left + lblPtCare.Width, lblPtAttending.Left + lblPtAttending.Width) + TINY_MARGIN then
   begin
-    lblPtAge.Left := lblPtAge.Left - (lblPtName.Left - TINY_MARGIN);
-    lblPtName.Left := TINY_MARGIN;
-    lblPTSSN.Left := TINY_MARGIN;
-    pnlPatient.Width := HigherOf( lblPtName.Left + lblPtName.Width, lblPtAge.Left + lblPtAge.Width)+ TINY_MARGIN;
+    lblPtAge.Left      := lblPtAge.Left - (lblPtName.Left - TINY_MARGIN);
+    lblPtName.Left     := TINY_MARGIN;
+    lblPTSSN.Left      := TINY_MARGIN;
+    pnlPatient.Width   := HigherOf( lblPtName.Left + lblPtName.Width, lblPtAge.Left + lblPtAge.Width)+ TINY_MARGIN;
     lblPtLocation.Left := TINY_MARGIN;
     lblPtProvider.Left := TINY_MARGIN;
-    pnlVisit.Width := HigherOf( lblPtLocation.Left + lblPtLocation.Width, lblPtProvider.Left + lblPtProvider.Width)+ TINY_MARGIN;
+    pnlVisit.Width     := HigherOf( lblPtLocation.Left + lblPtLocation.Width, lblPtProvider.Left + lblPtProvider.Width)+ TINY_MARGIN;
   end;
   pnlSchedule.Width := round(pnlPrimaryCare.Width/2);
   //pnlSchedule.Width := pnlPrimaryCare.Width;
@@ -3346,6 +3790,34 @@ begin
   end
   else }   // commented out - BA
     HorzScrollBar.Range := 0;
+
+  //tmg begin mod 11/26/22
+  //+<<<<<<<<+<<<<<<<<<<<<<<<<+<<<<<<<<<<<+<<<<<<<<<+<<<<<<<<<<<<<<<+------------+>>>>>>>+>>>>>>>>>>>+>>>>>>>>>+>>>>>>>>>>>>>>+>>>>>>>>>>>>>+>>>>>>>>>>>>+
+  //  alLeft      alLeft        alLeft      alLeft       alLeft       alClient    alRight  alRight     alRight     alRight       alRight      alRight
+  //+--------+----------------+-----------+---------+---------------+------------+-------+-----------+---------+--------------+-------------+------------+
+  //|pnlCCOW |pnlPatientImage |pnlPatient |pnlVisit |pnlPrimaryCare |pnlSchedule |pnlVAA |pnlCVnFlag |pnlTimer |pnlRemoteData |pnlReminders |pnlPostings |
+  //+--------+----------------+-----------+---------+---------------+------------+-------+-----------+---------+--------------+-------------+------------+
+  //Code below handles situation when pnlToolbar is too narrow to accomodate all panels.
+  //Left side panels are left aligned, Right side panels are right aligned, and pnlSchedule is alClient to fill available.
+  //  But if there is not enough room for pnlSchedule, it is hidden, and pnlPrimaryCare is shrunk.
+  RightWidthUsed := 0;
+  LeftWidthUsed := 0;
+  for i := 0 to pnlToolBar.ControlCount-1 do begin
+    AControl := pnlToolBar.Controls[i];
+    if not (AControl is tPanel) then continue;
+    if AControl.Visible = false then continue;
+    if AControl.Align = alRight then RightWidthUsed := RightWidthUsed + AControl.Width;
+    if AControl.Align = alLeft  then LeftWidthUsed  := LeftWidthUsed  + AControl.Width;
+  end;
+  CenterWidth := pnlToolbar.Width - leftWidthUsed - RightWidthUsed;
+  if CenterWidth < 0 then begin  //no room left for pnlSchedule
+    pnlSchedule.Visible := false;
+    pnlPrimaryCare.Width := pnlPrimaryCare.Width + CenterWidth;  //(CenterWidth here is NEGATIVE)
+  end else begin
+    pnlSchedule.Visible := true;
+  end;
+  //tmg end mod
+
 end;
 
 { Temporary Calls -------------------------------------------------------------------------- }
@@ -3375,13 +3847,6 @@ begin
       ChangeFont(Tag);
     end;
   end;
-end;
-
-procedure TfrmFrame.mnuFrameChange(Sender: TObject; Source: TMenuItem; Rebuild: Boolean);
-var i:integer;
-begin
-  inherited;
-  i := i + 1;
 end;
 
 procedure TfrmFrame.mnuEditClick(Sender: TObject);
@@ -3444,7 +3909,7 @@ end;
 
 procedure TfrmFrame.mnuFilePrintClick(Sender: TObject);
 begin
-  case mnuFilePrint.Tag of
+  case mnuFilePrint.Tag of       //note: this is set in the DisplayPage function of the various tab pages forms.
   CT_NOTES:    frmNotes.RequestPrint;
   CT_CONSULTS: frmConsults.RequestPrint;
   CT_DCSUMM:   frmDCSumm.RequestPrint;
@@ -3461,8 +3926,11 @@ begin
 end;
 
 procedure TfrmFrame.WMSysCommand(var Message: TMessage);
+var PageID : TPageID; //kt-tabs
 begin
-  case TabToPageID(tabPage.TabIndex) of
+  PageID := TabIndexToPageID(TabCtrlClickedSide, tabPage.TabIndex);
+  //kt tabs original -> case TabToPageID(tabPage.TabIndex) of
+  case PageID of
     CT_NOTES: begin
       if Assigned(Screen.ActiveControl.Parent) and (Screen.ActiveControl.Parent.Name = 'cboCosigner') then begin
         with Message do begin
@@ -4012,8 +4480,8 @@ begin
                    NewSize := ALLOWED_SIZES[SizeIdx];
                 end;
   end; {case}
+  FakeMenuItem := TMenuItem.Create(Self);
   try
-    FakeMenuItem := TMenuItem.Create(Self);
     FakeMenuItem.Tag := NewSize;
     mnuFontSizeClick(FakeMenuItem);
   finally
@@ -4059,92 +4527,129 @@ begin
   end;
 end;
 
-
-procedure TfrmFrame.CreateTab(ATabID: integer; ALabel: string);
-var TempFrmWebTab : TfrmWebTab;  //kt 9/11 added
+function TfrmFrame.PageName(APage : TFrmPage) : string;
+//kt-tabs Added entire function 1/16/23
+var i : integer;
 begin
-  //  old comment - try making owner self (instead of application) to see if solves TMenuItem.Insert bug
-  case ATabID of
+  Result := '';
+  i := FfrmPagesList.IndexOfObject(APage);
+  if i > -1 then Result := FfrmPagesList.Strings[i];
+end;
+
+
+procedure TfrmFrame.CreateTab(ASide: TTabPageSide; APageID: integer; ALabel: string; visible : boolean = true);  //kt-tabs
+//note: This is overloade version of code below. Later combine to avoid duplicate code
+var TempFrmWebTab : TfrmWebTab;  //kt 9/11 added
+    HolderPanel : TPanel;        //kt-tabs
+    ATabPage : TTabControl;      //kt-tabs
+    APageSide: TTabPageSide;     //kt-tabs
+begin
+  if (APageID = CT_SURGERY) and (ShowSurgeryTab = false) then exit;  //kt added
+  HolderPanel := PnlPages[ASide]; //kt-tabs
+  if not assigned(FfrmPagesList) then FfrmPagesList := TStringList.Create; //kt-tabs
+  case APageID of
     CT_PROBLEMS : begin
                     frmProblems := TfrmProblems.Create(Self);
-                    frmProblems.Parent := pnlPage;
+                    frmProblems.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmProblems.Name, frmProblems);  //kt-tabs
                   end;
     CT_MEDS     : begin
                     frmMeds := TfrmMeds.Create(Self);
-                    frmMeds.Parent := pnlPage;
+                    frmMeds.Parent := HolderPanel;
                     frmMeds.InitfMedsSize;
+                    FfrmPagesList.AddObject(frmMeds.Name, frmMeds);     //kt-tabs
                   end;
     CT_ORDERS   : begin
                     frmOrders := TfrmOrders.Create(Self);
-                    frmOrders.Parent := pnlPage;
+                    frmOrders.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmOrders.Name, frmOrders);  //kt-tabs
                   end;
     CT_HP       : begin
                     // not yet
                   end;
     CT_NOTES    : begin
                     frmNotes := TfrmNotes.Create(Self);
-                    frmNotes.Parent := pnlPage;
+                    frmNotes.Parent := HolderPanel;
                     //kt Note: The following two lines must be done **AFTER**
-                    //         the assigment of Parent to pnlPage.  Otherwise
+                    //         the assigment of Parent to HolderPanel.  Otherwise
                     //         the ActiveX object looses its attachement point
                     //         or something and the document objects turns nil.
                     frmNotes.HtmlViewer.Loaded;  //kt 9/11
                     frmNotes.HtmlEditor.Loaded;  //kt 9/11
+                    FfrmPagesList.AddObject(frmNotes.Name, frmNotes);   //kt-tabs
                   end;
     CT_CONSULTS : begin
                     frmConsults := TfrmConsults.Create(Self);
-                    frmConsults.Parent := pnlPage;
+                    frmConsults.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmConsults.Name, frmConsults);   //kt-tabs
                   end;
     CT_DCSUMM   : begin
                     frmDCSumm := TfrmDCSumm.Create(Self);
-                    frmDCSumm.Parent := pnlPage;
+                    frmDCSumm.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmDCSumm.Name, frmDCSumm);  //kt-tabs
                   end;
     CT_LABS     : begin
                     frmLabs := TfrmLabs.Create(Self);
-                    frmLabs.Parent := pnlPage;
+                    frmLabs.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmLabs.Name, frmLabs);  //kt-tabs
                   end;
     CT_REPORTS  : begin
                     frmReports := TfrmReports.Create(Self);
-                    frmReports.Parent := pnlPage;
+                    frmReports.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmReports.Name, frmReports);  //kt-tabs
                   end;
     CT_SURGERY  : begin
                     frmSurgery := TfrmSurgery.Create(Self);
-                    frmSurgery.Parent := pnlPage;
+                    frmSurgery.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmSurgery.Name, frmSurgery);   //kt-tabs
                   end;
     CT_COVER    : begin
                     frmCover := TfrmCover.Create(Self);
-                    frmCover.Parent := pnlPage;
+                    frmCover.Parent := HolderPanel;
+                    FfrmPagesList.AddObject(frmCover.Name, frmCover);  //kt-tabs
                   end;
     CT_IMAGES  : begin                                                //kt 9/11
                     frmImages := TfrmImages.Create(Self);             //kt 9/11
-                    frmImages.Parent := pnlPage;                      //kt 9/11
+                    frmImages.Parent := HolderPanel;                  //kt 9/11
+                    FfrmPagesList.AddObject(frmImages.Name, frmImages);      //kt-tabs
                   end;                                                //kt 9/11
     CT_MAILBOX : begin                                                //kt 9/11
                     frmMailbox := TfrmMailbox.Create(Self);           //kt 9/11
-                    frmMailbox.Parent := pnlPage;                     //kt 9/11
+                    frmMailbox.Parent := HolderPanel;                 //kt 9/11
+                    FfrmPagesList.AddObject(frmMailbox.Name, frmMailbox);   //kt-tabs
                   end;                                                //kt 9/11
     CT_WEBTAB1..CT_LAST_WEBTAB : begin                                //kt 9/11
                     TempFrmWebTab := TfrmWebTab.Create(Self);         //kt 9/11
-                    TempFrmWebTab.Parent := pnlPage;                  //kt 9/11
+                    TempFrmWebTab.Parent := HolderPanel;              //kt 9/11
                     Application.ProcessMessages;                      //kt 8/5/17
-                    TempFrmWebTab.WebBrowser.Loaded;                  //kt 8/5/17
+                    //12/6/22 TempFrmWebTab.WebBrowser.Loaded;                  //kt 8/5/17
                     TempFrmWebTab.NagivateTo('about:blank');          //kt 8/5/17
-                    WebTabsList[ATabID-CT_WEBTAB1] := TempFrmWebTab;  //kt 9/11
+                    FfrmPagesList.AddObject(TempFrmWebTab.Name, TempFrmWebTab);    //kt-tabs
+                    WebTabsList[APageID-CT_WEBTAB1] := TempFrmWebTab;  //kt 9/11
                   end;                                                //kt 9/11
+    else {case}
+      Exit;
+  end; {case}
 
-  else
-    Exit;
+  if Visible then for APageSide := tpsLeft to tpsRight do begin  //insert all tabs into both tab controllers.       //kt-tabs
+    //only allow specified tabs to be on right side.
+    if (APageSide = tpsRight )and not (APageID in [CT_COVER,
+                                                   CT_PROBLEMS,
+                                                   CT_MEDS,
+                                                   CT_ORDERS,
+                                                   CT_LABS,
+                                                   CT_REPORTS,
+                                                   CT_WEBTAB1,
+                                                   CT_WEBTAB2,
+                                                   CT_WEBTAB3])  then continue;
+    ATabPage := FTabPages[APageSide];
+    FTabList[APageSide].AddObject(IntToStr(APageID), pointer(ATabPage.Tabs.Count)); //   .Add(IntToStr(ATabID));
+    ATabPage.Tabs.Add(ALabel);
+    ATabPage.TabIndex := 0;
   end;
-  if ATabID = CT_COVER then begin
-    uTabList.Insert(0, IntToStr(ATabID));
-    tabPage.Tabs.Insert(0, ALabel);
-    tabPage.TabIndex := 0;
-  end else begin
-    uTabList.Add(IntToStr(ATabID));
-    tabPage.Tabs.Add(ALabel);
-  end;
-  TabColorsList.Add(IntToStr(ATabID));  //will put colors in later...  //kt 9/11
+  TabColorsList.Add(IntToStr(APageID));  //will put colors in later...  //kt 9/11
 end;
+
 
 procedure TfrmFrame.LoadTabColors(ColorsList : TStringList);
 //kt 9/11 added
@@ -4195,56 +4700,58 @@ end;
 procedure TfrmFrame.ShowHideChartTabMenus(AMenuItem: TMenuItem);
 var
   i: integer;
+  APageID : TPageID;
 begin
   for i := 0 to AMenuItem.Count - 1 do begin
-    AMenuItem.Items[i].Visible := TabExists(AMenuItem.Items[i].Tag);
+    APageID := AMenuItem.Items[i].Tag;  //values for .Tag are the same as CT_COVER, CT_PROBLEMS, etc., defined in uConst.pas
+    AMenuItem.Items[i].Visible := TabExists(APageID);
   end;
 end;
 
-function TfrmFrame.TabExists(ATabID: integer): boolean;
+function TfrmFrame.TabExists(APageID: TPageID): boolean;
 begin
-  Result := (uTabList.IndexOf(IntToStr(ATabID)) > -1)
+  Result := (FTabList[tpsLeft].IndexOf(IntToStr(APageID))  > -1) or
+            (FTabList[tpsRight].IndexOf(IntToStr(APageID)) > -1);
 end;
 
 procedure TfrmFrame.ReportsOnlyDisplay;
 begin
+  // Configure "Edit" menu:
+  menuHideAllBut(mnuEdit, mnuEditPref);     // Hide everything under Edit menu except Preferences.
+  menuHideAllBut(mnuEditPref, Prefs1); // Hide everything under Preferences menu except Fonts.
 
-// Configure "Edit" menu:
-menuHideAllBut(mnuEdit, mnuEditPref);     // Hide everything under Edit menu except Preferences.
-menuHideAllBut(mnuEditPref, Prefs1); // Hide everything under Preferences menu except Fonts.
+  // Remaining pull-down menus:
+  mnuView.visible := false;
+  mnuFileRefresh.visible := false;
+  mnuFileEncounter.visible := false;
+  mnuFileReview.visible := false;
+  mnuFileNext.visible := false;
+  mnuFileNotifRemove.visible := false;
+  mnuHelpBroker.visible := false;
+  mnuHelpLists.visible := false;
+  mnuHelpSymbols.visible := false;
 
-// Remaining pull-down menus:
-mnuView.visible := false;
-mnuFileRefresh.visible := false;
-mnuFileEncounter.visible := false;
-mnuFileReview.visible := false;
-mnuFileNext.visible := false;
-mnuFileNotifRemove.visible := false;
-mnuHelpBroker.visible := false;
-mnuHelpLists.visible := false;
-mnuHelpSymbols.visible := false;
+  // Top panel components:
+  pnlVisit.hint := 'Provider/Location';
+  pnlVisit.onMouseDown := nil;
+  pnlVisit.onMouseUp := nil;
 
-// Top panel components:
-pnlVisit.hint := 'Provider/Location';
-pnlVisit.onMouseDown := nil;
-pnlVisit.onMouseUp := nil;
+  // Forms for other tabs:
+  frmCover.visible := false;
+  frmProblems.visible := false;
+  frmMeds.visible := false;
+  frmOrders.visible := false;
+  frmNotes.visible := false;
+  frmConsults.visible := false;
+  frmDCSumm.visible := false;
+  if Assigned(frmSurgery) then
+    frmSurgery.visible := false;
+  frmLabs.visible := false;
 
-// Forms for other tabs:
-frmCover.visible := false;
-frmProblems.visible := false;
-frmMeds.visible := false;
-frmOrders.visible := false;
-frmNotes.visible := false;
-frmConsults.visible := false;
-frmDCSumm.visible := false;
-if Assigned(frmSurgery) then
-  frmSurgery.visible := false;
-frmLabs.visible := false;
-
-// Other tabs (so to speak):
-tabPage.tabs.clear;
-tabPage.tabs.add('Reports');
-
+  // Other tabs (so to speak):
+  FTabPages[tpsLeft].tabs.clear;
+  FTabPages[tpsRight].tabs.clear;
+  FTabPages[tpsLeft].tabs.add('Reports');
 end;
 
 procedure TfrmFrame.UpdatePtInfoOnRefresh;
@@ -4324,8 +4831,7 @@ begin
                  frmFrame.pnlCIRNClick(Sender);
      end;
 
-  if (Key = VK_TAB) then
-  begin
+  if (Key = VK_TAB) then begin
     if (ssCtrl in Shift) then begin
       FCtrlTabUsed := TRUE;
       if not (ActiveControl is TCustomMemo) or not TMemo(ActiveControl).WantTabs then begin
@@ -4379,8 +4885,11 @@ begin
     mnuChangeES.Visible := False;
   end;
   //kt end mod ------------------
-  if Assigned(FLastPage) then
-    FLastPage.FocusFirstControl;
+  //kt-tabs mod
+  if Assigned(FLastPages[tpsLeft]) then begin
+    FLastPages[tpsLeft].FocusFirstControl;
+  end;
+
 end;
 
 procedure TfrmFrame.pnlPrimaryCareEnter(Sender: TObject);
@@ -4630,8 +5139,7 @@ begin
       end;
       if User.IsProvider then Encounter.Provider := User.DUZ;
       SetupPatient;
-      tabPage.TabIndex := PageIDToTab(User.InitialTab);
-      tabPageChange(tabPage);
+      SelectChartTab(tpsLeft, User.InitialTab);
       Result := False;
     end;
   except
@@ -4836,9 +5344,9 @@ begin
     if User.IsProvider then Encounter.Provider := User.DUZ;
     if not FFirstLoad then SetupPatient;
     frmCover.UpdateVAAButton; //VAA
-    DetermineNextTab;
-    tabPage.TabIndex := PageIDToTab(NextTab);
-    tabPageChange(tabPage);
+    //kt-mod    
+    DetermineNextTab(tpsLeft);
+    SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
   end else
     HideEverything;
 end;
@@ -4926,8 +5434,7 @@ begin
     end;
   end;
   SetupPatient;
-  tabPage.TabIndex := PageIDToTab(User.InitialTab);
-  tabPageChange(tabPage);
+  SelectChartTab(tpsLeft, User.InitialTab);
 end;
 
 procedure TfrmFrame.CheckForDifferentPatient(aContextItemCollection: IDispatch; var PtChanged: boolean);
@@ -5071,6 +5578,12 @@ begin
   pnlFlag.BevelOuter := bvRaised;
 end;
 
+procedure TfrmFrame.pnlMainRResize(Sender: TObject);  //kt added
+begin
+  inherited;
+  tabPageR.Visible := (FTabPageOpenMode = tpoOpen) or (pnlMainL.Width < MainSideTabWidthTarget(tpoClosed));
+end;
+
 procedure TfrmFrame.pnlFlagClick(Sender: TObject);
 begin
   //ShowFlags;
@@ -5078,8 +5591,10 @@ begin
 end;
 
 procedure TfrmFrame.mnuFilePrintSelectedItemsClick(Sender: TObject);
+var PageID : TPageID; //kt-tabs
 begin
-  case TabToPageID(tabPage.TabIndex) of
+  PageID := TabIndexToPageID(TabCtrlClickedSide,tabPage.TabIndex);
+  case PageID of
     CT_NOTES:    frmNotes.LstNotesToPrint;
     CT_CONSULTS: frmConsults.LstConsultsToPrint;
     CT_DCSUMM:   frmDCSumm.LstSummsToPrint;
@@ -5174,17 +5689,25 @@ begin
   pnlFlag.BevelOuter := bvRaised;
 end;
 
+procedure TfrmFrame.tabPageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  ATabPage : TTabControl;
+  ASide : TTabPageSide;
+begin
+  if not (sender is TTabControl) then exit;
+  ATabPage := TTabControl(sender);
+  ASide := TabSide(ATabPage);
+  LastTabPageID[ASide] := TabIndexToPageID(ASide, ATabPage.TabIndex);
+  TabCtrlClicked := True;  //used in fProbs.
+  TabCtrlClickedSide := ASide; //used in fProbs.
+end;
+
 procedure TfrmFrame.tabPageMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
+//kt note: I don't think this event is used
 begin
   inherited;
   TabCtrlClicked := True;
-end;
-
-procedure TfrmFrame.tabPageMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-begin
-  LastTab := TabToPageID((sender as TTabControl).TabIndex);
 end;
 
 procedure TfrmFrame.lstCIRNLocationsExit(Sender: TObject);
@@ -5235,6 +5758,15 @@ begin
     FocusApplicationTopForm;
     Handled := True;
   end;
+end;
+
+procedure TfrmFrame.mnuToggleSidePanelClick(Sender: TObject);      //kt-tabs
+var NewMode: TTabPageOpenMode;
+begin
+  inherited;
+  NewMode := ToggleTabPageOpenMode(FTabPageOpenMode);
+  SetTabOpenMode(NewMode);
+  ResizeTabs(false);
 end;
 
 procedure TfrmFrame.mnuToolsGraphingClick(Sender: TObject);
@@ -5385,8 +5917,9 @@ begin
     1:begin { displays patient inquiry report (which optionally allows new patient to be selected) }
         StatusText(TX_PTINQ);
         PatientInquiry(SelectNew);
-        if Assigned(FLastPage) then
-          FLastPage.FocusFirstControl;
+        //kt-tabs mod
+        if Assigned(FLastPages[tpsLeft]) then
+          FLastPages[tpsLeft].FocusFirstControl;
         StatusText('');
         if SelectNew then mnuFileOpenClick(mnuViewDemo);
       end;
@@ -5595,9 +6128,8 @@ begin
   if EditResult <> mrCancel then mnuFileRefreshClick(Sender);
 end;
 
-procedure TfrmFrame.tabPageDrawTab(Control: TCustomTabControl; TabIndex: Integer;
-                                   const Rect: TRect; Active: Boolean);
-//kt 9/11 added
+procedure TfrmFrame.tabPageDrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect; Active: Boolean);
+//kt 9/11 added.  OnDrawTab Event handler for TTabControl
 var ALabel : string;
     color : TColor;
 begin
@@ -5612,6 +6144,7 @@ begin
     //TabPage.OwnerDraw := TabColorsEnabled;
   end;
 end;
+
 procedure TfrmFrame.DrawTab(Control: TCustomTabControl; TabIndex: Integer;
                            const Rect: TRect; Color : TColor; Active: Boolean);
 //kt 9/11 added
@@ -5626,42 +6159,6 @@ procedure TfrmFrame.DrawTab(Control: TCustomTabControl; TabIndex: Integer;
     tf            : TFont;
     Degrees       : integer;
     inactiveColor : TColor;
-
-    function DarkenRed(Color : TColor; Percent : byte) : TColor;
-    var red : longWord;
-    begin
-      red := (Color and $0000FF);
-      red := Round (red * (Percent/100));
-      Result := (Color and $FFFF00) or red;
-    end;
-
-    function DarkenGreen(Color : TColor; Percent : byte) : TColor;
-    var green : longWord;
-    begin
-      green := (Color and $00FF00);
-      green := green shr 8;
-      green := Round(green * (Percent/100));
-      green := green shl 8;
-      Result := (Color and $FF00FF) or green;
-    end;
-
-    function DarkenBlue(Color : TColor; Percent : byte) : TColor;
-    var blue : longWord;
-    begin
-      blue := (Color and $FF0000);
-      blue := blue shr 16;
-      Blue := Round (blue * (Percent/100));
-      blue := blue shl 16;
-      Result := (Color and $00FFFF) or blue;
-    end;
-
-   function Darken(Color : TColor; Percent : byte) : TColor;
-   begin
-     if Percent=0 then begin result := Color; exit; end;
-     result := DarkenRed(Color, Percent);
-     result := DarkenBlue(result,Percent);
-     result := DarkenGreen(result,Percent);
-   end;
 
   begin
     oRect    := Rect;
@@ -5779,23 +6276,15 @@ begin
 end;
 
 
-procedure TfrmFrame.SetActiveTab(PageID: Integer);
+procedure TfrmFrame.SetActiveTab(PageID: TPageID);
 begin
-  tabPage.TabIndex := frmFrame.PageIDToTab(PageID);
-  tabPageChange(tabPage);
+  SelectChartTab(PageID);
 end;
 
-function TfrmFrame.GetActiveTab: integer;
-//kt added 6/15
-//NOTE: results match to CT_COVER, CT_PROBLEMS, etc., defined in uConst.pas
+function TfrmFrame.GetActiveTab: TPageID;  //kt added 6/15
 begin
-  Result := tabPage.TabIndex;
-end; 
-          { REMOVE THIS
-procedure TfrmFrame.EPrescribing1Click(Sender: TObject);  //ERx 9/4/12
-begin
- CallERx(ERX_ACTION_ORDER);
-end;       }
+  Result := TabPageID(TabCtrlClickedSide);
+end;
 
 procedure TfrmFrame.NextButtonClick(Sender: TObject);
 begin

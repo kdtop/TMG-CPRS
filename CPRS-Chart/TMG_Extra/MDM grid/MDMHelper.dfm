@@ -147,7 +147,7 @@ object frmMDMGrid: TfrmMDMGrid
         ReadOnly = True
         TabOrder = 1
       end
-      object btnRefreshTime1: TButton
+      object btnNewPtRefreshTime: TButton
         Left = 558
         Top = 135
         Width = 75
@@ -155,7 +155,7 @@ object frmMDMGrid: TfrmMDMGrid
         Anchors = [akTop, akRight]
         Caption = 'Refresh'
         TabOrder = 2
-        OnClick = btnRefreshTime1Click
+        OnClick = btnNewPtRefreshTimeClick
       end
     end
     object pnlOldPtTimeAmount: TPanel
@@ -207,7 +207,7 @@ object frmMDMGrid: TfrmMDMGrid
         ReadOnly = True
         TabOrder = 1
       end
-      object Button1: TButton
+      object btnOldPtRefresh: TButton
         Left = 550
         Top = 140
         Width = 75
@@ -215,7 +215,7 @@ object frmMDMGrid: TfrmMDMGrid
         Anchors = [akTop, akRight]
         Caption = 'Refresh'
         TabOrder = 2
-        OnClick = Button1Click
+        OnClick = btnOldPtRefreshClick
       end
     end
     object pnlComplexity: TPanel
@@ -1567,7 +1567,7 @@ object frmMDMGrid: TfrmMDMGrid
         ReadOnly = True
         TabOrder = 1
       end
-      object Button2: TButton
+      object btnTeleMedRefresh: TButton
         Left = 558
         Top = 87
         Width = 75
@@ -1575,7 +1575,7 @@ object frmMDMGrid: TfrmMDMGrid
         Anchors = [akTop, akRight]
         Caption = 'Refresh'
         TabOrder = 2
-        OnClick = Button2Click
+        OnClick = btnTeleMedRefreshClick
       end
     end
     object pnlNewCPE: TPanel

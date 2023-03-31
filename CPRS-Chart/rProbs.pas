@@ -104,8 +104,12 @@ begin
 end ;
 
 function EditLoad(ProblemIFN: string; ProviderID: int64; ptVAMC: string): TStrings ;
+//kt NOTE: With patching of my system, it appears that the parameters ProviderID and ptVAMC has been REMOVED
+//         Because server code (as of 4/26/2019) only accepts 1 parameters (beyone return parameter), not 3.
+//         So will removed ProviderID and ptVAMC
 begin
-   CallV('ORQQPL EDIT LOAD',[ProblemIFN, ProviderID, ptVAMC]);
+   //kt CallV('ORQQPL EDIT LOAD',[ProblemIFN, ProviderID, ptVAMC]);
+   CallV('ORQQPL EDIT LOAD',[ProblemIFN]);  //kt mod  2/19/23
    Result := RPCBrokerV.Results ;
 end ;
 

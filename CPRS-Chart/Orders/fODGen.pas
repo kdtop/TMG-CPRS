@@ -28,27 +28,31 @@ type
     procedure cmdAcceptClick(Sender: TObject);
     procedure VA508CompMemOrderStateQuery(Sender: TObject; var Text: string);
   private
-    FilterOut: boolean;
-    TsID: string; //treating specialty id
-    TSDomain: string;
-    AttendID: string;
-    AttendDomain: string;
-    procedure ControlChange(Sender: TObject);
-    procedure LookupNeedData(Sender: TObject; const StartFrom: string;
-      Direction, InsertAt: Integer);
-    procedure PlaceControls;
-    procedure PlaceDateTime(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceFreeText(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceHidden(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem);
-    procedure PlaceNumeric(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceSetOfCodes(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceYesNo(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceLookup(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceMemo(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
-    procedure PlaceLabel(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem);
+    //kt moved to protected --> FilterOut: boolean;
+    //kt moved to protected --> TsID: string; //treating specialty id
+    //kt moved to protected --> TSDomain: string;
+    //kt moved to protected --> AttendID: string;
+    //kt moved to protected --> AttendDomain: string;
+    //kt moved to protected --> procedure ControlChange(Sender: TObject);
+    procedure LookupNeedData(Sender: TObject; const StartFrom: string; Direction, InsertAt: Integer);
+    //kt moved to protected --> procedure PlaceControls;
+    //kt moved to protected --> procedure PlaceDateTime(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceFreeText(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceHidden(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem);
+    //kt moved to protected --> procedure PlaceNumeric(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceSetOfCodes(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceYesNo(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceLookup(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceMemo(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
+    //kt moved to protected --> procedure PlaceLabel(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem);
     procedure TrimAllMemos;
     procedure SetComponentName(Editor: TWinControl; Index: Integer; DialogCtrl: TDialogCtrl);
   protected
+    FilterOut: boolean;                     //kt moved from private
+    TsID: string; //treating specialty id   //kt moved from private
+    TSDomain: string;                       //kt moved from private
+    AttendID: string;                       //kt moved from private
+    AttendDomain: string;                   //kt moved from private
     FFormCloseCalled : Boolean;
     FCharHt: Integer;
     FCharWd: Integer;
@@ -58,6 +62,19 @@ type
     FEditorTop: Integer;
     FFirstCtrl: TWinControl;
     FLabelWd: Integer;
+
+    procedure PlaceDateTime(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);       //kt moved from private
+    procedure PlaceFreeText(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);       //kt moved from private
+    procedure PlaceHidden(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem);                                     //kt moved from private
+    procedure PlaceNumeric(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);        //kt moved from private
+    procedure PlaceSetOfCodes(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);     //kt moved from private
+    procedure PlaceYesNo(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);          //kt moved from private
+    procedure PlaceLookup(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);         //kt moved from private
+    procedure PlaceMemo(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);           //kt moved from private
+    procedure PlaceLabel(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem);                                      //kt moved from private
+
+    procedure PlaceControls; virtual; //kt moved from private and added virtual
+    procedure ControlChange(Sender: TObject); virtual; //kt moved from private and added virtual
     procedure InitDialog; override;
     procedure SetDialogIEN(Value: Integer); override;
     procedure Validate(var AnErrMsg: string); override;
@@ -119,8 +136,7 @@ begin
   with FDialogCtrlList do for i := 0 to Count - 1 do
   begin
     DialogCtrl := TDialogCtrl(Items[i]);
-    with DialogCtrl do
-    begin
+    with DialogCtrl do begin
       if Prompt <> nil then Prompt.Free;
       if Editor <> nil then case DataType of
       'D': TORDateBox(Editor).Free;
@@ -164,28 +180,27 @@ var
   thePromptIen: integer;
   AResponse: TResponse;
   AnEvtResponse: TResponse;
+  DialogControl : TDialogCtrl; //kt
 begin
   inherited;
-  if OrderAction in [ORDER_COPY, ORDER_EDIT, ORDER_QUICK] then with Responses do
-  begin
+  if OrderAction in [ORDER_COPY, ORDER_EDIT, ORDER_QUICK] then with Responses do begin
     Changing := True;
     // for copy & edit, SetDialogIEN hasn't been called yet
     if (Length(ID) > 0) and (DialogIEN = 0) then SetDialogIEN(DialogForOrder(ID));
-    with FDialogCtrlList do for i := 0 to Count -1 do with TDialogCtrl(Items[i]) do
-    begin
-      if (ID = 'EVENT') and ( Responses.EventIFN > 0 ) then
-      begin
-        thePromptIen := GetIENForPrompt(ID);
-        if thePromptIen = 0 then
+    //kt original --> with FDialogCtrlList do for i := 0 to Count -1 do with TDialogCtrl(Items[i]) do begin
+    for i := 0 to FDialogCtrlList.Count -1 do begin
+      DialogControl := TDialogCtrl(FDialogCtrlList.Items[i]); //kt   I added all 'DialogControl.' additions below. Purpose is easier debugging.
+      if (DialogControl.ID = 'EVENT') and (Responses.EventIFN > 0) then begin
+        thePromptIen := GetIENForPrompt(DialogControl.ID);
+        if thePromptIen = 0 then begin
           thePromptIen := GetEventPromptID;
+        end;
         AResponse := FindResponseByName('EVENT', 1);
-        if AResponse <> nil then
-        begin
+        if AResponse <> nil then begin
           theEvtInfo := EventInfo1(AResponse.IValue);
           AResponse.EValue := Piece(theEvtInfo,'^',4);
         end;
-        if AResponse = nil then
-        begin
+        if AResponse = nil then begin
           AnEvtResponse := TResponse.Create;
           AnEvtResponse.PromptID  := 'EVENT';
           AnEvtResponse.PromptIEN := thePromptIen;
@@ -196,17 +211,15 @@ begin
           Responses.TheList.Add(AnEvtResponse);
         end;
       end;
-      if Editor <> nil then SetControl(Editor, ID, 1);
-      if DataType = 'H' then
-      begin
-        AResponse := FindResponseByName(ID, 1);
-        if AResponse <> nil then
-        begin
-          IHidden := AResponse.IValue;
-          EHidden := AResponse.EValue;
+      if DialogControl.Editor <> nil then SetControl(DialogControl.Editor, DialogControl.ID, 1);
+      if DialogControl.DataType = 'H' then begin
+        AResponse := FindResponseByName(DialogControl.ID, 1);
+        if AResponse <> nil then begin
+          DialogControl.IHidden := AResponse.IValue;
+          DialogControl.EHidden := AResponse.EValue;
         end; {if AResponse}
       end; {if DataType}
-    end; {with TDialogCtrl}
+    end; //for loop  //kt original --> {with TDialogCtrl}
     Changing := False;
   end; {if OrderAction}
   UpdateColorsFor508Compliance(Self);
@@ -230,13 +243,10 @@ begin
     begin
       // treat the list & combo boxes differently so their lists aren't cleared
       if      (Editor is TListBox)    then TListBox(Editor).ItemIndex := -1
-      else if (Editor is TComboBox)   then
-      begin
+      else if (Editor is TComboBox)   then begin
         TComboBox(Editor).Text := '';
         TComboBox(Editor).ItemIndex := -1;
-      end
-      else if (Editor is TORComboBox) then
-      begin
+      end else if (Editor is TORComboBox) then begin
         TORComboBox(Editor).Text := '';
         TORComboBox(Editor).ItemIndex := -1;
       end
@@ -268,36 +278,29 @@ var
 
 begin
   inherited;
-  with FDialogCtrlList do for i := 0 to Count -1 do
-  begin
+  with FDialogCtrlList do for i := 0 to Count -1 do begin
     DialogCtrl := TDialogCtrl(Items[i]);
-    with DialogCtrl do
-    begin
+    with DialogCtrl do begin
       if Prompt <> nil then ALabel := Piece(Prompt.Caption, ':', 1) else ALabel := '<Unknown>';
-      if Required then
-      begin
+      if Required then begin
         AResponse := Responses.FindResponseByName(ID, 1);
         if (AResponse = nil) or ((AResponse <> nil) and (AResponse.EValue = ''))
           then SetError(ALabel + ' is required.');
       end;
-      if ((DataType = 'D') or (DataType = 'R')) and (Editor <> nil) then
-      begin
+      if ((DataType = 'D') or (DataType = 'R')) and (Editor <> nil) then begin
         TORDateBox(Editor).Validate(AMsg);
         if Length(AMsg) > 0 then SetError('For ' + ALabel + ':  ' + AMsg);
       end;
-      if (DataType = 'N') then
-      begin
+      if (DataType = 'N') then begin
         AResponse := Responses.FindResponseByName(ID, 1);
-        if (AResponse <> nil) and (Length(AResponse.EValue) > 0) then with AResponse do
-        begin
+        if (AResponse <> nil) and (Length(AResponse.EValue) > 0) then with AResponse do begin
           ValidateNumericStr(EValue, Piece(TEdit(Editor).Hint, '|', 2), AMsg);
           if Length(AMsg) > 0 then SetError('For ' + ALabel + ':  ' + AMsg);
         end; {if AResponse}
       end; {if DataType}
     end; {with DialogCtrl}
   end; {with FDialogCtrlList}
-  with Responses do
-  begin
+  with Responses do begin
     AResponse := FindResponseByName('START', 1);
     if AResponse <> nil then StartDT := StrToFMDateTime(AResponse.EValue) else StartDT := 0;
     AResponse := FindResponseByName('STOP',  1);
@@ -319,33 +322,31 @@ begin
   with FDialogItemList do for i := 0 to Count - 1 do with TDialogItem(Items[i]) do
     if not Hidden then FLabelWd := HigherOf(FLabelWd, Canvas.TextWidth(Prompt));
   FEditorLeft := FLabelWd + (WD_MARGIN * 2);
-  with FDialogItemList do for i := 0 to Count - 1 do
-  begin
+  with FDialogItemList do for i := 0 to Count - 1 do begin
     DialogItem := TDialogItem(Items[i]);
-    if FilterOut then
-    begin
-      if ( compareText(TsID,DialogItem.Id)=0 ) or ( compareText(TSDomain,DialogItem.Domain)=0) then
+    if FilterOut then begin
+      if (compareText(TsID,DialogItem.Id)=0) or (compareText(TSDomain,DialogItem.Domain)=0) then
         Continue;
       if (Pos('primary',LowerCase(DialogItem.Prompt)) > 0) then
         Continue;
       if (compareText(AttendID,DialogItem.ID) = 0) or ( compareText(AttendDomain,DialogItem.Domain)=0 ) then
         Continue;
     end;
-    DialogCtrl := TDialogCtrl.Create;
+    DialogCtrl          := TDialogCtrl.Create;
     DialogCtrl.ID       := DialogItem.ID;
     DialogCtrl.DataType := DialogItem.DataType;
     DialogCtrl.Required := DialogItem.Required;
     DialogCtrl.Preserve := Length(DialogItem.EDefault) > 0;
     case DialogItem.DataType of
-    'D': PlaceDateTime(DialogCtrl, DialogItem, I);
-    'F': PlaceFreeText(DialogCtrl, DialogItem, i);
-    'H': PlaceHidden(DialogCtrl, DialogItem);
-    'N': PlaceNumeric(DialogCtrl, DialogItem, i);
-    'P': PlaceLookup(DialogCtrl, DialogItem, i);
-    'R': PlaceDateTime(DialogCtrl, DialogItem, i);
-    'S': PlaceSetOfCodes(DialogCtrl, DialogItem, i);
-    'W': PlaceMemo(DialogCtrl, DialogItem, i);
-    'Y': PlaceYesNo(DialogCtrl, DialogItem, i);
+      'D': PlaceDateTime(DialogCtrl, DialogItem, I);
+      'F': PlaceFreeText(DialogCtrl, DialogItem, i);
+      'H': PlaceHidden(DialogCtrl, DialogItem);
+      'N': PlaceNumeric(DialogCtrl, DialogItem, i);
+      'P': PlaceLookup(DialogCtrl, DialogItem, i);
+      'R': PlaceDateTime(DialogCtrl, DialogItem, i);
+      'S': PlaceSetOfCodes(DialogCtrl, DialogItem, i);
+      'W': PlaceMemo(DialogCtrl, DialogItem, i);
+      'Y': PlaceYesNo(DialogCtrl, DialogItem, i);
     end;
     FDialogCtrlList.Add(DialogCtrl);
     if (DialogCtrl.Editor <> nil) and (FFirstCtrl = nil) then FFirstCtrl := DialogCtrl.Editor;
@@ -356,8 +357,7 @@ procedure TfrmODGen.PlaceDateTime(DialogCtrl: TDialogCtrl; DialogItem: TDialogIt
 const
   NUM_CHAR = 22;
 begin
-  with DialogCtrl do
-  begin
+  with DialogCtrl do begin
     Editor := TORDateBox.Create(Self);
     Editor.Parent := sbxMain;
     Editor.SetBounds(FEditorLeft, FEditorTop, NUM_CHAR * FCharWd, HT_FRAME * FCharHt);
@@ -377,8 +377,7 @@ end;
 
 procedure TfrmODGen.PlaceFreeText(DialogCtrl: TDialogCtrl; DialogItem: TDialogItem; CurrentItemNumber: Integer);
 begin
-  with DialogCtrl do
-  begin
+  with DialogCtrl do begin
     Editor := TCaptionEdit.Create(Self);
     Editor.Parent := sbxMain;
     Editor.SetBounds(FEditorLeft, FEditorTop,
@@ -401,8 +400,7 @@ procedure TfrmODGen.PlaceNumeric(DialogCtrl: TDialogCtrl; DialogItem: TDialogIte
 const
   NUM_CHAR = 16;
 begin
-  with DialogCtrl do
-  begin
+  with DialogCtrl do begin
     Editor := TCaptionEdit.Create(Self);
     Editor.Parent := sbxMain;
     Editor.SetBounds(FEditorLeft, FEditorTop, NUM_CHAR * FCharWd, HT_FRAME * FCharHt);
@@ -642,19 +640,17 @@ var
 begin
   inherited;
   if Changing then Exit;
-  with FDialogCtrlList do for i := 0 to Count - 1 do with TDialogCtrl(Items[i]) do
-  begin
+  with FDialogCtrlList do for i := 0 to Count - 1 do with TDialogCtrl(Items[i]) do begin
     case DataType of
-    'D': Responses.Update(ID, 1, FloatToStr(TORDateBox(Editor).FMDateTime),
-                                 TORDateBox(Editor).Text);
-    'F': Responses.Update(ID, 1, TEdit(Editor).Text, TEdit(Editor).Text);
-    'H': Responses.Update(ID, 1, IHidden, EHidden);
-    'N': Responses.Update(ID, 1, TEdit(Editor).Text, TEdit(Editor).Text);
-    'P': Responses.Update(ID, 1, TORComboBox(Editor).ItemID, TORComboBox(Editor).Text);
-    'R': Responses.Update(ID, 1, TORDateBox(Editor).Text, TORDateBox(Editor).Text);
-    'S': Responses.Update(ID, 1, TORComboBox(Editor).ItemID, TORComboBox(Editor).Text);
-    'W': Responses.Update(ID, 1, TX_WPTYPE, TMemo(Editor).Text);
-    'Y': Responses.Update(ID, 1, TORComboBox(Editor).ItemID, TORComboBox(Editor).Text);
+      'D': Responses.Update(ID, 1, FloatToStr(TORDateBox(Editor).FMDateTime), TORDateBox(Editor).Text);
+      'F': Responses.Update(ID, 1, TEdit(Editor).Text, TEdit(Editor).Text);
+      'H': Responses.Update(ID, 1, IHidden, EHidden);
+      'N': Responses.Update(ID, 1, TEdit(Editor).Text, TEdit(Editor).Text);
+      'P': Responses.Update(ID, 1, TORComboBox(Editor).ItemID, TORComboBox(Editor).Text);
+      'R': Responses.Update(ID, 1, TORDateBox(Editor).Text, TORDateBox(Editor).Text);
+      'S': Responses.Update(ID, 1, TORComboBox(Editor).ItemID, TORComboBox(Editor).Text);
+      'W': Responses.Update(ID, 1, TX_WPTYPE, TMemo(Editor).Text);
+      'Y': Responses.Update(ID, 1, TORComboBox(Editor).ItemID, TORComboBox(Editor).Text);
     end;
   end;
   memOrder.Text := Responses.OrderText;
@@ -662,27 +658,28 @@ end;
 
 procedure TfrmODGen.SetComponentName(Editor: TWinControl; Index: Integer; DialogCtrl: TDialogCtrl);
 Var
- I: Integer;
- SaveName: String;
+  I: Integer;
+  SaveName: String;
 begin
- //strip all non alphanumeric characters to create the save name
- SaveName := '';
- //Check for blank id
- if DialogCtrl.ID = '' then DialogCtrl.ID := 'EMPTY';
+  //strip all non alphanumeric characters to create the save name
+  SaveName := '';
+  //Check for blank id
+  if DialogCtrl.ID = '' then DialogCtrl.ID := 'EMPTY';
 
- for i := 1 to length(DialogCtrl.ID) do begin
-   if (DialogCtrl.ID[i] in ['A'..'Z']) or (DialogCtrl.ID[i] in ['a'..'z']) or (DialogCtrl.ID[i] in ['0'..'9']) then
-    SaveName := SaveName + DialogCtrl.ID[i];
- end;
- SaveName := SaveName + '_' + IntToStr(Index);
+  for i := 1 to length(DialogCtrl.ID) do begin
+    if (DialogCtrl.ID[i] in ['A'..'Z']) or (DialogCtrl.ID[i] in ['a'..'z']) or (DialogCtrl.ID[i] in ['0'..'9']) then begin
+     SaveName := SaveName + DialogCtrl.ID[i];
+    end;
+  end;
+  SaveName := SaveName + '_' + IntToStr(Index);
 
- //extra backup - make sure that the component name doesn't already exist
- //Now set up the component name
- try
-  Editor.Name := SaveName;
- except
-  Editor.Name := SaveName + '_' + IntToStr(Index);
- end;
+  //extra backup - make sure that the component name doesn't already exist
+  //Now set up the component name
+  try
+    Editor.Name := SaveName;
+  except
+    Editor.Name := SaveName + '_' + IntToStr(Index);
+  end;
 end;
 
 end.

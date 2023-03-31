@@ -368,7 +368,7 @@ begin
    EncDt := Trunc(FMToday);
    uLastDFN := Patient.DFN;
    tCallV(UProblems, 'ORWPCE ACTPROB', [Patient.DFN, EncDT]);
-
+   //kt NOTE: see rPCE.AddProbsToDiagnoses for documentation on pieces etc.
    if uProblems.Count > 0 then
    begin
       BADiagnosis.add('^Problem List Items');

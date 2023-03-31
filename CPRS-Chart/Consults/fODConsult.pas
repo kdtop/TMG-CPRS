@@ -219,6 +219,7 @@ begin
   //once when multiple clicking the button especially on a slow network connection
   try
     //if (frmFrame.tabPage.TabIndex = 5) then begin
+    //if frmFrame.TabPageID = CT_CONSULTS then begin
       frmConsults.cmdNewProc.Enabled := false;
       frmConsults.cmdNewConsult.Enabled := false;
     //end;
@@ -1593,6 +1594,7 @@ begin
   //re-enable consult buttons
   try
     //if (frmFrame.tabPage.TabIndex = 5) then begin
+    //if frmFrame.TabPageID = CT_CONSULTS then begin
       frmConsults.cmdNewProc.Enabled := true;
       frmConsults.cmdNewConsult.Enabled := true;
     //end;

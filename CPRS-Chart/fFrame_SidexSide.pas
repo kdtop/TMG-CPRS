@@ -579,15 +579,24 @@ uses
   {$IFDEF CCOWBROKER}
   , CCOW_const
   {$ENDIF}
-  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uImages, uTMGOptions,   //kt added
-  fIntracarePtLbl, fPtAuditLog, fBillableItems, ColorUtil,       //kt added
-  fMemoEdit,                               //kt  testing purposes only can be removed later
-  fPtHTMLDemo, fOptionsLists, uTMGUtil, VA508AccessibilityRouter, fOtherSchedule, fSMSLabText,      //kt
-  VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit, fSingleNote,    //kt
-  fAnticoagulator, uTMG_WM_API,  //kt
+  , fLetterWriter, fSearchResults, fADT, fWebTab, fPtLabelPrint, fImages, uImages, 
+  fIntracarePtLbl, fPtAuditLog, fBillableItems, 
+  VA508AccessibilityRouter, 
+  fOtherSchedule, VAUtils, uVA508CPRSCompatibility, fIVRoutes, frmEPrescribe, fPtDemoEdit, fESEdit, 
   fPrintLocation, fTemplateEditor, fTemplateDialog, fCombatVet,
-  fTest_RW_HTML  //kt TEMP, KILL LATER...
-  , fMailbox, fUploadImages;
+  ColorUtil,       //kt added
+  uTMGOptions,   //kt added
+  fSMSLabText,      //kt
+  fSingleNote,    //kt
+  fAnticoagulator, 
+  uTMG_WM_API,  //kt
+  fTest_RW_HTML,  //kt TEMP, KILL LATER...
+  fMemoEdit,                               //kt  testing purposes only can be removed later
+  fPtHTMLDemo, 
+  fOptionsLists, 
+  uTMGUtil, 
+  fMailbox, 
+  fUploadImages;
 
 var                                 //  RV 05/11/04
   IsRunExecuted: Boolean = FALSE;           //  RV 05/11/04
@@ -1900,7 +1909,6 @@ begin
 end;
 
 procedure TfrmFrame.SelectChartTabL(PageID : integer);    //kt-tabs
-//kt-tabs
 begin
   SelectChartTab(tpsLeft, PageID);
 end;
@@ -2021,7 +2029,7 @@ begin
   tabPageChange(tpsLeft);
 end;
 
-procedure TfrmFrame.tabPageChange(ASide: TTabPageSide);  //kt-tabs
+procedure TfrmFrame.tabPagesChange(ASide: TTabPageSide);  //kt-tabs
 { switches to form linked to NewTab }
 var
   PageID, OtherPageID : integer;
@@ -3294,7 +3302,7 @@ begin
   ResizeTabs;
 end;
 
-procedure TfrmFrame.frameLRSplitterMoved(Sender: TObject);
+procedure TfrmFrame.frameLRSplitterMoved(Sender: TObject);  //kt-tabs
 begin
   //kt-tabs added 7/23/21
   inherited;
@@ -3344,12 +3352,12 @@ begin
   timHideSplitterHandle.Enabled := true;  //reset timer
 end;
 
-function TfrmFrame.ToggleTabPageOpenMode(Mode: TTabPageOpenMode) : TTabpageOpenMode;
+function TfrmFrame.ToggleTabPageOpenMode(Mode: TTabPageOpenMode) : TTabpageOpenMode; //kt-tabs
 begin
   if Mode = tpoOpen then Result := tpoClosed else Result := tpoOpen;
 end;
 
-procedure TfrmFrame.btnSplitterHandleClick(Sender: TObject);
+procedure TfrmFrame.btnSplitterHandleClick(Sender: TObject);  //kt-tabs
 //kt-tabs added 7/23/21
 var NewMode: TTabPageOpenMode;
 begin
@@ -3358,13 +3366,13 @@ begin
   SetTabOpenMode(NewMode);
 end;
 
-procedure TfrmFrame.timHideSplitterHandleTimer(Sender: TObject);
+procedure TfrmFrame.timHideSplitterHandleTimer(Sender: TObject);  //kt-tabs
 begin
   inherited;
   btnSplitterHandle.Visible := false;
 end;
 
-procedure TfrmFrame.btnSplitterHandleMouseEnter(Sender: TObject);
+procedure TfrmFrame.btnSplitterHandleMouseEnter(Sender: TObject);  //kt-tabs
 begin
   inherited;
   timHideSplitterHandle.Enabled := false;
@@ -4568,7 +4576,7 @@ begin
         end;
         tempTabPage.TabIndex := NewTabIndex;
         tabPageChange(tpsLeft);
-        Key := 0;
+                Key := 0;
       end;
     end;
   end;

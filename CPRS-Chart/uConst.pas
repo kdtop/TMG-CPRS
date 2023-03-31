@@ -176,7 +176,6 @@ const
   OD_VITALS    = 171;  // use 170 for ORWD GENERIC VITALS, 171 for GMRVOR
   OD_MEDIV     = 180;
   OD_NUR_OTP   = 800;  //TMG
-  OD_NUR_OSP   = 801;  //TMG
   OD_TEXTONLY  = 999;
   OM_NAV       = 1001;
   OM_QUICK     = 1002;
@@ -185,6 +184,7 @@ const
   OM_ALLERGY   = 1105;
   OM_HTML      = 1200;
   OD_AUTOACK   = 9999;
+  OD_TMG_GEN_1 = 22700; //tmg
 
   { Ordering role }
   OR_NOKEY     = 0;

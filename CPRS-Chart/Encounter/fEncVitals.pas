@@ -89,6 +89,7 @@ type
     procedure LoadVitalsList;
   public
     function OK2SaveVitals: boolean;
+    procedure SendData;  //kt added
     property VitalNew: TStringList read uVitalNew;
     property VitalOld: TStringList read uVitalOld;
   end;
@@ -505,6 +506,22 @@ begin
     Control.SetFocus;
   finally
     FChangingFocus := FALSE;
+  end;
+end;
+
+procedure TfrmEncVitals.SendData;  //kt added
+//kt moved code here from fEncounterFrame.SendData
+var
+  StoreMessage: string;
+
+begin
+  if HasData then begin
+    if AssignVitals then begin
+      StoreMessage := ValAndStoreVitals(VitalNew);
+      if (StoreMessage <> 'True') then begin
+        ShowMsg(StoreMessage);
+      end;
+    end;
   end;
 end;
 

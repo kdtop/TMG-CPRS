@@ -29,13 +29,14 @@ object frmMultiTIUSign: TfrmMultiTIUSign
     BevelOuter = bvNone
     TabOrder = 0
     object Splitter1: TSplitter
-      Left = 232
+      Left = 230
       Top = 0
       Width = 9
       Height = 475
+      ExplicitLeft = 232
     end
     object Splitter2: TSplitter
-      Left = 989
+      Left = 985
       Top = 0
       Width = 9
       Height = 475
@@ -44,7 +45,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 232
+      Width = 230
       Height = 475
       Align = alLeft
       BevelEdges = []
@@ -54,7 +55,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlLeftTop: TPanel
         Left = 0
         Top = 0
-        Width = 232
+        Width = 230
         Height = 20
         Align = alTop
         BevelOuter = bvLowered
@@ -62,7 +63,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblAlerts: TLabel
           Left = 1
           Top = 1
-          Width = 230
+          Width = 228
           Height = 18
           Align = alClient
           Alignment = taCenter
@@ -80,7 +81,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object lvUnSelected: TCaptionListView
         Left = 0
         Top = 20
-        Width = 232
+        Width = 230
         Height = 455
         Align = alClient
         Columns = <
@@ -109,12 +110,13 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         OnCompare = lvUnSelectedCompare
         OnResize = lvUnSelectedResize
         Caption = 'lvUnSelected'
+        ExplicitLeft = 3
       end
     end
     object pnlCenter: TPanel
-      Left = 241
+      Left = 239
       Top = 0
-      Width = 748
+      Width = 746
       Height = 475
       Align = alLeft
       Anchors = [akLeft, akTop, akRight, akBottom]
@@ -125,7 +127,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlHTMLEdit: TPanel
         Left = 0
         Top = 46
-        Width = 748
+        Width = 746
         Height = 361
         Align = alClient
         BevelOuter = bvLowered
@@ -134,15 +136,16 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object WebBrowser: TWebBrowser
           Left = 1
           Top = 1
-          Width = 746
+          Width = 744
           Height = 359
           Align = alClient
           TabOrder = 0
           ExplicitLeft = -63
           ExplicitTop = -4
+          ExplicitWidth = 746
           ExplicitHeight = 463
           ControlData = {
-            4C0000001A4D00001B2500000000000000000000000000000000000000000000
+            4C000000E54C00001B2500000000000000000000000000000000000000000000
             000000004C000000000000000000000001000000E0D057007335CF11AE690800
             2B2E126208000000000000004C0000000114020000000000C000000000000046
             8000000000000000000000000000000000000000000000000000000000000000
@@ -152,7 +155,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlCenterBottom: TPanel
         Left = 0
         Top = 407
-        Width = 748
+        Width = 746
         Height = 68
         Align = alBottom
         Anchors = [akRight, akBottom]
@@ -160,7 +163,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         TabOrder = 1
         OnResize = pnlCenterBottomResize
         DesignSize = (
-          748
+          746
           68)
         object btnPrev: TBitBtn
           Left = 5
@@ -470,7 +473,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             F0FFF0F0F0FF}
         end
         object btnAddToSign: TBitBtn
-          Left = 275
+          Left = 274
           Top = 6
           Width = 194
           Height = 56
@@ -778,7 +781,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             F0FFF0F0F0FF}
         end
         object btnNext: TBitBtn
-          Left = 675
+          Left = 673
           Top = 6
           Width = 67
           Height = 56
@@ -1086,7 +1089,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Layout = blGlyphRight
         end
         object btnMoveToLoose: TBitBtn
-          Left = 475
+          Left = 473
           Top = 6
           Width = 194
           Height = 56
@@ -1632,13 +1635,13 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlCenterTop: TPanel
         Left = 0
         Top = 0
-        Width = 748
+        Width = 746
         Height = 46
         Align = alTop
         BevelOuter = bvLowered
         TabOrder = 2
         DesignSize = (
-          748
+          746
           46)
         object btnEditZoomOut: TSpeedButton
           Left = 6
@@ -1782,7 +1785,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           OnClick = btnEditZoomInClick
         end
         object PatientImage: TImage
-          Left = 707
+          Left = 705
           Top = 6
           Width = 35
           Height = 35
@@ -1871,6 +1874,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Stretch = True
           OnMouseEnter = PatientImageMouseEnter
           OnMouseLeave = PatientImageMouseLeave
+          ExplicitLeft = 707
         end
         object pnlPatientID: TPanel
           Left = 1
@@ -1912,9 +1916,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       end
     end
     object pnlRight: TPanel
-      Left = 998
+      Left = 994
       Top = 0
-      Width = 158
+      Width = 162
       Height = 475
       Align = alClient
       Alignment = taLeftJustify
@@ -1926,7 +1930,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlRightCenter: TPanel
         Left = 0
         Top = 20
-        Width = 158
+        Width = 162
         Height = 403
         Align = alClient
         BevelEdges = []
@@ -1936,7 +1940,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lbSelected: TListBox
           Left = 0
           Top = 0
-          Width = 158
+          Width = 162
           Height = 403
           Align = alClient
           ItemHeight = 13
@@ -1947,19 +1951,19 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlRightBottom: TPanel
         Left = 0
         Top = 423
-        Width = 158
+        Width = 162
         Height = 52
         Align = alBottom
         BevelEdges = []
         BevelOuter = bvLowered
         TabOrder = 1
         DesignSize = (
-          158
+          162
           52)
         object btnRemove: TBitBtn
           Left = 6
           Top = 6
-          Width = 150
+          Width = 154
           Height = 38
           Anchors = [akLeft, akTop, akRight]
           Caption = '&Remove Doc'
@@ -2103,7 +2107,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       object pnlRightTop: TPanel
         Left = 0
         Top = 0
-        Width = 158
+        Width = 162
         Height = 20
         Align = alTop
         BevelOuter = bvLowered
@@ -2111,7 +2115,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblSignList: TLabel
           Left = 1
           Top = 1
-          Width = 156
+          Width = 160
           Height = 18
           Align = alClient
           Alignment = taCenter

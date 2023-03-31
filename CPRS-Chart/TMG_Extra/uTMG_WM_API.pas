@@ -255,7 +255,7 @@ implementation
   end;
 
   function TTMGWMAPI.Handle_HTML_PASTE(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler
-  //Expected DataStr format:  Tag-TextToReplaceWith^Handle
+  //Expected DataStr format:  Tag~@~TextToReplaceWith^Handle
   //                                                  |----Handle is unused
   var
     Tag,Replacement:string;

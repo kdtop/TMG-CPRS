@@ -120,6 +120,7 @@ type
     function EValueFor(const APromptID: string; AnInstance: Integer): string;
     function GetIENForPrompt(const APromptID: string): Integer;
     function FindResponseByName(const APromptID: string; AnInstance: Integer): TResponse;
+    function ResponseByIndex(Index : integer) : TResponse; //kt added
     function PromptExists(const APromptID: string):boolean;
     function InstanceCount(const APromptID: string): Integer;
     function IValueFor(const APromptID: string; AnInstance: Integer): string;
@@ -764,6 +765,15 @@ begin
     end;
 end;
 
+function TResponses.ResponseByIndex(Index : integer) : TResponse; //kt added
+begin
+  Result := nil;
+  if (Index>=0) and (Index < Self.TheList.Count) then begin
+    Result := TResponse(Self.TheList[Index]);
+  end;
+end;
+
+
 function TResponses.IENForPrompt(const APromptID: string): Integer;
 var
   i: Integer;
@@ -968,8 +978,7 @@ begin
   end; {with FPrompts}
 end; {GetOrderText}
 
-procedure TResponses.Update(const APromptID: string; AnInstance: Integer;
-  const AnIValue, AnEValue: string);
+procedure TResponses.Update(const APromptID: string; AnInstance: Integer; const AnIValue, AnEValue: string);
 { for a given Prompt,Instance update or create the associated response object }
 var
   AResponse: TResponse;
@@ -1396,10 +1405,10 @@ begin
   FAbortOrder := False;
   SetTemplateDialogCanceled(False);   //wat/jh CQ 20061
   case OrderAction of
-  ORDER_NEW:   {nothing};
-  ORDER_EDIT:  Responses.SetEditOrder(ID);
-  ORDER_COPY:  Responses.SetCopyOrder(ID);
-  ORDER_QUICK: Responses.SetQuickOrderByID(ID);
+    ORDER_NEW:   {nothing};
+    ORDER_EDIT:  Responses.SetEditOrder(ID);
+    ORDER_COPY:  Responses.SetCopyOrder(ID);
+    ORDER_QUICK: Responses.SetQuickOrderByID(ID);
   end;
   if Responses.FEventType in ['A','D','T','M','O'] then Caption := Caption + ' (Delayed ' + Responses.FEventName + ')'; // ' (Event Delayed)';
   if OrderAction in [ORDER_EDIT, ORDER_COPY] then cmdQuit.Caption := 'Cancel';

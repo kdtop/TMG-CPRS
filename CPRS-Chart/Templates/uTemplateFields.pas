@@ -604,7 +604,7 @@ function InsideMarkers(var S : string; MarkerCh : char; P : integer) : boolean;
 //     P = 5  ==> result is true
 //     P = 12 ==> result is false
 
-var p1,p2 : integer;
+var p1 : integer;
     Inside : boolean;
 begin
   Inside := false;
@@ -645,7 +645,7 @@ function SubstuteIDs(Txt : string; NameToObjID : TStringList) : string;
 
   Function FldIDNumFn(FldName,FldIndexStr : string) : integer;
   var i,Index,MatchCt : integer;
-      AFldName : string;
+      //AFldName : string;
   begin
     Result := -1;
     Index := StrToIntDef(FldIndexStr,-1);
@@ -661,13 +661,13 @@ function SubstuteIDs(Txt : string; NameToObjID : TStringList) : string;
     end;
   end;
 
-var i,j,p1,p2 : integer;
+var p1,p2 : integer;
     SubStrA,SubStrB, NumStr : string;
     FldIDNum : integer;
     SubstStr,FldIDNumStr : string;
-    CountOfSimStr : string;
-    Temp,FldName,FldInfo : string;
-    Skip : boolean;
+    //CountOfSimStr : string;
+    FldName,FldInfo : string;
+    //Skip : boolean;
 begin
   p1 := PosEx(FN_FIELD_TAG,Txt,1);
   while p1 > 0 do begin
@@ -916,7 +916,9 @@ var
 //  'Impression: <b>{FN:CASE([FN:SCORE]<3,TEXT(Mild))}{FN:CASE([FN:SCORE]>7,TEXT(Severe)}{{NO-BR}}'#$D#$A  <-- wrapped
 //  '{FN:CASE(IN([FN:SCORE],3,7),TEXT(Moderate))}</b>'
 begin
-  if frmFrame.tabPage.TabIndex=5 then HTMLTargetMode := False;  //kt Suppress HTML if Consults
+  //if frmFrame.tabPage.TabIndex=5 then HTMLTargetMode := False;  //kt Suppress HTML if Consults
+  if frmFrame.TabPageID(tpsLeft) = CT_CONSULTS then HTMLTargetMode := false; //kt suppress HTML if consults  //12/6/22 added left
+
   if(not assigned(uEntries)) then
     uEntries := TStringList.Create;
   Result := Text;
@@ -1037,7 +1039,8 @@ var
   ControlBlockDisabled : boolean;
 
 begin
-  if frmFrame.tabPage.TabIndex=5 then HTMLTargetMode := False;  //kt Suppress HTML if Consults
+  //kt if frmFrame.tabPage.TabIndex=5 then HTMLTargetMode := False;  //kt Suppress HTML if Consults
+  if frmFrame.TabPageID = CT_CONSULTS then HTMLTargetMode := false; //kt suppress HTML if consults
   Result := '';
   if not assigned(uEntries) then exit;
   ControlBlockDisabled := false;  //kt

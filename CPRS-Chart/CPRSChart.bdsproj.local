@@ -83,5 +83,25 @@
     <Transaction>2022/11/12 10:33:38.641.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.dfm=</Transaction>
     <Transaction>2022/11/12 10:57:28.019.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.pas=</Transaction>
     <Transaction>2022/11/12 10:57:28.024.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.dfm=</Transaction>
+    <Transaction>2023/01/16 10:34:44.037.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMessageDemo.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNetworkMessagerClient.pas</Transaction>
+    <Transaction>2023/01/16 10:34:44.037.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMessageDemo.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNetworkMessagerClient.dfm</Transaction>
+    <Transaction>2023/01/16 11:10:09.273.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNetworkMessagerClient.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNetworkMessengerClient.pas</Transaction>
+    <Transaction>2023/01/16 11:10:09.273.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNetworkMessagerClient.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNetworkMessengerClient.dfm</Transaction>
+    <Transaction>2023/01/25 15:42:13.753.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterMDM.pas</Transaction>
+    <Transaction>2023/01/25 15:42:13.753.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterMDM.dfm</Transaction>
+    <Transaction>2023/01/30 18:56:26.467.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.pas</Transaction>
+    <Transaction>2023/01/30 18:56:26.467.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.dfm</Transaction>
+    <Transaction>2023/02/17 18:12:51.412.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas=</Transaction>
+    <Transaction>2023/02/17 18:12:51.414.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.dfm=</Transaction>
+    <Transaction>2023/03/13 16:55:57.020.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTopicICDLinkerU.pas</Transaction>
+    <Transaction>2023/03/13 16:55:57.020.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTopicICDLinkerU.dfm</Transaction>
+    <Transaction>2023/03/19 10:53:19.170.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fProcedure.pas=</Transaction>
+    <Transaction>2023/03/19 10:53:19.174.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fProcedure.dfm=</Transaction>
+    <Transaction>2023/03/22 10:37:44.126,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType=</Transaction>
+    <Transaction>2023/03/22 10:37:44.132.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.dfm=</Transaction>
+    <Transaction>2023/03/22 10:59:34.725.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.pas=</Transaction>
+    <Transaction>2023/03/22 10:59:34.731.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.dfm=</Transaction>
+    <Transaction>2023/03/22 12:27:38.314.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas=</Transaction>
+    <Transaction>2023/03/22 12:27:38.318.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.dfm=</Transaction>
   </Transactions>
 </BorlandProject>

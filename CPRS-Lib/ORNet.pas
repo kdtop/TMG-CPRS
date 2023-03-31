@@ -329,7 +329,7 @@ begin
     Time2 := GetTime;      //kt 9/11
     AStringList.Add('Elapsed Time: ' + IntToStr(Round(MilliSecondSpan(Time2,Time1))) + ' ms');  //kt 9/11
     if not TMGFiltered then begin //kt 9/11
-    uCallList.Add(AStringList);
+      uCallList.Add(AStringList);
     end;                         //kt 9/11
     if uShowRPCs then StatusText('');
     RPCLastCall := RPCBrokerV.RemoteProcedure + ' (completed)';
@@ -609,7 +609,7 @@ initialization
   RPCBrokerV := nil;
   RPCLastCall := 'No RPCs called';
   uCallList := TList.Create;
-  uMaxCalls := 100;
+  uMaxCalls := 500;  //kt -- was 100
   uShowRPCs := False;
   FilteredRPCCalls := TStringList.Create;  //kt 9/11
 

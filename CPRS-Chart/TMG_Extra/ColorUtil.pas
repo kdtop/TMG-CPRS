@@ -47,9 +47,50 @@ interface
   function  LighterColor (Color : TColor; PctColor : byte=COLOR_BLEND_DEF_FACTOR) : TColor; forward;
   function ColorBlend (ColorA, ColorB : TColor; PctA : byte) : TColor; forward;
   procedure GradientFill(Bitmap : TBitmap; Color1, Color2 : TColor; Rect : TRect); forward;
+  function DarkenRed(Color : TColor; Percent : byte) : TColor;
+  function DarkenGreen(Color : TColor; Percent : byte) : TColor;
+  function DarkenBlue(Color : TColor; Percent : byte) : TColor;
+  function Darken(Color : TColor; Percent : byte) : TColor;
+
 
 
 implementation
+
+  function DarkenRed(Color : TColor; Percent : byte) : TColor;
+  var red : longWord;
+  begin
+    red := (Color and $0000FF);
+    red := Round (red * (Percent/100));
+    Result := (Color and $FFFF00) or red;
+  end;
+
+  function DarkenGreen(Color : TColor; Percent : byte) : TColor;
+  var green : longWord;
+  begin
+    green := (Color and $00FF00);
+    green := green shr 8;
+    green := Round(green * (Percent/100));
+    green := green shl 8;
+    Result := (Color and $FF00FF) or green;
+  end;
+
+  function DarkenBlue(Color : TColor; Percent : byte) : TColor;
+  var blue : longWord;
+  begin
+    blue := (Color and $FF0000);
+    blue := blue shr 16;
+    Blue := Round (blue * (Percent/100));
+    blue := blue shl 16;
+    Result := (Color and $00FFFF) or blue;
+  end;
+
+  function Darken(Color : TColor; Percent : byte) : TColor;
+  begin
+    if Percent=0 then begin result := Color; exit; end;
+    result := DarkenRed(Color, Percent);
+    result := DarkenBlue(result,Percent);
+    result := DarkenGreen(result,Percent);
+  end;
 
   procedure ColorToRGB16(Color : TColor; var Red, Blue, Green : Color16);
   var AColor : longint;

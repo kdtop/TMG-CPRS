@@ -17,7 +17,7 @@ inherited frmODCslt: TfrmODCslt
   object pnlCombatVet: TPanel [0]
     Left = 0
     Top = 0
-    Width = 607
+    Width = 599
     Height = 25
     Align = alTop
     BevelOuter = bvLowered
@@ -28,6 +28,7 @@ inherited frmODCslt: TfrmODCslt
     Font.Style = []
     ParentFont = False
     TabOrder = 0
+    ExplicitWidth = 607
     object txtCombatVet: TVA508StaticText
       Name = 'txtCombatVet'
       Left = 1
@@ -144,12 +145,11 @@ inherited frmODCslt: TfrmODCslt
       object lblReason: TLabel
         Left = 0
         Top = 0
-        Width = 596
+        Width = 95
         Height = 13
         Align = alTop
         Caption = 'Reason for Request'
         Constraints.MinHeight = 13
-        ExplicitWidth = 95
       end
       object memReason: TRichEdit
         Left = 0

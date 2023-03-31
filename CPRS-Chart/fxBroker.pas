@@ -1,6 +1,6 @@
 unit fxBroker;
 
-//kt 9/11 made changes to **FORM** of this unit
+//kt 9/11 made changes to this unit
 
  (*
  NOTE: The original version of this file may be obtained freely from the VA.
@@ -59,7 +59,26 @@ type
     cboJumpTo: TComboBox;      //kt 9/11
     btnClear: TBitBtn;         //kt 9/11
     lblStoredCallsNum: TLabel; //kt 9/11
-    btnFilter: TBitBtn;        //kt 9/11
+    btnFilter: TBitBtn;        //kt
+    pnlBottom: TPanel;         //kt 3/23
+    PanelBottomLeft: TPanel;   //kt 3/23
+    Splitter1: TSplitter;      //kt 3/23
+    pnlbottomRight: TPanel;    //kt 3/23
+    tabRPCViewMode: TTabControl;  //kt 3/23
+    lbRPCList: TListBox;
+    tvRPC: TTreeView;
+    pnlBanner: TPanel;
+    edtSearch: TEdit;
+    btnSearch: TBitBtn;
+    btnClearSrch: TBitBtn;
+    procedure btnClearSrchClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnSearchClick(Sender: TObject);
+    procedure tvRPCDblClick(Sender: TObject);       //kt 3/23
+    procedure tvRPCCollapsing(Sender: TObject; Node: TTreeNode; var AllowCollapse: Boolean); //kt 3/23
+    procedure tvRPCClick(Sender: TObject);  //kt 3/23
+    procedure lbRPCListClick(Sender: TObject);    //kt 3/23
+    procedure tabRPCViewModeChange(Sender: TObject);        //kt 9/11
     procedure btnFilterClick(Sender: TObject); //kt 9/11
     procedure btnClearClick(Sender: TObject);  //kt 9/11
     procedure cmdPrevClick(Sender: TObject);
@@ -67,16 +86,18 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnRLTClick(Sender: TObject);
     procedure cboJumpToDropDown(Sender: TObject);
     procedure cboJumpToChange(Sender: TObject);
   private
     { Private declarations }
+    FSearchTerms : TStringList;
     FRetained: Integer;
     FCurrent: Integer;
+    FCollapsing : boolean;
     procedure UpdateDisplay; //kt 9/11
+    function ExcludeBySearchTerms(SL : TStringList) : boolean;  //kt
   public
     { Public declarations }
   end;
@@ -88,7 +109,7 @@ implementation
 {$R *.DFM}
 
 uses
-  fMemoEdit;  //kt 9/11added
+  fMemoEdit;  //kt 9/11 added
 
 procedure ShowBroker;
 var
@@ -97,8 +118,7 @@ begin
   frmBroker := TfrmBroker.Create(Application);
   try
     ResizeAnchoredFormToFont(frmBroker);
-    with frmBroker do
-    begin
+    with frmBroker do begin
       FRetained := RetainedRPCCount - 1;
       FCurrent := FRetained;
       UpdateDisplay; //kt
@@ -178,9 +198,192 @@ begin
   Refresh;
 end;
 
+procedure TfrmBroker.lbRPCListClick(Sender: TObject);
+//kt added
+var i : integer;
+begin
+  inherited;
+  i := lbRPCList.ItemIndex;
+  if (i<0) or (i>= lbRPCList.Items.Count) then exit;
+  FCurrent := integer(lbRPCList.Items.Objects[i]);
+  UpdateDisplay;
+end;
+
+procedure TfrmBroker.tabRPCViewModeChange(Sender: TObject);
+//kt added
+type
+  tViewModes = (rpcvTime=0, rpcvName=1, rpcvTree=2);
+  tTimePos = (tFirst, tLast, tNone, tTagged);
+
+var Mode : tViewModes;
+    SL : TStringList;
+    i : integer;
+    RootNode : TTreeNode;
+
+  procedure LoadRPCs(SL : TStrings; TimePos: tTimePos);
+  var
+    i : integer;
+    TimeStr, s : string;
+    Info : TStringList;   //Not owned here...
+  begin
+    for i := RetainedRPCCount - 1 downto 0 do begin
+      Info := AccessRPCData(i);
+      if ExcludeBySearchTerms(Info) then continue;
+      if Info.Count < 2 then continue;
+      s := Info.Strings[1];
+      TimeStr := piece2(s,'Called at: ',2);
+      s := Info.Strings[0];
+      case TimePos of
+        tFirst:    s := TimeStr + ': ' + s;
+        tLast:     s := s + ' - ' + TimeStr;
+        tTagged :  s := s + '^' + TimeStr;
+        tNone:     s := s;
+      end;
+      SL.AddObject(s,TObject(i));  //linked 'object' will really be index into RetainedRPCCount
+    end;
+  end;
+
+  function GetNamedChild(Parent : TTreeNode; Name : string) : TTreeNode;
+  var AChild : TTreeNode;
+  begin
+    Result := nil;
+    if not Assigned(Parent) then exit;
+    AChild := Parent.getFirstChild;
+    while Assigned(AChild) and (Result = nil) do begin
+      if AChild.Text = Name then begin
+        Result := AChild;
+        break;
+      end;
+      AChild := AChild.getNextSibling;
+    end;
+  end;
+
+  function EnsureNode(TV : TTreeView; Parent : TTreeNode; Name : string; Data : pointer)  : TTreeNode;
+  begin
+    Result := GetNamedChild(Parent, Name);
+    if not Assigned(Result) then begin
+      Result := tvRPC.Items.AddChild(Parent, Name);
+    end;
+    Result.Data := Data;
+  end;
+
+  procedure AddToTV(TV : TTreeView; s : string; Data : pointer);
+  var TimeStr : string;
+      InsertNode: TTreeNode;
+  begin
+    TimeStr := piece(s, '^',2);
+    s := piece(s,'^',1);
+    InsertNode := TV.Items.GetFirstNode;
+    if Pos(' ',s) > 0 then begin
+      InsertNode := EnsureNode(TV, InsertNode, piece(s,' ', 1), pointer(-1));
+    end;
+    InsertNode := EnsureNode(TV, InsertNode, s, Data);
+    InsertNode := EnsureNode(TV, InsertNode, ' call time: ' + TimeStr, Data);
+  end;
+
+begin //tabRPCViewModeChange
+  inherited;
+  Mode := tViewModes(tabRPCViewMode.TabIndex);
+  case Mode of
+    rpcvTime: begin
+      lbRPCList.Align := alClient;
+      lbRPCList.Visible := true;
+      tvRPC.Visible := false;
+      lbRPCList.Items.Clear;
+      LoadRPCs(lbRPCList.Items, tFirst);  //load by sequence (time) order
+    end;
+    rpcvName: begin
+      lbRPCList.Align := alClient;
+      lbRPCList.Visible := true;
+      tvRPC.Visible := false;
+      lbRPCList.Items.Clear;
+      SL := TStringList.Create;
+      try
+        LoadRPCs(SL, tLast);  //load by sequence (time) order
+        SL.Sort;  //sort by name
+        lbRPCList.Items.Assign(SL);
+      finally
+        SL.Free;
+      end;
+    end;
+    rpcvTree: begin
+      tvRPC.Align := alClient;
+      lbRPCList.Visible := false;
+      tvRPC.Visible := true;
+      tvRPC.Items.BeginUpdate;
+      tvRPC.Items.Clear;
+      RootNode := tvRPC.Items.Add(nil,'RPC''s by Name');  //a root note
+      //load tree by name
+      SL := TStringList.Create;
+      try
+        LoadRPCs(SL, tTagged);  //load by sequence (time) order
+        for i := 0 to SL.Count - 1 do begin
+          AddToTV(tvRPC, SL.Strings[i], SL.Objects[i]);
+        end;
+        tvRPC.Items.AlphaSort(true);
+      finally
+        SL.Free;
+      end;
+      RootNode.Expand(false);
+      tvRPC.Items.EndUpdate;
+    end;
+  end;
+end;
+
+procedure TfrmBroker.tvRPCClick(Sender: TObject);
+//kt 3/23
+var ANode : TTreeNode;
+    value : integer;
+begin
+  inherited;
+  if FCollapsing then exit;
+  ANode := tvRPC.Selected;
+  if not Assigned(ANode) then begin
+    memData.Lines.Clear;
+    exit;
+  end;
+  value := integer(ANode.Data);
+  if value < 0 then begin
+    memData.Lines.Clear;
+    exit;
+  end;
+  FCurrent := value;
+  UpdateDisplay;
+end;
+
+procedure TfrmBroker.tvRPCCollapsing(Sender: TObject; Node: TTreeNode; var AllowCollapse: Boolean);
+//kt 3/23
+begin
+  inherited;
+  FCollapsing := true;
+  tvRPC.Selected := Node;
+  Application.ProcessMessages;
+  FCollapsing := false;
+end;
+
+procedure TfrmBroker.tvRPCDblClick(Sender: TObject);
+begin
+  inherited;
+  tvRPCClick(Sender);
+  if not Assigned(tvRPC.Selected) then exit;
+  tvRPC.Selected.Expand(false);
+end;
+
 procedure TfrmBroker.FormCreate(Sender: TObject);
 begin
+  FCollapsing := false;     //kt 3/23
+  udMax.Max := GetRPCMax;   //kt 3/23
   udMax.Position := GetRPCMax;
+  txtMaxCalls.Text := IntToStr(GetRPCMax);
+  FSearchTerms := TStringList.Create; //kt
+  tabRPCViewModeChange(Sender); //kt 3/23
+end;
+
+procedure TfrmBroker.FormDestroy(Sender: TObject);
+//kt added
+begin
+  FSearchTerms.Free; //kt
+  inherited;
 end;
 
 procedure TfrmBroker.FormKeyUp(Sender: TObject; var Key: Word;
@@ -195,13 +398,14 @@ end;
 
 procedure TfrmBroker.btnFilterClick(Sender: TObject);
 //kt 9/11 added entire unit
+//kt note: 3/23/24 -- this filter is different from search filter
 var
   frmMemoEdit: TfrmMemoEdit;
 
 begin
   inherited;
   frmMemoEdit := TfrmMemoEdit.Create(Self);
-  frmMemoEdit.lblMessage.Caption := 'Add / Delete / Edit list of FILTERED RPC calls:';
+  frmMemoEdit.lblMessage.Caption := 'Add/Del/Edit list of FILTERED RPC calls (No ''*'' matching):';
   frmMemoEdit.memEdit.Lines.Assign(ORNet.FilteredRPCCalls);
   frmMemoEdit.ShowModal;
   ORNet.FilteredRPCCalls.Assign(frmMemoEdit.memEdit.Lines);
@@ -231,6 +435,49 @@ diffDisplay := intToStr(theDiff);
 infoBox('Lapsed time (milliseconds) = ' + diffDisplay + '.', disclaimer, MB_OK);
 end;
 
+procedure TfrmBroker.btnClearSrchClick(Sender: TObject);
+begin
+  inherited;
+  edtSearch.Text := '';
+  btnSearchClick(Sender);
+end;
+
+procedure TfrmBroker.btnSearchClick(Sender: TObject);  //kt added
+var SearchText : string;
+begin
+  inherited;
+  SearchText := UpperCase(edtSearch.Text);
+  PiecesToList(SearchText, ' ', FSearchTerms);
+  tabRPCViewModeChange(Sender);
+end;
+
+function TfrmBroker.ExcludeBySearchTerms(SL : TStringList) : boolean;
+var i : integer;
+    ATerm : string;
+
+  function ContainsTerm(SL : TStringList; ATerm : string) : boolean;
+  //Does SL contain ATerm on ANY of its lines?
+  var i : integer;
+  begin
+    Result := false;
+    for i := 0 to SL.Count - 1 do begin
+      if Pos(ATerm, SL[i]) = 0  then continue;  //not found on this 1 line
+      Result := true;
+      break;
+    end;
+  end;
+
+begin
+  Result := false;
+  for i := 0 to FSearchTerms.Count - 1 do begin
+    ATerm := FSearchTerms[i];
+    if ContainsTerm(SL, ATerm) then continue;
+    Result := true;
+    break;
+  end;
+end;
+
+
 procedure TfrmBroker.btnClearClick(Sender: TObject);
 //kt 9/11 added
 begin
@@ -240,6 +487,7 @@ begin
   FCurrent := 0;
   FRetained := RetainedRPCCount - 1;
   cmdNextClick(Sender);
+  tabRPCViewModeChange(Sender);
 end;
 
 end.

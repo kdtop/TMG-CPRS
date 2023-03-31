@@ -228,8 +228,6 @@ end;
 procedure TfrmViewLabPDF.SetDateRange(AStartDate, AEndDate : TFMDateTime);
 var SameDay : boolean;
     InfoList : TStringList;
-    TempStartDate,TempEndDate : TDateTime;
-    StartTime,EndTime : TDateTime;
     ResultStr : string;
 
 begin

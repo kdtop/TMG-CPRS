@@ -1,106 +1,65 @@
 [Closed Files]
-File_0=TSourceModule,'C:\Source_Code\OR_30_296_SRC\OR_SRC_CREATION\BDK50\BDK32_P50T4\BDK32_P50T4\Source\Trpcb.pas',0,1,1249,1,1262,0,0,,
-File_1=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.pas',0,1,22,155,335,0,0,,
-File_2=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\rODAllergy.pas',0,1,262,1,288,0,0,,
-File_3=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fARTFreeTextMsg.pas',0,1,45,1,65,0,0,,
-File_4=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fARTAllgy.pas',0,1,1,1,1,0,0,,
-File_5=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersAlert.pas',0,1,1,1,1,0,0,,
-File_6=TSourceModule,'C:\Source_Code\OR_30_296_SRC\OR_SRC_CREATION\BDK50\BDK32_P50T4\BDK32_P50T4\Source\wsockc.pas',0,1,1469,1,1487,0,0,,
-File_7=TSourceModule,'c:\program files\borland\bds\4.0\source\Win32\rtl\common\Classes.pas',0,1,3324,1,3342,0,0,,
-File_8=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntryDetails.pas',0,1,26,62,40,0,0,,
-File_9=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rTIU.pas',0,1,449,3,473,0,0,,
+File_0=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrders.pas',0,1,1571,1,1587,0,0,,
+File_1=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\uOrders.pas',0,1,1187,1,1203,0,0,,
+File_2=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\rPCE.pas',0,1,502,1,520,0,0,,{1
+File_3=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncVitals.pas',0,1,508,47,519,0,0,,
+File_4=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fGAF.pas',0,1,196,1,204,0,0,,
+File_5=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas',0,1,1603,21,1630,0,0,,
+File_6=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Vitals\rVitals.pas',0,1,49,3,73,0,0,,
+File_7=TSourceModule,'c:\program files\borland\bds\4.0\source\Win32\vcl\Forms.pas',0,1,5153,58,5177,0,0,,
+File_8=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORCtrls.pas',0,1,1548,1,1568,0,0,,
+File_9=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.pas',0,1,852,1,879,0,0,,
 
 [Modules]
-Module0=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
-Module1=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteSelector.pas
-Module2=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.pas
-Module3=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
-Module4=default.htm
-Module5=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
-Module6=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rMisc.pas
-Module7=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.pas
-Module8=P:\vista\ASTRONAUT CPRS v30A\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
-Module9=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uCore.pas
-Module10=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
-Module11=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas
-Module12=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rCore.pas
-Module13=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uConst.pas
-Module14=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
-Module15=P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORFn.pas
-Module16=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uImages.pas
-Module17=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMessageDemo.pas
-Module18=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLTools.pas
-Module19=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.pas
-Count=20
+Module0=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\uPCE.pas
+Module1=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas
+Module2=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterMDM.pas
+Module3=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.pas
+Module4=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fFollowUp.pas
+Module5=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas
+Module6=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas
+Module7=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
+Module8=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMG_WM_API.pas
+Module9=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
+Module10=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas
+Module11=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGProcedure.pas
+Count=12
 EditWindowCount=1
 TypeLibWindowCount=1
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas]
-ModuleType=TSourceModule
-FormState=1
-FormOnTop=0
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteSelector.pas]
-ModuleType=TSourceModule
-FormState=1
-FormOnTop=0
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.pas]
-ModuleType=TSourceModule
-FormState=1
-FormOnTop=0
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas]
-ModuleType=TSourceModule
-FormState=1
-FormOnTop=0
-
-[default.htm]
-ModuleType=TURLModule
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas]
-ModuleType=TSourceModule
-FormState=1
-FormOnTop=0
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rMisc.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\uPCE.pas]
 ModuleType=TSourceModule
 FormState=0
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas]
 ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\ASTRONAUT CPRS v30A\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterMDM.pas]
 ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uCore.pas]
-ModuleType=TSourceModule
-FormState=0
-FormOnTop=0
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.pas]
 ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fFollowUp.pas]
 ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rCore.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas]
 ModuleType=TSourceModule
-FormState=0
+FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uConst.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas]
 ModuleType=TSourceModule
-FormState=0
+FormState=1
 FormOnTop=0
 
 [P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas]
@@ -108,27 +67,22 @@ ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORFn.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMG_WM_API.pas]
 ModuleType=TSourceModule
 FormState=0
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uImages.pas]
-ModuleType=TSourceModule
-FormState=0
-FormOnTop=0
-
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMessageDemo.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas]
 ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLTools.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas]
 ModuleType=TSourceModule
-FormState=0
+FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGProcedure.pas]
 ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
@@ -137,7 +91,19 @@ FormOnTop=0
 FormState=1
 FormOnTop=0
 
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODGen.pas]
+FormState=1
+FormOnTop=0
+
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODBase.pas]
+FormState=1
+FormOnTop=0
+
 [P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAutoSz.pas]
+FormState=1
+FormOnTop=0
+
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBase.pas]
 FormState=1
 FormOnTop=0
 
@@ -153,9 +119,17 @@ FormOnTop=0
 FormState=1
 FormOnTop=0
 
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBaseMain.pas]
+FormState=1
+FormOnTop=0
+
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fPCEBaseGrid.pas]
+FormState=1
+FormOnTop=0
+
 [EditWindow0]
-ViewCount=21
-CurrentEditView=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
+ViewCount=13
+CurrentEditView=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\uPCE.pas
 View0=0
 View1=1
 View2=2
@@ -169,298 +143,234 @@ View9=9
 View10=10
 View11=11
 View12=12
-View13=13
-View14=14
-View15=15
-View16=16
-View17=17
-View18=18
-View19=19
-View20=20
 PercentageSizes=1
 Create=1
 Visible=1
-Docked=1
+Docked=0
 State=0
-Left=0
-Top=0
-Width=10000
-Height=8980
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=10000
-ClientHeight=8980
-DockedToMainForm=1
+Left=1484
+Top=1080
+Width=6458
+Height=8500
+MaxLeft=0
+MaxTop=2920
+ClientWidth=6375
+ClientHeight=8120
+DockedToMainForm=0
 MessageView=MessageView@EditWindow0
 BorlandEditorCodeExplorer=BorlandEditorCodeExplorer@EditWindow0
 TopPanelSize=0
-LeftPanelSize=2542
-LeftPanelClients=DockSite7,DockSite8
-LeftPanelData=0000080001010100000009000000446F636B5369746537810C00000000000001EE090000000000000100000000A716000009000000446F636B5369746538FFFFFFFF
+LeftPanelSize=0
 RightPanelSize=0
-RightPanelClients=ToolForm,DockSite0
-RightPanelData=0000080001010200000008000000546F6F6C466F726D09000000446F636B53697465306E1500000000000001BF0B000000000000FFFFFFFF
-BottomPanelSize=2805
-BottomPanelClients=ToDo List,DockSite5,DockSite1,DockSite6
-BottomPanelData=000008000102020000000E000000546F446F4C69737457696E646F7709000000446F636B5369746535C14600000000000002F50A00000000000001000000006F1A000009000000446F636B53697465310100000000C146000009000000446F636B5369746536FFFFFFFF
+BottomPanelSize=1298
+BottomPanelClients=MessageView@EditWindow0
+BottomPanelData=0000080001000000000000000000000000000000000000000000000100000000000000000B0000004D65737361676556696577FFFFFFFF
 BottomMiddlePanelSize=0
-BottomMiddlePanelClients=DockSite4,DockSite3,DockSite2
-BottomMiddelPanelData=0000080001000300000009000000446F636B536974653409000000446F636B536974653309000000446F636B53697465320000000000000000000000000000000000FFFFFFFF
 
 [View0]
-CustomEditViewType=TWelcomePageView
-WelcomePageURL=bds:/default.htm
+CustomEditViewType=TEditView
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas
+CursorX=1
+CursorY=59
+TopLine=95
+LeftCol=1
+Elisions=
+Bookmarks={1,1322,38}{2,373,32}{3,987,1}{4,143,47}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas
 
 [View1]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGProcedure.pas
 CursorX=1
-CursorY=3118
-TopLine=3095
+CursorY=726
+TopLine=709
 LeftCol=1
 Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas
+Bookmarks={1,765,128}{2,244,3}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGProcedure.pas
 
 [View2]
 CustomEditViewType=TEditView
-Module=P:\vista\ASTRONAUT CPRS v30A\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
-CursorX=26
-CursorY=447
-TopLine=429
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas
+CursorX=1
+CursorY=173
+TopLine=157
 LeftCol=1
 Elisions=
-Bookmarks=
-EditViewName=P:\vista\ASTRONAUT CPRS v30A\CPRS-Chart\TMG_Extra\fTMGChartExporter.pas
+Bookmarks={1,197,15}{2,754,1}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas
 
 [View3]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas
 CursorX=1
-CursorY=847
-TopLine=840
+CursorY=669
+TopLine=653
 LeftCol=1
 Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPtSel.pas
+Bookmarks={1,199,1}{2,662,46}{3,580,23}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas
 
 [View4]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.pas
-CursorX=12
-CursorY=787
-TopLine=760
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.pas
+CursorX=1
+CursorY=89
+TopLine=72
 LeftCol=1
 Elisions=
-Bookmarks={1,961,1}{2,910,1}
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTaskEvents.pas
+Bookmarks={2,85,1}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.pas
 
 [View5]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rMisc.pas
-CursorX=23
-CursorY=91
-TopLine=119
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fFollowUp.pas
+CursorX=1
+CursorY=481
+TopLine=454
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rMisc.pas
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fFollowUp.pas
 
 [View6]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
-CursorX=122
-CursorY=256
-TopLine=234
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
+CursorX=3
+CursorY=4187
+TopLine=4184
 LeftCol=1
 Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiTIUSign.pas
+Bookmarks={1,564,1}{2,5537,1}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
 
 [View7]
 CustomEditViewType=TDisassemblyEditView
+DumpPane=79
+DisassemblyPane=187
+RegisterPane=231
+FlagPane=64
 
 [View8]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
-CursorX=1
-CursorY=1447
-TopLine=1428
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMG_WM_API.pas
+CursorX=55
+CursorY=259
+TopLine=245
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fReports.pas
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMG_WM_API.pas
 
 [View9]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uCore.pas
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterMDM.pas
 CursorX=1
-CursorY=1831
-TopLine=1813
+CursorY=179
+TopLine=153
 LeftCol=1
 Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uCore.pas
+Bookmarks={2,179,1}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterMDM.pas
 
 [View10]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rCore.pas
-CursorX=10
-CursorY=597
-TopLine=579
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
+CursorX=3
+CursorY=222
+TopLine=191
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\rCore.pas
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
 
 [View11]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uConst.pas
-CursorX=9
-CursorY=288
-TopLine=257
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\uPCE.pas
+CursorX=84
+CursorY=2878
+TopLine=2858
 LeftCol=1
 Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\uConst.pas
+Bookmarks={1,48,1}{2,1609,14}
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\uPCE.pas
 
 [View12]
 CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.pas
-CursorX=23
-CursorY=880
-TopLine=857
-LeftCol=1
-Elisions=
-Bookmarks={1,878,23}
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fLabEntry.pas
-
-[View13]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
-CursorX=35
-CursorY=5181
-TopLine=5175
-LeftCol=1
-Elisions=
-Bookmarks={1,5191,16}
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fLabs.pas
-
-[View14]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteSelector.pas
+Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas
 CursorX=1
-CursorY=123
-TopLine=105
+CursorY=1520
+TopLine=1507
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteSelector.pas
-
-[View15]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORFn.pas
-CursorX=3
-CursorY=830
-TopLine=811
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Lib\ORFn.pas
-
-[View16]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
-CursorX=32
-CursorY=3830
-TopLine=3812
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas
-
-[View17]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLTools.pas
-CursorX=1
-CursorY=2425
-TopLine=2405
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uHTMLTools.pas
-
-[View18]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.pas
-CursorX=1
-CursorY=173
-TopLine=152
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fImagePickExisting.pas
-
-[View19]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uImages.pas
-CursorX=88
-CursorY=1116
-TopLine=1091
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uImages.pas
-
-[View20]
-CustomEditViewType=TEditView
-Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMessageDemo.pas
-CursorX=37
-CursorY=5
-TopLine=1
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMessageDemo.pas
+EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas
 
 [TypeLibEditWindow0]
 Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\CPRSChart.tlb
 
 [Watches]
-Count=3
-Watch0='DataInGUI',256,0,18,1,1,'Watches'
-Watch1='RecordID',256,0,18,1,1,'Watches'
-Watch2='SizingList[0]',256,0,18,1,1,'Watches'
+Count=1
+Watch0='DataStr',256,0,18,1,0,'Watches'
 
 [WatchWindow]
 WatchColumnWidth=120
 WatchShowColumnHeaders=1
 PercentageSizes=1
 Create=1
-Visible=1
+Visible=0
 Docked=1
 State=0
 Left=0
 Top=0
-Width=3653
-Height=2157
+Width=1323
+Height=3620
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=3653
-ClientHeight=2157
-TBDockHeight=261
-LRDockWidth=18132
+ClientWidth=1323
+ClientHeight=3620
+TBDockHeight=1780
+LRDockWidth=3891
 Dockable=1
 StayOnTop=0
 
 [Breakpoints]
-Count=6
-Breakpoint0='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas',664,'',0,1,'',1,0,0,'',1,'','','',0
-Breakpoint1='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas',632,'',0,1,'',1,0,0,'',1,'','','',0
-Breakpoint2='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrdersSign.pas',525,'',0,1,'',1,0,0,'',1,'','','',0
-Breakpoint3='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteSelector.pas',123,'',0,1,'',1,0,0,'',1,'','','',0
-Breakpoint4='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.pas',257,'',0,1,'',1,0,0,'',1,'','','',0
-Breakpoint5='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.pas',277,'',0,1,'',1,0,0,'',1,'','','',0
+Count=35
+Breakpoint0='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas',664,'',0,0,'',1,0,0,'',1,'','','',0
+Breakpoint1='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas',632,'',0,0,'',1,0,0,'',1,'','','',0
+Breakpoint2='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteSelector.pas',123,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint3='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.pas',257,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint4='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fAllgyFind.pas',277,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint5='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fNotes.pas',4480,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint6='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas',2025,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint7='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.pas',5029,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint8='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.pas',4005,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint9='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.pas',1261,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint10='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Consults\fConsults.pas',1330,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint11='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fPage.pas',188,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint12='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas',1414,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint13='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\fFrame.pas',1421,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint14='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fMultiHandleLoose.pas',340,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint15='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODGen.pas',239,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint16='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fODGen.pas',318,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint17='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas',826,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint18='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas',822,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint19='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\uOrders.pas',1582,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint20='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\uOrders.pas',1203,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint21='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrders.pas',1539,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint22='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fODTMG1.pas',1486,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint23='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterLabs.pas',55,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint24='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Orders\fOrders.pas',1587,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint25='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.pas',142,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint26='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fProbAutoAdd.pas',726,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint27='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas',534,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint28='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas',562,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint29='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGDiagnoses.pas',512,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint30='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas',426,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint31='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas',173,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint32='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas',709,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint33='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\uTMG_WM_API.pas',263,'',0,1,'',1,0,0,'',1,'','','',0
+Breakpoint34='P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fEncounterFrame.pas',635,'',0,1,'',1,0,0,'',1,'','','',0
 
 [AddressBreakpoints]
 Count=0
@@ -470,94 +380,90 @@ PercentageSizes=1
 Create=1
 Visible=1
 Docked=0
-State=2
+State=0
 Left=0
-Top=13
+Top=0
 Width=10000
-Height=9974
-MaxLeft=-7
-MaxTop=-13
-MaxWidth=10056
-MaxHeight=10105
-ClientWidth=10000
-ClientHeight=9660
-BottomPanelSize=8642
-BottomPanelClients=EditWindow0
-BottomPanelData=0000080000000000000000000000000000000000000000000000000100000000000000000C0000004564697457696E646F775F30FFFFFFFF
+Height=920
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=9917
+ClientHeight=540
+BottomPanelSize=0
 
 [ProjectManager]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=2951
-Height=1333
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2951
-ClientHeight=1333
-TBDockHeight=7503
-LRDockWidth=4208
+Left=8453
+Top=1430
+Width=1495
+Height=8860
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=1411
+ClientHeight=8520
+TBDockHeight=6040
+LRDockWidth=3214
 Dockable=1
 StayOnTop=0
 
 [ToolForm]
 PercentageSizes=1
 Create=1
-Visible=0
+Visible=1
 Docked=1
 State=0
-Left=-1498
-Top=-429
-Width=3007
-Height=8562
+Left=0
+Top=0
+Width=1323
+Height=3620
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=3007
-ClientHeight=8562
-TBDockHeight=8562
-LRDockWidth=3007
+ClientWidth=1323
+ClientHeight=3620
+TBDockHeight=8660
+LRDockWidth=906
 Dockable=1
 StayOnTop=0
 
 [DebugLogView]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=3653
-Height=2157
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3653
-ClientHeight=2157
-TBDockHeight=523
-LRDockWidth=6604
+Left=68
+Top=8200
+Width=3625
+Height=3360
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3542
+ClientHeight=3020
+TBDockHeight=300
+LRDockWidth=3625
 Dockable=1
 StayOnTop=0
 
 [ThreadStatusWindow]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=3653
-Height=2157
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3653
-ClientHeight=2157
-TBDockHeight=261
-LRDockWidth=9882
+Left=68
+Top=8200
+Width=5422
+Height=1750
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=5339
+ClientHeight=1410
+TBDockHeight=150
+LRDockWidth=5422
 Dockable=1
 StayOnTop=0
 Column0Width=145
@@ -568,76 +474,76 @@ Column3Width=250
 [LocalVarsWindow]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=3653
-Height=2157
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3653
-ClientHeight=2157
-TBDockHeight=340
-LRDockWidth=4653
+Left=1734
+Top=1420
+Width=2625
+Height=2400
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=2542
+ClientHeight=2060
+TBDockHeight=200
+LRDockWidth=2547
 Dockable=1
 StayOnTop=0
 
 [CallStackWindow]
 PercentageSizes=1
 Create=1
-Visible=1
+Visible=0
 Docked=1
 State=0
 Left=0
 Top=0
-Width=3653
-Height=2157
+Width=1323
+Height=3620
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=3653
-ClientHeight=2157
-TBDockHeight=2627
-LRDockWidth=4653
+ClientWidth=1323
+ClientHeight=3620
+TBDockHeight=160
+LRDockWidth=2547
 Dockable=1
 StayOnTop=0
 
 [FindReferencsForm]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
 Left=0
 Top=0
-Width=3056
-Height=2392
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3056
-ClientHeight=2392
-TBDockHeight=2941
-LRDockWidth=3771
+Width=2828
+Height=3750
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=2745
+ClientHeight=3410
+TBDockHeight=3750
+LRDockWidth=2828
 Dockable=1
 StayOnTop=0
 
 [RefactoringForm]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
 Left=0
 Top=0
-Width=3056
-Height=2392
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3056
-ClientHeight=2392
-TBDockHeight=4078
-LRDockWidth=3771
+Width=2828
+Height=3750
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=2745
+ClientHeight=3410
+TBDockHeight=3750
+LRDockWidth=2828
 Dockable=1
 StayOnTop=0
 
@@ -645,18 +551,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-204
-Top=-787
-Width=4896
-Height=1464
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4896
-ClientHeight=1464
-TBDockHeight=1464
-LRDockWidth=4896
+Left=1745
+Top=10000
+Width=3672
+Height=1810
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3589
+ClientHeight=1470
+TBDockHeight=1810
+LRDockWidth=3672
 Dockable=1
 StayOnTop=0
 Column0Width=200
@@ -672,40 +578,40 @@ ShowChecked=1
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=44459
-Top=693
-Width=368
-Height=458
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=368
-ClientHeight=458
-TBDockHeight=458
-LRDockWidth=368
+Left=0
+Top=0
+Width=2292
+Height=4310
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=2208
+ClientHeight=3970
+TBDockHeight=4310
+LRDockWidth=2292
 Dockable=1
 StayOnTop=0
-Name=120
-Description=334
+Name=60
+Description=300
 filter=1
 
 [GantrySearchView]
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-208
-Top=-806
-Width=4750
-Height=6144
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=6144
-TBDockHeight=6144
-LRDockWidth=4750
+Left=0
+Top=0
+Width=3557
+Height=4840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3474
+ClientHeight=4500
+TBDockHeight=4840
+LRDockWidth=3557
 Dockable=1
 StayOnTop=0
 
@@ -713,18 +619,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-208
-Top=-806
-Width=4750
-Height=6144
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=6144
-TBDockHeight=6144
-LRDockWidth=4750
+Left=0
+Top=0
+Width=3557
+Height=4840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3474
+ClientHeight=4500
+TBDockHeight=4840
+LRDockWidth=3557
 Dockable=1
 StayOnTop=0
 
@@ -732,18 +638,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-208
-Top=-806
-Width=4750
-Height=3817
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=3817
-TBDockHeight=3817
-LRDockWidth=4750
+Left=0
+Top=0
+Width=3557
+Height=3000
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3474
+ClientHeight=2660
+TBDockHeight=3000
+LRDockWidth=3557
 Dockable=1
 StayOnTop=0
 
@@ -751,18 +657,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-208
-Top=-806
-Width=4750
-Height=6144
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=6144
-TBDockHeight=6144
-LRDockWidth=4750
+Left=0
+Top=0
+Width=3557
+Height=4840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3474
+ClientHeight=4500
+TBDockHeight=4840
+LRDockWidth=3557
 Dockable=1
 StayOnTop=0
 
@@ -770,37 +676,37 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-208
-Top=-806
-Width=4750
-Height=6144
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=6144
-TBDockHeight=6144
-LRDockWidth=4750
+Left=0
+Top=0
+Width=3557
+Height=4840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=3474
+ClientHeight=4500
+TBDockHeight=4840
+LRDockWidth=3557
 Dockable=1
 StayOnTop=0
 
 [DataExplorer]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=2951
-Height=1333
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2951
-ClientHeight=1333
-TBDockHeight=6196
-LRDockWidth=9535
+Left=8583
+Top=1430
+Width=1323
+Height=2490
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=1240
+ClientHeight=2150
+TBDockHeight=4880
+LRDockWidth=7146
 Dockable=1
 StayOnTop=0
 
@@ -808,18 +714,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=3862
-Top=814
-Width=4750
-Height=6144
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=6144
-TBDockHeight=6144
-LRDockWidth=4750
+Left=0
+Top=0
+Width=5307
+Height=3840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=5224
+ClientHeight=3500
+TBDockHeight=3840
+LRDockWidth=5307
 Dockable=1
 StayOnTop=0
 
@@ -827,18 +733,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=3862
-Top=814
-Width=18132
-Height=261
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=18132
-ClientHeight=261
-TBDockHeight=261
-LRDockWidth=18132
+Left=0
+Top=0
+Width=5307
+Height=3840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=5224
+ClientHeight=3500
+TBDockHeight=3840
+LRDockWidth=5307
 Dockable=1
 StayOnTop=0
 
@@ -846,18 +752,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-4454
-Top=-36971
-Width=4750
-Height=6144
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=6144
-TBDockHeight=6144
-LRDockWidth=4750
+Left=0
+Top=0
+Width=5307
+Height=3840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=5224
+ClientHeight=3500
+TBDockHeight=3840
+LRDockWidth=5307
 Dockable=1
 StayOnTop=0
 
@@ -865,37 +771,37 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-4454
-Top=-36971
-Width=4750
-Height=2928
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4750
-ClientHeight=2928
-TBDockHeight=2928
-LRDockWidth=4750
+Left=0
+Top=0
+Width=5307
+Height=3840
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=5224
+ClientHeight=3500
+TBDockHeight=3840
+LRDockWidth=5307
 Dockable=1
 StayOnTop=0
 
 [ModelViewTool]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=2951
-Height=1333
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2951
-ClientHeight=1333
-TBDockHeight=6196
-LRDockWidth=7069
+Left=8583
+Top=1430
+Width=1323
+Height=2490
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=1240
+ClientHeight=2150
+TBDockHeight=4880
+LRDockWidth=5307
 Dockable=1
 StayOnTop=0
 
@@ -903,43 +809,43 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=1
-Docked=1
+Docked=0
 State=0
-Left=0
-Top=0
-Width=2486
-Height=5595
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2486
-ClientHeight=5595
-TBDockHeight=523
-LRDockWidth=2542
+Left=26
+Top=5880
+Width=1448
+Height=4220
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=1365
+ClientHeight=3880
+TBDockHeight=4220
+LRDockWidth=974
 Dockable=1
 StayOnTop=0
-SplitPos=95
+SplitPos=118
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=Name,Action
-ExpandedItems=Anchors=0,Constraints=0,Font=0,Margins=0,BevelEdges=0,HorzScrollBar=0,Padding=0,Hint=0,BorderIcons=0,Menu=0
+SelectedItem=Caption,
+ExpandedItems=Anchors=0,BorderIcons=0,Constraints=0,Font=0
 
 [BreakpointWindow]
 PercentageSizes=1
 Create=1
-Visible=1
-Docked=1
+Visible=0
+Docked=0
 State=0
-Left=0
-Top=0
-Width=3653
-Height=2157
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3653
-ClientHeight=2157
-TBDockHeight=1974
-LRDockWidth=11653
+Left=1099
+Top=8090
+Width=6391
+Height=1390
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=6307
+ClientHeight=1050
+TBDockHeight=1390
+LRDockWidth=6391
 Dockable=1
 StayOnTop=0
 Column0Width=100
@@ -952,57 +858,19 @@ Column5Width=75
 [StructureView]
 PercentageSizes=1
 Create=1
-Visible=0
+Visible=1
 Docked=1
 State=0
-Left=-32
-Top=-495
-Width=2542
-Height=4680
+Left=0
+Top=0
+Width=1323
+Height=3620
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=2542
-ClientHeight=4680
-TBDockHeight=4680
-LRDockWidth=2542
-Dockable=1
-StayOnTop=0
-
-[fmGrepResults]
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=0
-State=0
-Left=3931
-Top=8497
-Width=3819
-Height=8301
-MaxLeft=-7
-MaxTop=-13
-ClientWidth=3764
-ClientHeight=7961
-TBDockHeight=8301
-LRDockWidth=3819
-Dockable=1
-StayOnTop=0
-
-[fmMacroLibrary]
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=0
-State=0
-Left=5493
-Top=1242
-Width=2347
-Height=9869
-MaxLeft=-7
-MaxTop=-13
-ClientWidth=2292
-ClientHeight=9529
-TBDockHeight=9869
-LRDockWidth=2347
+ClientWidth=1323
+ClientHeight=3620
+TBDockHeight=3440
+LRDockWidth=1016
 Dockable=1
 StayOnTop=0
 
@@ -1010,18 +878,18 @@ StayOnTop=0
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-32
-Top=-495
-Width=2007
-Height=1399
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2007
-ClientHeight=1399
-TBDockHeight=1399
-LRDockWidth=2007
+Left=78
+Top=7660
+Width=9865
+Height=2220
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=9781
+ClientHeight=1880
+TBDockHeight=1100
+LRDockWidth=1500
 Dockable=1
 StayOnTop=0
 
@@ -1032,15 +900,15 @@ Visible=1
 Docked=1
 State=0
 Left=0
-Top=0
-Width=6208
-Height=2484
+Top=23
+Width=6375
+Height=1120
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=6208
-ClientHeight=2484
-TBDockHeight=2850
-LRDockWidth=5771
+ClientWidth=6375
+ClientHeight=1120
+TBDockHeight=1120
+LRDockWidth=2349
 Dockable=1
 StayOnTop=0
 
@@ -1052,220 +920,40 @@ Docked=0
 State=0
 Left=0
 Top=0
-Width=1486
-Height=5686
-MaxLeft=-7
-MaxTop=-13
-ClientWidth=1431
-ClientHeight=5346
-TBDockHeight=5686
-LRDockWidth=1486
+Width=979
+Height=4560
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=896
+ClientHeight=4220
+TBDockHeight=4560
+LRDockWidth=979
 Dockable=1
 StayOnTop=0
 
 [DockHosts]
-DockHostCount=9
+DockHostCount=1
 
 [DockSite0]
 DockSiteType=1
 PercentageSizes=1
 Create=1
 Visible=0
-Docked=1
+Docked=0
 State=0
-Left=-1437
-Top=0
-Width=3007
-Height=1791
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3007
-ClientHeight=1791
-TBDockHeight=1791
-LRDockWidth=3007
+Left=16
+Top=1480
+Width=1448
+Height=4310
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=1365
+ClientHeight=3970
+TBDockHeight=4310
+LRDockWidth=1016
 Dockable=1
 StayOnTop=0
-TabPosition=1
-ActiveTabID=ProjectManager
-TabDockClients=ProjectManager,ModelViewTool,DataExplorer
-
-[DockSite1]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=1
-Docked=1
-State=0
-Left=0
-Top=23
-Width=3708
-Height=2614
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3708
-ClientHeight=2614
-TBDockHeight=2614
-LRDockWidth=13333
-Dockable=1
-StayOnTop=0
-TabPosition=1
-ActiveTabID=WatchWindow
-TabDockClients=BreakpointWindow,CallStackWindow,WatchWindow,ThreadStatusWindow,DebugLogView,LocalVarsWindow
-
-[DockSite2]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=1
-State=0
-Left=-369
-Top=3
-Width=3111
-Height=2850
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=3111
-ClientHeight=2850
-TBDockHeight=2850
-LRDockWidth=3111
-Dockable=1
-StayOnTop=0
-TabPosition=1
-ActiveTabID=FindReferencsForm
-TabDockClients=RefactoringForm,FindReferencsForm
-
-[DockSite3]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=1
-State=0
-Left=-369
-Top=3
-Width=4674
-Height=2941
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4674
-ClientHeight=2941
-TBDockHeight=2941
-LRDockWidth=4674
-Dockable=1
-StayOnTop=0
-TabPosition=1
-TabDockClients=UsagesView,RefactoringsView
-
-[DockSite4]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=1
-State=0
-Left=-204
-Top=-784
-Width=4674
-Height=4314
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4674
-ClientHeight=4314
-TBDockHeight=4314
-LRDockWidth=4674
-Dockable=1
-StayOnTop=0
-TabPosition=1
-TabDockClients=PendingCheckinsView,PendingCheckoutsView,ShortcutsView,GantrySearchView,GantryResultsView
-
-[DockSite5]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=1
-State=0
-Left=369
-Top=-216
-Width=4674
-Height=2719
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=4674
-ClientHeight=2719
-TBDockHeight=2719
-LRDockWidth=4674
-Dockable=1
-StayOnTop=0
-TabPosition=1
-TabDockClients=QAView,MetricsView
-
-[DockSite6]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=1
-Docked=1
-State=0
-Left=538
-Top=23
-Width=6264
-Height=2614
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=6264
-ClientHeight=2614
-TBDockHeight=2614
-LRDockWidth=4674
-Dockable=1
-StayOnTop=0
-TabPosition=1
-ActiveTabID=MessageView@EditWindow0
-TabDockClients=MessageView@EditWindow0
-
-[DockSite7]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=1
-State=0
-Left=-3
-Top=710
-Width=2542
-Height=2078
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2542
-ClientHeight=2078
-TBDockHeight=2078
-LRDockWidth=2542
-Dockable=1
-StayOnTop=0
-TabPosition=1
-TabDockClients=StructureView,frmCaliberMain
-
-[DockSite8]
-DockSiteType=1
-PercentageSizes=1
-Create=1
-Visible=1
-Docked=1
-State=0
-Left=0
-Top=23
-Width=2542
-Height=5725
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=2542
-ClientHeight=5725
-TBDockHeight=3307
-LRDockWidth=2542
-Dockable=1
-StayOnTop=0
-TabPosition=1
-ActiveTabID=PropertyInspector
-TabDockClients=PropertyInspector,TemplateView
+TabPosition=0
+ActiveTabID=CallStackWindow
+TabDockClients=WatchWindow,CallStackWindow,StructureView,ToolForm
 

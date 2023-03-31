@@ -11,6 +11,8 @@ uses
 
 type
   TCopyItemsMethod = procedure(Dest: TStrings) of object;
+  TCopyVisitsMethod = procedure(Dest: TPCEProcList) of object;  //kt added
+
   TListSectionsProc = procedure(Dest: TStrings);
 
   TfrmPCEBaseMain = class(TfrmPCEBaseGrid)
@@ -23,7 +25,7 @@ type
     btnOther: TButton;
     bvlMain: TBevel;
     btnSelectAll: TButton;
-    lbxSection: TORListBox;
+    lbxSection: TORListBox;  //kt doc: CPTCode^CPTName^CPTCode^CPTModifiers^Flag^#   <-- Confirm if this is correct
     pnlMain: TPanel;
     pnlLeft: TPanel;
     splLeft: TSplitter;
@@ -51,7 +53,7 @@ type
     FCommentItem: integer;
     FCommentChanged: boolean;
     FUpdateCount: integer;
-    FSectionPopulated: boolean;
+    //FSectionPopulated: boolean;   moved to 'protected' so frmTMGDiagnoses can see it  //kt
     //FUpdatingGrid: boolean;  moved to 'protected' so frmDiagnoses can see it  (RV)
   protected
     FUpdatingGrid: boolean;
@@ -60,6 +62,7 @@ type
     FPCECode: string;
     FSplitterMove: Boolean;
     FProblems: TStringList;
+    FSectionPopulated: boolean; //kt
     function GetCat: string;
     procedure UpdateNewItemStr(var x: string); virtual;
 //    procedure UpdateNewItem(APCEItem: TPCEItem); virtual;
@@ -72,6 +75,7 @@ type
     procedure UpdateTabPos;
     procedure Sync2Grid;
     procedure Sync2Section;
+    function SetGridItem(ItemStr, SCat : String; ItemChecked : boolean) : boolean; //kt added
   public
     procedure AllowTabChange(var AllowChange: boolean); override;
     procedure InitTab(ACopyProc: TCopyItemsMethod; AListProc: TListSectionsProc);
@@ -126,6 +130,7 @@ end;
 
 procedure TfrmPCEBaseMain.UpdateNewItemStr(var x: string);
 begin
+  //virtual, so anticipate this to be overridded by descendent class
 end;
 
 procedure TfrmPCEBaseMain.GridChanged;
@@ -180,7 +185,7 @@ begin
   begin
     x := FPCECode + U + Piece(Code, U, 1) + U + U + Piece(Code, U, 2);
     if FPCEItemClass = TPCEProc then
-      SetPiece(x, U, pnumProvider, IntToStr(uProviders.PCEProvider));
+      SetPiece(x, U, pnumProvider, IntToStr(FProviders.PCEProvider));
     UpdateNewItemStr(x);
     APCEItem := FPCEItemClass.Create;
     APCEItem.SetFromString(x);
@@ -188,7 +193,7 @@ begin
     GridIndex := lbGrid.Items.AddObject(APCEItem.ItemStr, APCEItem);
     SyncGridData;
   end;
-  UpdateControls;
+  UpdateControls;  //button, label enabled etc.
 end;
 
 procedure TfrmPCEBaseMain.btnOtherExit(Sender: TObject);
@@ -266,8 +271,7 @@ var
 begin
   btnSelectAll.Enabled := (lbGrid.Items.Count > 0);
   btnRemove.Enabled := (lbGrid.SelCount > 0);
-  if(NotUpdating) then
-  begin
+  if(NotUpdating) then begin
     BeginUpdate;
     try
       inherited;
@@ -357,28 +361,61 @@ const
   TX_INACTIVE_CODE3 = ' as of the encounter date, and will be removed.' + #13#10#13#10 +
                           'Please select another diagnosis.';
   TC_INACTIVE_CODE = 'Diagnosis Contains Inactive Code';
+
 var
   i, j: Integer;
   CurCategory, SCode, SNarr: string;
   APCEItem: TPCEItem;
+  Item, P4 : string;  //kt
+  P4HasHash,P4HasDollar : boolean;
+
 begin
   FUpdatingGrid := TRUE;
   try
+    //kt mod -----
+    if(lbSection.Items.Count < 1) then exit;
+    CurCategory := GetCat;
+    for i := lbGrid.Items.Count - 1 downto 0 do begin
+      APCEItem := TPCEItem(lbGrid.Items.Objects[i]);
+      //kt removing need for category match --> if APCEItem.Category = CurCategory then begin
+      for j := 0 to lbxSection.Items.Count - 1 do begin
+        Item := lbxSection.Items[j];  //fmt CPTCode^CPTName^CPTCode^CPTModifiers^Flag^#   <-- Confirm if this is correct
+        SCode := Piece(Item, U, 1);
+        SNarr := Piece(Item, U, 2);
+        P4    := Piece(Item, U, 4); P4HasHash   := (Pos('#',P4)>0); P4HasDollar := (Pos('$',P4)>0); //kt
+        //kt original --> if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then begin
+        if APCEItem.Code <> SCode then continue;  //kt changing to match just on CPT code, not on narrative
+        if (CurCategory = 'Problem List Items') and (P4HasHash or P4HasDollar) then begin
+          //NOTE: I think that Problem List Items have different format, so Piece#4 is different...
+          if P4HasHash then begin
+            InfoBox(TX_INACTIVE_CODE1 + APCEItem.Narrative + TX_INACTIVE_ICD_CODE + APCEItem.Code + TX_INACTIVE_CODE3, TC_INACTIVE_CODE, MB_ICONWARNING or MB_OK)
+          end else if P4HasDollar then begin
+            InfoBox(TX_INACTIVE_CODE1 + APCEItem.Narrative + TX_INACTIVE_SCT_CODE + TX_INACTIVE_CODE3, TC_INACTIVE_CODE, MB_ICONWARNING or MB_OK);
+          end;
+          lbxSection.Checked[j] := False;
+          APCEItem.Free;
+          lbGrid.Items.Delete(i);
+        end else begin
+          lbxSection.Checked[j] := True;
+        end;
+      end;
+      //kt end;
+    end;
+    //kt mod -----
+
+{   //kt original below
     if(lbSection.Items.Count < 1) then exit;
     CurCategory := GetCat;
     for i := lbGrid.Items.Count - 1 downto 0 do
     begin
       APCEItem := TPCEItem(lbGrid.Items.Objects[i]);
-      if APCEItem.Category = CurCategory then
-      begin
+      if APCEItem.Category = CurCategory then begin
 //        CodeNarr := APCEItem.Code + U + APCEItem.Narrative;
-        for j := 0 to lbxSection.Items.Count - 1 do
-        begin
+        for j := 0 to lbxSection.Items.Count - 1 do begin
           SCode := Piece(lbxSection.Items[j], U, 1);
           SNarr := Piece(lbxSection.Items[j], U, 2);
-          if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then
+          if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then begin
 //          if (Pos(APCEItem.Code, SCode) > 0) then
-          begin
             if (CurCategory = 'Problem List Items') and ((Pos('#', Piece(lbxSection.Items[j], U, 4)) > 0) or
                (Pos('$', Piece(lbxSection.Items[j], U, 4)) > 0)) then
             begin
@@ -398,6 +435,9 @@ begin
         end;
       end;
     end;
+
+
+}
   finally
     FUpdatingGrid := FALSE;
   end;
@@ -442,18 +482,69 @@ begin
     Result := Piece(lbSection.Items[lbSection.ItemIndex], U, 2);
 end;
 
-procedure TfrmPCEBaseMain.lbxSectionClickCheck(Sender: TObject;
-  Index: Integer);
+function TfrmPCEBaseMain.SetGridItem(ItemStr, SCat : String; ItemChecked : boolean) : boolean;
+//kt added, splitting out code from lbxSectionClickCheck(Sender: TObject; Index: Integer);
+//Result is DoSync
+//E.g. ItemStr = '11403^Benign excision (T/E) 2.1-3.0 cm (EXC TR-EXT B9+MARG 2.1-3 CM)^11403^^^3'
 var
-  i, j: Integer;
-  x, SCat, SCode, SNarr, CodeCatNarr: string;
+  j: Integer;
+  x, SCode, SNarr, CodeCatNarr: string;
   APCEItem: TPCEItem;
   Found, DoSync: boolean;
+begin
+  x := Pieces(ItemStr, U, 1, 2);
+  SCode := Piece(x, U, 1);
+  SNarr := Piece(x, U, 2);
+  CodeCatNarr := SCode + U + SCat + U + SNarr;
+  Found := FALSE;
+  DoSync := FALSE;
+  //Scan through Grid, and any prior unwanted items are deleted.
+  for j := lbGrid.Items.Count - 1 downto 0 do begin
+    APCEItem := TPCEItem(lbGrid.Items.Objects[j]);
+    if (SCat = APCEItem.Category) and (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then
+//      if (SCat = APCEItem.Category) and (Pos(APCEItem.Code, SCode) > 0) then
+    begin
+      Found := TRUE;
+      if ItemChecked then break;
+      APCEItem.Free;
+      lbGrid.Items.Delete(j);
+    end;
+  end;
+  //Now add item to Grid if wanted and not already present.
+  if (ItemChecked and (not Found)) then begin
+    x := FPCECode + U + CodeCatNarr;
+    if FPCEItemClass = TPCEProc then begin
+      SetPiece(x, U, pnumProvider, IntToStr(FProviders.PCEProvider));
+    end;
+    UpdateNewItemStr(x);
+    APCEItem := FPCEItemClass.Create;
+    APCEItem.SetFromString(x);
+    GridIndex := lbGrid.Items.AddObject(APCEItem.ItemStr, APCEItem);
+    DoSync := TRUE;
+  end;
+  Result := DoSync;
+end;
+
+procedure TfrmPCEBaseMain.lbxSectionClickCheck(Sender: TObject; Index: Integer);
+var
+  i : Integer;
+  SCat : string;
+  //x, SCat, SCode, SNarr, CodeCatNarr: string;
+  //APCEItem: TPCEItem;
+  //Found : boolean;
+  DoSync, OneSync: boolean;
 begin
   inherited;
   if FUpdatingGrid or FClosing then exit;
   DoSync := FALSE;
   SCat := GetCat;
+  //--- begin kt mod ---
+  for i := 0 to lbxSection.Items.Count-1 do begin
+    OneSync := SetGridItem(lbxSection.Items[i], SCat, lbxSection.Checked[i]);
+    DoSync := DoSync or OneSync;
+  end;
+  //kt --- end mod ---------
+  { //kt splitting code out to SetGridItem above
   for i := 0 to lbxSection.Items.Count-1 do
   begin
     x := ORFn.Pieces(lbxSection.Items[i], U, 1, 2);
@@ -485,6 +576,7 @@ begin
       DoSync := TRUE;
     end;
   end;
+  }
   if(DoSync) then
     SyncGridData;
   UpdateControls;
@@ -526,23 +618,18 @@ begin
   try
     cnt := 0;
     idx := -1;
-    for i := 0 to lbGrid.Items.Count - 1 do
-    begin
-      if(lbGrid.Selected[i]) then
-      begin
+    for i := 0 to lbGrid.Items.Count - 1 do begin
+      if(lbGrid.Selected[i]) then begin
         if(idx < 0) then idx := i;
         inc(cnt);
         if(cnt > 1) then break;
       end;
     end;
     NewIdx := -1;
-    if(cnt = 1) then
-    begin
+    if(cnt = 1) then begin
       APCEItem := TPCEItem(lbGrid.Items.Objects[idx]);
-      if APCEItem.Category = GetCat then
-      begin
-        for i := 0 to lbxSection.Items.Count - 1 do
-        begin
+      if APCEItem.Category = GetCat then begin
+        for i := 0 to lbxSection.Items.Count - 1 do begin
           SCode := Piece(lbxSection.Items[i], U, 1);
           SNarr := Piece(lbxSection.Items[i], U, 2);
           if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0)then

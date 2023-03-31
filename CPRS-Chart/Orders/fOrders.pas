@@ -115,13 +115,10 @@ type
     procedure mnuChartTabClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure lstOrdersDrawItem(Control: TWinControl; Index: Integer;
-      TheRect: TRect; State: TOwnerDrawState);
-    procedure lstOrdersMeasureItem(Control: TWinControl; Index: Integer;
-      var AHeight: Integer);
+    procedure lstOrdersDrawItem(Control: TWinControl; Index: Integer; TheRect: TRect; State: TOwnerDrawState);
+    procedure lstOrdersMeasureItem(Control: TWinControl; Index: Integer; var AHeight: Integer);
     procedure mnuViewActiveClick(Sender: TObject);
-    procedure hdrOrdersSectionResize(HeaderControl: THeaderControl;
-      Section: THeaderSection);
+    procedure hdrOrdersSectionResize(HeaderControl: THeaderControl; Section: THeaderSection);
     procedure mnuViewCustomClick(Sender: TObject);
     procedure mnuViewExpiringClick(Sender: TObject);
     procedure mnuViewExpiredClick(Sender: TObject);
@@ -158,22 +155,18 @@ type
     procedure mnuActChgEvntClick(Sender: TObject);
     procedure mnuActRelClick(Sender: TObject);
     procedure EventRealeasedOrder1Click(Sender: TObject);
-    procedure lblWriteMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer);
+    procedure lblWriteMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure popOrderPopup(Sender: TObject);
     procedure mnuViewClick(Sender: TObject);
     procedure mnuActClick(Sender: TObject);
     procedure mnuOptClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure hdrOrdersMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure hdrOrdersMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure hdrOrdersMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure hdrOrdersMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ViewInfo(Sender: TObject);
     procedure mnuViewInformationClick(Sender: TObject);
     procedure mnuOptimizeFieldsClick(Sender: TObject);
-    procedure hdrOrdersSectionClick(HeaderControl: THeaderControl;
-      Section: THeaderSection);
+    procedure hdrOrdersSectionClick(HeaderControl: THeaderControl; Section: THeaderSection);
     procedure sptHorzMoved(Sender: TObject);
     procedure sptVertMoved(Sender: TObject);
   private
@@ -225,8 +218,7 @@ type
     procedure SynchListToOrders;
     procedure ActivateDeactiveRenew;
     procedure ValidateSelected(const AnAction, WarningMsg, WarningTitle: string);
-    procedure ViewAlertedOrders(OrderIEN: string; Status: integer; DispGrp: string;
-          BySvc, InvDate: boolean; Title: string);
+    procedure ViewAlertedOrders(OrderIEN: string; Status: integer; DispGrp: string; BySvc, InvDate: boolean; Title: string);
     procedure UMDestroy(var Message: TMessage); message UM_DESTROY;
     function GetStartStopText(StartTime: string; StopTime: string): string;
     function GetOrderText(AnOrder: TOrder; Index: integer; Column: integer): string;
@@ -256,20 +248,21 @@ type
     procedure InitOrderSheets2(AnItem: string = '');
     procedure SetFontSize( FontSize: integer); override;
     procedure TMGLoadColors;  //TMG  12/14/17
-    property IsDefaultDlg: boolean      read FIsDefaultDlg       write FIsDefaultDlg;
-    property SendDelayOrders: Boolean   read FSendDelayOrders    write FSendDelayOrders;
-    property NewEvent: Boolean          read FNewEvent           write FNewEvent;
-    property NeedShowModal: Boolean     read FNeedShowModal      write FNeedShowModal;
-    property AskForCancel: Boolean      read FAskForCancel       write FAskForCancel;
-    property EventDefaultOrder: string  read FEventDefaultOrder  write FEventDefaultOrder;
-    property TheCurrentView: TOrderView read FCurrentView;
+    procedure EnsureLstWriteLoaded(); //tmg //kt 2/1/23
+    property IsDefaultDlg: boolean         read FIsDefaultDlg         write FIsDefaultDlg;
+    property SendDelayOrders: Boolean      read FSendDelayOrders      write FSendDelayOrders;
+    property NewEvent: Boolean             read FNewEvent             write FNewEvent;
+    property NeedShowModal: Boolean        read FNeedShowModal        write FNeedShowModal;
+    property AskForCancel: Boolean         read FAskForCancel         write FAskForCancel;
+    property EventDefaultOrder: string     read FEventDefaultOrder    write FEventDefaultOrder;
+    property TheCurrentView: TOrderView    read FCurrentView;
     property HighlightFromMedsTab: integer read FHighlightFromMedsTab write FHighlightFromMedsTab;
-    property CalledFromWDO: boolean     read FCalledFromWDO;
-    property EvtOrderList: TStringlist  read FEvtOrderList       write FEvtOrderList;
-    property FromDCRelease: boolean     read FFromDCRelease      write FFromDCRelease;
-    property EvtColWidth: integer       read FEvtColWidth        write FEvtColWidth;
-    property DontCheck: boolean         read FDontCheck          write FDontCheck;
-    property ParentComplexOrderID: string       read FParentComplexOrderID        write FParentComplexOrderID;
+    property CalledFromWDO: boolean        read FCalledFromWDO;
+    property EvtOrderList: TStringlist     read FEvtOrderList         write FEvtOrderList;
+    property FromDCRelease: boolean        read FFromDCRelease        write FFromDCRelease;
+    property EvtColWidth: integer          read FEvtColWidth          write FEvtColWidth;
+    property DontCheck: boolean            read FDontCheck            write FDontCheck;
+    property ParentComplexOrderID: string  read FParentComplexOrderID write FParentComplexOrderID;
   end;
 
 type
@@ -373,22 +366,22 @@ const
   TX_NO_CHANGE  = CRLF + CRLF + '- cannot be changed' + CRLF + CRLF + 'Reason: ';
   TC_NO_CHANGE  = 'Unable to Change Order';
   TX_COMPLEX    = 'You can not take this action on a complex medication.' + #13 + 'You must enter a new order.';
-  TX_CMPTEVT = ' occurred since you started writing delayed orders. '
-    + 'The orders that were entered and signed have now been released. '
-    + 'Any unsigned orders will be released immediately upon signature. '
-    + #13#13
-    + 'To write new delayed orders for this event you need to click the write delayed orders button again and select the appropriate event. '
-    + 'Orders delayed to this same event will remain delayed until the event occurs again.'
-    + #13#13
-    + 'The Orders tab will now be refreshed and switched to the Active Orders view. '
-    + 'If you wish to continue to write active orders for this patient, '
-    + 'close this message window and continue as usual.';
+  TX_CMPTEVT    = ' occurred since you started writing delayed orders. '
+                + 'The orders that were entered and signed have now been released. '
+                + 'Any unsigned orders will be released immediately upon signature. '
+                + #13#13
+                + 'To write new delayed orders for this event you need to click the write delayed orders button again and select the appropriate event. '
+                + 'Orders delayed to this same event will remain delayed until the event occurs again.'
+                + #13#13
+                + 'The Orders tab will now be refreshed and switched to the Active Orders view. '
+                + 'If you wish to continue to write active orders for this patient, '
+                + 'close this message window and continue as usual.';
   TX_CMPTEVT_MEDSTAB = ' occurred since you started writing delayed orders. '
-    + 'The orders that were entered and signed have now been released. '
-    + 'Any unsigned orders will be released immediately upon signature. '
-    + #13#13
-    + 'To write new delayed orders for this event you need to click the write delayed orders button on the orders tab and select the appropriate event. '
-    + 'Orders delayed to this same event will remain delayed until the event occurs again.';
+                + 'The orders that were entered and signed have now been released. '
+                + 'Any unsigned orders will be released immediately upon signature. '
+                + #13#13
+                + 'To write new delayed orders for this event you need to click the write delayed orders button on the orders tab and select the appropriate event. '
+                + 'Orders delayed to this same event will remain delayed until the event occurs again.';
   TX_DEAFAIL    = 'Signing provider does not have a current, valid DEA# on record.';
   TX_SCHFAIL    = 'Signing provider is not authorized to prescribe medications in Federal Schedule ';
   TX_NO_DETOX   = 'Signing provider does not have a valid Detoxification/Maintenance ID number on record.';
@@ -406,11 +399,10 @@ function TfrmOrders.AllowContextChange(var WhyNot: string): Boolean;
 begin
   Result := inherited AllowContextChange(WhyNot);  // sets result = true
   case BOOLCHAR[frmFrame.CCOWContextChanging] of
-    '1': if ActiveOrdering then
-           begin
-             WhyNot := 'Orders in progress will be discarded.';
-             Result := False;
-           end;
+    '1': if ActiveOrdering then begin
+           WhyNot := 'Orders in progress will be discarded.';
+           Result := False;
+         end;
     '0': Result := CloseOrdering;  // call in uOrders, should move to fFrame
   end;
 end;
@@ -437,8 +429,7 @@ begin
   frmFrame.mnuFilePrint.Tag := CT_ORDERS;
   frmFrame.mnuFilePrint.Enabled := True;
   frmFrame.mnuFilePrintSetup.Enabled := True;
-  if InitPage then
-  begin
+  if InitPage then begin
     // set visibility according to order role
     mnuActComplete.Visible   := (User.OrderRole = OR_NURSE) or (User.OrderRole = OR_CLERK) or
                                 (User.OrderRole = OR_PHYSICIAN);
@@ -455,33 +446,46 @@ begin
     popOrderRel.Visible      := False;
     // now set enabled/disabled according to parameters
     // popup items that apply to ordering have tag>0
-    with mnuAct do
-      for i := 0 to Pred(Count) do
+    with mnuAct do begin
+      for i := 0 to Pred(Count) do begin
         Items[i].Enabled := not User.NoOrdering;
-    with popOrder.Items do
-      for i := 0 to Pred(Count) do
+      end;
+    end;
+    with popOrder.Items do begin
+      for i := 0 to Pred(Count) do begin
         if Items[i].Tag > 0 then Items[i].Enabled := not User.NoOrdering;
+      end;
+    end;
     // set nurse verification actions (may be enabled when ordering disabled)
     mnuActVerify.Enabled     := User.EnableVerify;
     mnuActChartRev.Enabled   := User.EnableVerify;
     popOrderVerify.Enabled   := User.EnableVerify;
     popOrderChartRev.Enabled := User.EnableVerify;
-    if User.DisableHold then
-    begin
+    if User.DisableHold then begin
       mnuActHold.Visible := False;
       mnuActUnhold.Visible := False;
     end;
   end;
   AskForCancel := true;
-  if InitPatient then                          // for both CC_INIT_PATIENT and CC_NOTIFICATION
-  begin
+  if InitPatient then begin                         // for both CC_INIT_PATIENT and CC_NOTIFICATION
     if not User.NoOrdering then LoadWriteOrders(lstWrite.Items) else lstWrite.Clear;
     InitOrderSheets;
   end;
   case CallingContext of
-  CC_INIT_PATIENT: mnuViewDfltShowClick(Self); // when new patient but not doing notifications
-  CC_NOTIFICATION: ProcessNotifications;       // when new patient and doing notifications
+    CC_INIT_PATIENT: mnuViewDfltShowClick(Self); // when new patient but not doing notifications
+    CC_NOTIFICATION: ProcessNotifications;       // when new patient and doing notifications
   end;
+end;
+
+procedure TfrmOrders.EnsureLstWriteLoaded();
+//kt added 2/1/23
+//Purpose: allow ability to launch or order dialog from encounter form in case
+//         where order page has not first been displayed
+
+begin
+  if lstWrite.Items.Count> 0 then exit; //nothing needed.
+  if not User.NoOrdering then LoadWriteOrders(lstWrite.Items) else lstWrite.Clear;
+  InitOrderSheets;
 end;
 
 procedure TfrmOrders.mnuChartTabClick(Sender: TObject);
@@ -504,10 +508,10 @@ var
   var
    ij: integer;
   begin
-    for ij := uOrderList.Count - 1 downto 0 do
-    begin
-      if TOrder(uOrderList[ij]).ID = ChildOrderID then
+    for ij := uOrderList.Count - 1 downto 0 do begin
+      if TOrder(uOrderList[ij]).ID = ChildOrderID then begin
         uOrderList.Remove(TOrder(uOrderList[ij]));
+      end;
     end;
   end;
 
@@ -523,108 +527,99 @@ begin
 //    end;                                                            {**REV**}
   if FCurrentView = nil then Exit;
   case OrderAction of
-  ORDER_NEW:  if AnOrder.ID <> '' then
-              begin
-                OrderForList := TOrder.Create;
-                OrderForList.Assign(AnOrder);
-                uOrderList.Add(OrderForList);
-                FCompress := True;
-                RefreshOrderList(FROM_SELF);
-                //PositionTopOrder(AnOrder.DGroup);
-                PositionTopOrder(0);  // puts new orders on top
-                lstOrders.Invalidate;
-              end;
-  ORDER_DC:   begin
-                IndexOfOrder := -1;
-                with lstOrders do for i := 0 to Items.Count - 1 do
-                  if TOrder(Items.Objects[i]).ID = AnOrder.ID then IndexOfOrder := i;
-                if IndexOfOrder > -1
-                  then OrderForList := TOrder(lstOrders.Items.Objects[IndexOfOrder])
-                  else OrderForList := AnOrder;
-                if (Encounter.Provider = User.DUZ) and User.CanSignOrders
-                  then CanSign := CH_SIGN_YES
-                  else CanSign := CH_SIGN_NA;
-                DCNEwOrder := false;
-                if Changes.Orders.Count > 0 then
-                  begin
-                    for j := 0 to Changes.Orders.Count - 1 do
-                      begin
-                        DCChangeItem := TChangeItem(Changes.Orders.Items[j]);
-                        if DCChangeItem.ID = OrderForList.ID then
-                          begin
-                            if (Pos('DC', OrderForList.ActionOn) = 0) then
-                            DCNewOrder := True;
-                            //else DCNewOrder := False;
-                          end;
-                      end;
+    ORDER_NEW:    if AnOrder.ID <> '' then begin
+                    OrderForList := TOrder.Create;
+                    OrderForList.Assign(AnOrder);
+                    uOrderList.Add(OrderForList);
+                    FCompress := True;
+                    RefreshOrderList(FROM_SELF);
+                    //PositionTopOrder(AnOrder.DGroup);
+                    PositionTopOrder(0);  // puts new orders on top
+                    lstOrders.Invalidate;
                   end;
-                DCOrder(OrderForList, GetReqReason, DCNewOrder, ReturnedType);
-                Changes.Add(CH_ORD, OrderForList.ID, OrderForList.Text, '', CanSign);
-                FCompress := True;
-                SynchListToOrders;
-              end;
-  ORDER_EDIT: with lstOrders do
-              begin
-                IndexOfOrder := -1;
-                for i := 0 to Items.Count - 1 do
-                  if TOrder(Items.Objects[i]).ID = AnOrder.EditOf then IndexOfOrder := i;
-                if IndexOfOrder > -1 then
-                begin
-                  TOrder(Items.Objects[IndexOfOrder]).Assign(AnOrder);
-                end; {if IndexOfOrder}
-                //RedrawOrderList;  {redraw here appears to clear selected}
-              end; {with lstOrders}
-  ORDER_ACT:  begin
-                if IsComplexOrder(AnOrder.ID) then
-                begin
-                  RefreshOrderList(FROM_SERVER);
-                  exit;
-                end;
-                with lstOrders do
-                begin
-                  IndexOfOrder := -1;
-                  for i := 0 to Items.Count - 1 do
-                    if TOrder(Items.Objects[i]).ID = Piece(AnOrder.ActionOn, '=', 1) then IndexOfOrder := i;
-                  if (IndexOfOrder > -1) and (AnOrder <> Items.Objects[IndexOfOrder]) then
-                  begin
-                    TOrder(Items.Objects[IndexOfOrder]).Assign(AnOrder);
-                  end; {if IndexOfOrder}
-                  FCompress := True;
-                  RedrawOrderList;
-                end; {with lstOrders}
-              end; //PSI-COMPLEX
-  ORDER_CPLXRN: begin
-                  AChildList := TStringList.Create;
-                  CplxOrderID := Piece(AnOrder.ActionOn,'=',1);
-                  GetChildrenOfComplexOrder(CplxOrderID, Piece(CplxOrderID,';',2), AChildList);
-                  with lstOrders do
-                  begin
-                    for i := Items.Count-1 downto 0 do
-                    begin
-                      for j := 0 to AChildList.Count - 1 do
-                      begin
-                        if TOrder(Items.Objects[i]).ID = AChildList[j] then
-                        begin
-                          RemoveFromOrderList(AChildList[j]);
-                          Items.Objects[i].Free;
-                          Items.Delete(i);
-                          Break;
+    ORDER_DC:     begin
+                    IndexOfOrder := -1;
+                    with lstOrders do for i := 0 to Items.Count - 1 do
+                      if TOrder(Items.Objects[i]).ID = AnOrder.ID then IndexOfOrder := i;
+                    if IndexOfOrder > -1
+                      then OrderForList := TOrder(lstOrders.Items.Objects[IndexOfOrder])
+                      else OrderForList := AnOrder;
+                    if (Encounter.Provider = User.DUZ) and User.CanSignOrders
+                      then CanSign := CH_SIGN_YES
+                      else CanSign := CH_SIGN_NA;
+                    DCNEwOrder := false;
+                    if Changes.Orders.Count > 0 then begin
+                      for j := 0 to Changes.Orders.Count - 1 do begin
+                        DCChangeItem := TChangeItem(Changes.Orders.Items[j]);
+                        if DCChangeItem.ID = OrderForList.ID then begin
+                          if (Pos('DC', OrderForList.ActionOn) = 0) then begin
+                            DCNewOrder := True;
+                          end else begin
+                            //DCNewOrder := False;
+                          end;
                         end;
                       end;
                     end;
-                    Items.InsertObject(0,AnOrder.Text,AnOrder);
-                    Items[0] := GetPlainText(AnOrder,0);
-                    uOrderList.Insert(0,AnOrder);
+                    DCOrder(OrderForList, GetReqReason, DCNewOrder, ReturnedType);
+                    Changes.Add(CH_ORD, OrderForList.ID, OrderForList.Text, '', CanSign);
+                    FCompress := True;
+                    SynchListToOrders;
                   end;
-                  FCompress := True;
-                  RedrawOrderList;
-                  AChildList.Clear;
-                  AChildList.Free;
-                end;
-  ORDER_SIGN: begin
-                FCompress := True;
-                SaveSignOrders;  // sent when orders signed, AnOrder=nil
-              end;
+    ORDER_EDIT:   with lstOrders do begin
+                    IndexOfOrder := -1;
+                    for i := 0 to Items.Count - 1 do begin
+                      if TOrder(Items.Objects[i]).ID = AnOrder.EditOf then IndexOfOrder := i;
+                    end;
+                    if IndexOfOrder > -1 then begin
+                      TOrder(Items.Objects[IndexOfOrder]).Assign(AnOrder);
+                    end; {if IndexOfOrder}
+                    //RedrawOrderList;  {redraw here appears to clear selected}
+                  end; {with lstOrders}
+    ORDER_ACT:    begin
+                    if IsComplexOrder(AnOrder.ID) then begin
+                      RefreshOrderList(FROM_SERVER);
+                      exit;
+                    end;
+                    with lstOrders do begin
+                      IndexOfOrder := -1;
+                      for i := 0 to Items.Count - 1 do begin
+                        if TOrder(Items.Objects[i]).ID = Piece(AnOrder.ActionOn, '=', 1) then IndexOfOrder := i;
+                      end;
+                      if (IndexOfOrder > -1) and (AnOrder <> Items.Objects[IndexOfOrder]) then begin
+                        TOrder(Items.Objects[IndexOfOrder]).Assign(AnOrder);
+                      end; {if IndexOfOrder}
+                      FCompress := True;
+                      RedrawOrderList;
+                    end; {with lstOrders}
+                  end; //PSI-COMPLEX
+    ORDER_CPLXRN: begin
+                    AChildList := TStringList.Create;
+                    CplxOrderID := Piece(AnOrder.ActionOn,'=',1);
+                    GetChildrenOfComplexOrder(CplxOrderID, Piece(CplxOrderID,';',2), AChildList);
+                    with lstOrders do begin
+                      for i := Items.Count-1 downto 0 do begin
+                        for j := 0 to AChildList.Count - 1 do begin
+                          if TOrder(Items.Objects[i]).ID = AChildList[j] then begin
+                            RemoveFromOrderList(AChildList[j]);
+                            Items.Objects[i].Free;
+                            Items.Delete(i);
+                            Break;
+                          end;
+                        end;
+                      end;
+                      Items.InsertObject(0,AnOrder.Text,AnOrder);
+                      Items[0] := GetPlainText(AnOrder,0);
+                      uOrderList.Insert(0,AnOrder);
+                    end;
+                    FCompress := True;
+                    RedrawOrderList;
+                    AChildList.Clear;
+                    AChildList.Free;
+                  end;
+    ORDER_SIGN:   begin
+                    FCompress := True;
+                    SaveSignOrders;  // sent when orders signed, AnOrder=nil
+                  end;
   end; {case}
 end;
 
@@ -640,7 +635,7 @@ begin
   uEvtDCList         := TList.Create;
   uEvtRLList         := TList.Create;
   FDfltSort          := OVS_CATINV;
-  FCompress     := False;
+  FCompress          := False;
   FFromDCRelease     := False;
   FSendDelayOrders   := False;
   FNewEvent          := False;
@@ -655,7 +650,7 @@ begin
   FEvtColWidth := 0;
   FDontCheck := False;
   FParentComplexOrderID := '';
-  // 508 black color scheme that causes problems 
+  // 508 black color scheme that causes problems
   FHighContrast2Mode := BlackColorScheme and (ColorToRGB(clInfoBk) <> ColorToRGB(clBlack));
   AddMessageHandler(lstOrders, RightClickMessageHandler);
   TMGLoadColors;  //TMG  12/14/17
@@ -698,29 +693,26 @@ var
   i, Seq: Integer;
   AnOrder: TOrder;
 begin
-  with lstOrders do
-  begin
+  with lstOrders do begin
     case (Ord(FCurrentView.ByService) * 2) + Ord(FCurrentView.InvChrono) of
-    SORT_FWD: TopIndex := Items.Count - 1;
-    SORT_REV: TopIndex := 0;
-    SORT_GRP_FWD: begin
-                    Seq := SeqOfDGroup(DGroup);
-                    for i := Items.Count - 1 downto 0 do
-                    begin
-                      AnOrder := TOrder(Items.Objects[i]);
-                      if AnOrder.DGroupSeq <= Seq then break;
+      SORT_FWD: TopIndex := Items.Count - 1;
+      SORT_REV: TopIndex := 0;
+      SORT_GRP_FWD: begin
+                      Seq := SeqOfDGroup(DGroup);
+                      for i := Items.Count - 1 downto 0 do begin
+                        AnOrder := TOrder(Items.Objects[i]);
+                        if AnOrder.DGroupSeq <= Seq then break;
+                      end;
+                      TopIndex := i;
                     end;
-                    TopIndex := i;
-                  end;
-    SORT_GRP_REV: begin
-                    Seq := SeqOfDGroup(DGroup);
-                    for i := 0 to Items.Count - 1 do
-                    begin
-                      AnOrder := TOrder(Items.Objects[i]);
-                      if AnOrder.DGroupSeq >= Seq then break;
+      SORT_GRP_REV: begin
+                      Seq := SeqOfDGroup(DGroup);
+                      for i := 0 to Items.Count - 1 do begin
+                        AnOrder := TOrder(Items.Objects[i]);
+                        if AnOrder.DGroupSeq >= Seq then break;
+                      end;
+                      TopIndex := i;
                     end;
-                    TopIndex := i;
-                  end;
     end; {case}
   end; {with}
 end;
@@ -731,17 +723,16 @@ var
   i, SaveTop: Integer;
   AnOrder: TOrder;
 begin
-  with lstOrders do
-  begin
+  with lstOrders do begin
     RedrawSuspend(Handle);
     SaveTop := TopIndex;
     Clear;
     repaint;
-    for i := 0 to uOrderList.Count - 1 do
-    begin
+    for i := 0 to uOrderList.Count - 1 do begin
       AnOrder := TOrder(uOrderList.Items[i]);
-      if (AnOrder.OrderTime <= 0) then
-          Continue;
+      if (AnOrder.OrderTime <= 0) then begin
+        Continue;
+      end;
       Items.AddObject(AnOrder.ID, AnOrder);
       Items[i] := GetPlainText(AnOrder,i);
     end;
@@ -754,19 +745,17 @@ procedure TfrmOrders.RefreshOrderList(FromServer: Boolean; APtEvtID: string);
 var
   i: Integer;
 begin
-  with FCurrentView do
-  begin
-    if EventDelay.EventIFN > 0 then
+  with FCurrentView do begin
+    if EventDelay.EventIFN > 0 then begin
       FCompress := False;
+    end;
     RedrawSuspend(lstOrders.Handle);
     lstOrders.Clear;
-    if FromServer then
-    begin
+    if FromServer then begin
       StatusText('Retrieving orders list...');
-      if not FFromDCRelease then
+      if not FFromDCRelease then begin
         LoadOrdersAbbr(uOrderList, FCurrentView, APtEvtID)
-      else
-      begin
+      end else begin
         ClearOrders(uOrderList);
         uEvtDCList.Clear;
         uEvtRLList.Clear;
@@ -774,31 +763,31 @@ begin
       end;
     end;
     if ((Length(APtEvtID)>0) or (FCurrentView.Filter in [15,16,17,24]) or  (FCurrentView.EventDelay.PtEventIFN>0))
-      and ((not FCompress) or (lstSheets.ItemIndex<0)) and (not FFromDCRelease) then ExpandEventSection
-    else CompressEventSection;
-    if not FFromDCRelease then
-    begin
-      if FRightAfterWriteOrderBox and (EventDelay.EventIFN>0) then
-      begin
+    and ((not FCompress) or (lstSheets.ItemIndex<0)) and (not FFromDCRelease) then begin
+      ExpandEventSection
+    end else begin
+      CompressEventSection;
+    end;
+    if not FFromDCRelease then begin
+      if FRightAfterWriteOrderBox and (EventDelay.EventIFN>0) then begin
         SortOrders(uOrderList,False,True);
         FRightAfterWriteOrderBox := False;
       end else
         SortOrders(uOrderList, ByService, InvChrono);
       AddToListBox(uOrderList);
     end;
-    if FFromDCRelease then
-    begin
-      if uEvtRLList.Count > 0 then
-      begin
+    if FFromDCRelease then begin
+      if uEvtRLList.Count > 0 then begin
         SortOrders(uEvtRLList,True,True);
-        for i := 0 to uEvtRLList.Count - 1 do
+        for i := 0 to uEvtRLList.Count - 1 do begin
           uOrderList.Add(TOrder(uEvtRLList[i]));
+        end;
       end;
-      if uEvtDCList.Count > 0 then
-      begin
+      if uEvtDCList.Count > 0 then begin
         SortOrders(uEvtDCList,True,True);
-        for i := 0 to uEvtDCList.Count - 1 do
-          uOrderList.Add(TOrder(uEvtDCList[i]));   
+        for i := 0 to uEvtDCList.Count - 1 do begin
+          uOrderList.Add(TOrder(uEvtDCList[i]));
+        end;
       end;
       AddToListBox(uOrderList);
     end;
@@ -812,33 +801,33 @@ end;
 
 procedure TfrmOrders.UseDefaultSort;
 begin
-  with FCurrentView do
+  with FCurrentView do begin
     case FDfltSort of
-    OVS_CATINV:  begin
-                   InvChrono := True;
-                   ByService := True;
-                 end;
-    OVS_CATFWD:  begin
-                   InvChrono := False;
-                   ByService := True;
-                 end;
-    OVS_INVERSE: begin
-                   InvChrono := True;
-                   ByService := False;
-                 end;
-    OVS_FORWARD: begin
-                   InvChrono := False;
-                   ByService := False;
-                 end;
-    end;
+      OVS_CATINV:  begin
+                     InvChrono := True;
+                     ByService := True;
+                   end;
+      OVS_CATFWD:  begin
+                     InvChrono := False;
+                     ByService := True;
+                   end;
+      OVS_INVERSE: begin
+                     InvChrono := True;
+                     ByService := False;
+                   end;
+      OVS_FORWARD: begin
+                     InvChrono := False;
+                     ByService := False;
+                   end;
+    end; //case
+  end; //with
 end;
 
 function TfrmOrders.CanChangeOrderView: Boolean;
 { Disallows changing view while doing delayed release orders. }
 begin
   Result := True;
-  if (lstSheets.ItemIndex > 0) and ActiveOrdering then
-  begin
+  if (lstSheets.ItemIndex > 0) and ActiveOrdering then begin
     InfoBox(TX_NOCHG_VIEW, TC_NOCHG_VIEW, MB_OK);
     Result := False;
   end;
@@ -853,35 +842,33 @@ begin
   if not CanChangeOrderView then Exit;
   lstSheets.ItemIndex := 0;
   FCurrentView := TOrderView(lstSheets.Items.Objects[0]);
-  if FCurrentView = nil then
+  if FCurrentView = nil then begin
     FCurrentView := TOrderView.Create;
-  with FCurrentView do
-  begin
+  end;
+  with FCurrentView do begin
     TimeFrom  := 0;
     TimeThru  := 0;
-    if NotifSort then
-    begin
+    if NotifSort then begin
       ByService := False;
       InvChrono := True;
-      if AFilter = STS_RECENT then
-        begin
-          tmpDate  := Trunc(FMDateTimeToDateTime(StrToFMDateTime(Piece(Piece(Notifications.RecordID, U, 2), ';', 3))));
-          TimeFrom := DateTimeToFMDateTime(tmpDate - 5);
-          TimeThru := FMNow;
+      if AFilter = STS_RECENT then begin
+        tmpDate  := Trunc(FMDateTimeToDateTime(StrToFMDateTime(Piece(Piece(Notifications.RecordID, U, 2), ';', 3))));
+        TimeFrom := DateTimeToFMDateTime(tmpDate - 5);
+        TimeThru := FMNow;
+      end;
+      if AFilter = STS_UNVERIFIED then begin
+        if Patient.AdmitTime > 0 then begin
+          tmpDate := Trunc(FMDateTimeToDateTime(Patient.AdmitTime))
+        end else begin
+          tmpdate := Trunc(FMDateTimeToDateTime(FMNow)) - 30;
         end;
-      if AFilter = STS_UNVERIFIED then
-        begin
-          if Patient.AdmitTime > 0 then
-            tmpDate := Trunc(FMDateTimeToDateTime(Patient.AdmitTime))
-          else
-            tmpdate := Trunc(FMDateTimeToDateTime(FMNow)) - 30;
-          TimeFrom := DateTimeToFMDateTime(tmpDate);
-          TimeThru := FMNow;
-        end;
-    end
-    else UseDefaultSort;
-    if AFilter = STS_EXPIRED then
-    begin
+        TimeFrom := DateTimeToFMDateTime(tmpDate);
+        TimeThru := FMNow;
+      end;
+    end else begin
+      UseDefaultSort;
+    end;
+    if AFilter = STS_EXPIRED then begin
       TimeFrom := ExpiredOrdersStartDT;
       TimeThru := FMNow;
     end;
@@ -894,7 +881,7 @@ begin
     EventDelay.EventType := 'C';
     EventDelay.Specialty := 0;
     EventDelay.Effective := 0;
-  end;
+  end; //with
   RefreshOrderList(FROM_SERVER);
 end;
 
@@ -950,16 +937,13 @@ begin
     AnOrderView.EventDelay.EventIFN  := 0;
     AnOrderView.EventDelay.EventName := 'All Services, Active';*)
     SelectOrderView(AnOrderView);
-    with AnOrderView do if Changed then
-    begin
+    with AnOrderView do if Changed then begin
       FCurrentView.Assign(AnOrderView);
-      if FCurrentView.Filter in [15,16,17,24] then
-      begin
+      if FCurrentView.Filter in [15,16,17,24] then begin
         FCompress      := False;
         mnuActRel.Visible   := True;
         popOrderRel.Visible := True;
-      end else
-      begin
+      end else begin
         mnuActRel.Visible   := False;
         popOrderRel.Visible := False;
       end;
@@ -973,11 +957,9 @@ begin
       LoadWriteOrders(lstWrite.Items);
       RefreshOrderList(FROM_SERVER);
 
-      if ByService then
-      begin
+      if ByService then begin
         if InvChrono then FDfltSort := OVS_CATINV  else FDfltSort := OVS_CATFWD;
-      end else
-      begin
+      end else begin
         if InvChrono then FDfltSort := OVS_INVERSE else FDfltSort := OVS_FORWARD;
       end;
     end;
@@ -1010,17 +992,20 @@ var
   x: string;
 begin
   inherited;
-  with FCurrentView do
-  begin
+  with FCurrentView do begin
     x := Piece(Viewname, '(', 1) + CRLF;
     if TimeFrom > 0 then x := x + 'From: ' + MakeRelativeDateTime(TimeFrom);
     if TimeThru > 0 then x := x + '  Thru: ' + MakeRelativeDateTime(TimeThru);
-    if InvChrono
-      then x := x + CRLF + 'Sort order dates in reverse chronological order'
-      else x := x + CRLF + 'Sort order dates in chronological order';
-    if ByService
-      then x := x + CRLF + 'Group orders by service'
-      else x := x + CRLF + 'Don''t group orders by service';
+    if InvChrono then begin
+      x := x + CRLF + 'Sort order dates in reverse chronological order'
+    end else begin
+      x := x + CRLF + 'Sort order dates in chronological order';
+    end;
+    if ByService then begin
+      x := x + CRLF + 'Group orders by service'
+    end else begin
+      x := x + CRLF + 'Don''t group orders by service';
+    end;
   end;
   if InfoBox(TX_VWSAVE1 + x + TX_VWSAVE2, TC_VWSAVE, MB_YESNO) = IDYES
     then SaveOrderViewDefault(FCurrentView);
@@ -1038,46 +1023,41 @@ begin
   tmpList := TStringList.Create;
   idx := 0;
   try
-    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then
-    begin
+    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
       StatusText('Retrieving order details...');
       BigOrderID := TOrder(Items.Objects[i]).ID;
       AnOrderID := Piece(BigOrderID, ';', 1);
-      if StrToFloatDef(AnOrderID,0) = 0 then
+      if StrToFloatDef(AnOrderID,0) = 0 then begin
         ShowMsg('Detail view is not available for selected order.')
-      else
-        begin
-          FastAssign(DetailOrder(BigOrderID), tmpList);
-          if ((TOrder(Items.Objects[i]).DGroupName = 'Inpt. Meds') or
-              (TOrder(Items.Objects[i]).DGroupName = 'Out. Meds') or
-              (TOrder(Items.Objects[i]).DGroupName = 'Clinic Orders') or
-              (TOrder(Items.Objects[i]).DGroupName = 'Infusion')) then
-            begin
-              tmpList.Add('');
-              tmpList.Add(StringOfChar('=', 74));
-              tmpList.Add('');
-              FastAddStrings(MedAdminHistory(AnOrderID), tmpList);
-            end;
-
-          if CheckOrderGroup(AnOrderID)=1 then  // if it's UD group
-          begin
-            for j := 0 to tmpList.Count - 1 do
-            begin
-              if Pos('PICK UP',UpperCase(tmpList[j]))>0 then
-              begin
-                idx := j;
-                Break;
-              end;
-            end;
-            if idx > 0 then
-              tmpList.Delete(idx);
-          end;
-          ReportBox(tmpList, 'Order Details - ' + BigOrderID, True);
+      end else begin
+        FastAssign(DetailOrder(BigOrderID), tmpList);
+        if ((TOrder(Items.Objects[i]).DGroupName = 'Inpt. Meds') or
+            (TOrder(Items.Objects[i]).DGroupName = 'Out. Meds') or
+            (TOrder(Items.Objects[i]).DGroupName = 'Clinic Orders') or
+            (TOrder(Items.Objects[i]).DGroupName = 'Infusion')) then begin
+          tmpList.Add('');
+          tmpList.Add(StringOfChar('=', 74));
+          tmpList.Add('');
+          FastAddStrings(MedAdminHistory(AnOrderID), tmpList);
         end;
+
+        if CheckOrderGroup(AnOrderID)=1 then begin  // if it's UD group
+          for j := 0 to tmpList.Count - 1 do begin
+            if Pos('PICK UP',UpperCase(tmpList[j]))>0 then begin
+              idx := j;
+              Break;
+            end;
+          end;
+          if idx > 0 then begin
+            tmpList.Delete(idx);
+          end;
+        end;
+        ReportBox(tmpList, 'Order Details - ' + BigOrderID, True);
+      end;
       StatusText('');
       if (frmFrame.TimedOut) or (frmFrame.CCOWDrivedChange) then Exit; //code added to correct access violation on timeout
       Selected[i] := False;
-      end;
+    end; //with
   finally
     tmpList.Free;
   end;
@@ -1108,12 +1088,12 @@ var
 begin
   inherited;
   if NoneSelected(TX_NOSEL) then Exit;
-  with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then
-  begin
+  with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
     StatusText('Retrieving order results...');
     BigOrderID := TOrder(Items.Objects[i]).ID;
-    if Length(Piece(BigOrderID,';',1)) > 0 then
+    if Length(Piece(BigOrderID,';',1)) > 0 then begin
       ReportBox(ResultOrderHistory(BigOrderID), 'Order Results History- ' + BigOrderID, True);
+    end;
     Selected[i] := False;
     StatusText('');
   end;
@@ -1159,8 +1139,7 @@ begin
   FCurrentView := AnOrderView;
   FOrderViewForActiveOrders := AnOrderView;
   // now setup the event-delayed views in lstSheets, each with its own TOrderView object
-  with lstSheets do for i := 1 to Items.Count - 1 do
-  begin
+  with lstSheets do for i := 1 to Items.Count - 1 do begin
     AnOrderView := TOrderView.Create;
     AnOrderView.DGroup := DGroupAll;
     AnEventInfo := EventInfo(Piece(Items[i],'^',1));
@@ -1170,9 +1149,9 @@ begin
     AnOrderView.EventDelay.Specialty := 0;
     AnOrderView.EventDelay.Effective := 0;
     case AnOrderView.EventDelay.EventType of
-    'A': AnOrderView.Filter := 15;
-    'D': AnOrderView.Filter := 16;
-    'T': AnOrderView.Filter := 17;
+      'A': AnOrderView.Filter := 15;
+      'D': AnOrderView.Filter := 16;
+      'T': AnOrderView.Filter := 17;
     end;
     AnOrderView.ViewName  := DisplayText[i] + ' Orders';
     AnOrderView.InvChrono := FCurrentView.InvChrono;
@@ -1196,25 +1175,25 @@ begin
   if not CloseOrdering then Exit;
   FCompress  := True;
   if lstSheets.ItemIndex < 0 then Exit;
-  with lstSheets do
-  begin
-   AnOrderView := TOrderView(Items.Objects[ItemIndex]);
-   AnOrderView.EventDelay.PtEventIFN := StrToIntDef(Piece(Items[lstSheets.ItemIndex],'^',1),0);
-   if AnOrderView.EventDelay.PtEventIFN > 0 then
-    FCompress := False;
+  with lstSheets do begin
+    AnOrderView := TOrderView(Items.Objects[ItemIndex]);
+    AnOrderView.EventDelay.PtEventIFN := StrToIntDef(Piece(Items[lstSheets.ItemIndex],'^',1),0);
+    if AnOrderView.EventDelay.PtEventIFN > 0 then begin
+      FCompress := False;
+    end;
   end;
   //CQ 18660 Orders for events should be modal. Orders for non-event should not be modal
-  if AnOrderView.EventDelay.EventIFN = 0 then NeedShowModal := False
-  else NeedShowModal := True;
-  if (FCurrentView <> nil) and (AnOrderView.EventDelay.EventIFN <> FCurrentView.EventDelay.EventIFN) and (FCurrentView.EventDelay.EventIFN > 0 ) then
-  begin
+  if AnOrderView.EventDelay.EventIFN = 0 then begin
+    NeedShowModal := False;
+  end else begin
+    NeedShowModal := True;
+  end;
+  if (FCurrentView <> nil) and (AnOrderView.EventDelay.EventIFN <> FCurrentView.EventDelay.EventIFN)
+  and (FCurrentView.EventDelay.EventIFN > 0 ) then begin
     APtEvtID := IntToStr(FCurrentView.EventDelay.PtEventIFN);
-    if frmMeds.ActionOnMedsTab then
-      Exit;
-    if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then
-      Exit;
-    if (not FDontCheck) and DeleteEmptyEvt(APtEvtID, FCurrentView.EventDelay.EventName) then
-    begin
+    if frmMeds.ActionOnMedsTab then Exit;
+    if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then Exit;
+    if (not FDontCheck) and DeleteEmptyEvt(APtEvtID, FCurrentView.EventDelay.EventName) then begin
       ChangesUpdate(APtEvtID);
       FCompress := True;
       InitOrderSheetsForEvtDelay;
@@ -1224,11 +1203,9 @@ begin
     end;
   end;
 
-  if (FCurrentView = nil) or (AnOrderView <> FCurrentView) or ((AnOrderView=FcurrentView) and (FCurrentView.EventDelay.EventIFN>0)) then
-  begin
+  if (FCurrentView = nil) or (AnOrderView <> FCurrentView) or ((AnOrderView=FcurrentView) and (FCurrentView.EventDelay.EventIFN>0)) then begin
     FCurrentView := AnOrderView;
-    if FCurrentView.EventDelay.EventIFN > 0 then
-    begin
+    if FCurrentView.EventDelay.EventIFN > 0 then begin
       FCompress := False;
       lstWrite.Items.Clear;
       lblWrite.Caption := 'Write ' + FCurrentView.ViewName;
@@ -1240,16 +1217,15 @@ begin
       RefreshOrderList(FROM_SERVER,Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1));
       mnuActRel.Visible   := True;
       popOrderRel.Visible := True;
-      if (lstOrders.Items.Count = 0) and (not NewEvent) then
-      begin
-        if frmMeds.ActionOnMedsTab then
-           Exit;
-        if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then
+      if (lstOrders.Items.Count = 0) and (not NewEvent) then begin
+        if frmMeds.ActionOnMedsTab then begin
           Exit;
-        if PtEvtEmpty(Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1)) then
-        begin
-          if (FAskForCancel) and ( InfoBox(TX_EVTDEL, 'Confirmation', MB_YESNO or MB_ICONQUESTION) = IDYES ) then
-          begin
+        end;
+        if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then begin
+          Exit;
+        end;
+        if PtEvtEmpty(Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1)) then begin
+          if (FAskForCancel) and ( InfoBox(TX_EVTDEL, 'Confirmation', MB_YESNO or MB_ICONQUESTION) = IDYES ) then begin
             DeletePtEvent(Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1));
             FCompress := True;
             lstSheets.Items.Objects[lstSheets.ItemIndex].Free;
@@ -1261,11 +1237,10 @@ begin
           end;
         end;
       end;
-      if NewEvent then
+      if NewEvent then begin
         NewEvent := False;
-    end
-    else
-    begin
+      end;
+    end else begin
       NewEvent := False;
       mnuActRel.Visible   := False;
       popOrderRel.Visible := False;
@@ -1274,8 +1249,7 @@ begin
       LoadWriteOrders(lstWrite.Items);
       RefreshOrderList(FROM_SERVER);
     end;
-  end else
-  begin
+  end else begin
     mnuActRel.Visible   := False;
     popOrderRel.Visible := False;
     lblWrite.Caption := 'Write Orders';
@@ -1295,8 +1269,7 @@ var
   AnOrder: TOrder;
 begin
   tmplst := TList.Create;
-  for i := AnIndex to AnIndex + 100 do
-  begin
+  for i := AnIndex to AnIndex + 100 do begin
     if i >= uOrderList.Count then break;
     AnOrder := TOrder(uOrderList.Items[i]);
     if not AnOrder.Retrieved then tmplst.Add(AnOrder);
@@ -1305,11 +1278,11 @@ begin
   tmplst.Free;
 end;
 
-procedure TfrmOrders.RightClickMessageHandler(var Msg: TMessage;
-  var Handled: Boolean);
+procedure TfrmOrders.RightClickMessageHandler(var Msg: TMessage; var Handled: Boolean);
 begin
-  if Msg.Msg = WM_RBUTTONUP then
+  if Msg.Msg = WM_RBUTTONUP then begin
     lstOrders.RightClickSelect := (lstOrders.SelCount < 1);
+  end;
 end;
 
 function TfrmOrders.GetPlainText(AnOrder: TOrder; index: integer):string;
@@ -1319,14 +1292,16 @@ var
   x: string;
 begin
   result := '';
-  if hdrOrders.Sections[0].Text = 'Event' then
+  if hdrOrders.Sections[0].Text = 'Event' then begin
     FirstColumnDisplayed := 0
-  else
+  end else begin
     FirstColumnDisplayed := 1;
+  end;
   for i:= FirstColumnDisplayed to 9 do begin
     x := GetOrderText(AnOrder, index, i);
-    if x <> '' then
+    if x <> '' then begin
       result := result + hdrOrders.Sections[i].Text + ': ' + x + CRLF;
+    end;
   end;
 end;
 
@@ -1350,18 +1325,17 @@ var
   NewHeight: Integer;
 begin
   NewHeight := AHeight;
-  with lstOrders do if Index < Items.Count then
-  begin
+  with lstOrders do if Index < Items.Count then begin
     AnOrder := TOrder(uOrderList.Items[Index]);
-    if AnOrder <> nil then with AnOrder do
-    begin
+    if AnOrder <> nil then with AnOrder do begin
       if not AnOrder.Retrieved then RetrieveVisibleOrders(Index);
       Canvas.Font.Style := [];
       if Changes.Exist(CH_ORD, ID) then Canvas.Font.Style := [fsBold];
     end;
     {measure height of event delayed name}
-    if hdrOrders.Sections[0].Text = 'Event' then
+    if hdrOrders.Sections[0].Text = 'Event' then begin
       NewHeight := HigherOf(AHeight, MeasureColumnHeight(AnOrder, Index, 0));
+    end;
     {measure height of order text}
     NewHeight := HigherOf(NewHeight, MeasureColumnHeight(AnOrder, Index, 2));
     {measure height of start/stop times}
@@ -1389,58 +1363,53 @@ var
   AReason:  TStringlist;
   i: integer;
 begin
-  if AnOrder <> nil then with AnOrder do
-  begin
+  if AnOrder <> nil then with AnOrder do begin
     case Column of
-      0:
-      begin
-        result := EventName;
-        if (Index > 0) and (result = TOrder(lstOrders.Items.Objects[Index - 1]).EventName) then result := '';
-      end;
-      1:
-      begin
-        result := DGroupName;
-        if (Index > 0) and (result = TOrder(lstOrders.Items.Objects[Index - 1]).DGroupName) then result := '';
-      end;
-      2:
-      begin
-        result := Text;
-        if Flagged then
-        begin
-          if Notifications.Active then
-          begin
-            AReason := TStringList.Create;
-            try
-              result := result + crlf;
-              LoadFlagReason(AReason, ID);
-              for i := 0 to AReason.Count - 1 do
-                result :=  result + AReason[i] + CRLF;
-            finally
-              AReason.Free;
+      0:  begin
+            result := EventName;
+            if (Index > 0) and (result = TOrder(lstOrders.Items.Objects[Index - 1]).EventName) then result := '';
+          end;
+      1:  begin
+            result := DGroupName;
+            if (Index > 0) and (result = TOrder(lstOrders.Items.Objects[Index - 1]).DGroupName) then result := '';
+          end;
+      2:  begin
+            result := Text;
+            if Flagged then
+            begin
+              if Notifications.Active then begin
+                AReason := TStringList.Create;
+                try
+                  result := result + crlf;
+                  LoadFlagReason(AReason, ID);
+                  for i := 0 to AReason.Count - 1 do begin
+                    result :=  result + AReason[i] + CRLF;
+                  end;
+                finally
+                  AReason.Free;
+                end;
+              end else begin
+                result := result + '  *Flagged*';
+              end;
             end;
-          end
-          else
-            result := result + '  *Flagged*';
-        end;
-      end;
-      3: result := GetStartStopText( StartTime, StopTime);
-      4:
-      begin
-        result := MixedCase(ProviderName);
-//        result := Piece(result, ',', 1) + ',' + Copy(Piece(result, ',', 2), 1, 1);
-// CQ#15915
-        result := Piece(result, ',', 1) + ',' + Piece(result, ',', 2);
-      end;
-      5: result := VerNurse;
-      6: result := VerClerk;
-      7: result := ChartRev;
-      8: result := NameOfStatus(Status);
-      9: result := MixedCase(Anorder.OrderLocName);
-      //begin AGP change 26.52 display all location for orders.
-        //result := MixedCase(Anorder.OrderLocName);
-        //if (Index > 0) and (result = TOrder(lstOrders.Items.Objects[Index - 1]).OrderLocName) then result := '';
-      //end;
-    end;
+          end;
+      3:  result := GetStartStopText( StartTime, StopTime);
+      4:  begin
+            result := MixedCase(ProviderName);
+    //        result := Piece(result, ',', 1) + ',' + Copy(Piece(result, ',', 2), 1, 1);
+    // CQ#15915
+            result := Piece(result, ',', 1) + ',' + Piece(result, ',', 2);
+          end;
+      5:  result := VerNurse;
+      6:  result := VerClerk;
+      7:  result := ChartRev;
+      8:  result := NameOfStatus(Status);
+      9:  result := MixedCase(Anorder.OrderLocName);
+       //begin AGP change 26.52 display all location for orders.
+         //result := MixedCase(Anorder.OrderLocName);
+         //if (Index > 0) and (result = TOrder(lstOrders.Items.Objects[Index - 1]).OrderLocName) then result := '';
+       //end;
+    end;  //case
   end;
 end;
 
@@ -1458,11 +1427,9 @@ var
   ThisDate:TDateTime;  //TMG 1/16/18
 begin
   inherited;
-  with lstOrders do
-  begin
+  with lstOrders do begin
     ARect := TheRect;
-    if odSelected in State then
-    begin
+    if odSelected in State then begin
       Canvas.Brush.Color := clHighlight;
       Canvas.Font.Color := clHighlightText
     end else begin   //TMG added else for date checking of nursing orders   12/14/17
@@ -1493,52 +1460,50 @@ begin
     Canvas.LineTo(ARect.Right, ARect.Bottom - 1);
     RightSide := -2;
 
-    for i := 0 to 9 do
-    begin
+    for i := 0 to 9 do begin
       RightSide := RightSide + hdrOrders.Sections[i].Width;
       Canvas.MoveTo(RightSide, ARect.Bottom - 1);
       Canvas.LineTo(RightSide, ARect.Top);
     end;
 
-    if Index < Items.Count then
-    begin
+    if Index < Items.Count then begin
       AnOrder := TOrder(Items.Objects[Index]);
-      if hdrOrders.Sections[0].Text = 'Event' then
+      if hdrOrders.Sections[0].Text = 'Event' then begin
         FirstColumnDisplayed := 0
-      else
+      end else begin
         FirstColumnDisplayed := 1;
-      if AnOrder <> nil then with AnOrder do for i := FirstColumnDisplayed to 9 do
-      begin
-        if i > FirstColumnDisplayed then
+      end;
+      if AnOrder <> nil then with AnOrder do for i := FirstColumnDisplayed to 9 do begin
+        if i > FirstColumnDisplayed then begin
           ARect.Left := ARect.Right + 2
-        else
+        end else begin
           ARect.Left := 2;
+        end;
         ARect.Right := ARect.Left + hdrOrders.Sections[i].Width - 6;
         x := GetOrderText(AnOrder, Index, i);
         SaveColor := Canvas.Brush.Color;
-        if i = FirstColumnDisplayed then
-        begin
-          if Flagged then
-          begin
+        if i = FirstColumnDisplayed then begin
+          if Flagged then begin
             Canvas.Brush.Color := Get508CompliantColor(clRed);
             Canvas.FillRect(ARect);
           end;
         end;
-        if i = 2 then
-        begin
+        if i = 2 then begin
           Canvas.Font.Style := [];
           if Changes.Exist(CH_ORD, AnOrder.ID) then Canvas.Font.Style := [fsBold];
-          if not (odSelected in State) and (AnOrder.Signature = OSS_UNSIGNED) then
-          begin
-            if FHighContrast2Mode then
+          if not (odSelected in State) and (AnOrder.Signature = OSS_UNSIGNED) then begin
+            if FHighContrast2Mode then begin
               Canvas.Font.Color := clBlue
-            else
+            end else begin
               Canvas.Font.Color := Get508CompliantColor(clBlue);
+            end;
           end;
         end;
-        if (i = 2) or (i = 3) or (i = 0) then
+        if (i = 2) or (i = 3) or (i = 0) then begin
           DrawText(Canvas.Handle, PChar(x), Length(x), ARect, DT_LEFT or DT_NOPREFIX or DT_WORDBREAK)
-        else DrawText(Canvas.Handle, PChar(x), Length(x), ARect, DT_LEFT or DT_NOPREFIX );
+        end else begin
+          DrawText(Canvas.Handle, PChar(x), Length(x), ARect, DT_LEFT or DT_NOPREFIX );
+        end;
         Canvas.Brush.Color := SaveColor;
         ARect.Right := ARect.Right + 4;
       end;
@@ -1569,6 +1534,7 @@ procedure TfrmOrders.lstWriteClick(Sender: TObject);
 var
   Activated: Boolean;
   NextIndex: Integer;
+
 begin
   if OrderListClickProcessing then Exit;
   OrderListClickProcessing := true;   //Make sure this gets set to false prior to exiting.
@@ -1580,70 +1546,66 @@ begin
   //frmFrame.UpdatePtInfoOnRefresh;
   if not ActiveOrdering then SetConfirmEventDelay;
   NextIndex := lstWrite.ItemIndex;
-  if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then
-  begin
+  if (FCurrentView.EventDelay.PtEventIFN>0) and (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then begin
     OrderListClickProcessing := false;
     Exit;
   end;
-  if not ReadyForNewOrder(FCurrentView.EventDelay) then
-  begin
+  if not ReadyForNewOrder(FCurrentView.EventDelay) then begin
     lstWrite.ItemIndex := RefNumFor(Self);
     OrderListClickProcessing := false;
     Exit;
   end;
 
   // don't write delayed orders for non-VA meds:
-  if (FCurrentView.EventDelay.EventIFN>0) and (Piece(lstWrite.ItemID,';',2) = '145') then
-    begin
-      InfoBox('Delayed orders cannot be written for Non-VA Medications.', 'Meds, Non-VA', MB_OK);
-      OrderListClickProcessing := false;
-      Exit;
-    end;
+  if (FCurrentView.EventDelay.EventIFN>0) and (Piece(lstWrite.ItemID,';',2) = '145') then begin
+    InfoBox('Delayed orders cannot be written for Non-VA Medications.', 'Meds, Non-VA', MB_OK);
+    OrderListClickProcessing := false;
+    Exit;
+  end;
 
-  if (FCurrentView <> nil) and (FCurrentView.EventDelay.EventIFN>0) then
+  if (FCurrentView <> nil) and (FCurrentView.EventDelay.EventIFN>0) then begin
     FRightAfterWriteOrderBox := True;
+  end;
   lstWrite.ItemIndex := NextIndex;  // (ReadyForNewOrder may reset ItemIndex to -1)
-  if FCurrentView <> nil then with FCurrentView.EventDelay do
-    if (EventType = 'D') and (Effective = 0) then
-      if not ObtainEffectiveDate(Effective) then
-      begin
+  if FCurrentView <> nil then with FCurrentView.EventDelay do begin
+    if (EventType = 'D') and (Effective = 0) then begin
+      if not ObtainEffectiveDate(Effective) then begin
         lstWrite.ItemIndex := -1;
         OrderListClickProcessing := false;
         Exit;
       end;
+    end;
+  end;
   if frmFrame.CCOWDrivedChange then begin
     OrderListClickProcessing := false;
     Exit;
   end;
   PositionTopOrder(StrToIntDef(Piece(lstWrite.ItemID, ';', 3), 0));  // position Display Group
   case CharAt(Piece(lstWrite.ItemID, ';', 4), 1) of
-  'A':      Activated := ActivateAction(     Piece(lstWrite.ItemID, ';', 1), Self,
-                                             lstWrite.ItemIndex);
-  'D', 'Q': Activated := ActivateOrderDialog(Piece(lstWrite.ItemID, ';', 1),
-                                             FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
-  'H':      Activated := ActivateOrderHTML(  Piece(lstWrite.ItemID, ';', 1),
-                                             FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
-  'M':      Activated := ActivateOrderMenu(  Piece(lstWrite.ItemID, ';', 1),
-                                             FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
-  'O':      Activated := ActivateOrderSet(   Piece(lstWrite.ItemID, ';', 1),
-                                             FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
-  else      Activated := not (InfoBox(TX_BAD_TYPE, TC_BAD_TYPE, MB_OK) = IDOK);
+    'A':      Activated := ActivateAction(     Piece(lstWrite.ItemID, ';', 1), Self, lstWrite.ItemIndex);
+    'D', 'Q': begin
+              Activated := ActivateOrderDialog(Piece(lstWrite.ItemID, ';', 1), FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
+              if frmFrame.TabPageID(tpsRight)=CT_ORDERS then frmFrame.PositionSideTabTextOrderDialog(uOrderDialog); //kt-tabs added
+              end;
+    'H':      Activated := ActivateOrderHTML(  Piece(lstWrite.ItemID, ';', 1), FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
+    'M':      Activated := ActivateOrderMenu(  Piece(lstWrite.ItemID, ';', 1), FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
+    'O':      Activated := ActivateOrderSet(   Piece(lstWrite.ItemID, ';', 1), FCurrentView.EventDelay, Self, lstWrite.ItemIndex);
+    else      Activated := not (InfoBox(TX_BAD_TYPE, TC_BAD_TYPE, MB_OK) = IDOK);
   end; {case}
-  if not Activated then
-  begin
+  if not Activated then begin
     lstWrite.ItemIndex := -1;
     FRightAfterWriteOrderBox := False;
   end;
-  if (lstSheets.ItemIndex > -1) and (Pos('EVT',Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1))>0) then
-  begin
+  if (lstSheets.ItemIndex > -1) and (Pos('EVT',Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1))>0) then begin
     InitOrderSheetsForEvtDelay;
     lstSheets.ItemIndex := 0;
     lstSheetsClick(Self);
   end;
   OrderListClickProcessing := false;
   if (FCurrentView <> nil) and (FCurrentView.EventDelay.PtEventIFN>0) and
-    (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then
+    (PtEvtCompleted(FCurrentView.EventDelay.PtEventIFN, FCurrentView.EventDelay.EventName)) then begin
     Exit;
+  end;
 end;
 
 procedure TfrmOrders.SaveSignOrders;
@@ -1653,17 +1615,18 @@ var
 begin
   // unlock if able??
   if not PatientViewed then Exit;
-  if not frmFrame.ContextChanging then with lstOrders do
-  begin
+  if not frmFrame.ContextChanging then with lstOrders do begin
     if (TopIndex < Items.Count) and (TopIndex > -1)
       then SaveOrderID := TOrder(Items.Objects[TopIndex]).ID
       else SaveOrderID := '';
-    if lstSheets.ItemIndex > 0 then
+    if lstSheets.ItemIndex > 0 then begin
       RefreshOrderList(FROM_SERVER,Piece(lstSheets.Items[lstSheets.ItemIndex],'^',1))
-    else
+    end else begin
       RefreshOrderList(FROM_SERVER);
-    if Length(SaveOrderID) > 0 then for i := 0 to Items.Count - 1 do
+    end;
+    if Length(SaveOrderID) > 0 then for i := 0 to Items.Count - 1 do begin
       if TOrder(Items.Objects[i]).ID = SaveOrderID then TopIndex := i;
+    end;
   end;
 end;
 
@@ -1681,65 +1644,61 @@ begin
   BadList  := TStringList.Create;
   CheckedList := TStringList.Create;
   try
-    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then
-    begin
+    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
       AnOrder := TOrder(Items.Objects[i]);
-      if (AnAction = 'RN') and (PassDrugTest(StrtoINT(Piece(AnOrder.ID, ';',1)), 'E', True, True)=True) then
-        begin
-          ShowMsg('Cannot renew Clozapine orders.');
-          Selected[i] := false;
-        end;
-      if (AnAction = 'RN') and (AnOrder.Status=6) and (AnOrder.DGroupName = 'Inpt. Meds') and (Patient.inpatient) and (IsClinicLoc(Encounter.Location)) then
-         begin
-           Selected[i] := False;
-           MessageDlg('You cannot renew inpatient medication order on a clinic location for selected inpatient.', mtWarning, [mbOK], 0);
-         end;
-      if ((AnAction = 'RN') or (AnAction = 'EV')) and (AnOrder.EnteredInError = 0) then  //AGP Changes PSI-04053
-      begin
-        if not IsValidSchedule(AnOrder.ID) then
-        begin
-          if (AnAction = 'RN') then
+      if (AnAction = 'RN') and (PassDrugTest(StrtoINT(Piece(AnOrder.ID, ';',1)), 'E', True, True)=True) then begin
+        ShowMsg('Cannot renew Clozapine orders.');
+        Selected[i] := false;
+      end;
+      if (AnAction = 'RN') and (AnOrder.Status=6) and (AnOrder.DGroupName = 'Inpt. Meds')
+      and (Patient.inpatient) and (IsClinicLoc(Encounter.Location)) then begin
+        Selected[i] := False;
+        MessageDlg('You cannot renew inpatient medication order on a clinic location for selected inpatient.', mtWarning, [mbOK], 0);
+      end;
+      if ((AnAction = 'RN') or (AnAction = 'EV')) and (AnOrder.EnteredInError = 0) then begin //AGP Changes PSI-04053
+        if not IsValidSchedule(AnOrder.ID) then begin
+          if (AnAction = 'RN') then begin
             ShowMsg('The order contains invalid schedule and can not be renewed.')
-          else if (AnAction = 'EV') then
+          end else if (AnAction = 'EV') then begin
             ShowMsg('The order contains invalid schedule and can not be changed to event delayed order.');
+          end;
 
           Selected[i] := False;
           Continue;
         end;
       end;
       //AGP CHANGE ORDER ENTERED IN ERROR TO ALLOW SIGNATURE AND VERIFY ACTIONS 26.23
-      if ((AnOrder.EnteredInError = 1) and ((AnOrder.Status = 1) or (AnOrder.Status = 13)))  and ((AnAction <> 'ES') and (AnAction <> 'VR') and (AnAction <> 'CR')) then
-         begin
-            InfoBox(AnOrder.Text + WarningMsg + 'This order has been mark as Entered in error.', WarningTitle, MB_OK);
-            Selected[i] := False;
-            Continue;
-         end;
-      if ((AnAction <> OA_RELEASE) and (AnOrder.EnteredInError = 0)) or (((AnOrder.EnteredInError = 1) and ((AnOrder.Status = 1) or (AnOrder.Status = 13))) and
-            (AnAction = 'ES')) then
-         ValidateOrderAction(AnOrder.ID, AnAction, ErrMsg)
+      if ((AnOrder.EnteredInError = 1) and ((AnOrder.Status = 1) or (AnOrder.Status = 13)))
+      and ((AnAction <> 'ES') and (AnAction <> 'VR') and (AnAction <> 'CR')) then begin
+        InfoBox(AnOrder.Text + WarningMsg + 'This order has been mark as Entered in error.', WarningTitle, MB_OK);
+        Selected[i] := False;
+        Continue;
+      end;
+      if ((AnAction <> OA_RELEASE) and (AnOrder.EnteredInError = 0)) or (((AnOrder.EnteredInError = 1)
+      and ((AnOrder.Status = 1) or (AnOrder.Status = 13))) and (AnAction = 'ES')) then begin
+        ValidateOrderAction(AnOrder.ID, AnAction, ErrMsg);
       //AGP END Changes
-        else ErrMsg := '';
+      end else begin
+        ErrMsg := '';
+      end;
       case StrToIntDef(Piece(ErrMsg,U,1),0) of
           1:  ErrMsg := TX_DEAFAIL;  //prescriber has an invalid or no DEA#
           2:  ErrMsg := TX_SCHFAIL + Piece(ErrMsg,U,2) + '.';  //prescriber has no schedule privileges in 2,2N,3,3N,4, or 5
           3:  ErrMsg := TX_NO_DETOX;  //prescriber has an invalid or no Detox#
           4:  ErrMsg := TX_EXP_DEA1 + Piece(ErrMsg,U,2) + TX_EXP_DEA2;  //prescriber's DEA# expired and no VA# is assigned
           5:  ErrMsg := TX_EXP_DETOX + Piece(ErrMsg,U,2) + '.';  //valid detox#, but expired DEA#
-      end;
-      if (Length(ErrMsg)>0) and (Pos('COMPLEX-PSI',ErrMsg)<1) then
-      begin
+      end; //case
+      if (Length(ErrMsg)>0) and (Pos('COMPLEX-PSI',ErrMsg)<1) then begin
         InfoBox(AnOrder.Text + WarningMsg + ErrMsg, WarningTitle, MB_OK);
         Selected[i] := False;
         Continue;
       end;
-      if (Length(ErrMsg)>0) and IsFirstDoseNowOrder(AnOrder.ID) and (AnAction <> 'RL') then
-      begin
+      if (Length(ErrMsg)>0) and IsFirstDoseNowOrder(AnOrder.ID) and (AnAction <> 'RL') then begin
         InfoBox(AnOrder.Text + WarningMsg + ErrMsg, WarningTitle, MB_OK);
         Selected[i] := False;
         Continue;
       end;
-      if (Length(ErrMsg)>0) and ( (AnAction = OA_CHGEVT) or (AnAction = OA_EDREL) ) then
-      begin
+      if (Length(ErrMsg)>0) and ( (AnAction = OA_CHGEVT) or (AnAction = OA_EDREL) ) then begin
         InfoBox(AnOrder.Text + WarningMsg + ErrMsg, WarningTitle, MB_OK);
         Selected[i] := False;
         Continue;
@@ -1747,44 +1706,40 @@ begin
       AParentID := '';
       IsValidActionOnComplexOrder(AnOrder.ID, AnAction,TListBox(lstOrders),CheckedList,ErrMsg, AParentID);
       TOrder(Items.Objects[i]).ParentID := AParentID;
-      if (Length(ErrMsg)=0) and (AnAction=OA_EDREL) then
-         begin
-           if (AnOrder.Signature = 2) and (not VerbTelPolicyOrder(AnOrder.ID)) then
-              begin
-                ErrMsg := 'Need to be signed first.';
-                Selected[i] := False;
-              end;
-         end;
+      if (Length(ErrMsg)=0) and (AnAction=OA_EDREL) then begin
+        if (AnOrder.Signature = 2) and (not VerbTelPolicyOrder(AnOrder.ID)) then begin
+          ErrMsg := 'Need to be signed first.';
+          Selected[i] := False;
+        end;
+      end;
 
-      if (AnAction = OA_CHGEVT) or (AnAction = OA_EDREL) then
-         begin
-           if Length(ErrMsg)>0 then
-              begin
-                Selected[i] := False;
-                Badlist.Add(AnOrder.Text + '^' + ErrMsg);
-              end
-           else
-             GoodList.Add(AnOrder.Text);
-         end;
+      if (AnAction = OA_CHGEVT) or (AnAction = OA_EDREL) then begin
+        if Length(ErrMsg)>0 then begin
+          Selected[i] := False;
+          Badlist.Add(AnOrder.Text + '^' + ErrMsg);
+        end else begin
+          GoodList.Add(AnOrder.Text);
+        end;
+      end;
 
-      if (Length(ErrMsg) > 0) and (AnAction <> OA_CHGEVT) and (AnAction <> OA_EDREL) then
-         begin
-           if Pos('COMPLEX-PSI',ErrMsg)>0 then ErrMsg := TX_COMPLEX;
-           InfoBox(AnOrder.Text + WarningMsg + ErrMsg, WarningTitle, MB_OK);
-           Selected[i] := False;
-         end;
+      if (Length(ErrMsg) > 0) and (AnAction <> OA_CHGEVT) and (AnAction <> OA_EDREL) then begin
+        if Pos('COMPLEX-PSI',ErrMsg)>0 then ErrMsg := TX_COMPLEX;
+        InfoBox(AnOrder.Text + WarningMsg + ErrMsg, WarningTitle, MB_OK);
+        Selected[i] := False;
+      end;
 
       if Selected[i] and (not OrderIsLocked(AnOrder.ID, AnAction)) then Selected[i] := False;
 
     end; //with
 
-    if ((AnAction = OA_CHGEVT) or (AnAction = OA_EDREL)) then
-       begin
-        if (BadList.Count = 1) and (GoodList.Count < 1 ) then
-          InfoBox(Piece(BadList[0],'^',1) + WarningMsg + Piece(BadList[0],'^',2), WarningTitle, MB_OK);
-        if ((BadList.Count >= 1) and (GoodList.Count >= 1)) or ( BadList.Count > 1 )then
-          DisplayOrdersForAction(BadList,GoodList,AnAction);
-       end;
+    if ((AnAction = OA_CHGEVT) or (AnAction = OA_EDREL)) then begin
+      if (BadList.Count = 1) and (GoodList.Count < 1 ) then begin
+        InfoBox(Piece(BadList[0],'^',1) + WarningMsg + Piece(BadList[0],'^',2), WarningTitle, MB_OK);
+      end;
+      if ((BadList.Count >= 1) and (GoodList.Count >= 1)) or ( BadList.Count > 1 )then begin
+        DisplayOrdersForAction(BadList,GoodList,AnAction);
+      end;
+    end;
   finally
     GoodList.Free;
     BadList.Free;
@@ -3046,7 +3001,7 @@ begin
   if FCurrentView = nil then
   begin                                                  
     FCurrentView := TOrderView.Create;                   
-    with FCurrentView do                                 
+    with FCurrentView do
     begin                                                
       InvChrono := True;                                 
       ByService := True;                                 
@@ -3078,18 +3033,15 @@ begin
       end;
   PositionTopOrder(StrToIntDef(Piece(ADlgInfo, ';', 3), 0));
   case CharAt(Piece(ADlgInfo, ';', 4), 1) of
-  'A':      Activated := ActivateAction(     Piece(ADlgInfo, ';', 1), Self,
-                                             lstWrite.ItemIndex);
-  'D', 'Q': Activated := ActivateOrderDialog(Piece(ADlgInfo, ';', 1),
-                                             TheEvent, Self, lstWrite.ItemIndex);
-  'H':      Activated := ActivateOrderHTML(  Piece(ADlgInfo, ';', 1),
-                                             TheEvent, Self, lstWrite.ItemIndex);
-  'M':      Activated := ActivateOrderMenu(  Piece(ADlgInfo, ';', 1),
-                                             TheEvent, Self, lstWrite.ItemIndex);
-  'O':      Activated := ActivateOrderSet(   Piece(ADlgInfo, ';', 1),
-                                             TheEvent, Self, lstWrite.ItemIndex);
-  else      Activated := not (InfoBox(TX_BAD_TYPE, TC_BAD_TYPE, MB_OK) = IDOK);
-  end;
+    'A':      Activated := ActivateAction(Piece(ADlgInfo, ';', 1), Self, lstWrite.ItemIndex);
+    'D', 'Q': begin
+                Activated := ActivateOrderDialog(Piece(ADlgInfo, ';', 1), TheEvent, Self, lstWrite.ItemIndex);
+              end;
+    'H':      Activated := ActivateOrderHTML(  Piece(ADlgInfo, ';', 1), TheEvent, Self, lstWrite.ItemIndex);
+    'M':      Activated := ActivateOrderMenu(  Piece(ADlgInfo, ';', 1), TheEvent, Self, lstWrite.ItemIndex);
+    'O':      Activated := ActivateOrderSet(   Piece(ADlgInfo, ';', 1), TheEvent, Self, lstWrite.ItemIndex);
+    else      Activated := not (InfoBox(TX_BAD_TYPE, TC_BAD_TYPE, MB_OK) = IDOK);
+  end; //case
   if (not Activated) and (IsDefaultDialog) then
   begin
     lstWrite.ItemIndex := -1;
@@ -3156,32 +3108,26 @@ begin
       AnDlgStr := ADest.Items[ADest.ItemIndex];
 
     if IsDefaultDlg then NeedShowModal := True else FNeedShowModal := False;
-    if not IsDefaultDlg then
-    begin
-      if FEventForCopyActiveOrders.EventIFN > 0 then
-      begin
-        if IsExistedEvent(Patient.DFN,IntToStr(FEventForCopyActiveOrders.EventIFN),tmpPtEvtID) then
-        begin
+    if not IsDefaultDlg then begin
+      if FEventForCopyActiveOrders.EventIFN > 0 then begin
+        if IsExistedEvent(Patient.DFN,IntToStr(FEventForCopyActiveOrders.EventIFN),tmpPtEvtID) then begin
           FEventForCopyActiveOrders.PtEventIFN := StrToIntDef(tmpPtEvtID,0);
           FEventForCopyActiveOrders.IsNewEvent := False
         end;
-        if DispOrdersForEvent(IntToStr(FEventForCopyActiveOrders.EventIFN)) then
+        if DispOrdersForEvent(IntToStr(FEventForCopyActiveOrders.EventIFN)) then begin
           CopyActiveOrdersToEvent(FOrderViewForActiveOrders, FEventForCopyActiveOrders);
+        end;
       end;
       FEventForCopyActiveOrders.EventIFN := 0;
     end;
 
-    if PlaceOrderForDefaultDialog(AnDlgStr,IsDefaultDlg, AFillEvent) then
-    begin
-      if isExistedEvent(Patient.DFN,IntToStr(FEventForCopyActiveOrders.EventIFN), APtEvtID) then
-      begin
+    if PlaceOrderForDefaultDialog(AnDlgStr,IsDefaultDlg, AFillEvent) then begin
+      if isExistedEvent(Patient.DFN,IntToStr(FEventForCopyActiveOrders.EventIFN), APtEvtID) then begin
         FCurrentView.EventDelay.PtEventIFN := StrToIntDef(APtEvtID,0);
         FCurrentView.EventDelay.IsNewEvent := False;
       end;
-      if FEventForCopyActiveOrders.EventIFN > 0 then
-      begin
-        if IsExistedEvent(Patient.DFN,IntToStr(FEventForCopyActiveOrders.EventIFN),tmpPtEvtID) then
-        begin
+      if FEventForCopyActiveOrders.EventIFN > 0 then begin
+        if IsExistedEvent(Patient.DFN,IntToStr(FEventForCopyActiveOrders.EventIFN),tmpPtEvtID) then begin
           FEventForCopyActiveOrders.PtEventIFN := StrToIntDef(tmpPtEvtID,0);
           FEventForCopyActiveOrders.IsNewEvent := False
         end;
@@ -3222,20 +3168,18 @@ begin
   InitOrderSheets;
   LoadOrderViewDefault(TOrderView(lstSheets.Items.Objects[0]));
   lstSheets.Items[0] := 'C;0^' + TOrderView(lstSheets.Items.Objects[0]).ViewName;
-  if Length(AnItem)>0 then
-  begin
-      with lstSheets do for i := 0 to Items.Count - 1 do
-      begin
-        if AnsiCompareText(TOrderView(Items.Objects[i]).ViewName, AnItem)=0 then
-         begin
-           ItemIndex := i;
-           FCurrentView := TOrderView(lstSheets.Items.Objects[i]);
-           break;
-         end;
+  if Length(AnItem)>0 then begin
+    with lstSheets do for i := 0 to Items.Count - 1 do begin
+      if AnsiCompareText(TOrderView(Items.Objects[i]).ViewName, AnItem)=0 then begin
+        ItemIndex := i;
+        FCurrentView := TOrderView(lstSheets.Items.Objects[i]);
+        break;
       end;
+    end;
   end;
-  if lstSheets.ItemIndex < -1 then
+  if lstSheets.ItemIndex < -1 then begin
     lstSheets.ItemIndex := 0;
+  end;
   lstSheetsClick(Self);
 end;
 
@@ -3258,13 +3202,13 @@ var OrderText:string;
 begin
   inherited;
   with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
-      StatusText('Copying order details...');
-      OrderText := TOrder(Items.Objects[i]).Text;
-      if pos('>>',OrderText)>0 then OrderText := piece2(OrderText,'>>',2);  //Get rid of the leading >>
-      OrderText := '<TABLE BORDER=1><TR><TD><PRE>'+ORDERTEXT+'</PRE></TD></TR></TABLE>';
-      CopyHTMLToClipboard('',OrderText);
-      ShowMessage('Order text has been copied to the clipboard.');
-      StatusText('');
+    StatusText('Copying order details...');
+    OrderText := TOrder(Items.Objects[i]).Text;
+    if pos('>>',OrderText)>0 then OrderText := piece2(OrderText,'>>',2);  //Get rid of the leading >>
+    OrderText := '<TABLE BORDER=1><TR><TD><PRE>'+ORDERTEXT+'</PRE></TD></TR></TABLE>';
+    CopyHTMLToClipboard('',OrderText);
+    ShowMessage('Order text has been copied to the clipboard.');
+    StatusText('');
   end;
 end;
 
@@ -3315,14 +3259,13 @@ var
   AnOrder: TOrder;
   i: integer;
 begin
-   with AnOrderList do for idx := 0 to Count - 1 do
-   begin
-     AnOrder := TOrder(Items[idx]);
-     if (AnOrder.OrderTime <= 0) then
-         Continue;
-     i := lstOrders.Items.AddObject(AnOrder.ID, AnOrder);
-     lstOrders.Items[i] := GetPlainText(AnOrder,i);
-   end;
+  with AnOrderList do for idx := 0 to Count - 1 do
+  begin
+    AnOrder := TOrder(Items[idx]);
+    if (AnOrder.OrderTime <= 0) then Continue;
+    i := lstOrders.Items.AddObject(AnOrder.ID, AnOrder);
+    lstOrders.Items[i] := GetPlainText(AnOrder,i);
+  end;
 end;
 
 procedure TfrmOrders.ChangesUpdate(APtEvtID: string);
@@ -3331,34 +3274,33 @@ var
   APrtEvtId, tempEvtId,EvtOrderID: string;
 begin
   APrtEvtId := TheParentPtEvt(APtEvtID);
-  if Length(APrtEvtId)>0 then
+  if Length(APrtEvtId)>0 then begin
     tempEvtId := APrtEvtId
-  else
+  end else begin
     tempEvtId := APtEvtID;
-  for jdx := EvtOrderList.Count - 1 downto 0 do
-    if AnsiCompareStr(Piece(EvtOrderList[jdx],'^',1),tempEvtID) = 0 then
-    begin
+  end;
+  for jdx := EvtOrderList.Count - 1 downto 0 do begin
+    if AnsiCompareStr(Piece(EvtOrderList[jdx],'^',1),tempEvtID) = 0 then begin
       EvtOrderID := Piece(EvtOrderList[jdx],'^',2);
       Changes.Remove(CH_ORD,EvtOrderID);
       EvtOrderList.Delete(jdx);
     end;
+  end;
 end;
 
 function TfrmOrders.PtEvtCompleted(APtEvtID: integer; APtEvtName: string; FromMeds: boolean; Signing: boolean): boolean;
 begin
   Result := False;
-  if IsCompletedPtEvt(APtEvtID) then
-  begin
+  if IsCompletedPtEvt(APtEvtID) then begin
     if FromMeds then
       InfoBox('The event "Delayed ' + APtEvtName + '" ' + TX_CMPTEVT_MEDSTAB, 'Warning', MB_OK or MB_ICONWARNING)
     else
       InfoBox('The event "Delayed ' + APtEvtName + '" ' + TX_CMPTEVT, 'Warning', MB_OK or MB_ICONWARNING);
     GroupChangesUpdate('Delayed ' + APtEvtName);
-    if signing = true then
-      begin
-        Result := True;
-        exit;
-      end;
+    if signing = true then begin
+      Result := True;
+      exit;
+    end;
     InitOrderSheetsForEvtDelay;
     lstSheets.ItemIndex := 0;
     lstSheetsClick(self);
@@ -3380,11 +3322,11 @@ var
   theChangeItem: TChangeItem;
 begin
   Changes.ChangeOrderGrp(GrpName,'');
-  for ji := 0 to Changes.Orders.Count - 1 do
-  begin
+  for ji := 0 to Changes.Orders.Count - 1 do begin
     theChangeItem := TChangeItem(Changes.Orders.Items[ji]);
-    if AnsiCompareText(theChangeItem.GroupName,GrpName)=0 then
+    if AnsiCompareText(theChangeItem.GroupName,GrpName)=0 then begin
       Changes.ReplaceODGrpName(theChangeItem.ID,'');
+    end;
   end;
 end;
 
@@ -3403,8 +3345,9 @@ var
   i: integer;
 begin
   //CQ6170
-  for i := 0 to 9 do
-     origWidths[i] := hdrOrders.Sections[i].Width;
+  for i := 0 to 9 do begin
+    origWidths[i] := hdrOrders.Sections[i].Width;
+  end;
   //end CQ6170
 end;
 
@@ -3437,12 +3380,13 @@ begin
   if totalSectionsWidth > lstOrders.Width - 5 then
   begin
     originalwidth := 0;
-    for i := 0 to hdrOrders.Sections.Count - 1 do
+    for i := 0 to hdrOrders.Sections.Count - 1 do begin
       originalwidth := originalwidth + origWidths[i];
-    if originalwidth < totalSectionsWidth then
-    begin
-      for i := 0 to hdrOrders.Sections.Count - 1 do
+    end;
+    if originalwidth < totalSectionsWidth then begin
+      for i := 0 to hdrOrders.Sections.Count - 1 do begin
         hdrOrders.Sections[i].Width := origWidths[i];
+      end;
       lstOrders.Invalidate;
       RefreshOrderList(false);
     end;
@@ -3495,17 +3439,15 @@ OrderArray: TStringList;
 begin
     Result := False;
     OrderArray := TStringList.Create;
-    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then
-    begin
+    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
       AnOrder := TOrder(Items.Objects[i]);
       OrderArray.Add(AnOrder.ID + U + InttoStr(AnOrder.Status));
     end;
-    if (OrderArray <> nil) and (not DoesOrderStatusMatch(OrderArray)) then
-      begin
-        MessageDlg('The Order status has changed.' + #13#10#13 + 'CPRS needs to refresh patient information to display the correct order status', mtWarning, [mbOK], 0);
-        frmFrame.mnuFileRefreshClick(Application);
-        Result := True;
-      end;
+    if (OrderArray <> nil) and (not DoesOrderStatusMatch(OrderArray)) then begin
+      MessageDlg('The Order status has changed.' + #13#10#13 + 'CPRS needs to refresh patient information to display the correct order status', mtWarning, [mbOK], 0);
+      frmFrame.mnuFileRefreshClick(Application);
+      Result := True;
+    end;
     ORderArray.Free;
 end;
 
@@ -3515,13 +3457,12 @@ var
   AnOrder: TOrder;
   tmpArr: TStringList;
 begin
-    tmpArr := TStringList.Create;
-    with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then
-    begin
-      AnOrder := TOrder(Items.Objects[i]);
-      if AnOrder.Status = 5 then tmpArr.Add(AnOrder.ID);
-    end;
-    if tmpArr <> nil then frmActivateDeactive.fActivateDeactive(tmpArr);
+  tmpArr := TStringList.Create;
+  with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin
+    AnOrder := TOrder(Items.Objects[i]);
+    if AnOrder.Status = 5 then tmpArr.Add(AnOrder.ID);
+  end;
+  if tmpArr <> nil then frmActivateDeactive.fActivateDeactive(tmpArr);
 end;
 
 procedure TfrmOrders.ViewInfo(Sender: TObject);
@@ -3551,8 +3492,7 @@ begin
   totalSectionsWidth := pnlRight.Width - 3;
   if totalSectionsWidth < 16 then exit;
   unitvalue := round(totalSectionsWidth / 16);
-  with hdrOrders do
-  begin
+  with hdrOrders do begin
     Sections[1].Width := unitvalue;
     Sections[2].Width := pnlRight.Width - (unitvalue * 10) - 5;
     Sections[3].Width := unitvalue * 2;

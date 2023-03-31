@@ -4,6 +4,9 @@ inherited frmODGen: TfrmODGen
   Height = 295
   Caption = 'frmODGen'
   ExplicitHeight = 295
+  DesignSize = (
+    512
+    257)
   PixelsPerInch = 96
   TextHeight = 13
   object lblOrderSig: TLabel [0]
@@ -24,7 +27,6 @@ inherited frmODGen: TfrmODGen
     Height = 185
     Align = alTop
     TabOrder = 4
-    ExplicitWidth = 520
   end
   inherited cmdAccept: TButton
     Top = 209

@@ -82,7 +82,6 @@ inherited frmPCEEdit: TfrmPCEEdit
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
-    ExplicitTop = 104
   end
   object Button1: TButton [6]
     Left = 8

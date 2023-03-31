@@ -152,59 +152,47 @@ var
   Subs, x, ODtxt, thePI: string;
   WPStrings: TStringList;
   IVDuration, IVDurVal: string;
+  AResponse : TResponse; //kt
 begin
   piIdx := 0;
   odIdx := 0;
   IVDuration := '';
   IVDurVal := '';
   AParam.PType := list;
-  for j := 0 to ResponseList.Count - 1 do
-  begin
-    if TResponse(ResponseList.Items[j]).PromptID = 'SIG' then
-    begin
+  for j := 0 to ResponseList.Count - 1 do begin
+    if TResponse(ResponseList.Items[j]).PromptID = 'SIG' then begin
       ODtxt := TResponse(ResponseList.Items[j]).EValue;
       odIdx := j;
     end;
-    if TResponse(ResponseList.Items[j]).PromptID = 'PI' then
+    if TResponse(ResponseList.Items[j]).PromptID = 'PI' then begin
       thePI := TResponse(ResponseList.Items[j]).EValue;
-    if Length(Trim(thePI)) > 0 then
+    end;
+    if Length(Trim(thePI)) > 0 then begin
       piIdx := Pos(thePI, ODtxt);
-    if piIdx > 0 then
-    begin
+    end;
+    if piIdx > 0 then begin
       Delete(ODtxt,piIdx,Length(thePI));
       TResponse(ResponseList.Items[odIdx]).EValue := ODtxt;
     end;
-    if (IsIV and (TResponse(ResponseList.Items[j]).PromptID = 'DAYS')) then
-    begin
+    if (IsIV and (TResponse(ResponseList.Items[j]).PromptID = 'DAYS')) then begin
       IVDuration := TResponse(ResponseList.Items[j]).EValue;
-      if (Length(IVDuration) > 1) then
-      begin
+      if (Length(IVDuration) > 1) then begin
         if (Pos('TOTAL',upperCase(IVDuration))>0) or (Pos('FOR',upperCase(IVDuration))>0) then continue;
-        if (Pos('H',upperCase(IVDuration))>0)  then
-        begin
+        if (Pos('H',upperCase(IVDuration))>0)  then begin
           IVDurVal := Copy(IVDuration,1,length(IVDuration)-1);
           TResponse(ResponseList.Items[j]).IValue := 'for ' + IVDurVal + ' hours';
-        end
-        else if (Pos('D',upperCase(IVDuration))>0) then
-        begin
-          if Pos('DOSES', upperCase(IVDuration)) > 0 then
-            begin
-              IVDurVal := Copy(IVDuration, 1, length(IVDuration)-5);
-              TResponse(ResponseList.Items[j]).IValue := 'for a total of ' + IVDurVal + ' doses';
-            end
-          else
-            begin
-              IVDurVal := Copy(IVDuration,1,length(IVDuration)-1);
-              TResponse(ResponseList.Items[j]).IValue := 'for ' + IVDurVal + ' days';
-            end;
-        end
-        else if ((Pos('ML',upperCase(IVDuration))>0) or (Pos('CC',upperCase(IVDuration))>0)) then
-        begin
+        end else if (Pos('D',upperCase(IVDuration))>0) then begin
+          if Pos('DOSES', upperCase(IVDuration)) > 0 then begin
+            IVDurVal := Copy(IVDuration, 1, length(IVDuration)-5);
+            TResponse(ResponseList.Items[j]).IValue := 'for a total of ' + IVDurVal + ' doses';
+          end else begin
+            IVDurVal := Copy(IVDuration,1,length(IVDuration)-1);
+            TResponse(ResponseList.Items[j]).IValue := 'for ' + IVDurVal + ' days';
+          end;
+        end else if ((Pos('ML',upperCase(IVDuration))>0) or (Pos('CC',upperCase(IVDuration))>0)) then begin
           IVDurVal := Copy(IVDuration,1,length(IVDuration)-2);
           TResponse(ResponseList.Items[j]).IValue := 'with total volume ' + IVDurVal + 'ml';
-        end
-        else if (Pos('L',upperCase(IVDuration))>0) then
-        begin
+        end else if (Pos('L',upperCase(IVDuration))>0) then begin
           IVDurVal := Copy(IVDuration,0,length(IVDuration)-1);
           TResponse(ResponseList.Items[j]).IValue := 'with total volume ' + IVDurVal + 'L';
         end;
@@ -212,29 +200,28 @@ begin
     end;
   end;
 
-  with AParam, ResponseList do for i := 0 to Count - 1 do
-  begin
-    with TResponse(Items[i]) do
-    begin
+  with AParam, ResponseList do for i := 0 to Count - 1 do begin
+    AResponse := TResponse(Items[i]); //kt
+    //with TResponse(Items[i]) do begin
+    with AResponse do begin
       Subs := IntToStr(PromptIEN) + ',' + IntToStr(Instance);
-      if IValue = TX_WPTYPE then
-      begin
+      if IValue = TX_WPTYPE then begin
         WPStrings := TStringList.Create;
         try
           WPStrings.Text := EValue;
           LimitStringLength(WPStrings, MAX_STR_LEN);
           x := 'ORDIALOG("WP",' + Subs + ')';
           Mult[Subs] := x;
-          for ALine := 0 to WPStrings.Count - 1 do
-          begin
+          for ALine := 0 to WPStrings.Count - 1 do begin
             x := '"WP",' + Subs + ',' + IntToStr(ALine+1) + ',0';
             Mult[x] := WPStrings[ALine];
           end; {for}
         finally
           WPStrings.Free;
         end; {try}
-      end
-      else Mult[Subs] := IValue;
+      end else begin
+        Mult[Subs] := IValue;
+      end;
     end; {with TResponse}
   end; {with AParam}
 end;
@@ -479,31 +466,27 @@ begin
     if Length(ConstructOrder.TrailText) > 0
       then Param[7].Mult['"ORTRAIL"'] := ConstructOrder.TrailText;
     Param[7].Mult['"ORCHECK"'] := IntToStr(ConstructOrder.OCList.Count);
-    with ConstructOrder do for i := 0 to OCList.Count - 1 do
-    begin
+    with ConstructOrder do for i := 0 to OCList.Count - 1 do begin
       // put quotes around everything to prevent broker from choking
       y := '"ORCHECK","' + Piece(OCList[i], U, 1) + '","' + Piece(OCList[i], U, 3) +
         '","' + IntToStr(i+1) + '"';
       //Param[7].Mult[y] := Pieces(OCList[i], U, 2, 4);
       OCStr :=  Pieces(OCList[i], U, 2, 4);
       len := Length(OCStr);
-      if len > 255 then
-        begin
-          numLoop := len div 255;
-          remain := len mod 255;
-          inc := 0;
-          while inc <= numLoop do
-            begin
-              tmpStr := Copy(OCStr, 1, 255);
-              OCStr := Copy(OCStr, 256, Length(OcStr));
-              Param[7].Mult[y + ',' + InttoStr(inc)] := tmpStr;
-              inc := inc +1;
-            end;
-          if remain > 0 then  Param[7].Mult[y + ',' + inttoStr(inc)] := OCStr;
-
-        end
-      else
+      if len > 255 then begin
+        numLoop := len div 255;
+        remain := len mod 255;
+        inc := 0;
+        while inc <= numLoop do begin
+          tmpStr := Copy(OCStr, 1, 255);
+          OCStr := Copy(OCStr, 256, Length(OcStr));
+          Param[7].Mult[y + ',' + InttoStr(inc)] := tmpStr;
+          inc := inc +1;
+        end;
+        if remain > 0 then  Param[7].Mult[y + ',' + inttoStr(inc)] := OCStr;
+      end else begin
        Param[7].Mult[y] := OCStr;
+      end;
     end;
     if ConstructOrder.DelayEvent in ['A','D','T','M','O'] then
       Param[7].Mult['"OREVENT"'] := ConstructOrder.PTEventPtr;
@@ -512,12 +495,10 @@ begin
     Param[7].Mult['"ORTS"'] := IntToStr(Patient.Specialty);  // pass in treating specialty for ORTS
     Param[8].PType := literal;
     Param[8].Value := ConstructOrder.DigSig;
-    if Constructorder.IsIMODialog then
-    begin
+    if Constructorder.IsIMODialog then begin
       Param[9].PType := literal;                       //IMO
       Param[9].Value := FloatToStr(Encounter.DateTime);
-    end else
-    begin
+    end else begin
       Param[9].PType := literal;                       //IMO
       Param[9].Value := '';
     end;
@@ -532,22 +513,19 @@ begin
     Results.Delete(0);
     y := '';
 
-    while (Results.Count > 0) and (CharAt(Results[0], 1) <> '~') and (CharAt(Results[0], 1) <> '|') do
-      begin
-        y := y + Copy(Results[0], 2, Length(Results[0])) + CRLF;
-        Results.Delete(0);
-      end;
+    while (Results.Count > 0) and (CharAt(Results[0], 1) <> '~') and (CharAt(Results[0], 1) <> '|') do begin
+      y := y + Copy(Results[0], 2, Length(Results[0])) + CRLF;
+      Results.Delete(0);
+    end;
     if Length(y) > 0 then y := Copy(y, 1, Length(y) - 2);  // take off last CRLF
     z := '';
-    if (Results.Count > 0) and (Results[0] = '|') then
-      begin
+    if (Results.Count > 0) and (Results[0] = '|') then begin
+      Results.Delete(0);
+      while (Results.Count > 0) and (CharAt(Results[0], 1) <> '~') and (CharAt(Results[0], 1) <> '|') do begin
+        z := z + Copy(Results[0], 2, Length(Results[0]));
         Results.Delete(0);
-        while (Results.Count > 0) and (CharAt(Results[0], 1) <> '~') and (CharAt(Results[0], 1) <> '|') do
-          begin
-            z := z + Copy(Results[0], 2, Length(Results[0]));
-            Results.Delete(0);
-          end;
       end;
+    end;
     SetOrderFields(AnOrder, x, y, z);
   end;
 end;
@@ -564,9 +542,8 @@ begin
     result := 'No patient selected';
     exit;
   end;
-    
-  with RPCBrokerV do
-  begin
+
+  with RPCBrokerV do begin
     ClearParameters := True;
     RemoteProcedure := 'ORWDX SAVE';
     Param[0].PType := literal;
@@ -583,7 +560,6 @@ begin
     Param[5].Value := '49';
     Param[6].PType := literal;
     Param[6].Value := '';        // null if new order, otherwise ORIFN of original
-
 
     {if (ConstructOrder.DGroup = IVDisp) or (ConstructOrder.DialogName = 'PSJI OR PAT FLUID OE') then
       SetupORDIALOG(Param[7], ConstructOrder.ResponseList, True)
@@ -623,7 +599,8 @@ begin
     if ConstructOrder.DelayEvent in ['A','D','T','M','O'] then
       Param[7].Mult['"OREVENT"'] := ConstructOrder.PTEventPtr;
     if ConstructOrder.LogTime > 0
-      then Param[7].Mult['"ORSLOG"'] := FloatToStr(ConstructOrder.LogTime);}
+      then Param[7].Mult['"ORSLOG"'] := FloatToStr(ConstructOrder.LogTime);
+    }
     Param[7].PType := list;
     Param[7].Mult['6,1'] := 'NOW';
     Param[7].Mult['15,1'] := 'ORDIALOG("WP",15,1)';
@@ -631,8 +608,7 @@ begin
     OrderArray.Text := OrderText;
     LimitStringLength(OrderArray, 74);
     for j := 0 to OrderArray.Count - 1 do begin
-      Param[7].Mult['"WP",15,1,'+inttostr(j+1)+',0'] := OrderArray[j];
-//            Mult[x] := WPStrings[ALine];
+      Param[7].Mult['"WP",15,1,'+inttostr(j+1)+',0'] := OrderArray[j];  // Mult[x] := WPStrings[ALine];
     end;
     OrderArray.Free;
     //Param[7].Mult['"WP",15,1,'+inttostr(j)+',0'] := OrderText;
@@ -658,9 +634,10 @@ begin
     if AutoSign then begin
       AList := TList.Create();
       IndexOfOrder := -1;
-      for i := 0 to frmOrders.lstOrders.Items.Count - 1 do
+      for i := 0 to frmOrders.lstOrders.Items.Count - 1 do begin
         if TOrder(frmOrders.lstOrders.Items.Objects[i]).ID = piece(piece(x,'^',1),'~',2) then IndexOfOrder := i;
-      if IndexOfOrder<>-1 then begin      
+      end;
+      if IndexOfOrder <> -1 then begin
         AList.Add(frmOrders.lstOrders.Items.Objects[IndexOfOrder]);
         if fOrdersSign.ExecuteSignOrders(AList) then begin
           frmOrders.RefreshToFirstItem;

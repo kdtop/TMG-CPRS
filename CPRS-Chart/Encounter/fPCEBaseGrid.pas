@@ -122,39 +122,39 @@ var
   tmp: string;
 
 begin
-  if(lbGrid.Items.Count > 0) then
-  begin
+  if(lbGrid.Items.Count > 0) then begin
     for j := 0 to hcGrid.Sections.Count-2 do max[j] := 0;
-    for i := 0 to lbGrid.Items.Count-1 do
-    begin
+    for i := 0 to lbGrid.Items.Count-1 do begin
       tmp := lbGrid.Items[i];
-      for j := 0 to hcGrid.Sections.Count-2 do
-      begin
+      for j := 0 to hcGrid.Sections.Count-2 do begin
         tlen := Canvas.TextWidth(Piece(tmp,U,j+1)) + FSectionGap;
-        if(max[j] < tlen) then
+        if(max[j] < tlen) then begin
           max[j] := tlen;
+        end;
       end;
     end;
     ltp := 0;
     tmp := lbGrid.TabPositions;
-    for i := 0 to hcGrid.Sections.Count-2 do
-    begin
-      if(max[i] < hcGrid.Sections[i].MinWidth) then
+    for i := 0 to hcGrid.Sections.Count-2 do begin
+      if(max[i] < hcGrid.Sections[i].MinWidth) then begin
         max[i] := hcGrid.Sections[i].MinWidth;
+      end;
       tp := StrToIntDef(Piece(tmp,',',i+1),0);
       tlen := tp - ltp;
       ltp := tp;
-      if(max[i] < tlen) then
+      if(max[i] < tlen) then begin
         max[i] := tlen;
+      end;
     end;
-    for i := 1 to hcGrid.Sections.Count-2 do
+    for i := 1 to hcGrid.Sections.Count-2 do begin
       inc(max[i], max[i-1]);
+    end;
     tmp := '';
-    for i := 0 to hcGrid.Sections.Count-2 do
+    for i := 0 to hcGrid.Sections.Count-2 do begin
       tmp := tmp + ',' + inttostr(max[i]);
+    end;
     delete(tmp,1,1);
-    if(lbGrid.TabPositions <> tmp) then
-    begin
+    if(lbGrid.TabPositions <> tmp) then begin
       SaveGridSelected;
       lbGrid.TabPositions := tmp;
       RestoreGridSelected;
@@ -195,8 +195,7 @@ var
   i: integer;
 
 begin
-  if lbGrid.SelCount > 0 then
-  begin
+  if lbGrid.SelCount > 0 then begin
     for i := 0 to lbGrid.Items.Count-1 do
       lbGrid.Selected[i] := FALSE;
   end;

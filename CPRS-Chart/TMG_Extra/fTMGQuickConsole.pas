@@ -249,7 +249,7 @@ const
         for i := 0 to TopicList.Count - 1 do begin
           Input.Add('GET^'+Patient.DFN+'^TOPIC='+piece(TopicList.Strings[i],'^',1));
         end;
-        ProblemTopicLink(Results, Input);
+        TMGTopicLinks(Results, Input);
         if Results.Count > 0 then Results.Delete(0);
         for i := 0 to Results.Count - 1 do begin
           line := Results.Strings[i];

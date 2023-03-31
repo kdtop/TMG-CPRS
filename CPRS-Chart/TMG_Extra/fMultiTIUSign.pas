@@ -114,6 +114,7 @@ type
     ESCode : string;
     FZoomValue : integer;
     FZoomStep : integer;  //e.g. 5% change with each zoom in
+    FInitZoomValue : integer;
     SelectedDFN : string;
     //ColLeftWidth, ColCenterWidth, ColRightWidth : integer;
     frmPatientPhotoID : TfrmPatientPhotoID;
@@ -173,9 +174,14 @@ function ShowMultiAlertsSign(Items : TListItems) : boolean;
 var
   frmMultiTIUSign: TfrmMultiTIUSign;
   InitialBounds:string;
+  InitPnlLeft,InitPnlCenter,InitZoom : string;
+  InitLeftWidth,InitCenterWidth : integer;
 begin
   result := false;
   InitialBounds := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign']);
+  InitPnlLeft := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.pnlLeft']);
+  InitPnlCenter := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.pnlCenter']);
+  InitZoom := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.ZoomValue']);
   frmMultiTIUSign := TfrmMultiTIUSign.Create(Application);
   try
     frmMultiTIUSign.Initialize(Items);
@@ -184,6 +190,22 @@ begin
       frmMultiTIUSign.Top := strtoint(piece(InitialBounds,',',2));
       frmMultiTIUSign.Width := strtoint(piece(InitialBounds,',',3));
       frmMultiTIUSign.Height := strtoint(piece(InitialBounds,',',4));
+    end;
+    if InitPnlLeft<>'' then begin
+      InitLeftWidth := strtoint(piece(InitPnlLeft,',',1));
+      if InitLeftWidth > 1 then frmMultiTIUSign.pnlLeft.Width := InitLeftWidth;
+    end;
+    if InitPnlCenter<>'' then begin
+      InitCenterWidth := strtoint(piece(InitPnlCenter,',',1));
+      if (frmMultiTIUSign.pnlLeft.Width+InitCenterWidth+20)<frmMultiTIUSign.width then
+        frmMultiTIUSign.pnlCenter.Width := strtoint(piece(InitPnlCenter,',',1));
+    end;
+    if InitZoom<>'' then begin
+      //frmMultiTIUSign.FZoomValue := strtoint(piece(InitZoom,',',1));
+      //frmMultiTIUSign.SetZoom(strtoint(piece(InitZoom,',',1)));
+      frmMultiTIUSign.FInitZoomValue := strtoint(piece(InitZoom,',',1));
+    end else begin
+      frmMultiTIUSign.FInitZoomValue := -1;
     end;
     if frmMultiTIUSign.ShowModal = mrOK then begin
       result := true;
@@ -254,6 +276,12 @@ begin
    Bounds := inttostr(Self.Left)+','+inttostr(Self.Top);
    Bounds := Bounds+','+inttostr(Self.Width)+','+ inttostr(Self.Height);
    SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign',Bounds]);
+   Bounds := inttostr(pnlLeft.Width)+',0,0,0';
+   SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign.pnlLeft',Bounds]);
+   Bounds := inttostr(pnlCenter.Width)+',0,0,0';
+   SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign.pnlCenter',Bounds]);
+   Bounds := inttostr(FZoomValue)+',0,0,0';
+   SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign.ZoomValue',Bounds]);
 end;
 
 procedure TfrmMultiTIUSign.FormCreate(Sender: TObject);
@@ -277,10 +305,14 @@ begin
   if lvUnSelected.Items.Count > 0 then begin
     lvUnSelected.ItemIndex := 0;
     lvUnSelectedClick(self);
+    Application.ProcessMessages;
+    if FInitZoomValue<>-1 then SetZoom(FInitZoomValue);
   end;
   UpdateButtonEnableStates;
   FsortDirection := 'F';
-  FsortAscending := true
+  FsortAscending := true;
+  //if FInitZoomValue<>-1 then SetZoom(FInitZoomValue);
+  
 end;
 
 procedure TfrmMultiTIUSign.Initialize(Items : TListItems);
@@ -1208,7 +1240,12 @@ begin
   if FZoomValue > MaxZoom then FZoomValue := MaxZoom;
   pvaIn := FZoomValue;
   pvaOut := #0;
-  WebBrowser.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, pvaIn, pvaOut);
+  try
+    WebBrowser.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, pvaIn, pvaOut);
+  except
+    On E : exception do messagedlg('Error on setting Zoom.'+#13#10+E.Message,mtError,[mbok],0);
+    //
+  end;
 end;
 
 

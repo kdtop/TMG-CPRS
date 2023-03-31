@@ -6,8 +6,20 @@ C:\Users\Eddie\Documents\Borland Studio Projects\MDM grid\MDMHelper.dfm
 77016/1368737972
 2
 2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.dfm
+1473/1446742794
+4
+2
+P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.dfm
+82888/1446742576
+6
+2
 |EOINDEX|
 41
 object Form1: TForm1
 1473
+object frmMDMGrid: TfrmMDMGrid
+70
+object Form1: TForm1
+1688
 object frmMDMGrid: TfrmMDMGrid

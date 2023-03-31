@@ -4,7 +4,7 @@ unit rPCE;
 
 interface
 
-uses SysUtils, Classes, ORNet, ORFn, uPCE, UBACore, ORClasses;
+uses SysUtils, Classes, ORNet, ORFn, uPCE, UBACore, ORClasses, ORCtrls;
 
 const
   LX_ICD = 12;
@@ -88,10 +88,12 @@ procedure DeletePCE(const AVisitStr: string);
 function EligbleConditions: TSCConditions;
 
 procedure ListVisitTypeSections(Dest: TStrings);
-procedure ListVisitTypeCodes(Dest: TStrings; SectionIndex: Integer);
+//kt original --> procedure ListVisitTypeCodes(Dest: TStrings; SectionIndex: Integer);
+procedure ListVisitTypeCodes(Dest: TStrings; SectionIndex: Integer; VisitTypesList: TPCEProcList); //kt
 procedure ListVisitTypeByLoc(Dest: TStrings; Location: Integer; ADateTime: TFMDateTime = 0);
 function AutoSelectVisit(Location: integer): boolean;
-function UpdateVisitTypeModifierList(Dest: TStrings; Index: integer): string;
+//kt original --> function UpdateVisitTypeModifierList(Dest: TStrings; Index: integer): string;
+//kt function UpdateVisitTypeModifierList(lb : TORListBox; Index: integer): string; //kt
 
 procedure ListDiagnosisSections(Dest: TStrings);
 procedure ListDiagnosisCodes(Dest: TStrings; SectionIndex: Integer);
@@ -169,20 +171,32 @@ uses TRPCB, rCore, uCore, uConst, fEncounterFrame, UBAGlobals, UBAConst
      , rMisc, fDiagnoses; //agp //kt
 
 var
+  //kt  NOTE: I wish the data below was held in an object.  But apparently only one
+  //          set is needed at a time.  To ensure that the data is the correct set,
+  //          the vars uVTypeLastLoc and uVTypeLastDate are used.  If they don't
+  //          match desired data, then everything is reloaded.
+
   uLastLocation:  Integer;
   uLastDFN:       String;
   uLastEncDt:     TFMDateTime;  //agp //kt
   uVTypeLastLoc:  Integer;
   uVTypeLastDate: double = 0;
-  uDiagnoses:     TStringList;
+  uDiagnoses:     TStringList;  //fmt: ICD code ^ Problem Text ^ Code Status ^ ProblemIEN ^ ICD Coding system   //kt doc added
   uExams:         TStringList;
   uHealthFactors: TStringList;
   uImmunizations: TStringList;
   uPatientEds:    TStringList;
-  uProcedures:    TStringList;
+  uProcedures:    TStringList;  //e.g. format.  Either (for header)  --> "^MISCELLANEOUS     //kt documentation"
+                                //                              or   --> "17000^Destruction of facial lesion^^^^^^^"
+                                //            P1 := cpt or icd code / ien of other items
+                                //            P2 := user defined text
+                                //            p6 := user defined expanded text to send to PCE
+                                //            p7 := second code or item defined for line item
+                                //            p8 := third code or item defined for line item
+                                //            p9 := associated clinical lexicon term
   uSkinTests:     TStringList;
   uVisitTypes:    TStringList;
-  uVTypeForLoc:   TStringList;
+  uVTypeForLoc:   TPieceStringList;  //kt  was TStringList;
   uProblems:      TStringList;
   uModifiers:     TORStringList = nil;
   uGAFOK:         boolean;
@@ -337,26 +351,24 @@ begin
   //add problems to the top of diagnoses.
   uTempList := TstringList.Create;
 
-
-  if UBAGlobals.BILLING_AWARE then //BAPHII 1.3.10
-     begin
-        UBACore.BADxList := TStringList.Create;
-     end;
+  if UBAGlobals.BILLING_AWARE then begin  //BAPHII 1.3.10
+    UBACore.BADxList := TStringList.Create;
+  end;
 
   try
     uDiagnoses.clear;
 
-    if BILLING_AWARE then
-     begin
-        UBACore.BADxList.Clear; //BAPHII 1.3.10
+    if BILLING_AWARE then begin
+      UBACore.BADxList.Clear; //BAPHII 1.3.10
      end;
 
     tCallV(uTempList,     'ORWPCE DIAG',  [uEncLocation, EncDt]);  //BAPHII 1.3.10
-    uDiagnoses.add(utemplist.strings[0]);  //BAPHII 1.3.10
+    uDiagnoses.add(uTempList.strings[0]);  //BAPHII 1.3.10
     AddProbsToDiagnoses;  //BAPHII 1.3.10
    // BA 25  AddProviderPatientDaysDx(uDxLst, IntToStr(Encounter.Provider), Patient.DFN);
-    for i := 1 to (uTempList.Count-1) do  //BAPHII 1.3.10
+    for i := 1 to (uTempList.Count-1) do begin  //BAPHII 1.3.10
       uDiagnoses.add(uTemplist.strings[i]);  //BAPHII 1.3.10
+    end;
 
   finally
     uTempList.free;
@@ -373,20 +385,20 @@ begin
   if uVisitTypes.Count > 0    then uVisitTypes.Delete(0);             // discard counts
   if uDiagnoses.Count  > 0    then uDiagnoses.Delete(0);
   if uProcedures.Count > 0    then uProcedures.Delete(0);
-  if uImmunizations.Count > 0 then uImmunizations.Delete(0);   
-  if uSkinTests.Count > 0     then uSkinTests.Delete(0);       
-  if uPatientEds.Count > 0    then uPatientEds.Delete(0);      
-  if uHealthFactors.Count > 0 then uHealthFactors.Delete(0);   
-  if uExams.Count > 0         then uExams.Delete(0);           
+  if uImmunizations.Count > 0 then uImmunizations.Delete(0);
+  if uSkinTests.Count > 0     then uSkinTests.Delete(0);
+  if uPatientEds.Count > 0    then uPatientEds.Delete(0);
+  if uHealthFactors.Count > 0 then uHealthFactors.Delete(0);
+  if uExams.Count > 0         then uExams.Delete(0);
 
-  if (uVisitTypes.Count > 0) and (CharAt(uVisitTypes[0], 1) <> U) then uVisitTypes.Insert(0, U);
-  if (uDiagnoses.Count > 0)  and (CharAt(uDiagnoses[0], 1)  <> U) then uDiagnoses.Insert(0,  U);
-  if (uProcedures.Count > 0) and (CharAt(uProcedures[0], 1) <> U) then uProcedures.Insert(0, U);
+  if (uVisitTypes.Count > 0)    and (CharAt(uVisitTypes[0], 1) <> U)    then uVisitTypes.Insert(0, U);
+  if (uDiagnoses.Count > 0)     and (CharAt(uDiagnoses[0], 1)  <> U)    then uDiagnoses.Insert(0,  U);
+  if (uProcedures.Count > 0)    and (CharAt(uProcedures[0], 1) <> U)    then uProcedures.Insert(0, U);
   if (uImmunizations.Count > 0) and (CharAt(uImmunizations[0], 1) <> U) then uImmunizations.Insert(0, U);
-  if (uSkinTests.Count > 0) and (CharAt(uSkinTests[0], 1) <> U) then uSkinTests.Insert(0, U);            
-  if (uPatientEds.Count > 0) and (CharAt(uPatientEds[0], 1) <> U) then uPatientEds.Insert(0, U);         
+  if (uSkinTests.Count > 0)     and (CharAt(uSkinTests[0], 1) <> U)     then uSkinTests.Insert(0, U);
+  if (uPatientEds.Count > 0)    and (CharAt(uPatientEds[0], 1) <> U)    then uPatientEds.Insert(0, U);
   if (uHealthFactors.Count > 0) and (CharAt(uHealthFactors[0], 1) <> U) then uHealthFactors.Insert(0, U);
-  if (uExams.Count > 0) and (CharAt(uExams[0], 1) <> U) then uExams.Insert(0, U);                        
+  if (uExams.Count > 0)         and (CharAt(uExams[0], 1) <> U)         then uExams.Insert(0, U);
 
 end;
 
@@ -406,11 +418,14 @@ begin
   end;
 end;
 
-procedure ListVisitTypeCodes(Dest: TStrings; SectionIndex: Integer);
+procedure ListVisitTypeCodes(Dest: TStrings; SectionIndex: Integer; VisitTypesList: TPCEProcList);
+//kt added VisitTypesList: TPCEProcList
 { return visit types in format: visit type <TAB> amount of time <TAB> CPT code <TAB> CPT code }
 var
   i: Integer;
   s: string;
+  Code, Narr : string; //kt
+  AVisit : TPCEProc;  //kt
 
   function InsertTab(x: string): string;
   { turn the white space between the name and the number of minutes into a single tab }
@@ -423,11 +438,17 @@ var
 begin {ListVisitTypeCodes}
   Dest.Clear;
   i := SectionIndex + 1;           // first line after the section name
-  while (i < uVisitTypes.Count) and (CharAt(uVisitTypes[i], 1) <> U) do
-  begin
-    s := Pieces(uVisitTypes[i], U, 1, 2) + U + InsertTab(Piece(uVisitTypes[i], U, 2)) + U + Piece(uVisitTypes[i], U, 1) +
-         U + IntToStr(i);
-    Dest.Add(s);
+  while (i < uVisitTypes.Count) and (CharAt(uVisitTypes[i], 1) <> U) do begin
+    Code := Piece(uVisitTypes[i], U, 1); //kt added
+    Narr := Piece(uVisitTypes[i], U, 2); //kt added
+    s := Code + U + Narr + U + InsertTab(Narr) + U + Code + U + IntToStr(i);  //kt mod
+    {s := Pieces(uVisitTypes[i], U, 1, 2) + U +
+         InsertTab(Piece(uVisitTypes[i], U, 2)) + U +
+         Piece(uVisitTypes[i], U, 1) +
+         U + IntToStr(i);  } //kt original
+    AVisit := VisitTypesList.ProcForCodeUNarr(Code + U +Narr); //kt added.  Likely returns nil.
+    Dest.AddObject(s, AVisit);
+    //kt Dest.Add(s);
     Inc(i);
   end;
 end;
@@ -437,10 +458,13 @@ var
   i: Integer;
   x, SectionName: string;
   EncDt: TFMDateTime;
+  SL: TStringList; //kt
+  Value, CPT, CMD : string; //kt
+  index : integer; //kt
+
 begin
   EncDt := Trunc(ADateTime);
-  if (uVTypeLastLoc <> Location) or (uVTypeLastDate <> EncDt) then
-  begin
+  if (uVTypeLastLoc <> Location) or (uVTypeLastDate <> EncDt) then begin
     uVTypeForLoc.Clear;
     if Location = 0 then Exit;
     SectionName := '';
@@ -448,13 +472,50 @@ begin
     with RPCBrokerV do for i := 0 to Results.Count - 1 do
     begin
       x := Results[i];
-      if CharAt(x, 1) = U
-        then SectionName := Piece(x, U, 2)
-        else uVTypeForLoc.Add(Piece(x, U, 1) + U + SectionName + U + Piece(x, U, 2));
+      if CharAt(x, 1) = U then begin
+        SectionName := Piece(x, U, 2)
+      //kt end else uVTypeForLoc.Add(Piece(x, U, 1) + U + SectionName + U + Piece(x, U, 2));
+      end else begin
+        Value := Piece(x, U, 1) + U + SectionName + U + Piece(x, U, 2);  //kt done for debugging to see Value at runtime.
+        uVTypeForLoc.Add(Value);   //Fmt:  <CPT Code>^<Section Name>^<Narrative>  //kt
+      end;
     end;
     uVTypeLastLoc := Location;
     uVTypeLastDate := EncDt;
+
+    //kt added block below --------------
+    //Purpose: In addition to visits listed in RPC call above, we also have visits define in RPC below
+    //         So need both added to list, as there may be differences in display name etc.
+    //         HOWEVER, any new entries below that match CPT from above, will cause prior values
+    //         to be DELETED (i.e. overwriten)
+    SL := TStringList.Create;
+    SectionName := '';
+    CMD := 'LIST FOR USER,LOC^'+IntToStr(User.DUZ)+'^'+IntToStr(Location);
+    try
+      tCallV(SL, 'TMG CPRS ENCOUNTER GET VST LST', [Patient.DFN, CMD, ADateTime]);
+      for i := 1 to SL.Count - 1 do begin
+        x := SL.Strings[i];
+        if Piece(x,'^',1) <> '1' then continue;
+        if Piece(x,'^',2) = 'HEADER' then begin
+          //fmt of x: 1^HEADER^<Section Name>"
+          SectionName := Piece(x,'^',3);
+        end else begin
+          //fmt of x: 1^ENTRY^<CPT CODE>^<DISPLAY NAME>^<CPT NAME>"
+          CPT := Piece(x, U, 3);
+          index := uVTypeForLoc.IndexOfPiece(1, CPT);
+          if index >= 0 then begin  //remove any prior entries (i.e. from traditional VA call), so no duplicate CPT entries.
+            uVTypeForLoc.Delete(index);
+          end;
+          Value := CPT + U + SectionName + U + Piece(x, U, 4);
+          uVTypeForLoc.Add(Value); //Fmt:  <CPT Code>^<Section Name>^<Narrative/DisplayName>
+        end;
+      end;
+    finally
+      SL.Free;
+    end;
+    //kt END of block --------------
   end;
+
   FastAssign(uVTypeForLoc, Dest);
 end;
 
@@ -479,11 +540,12 @@ begin
 
   //AGP WV INTEGRATE CPRS30.70 CHANGES begin
   if (uLastLocation <> uEncLocation) or (uLastDFN <> patient.DFN) or
-  (uLastEncDt <> Trunc(uEncPCEData.VisitDateTime)) or PLUpdated then LoadEncounterForm; // reinstated, since CIDC is gone.
+  (uLastEncDt <> Trunc(uEncPCEData.VisitDateTime)) or PLUpdated then begin
+    LoadEncounterForm; // reinstated, since CIDC is gone.
+  end;
   if PLUpdated  then PLUpdated := False;
   //agp end
-  for i := 0 to uDiagnoses.Count - 1 do if CharAt(uDiagnoses[i], 1) = U then
-  begin
+  for i := 0 to uDiagnoses.Count - 1 do if CharAt(uDiagnoses[i], 1) = U then begin
     x := Piece(uDiagnoses[i], U, 2);
     if Length(x) = 0 then x := '<No Section Name>';
     Dest.Add(IntToStr(i) + U + Piece(uDiagnoses[i], U, 2) + U + x);
@@ -492,25 +554,24 @@ end;
 
 procedure ListDiagnosisCodes(Dest: TStrings; SectionIndex: Integer);
 { return diagnoses within section in format:
-    diagnosis <TAB> ICDInteger <TAB> .ICDDecimal <TAB> ICD Code }
+    diagnosis <TAB> ICDInteger <TAB> .ICDDecimal <TAB> ICD Code }  //kt <---- this format doesn't seem to match code below.
 var
   i: Integer;
   t, c, f, p, ICDCSYS: string;
 begin
   Dest.Clear;
   i := SectionIndex + 1;           // first line after the section name
-  while (i < uDiagnoses.Count) and (CharAt(uDiagnoses[i], 1) <> U) do
-  begin
-    c := Piece(uDiagnoses[i], U, 1);
-    t := Piece(uDiagnoses[i], U, 2);
-    f := Piece(uDiagnoses[i], U, 3);
-    p := Piece(uDiagnoses[i], U, 4);
-    ICDCSYS := Piece(uDiagnoses[i], U, 5);
+  while (i < uDiagnoses.Count) and (CharAt(uDiagnoses[i], 1) <> U) do begin
+    c := Piece(uDiagnoses[i], U, 1);        //kt ICD Code
+    t := Piece(uDiagnoses[i], U, 2);        //kt Problem Text
+    f := Piece(uDiagnoses[i], U, 3);        //kt Code Status
+    p := Piece(uDiagnoses[i], U, 4);        //kt ProblemIEN
+    ICDCSYS := Piece(uDiagnoses[i], U, 5);  //kt ICD Coding system
     //identify inactive codes.
-    if (Pos('#', f) > 0) or (Pos('$', f) > 0) then
-      t := '#  ' + t;
-    Dest.Add(c + U + t + U + c + U + f + U + p + U + ICDCSYS);
-
+    if (Pos('#', f) > 0) or (Pos('$', f) > 0) then begin
+      t := '#  ' + t;    //kt this is signal that code is inactive.  See doc in AddProbsToDiagnoses()
+    end;
+    Dest.Add(c + U + t + U + c + U + f + U + p + U + ICDCSYS); //kt doc: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
     Inc(i);
   end;
 end;
@@ -518,6 +579,7 @@ end;
 procedure AddProbsToDiagnoses;
 var
   i: integer;                 //loop index
+  s : string; //kt
   EncDT: TFMDateTime;
   ICDVersion: String;
 begin
@@ -526,41 +588,69 @@ begin
   uLastDFN := patient.DFN;
   ICDVersion := piece(Encounter.GetICDVersion, U, 1);
   tCallV(uProblems, 'ORWPCE ACTPROB', [Patient.DFN, EncDT]);
-  if uProblems.count > 0 then
-  begin
+  {//kt documentation.  Each uProblem.Strings[i] should have following format.  From  DSELECT^GMPLENFM
+	;   Piece 1:  Problem IEN
+	;         2:  Problem Text
+	;         3:  ICD code
+	;         4:  Date of Onset     00/00/00 format
+	;         5:  SC/NSC/""         serv-conn/not sc/unknown
+	;         6:  Y/N/""            serv-conn/not sc/unknown
+	;         7:  A/I/E/H/M/C/S/""  If problem is flagged as:
+	;                               A - Agent Orange
+	;                               I - Ionizing Radiation
+	;                               E - Environmental Contaminants
+	;                               H - Head/Neck Cancer
+	;                               M - Mil Sexual Trauma
+	;                               C - Combat Vet
+	;                               S - SHAD
+	;                                 - None
+	;         8:  Special Exposure  Full text of piece 6
+	;         9:  SNOMED-CT Concept Code
+	;        10:  SNOMED-CT Designation Code
+	;        11:  VHAT Concept VUID
+	;        12:  VHAT Designation VUID
+	;        13:  Code Status (#  -> ICD code inactive, $ -> SNOMED CT inactive,
+	;                          #$ -> Both ICD & SNOMED CT inactive, else "")
+	;        14:  ICD coding system ("ICD": ICD-9-CM, "10D": ICD-10-CM)
+  }
+  if uProblems.count > 0 then begin
     //add category to udiagnoses
     uDiagnoses.add(U + DX_PROBLEM_LIST_TXT);
-    for i := 1 to (uProblems.count-1) do //start with 1 because strings[0] is the count of elements.
-    begin
+    for i := 1 to (uProblems.count-1) do begin//start with 1 because strings[0] is the count of elements.
       //filter out 799.9 and inactive codes when ICD-9 is active
-       if (ICDVersion = 'ICD') and (piece(uProblems.Strings[i],U,3) = '799.9') then continue;
+      if (ICDVersion = 'ICD') and (piece(uProblems.Strings[i],U,3) = '799.9') then continue;
       // otherwise add all active problems (including 799.9, R69, and inactive codes) to udiagnosis
-      uDiagnoses.add(piece(uProblems.Strings[i], U, 3) + U + piece(uProblems.Strings[i], U, 2) + U +
-                       piece(uProblems.Strings[i], U, 13) + U + piece(uProblems.Strings[i], U, 1) + U +
-                       piece(uProblems.Strings[i], U, 14));
+
+      //kt ------ -mod for easier debugging, no logic change ---------------
+      s := uProblems.Strings[i];
+      //kt doc:      ICD code         Problem Text     Code Status       ProblemIEN       ICD Coding system
+      uDiagnoses.add(piece(s,U,3) +U+ piece(s,U,2) +U+ piece(s,U,13) +U+ piece(s,U,1) +U+ piece(s, U, 14));
+      //kt original --> uDiagnoses.add(piece(uProblems.Strings[i], U, 3) + U + piece(uProblems.Strings[i], U, 2) + U +
+      //kt original -->                  piece(uProblems.Strings[i], U, 13) + U + piece(uProblems.Strings[i], U, 1) + U +
+      //kt original -->                  piece(uProblems.Strings[i], U, 14));
+      //kt ------------ end mod ----------------
     end;
 
     //1.3.10
-    if BILLING_AWARE then
-     begin
-        //  add New Section and dx codes to Encounter Diagnosis Section and Code List.
-        //  Diagnoses  ->  Provider/Patient/24 hrs
-        uDiagnoses.add(UBAConst.ENCOUNTER_TODAYS_DX); //BAPHII 1.3.10
-        //BADxList := AddProviderPatientDaysDx(UBACore.uDxLst, IntToStr(Encounter.Provider), Patient.DFN); //BAPHII 1.3.10
-        rpcGetProviderPatientDaysDx(IntToStr(Encounter.Provider), Patient.DFN); //BAPHII 1.3.10
+    if BILLING_AWARE then begin
+      //  add New Section and dx codes to Encounter Diagnosis Section and Code List.
+      //  Diagnoses  ->  Provider/Patient/24 hrs
+      uDiagnoses.add(UBAConst.ENCOUNTER_TODAYS_DX); //BAPHII 1.3.10
+      //BADxList := AddProviderPatientDaysDx(UBACore.uDxLst, IntToStr(Encounter.Provider), Patient.DFN); //BAPHII 1.3.10
+      rpcGetProviderPatientDaysDx(IntToStr(Encounter.Provider), Patient.DFN); //BAPHII 1.3.10
 
-        for i := 0 to (UBACore.uDxLst.Count-1) do //BAPHII 1.3.10
-           uDiagnoses.add(UBACore.uDxLst[i]); //BAPHII 1.3.10
-        //  Code added after presentation.....
-        //  Add Personal Diagnoses Section and Codes to Encounter Diagnosis Section and Code List.
-        UBACore.uDxLst.Clear;
-        uDiagnoses.Add(UBAConst.ENCOUNTER_PERSONAL_DX);
-        UBACore.uDxLst := rpcGetPersonalDxList(User.DUZ);
-        for i := 0 to (UBACore.uDxLst.Count -1) do
-        begin
-            uDiagnoses.Add(UBACore.uDxLst.Strings[i]);
-        end;
-     end;
+      for i := 0 to (UBACore.uDxLst.Count-1) do begin //BAPHII 1.3.10
+         uDiagnoses.add(UBACore.uDxLst[i]); //BAPHII 1.3.10
+       end;
+      //  Code added after presentation.....
+      //  Add Personal Diagnoses Section and Codes to Encounter Diagnosis Section and Code List.
+      UBACore.uDxLst.Clear;
+      uDiagnoses.Add(UBAConst.ENCOUNTER_PERSONAL_DX);
+      UBACore.uDxLst := rpcGetPersonalDxList(User.DUZ);
+      for i := 0 to (UBACore.uDxLst.Count -1) do begin
+        uDiagnoses.Add(UBACore.uDxLst.Strings[i]);
+      end;
+    end;
 
   end;
 end;
@@ -570,7 +660,7 @@ begin
   tCallV(Dest,'ORWPCE GET SET OF CODES',['9000010.11','.06','1']);
 end;
 
-procedure LoadImmSeriesItems(Dest: TStrings);  
+procedure LoadImmSeriesItems(Dest: TStrings);
 {loads items into combo box on Immunixation screen}
 begin
   tCallV(Dest,'ORWPCE GET SET OF CODES',['9000010.11','.04','1']);
@@ -666,32 +756,30 @@ end;
 function ModifierList(CPTCode: string): string;
 // uModifiers list contains <@>CPTCode;ModCount;^Mod1Index^Mod2Index^...^ModNIndex
 //    or                    MODIEN^MODDescription^ModCode
-
-const
-  CPTCodeHeader = '<@>';
-
+const  CPTCodeHeader = '<@>';
 var
   i, idx: integer;
   s, ModIEN: string;
   EncDt: TFMDateTime;
 begin
+  if not Assigned(uModifiers) then exit;
   EncDT := Trunc(uEncPCEData.VisitDateTime);
   idx := uModifiers.IndexOfPiece(CPTCodeHeader + CPTCode, ';', 1);
-  if(idx < 0) then
-  begin
-    CallV('ORWPCE CPTMODS', [CPTCode, EncDt]);
+  if idx < 0 then begin
+    //kt CallV('ORWPCE CPTMODS', [CPTCode, EncDt]);
+    CallV('TMG ORWPCE CPTMODS', [CPTCode, EncDt]);   //kt
     s := CPTCodeHeader + CPTCode + ';' + IntToStr(RPCBrokerV.Results.Count) + ';' + U;
-    for i := 0 to RPCBrokerV.Results.Count - 1 do
-    begin
+    for i := 0 to RPCBrokerV.Results.Count - 1 do begin
       ModIEN := piece(RPCBrokerV.Results[i], U, 1);
       idx := uModifiers.IndexOfPiece(ModIEN);
-      if(idx < 0) then
+      if idx < 0 then begin
         idx := uModifiers.Add(MixedCaseModifier(RPCBrokerV.Results[i]));
+      end;
       s := s + IntToStr(idx) + U;
     end;
     idx := uModifiers.Add(s);
   end;
-  Result := uModifiers[idx];
+  Result := uModifiers[idx]; //e.g. '<@>99214;42;^0^1^2^3^4^5^6^7^8^9^10^11^12^13^14^15^16^17^18^19^20^21^22^23^24^25^26^27^28^29^30^31^32^33^34^35^36^37^38^39^40^41^'
 end;
 
 procedure ListCPTModifiers(Dest: TStrings; CPTCodes, NeededModifiers: string);
@@ -703,48 +791,42 @@ var
   s, Code: string;
 
 begin
-  if(not assigned(uModifiers)) then uModifiers := TORStringList.Create;
-  if(copy(CPTCodes, length(CPTCodes), 1) <> U) then
+  if (not assigned(uModifiers)) then uModifiers := TORStringList.Create;
+  if (copy(CPTCodes, length(CPTCodes), 1) <> U) then
     CPTCodes := CPTCodes + U;
-  if(copy(NeededModifiers, length(NeededModifiers), 1) <> ';') then
+  if (copy(NeededModifiers, length(NeededModifiers), 1) <> ';') then
     NeededModifiers := NeededModifiers + ';';
 
   TmpSL := TStringList.Create;
   try
-    repeat
+    repeat  //Cycle through pieces of CPTCodes.  Expected format: code^code^code^
       i := pos(U, CPTCodes);
-      if(i > 0) then
-      begin
+      if(i > 0) then begin
         Code := copy(CPTCodes, 1, i-1);
         delete(CPTCodes,1,i);
-        if(Code <> '') then
-          TmpSL.Add(ModifierList(Code));
+        if(Code <> '') then begin
+          TmpSL.Add(ModifierList(Code)); //calls RPC if needed
+        end;
         i := pos(U, CPTCodes);
       end;
     until(i = 0);
-    if(TmpSL.Count = 0) then
+    if(TmpSL.Count = 0) then begin
       s := ';0;'
-    else
-    if(TmpSL.Count = 1) then
+    end else if(TmpSL.Count = 1) then begin
       s := TmpSL[0]
-    else
-    begin
+    end else begin
       s := '';
       found := 0;
       cnt := StrToIntDef(piece(TmpSL[0], ';', 2), 0);
-      for i := 1 to cnt do
-      begin
+      for i := 1 to cnt do begin
         Code := U + Piece(TmpSL[0], U, i+1);
-        for j := 1 to TmpSL.Count-1 do
-        begin
-          if(pos(Code + U, TmpSL[j]) = 0) then
-          begin
+        for j := 1 to TmpSL.Count-1 do begin
+          if(pos(Code + U, TmpSL[j]) = 0) then begin
             Code := '';
             break;
           end;
         end;
-        if(Code <> '') then
-        begin
+        if(Code <> '') then begin
           s := s + Code;
           inc(found);
         end;
@@ -755,22 +837,19 @@ begin
   finally
     TmpSL.Free;
   end;
-
+  //example s: '<@>99214;42;^0^1^2^3^4^5^6^7^8^9^10^11^12^13^14^15^16^17^18^19^20^21^22^23^24^25^26^27^28^29^30^31^32^33^34^35^36^37^38^39^40^41^'
+  //            <@>code;count;^refIdx^...  refIdx is index in uModifiers[]
   Dest.Clear;
   cnt := StrToIntDef(piece(s, ';', 2), 0);
-  if(NeededModifiers <> '') then
-  begin
+  if(NeededModifiers <> '') then begin
     found := cnt;
     repeat
       i := pos(';',NeededModifiers);
-      if(i > 0) then
-      begin
+      if(i > 0) then begin
         idx := StrToIntDef(copy(NeededModifiers,1,i-1),0);
-        if(idx > 0) then
-        begin
+        if(idx > 0) then begin
           Code := IntToStr(ModifierIdx(IntToStr(idx))) + U;
-          if(pos(U+Code, s) = 0) then
-          begin
+          if(pos(U+Code, s) = 0) then begin
             s := s + Code;
             inc(cnt);
           end;
@@ -778,14 +857,15 @@ begin
         delete(NeededModifiers,1,i);
       end;
     until(i = 0);
-    if(found <> cnt) then
+    if(found <> cnt) then begin
       SetPiece(s , ';', 2, IntToStr(cnt));
+    end;
   end;
-  for i := 1 to cnt do
-  begin
+  for i := 1 to cnt do begin
     idx := StrToIntDef(piece(s, U, i + 1), -1);
-    if(idx >= 0) then
-      Dest.Add(uModifiers[idx]);
+    if(idx >= 0) then begin
+      Dest.Add(uModifiers[idx]);  //Format: Ref#^Description^Code. e.g. '390^Actual Item/Service Ordered^GK'
+    end;
   end;
 end;
 
@@ -853,50 +933,67 @@ begin
   end;
 end;
 
-function UpdateVisitTypeModifierList(Dest: TStrings; Index: integer): string;
+{//kt moving to fTMGVisitType
+
+//TORListBox
+//kt original --> function UpdateVisitTypeModifierList(Dest: TStrings; Index: integer): string;
+function UpdateVisitTypeModifierList(lb : TORListBox; Index: integer): string;
+//called from TfrmVisitType
+//Dest is always frmVisitType.lbxVisits.Items
 var
   i, idx, LastIdx: integer;
   Tmp, OKMods, Code: string;
   OK: boolean;
-
+  Data : string; //kt added
+  Dest: TStrings; //kt added
+  Checked : boolean; //kt
+  ClickCheckEvent :  TORItemNotifyEvent; //kt
+  ClickEvent : TNotifyEvent; //kt
 begin
-  if(Piece(Dest[Index], U, 7) = '1') then
-    Result := Piece(Dest[Index],U,6)
-  else
-  begin
-    Tmp := Piece(Dest[Index], U, 6);
+  Dest := lb.Items; //kt added
+  if (Index < 0) or (Index >= Dest.Count) then exit; //kt added
+  if not Assigned(uModifiers) then exit; //kt added
+  Data := Dest[Index]; //kt mod for easier debugging.  All instances of 'Data' below used to be Dest[Index]
+  if(Piece(Data, U, 7) = '1') then begin //kt: I think this is a 'Already Checked' flag.
+    Result := Piece(Data,U,6)
+  end else begin
+    Tmp := Piece(Data, U, 6);  //This is modifier code.  e.g. '10', from '99214^Extended Exam       20-30 Min^Extended Exam^20-30 Min^99214^10'
     Result := '';
-    OKMods := ModifierList(Piece(Dest[Index], U, 1))+U;
+    OKMods := ModifierList(Piece(Data, U, 1))+U; //e.g. '<@>99214;42;^0^1^2^3^4^5^6^7^8^9^10^11^12^13^14^15^16^17^18^19^20^21^22^23^24^25^26^27^28^29^30^31^32^33^34^35^36^37^38^39^40^41^^'
     i := 1;
     repeat
-      Code := Piece(Tmp,';',i);
-      if(Code <> '') then
-      begin
+      Code := Piece(Tmp,';',i);  //e.g. '10'  //Modier code.  may be Alphanumeric, e.g. 'GT'
+      if(Code <> '') then begin
         LastIdx := -1;
         OK := FALSE;
         repeat
           idx := uModifiers.IndexOfPiece(Code, U, 3, LastIdx);
-          if(idx > 0) then
-          begin
-            if(pos(U + IntToStr(idx) + U, OKMods)>0) then
-            begin
+          if(idx > 0) then begin
+            if(pos(U + IntToStr(idx) + U, OKMods)>0) then begin
               Result := Result + piece(uModifiers[idx],U,1) + ';';
               OK := TRUE;
-            end
-            else
+            end else begin
               LastIdx := Idx;
+            end;
           end;
         until(idx < 0) or OK;
         inc(i);
       end
     until(Code = '');
-    Tmp := Dest[Index];
+    Tmp := Data;
     SetPiece(Tmp,U,6,Result);
-    SetPiece(Tmp,U,7,'1');
-    Dest[Index] := Tmp;
+    SetPiece(Tmp,U,7,'1');  //kt: Set Flag.  I think this is a 'Already Checked' flag.
+    Checked := lb.Checked[Index]; //kt
+    //turn off click event handlers
+    ClickCheckEvent := lb.OnClickCheck; lb.OnClickCheck := nil; //kt
+    ClickEvent      := lb.OnClick;      lb.OnClick := nil;      //kt
+    Dest[Index] := Tmp;  //kt NOTE: For some reason, this changes the Checked property of the Dest list
+    lb.Checked[Index] := Checked; //kt  restore checked value
+    //restore click event handlers
+    lb.OnClickCheck := ClickCheckEvent;  //kt
+    lb.OnClick := ClickEvent;            //kt
     idx := StrToIntDef(piece(Tmp,U,8),-1);
-    if(idx >= 0) then
-    begin
+    if(idx >= 0) then begin
       Tmp := uProcedures[idx];
       SetPiece(Tmp,U,12,Result);
       SetPiece(Tmp,U,13,'1');
@@ -904,7 +1001,7 @@ begin
     end;
   end;
 end;
-
+}
 
 {SkinTests---------------------------------------------------------------------}
 procedure LoadSkResultsItems(Dest: TStrings);  
@@ -1520,7 +1617,7 @@ initialization
   uProcedures    := TStringList.Create;
   uSkinTests     := TStringList.Create;
   uVisitTypes    := TStringList.Create;
-  uVTypeForLoc   := TStringList.Create;
+  uVTypeForLoc   := TPieceStringList.Create;   //kt was TStringList.Create;
   uProblems      := TStringList.Create;
 
 finalization
@@ -1538,3 +1635,4 @@ finalization
   KillObj(@uHasCPT);
 
 end.
+

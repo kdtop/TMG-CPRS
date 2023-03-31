@@ -41,7 +41,7 @@ object frmMessageDemo: TfrmMessageDemo
     Top = 32
     Width = 345
     Height = 21
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 1
     Text = 'ComboBox1'
   end

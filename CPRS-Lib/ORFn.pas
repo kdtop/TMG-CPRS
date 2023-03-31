@@ -61,6 +61,12 @@ type
   TCharacterSet = Set of Char;
   TFMDateTime = Double;
   TORIdleCallProc = procedure(Msg: string);
+
+  TPieceStringList = class(TStringList)  //kt added class 3/26/23
+  public
+    function IndexOfPiece(PieceNum : integer; SearchValue : string) : integer;
+  end;
+
 { sundries }
 function CharInSet(AChar: Char; ASetOfChar: TCharacterSet) : Boolean;
 
@@ -282,6 +288,27 @@ type
       property Font;
       property ParentFont;
     end;
+
+//===================================================================
+//===================================================================
+
+
+function TPieceStringList.IndexOfPiece(PieceNum : integer; SearchValue : string) : integer;
+//kt added 3/26/23
+var i : integer;
+begin
+  Result := -1;
+  for i := 0 to self.Count - 1 do begin
+    if piece(self.Strings[i], U, PieceNum) <> SearchValue then continue;
+    Result := i;
+    break;
+  end;
+end;
+
+//===================================================================
+//===================================================================
+
+
 
 { Date/Time functions }
 

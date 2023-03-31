@@ -4,6 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  StrUtils,
   Dialogs, StdCtrls, Buttons, ExtCtrls, Math;
 
 type
@@ -23,18 +24,31 @@ type
     procedure SetUnitBefore(AUnit : TCollapsablePanel);
     procedure SetUnitAfter(AUnit : TCollapsablePanel);
     procedure HandleHeaderBtnClick(Sender: TObject);
-    procedure SetOpenState(AState : TOpenState);
+    procedure SetOpenClosedState(AState : TOpenState);
     procedure PropagateResizing;
   public
     { Public declarations }
+    Name : string;
+    CommonLog : TStrings;
     OpenSize : Integer;
+    DisplayPanelOriginalSize : TPoint;
     HeaderBtn : TBitBtn;
     DisplayPanel : TPanel;
     RefreshHandler : TNotifyEvent;
     OpenMode : TOpenMode;
-    constructor Create(ParentPanel : TWinControl; AUnitBefore: TCollapsablePanel; AOpenMode : TOpenMode; ADisplayPanel : TPanel = nil); overload;
-    constructor Create(ParentPanel : TWinControl; Location : TPoint; AOpenMode : TOpenMode; ADisplayPanel : TPanel = nil); overload;
-    destructor Destroy();
+    constructor Create(AName : string;
+                       ParentPanel : TWinControl;
+                       AUnitBefore: TCollapsablePanel;
+                       AOpenMode : TOpenMode;
+                       ADisplayPanel : TPanel = nil;
+                       ACommonLog : TStrings = nil); overload;
+    constructor Create(AName : string;
+                       ParentPanel : TWinControl;
+                       Location : TPoint;
+                       AOpenMode : TOpenMode;
+                       ADisplayPanel : TPanel = nil;
+                       ACommonLog : TStrings = nil); overload;
+    destructor Destroy(); override;
     procedure Initialize(InitState : TOpenState = OpenPanel);
     procedure HandleUnitBeforeResized(Sender: TCollapsablePanel; NewTop, NewLeft : integer);
     procedure ToggleOpenState;
@@ -42,10 +56,11 @@ type
     procedure SetOpenCaption(S : string);
     procedure Refresh;
     function CurrentRect : TRect;
+    procedure LogEvent(S : string);
   published
     property UnitBefore : TCollapsablePanel read FUnitBefore write SetUnitBefore;
     property UnitAfter : TCollapsablePanel read FUnitAfter write SetUnitAfter;
-    property OpenState : TOpenState read FOpenState write SetOpenState;
+    property OpenState : TOpenState read FOpenState write SetOpenClosedState;
     property OpenCaption : string read FOpenCaption write SetOpenCaption;
     property ClosedCaption : string read FClosedCaption write SetClosedCaption;
     property OwnsPanel : boolean read FPanelOwnedHere;
@@ -83,21 +98,28 @@ const
 
   procedure TCollapsablePanel.Initialize(InitState : TOpenState = OpenPanel);
   begin
-    SetOpenState(ClosedPanel);
-    SetOpenState(InitState);
+    SetOpenClosedState(ClosedPanel);
+    SetOpenClosedState(InitState);
   end;
 
-  constructor TCollapsablePanel.Create(ParentPanel : TWinControl; Location : TPoint; AOpenMode : TOpenMode; ADisplayPanel : TPanel = nil);
+  constructor TCollapsablePanel.Create(AName : string;
+                                       ParentPanel : TWinControl;
+                                       Location : TPoint;
+                                       AOpenMode : TOpenMode;
+                                       ADisplayPanel : TPanel = nil;
+                                       ACommonLog : TStrings = nil);
   begin
-    Create(ParentPanel, nil, AOpenMode, ADisplayPanel);
+    Create(AName, ParentPanel, nil, AOpenMode, ADisplayPanel, ACommonLog);
     Self.Top := Location.Y;
     Self.Left := Location.X;
   end;
 
-  constructor TCollapsablePanel.Create(ParentPanel : TWinControl;
+  constructor TCollapsablePanel.Create(AName : string;
+                                       ParentPanel : TWinControl;
                                        AUnitBefore: TCollapsablePanel;
                                        AOpenMode : TOpenMode;
-                                       ADisplayPanel : TPanel = nil);
+                                       ADisplayPanel : TPanel = nil;
+                                       ACommonLog : TStrings = nil);
   begin
     inherited Create(ParentPanel);
     Self.Parent := ParentPanel;
@@ -107,6 +129,8 @@ const
     FOnStartOpenStateClick := nil;
     FOnEndOpenStateClick := nil;
     OpenMode := AOpenMode;
+    CommonLog := ACommonLog;
+    Name := AName;
 
     Self.UnitBefore := AUnitBefore;  //This triggers setter, which sets .top, .left, .width, .height
     if not assigned(FUnitBefore) then begin
@@ -136,12 +160,18 @@ const
       DisplayPanel.Height := 400;
       DisplayPanel.Width := 300;
       DisplayPanel.Color := clSkyBlue;
+      //DisplayPanel.Name := 'PanelCreatedIn'+Self.Name;
     end;
+    DisplayPanelOriginalSize.X := DisplayPanel.Width;
+    DisplayPanelOriginalSize.Y := DisplayPanel.Height;
     DisplayPanel.Parent := self;
     DisplayPanel.Visible := true;
     DisplayPanel.Align := alNone; //ensure at "original" size, not elarged to alClient.
     if DisplayPanel.Height < 30 then DisplayPanel.Height := 30;
-    if DisplayPanel.Width < 30 then DisplayPanel.Width := 30;
+    if DisplayPanel.Width < 30 then begin
+      LogEvent('Provided display panel Width= '+IntToStr(DisplayPanel.Width)+', so widening to 30');
+      DisplayPanel.Width := 30;
+    end;
 
     if OpenMode = OpensUpDown then begin
       HeaderBtn.Width := Self.Width;
@@ -151,6 +181,7 @@ const
       DisplayPanel.Left := 0;
       DisplayPanel.Width := Self.Width;
       Self.Height := HeaderBtn.Height + DisplayPanel.Height;
+      LogEvent('Provided display panel height= '+IntToStr(DisplayPanel.Height));
       OpenSize := DisplayPanel.Height + HeaderBtn.Height+ 18;
       OpenCaption := '<Click To Close>';
       ClosedCaption := '<Click To Open>';
@@ -161,10 +192,12 @@ const
       DisplayPanel.Top := HeaderBtn.Top;
       DisplayPanel.Left := HeaderBtn.Left + HeaderBtn.Width;
       Self.Width := HeaderBtn.Width + DisplayPanel.Width;
+      LogEvent('Provided display panel ('+DisplayPanel.Name+') width= '+IntToStr(DisplayPanel.Width));
       OpenSize := DisplayPanel.Width + HeaderBtn.Width + 18;
       OpenCaption := '>';
       ClosedCaption := 'V';
     end;
+    LogEvent('OpenSize for ' + Self.Name + ' set to:  '+IntToStr(OpenSize));
     DisplayPanel.Align := alClient;  //now allow to resize to fill client.
   end;
 
@@ -173,6 +206,9 @@ const
     HeaderBtn.Free;
     if FPanelOwnedHere then begin
       DisplayPanel.Free;
+    end else begin
+      DisplayPanel.Width := DisplayPanelOriginalSize.X;
+      DisplayPanel.Height := DisplayPanelOriginalSize.Y;
     end;
     //cut self out of pointer chain.
     if assigned(FUnitBefore) then begin
@@ -233,9 +269,9 @@ const
   procedure TCollapsablePanel.ToggleOpenState;
   begin
     if FOpenState = OpenPanel then begin
-      SetOpenState(ClosedPanel);
+      SetOpenClosedState(ClosedPanel);
     end else begin
-      SetOpenState(OpenPanel);
+      SetOpenClosedState(OpenPanel);
     end;
   end;
 
@@ -254,27 +290,33 @@ const
     PropagateResizing
   end;
 
-  procedure TCollapsablePanel.SetOpenState(AState : TOpenState);
+  procedure TCollapsablePanel.SetOpenClosedState(AState : TOpenState);
   begin
     if AState = FOpenState then exit;
     if assigned(FOnStartOpenStateClick) then FOnStartOpenStateClick(self);
     FOpenState := AState;
+    LogEvent('Setting State to: ' + IfThen(AState = OpenPanel, 'OpenPanel', 'ClosedPanel'));
     if FOpenState = OpenPanel then begin
+      LogEvent('  While setting status to OPEN, using OpenSize: ' + IntToStr(OpenSize));
       HeaderBtn.Caption := OpenCaption;
       if OpenMode = OpensUpDown then begin
         Self.Height := OpenSize;
       end else begin
         Self.Width := OpenSize;
+        LogEvent('Setting width to: ' + IntToStr(OpenSize));
       end;
     end else begin  //Closed
+      LogEvent('Closing panel: ' +Self.Name);
       HeaderBtn.Caption := ClosedCaption;
       if OpenMode = OpensUpDown then begin
         Self.Height := HeaderBtn.Height + 5;
+        LogEvent('Setting Height to: ' + IntToStr(Self.Height));
       end else begin
         Self.Width := HeaderBtn.Width + 5;
+        LogEvent('Setting width to: ' + IntToStr(Self.Width));
       end;
     end;
-    PropagateResizing;     
+    PropagateResizing;
     if assigned(FOnEndOpenStateClick) then FOnEndOpenStateClick(self);
   end;
 
@@ -289,6 +331,11 @@ const
     if assigned(FUnitAfter) then FUnitAfter.Refresh;
   end;
 
-
+  procedure TCollapsablePanel.LogEvent(s : string);
+  begin
+    if Assigned(CommonLog) then begin
+      CommonLog.Add(Self.Name +': ' + s);
+    end;
+  end;
 
 end.

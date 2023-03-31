@@ -11,7 +11,6 @@ inherited frmODProc: TfrmODProc
   Constraints.MinHeight = 442
   Constraints.MinWidth = 606
   Position = poDesigned
-  OnShow = FormShow
   ExplicitWidth = 606
   ExplicitHeight = 442
   PixelsPerInch = 96
@@ -19,7 +18,7 @@ inherited frmODProc: TfrmODProc
   object pnlCombatVet: TPanel [0]
     Left = 0
     Top = 0
-    Width = 598
+    Width = 590
     Height = 25
     Align = alTop
     BevelOuter = bvLowered
@@ -30,6 +29,7 @@ inherited frmODProc: TfrmODProc
     Font.Style = []
     ParentFont = False
     TabOrder = 0
+    ExplicitWidth = 598
     object txtCombatVet: TVA508StaticText
       Name = 'txtCombatVet'
       Left = 1
@@ -441,7 +441,7 @@ inherited frmODProc: TfrmODProc
     Top = 382
     Width = 64
     Anchors = [akRight, akBottom]
-    TabOrder = 5
+    TabOrder = 6
     ExplicitLeft = 526
     ExplicitTop = 382
     ExplicitWidth = 64

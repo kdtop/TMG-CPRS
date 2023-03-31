@@ -108,7 +108,7 @@ function DisplayCosignerDialog(IEN: Int64): boolean;   //elh   1/30/14   //kt
 procedure AddProblemLink(RPCResult : TStrings; DocIEN, ProbIEN : string; POVIEN : string = '');  //kt 5/15
 procedure ReadProblemLink(RPCResult : TStrings; ProbIEN : string);  //kt 5/15
 procedure ProblemTopics(RPCResult : TStrings; Command : string; Section : string = 'HPI'; Option: string=''; SDT : string = ''; EDT : string = '');  //kt 5/15
-procedure ProblemTopicLink(RPCResult : TStrings; Input: TStringList);  //kt 5/15
+procedure TMGTopicLinks(RPCResult : TStrings; Input: TStringList);  //kt 5/15
 procedure ProblemTopicLinkSubset(RPCResult : TStrings; DFN: string; Starting : string=''; Dir : string = ''; Max : string = '');  //kt 5/15
 function GetTMGPSCode(IEN: Int64): string;  //kt //elh  5/13/14
 function TMGSearchTemplates(OutSL : TStringList; SearchTerm : string; DUZ : Int64; CaseSensitiveStr : string = '0') : string;  //kt 5/15
@@ -836,14 +836,14 @@ procedure ProblemTopics(RPCResult : TStrings; Command : string; Section : string
   ;"        If CMD="LIST", then
   ;"          OUT(0)="1^OK" or "-1^Error message"
   ;"          OUT(#)=<TOPIC NAME>^<IEN8925>^<FM DT>
-  ;"        If CMD="SUM1", then 
+  ;"        If CMD="SUM1", then
   ;"          OUT(0)="1^OK" or "-1^Error message"
   ;"          OUT(#)=FMDT^line#^line of text
   ;"       CMD -- The mode of the function.  Should be: 'LIST', or 'SUM1'
-  ;"       ADFN -- PATIENT IEN NUMBER 
+  ;"       ADFN -- PATIENT IEN NUMBER
   ;"       SECTION -- 'HPI', or 'A&P'  OPTIONAL.  Default is 'HPI'
   ;"       OPTION -- if CMD="SUM1", then this should be name of desired topic for summary.
-  ;"            To provide multiple topic names, separate by "," character.  E.g. 
+  ;"            To provide multiple topic names, separate by "," character.  E.g.
   ;"             "HTN,HYPERTENSION.,HYPERTENSION"
   ;"       SDT -- FM date for starting date range.  OPTIONAL.  Default = 0;
   ;"       EDT -- FM date for ENDING date range.  OPTIONAL.  Default = 9999999;}
@@ -852,33 +852,43 @@ begin
   FastAssign(RPCBrokerV.Results, RPCResult);
 end;
 
-procedure ProblemTopicLink(RPCResult : TStrings; Input: TStringList);
+procedure TMGTopicLinks(RPCResult : TStrings; Input: TStringList);
 //kt added entire function 5/15
 //Input syntax:
-//  NOTE: one or many lines can be passed.  Each is a separate command,
-//      and are executed in the number order #
-//  Input(#)='<CMD>^<Info>...'
-//      <CMD> can be:
-//       'SET', in which case <Info> should be as follows:
-//           'SET^<DFN>^<TopicName>^<ProblemIEN>'
-//           'SET^1234^A-fib^5678'
-//       'GET', in which case <Info> should be as follows:
-//           'GET^<DFN>^PROB=<ProblemIEN>'
-//        or 'GET^<DFN>^TOPIC=<TopicName>'
-//        or 'GET^<DFN>^ALL'
-//       'KILL', in which case <Info> should be as follows:
-//           'KILL^<DFN>^<TopicName>'
+//          NOTE: one or many lines can be passed.  Each is a separate command,
+//              and are executed in the number order #
+//          Input(#)='<CMD>^<Info>...'
+//            <CMD> can be:
+//               'SET', in which case <Info> should be as follows:
+//                   'SET^<DFN>^<TopicName>^<ProblemIEN>^<ICD_INFO*>^<SCTIEN>'  <-- can have any combo of IENS's
+//                   'SET^1234^A-fib^5678'
+//                   NOTE: ProblemIEN is IEN in 9000011, SCT is snowmed code in ____ (to do!)
+//                   NOTE: *For ICD_INFO, format should be:
+//                        '<ICD_IEN>;<ICD_CODE>;<ICD_CODING_SYS>;<AS-OF FMDT>'
+//                        ICD_IEN is IEN in 80.   If valid IEN provided, then rest is optional and ignored
+//                        ICD_CODE e.g. I10 for Essential HTN
+//                        ICD_CODING_SYS.  e.g. 10D for ICD 10
+//                        AS-OF FMDT: FMDT for date lookup.  Default is NOW
+//               'GET', in which case <Info> should be as follows:
+//                   'GET^<DFN>^PROB=<ProblemIEN>'
+//                or 'GET^<DFN>^TOPIC=<TopicName>'
+//                or 'GET^<DFN>^ICD=<ICDIEN>'
+//                or 'GET^<DFN>^SCT=<SCTIEN>'  <-- to do!
+//                or 'GET^<DFN>^ALL'
+//               'KILL', in which case <Info> should be as follows:
+//                   'KILL^<DFN>^<TopicName>'
 //---- Result syntax ---
-//Output:
-//  Out(0)=1^OK   <-- only if all filings were OK, otherwise -1^Problem
-//     Out(#)=1^OK  or -1^ErrorMessage  <-- if line command was a SET or KILL command
-//     Out(#)=<result value>   <-- if line command was a GET command.
-//      e.g.   1^OK^DFN^PROB=<ProblemIEN>^TOPIC=<Name>,<Name>,<Name>,....   <-- if input was PROB=<IEN>
-//       or    1^OK^DFN^TOPIC=<TopicName>^PROB=<IEN>                        <-- if input was TOPIC=<Name>
-//       or   -1^Error Message
-//     The # will match the # from the Input array
+//Output: Out(0)=1^OK   <-- only if all filings were OK, otherwise -1^Problem
+//        Out(#)=1^OK  or -1^ErrorMessage  <-- if line command was a SET or KILL command
+//        Out(#)=<result value>   <-- if line command was a GET command.
+//         e.g.   1^OK^DFN^PROB=<ProblemIEN>^TOPIC=<Name>,<Name>,<Name>,....   <-- if input was PROB=<IEN>
+//          or    1^OK^DFN^ICD=<ICDIEN>^^TOPIC=<Name>,<Name>,<Name>,....       <-- if input was ICD=<IEN>
+//          or    1^OK^DFN^TOPIC=<TopicName>^PROB=<IEN>                        <-- if input was TOPIC=<Name>
+//          or    1^OK^DFN^TOPIC=<TopicName>^PROB=<IEN>^ICD=<ICDIEN>^SCT=<SCTIEN> <-- if input was ALL  (SCT IS STILL TO DO...)
+//          or   -1^Error Message
+//        The # will match the # from the IN array
 begin
-  CallV('TMG CPRS TOPIC PROBLEM LINK', [Input]);
+  CallV('TMG CPRS TOPIC LINKS', [Input]);  //WAS TMG CPRS TOPIC PROBLEM LINK
   FastAssign(RPCBrokerV.Results, RPCResult);
 end;
 

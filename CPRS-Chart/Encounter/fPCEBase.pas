@@ -22,6 +22,7 @@ type
   TfrmPCEBase = class(TfrmAutoSz)
     btnOK: TBitBtn;
     btnCancel: TBitBtn;
+    procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject); virtual;
@@ -35,6 +36,7 @@ type
 //    function GetPatientViewed: Boolean;
     procedure UMResizePage(var Message: TMessage); message UM_RESIZEPAGE;
   protected
+    FProviders: TPCEProviderList;  //kt local pointer, owned elsewhere
     FClosing: boolean;
     FSectionTabs: array[0..2] of Integer;
     FSectionTabCount: integer;
@@ -83,6 +85,12 @@ procedure TfrmPCEBase.FormCreate(Sender: TObject);
 begin
   FDisplayCount := 0;
   FPatientCount := 0;
+  FProviders := frmEncounterFrame.uProviders;  //kt  NOTE: It is messy to access frmEncounterFrame in global scope, but it would cause extensive changes to have this passed in.
+end;
+
+procedure TfrmPCEBase.FormDestroy(Sender: TObject);
+begin
+  inherited;
 end;
 
 {///////////////////////////////////////////////////////////////////////////////

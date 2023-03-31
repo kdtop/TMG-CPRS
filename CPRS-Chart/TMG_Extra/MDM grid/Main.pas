@@ -4,23 +4,27 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Buttons
-
-
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Buttons,
+  MDMHelper
   ;
 
 type
   TForm1 = class(TForm)
     Memo1: TMemo;
-    Button1: TButton;
-    procedure Button1Click(Sender: TObject);
+    btnLaunchEmbedded: TButton;
+    btnClear: TButton;
+    Panel1: TPanel;
+    btnLaunchFloating: TButton;
+    procedure btnLaunchFloatingClick(Sender: TObject);
+    procedure btnClearClick(Sender: TObject);
+    procedure btnLaunchEmbeddedClick(Sender: TObject);
   private
     { Private declarations }
+    frmMDMGrid: TfrmMDMGrid;    //not autocreated
+    procedure InstantiateHelper;
+    procedure HandleMDMClosing(Sender: TObject);
   public
     { Public declarations }
-    procedure DrawTextRotatedB(ACanvas: TCanvas; Angle, X, Y: Integer;  //temp
-                               ATextColor: TColor; AText: String);
-
   end;
 
 var
@@ -28,98 +32,58 @@ var
 
 implementation
 
-uses MDMHelper;
 
 {$R *.dfm}
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.btnClearClick(Sender: TObject);
+begin
+  Memo1.Lines.Clear;
+end;
+
+procedure TForm1.btnLaunchEmbeddedClick(Sender: TObject);
+begin
+  if Assigned(frmMDMGrid) then exit;
+  InstantiateHelper;
+  frmMDMGrid.EmbeddedMode := true;
+  frmMDMGrid.Parent := Panel1;
+  frmMDMGrid.Show;
+end;
+
+procedure TForm1.btnLaunchFloatingClick(Sender: TObject);
+begin
+  if Assigned(frmMDMGrid) then exit;
+  InstantiateHelper;
+  frmMDMGrid.EmbeddedMode := false;
+  frmMDMGrid.Show;
+end;
+
+procedure TForm1.InstantiateHelper;
+begin
+  frmMDMGrid := TfrmMDMGrid.Create(Self);
+  //frmMDMGrid.CommonLog := Memo1.Lines;
+  frmMDMGrid.OnCloseForm := HandleMDMClosing;
+end;
+
+
+procedure TForm1.HandleMDMClosing(Sender: TObject);
 var
-  frmMDMGrid: TfrmMDMGrid;    //not autocreated
-  s : string;
   i : integer;
   SL : TStringList;
 
 begin
-  frmMDMGrid := TfrmMDMGrid.Create(Self);
-  if frmMDMGrid.ShowModal = mrOK then begin
-    Memo1.Lines.Add(frmMDMGrid.CPT);
-    Memo1.Lines.Add(frmMDMGrid.Narrative);
-    SL := frmMDMGrid.TextTable;
-    for i := 0 to SL.Count - 1 do begin
-      Memo1.Lines.Add(SL[i]);
-    end;
-
+  Memo1.Lines.Add(frmMDMGrid.CPT);
+  Memo1.Lines.Add(frmMDMGrid.Narrative);
+  SL := frmMDMGrid.TextTable;
+  for i := 0 to SL.Count - 1 do begin
+    Memo1.Lines.Add(SL[i]);
   end;
-  frmMDMGrid.Free;
-end;
-
-
-
-//-------------------------------------
-
-
-procedure TForm1.DrawTextRotatedB(ACanvas: TCanvas; Angle, X, Y: Integer;
-  ATextColor: TColor; AText: String);
-  //from here: https://stackoverflow.com/questions/52916612/how-to-draw-text-in-a-canvas-vertical-horizontal-with-delphi-10-2/52923681
-var
-  NewX: Integer;
-  NewY: integer;
-  Escapement: Integer;
-  LogFont: TLogFont;
-  NewFontHandle: HFONT;
-  OldFontHandle: HFONT;
-begin
-  if not Assigned(ACanvas) then Exit;
-
-  // Get handle of font and prepare escapement
-  GetObject(ACanvas.Font.Handle, SizeOf(LogFont), @LogFont);
-  if Angle > 360 then Angle := 0;
-  Escapement := Angle * 10;
-
-  // We must initialise all fields of the record structure
-  LogFont.lfWidth := 0;
-  LogFont.lfHeight := ACanvas.Font.Height;
-  LogFont.lfEscapement := Escapement;
-  LogFont.lfOrientation := 0;
-  if fsBold in ACanvas.Font.Style then
-    LogFont.lfWeight := FW_BOLD
-  else
-    LogFont.lfWeight := FW_NORMAL;
-  LogFont.lfItalic := Byte(fsItalic in ACanvas.Font.Style);
-  LogFont.lfUnderline := Byte(fsUnderline in ACanvas.Font.Style);
-  LogFont.lfStrikeOut := Byte(fsStrikeOut in ACanvas.Font.Style);
-  LogFont.lfCharSet := ACanvas.Font.Charset;
-  LogFont.lfOutPrecision := OUT_DEFAULT_PRECIS;
-  LogFont.lfClipPrecision := CLIP_DEFAULT_PRECIS;
-  LogFont.lfQuality := DEFAULT_QUALITY;
-  LogFont.lfPitchAndFamily := DEFAULT_PITCH;
-  StrPCopy(LogFont.lfFaceName, ACanvas.Font.Name);
-
-  // Create new font with rotation
-  NewFontHandle := CreateFontIndirect(LogFont);
-  try
-    // Set color of text
-    ACanvas.Font.Color := ATextColor;
-
-    // Select the new font into the canvas
-    OldFontHandle := SelectObject(ACanvas.Handle, NewFontHandle);
-    try
-      // Output result
-      ACanvas.Brush.Style := Graphics.bsClear;
-      try
-        ACanvas.TextOut(X, Y, AText);
-      finally
-        ACanvas.Brush.Style := Graphics.bsSolid;
-      end;
-    finally
-      // Restore font handle
-      NewFontHandle := SelectObject(ACanvas.Handle, OldFontHandle);
-    end;
-  finally
-    // Delete the deselected font object
-    DeleteObject(NewFontHandle);
+  if not frmMDMGrid.EmbeddedMode then begin
+    FreeAndNil(frmMDMGrid);
+  end else begin
+    frmMDMGrid.reset
   end;
 end;
+
 
 
 end.

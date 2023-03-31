@@ -392,7 +392,6 @@ end;
 
 
 procedure TfrmSingleNote.btnCloseClick(Sender: TObject);
-var Response:integer;
 begin
   inherited;
   FSaveAndCloseTriggered := false;

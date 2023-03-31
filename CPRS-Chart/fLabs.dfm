@@ -9,8 +9,8 @@ inherited frmLabs: TfrmLabs
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 1050
-  ExplicitHeight = 668
+  ExplicitWidth = 1058
+  ExplicitHeight = 672
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape

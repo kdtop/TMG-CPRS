@@ -366,7 +366,7 @@ begin
   Application.CreateForm(TfrmProbAutoAdd, frmProbAutoAdd);
   frmProbAutoAdd.ShowModal;
   Result := frmProbAutoAdd.ResultMessage;  //e.g.   'EDIT^'+IEN+'^'+Name+'^'+ICD+'^'+Category;
-  frmProbAutoAdd.Free;
+  FreeAndNil(frmProbAutoAdd);
   tempComp := TComponent.Create(self);
   try
     if Result = '' then begin
@@ -400,11 +400,11 @@ begin
       end;
     end;
   //CQ #11529: 508 PL tab - defaults the focus to the New Problem button ONLY upon switching to the Probs tab.  {TC}
-  if TabCtrlClicked and (ChangingTab = CT_PROBLEMS) then ProbTabClicked := True;
-  if (bbNewProb.CanFocus) and (not pnlButtons.Visible) and ((not PTSwitchRefresh) or ProbTabClicked) then bbNewProb.SetFocus;
+  //kt moved into frmFrame.tabPagesChange --   if frmFrame.TabCtrlClicked and (ChangingTab = CT_PROBLEMS) then frmFrame.ProbTabClicked := True;  //kt-tabs added frmFrame.
+  if (bbNewProb.CanFocus) and (not pnlButtons.Visible) and ((not PTSwitchRefresh) or frmFrame.ProbTabClicked) then bbNewProb.SetFocus; //kt-tabs added frmFrame.
   if PTSwitchRefresh then PTSwitchRefresh := False;
-  if TabCtrlClicked then TabCtrlClicked := False;
-  if ProbTabClicked then ProbTabClicked := False;
+  if frmFrame.TabCtrlClicked then frmFrame.TabCtrlClicked := False;  //kt-tabs added frmFrame.
+  if frmFrame.ProbTabClicked then frmFrame.ProbTabClicked := False;  //kt-tabs added frmFrame.
   finally
     tempComp.Free;
   end;
@@ -1131,7 +1131,7 @@ var {init should only be true when initializing a list for a new patient}
       end;
   end;
 
-begin  {Body}
+begin  //LoadPatientProblems
 {$IFDEF VEVA_USE_CP}
   MaxProblemIconIndex := -1; //kt-cp 9/11 reset
 {$ENDIF}
@@ -1143,22 +1143,19 @@ begin  {Body}
     ClearGrid;
     inactI := 0;
     inactS := 0;
-    if PLPt = nil then
-      begin
-        InfoBox(TX_INVALID_PATIENT, TC_NO_PATIENT, MB_OK or MB_ICONWARNING);
-        AList.Clear;
-        AList.Add('No data available');
-      end
-    else
-      begin
-        st:=status;
-        if st= '' then st := 'A'; {default to active list}
-        if Patient.Inpatient then   //CQ 21793
-          DateOfInterest := FMNow
-        else
-          DateOfInterest := Encounter.DateTime;
-        FastAssign(ProblemList(Patient.DFN, st, DateOfInterest), AList);
-      end;
+    if PLPt = nil then begin
+      InfoBox(TX_INVALID_PATIENT, TC_NO_PATIENT, MB_OK or MB_ICONWARNING);
+      AList.Clear;
+      AList.Add('No data available');
+    end else begin
+      st:=status;
+      if st= '' then st := 'A'; {default to active list}
+      if Patient.Inpatient then   //CQ 21793
+        DateOfInterest := FMNow
+      else
+        DateOfInterest := Encounter.DateTime;
+      FastAssign(ProblemList(Patient.DFN, st, DateOfInterest), AList);
+    end;
     if Status = 'R' then
       SetGridPieces('3,4,5,7,8,9')
     else
@@ -1170,51 +1167,47 @@ begin  {Body}
     if PLUser.usReverseChronDisplay then {reverse chron order if required}
       ReverseList(Alist);
     {populate the grid}
-    if ((Alist.Count = 1) and (pos('No data available', Alist[0]) > 0))then
-      begin
-        FAllProblems.Add('^^No problems found.');
-        FProblemsVisible.Add('Y');
-        RefreshList;
-        Alist.Clear ;
-        NoRowSelected;
-        exit ;
-      end ;
-    for i := 0 to pred(Alist.count) do
-    begin
+    if ((Alist.Count = 1) and (pos('No data available', Alist[0]) > 0))then begin
+      FAllProblems.Add('^^No problems found.');
+      FProblemsVisible.Add('Y');
+      RefreshList;
+      Alist.Clear ;
+      NoRowSelected;
+      exit ;
+    end ;
+    for i := 0 to pred(Alist.count) do begin
       FAllProblems.Add('');
       FProblemsVisible.Add('Y');
       comments := '';
       CmtList.Clear;
       x := AList[i];
-      if (Piece(x, U, 18) = '#') and CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B', 'I', 'R']) and (not FI10Active) then
-        begin
-          ver := '#';      // inactive ICD code flag takes precedence over unverified flag
-          if (Piece(x, U, 2) = 'A') then inactI := inactI + 1;
-        end
-      else if (Piece(x, U, 18) = '$') and CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B', 'I', 'R']) then
-        begin
-          ver := '#';      // inactive SNOMED CT code flag takes precedence over unverified flag
-          if (Piece(x, U, 2) = 'A') then inactS := inactS + 1;
-        end
-      else if (PlUSer.usVerifyTranscribed) and
-              (Piece(x, U, 9) = 'T') then
+      if (Piece(x, U, 18) = '#') and
+      CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B', 'I', 'R']) and
+      (not FI10Active) then begin
+        ver := '#';      // inactive ICD code flag takes precedence over unverified flag
+        if (Piece(x, U, 2) = 'A') then inactI := inactI + 1;
+      end else if (Piece(x, U, 18) = '$') and
+      CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B', 'I', 'R']) then begin
+        ver := '#';      // inactive SNOMED CT code flag takes precedence over unverified flag
+        if (Piece(x, U, 2) = 'A') then inactS := inactS + 1;
+      end else if (PlUSer.usVerifyTranscribed) and
+      (Piece(x, U, 9) = 'T') then begin
         ver := '(u)'
-      else
+      end else begin
         ver := '   ';
+      end;
       if Piece(x, U, 14) = 'A' then prio   := ' * ' else prio   := '   ' ;
       Line := '';
       SetPiece(Line, U, 2, Piece(x, U, 2) + prio + ver);
-      if Piece(x, U, 15) = '1' then  //problem has comments
-        begin
-          FastAssign(GetProblemComments(Piece(x, U, 1)), CmtList);
-          if FAllProblems.Objects[i] = nil then FAllProblems.Objects[i]:= TStringList.Create;
-          FastAssign(CmtList, TStringList(FAllProblems.Objects[i]));
-        end;
+      if Piece(x, U, 15) = '1' then begin  //problem has comments
+        FastAssign(GetProblemComments(Piece(x, U, 1)), CmtList);
+        if FAllProblems.Objects[i] = nil then FAllProblems.Objects[i]:= TStringList.Create;
+        FastAssign(CmtList, TStringList(FAllProblems.Objects[i]));
+      end;
 
       SetPiece(Line, U, 3, Piece(x, U, 3));
 
-      if Piece(x, U, 19) <> '' then
-      begin
+      if Piece(x, U, 19) <> '' then begin
         if Piece(x, U, 20) = 'ICD' then
           cs := 'ICD-9-CM'
         else if Piece(x, U, 20) = '10D' then
@@ -1224,12 +1217,11 @@ begin  {Body}
         SetPiece(Line, U, 3, Piece(Line, U, 3) + #13#10 + cs + ' Text: ' + MixedCase(Piece(x, U, 19)));
       end;
       Code := Piece(x, U, 4);  if Code <> '' then Line := Line + ' ('+Code+')'; //kt added
-      if PLUser.usViewComments = '1' then
-        begin
-          for j := 0 to CmtList.Count-1 do
-            comments := comments + '         ' + CmtList.Strings[j] + #13#10;
-          SetPiece(Line, U, 3, Piece(Line, U, 3) + #13#10 + comments);
-        end;
+      if PLUser.usViewComments = '1' then begin
+        for j := 0 to CmtList.Count-1 do
+          comments := comments + '         ' + CmtList.Strings[j] + #13#10;
+        SetPiece(Line, U, 3, Piece(Line, U, 3) + #13#10 + comments);
+      end;
       SetPiece(Line, U, 4, Trim(Piece(x, U, 5)));                        {onset date}
       SetPiece(Line, U, 5, Trim(Piece(x, U, 6)));                        {last updated}
       SetPiece(Line, U, 7, MixedCase(Piece(Piece(x, U, 10), ';', 2)));   {location name}
@@ -1260,43 +1252,47 @@ begin  {Body}
     ApplyViewFilters;
     RefreshList;
     lstProbPick.ItemIndex := -1;
-    if (ProbRec <> nil) and (ProbRec.PIFN <> '') then
-      begin
-        for i := 0 to wgProbData.Items.count-1 do
-          if (Piece(MString(i), U, 1) = ProbRec.PIFN) then
-             wgProbData.ItemIndex := i ;
+    if (ProbRec <> nil) and (ProbRec.PIFN <> '') then begin
+      for i := 0 to wgProbData.Items.count-1 do begin
+        if (Piece(MString(i), U, 1) = ProbRec.PIFN) then begin
+          wgProbData.ItemIndex := i ;
+        end;
         wgProbDataClick(Self);
-      end
-    else
-      wgProbData.ItemIndex := -1;
-    if (wgProbData.Items.Count > 0) and (wgProbData.ItemIndex > -1) then
-      RowSelected
-    else
-      NoRowSelected;
-    pnlRightResize(Self);
-    if (not FWarningShown) and (inactI > 0) and (inactS > 0) and CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B']) then
-      begin
-       InfoBox('There are ' + IntToStr(inactI) + ' active problem(s) flagged with a "#" as having ' +
-               'inactive ICD codes as of the Encounter date. There are also ' + IntToStr(inactS) +
-               ' active problem(s) flagged with a "#" as having inactive SNOMED CT codes as of ' +
-               'the Encounter date. You may correct these problems using the "Change" option.',
-               'Inactive ICD & SNOMED CT Codes Found', MB_ICONWARNING or MB_OK);
-       FWarningShown := True;
-      end
-    else if (not FWarningShown) and (inactI > 0) and CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B']) then
-      begin
-       InfoBox('There are ' + IntToStr(inactI) + ' active problem(s) flagged with a "#" as having ' +
-               'inactive ICD codes as of the Encounter date. You may correct these problems using the "Change" option.',
-               'Inactive ICD Codes Found', MB_ICONWARNING or MB_OK);
-       FWarningShown := True;
-      end
-    else if (not FWarningShown) and (inactS > 0) and CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B']) then
-      begin
-       InfoBox('There are ' + IntToStr(inactS) + ' active problem(s) flagged with a "#" as having ' +
-               'inactive SNOMED CT codes as of the Encounter date. You may correct these problems ' +
-               'using the "Change" option.', 'Inactive SNOMED CT Codes Found', MB_ICONWARNING or MB_OK);
-       FWarningShown := True;
       end;
+    end else begin
+      wgProbData.ItemIndex := -1;
+    end;
+    if (wgProbData.Items.Count > 0) and (wgProbData.ItemIndex > -1) then begin
+      RowSelected
+    end else begin
+      NoRowSelected;
+    end;
+    pnlRightResize(Self);
+    if (not FWarningShown) and
+    (inactI > 0) and
+    (inactS > 0) and
+    CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B']) then begin
+      InfoBox('There are ' + IntToStr(inactI) + ' active problem(s) flagged with a "#" as having ' +
+              'inactive ICD codes as of the Encounter date. There are also ' + IntToStr(inactS) +
+              ' active problem(s) flagged with a "#" as having inactive SNOMED CT codes as of ' +
+              'the Encounter date. You may correct these problems using the "Change" option.',
+              'Inactive ICD & SNOMED CT Codes Found', MB_ICONWARNING or MB_OK);
+      FWarningShown := True;
+    end else if (not FWarningShown) and
+    (inactI > 0) and
+    CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B']) then begin
+      InfoBox('There are ' + IntToStr(inactI) + ' active problem(s) flagged with a "#" as having ' +
+              'inactive ICD codes as of the Encounter date. You may correct these problems using the "Change" option.',
+              'Inactive ICD Codes Found', MB_ICONWARNING or MB_OK);
+      FWarningShown := True;
+    end else if (not FWarningShown) and
+    (inactS > 0) and
+    CharInSet(CharAt(UpperCase(Status), 1), ['A', 'B']) then begin
+      InfoBox('There are ' + IntToStr(inactS) + ' active problem(s) flagged with a "#" as having ' +
+              'inactive SNOMED CT codes as of the Encounter date. You may correct these problems ' +
+              'using the "Change" option.', 'Inactive SNOMED CT Codes Found', MB_ICONWARNING or MB_OK);
+      FWarningShown := True;
+    end;
   finally
     CmtList.Free;
   end;
@@ -1630,50 +1626,47 @@ var
   reas: string;
 begin
   prob := Piece(MString(wgProbData.ItemIndex), U, 1);
-  if (prob <> '') and (ProbRec = nil) then
-    begin
-      StatusText('Retrieving selected problem...') ;
-      bbCancel.Enabled := False ;
-      bbOtherProb.enabled := false; {don't let them invoke lexicon till edit completed}
-      case why of
-        'E','e','C','c' : reas := 'Edit Problem';
-        'D','d'         : reas := 'Display Problem';
-        'R','r'         : reas := 'Remove Problem';
-      end;
-      pnlRight.Caption   := lblProbList.caption ;
-      lblProbList.caption     := reas;
-      wgProbData.Caption := lblProbList.Caption;
-      pnlProbDlg.Visible := True;
-      pnlProbDlg.BringToFront ;
-      //prevents JAWS from reading the top item in the wgProbData caption listbox when hidden from view.
-      pnlProbDlg.SetFocus;
-      dlgProbs           := TFrmDlgProb.create(pnlProbDlg);
-      dlgProbs.HorzScrollBar.Range := dlgProbs.ClientWidth;
-      dlgProbs.VertScrollBar.Range := dlgProbs.ClientHeight;
-      dlgProbs.parent    := pnlProbDlg;
-      dlgProbs.Align     := alClient ;
-      dlgProbs.Reason    := why;
-      with wgProbData do dlgProbs.subjProb:=prob + u + Piece(Piece(MString(itemindex), U, 3), #13, 1) + u + Piece(MString(itemindex), U, 14);
-      dlgProbs.OnFormClose := HandleProbEditClose; //kt added 6/15
-      with wgProbData do dlgProbs.subjProb:=prob + u + Trim(Piece(Piece(Piece(MString(itemindex), U, 3), #13, 1), '(', 1)) + u + Piece(MString(itemindex), U, 14);
-      StatusText('') ;
-      dlgProbs.Show;
-      PostMessage(dlgProbs.Handle, UM_TAKEFOCUS, 0, 0);
-      wgProbData.TabStop := False;  //fixes part (c) of CQ #15531: 508 Problems tab [CPRS v28.1] {TC}.
-      //prevents the selected problem or last entered problem from the PL captionlistbox
-      //underneath pnlProbDlg to be focused & read by Jaws
-    end
-  else
-    begin
-      case why of
-        'E','e','C','c' : reas := 'Edited';
-        'D','d'         : reas := 'Displayed';
-        'R','r'         : reas := 'Removed';
-      end;
-      InfoBox('Current Add/Edit/Display activity must be completed' + #13#10 +
-        'before another record may be ' + reas,
-        'Information', MB_OK or MB_ICONINFORMATION);
+  if (prob <> '') and (ProbRec = nil) then begin
+    StatusText('Retrieving selected problem...') ;
+    bbCancel.Enabled := False ;
+    bbOtherProb.enabled := false; {don't let them invoke lexicon till edit completed}
+    case why of
+      'E','e','C','c' : reas := 'Edit Problem';
+      'D','d'         : reas := 'Display Problem';
+      'R','r'         : reas := 'Remove Problem';
     end;
+    pnlRight.Caption   := lblProbList.caption ;
+    lblProbList.caption     := reas;
+    wgProbData.Caption := lblProbList.Caption;
+    pnlProbDlg.Visible := True;
+    pnlProbDlg.BringToFront ;
+    //prevents JAWS from reading the top item in the wgProbData caption listbox when hidden from view.
+    pnlProbDlg.SetFocus;
+    dlgProbs           := TFrmDlgProb.create(pnlProbDlg);
+    dlgProbs.HorzScrollBar.Range := dlgProbs.ClientWidth;
+    dlgProbs.VertScrollBar.Range := dlgProbs.ClientHeight;
+    dlgProbs.parent    := pnlProbDlg;
+    dlgProbs.Align     := alClient ;
+    dlgProbs.Reason    := why;
+    with wgProbData do dlgProbs.subjProb:=prob + u + Piece(Piece(MString(itemindex), U, 3), #13, 1) + u + Piece(MString(itemindex), U, 14);
+    dlgProbs.OnFormClose := HandleProbEditClose; //kt added 6/15
+    with wgProbData do dlgProbs.subjProb:=prob + u + Trim(Piece(Piece(Piece(MString(itemindex), U, 3), #13, 1), '(', 1)) + u + Piece(MString(itemindex), U, 14);
+    StatusText('') ;
+    dlgProbs.Show;
+    PostMessage(dlgProbs.Handle, UM_TAKEFOCUS, 0, 0);
+    wgProbData.TabStop := False;  //fixes part (c) of CQ #15531: 508 Problems tab [CPRS v28.1] {TC}.
+    //prevents the selected problem or last entered problem from the PL captionlistbox
+    //underneath pnlProbDlg to be focused & read by Jaws
+  end else begin
+    case why of
+      'E','e','C','c' : reas := 'Edited';
+      'D','d'         : reas := 'Displayed';
+      'R','r'         : reas := 'Removed';
+    end;
+    InfoBox('Current Add/Edit/Display activity must be completed' + #13#10 +
+      'before another record may be ' + reas,
+      'Information', MB_OK or MB_ICONINFORMATION);
+  end;
 end;
 
 {$IFDEF VEVA_USE_CP}

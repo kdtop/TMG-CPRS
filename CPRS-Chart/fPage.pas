@@ -183,8 +183,11 @@ end;
 
 procedure TfrmPage.frmPageEnter(Sender: TObject);
 begin
+  {
+  //kt I don't think this is needed.  And if needed, will be tricky to figure out when there are 2 sides...
   if Assigned(frmFrame) then
-    FrmFrame.tabPage.TabIndex := FrmFrame.PageIDToTab(PageID);
+    FrmFrame.tabPage.TabIndex := FrmFrame.PageIDToTabIndex(PageID);
+  }
   if Assigned(FOldEnter) then
     FOldEnter(Sender);
 end;

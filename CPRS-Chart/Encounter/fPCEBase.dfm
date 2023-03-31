@@ -7,15 +7,15 @@ inherited frmPCEBase: TfrmPCEBase
   Position = poMainFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
-  ExplicitWidth = 320
-  ExplicitHeight = 240
+  ExplicitWidth = 640
+  ExplicitHeight = 438
   DesignSize = (
     624
     400)
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TBitBtn [0]
-    Left = 467
+    Left = 466
     Top = 376
     Width = 75
     Height = 21

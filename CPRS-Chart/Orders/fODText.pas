@@ -47,6 +47,7 @@ const
 
 procedure TfrmODText.FormCreate(Sender: TObject);
 begin
+  //kt AutoSizeDisabled := True;  //kt added 12/1/11
   inherited;
   FillerID := 'OR';                     // does 'on Display' order check **KCM**
   StatusText('Loading Dialog Definition');
@@ -66,13 +67,13 @@ end;
 procedure TfrmODText.SetupDialog(OrderAction: Integer; const ID: string);
 begin
   inherited;
-  if OrderAction in [ORDER_COPY, ORDER_EDIT, ORDER_QUICK] then with Responses do
-  begin
+  if OrderAction in [ORDER_COPY, ORDER_EDIT, ORDER_QUICK] then with Responses do begin
     SetControl(memText,  'COMMENT', 1);
     SetControl(txtStart, 'START',   1);
     SetControl(txtStop,  'STOP',    1);
-  end
-  else txtStart.Text := 'NOW';
+  end else begin
+    txtStart.Text := 'NOW';
+  end;
 end;
 
 procedure TfrmODText.VA508CompMemOrderStateQuery(Sender: TObject;
@@ -99,8 +100,7 @@ var
 begin
   inherited;
   ContainsPrintable := False;
-  for i := 1 to Length(memText.Text) do if Ord(memText.Text[i]) > SPACE_CHAR then
-  begin
+  for i := 1 to Length(memText.Text) do if Ord(memText.Text[i]) > SPACE_CHAR then begin
     ContainsPrintable := True;
     break;
   end;
@@ -126,7 +126,7 @@ procedure TfrmODText.cmdAcceptClick(Sender: TObject);
 begin
   inherited;
   Application.ProcessMessages; //CQ 14670
-  //TMG added if below  original -> memText.Lines.Text := Trim(memText.Lines.Text); //CQ 14670
+  //TMG added 'if' below  original -> memText.Lines.Text := Trim(memText.Lines.Text); //CQ 14670
   if assigned(memText) then memText.Lines.Text := Trim(memText.Lines.Text); //CQ 14670
 end;
 

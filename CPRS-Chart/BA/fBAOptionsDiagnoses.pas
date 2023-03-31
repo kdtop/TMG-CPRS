@@ -211,6 +211,7 @@ begin
    EncDt := Trunc(FMToday);
    LastDFN := Patient.DFN;
    tCallV(Problems, 'ORWPCE ACTPROB', [Patient.DFN, EncDT]);
+   //kt NOTE: see rPCE.AddProbsToDiagnoses for documentation on pieces etc.
    if Problems.Count > 0 then
    begin
       DxList.add('^Problem List Items');

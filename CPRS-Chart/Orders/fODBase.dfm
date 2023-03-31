@@ -18,6 +18,9 @@ inherited frmODBase: TfrmODBase
   OnShow = FormShow
   ExplicitWidth = 528
   ExplicitHeight = 275
+  DesignSize = (
+    512
+    237)
   PixelsPerInch = 96
   TextHeight = 13
   object memOrder: TCaptionMemo [0]

@@ -261,11 +261,10 @@ var
   idx: integer;
 begin
   Result := '';
-  //kt if assigned(frmFrame) and assigned(frmFrame.tabPage) then
-  if assigned(frmFrame) and (frmFrame.tabPage <> nil) then  //kt
-  begin
+  if assigned(frmFrame) and (frmFrame.tabPage <> nil) then begin
     idx := frmFrame.tabPage.TabIndex;
-    if (idx >= 0) and (idx < uTabList.Count) then
+    //ktif (idx >= 0) and (idx < uTabList.Count) then
+    if (idx >= 0) and (idx < frmFrame.tabPage.Tabs.Count) then  //kt
     begin
       Result := frmFrame.tabPage.Tabs[idx];
       if Result = 'D/C Summ' then

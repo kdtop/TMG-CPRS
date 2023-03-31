@@ -1,5 +1,7 @@
 program CPRSChart;
 
+
+
 uses
   ShareMem,
   Forms,
@@ -77,9 +79,7 @@ uses
   fPCEBase in 'Encounter\fPCEBase.pas' {frmPCEBase},
   fPCELex in 'Encounter\fPCELex.pas' {frmPCELex},
   fPCEOther in 'Encounter\fPCEOther.pas' {frmPCEOther},
-  fProcedure in 'Encounter\fProcedure.pas' {frmProcedures},
   fSkinTest in 'Encounter\fSkinTest.pas' {frmSkinTests},
-  fVisitType in 'Encounter\fVisitType.pas' {frmVisitType},
   rPCE in 'Encounter\rPCE.pas',
   fDiagnoses in 'Encounter\fDiagnoses.pas' {frmDiagnoses},
   fPatientEd in 'Encounter\fPatientEd.pas' {frmPatientEd},
@@ -401,7 +401,6 @@ uses
   uTMGAllscriptsDriver in 'TMG_Extra\uTMGAllscriptsDriver.pas',
   uTMGDiffRecord in 'TMG_Extra\uTMGDiffRecord.pas',
   Diff_NP in 'TMG_Extra\Diff_NP.pas',
-  fODTMGOTP in 'TMG_Extra\fODTMGOTP.pas' {frmODTMGOTP},
   fAnticoagulator in 'TMG_Extra\AnticoagMgmtTool\fAnticoagulator.pas' {frmAnticoagulate},
   uTMG_WM_API in 'TMG_Extra\uTMG_WM_API.pas',
   fTMGPrintList in 'TMG_Extra\fTMGPrintList.pas' {frmTMGPrintList},
@@ -421,8 +420,16 @@ uses
   fConfirmTimer in 'TMG_Extra\fConfirmTimer.pas' {frmConfirmTimer},
   fNotesLoading in 'TMG_Extra\fNotesLoading.pas' {frmNotesLoading},
   fNoteSelector in 'TMG_Extra\fNoteSelector.pas' {frmNoteSelector},
-  fMessageDemo in 'TMG_Extra\fMessageDemo.pas' {frmMessageDemo},
-  fTaskEvents in 'TMG_Extra\fTaskEvents.pas' {frmEditTaskEvents};
+  fNetworkMessengerClient in 'TMG_Extra\fNetworkMessengerClient.pas' {frmNetworkMessagerClient},
+  fTaskEvents in 'TMG_Extra\fTaskEvents.pas' {frmEditTaskEvents},
+  fODTMG1 in 'TMG_Extra\fODTMG1.pas' {frmODTMG1},
+  fFollowUp in 'TMG_Extra\fFollowUp.pas' {frmFollowUp},
+  fEncounterMDM in 'TMG_Extra\fEncounterMDM.pas' {frmEncounterMDM},
+  fEncounterLabs in 'TMG_Extra\fEncounterLabs.pas' {frmEnounterLabs},
+  fTMGDiagnoses in 'TMG_Extra\fTMGDiagnoses.pas' {frmTMGDiagnoses},
+  fTopicICDLinkerU in 'TMG_Extra\fTopicICDLinkerU.pas' {frmTopicICDLinker},
+  fTMGProcedure in 'TMG_Extra\fTMGProcedure.pas' {frmTMGProcedures},
+  fTMGVisitType in 'TMG_Extra\fTMGVisitType.pas' {frmTMGVisitTypes};
 
 {$R *.TLB}
 
@@ -446,7 +453,7 @@ begin
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
   Application.CreateForm(TfrmConfirmTimer, frmConfirmTimer);
   Application.CreateForm(TfrmNoteSelector, frmNoteSelector);
-  Application.CreateForm(TfrmMessageDemo, frmMessageDemo);
+  Application.CreateForm(TfrmNetworkMessagerClient, frmNetworkMessagerClient);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
       Application.Run;
     end;

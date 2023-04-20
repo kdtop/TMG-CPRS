@@ -9,6 +9,8 @@ uses
   ORCtrls, CheckLst, Buttons, uCore, ORNet, VAUtils;
 
 type
+  TfrmODTMG1 = class;  //forward declaration
+  TNotifyODTMGClosing = procedure(Dlg : TfrmODTMG1; Data : TStringList) of object;
   tTMGDataType = (ttdtNone=1,
                   ttdtDialog,
                   ttdtDx,
@@ -97,6 +99,7 @@ type
     Label1: TLabel;
     lblComments: TLabel;
     rgProvider: TRadioGroup;
+    procedure cmdQuitClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure cmdAcceptClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
@@ -119,6 +122,7 @@ type
     FLabTimingStr : string;
     FCustomProcOpen : boolean;
     FOrderFlagFastingIndex : integer;
+    FOnClosing : TNotifyODTMGClosing;
     procedure SetCustomProcArea(Open : boolean);
     procedure ToggleCustomProcArea;
     procedure GetChangedObjsList(ListBox : TCheckListBox; ChangedDataObjs : TTMGDataList);
@@ -133,12 +137,13 @@ type
     procedure Data2GUI();
     procedure ClearData(ChangedDataObjs : TTMGDataList);
     function rgExternalValue(DataObj : TTMGData) : string;
-    procedure SendLabOrderMsg;
+    procedure SetupLabOrderMsg(SL : TStringList);
   protected
     procedure PlaceControls; override;
     procedure ControlChange(Sender: TObject); override;
   public
     { Public declarations }
+    LaunchedFromEncounter : boolean;
     procedure SetupDialog(OrderAction: Integer; const ID: string); override;
     function SelectOrder(OrderName : string; var ErrMsg : string) : boolean;
     function SelectDx(DxName : string; var ErrMsg : string) : boolean;
@@ -147,9 +152,11 @@ type
     procedure AutoCheckPerOrderedLabs();
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    property  OnClosing : TNotifyODTMGClosing read FOnClosing write FOnClosing;  //kt
   end;
 
   procedure TMGLabOrderAutoPopulateIfActive();
+  procedure SendLabOrderMsg(MessageArr : TStringList);
 
 implementation
 
@@ -184,6 +191,80 @@ const
     frmODTMG1 := TfrmODTMG1(uOrderDialog);
     frmODTMG1.AutoCheckPerOrderedLabs();
   end;
+
+//=================================================================
+//=================================================================
+
+  procedure SendLabOrderMsg(MessageArr : TStringList);
+  var MyName : string;
+      //LabTimingMsg:string;
+      PromptToPrint                     : boolean;
+      Recipients : string;
+      AUser : string;
+      i : integer;
+  begin
+    if not Assigned(MessageArr) then exit;
+    if MessageArr.Count<3 then exit;
+    Recipients := MessageArr[0];
+    PromptToPrint := (MessageArr[1] = 'T');
+    MyName := MessageArr[2];
+    for i := 2 downto 0 do MessageArr.Delete(i);
+
+    //LabTimingMsg := FLabTimingStr;
+    uTMG_WM_API.PromptForPrint := PromptToPrint;  //This sets the Prompt For Print when the order is signed
+    //
+    for i := 1 to NumPieces(Recipients,'^') do begin
+      AUser := Piece(Recipients,'^',i);
+      if AUser='' then continue;
+      //Send message to User, and send to lab user if appropriate
+      SendOneMessage(AUser,MyName,MessageArr);
+    end;
+
+    {
+    //LabTimingMsg := FLabTimingStr;
+    FastingMsg := IfThen(FFasting, 'FASTING', 'NON-FASTING');
+    uTMG_WM_API.PromptForPrint := FPromptToPrint;  //This sets the Prompt For Print when the order is signed
+    //
+    //GET USERS AND PREPARE MESSAGE
+    MessageArr := TStringList.create();
+    try
+      User := LabOrderMsgRecip('1');
+      if piece(User,'^',1)='-1' then begin
+        ShowMessage('Error getting User Name: '+piece(User,'^',2));
+        exit;
+      end;
+      LabUser := LabOrderMsgRecip('2');
+      if piece(LabUser,'^',1)='-1' then begin
+        ShowMessage('Error getting Lab User Name: '+piece(LabUser,'^',2));
+        exit;
+      end;
+      MyName :=  GetMyName;
+      if MyName='' then begin
+        ShowMessage('Error getting Current User Name');
+        exit;
+      end;
+      MessageArr.Add(MyName+' ORDERED LABS');
+      MessageArr.Add('');
+      MessageArr.Add(Patient.Name);
+      MessageArr.Add('');
+      MessageArr.Add(FastingMsg);
+      MessageArr.Add('');
+      //MessageArr.Add(uppercase(LabTimingMsg));
+      MessageArr.Add(UpperCase(FLabTimingStr));
+
+      //Send message to User, and send to lab user if appropriate
+      SendOneMessage(User,MyName,MessageArr);
+      //if (LabTimingMsg='Today') or (LabTimingMsg='Use lab blood if possible') then begin
+      if (FLabTimingStr='Today') or (FLabTimingStr='Use lab blood if possible') then begin
+        SendOneMessage(LabUser, MyName, MessageArr);
+      end;
+    finally
+      MessageArr.Free;
+    end;
+    }
+  end;
+
+
 
 //=================================================================
 //=================================================================
@@ -1481,59 +1562,80 @@ begin
 end;
 
 procedure TfrmODTMG1.cmdAcceptClick(Sender: TObject);
+var MessageArr : TStringList;
 begin
   inherited;
-  SendLabOrderMsg;
-end;
-
-procedure TfrmODTMG1.SendLabOrderMsg;
-var MyName, User, LabUser, FastingMsg : string;
-    //LabTimingMsg:string;
-    PromptToPrint                     : boolean;
-    MessageArr                        : TStringList;
-begin
-  //LabTimingMsg := FLabTimingStr;
-  FastingMsg := IfThen(FFasting, 'FASTING', 'NON-FASTING');
-  uTMG_WM_API.PromptForPrint := FPromptToPrint;  //This sets the Prompt For Print when the order is signed
-  //
-  //GET USERS AND PREPARE MESSAGE
-  MessageArr := TStringList.create();
+  MessageArr := TStringList.Create;
   try
-    User := LabOrderMsgRecip('1');
-    if piece(User,'^',1)='-1' then begin
-      ShowMessage('Error getting User Name: '+piece(User,'^',2));
-      exit;
-    end;
-    LabUser := LabOrderMsgRecip('2');
-    if piece(LabUser,'^',1)='-1' then begin
-      ShowMessage('Error getting Lab User Name: '+piece(LabUser,'^',2));
-      exit;
-    end;
-    MyName :=  GetMyName;
-    if MyName='' then begin
-      ShowMessage('Error getting Current User Name');
-      exit;
-    end;
-    MessageArr.Add(MyName+' ORDERED LABS');
-    MessageArr.Add('');
-    MessageArr.Add(Patient.Name);
-    MessageArr.Add('');
-    MessageArr.Add(FastingMsg);
-    MessageArr.Add('');
-    //MessageArr.Add(uppercase(LabTimingMsg));
-    MessageArr.Add(UpperCase(FLabTimingStr));
-
-    //Send message to User, and send to lab user if appropriate
-    SendOneMessage(User,MyName,MessageArr);
-    //if (LabTimingMsg='Today') or (LabTimingMsg='Use lab blood if possible') then begin
-    if (FLabTimingStr='Today') or (FLabTimingStr='Use lab blood if possible') then begin
-      SendOneMessage(LabUser, MyName, MessageArr);
+    SetupLabOrderMsg(MessageArr);
+    //if dialog launched from Encounter, then delay sending until Encounter form is closed.
+    if LaunchedFromEncounter then begin
+      if assigned(FOnClosing) then FOnClosing(Self,MessageArr);
+    end else begin
+      SendLabOrderMsg(MessageArr);
     end;
   finally
     MessageArr.Free;
   end;
 end;
 
+procedure TfrmODTMG1.cmdQuitClick(Sender: TObject);
+//kt added
+begin
+  inherited;
+  if LaunchedFromEncounter then begin
+    //NOTE: inherited will have set Self.FFromQuit := true;
+    if assigned(FOnClosing) then FOnClosing(Self,nil);
+  end;
+end;
+
+procedure TfrmODTMG1.SetupLabOrderMsg(SL : TStringList);
+//FORMAT:  SL[0] = Recipient^Recipient^.....
+//         SL[1] = 'T' or 'F' for boolean for FPromptToPrint
+//         SL[2] = MyName
+//         SL[3...] = the usual content of the message.
+//
+var s, MyName, User, LabUser, FastingMsg : string;
+begin
+  if not assigned(SL) then exit;
+  SL.Clear;
+  FastingMsg := IfThen(FFasting, 'FASTING', 'NON-FASTING');
+  //
+  //GET USERS AND PREPARE MESSAGE
+  User := LabOrderMsgRecip('1');
+  if piece(User,'^',1)='-1' then begin
+    ShowMessage('Error getting User Name: '+piece(User,'^',2));
+    exit;
+  end;
+  LabUser := LabOrderMsgRecip('2');
+  if piece(LabUser,'^',1)='-1' then begin
+    ShowMessage('Error getting Lab User Name: '+piece(LabUser,'^',2));
+    exit;
+  end;
+  MyName :=  GetMyName;
+  if MyName='' then begin
+    ShowMessage('Error getting Current User Name');
+    exit;
+  end;
+
+  s := User + '^';
+  if (FLabTimingStr='Today') or (FLabTimingStr='Use lab blood if possible') then begin
+    s := s + LabUser + '^';
+  end;
+  SL.Add(s);       // index 0
+  s := IfThen(FPromptToPrint, 'T','F');
+  SL.Add(s);       // index 1
+  SL.Add(MyName);  // index 2
+
+  SL.Add(MyName+' ORDERED LABS');
+  SL.Add('');
+  SL.Add(Patient.Name);
+  SL.Add('');
+  SL.Add(FastingMsg);
+  SL.Add('');
+  //MessageArr.Add(uppercase(LabTimingMsg));
+  SL.Add(UpperCase(FLabTimingStr));
+end;
 
 constructor TfrmODTMG1.Create(AOwner: TComponent);
 begin
@@ -1546,6 +1648,7 @@ begin
   FPromptToPrint:= false;
   FFasting      := false;
   FLabTimingStr := '';
+  FOnClosing := nil;
 
   inherited;  //<-- I think this may trigger a call to init data etc, so above needs to be done BEFORE inherited
   FOrderFlagFastingIndex := -1;;
@@ -1568,7 +1671,7 @@ begin
   w := tcProcTabs.Width;  //DoSetFontSize(MainFontSize) in inherited messes up width
   inherited;
   tcProcTabs.Width := w;  //restore width
-
+  LaunchedFromEncounter := false;
   SetCustomProcArea(false);
 end;
 

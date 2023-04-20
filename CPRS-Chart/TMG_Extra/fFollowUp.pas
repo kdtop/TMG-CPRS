@@ -40,7 +40,7 @@ type
     edtFreeTxtFU: TEdit;
     DateTimePicker: TDateTimePicker;
     edtGroupFreeTxt: TEdit;
-    edtFUReason: TEdit;       
+    edtFUReason: TEdit;
     edtApptWith: TEdit;
     rgTelemed: TRadioButton;
     rgInOffice: TRadioButton;
@@ -82,6 +82,7 @@ type
     procedure UpdateGroupOutput;
     procedure UpdateRGLocationOutput;
     procedure UpdateNetOutput;
+    procedure SetupFollowUpMsg(SL : TStringList);
   public
     { Public declarations }
     procedure SendData;  //kt
@@ -96,9 +97,40 @@ implementation
 {$R *.dfm}
 
 uses
-  fEncounterFrame, fNotes;
+  fEncounterFrame, fNetworkMessengerClient, fNotes;
 
 const BTN_BACKGROUND_COLOR = $8080FF;  //light red.  was clMaroon;
+
+//===============================================================
+
+procedure SendFollowUpMsg(MessageArr : TStringList);
+//FORMAT:  SL[0] = Recipient^Recipient^.....
+//         SL[1] = MyName
+//         SL[2...] = the usual content of the message.
+//
+var MyName : string;
+    PromptToPrint                     : boolean;
+    Recipients : string;
+    AUser : string;
+    i : integer;
+begin
+  if not Assigned(MessageArr) then exit;
+  if MessageArr.Count<2 then exit;
+  Recipients := MessageArr[0];
+  MyName := MessageArr[1];
+  for i := 1 downto 0 do MessageArr.Delete(i);
+
+  for i := 1 to NumPieces(Recipients,'^') do begin
+    AUser := Piece(Recipients,'^',i);
+    if AUser='' then continue;
+    //Send message to User, and send to lab user if appropriate
+    SendOneMessage(AUser, MyName, MessageArr);
+  end;
+end;
+
+//===============================================================
+
+
 
 constructor TfrmFollowUp.CreateLinked(AParent: TWinControl);
 begin
@@ -465,18 +497,56 @@ begin
   HTMLNetOutput := '';
 end;
 
+procedure TfrmFollowUp.SetupFollowUpMsg(SL : TStringList);
+//FORMAT:  SL[0] = Recipient^Recipient^.....
+//         SL[1] = MyName
+//         SL[3...] = the usual content of the message.
+//
+var s, MyName, User, FastingMsg : string;
+    i : integer;
+begin
+  if not assigned(SL) then exit;
+  SL.Clear;
+
+  //GET USER(S) AND PREPARE MESSAGE
+  User := LabOrderMsgRecip('1');
+  if piece(User,'^',1)='-1' then begin
+    ShowMessage('Error getting User Name: '+piece(User,'^',2));
+    exit;
+  end;
+  MyName :=  GetMyName;
+  if MyName='' then begin
+    ShowMessage('Error getting Current User Name');
+    exit;
+  end;
+
+  s := User + '^';
+  SL.Add(s);       // index 0
+  SL.Add(MyName);  // index 1
+  for i := 0 to memOutput.Lines.Count - 1 do begin
+    SL.Add(memOutput.Lines.Strings[i]);
+  end;
+end;
 
 procedure TfrmFollowUp.SendData;  //kt
 var Tag, InsertStr, Result : string;
+    MessageArr : TStringList;
 begin
-  if not Assigned(frmNotes) then exit;
-  Tag := '[*FOLLOWUP*]';
-  InsertStr := memOutput.Text;
+  InsertStr := Trim(memOutput.Text);
   if InsertStr = '' then exit;
-  InsertStr := '<B>FOLLOW UP APPT:</B>' + InsertStr + '<DIV name="*FOLLOWUP*"></DIV>';
-  Result := frmNotes.WMReplaceHTMLText(Tag,InsertStr);
-  if piece(Result,'^',1) <> '1' then begin
-    MessageDlg(piece(Result,'^',2), mtError, [mbOK], 0);
+  MessageArr := TStringList.Create;
+  try
+    SetupFollowUpMsg(MessageArr);
+    SendFollowUpMsg(MessageArr);
+    if not Assigned(frmNotes) then exit;
+    Tag := '[*FOLLOWUP*]';
+    InsertStr := '<B>FOLLOW UP APPT:</B>' + InsertStr + '<DIV name="*FOLLOWUP*"></DIV>';
+    Result := frmNotes.WMReplaceHTMLText(Tag,InsertStr);
+    if piece(Result,'^',1) <> '1' then begin
+      MessageDlg(piece(Result,'^',2), mtError, [mbOK], 0);
+    end;
+  finally
+    MessageArr.Free;
   end;
 end;
 

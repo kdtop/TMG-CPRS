@@ -258,6 +258,7 @@ type
     property IncludeOIPI: boolean       read FIncludeOIPI  write FIncludeOIPI;
     property IsIMO:boolean              read FIsIMO        write FIsIMO;
     property IsSupply: boolean          read FIsSupply     write FIsSupply;
+    property FromQuit : boolean         read FFromQuit;                             //kt added
   end;
 
 var
@@ -1044,21 +1045,22 @@ var
   QOUDGroup: boolean;
   NewPtEvtPtr: Integer;  // ptr to #100.2
   APtEvtPtr: string;
+
 begin
   //IMOLoc := 0;
   NewPtEvtPtr := 0;
   QOUDGroup := False;
-  if FQuickOrder > 0 then
-  begin
+  if FQuickOrder > 0 then begin
    DlgIEN := FQuickOrder;
    QOUDGroup := CheckQOGroup( IntToStr(FQuickOrder) );
   end;
   AnOrder.EditOf := FEditOrder;  // null if new order, otherwise ORIFN of original order
-  with ConstructOrder do
-  begin
-    if XfInToOutNow then
+  with ConstructOrder do begin
+    if XfInToOutNow then begin
       DialogName := FDialog + '^O'
-    else DialogName := FDialog;
+    end else begin
+      DialogName := FDialog;
+    end;
     LeadText     := FVarLeading;
     TrailText    := FVarTrailing;
     DGroup       := FDisplayGroup;
@@ -1088,50 +1090,42 @@ begin
       end; *)
     //AGP Change 26.51, change logic to set text orders to IMO for outpatients at an outpatient location.
     //AGP Text orders are only treated as IMO if the order display group is a nursing display group
-    if (Patient.Inpatient = False) and (IsValidIMOLoc(encounter.Location,Patient.DFN)=true) and
-       (((pos('OR GXTEXT WORD PROCESSING ORDER',ConstructOrder.DialogName)>0) and (ConstructOrder.DGroup = NurDisp)) or
-       ((ConstructOrder.DialogName = 'OR GXMISC GENERAL') and (ConstructOrder.DGroup = NurDisp)) or
-       ((ConstructOrder.DialogName = 'OR GXTEXT TEXT ONLY ORDER') and (ConstructOrder.DGroup = NurDisp))) and //AGP Change CQ #10757
-      ((FEditOrder = '') and (Self.FEventName = '') and (Self.FCopyOrder = '')) then
-         begin
-            ConstructOrder.IsIMODialog := True;
-            ConstructOrder.DGroup := ClinDisp;
-          end;
+    if (Patient.Inpatient = False) and (IsValidIMOLoc(encounter.Location,Patient.DFN)=true)
+    and ( ((pos('OR GXTEXT WORD PROCESSING ORDER',ConstructOrder.DialogName)>0) and (ConstructOrder.DGroup = NurDisp))
+          or ((ConstructOrder.DialogName = 'OR GXMISC GENERAL') and (ConstructOrder.DGroup = NurDisp))
+          or ((ConstructOrder.DialogName = 'OR GXTEXT TEXT ONLY ORDER') and (ConstructOrder.DGroup = NurDisp)))
+    and ( (FEditOrder = '') and (Self.FEventName = '') and (Self.FCopyOrder = '')) then begin  //AGP Change CQ #10757
+      ConstructOrder.IsIMODialog := True;
+      ConstructOrder.DGroup := ClinDisp;
+    end;
     IsEventDefaultOR := EventDefaultOD;
-    if IsUDGroup or QOUDGroup then
-    begin
-      for i := 0 to FResponseList.Count - 1 do
-       if UpperCase(TResponse(FResponseList.Items[i]).PromptID) = 'PICKUP' then
-       begin
+    if IsUDGroup or QOUDGroup then begin
+      for i := 0 to FResponseList.Count - 1 do begin
+        if UpperCase(TResponse(FResponseList.Items[i]).PromptID) = 'PICKUP' then begin
           FResponseList.Delete(i);
           Break;
-       end;
+        end;
+      end;
     end;
 
     if SaveAsCurrent then
       ConstructOrder.DelayEvent := #0;
 
     ResponseList := FResponseList;
-    if (FEventIFN>0) and (EventExist(Patient.DFN, FEventIFN)>0) then
-    begin
+    if (FEventIFN>0) and (EventExist(Patient.DFN, FEventIFN)>0) then begin
       APtEvtPtr   := IntToStr(EventExist(Patient.DFN, FEventIFN));
       PTEventPtr  := APtEvtPtr;
       //PutNewOrder(AnOrder, ConstructOrder, OrderSource, IMOLoc);
       PutNewOrder(AnOrder, ConstructOrder, OrderSource);
-      if not SaveAsCurrent then
-      begin
+      if not SaveAsCurrent then begin
         AnOrder.EventPtr  := PTEventPtr;
         AnOrder.EventName := 'Delayed ' + MixedCase(Piece(EventInfo(APtEvtPtr),'^',4));
       end;
-    end
-    else
-    begin
+    end else begin
       //PutNewOrder(AnOrder, ConstructOrder, OrderSource, IMOLoc);
-      PutNewOrder(AnOrder, ConstructOrder, OrderSource);
-      if not SaveAsCurrent then
-      begin
-        if (FEventIFN > 0) and (FParentEvent.ParentIFN > 0) then
-        begin
+      PutNewOrder(AnOrder, ConstructOrder, OrderSource);     //RPC call to save to server  //kt
+      if not SaveAsCurrent then begin
+        if (FEventIFN > 0) and (FParentEvent.ParentIFN > 0) then begin
           {For a child event, create a parent event in 100.2 first}
           SaveEvtForOrder(Patient.DFN, FParentEvent.ParentIFN, AnOrder.ID);
           NewPtEvtPtr := EventExist(Patient.DFN, FParentEvent.ParentIFN);
@@ -1140,20 +1134,15 @@ begin
           {Then create the child event in 100.2}
           SaveEvtForOrder(Patient.DFN, FEventIFN, '');
           NewPtEvtPtr := EventExist(Patient.DFN, FEventIFN);
-        end
-        else if (FEventIFN > 0) and (FParentEvent.ParentIFN = 0) then
-        begin
+        end else if (FEventIFN > 0) and (FParentEvent.ParentIFN = 0) then begin
           SaveEvtForOrder(Patient.DFN, FEventIFN, AnOrder.ID);
           NewPtEvtPtr := EventExist(Patient.DFN, FEventIFN);
           AnOrder.EventPtr := IntToStr(NewPtEvtPtr);
           AnOrder.EventName := 'Delayed ' + MixedCase(Piece(EventInfo(IntToStr(NewPtEvtPtr)),'^',4));
         end;
-        if FEventIFN > 0 then
-        begin
-          for j := 1 to frmOrders.lstSheets.Items.Count - 1 do
-          begin
-            if FEventIFN = StrToInt( Piece(Piece(frmOrders.lstSheets.Items[j],'^',1),';',1) ) then
-            begin
+        if FEventIFN > 0 then begin
+          for j := 1 to frmOrders.lstSheets.Items.Count - 1 do begin
+            if FEventIFN = StrToInt( Piece(Piece(frmOrders.lstSheets.Items[j],'^',1),';',1) ) then begin
               frmOrders.lstSheets.Items[j] := IntToStr( NewPtEvtPtr) + '^' + Piece(frmOrders.lstSheets.Items[j],'^',2);
               frmOrders.lstSheets.ItemIndex := j;
             end;
@@ -1165,8 +1154,7 @@ begin
   end;
   AnOrder.EditOf := FEditOrder;
 {Begin BillingAware}
-  if  rpcGetBAMasterSwStatus then
-  begin
+  if  rpcGetBAMasterSwStatus then begin
      UBAGlobals.BAOrderID := '';
      UBAGlobals.BAOrderID := AnOrder.ID;
   end;
@@ -1579,32 +1567,27 @@ begin
   Result := True;
   IsDelayOrder := False;
   Validate(ErrMsg);
-  if Length(ErrMsg) > 0 then
-  begin
+  if Length(ErrMsg) > 0 then begin
     InfoBox(TX_NO_SAVE + ErrMsg, TX_NO_SAVE_CAP, MB_OK);
     Result := False;
     Exit;
   end;
-  if not AcceptOrderChecks then
-  begin
+  if not AcceptOrderChecks then begin
     //added code to shut CPRS down without access violations if the fOCAccept is open when timing out.
-    if frmFrame.TimedOut then
-      begin
-         Result := False;
-         Exit;
-      end;
-    if AskAnotherOrder(DialogIEN) then
-        InitDialog           // ClearDialogControls is in InitDialog
-      else
-        begin
-          ClearDialogControls;    // to allow form to close without prompting to save order
-          Close;
-        end;
+    if frmFrame.TimedOut then begin
+      Result := False;
+      Exit;
+    end;
+    if AskAnotherOrder(DialogIEN) then begin
+      InitDialog           // ClearDialogControls is in InitDialog
+    end else begin
+      ClearDialogControls;    // to allow form to close without prompting to save order
+      Close;
+    end;
     Result := False;
     Exit;
   end;
-  if FTestMode then
-  begin
+  if FTestMode then begin
     Result := False;
     Exit;
   end;
@@ -1614,36 +1597,36 @@ begin
 
   Responses.SaveOrder(NewOrder, DialogIEN, FIsIMO);
 
-  if frmOrders.IsDefaultDlg then
-  begin
+  if frmOrders.IsDefaultDlg then begin
     frmOrders.EventDefaultOrder := NewOrder.ID;
     frmOrders.EvtOrderList.Add(NewOrder.EventPtr + '^' + NewOrder.ID);
     frmOrders.IsDefaultDlg := False;
   end;
   if Length(DfltCopay)>0 then SetDefaultCoPayToNewOrder(NewOrder.ID, DfltCopay);
-  if (Length(FEvtName)>0) then
-  begin
+  if (Length(FEvtName)>0) then begin
     NewOrder.EventName := 'Delayed ' + MixedCase(FEvtName);
     FEvtName := '';
   end;
-  if not ProcessOrderAcceptEventHook(NewOrder.ID, NewOrder.DGroup) then
-  begin
-    if NewOrder.ID <> '' then
-    begin
-      if (Encounter.Provider = User.DUZ) and User.CanSignOrders
-        then CanSign := CH_SIGN_YES
-        else CanSign := CH_SIGN_NA;
+  if not ProcessOrderAcceptEventHook(NewOrder.ID, NewOrder.DGroup) then begin
+    if NewOrder.ID <> '' then begin
+      if (Encounter.Provider = User.DUZ) and User.CanSignOrders then begin
+        CanSign := CH_SIGN_YES;
+      end else begin
+        CanSign := CH_SIGN_NA;
+      end;
       if NewOrder.Signature = OSS_NOT_REQUIRE then CanSign := CH_SIGN_NA;
-      if (NewOrder.EventPtr <> '') and (GetEventDefaultDlg(responses.FEventIFN) <> InttoStr(Responses.QuickOrder)) then
-          IsDelayOrder := True;
+      if (NewOrder.EventPtr <> '') and (GetEventDefaultDlg(responses.FEventIFN) <> InttoStr(Responses.QuickOrder)) then begin
+        IsDelayOrder := True;
+      end;
       Changes.Add(CH_ORD, NewOrder.ID, NewOrder.Text, Responses.FViewName, CanSign,'',0, NewOrder.DGroupName, False, IsDelayOrder);
 
-    UBAGlobals.TargetOrderID := NewOrder.ID;
+      UBAGlobals.TargetOrderID := NewOrder.ID;
 
       if Responses.EditOrder = '' then OrderAction := ORDER_NEW else OrderAction := ORDER_EDIT;
       SendMessage(Application.MainForm.Handle, UM_NEWORDER, OrderAction, Integer(NewOrder));
-    end
-    else InfoBox(TX_SAVE_ERR, TX_NO_SAVE_CAP, MB_OK);
+    end else begin
+      InfoBox(TX_SAVE_ERR, TX_NO_SAVE_CAP, MB_OK);
+    end;
   end;
   NewOrder.Free;      // free here - recieving forms should get own copy using assign
 end;
@@ -1665,41 +1648,36 @@ var
   alreadyClosed: boolean;
   LateTrayFields: TLateTrayFields;
   x, CxMsg: string;
+
 begin
   FAcceptOK := False;
   CIDCOkToSave := False;
   alreadyClosed := False;
   self.Responses.Cancel := False;
   if chkCopyWhenAccepted.checked then Clipboard.AsText := memOrder.Lines.Text;  //elh  2/12/18
-  if frmOrders <> nil then
-  begin
-    if (frmOrders.TheCurrentView <> nil) and (frmOrders.TheCurrentView.EventDelay.PtEventIFN>0) and IsCompletedPtEvt(frmOrders.TheCurrentView.EventDelay.PtEventIFN) then
-    begin
+  if frmOrders <> nil then begin
+    if (frmOrders.TheCurrentView <> nil)
+    and (frmOrders.TheCurrentView.EventDelay.PtEventIFN>0)
+    and IsCompletedPtEvt(frmOrders.TheCurrentView.EventDelay.PtEventIFN) then begin
       theGrpName := 'Delayed ' + frmOrders.TheCurrentView.EventDelay.EventName;
       SaveAsCurrent := True;
     end;
   end;
 
   // check for diet orders that will be auto-DCd because of start/stop overlaps
-  if Responses.Dialog = 'FHW1' then
-  begin
-    if (Self.EvtID <> 0) then
-    begin
+  if Responses.Dialog = 'FHW1' then begin
+    if (Self.EvtID <> 0) then begin
       CheckForAutoDCDietOrders(Self.EvtID, Self.DisplayGroup, '', CxMsg, cmdAccept);
-      if CxMsg <> '' then
-      begin
+      if CxMsg <> '' then begin
         if InfoBox(CxMsg + CRLF + CRLF +
            'Have you done either of the above?', 'Possible delayed order conflict',
            MB_ICONWARNING or MB_YESNO) = ID_NO
-           then exit;
+        then exit;
       end;
-    end
-    else if FAutoAccept then
-    begin
+    end else if FAutoAccept then begin
       x := CurrentDietText;
       CheckForAutoDCDietOrders(0, Self.DisplayGroup, x, CxMsg, nil);
-      if CxMsg <> '' then
-      begin
+      if CxMsg <> '' then begin
         if InfoBox(CxMsg + CRLF +
                   'Are you sure?', 'Confirm', MB_ICONWARNING or MB_YESNO) = ID_NO then
         begin
@@ -1712,36 +1690,32 @@ begin
     end;
   end;
 
-  if ValidSave then
-  begin
+  if ValidSave then begin
     FAcceptOK := True;
     CIDCOkToSave := True;
-    with Responses do
-      if not FAutoAccept and (CopyOrder = '') and (EditOrder = '') and (TransferOrder = '')
-        and AskAnotherOrder(DialogIEN)
-        then InitDialog           // ClearDialogControls is in InitDialog
-        else
-        begin
-          LateTrayFields.LateMeal := #0;
-          with Responses do
-            if FAutoAccept and ((Dialog = 'FHW1') or (Dialog = 'FHW OP MEAL') or (Dialog ='FHW SPECIAL MEAL')) then
-            begin
-              LateTrayCheck(Responses, Self.EvtID, not OrderForInpatient, LateTrayFields);
-            end;
-          ClearDialogControls;    // to allow form to close without prompting to save order
-          with LateTrayFields do if LateMeal <> #0 then LateTrayOrder(LateTrayFields, OrderForInpatient);
-          Close;
-          alreadyClosed := True;
+    with Responses do begin
+      if not FAutoAccept and (CopyOrder = '')
+      and (EditOrder = '') and (TransferOrder = '')
+      and AskAnotherOrder(DialogIEN) then begin
+        InitDialog;           // ClearDialogControls is in InitDialog
+      end else begin
+        LateTrayFields.LateMeal := #0;
+        with Responses do begin
+          if FAutoAccept and ((Dialog = 'FHW1') or (Dialog = 'FHW OP MEAL') or (Dialog ='FHW SPECIAL MEAL')) then begin
+            LateTrayCheck(Responses, Self.EvtID, not OrderForInpatient, LateTrayFields);
+          end;
         end;
-    if NoFresh then
-    begin
-      if SaveAsCurrent then
-      begin
+        ClearDialogControls;    // to allow form to close without prompting to save order
+        with LateTrayFields do if LateMeal <> #0 then LateTrayOrder(LateTrayFields, OrderForInpatient);
+        Close;
+        alreadyClosed := True;
+      end;
+    end;
+    if NoFresh then begin
+      if SaveAsCurrent then begin
         SaveAsCurrent := False;
-        with Responses do
-        begin
-          if not alreadyClosed then
-          begin
+        with Responses do begin
+          if not alreadyClosed then begin
             ClearDialogControls;
             Close;
           end;
@@ -1749,15 +1723,11 @@ begin
         frmOrders.GroupChangesUpdate(theGrpName);
         Exit;
       end;
-    end else
-    begin
-      if SaveAsCurrent then
-      begin
+    end else begin
+      if SaveAsCurrent then begin
         SaveAsCurrent := False;
-        with Responses do
-        begin
-          if not alreadyClosed then
-          begin
+        with Responses do begin
+          if not alreadyClosed then begin
             ClearDialogControls;
             Close;
           end;
@@ -1768,8 +1738,9 @@ begin
       end;
     end
   end; {if ValidSave}
-  if SaveAsCurrent then
+  if SaveAsCurrent then begin
     SaveAsCurrent := False;
+  end;
 end;
 
 procedure TfrmODBase.cmdQuitClick(Sender: TObject);

@@ -8,7 +8,7 @@ uses
   {fVisitType,} fDiagnoses, {fProcedure,} fImmunization, fSkinTest, fPatientEd,
   fHealthFactor, fExam, uPCE, rPCE, rTIU, ORCtrls, ORFn, fEncVitals, rvitals, fBase508Form,
   fFollowUp,
-  fTMGDiagnoses, fTMGProcedure, fTMGVisitType, //kt
+  fTMGDiagnoses, fTMGProcedure, fTMGVisitType, rOrders, //kt
   VA508AccessibilityManager;
 
 const
@@ -22,7 +22,7 @@ const
   CT_VitNm          = 'Vitals';
   CT_GAFNm          = 'GAF';
   CT_TMG_FolwUpNm   = 'Follow Up';  //kt added
-  CT_TMG_EnctrMDMNm = 'MDM';        //kt added  
+  CT_TMG_EnctrMDMNm = 'MDM';        //kt added
   CT_TMG_LabsNm     = 'Labs';       //kt added
   CT_TMG_DiagNm     = 'Dx''s';      //kt added
   CT_TMG_ProcNm     = 'Procedures'; //kt added, was CT_ProcNm
@@ -93,6 +93,7 @@ type
     FLastPage: TfrmPCEBase;
     FGiveMultiTabMessage: boolean;
     PCEData: TPCEData;  //kt added.  Pointer to object owned elsewhere.
+    FInitialPageIndex : integer;
     procedure CreateChildForms(Sender: TObject; Location: integer);
     procedure SynchPCEData(SrcPCEData :TPCEData);  //kt added SrcPCEData parameter
     procedure SwitchToPage(NewForm: TfrmPCEBase);   //was tfrmPage
@@ -111,6 +112,7 @@ type
     procedure SelectTab(NewTabName: string);
     procedure SelectNextTab; //kt added 2/1/23
     procedure Initialize(SrcPCEData : TPCEData; InitialPageIndex : byte = 0);  //kt added
+    procedure NotifyOrder(OrderAction: Integer; AnOrder: TOrder);    //kt added
     property ChangeSource:    Integer read FChangeSource;
     property Forms:           tstringlist read FormList;
     property Cancel:          Boolean read FCancel write FCancel;
@@ -137,8 +139,8 @@ uses
   uCore,
   fGAF, uConst,
   fEncounterMDM,  //kt
-
-  rCore, fPCEProvider, rMisc, VA508AccessibilityRouter, VAUtils, fEncounterLabs;
+  rCore, fPCEProvider, rMisc, VA508AccessibilityRouter, VAUtils, fEncounterLabs,
+  fNotes;  //kt
 
 {$R *.DFM}
 
@@ -199,18 +201,19 @@ begin
     frmEncounterFrame.ShowModal;
     Result := frmEncounterFrame.SaveNeeded;   //was FSaveNeeded
     //kt NOTE: When frmEncounterFrame is closed (i.e. when ShowModal returns)
-    //         then PCE data is typically saved.  If it is NOT saved, then
-    //         .SaveNeeded set to true.  HOWEVER, after the form is released,
-    //         any data saved in the form will be lost, so I'm not sure how it
-    //         can later be saved.  Must be some aspect of this I don't understand...
-    //  The data that gets saved is actually uEncPCEData, a globally scoped variable.
+    //         then PCE data is typically saved in FormCloseQuery()
+    //         If it is NOT saved, then .SaveNeeded set to true.
+    //         HOWEVER, after the form is released, any data saved in the form
+    //         will be lost, so I'm not sure how it can later be saved.
+    //         Must be some aspect of this I don't understand...
+    //  The data that gets saved is actually uEncPCEData, a globally scoped pointer
+    //    variable, which is set to the SrcPCEData that is passed into this UpdatePCE()
     //    So must be that the data is stored there, not in frmEncounterFrame,
     //    and so not lost when form is closed.
-    //  Actually, uEncPCEData is a globally scoped pointer that is set to
-    //     the SrcPCEData that is passed into this UpdatePCE()
 
   finally
-    frmEncounterFrame.Release;
+    //kt frmEncounterFrame.Release;
+    FreeAndNil(frmEncounterFrame);  //kt I want to make sure that frmEncounterFrame is nil when not active.
   end;
 end;
 
@@ -304,13 +307,15 @@ end;
 //Description: Loads Formlist with the forms to create, will be replaced by RPC call.
 ///////////////////////////////////////////////////////////////////////////////}
 procedure TfrmEncounterFrame.LoadFormList(Location: integer);
+var EditingNote : boolean;
 begin
   //change this to an RPC in RPCE.pas
   //NOTE: The order of entry here will determine order of tabs displayed.
+  EditingNote := frmNotes.EditingNoteSelected;
   FormList.clear;
-  FormList.add(CT_TMG_FolwUpNm);   //kt added
-  FormList.add(CT_TMG_LabsNm);     //kt added
-  FormList.add(CT_TMG_EnctrMDMNm); //kt added
+  if EditingNote then FormList.add(CT_TMG_FolwUpNm);   //kt added
+  if EditingNote then FormList.add(CT_TMG_LabsNm);     //kt added
+  if EditingNote then FormList.add(CT_TMG_EnctrMDMNm); //kt added
   FormList.add(CT_TMG_VisitNm);    //kt added   was FormList.add(CT_VisitNm);
   FormList.add(CT_TMG_DiagNm);     //kt added   was FormList.add(CT_DiagNm);
   FormList.add(CT_TMG_ProcNm);     //kt added   was FormList.add(CT_ProcNm);
@@ -582,10 +587,14 @@ begin
   //SetFormPosition(self);
 
   SetRPCEncLocation(SrcPCEData.Location);
-  SynchPCEData(SrcPCEData);
+  SynchPCEData(SrcPCEData);  //kt: This is PCE data -> GUI form
 
-  TabControl.Tabindex := InitialPageIndex;
-  TabControlChange(Self.TabControl);
+  FInitialPageIndex := InitialPageIndex;
+
+  //NOTE: Initialize is called before ShowModal.  So at this point form has not been shown.
+  //  Lines below attempt to set focus and this causes problems.  Moving to OnShow.
+  //TabControl.Tabindex := InitialPageIndex;
+  //TabControlChange(Self.TabControl);
 end;
 
 
@@ -603,6 +612,7 @@ begin
   //kt uVisitType := TPCEProc.create;
   //uVitalOld  := TStringList.create;
   //uVitalNew  := TStringList.create;
+  FLastPage := nil; //kt
   FormList := TStringList.create;
   fCancel := False;
   FAbort := TRUE;
@@ -662,6 +672,7 @@ begin
   if FormListContains(CT_TMG_FolwUpNm)   then frmFollowUp.SendData;      //kt added.
   if FormListContains(CT_TMG_LabsNm)     then frmEnounterLabs.SendData;  //kt added.
   if FormListContains(CT_TMG_EnctrMDMNm) then frmEncounterMDM.SendData;  //kt added.
+  if FormListContains(CT_TMG_DiagNm)     then frmTMGDiagnoses.SendData;  //kt added.
 
   //PCE
 
@@ -708,6 +719,17 @@ var
 begin
   CanClose := True;
   if FAbort then FCancel := (InfoBox(TXT_SAVECHANGES, TXT_SAVECHANGES, MB_YESNO) = ID_NO);
+
+  //kt added
+  if CanClose and FormListContains(CT_TMG_LabsNm) then begin
+    CanClose := frmEnounterLabs.OK2Close(FCancel);
+    if not CanClose then begin
+      tabPageChange(Self, FormList.IndexOf(CT_TMG_LabsNm), ChangeOK);
+      SwitchToPage(PageIDToForm(CT_TMG_LABS));
+      TabControl.TabIndex := FormList.IndexOf(CT_TMG_LabsNm);
+    end;
+  end;
+
   if FCancel then Exit;  //*KCM*
 
   if(uProviders.PrimaryIdx >= 0) then begin
@@ -897,6 +919,15 @@ begin
   //kt if FormListContains(CT_VisitNm)   then frmVisitType.Font.Size := NewFontSize;
 end;
 
+procedure TfrmEncounterFrame.NotifyOrder(OrderAction: Integer; AnOrder: TOrder);
+//kt added
+//NOTE: This gets called from fFrame.  When an arder is created, a windows message is sent out
+//      that is handled in TfrmFrame.UMNewOrder(var Message: TMessage);
+begin
+  if FormListContains(CT_TMG_LabsNm) then frmEnounterLabs.NotifyOrder(OrderAction, AnOrder);
+end;
+
+
 procedure TfrmEncounterFrame.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   SaveUserBounds(Self);
@@ -914,9 +945,16 @@ end;
 procedure TfrmEncounterFrame.FormShow(Sender: TObject);
 begin
   inherited;
+
+  TabControl.Tabindex := FInitialPageIndex;  //kt added
+  TabControlChange(Self.TabControl);         //kt added
+
+  //kt I think below is redundant.  
   if TabControl.CanFocus then begin
     TabControl.SetFocus;
   end;
 end;
 
+initialization
+  frmEncounterFrame := nil; //kt
 end.

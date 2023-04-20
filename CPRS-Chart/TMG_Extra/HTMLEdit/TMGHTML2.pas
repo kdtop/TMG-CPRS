@@ -617,6 +617,31 @@ procedure THtmlObj.PasteEvent(Sender : TObject; var AllowPaste : boolean);
    //    it sends the HTML to the server to alter as needed then inserts it
    //    into the note
 
+      procedure TMGLocalBackup(Text : TStrings;FileName : string);
+      //kt added entire function 10/12/16
+      //Note: TfrmImages.EmptyCache() will delete all these files when CPRS exits normally.
+      var SL : TStringList;
+          BackupDir, NowStr : string;
+          i : integer;
+      begin
+        NowStr := DateTimeToStr(Now);
+        NowStr := StringReplace(NowStr,'/','-', [rfReplaceAll]);
+        NowStr := StringReplace(NowStr,':','-', [rfReplaceAll]);
+        NowStr := StringReplace(NowStr,' ','_', [rfReplaceAll]);
+        SL := TStringList.Create;
+        SL.Add('Backup: ' + NowStr);
+        SL.Add('== TEXT ===');
+        for i := 0 to Text.Count-1 do begin
+          SL.Add(Text.Strings[i]);
+        end;
+        SL.Add('== END TEXT ===');
+        BackupDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
+        if not DirectoryExists(BackupDir) then CreateDir(BackupDir);
+        Filename := BackupDir + '\' + FileName + NowStr+'.txt';
+        SL.SaveToFile(Filename);
+        SL.Free;
+      end;
+
       function StripOutNonAscii(const s: string): string;
       var
         i, Count: Integer;
@@ -677,6 +702,9 @@ begin
    HTMLArray := TStringList.Create;
    StrToStringList(HTML,HTMLArray,100);
    TrimmedHTML := TStringList.create;
+   if uTMGOptions.ReadBool('SavePastedHTMLLocal',false)=True then begin
+     TMGLocalBackup(HTMLArray,'PASTE BACKUP-');
+   end;
    //HTML := sCallV('TMG CPRS HTML PASTE EVENT',[HTMLArray]);
    tCallV(TrimmedHTML,'TMG CPRS HTML PASTE EVENT',[HTMLArray]);
    InsertHTMLAtCaret(TrimmedHTML.text);

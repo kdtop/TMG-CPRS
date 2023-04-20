@@ -4,6 +4,7 @@ inherited frmODTMG1: TfrmODTMG1
   Caption = 'TMG Lab / Procedure Orders'
   Constraints.MinHeight = 700
   Constraints.MinWidth = 520
+  ExplicitTop = -93
   ExplicitWidth = 520
   ExplicitHeight = 700
   PixelsPerInch = 96

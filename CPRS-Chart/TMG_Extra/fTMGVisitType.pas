@@ -9,7 +9,7 @@ unit fTMGVisitType;    //<--- note: would ideally be renamed to fTMGVisitTypes (
 {
 NOTE: This form is for dealing with E/M codes, which are a subset of all CPT codes.
       Fundamentally, this form could be an exact copy of fTMGProcedure, because they
-      really do the same thing.  However, because I the VA fVisitTypes form treated
+      really do the same thing.  However, because the VA fVisitTypes form treated
       visits differently, I started out there, and worked towards fTMGProcedures, and
       ended up with this form.
       The fundamental difference is that every time data is written to lbGrid, which
@@ -167,37 +167,66 @@ var i,j : integer;
     OneCPT : string;
     countStr : string;
     count : integer;
-    data : string;
+    //data : string;
     x : string;
+    Data,AddData : TDataStr;
+
+const
+  FORMAT_PotentialVisitCodes = 'CPT^Category^CPTLongName';
+  FORMAT_VisitTypesList      = 'Type^CPT^Category^Narrative^Quant^Provider^Modifiers^Comment';
 begin
-  for i := 0 to List.Count - 1 do begin
-    OneCPT := List.Strings[i];
-    countStr := piece(OneCPT,'x',2);
-    if countStr <> '' then begin
-      count := StrToIntDef(countStr,0);
-      OneCPT := piece(OneCPT,'x',1);
-    end else begin
-      count := 0;
+  Data := TDataStr.Create(FORMAT_PotentialVisitCodes);
+  AddData := TDataStr.Create(FORMAT_VisitTypesList);
+  try
+    for i := 0 to List.Count - 1 do begin
+      OneCPT := List.Strings[i];
+      countStr := piece(OneCPT,'x',2);
+      if countStr <> '' then begin
+        count := StrToIntDef(countStr,0);
+        OneCPT := piece(OneCPT,'x',1);
+      end else begin
+        count := 0;
+      end;
+      for j := 0 to FListOfPotentialVisitCodes.Count - 1 do begin
+        Data.DataStr := FListOfPotentialVisitCodes.Strings[j];  //format e.g.: '99202^NEW PATIENT^Limited Exam        16-25 Min'
+        //data := FListOfPotentialVisitCodes.Strings[j];  //format e.g.: '99202^NEW PATIENT^Limited Exam        16-25 Min'
+        if Data.Value['CPT'] <> OneCPT then continue;
+        //if piece(data,U,1) <> OneCPT then continue;
+
+        //set up x. Format: TYP ^ Code ^ Category ^ Narrative ^ Qty ^ Prov
+        //  piece  1  -> Type <-- NOTE: not used
+        //         2  -> Code
+        //         3  -> Category
+        //         4  -> Narrative
+        //         5  -> Quantity
+        //         6  -> Provider
+        //         9  -> Modifiers
+        //         10 -> Comment
+        //
+        //x :=  'CPT' + U +      Pieces(data, U, 1, 3)   + U + IntToStr(count) + U + IntToStr(User.DUZ);
+        //
+        //e.g  CPT    ^       99202            ^        NEW PATIENT        ^       Limited Exam            ^        0           ^      168
+        //x :=  'CPT' + U +  Data.Value['CPT'] + U +Data.Value['Category'] + U + Data.Value['CPTLongName'] + U + IntToStr(count) + U + IntToStr(User.DUZ);
+        //FVisitTypesList.EnsureFromString(x); //Format: TYP ^ Code ^ Category ^ Narrative ^ Qty ^ Prov
+
+        AddData.Clear; AddData.FormatStr := FORMAT_VisitTypesList;
+        AddData.Value['Type']      := 'CPT';
+        AddData.Value['CPT']       := Data.Value['CPT'];
+        AddData.Value['Category']  := Data.Value['Category'];
+        AddData.Value['Narrative'] := Data.Value['CPTLongName'];
+        AddData.Value['Quant']     := IntToStr(count);
+        AddData.Value['Provider']  := IntToStr(User.DUZ);
+        AddData.Value['Modifiers'] := '';
+        AddData.Value['Comment']   := '';
+        FVisitTypesList.EnsureFromString(AddData.DataStr); //Format: TYP ^ Code ^ Category ^ Narrative ^ Qty ^ Prov
+        Data2Grid;
+        break;
+      end;
     end;
-    for j := 0 to FListOfPotentialVisitCodes.Count - 1 do begin
-      data := FListOfPotentialVisitCodes.Strings[j];  //format e.g.: '99202^NEW PATIENT^Limited Exam        16-25 Min'
-      if piece(data,U,1) <> OneCPT then continue;
-      //set up x. Format: TYP ^ Code ^ Category ^ Narrative ^ Qty ^ Prov
-      //  piece  1  -> Type <-- NOTE: not used
-      //         2  -> Code
-      //         3  -> Category
-      //         4  -> Narrative
-      //         5  -> Quantity
-      //         6  -> Provider
-      //         9  -> Modifiers
-      //         10 -> Comment
-      //
-      //e.g  CPT    ^   99202^NEW PATIENT^Limited Exam ^          0          ^      168
-      x :=  'CPT' + U +      Pieces(data, U, 1, 3)   + U + IntToStr(count) + U + IntToStr(User.DUZ);
-      FVisitTypesList.EnsureFromString(x);
-      Data2Grid;
-      break;
-    end;
+    CheckOffEntries;
+  finally
+    Data.Free;
+    AddData.Free;
   end;
 end;
 
@@ -290,6 +319,7 @@ begin
     AProc := FVisitTypesList.Proc[i];
     ACopiedProc := TPCEProc.Create;
     ACopiedProc.Assign(AProc);
+    if Trim(ACopiedProc.Narrative) = '' then ACopiedProc.Narrative := '???';
     lbGrid.Items.AddObject(ACopiedProc.Narrative, ACopiedProc);
   end;
 end;

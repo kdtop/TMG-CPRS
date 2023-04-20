@@ -1,12 +1,12 @@
 inherited frmTMGDiagnoses: TfrmTMGDiagnoses
   Left = 304
   Top = 169
-  Width = 660
-  Height = 433
+  Width = 674
+  Height = 436
   AutoScroll = True
   Caption = 'Encounter Diagnoses'
-  ExplicitWidth = 660
-  ExplicitHeight = 433
+  ExplicitWidth = 674
+  ExplicitHeight = 436
   PixelsPerInch = 96
   TextHeight = 13
   inherited lblSection: TLabel
@@ -37,26 +37,26 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
     Margins.Bottom = 5
   end
   inherited btnOK: TBitBtn
-    Left = 484
-    Top = 371
+    Left = 498
+    Top = 374
     Margins.Left = 7
     Margins.Top = 7
     Margins.Right = 7
     Margins.Bottom = 7
     TabOrder = 7
-    ExplicitLeft = 480
-    ExplicitTop = 377
+    ExplicitLeft = 498
+    ExplicitTop = 374
   end
   inherited btnCancel: TBitBtn
-    Left = 564
-    Top = 371
+    Left = 578
+    Top = 374
     Margins.Left = 7
     Margins.Top = 7
     Margins.Right = 7
     Margins.Bottom = 7
     TabOrder = 8
-    ExplicitLeft = 560
-    ExplicitTop = 377
+    ExplicitLeft = 578
+    ExplicitTop = 374
   end
   inherited pnlGrid: TPanel
     Width = 523
@@ -113,9 +113,9 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
     TabOrder = 3
     ExplicitLeft = 10
   end
-  object cmdDiagPrimary: TButton [8]
-    Left = 536
-    Top = 306
+  object cmdDiagPrimary: TBitBtn [8]
+    Left = 532
+    Top = 304
     Width = 75
     Height = 21
     Margins.Left = 4
@@ -126,6 +126,33 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
     Enabled = False
     TabOrder = 5
     OnClick = cmdDiagPrimaryClick
+    Glyph.Data = {
+      36030000424D3603000000000000360000002800000010000000100000000100
+      18000000000000030000120B0000120B00000000000000000000FFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF3830EFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEAE9FDF2F1FEFFFFFFFFFFFFFE
+      FFFF3830EFFFFFFFFFFFFFFFFFFFEFEEFEF3F2FEFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFF1F0FE4E48F17DBDF743FAF513F9F13830EF19F9F255FBF68FBDF75750
+      F2FCFCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDCFEFD3A5FF03830EF2F79F020
+      EDF31EFAF320EDF32E7AF03830EF4678F2F2FFFEFFFFFFFFFFFFFFFFFFFFFFFF
+      E9FEFE46FAF53599F23830EF3830EF3745F0359FF23745F03830EF3830EF33B2
+      F264FBF7FBFFFF473FF03830EFFFFFFF81FCF847FBF544D4F43830EF3830EF38
+      30EF3830EF3830EF3830EF3832EF44ECF53830EF3830EFACA8F8C6C4FA615FF2
+      3830EF5CFBF65BFAF63C45F03830EF3830EF3830EF3830EF3830EF405EF15AFB
+      F63830EF70FCF7FFFFFFFFFFFFCEFEFC70FCF770FCF759A8F43934EF3830EF38
+      30EF3830EF3830EF3830EF3A38EF5CB8F46EFCF76DFCF7F0FFFEFFFFFFCEFEFC
+      83F8F85482F23830EF3830EF3830EF3830EF3830EF3830EF3830EF3830EF3932
+      EF5897F381FBF8ECFFFEFFFFFFD2EDFC4B61F13830EF3830EF3830EF3830EF38
+      30EF3830EF3830EF3830EF3830EF3830EF3830EF5977F2F3F9FFFFFFFFBCBCFA
+      5E7AF3474FF04048F0424EF04046F03830EF3830EF3830EF4147F0444FF0434A
+      F04857F181A1F6CFCDFBFFFFFFFFFFFFDDFEFDADFDFA88FCF87FFBF765B3F438
+      30EF3830EF3831EF77DBF575CFF4A1FCF9B2FCFAECFEFEFFFFFFFFFFFFFFFFFF
+      FEFFFFDEFEFE3830EF3830EF97F6F74041F03830EF4E61F096FAF7BCFDFA3830
+      EFE6FEFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF3830EF3830EFDFFDFDDFFDFD6C
+      6DF33830EF888EF6E7FEFEE8FEFEF3FFFE3830EFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFF3830EFFFFFFFFEFFFFFBFFFFE5E7FD524CF1F7FCFFFBFFFFFEFFFFFFFF
+      FFFFFFFF3830EFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFD7D6FCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
   end
   object ckbDiagProb: TCheckBox [9]
     Left = 535
@@ -143,7 +170,7 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
   end
   object BitBtn1: TBitBtn [10]
     Left = 8
-    Top = 369
+    Top = 372
     Width = 20
     Height = 20
     Anchors = [akLeft, akBottom]
@@ -192,10 +219,9 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
       070C171112000707070707070707070707070C17000E00070707070707070707
       0707070F170D10000707070707070707070707070F17150B0707070707070707
       07070707070F1007070707070707070707070707070707070707}
-    ExplicitTop = 375
   end
   object btnSearch: TBitBtn [11]
-    Left = 618
+    Left = 632
     Top = 1
     Width = 18
     Height = 18
@@ -226,18 +252,18 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
   object edtSearchTerms: TEdit [12]
     Left = 288
     Top = 1
-    Width = 305
+    Width = 319
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 12
     OnChange = edtSearchTermsChange
   end
   object btnClearSrch: TBitBtn [13]
-    Left = 596
+    Left = 610
     Top = 1
     Width = 18
     Height = 18
-    Anchors = [akRight, akBottom]
+    Anchors = [akTop, akRight]
     TabOrder = 13
     OnClick = btnClearSrchClick
     Glyph.Data = {
@@ -276,35 +302,47 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
       ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
       80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
   end
-  inherited btnRemove: TButton
+  inherited btnRemove: TBitBtn
+    Left = 397
+    Top = 374
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
+    Anchors = [akLeft, akBottom]
     TabOrder = 6
+    ExplicitLeft = 397
+    ExplicitTop = 374
   end
-  inherited btnSelectAll: TButton
-    Left = 454
+  inherited btnSelectAll: TBitBtn
+    Left = 288
+    Top = 374
+    Width = 99
+    Height = 21
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
+    Anchors = [akLeft, akBottom]
     TabOrder = 2
     TabStop = True
-    ExplicitLeft = 454
+    ExplicitLeft = 288
+    ExplicitTop = 374
+    ExplicitWidth = 99
+    ExplicitHeight = 21
   end
   inherited pnlMain: TPanel
-    Width = 632
-    Height = 199
+    Width = 646
+    Height = 202
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     TabOrder = 0
-    ExplicitWidth = 628
-    ExplicitHeight = 205
+    ExplicitWidth = 646
+    ExplicitHeight = 202
     inherited splLeft: TSplitter
-      Height = 199
+      Height = 202
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -313,7 +351,7 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
     end
     inherited lbxSection: TORListBox
       Tag = 20
-      Width = 425
+      Width = 439
       Height = 196
       Margins.Left = 5
       Margins.Top = 5
@@ -324,18 +362,19 @@ inherited frmTMGDiagnoses: TfrmTMGDiagnoses
       OnContextPopup = lbxSectionContextPopup
       OnDrawItem = lbxSectionDrawItem
       OnMouseLeave = lbxSectionMouseLeave
+      OnMouseMove = lbxSectionMouseMove
       OnMouseUp = lbxSectionMouseUp
       Pieces = '2,3'
-      ExplicitWidth = 425
+      ExplicitWidth = 439
       ExplicitHeight = 196
     end
     inherited pnlLeft: TPanel
-      Height = 199
+      Height = 202
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      ExplicitHeight = 205
+      ExplicitHeight = 202
       inherited lbSection: TORListBox
         Tag = 20
         Margins.Left = 5

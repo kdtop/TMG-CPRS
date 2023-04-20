@@ -45,6 +45,10 @@ uses Windows, SysUtils, Classes, ORFn, uConst, ORCtrls, ORClasses,UBAGlobals
    OtherVisitStr : string;   //TMG added 6/6/22}
 
 type
+  //kt moved this definition up from below.  
+  TPCEDataCat = (pdcVisit, pdcDiag, pdcProc, pdcImm, pdcSkin, pdcPED, pdcHF,
+                 pdcExam, pdcVital, pdcOrder, pdcMH, pdcMST, pdcHNC, pdcWHR, pdcWH);
+
   TPCEProviderRec = record
     IEN: int64;
     Name: string;
@@ -103,6 +107,7 @@ type
     FGecRem: string;
     procedure Assign(Src: TPCEItem); virtual;
     procedure Clear; virtual;
+    function IsCleared : boolean;
     function DelimitedStr: string; virtual;
     function DelimitedStr2: string; virtual;
     function ItemStr: string; virtual;
@@ -248,7 +253,7 @@ type
     function HasCPTStr: string; override;
   end;
 
-  TPCESkin = class(TPCEItem)  
+  TPCESkin = class(TPCEItem)
   {class for skin tests}
   public
 //    Provider:  Int64; {jm 9/8/99}
@@ -333,11 +338,13 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
-    procedure CopyPCEData(Dest: TPCEData);
+    procedure CopyPCEData(Dest: TPCEData);  //Copies self -> Dest
+    procedure Assign(Src: TPCEData);        //copies Src -> self.
     function Empty: boolean;
-    procedure PCEForNote(NoteIEN: Integer; EditObj: TPCEData);(* overload;
+    procedure PCEForNote(NoteIEN: Integer; PotentialSrcObj: TPCEData);(* overload;
     procedure PCEForNote(NoteIEN: Integer; EditObj: TPCEData; DCSummAdmitString: string); overload;*)
-    procedure Save;
+    //kt procedure Save;
+    procedure Save(ForceForegroundSave : boolean = false);  //kt added ForceForegroundSave
     procedure CopyVisits(Dest: TPCEProcList);        //kt added
     procedure CopyDiagnoses(Dest: TStrings);     // ICDcode^P|S^Category^Narrative^P|S Text
     procedure CopyProcedures(Dest: TStrings);    // CPTcode^Qty^Category^Narrative^Qty Text
@@ -359,17 +366,19 @@ type
     function  GetVisitType(index : integer) : TPCEProc; //kt added
     procedure SetExtraVisitTypes(Src: TStrings; FromForm: boolean = TRUE); //kt
 
-    function StrDiagnoses: string;               // Diagnoses: ...
-    function StrImmunizations: string;           // Immunizzations: ...
-    function StrProcedures: string;              // Procedures: ...
-    function StrSkinTests: string;
-    function StrPatientEds: string;
-    function StrHealthFactors: string;
-    function StrExams: string;
+    function StrForList(AList : TList; AClass : TPCEItemClass; CatType: TPCEDataCat; NoHeader : boolean = false) : string;  //kt added
+    function StrDiagnoses(NoHeader : boolean = false): string;               // Diagnoses: ...               //kt added NoHeader param
+    function StrImmunizations(NoHeader : boolean = false): string;           // Immunizzations: ...          //kt added NoHeader param
+    function StrProcedures(NoHeader : boolean = false): string;              // Procedures: ...              //kt added NoHeader param
+    function StrSkinTests(NoHeader : boolean = false): string;                                               //kt added NoHeader param
+    function StrPatientEds(NoHeader : boolean = false): string;                                              //kt added NoHeader param
+    function StrHealthFactors(NoHeader : boolean = false): string;                                           //kt added NoHeader param
+    function StrExams(NoHeader : boolean = false): string;                                                   //kt added NoHeader param
     function StrVisitType(const ASCRelated, AAORelated, AIRRelated, AECRelated,
                                 AMSTRelated, AHNCRelated, ACVRelated, ASHADRelated: Integer): string; overload;
     //kt function StrVisitType: string; overload;
     function StrVisitType(AVisitType : TPCEProc) : string; overload; //kt added
+    function StrVisitTypes(NoHeader : boolean = false) : string; //kt added. NOTE: this is plural form (added 's')
     function StandAlone: boolean;
     procedure AddStrData(List: TStrings);
     procedure AddVitalData(Data, List: TStrings);
@@ -435,30 +444,26 @@ function ValidateGAFDate(var GafDate: TFMDateTime): string;
 procedure GetVitalsFromDate(VitalStr: TStrings; PCEObj: TPCEData);
 procedure GetVitalsFromNote(VitalStr: TStrings; PCEObj: TPCEData; ANoteIEN: Int64);
 
-type
-  TPCEDataCat = (pdcVisit, pdcDiag, pdcProc, pdcImm, pdcSkin, pdcPED, pdcHF,
-                 pdcExam, pdcVital, pdcOrder, pdcMH, pdcMST, pdcHNC, pdcWHR, pdcWH);
-
 function GetPCEDataText(Cat: TPCEDataCat; Code, Category, Narrative: string;
                        PrimaryDiag: boolean = FALSE; Qty: integer = 0): string;
 
 const
   PCEDataCatText: array[TPCEDataCat] of string =
-                        { dcVisit } ('',
-                        { dcDiag  }  'Diagnoses: ',
-                        { dcProc  }  'Procedures: ',
-                        { dcImm   }  'Immunizations: ',
-                        { dcSkin  }  'Skin Tests: ',
-                        { dcPED   }  'Patient Educations: ',
-                        { dcHF    }  'Health Factors: ',
-                        { dcExam  }  'Examinations: ',
-                        { dcVital }  '',
-                        { dcOrder }  'Orders: ',
-                        { dcMH    }  'Mental Health: ',
-                        { dcMST   }  'MST History: ',
-                        { dcHNC   }  'Head and/or Neck Cancer: ',
-                        { dcWHR   }  'Women''s Health Procedure: ',
-                        { dcWH    }  'WH Notification: ');
+                        { pdcVisit } ('Visit E/M',    //kt added Visit E/M.  Was ''  4/23
+                        { pdcDiag  }  'Diagnoses: ',
+                        { pdcProc  }  'Procedures: ',
+                        { pdcImm   }  'Immunizations: ',
+                        { pdcSkin  }  'Skin Tests: ',
+                        { pdcPED   }  'Patient Educations: ',
+                        { pdcHF    }  'Health Factors: ',
+                        { pdcExam  }  'Examinations: ',
+                        { pdcVital }  '',
+                        { pdcOrder }  'Orders: ',
+                        { pdcMH    }  'Mental Health: ',
+                        { pdcMST   }  'MST History: ',
+                        { pdcHNC   }  'Head and/or Neck Cancer: ',
+                        { pdcWHR   }  'Women''s Health Procedure: ',
+                        { pdcWH    }  'WH Notification: ');
 
   NoPCEValue = '@';
   TAB_STOP_CHARS = 7;
@@ -866,22 +871,27 @@ begin
   end;
 end;
 
-function GetPCEDataText(Cat: TPCEDataCat; Code, Category, Narrative: string;
-                       PrimaryDiag: boolean = FALSE; Qty: integer = 0): string;
+function GetPCEDataText(Cat: TPCEDataCat;
+                        Code, Category, Narrative: string;
+                        PrimaryDiag: boolean = FALSE;
+                        Qty: integer = 0): string;
 begin
   Result := '';
   case Cat of
-    pdcVisit: if Code <> '' then Result := Category + ' ' + Narrative;
+    pdcVisit: begin
+                //kt original -> if Code <> '' then Result := Category + ' ' + Narrative;
+                if Code <> '' then Result := Code + ' - ' + Narrative;  //kt
+              end;
     pdcDiag:  begin
                Result := GetDiagnosisText(Narrative, Code);
                if PrimaryDiag then Result := Result + ' (Primary)';
-             end;
-    pdcProc: begin
-              Result := Narrative;
-              if Qty > 1 then Result := Result + ' (' + IntToStr(Qty) + ' times)';
-            end;
-    else Result := Narrative;
-  end;
+              end;
+    pdcProc:  begin
+               Result := Narrative;
+               if Qty > 1 then Result := Result + ' (' + IntToStr(Qty) + ' times)';
+              end;
+    else      Result := Narrative;
+  end; //case
 end;
 
 procedure SetDefaultProvider(ProviderList: TPCEProviderList; APCEData: TPCEData);
@@ -1048,6 +1058,26 @@ begin
   FInactive := false; //kt added
 end;
 
+
+//function TPCEItem.IsCleared : boolean;
+//modified: 4/19/23
+//By: K. Toppenberg
+//Location: TMG
+//Purpose: Check if item has been cleared.
+function TPCEItem.IsCleared : boolean;
+begin
+  Result :=
+    (FDelete   = False) and
+    (FSend     = False) and
+    (Code      = '') and
+    (Category  = '') and
+    (Narrative = '') and
+    (Provider  = 0) and
+    (Comment   = '') and
+    (FInactive = false);
+end;
+
+
 //function TPCEItem.DelimitedStr: string;
 //modified: 6/17/98
 //By: Robert Bott
@@ -1098,7 +1128,6 @@ begin
   Provider  := StrToInt64Def(Piece(x, U, pnumProvider), 0);  //pnumProvider = 6;
   Comment   := Piece(x, U, pnumComment);   //pnumComment   = 10;
 end;
-
 
 { TPCEExams methods ------------------------------------------------------------------------- }
 
@@ -2129,7 +2158,13 @@ begin
   Result := (([ndDiag, ndProc] * NeededPCEData) <> []);
 end;
 
-procedure TPCEData.PCEForNote(NoteIEN: Integer; EditObj: TPCEData);
+procedure TPCEData.PCEForNote(NoteIEN: Integer; PotentialSrcObj: TPCEData);
+//kt notes:
+//   NoteIEN         -- IEN of current notew
+//   PotentialSrcObj -- this is sometimes used as a source to copy from, under certain circumstances.
+//                      If PotentialSrcObj matches VisitStr for NoteIEN (or current Encounter), and copied, then not loaded from server again.
+//                      Was renamed from EditObj -> PotentialSrcObj:
+
 var
   i, j: Integer;
   TmpCat, TmpVStr: string;
@@ -2150,7 +2185,7 @@ var
   FRestDate: TFMDateTime;
 //  AProvider:     TPCEProvider;  {6/9/99}
   tempCPTInfo : string; //kt
-  TempS,CPTStr : string; //kt
+  CPTStr : string; //kt
   MsgType,MsgOpt1 : string; //kt
 
   function SCCValue(x: string): Integer;
@@ -2175,8 +2210,12 @@ var
   end;
 
 begin //TPCEData.PCEForNote
+  Clear;  //kt moved up from below. This may be a mistake...  4/8/23
+          //kt NOTE: Clear sets self.FEncSvcCat to 'A', so it will never be #0 in test below.
+          
+  //Setup TmpVStr.  Either get from passed in NoteIEN or current Encounter data
   if(NoteIEN < 1) then begin
-    TmpVStr := Encounter.VisitStr
+    TmpVStr := Encounter.VisitStr  //kt note: Encounter is a globally scoped var, ucore.Encounter
   end else begin
     TmpVStr := VisitStrForNote(NoteIEN);
     if(FEncSvcCat = #0) then begin
@@ -2196,21 +2235,22 @@ begin //TPCEData.PCEForNote
     end;
   end;
 
-  if(assigned(EditObj)) then begin
+  //If passed PotentialSrcObj matches TmpVStr, then copy PotentialSrcObj to self
+  if(assigned(PotentialSrcObj)) then begin
     if(copy(TmpVStr,1,2) <> '0;') and   // has location
-      (pos(';0;',TmpVStr) = 0) and     // has time
-      (EditObj.GetVisitString = TmpVStr) then
+      (pos(';0;',TmpVStr) = 0) and      // has time
+      (PotentialSrcObj.GetVisitString = TmpVStr) then
     begin
       if(FEncSvcCat = 'H') and (FEncInpatient) then begin
-        DoCopy := (FNoteDateTime = EditObj.FNoteDateTime)
+        DoCopy := (FNoteDateTime = PotentialSrcObj.FNoteDateTime)
       end else begin
         DoCopy := TRUE;
       end;
       if(DoCopy) then begin
-        if(EditObj <> Self) then begin
-          EditObj.CopyPCEData(Self);
+        if(PotentialSrcObj <> Self) then begin
+          PotentialSrcObj.CopyPCEData(Self); //Copy PotentialSrcObj -> self
           FNoteTitle := 0;
-          FNoteIEN := 0;
+          //kt removing.  Why was this here ?? --> FNoteIEN := 0;   //kt 4/8/23
         end;
         exit;
       end;
@@ -2247,7 +2287,8 @@ begin //TPCEData.PCEForNote
     end;
   end;
 
-  Clear;
+  //kt note: What is the point of this?? The code above loads up self.  Why then just clear it??
+  //kt moving to above 4/8/23 --> Clear;
   PCEList                   := TStringList.Create;
   ListOfPotentialVisitCodes := TPieceStringList.Create;
   try
@@ -2435,7 +2476,8 @@ end;
 //By: Robert Bott
 //Location: ISL
 //Purpose: Add Comments to PCE Items.
-procedure TPCEData.Save;
+//kt original --> procedure TPCEData.Save;
+procedure TPCEData.Save(ForceForegroundSave : boolean = false);  //kt added ForceForegroundSave
 { pass the changes to the encounter to DATA2PCE,
   Pieces: Subscript^Code^Qualifier^Category^Narrative^Delete }
 var
@@ -2656,7 +2698,7 @@ begin
       end;
 
       //kt added block below
-      for i := 0 to FVisitTypesList.Count-1 do begin
+      for i := FVisitTypesList.Count-1 downto 0 do begin
         AVisitType := FVisitTypesList.Proc[i];
         AVisitType.FSend := False;
         if AVisitType.FDelete then begin
@@ -2665,12 +2707,14 @@ begin
         end;
       end;
       //kt added block below
+      {
       if FVisitTypesList.Count = 0 then begin
         FVisitTypesList.EnsureFromString('');
         AVisitType := FVisitTypesList.Proc[0];
         AVisitType.Clear;
         AVisitType.FSend := false;
       end;
+      }
       //kt original --> if FVisitType.FDelete then FVisitType.Clear else FVisitType.FSend := False;
 
     end; {with PCEList}
@@ -3256,88 +3300,163 @@ begin
   SetRPCEncLocation(FEncLocation);
 end;
 
-function TPCEData.StrDiagnoses: string;
-{ returns the list of diagnoses for this encounter as a single comma delimited string }
-var
-  i: Integer;
+function SectionHeading(CatType: TPCEDataCat) : string;
 begin
-  Result := '';
-  with FDiagnoses do for i := 0 to Count - 1 do with TPCEDiag(Items[i]) do
-    if not FDelete then
-      Result := Result + GetPCEDataText(pdcDiag, Code, Category, Narrative, Primary) + CRLF;
-  if Length(Result) > 0 then Result := PCEDataCatText[pdcDiag] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  Result := '--- ' + PCEDataCatText[CatType] + ' ---';
 end;
 
-function TPCEData.StrProcedures: string;
-{ returns the list of procedures for this encounter as a single comma delimited string }
-var
-  i: Integer;
+function TPCEData.StrForList(AList : TList;
+                             AClass : TPCEItemClass;
+                             CatType: TPCEDataCat;
+                             NoHeader : boolean = false) : string;
+//kt added to unify functionality.
+var i : integer;
+    AnItem : TPCEItem;
+    Quant : integer;
+    PrimeDx : boolean;
+    ModText : string;
 begin
+  Result := '';
+  Quant := 0;
+  PrimeDx := false;
+  ModText := '';
+  with AList do begin
+    for i := 0 to AList.Count - 1 do begin
+      AnItem := TPCEItem(AList.Items[i]);
+      if AnItem.FDelete then continue;
+      if AnItem is TPCEDiag then begin
+        PrimeDx := TPCEDiag(AnItem).Primary;
+      end;
+      if AnItem is TPCEProc then begin
+        ModText := TPCEProc(AnItem).ModText;
+        Quant := TPCEProc(AnItem).Quantity;
+        PrimeDx := false;
+      end;
+      Result := Result + GetPCEDataText(CatType, AnItem.Code, AnItem.Category, AnItem.Narrative, PrimeDx, Quant) + ModText + CRLF;
+    end;
+    if (Length(Result)>0) and (NoHeader=false) then Result := SectionHeading(CatType) + CRLF + Result;
+  end;
+end;
+
+
+function TPCEData.StrDiagnoses(NoHeader : boolean = false): string;
+{ returns the list of diagnoses for this encounter as a single comma delimited string }
+//kt var  i: Integer;
+begin
+  Result := StrForList(FDiagnoses, TPCEDiag, pdcDiag, NoHeader);  //kt
+  {//kt
+  Result := '';
+  with FDiagnoses do begin
+    for i := 0 to Count - 1 do with TPCEDiag(Items[i]) do begin
+      if not FDelete then begin
+        Result := Result + GetPCEDataText(pdcDiag, Code, Category, Narrative, Primary) + CRLF;
+      end;
+    end;
+    if Length(Result) > 0 then begin
+      Result := PCEDataCatText[pdcDiag] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+    end;
+  end;
+  }
+end;
+
+function TPCEData.StrProcedures(NoHeader : boolean = false): string;
+{ returns the list of procedures for this encounter as a single comma delimited string }
+//kt var i: Integer;
+begin
+  Result := StrForList(FProcedures, TPCEProc, pdcProc, NoHeader);  //kt
+  {//kt
   Result := '';
   with FProcedures do for i := 0 to Count - 1 do with TPCEProc(Items[i]) do
     if not FDelete then
       Result := Result + GetPCEDataText(pdcProc, Code, Category, Narrative, FALSE, Quantity) +
                          ModText + CRLF;
   if Length(Result) > 0 then Result := PCEDataCatText[pdcProc] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  }
 end;
 
-function TPCEData.StrImmunizations: string;
+function TPCEData.StrImmunizations(NoHeader : boolean = false): string;
 { returns the list of Immunizations for this encounter as a single comma delimited string }
-var
-  i: Integer;
+//kt var i: Integer;
 begin
+  Result := StrForList(FImmunizations, TPCEImm, pdcImm, NoHeader);  //kt
+  {/kt
   Result := '';
   with FImmunizations do for i := 0 to Count - 1 do with TPCEImm(Items[i]) do
     if not FDelete then
       Result := Result + GetPCEDataText(pdcImm, Code, Category, Narrative) + CRLF;
   if Length(Result) > 0 then Result := PCEDataCatText[pdcImm] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  }
 end;
 
 
-function TPCEData.StrSkinTests: string;
+function TPCEData.StrSkinTests(NoHeader : boolean = false): string;
 { returns the list of Immunizations for this encounter as a single comma delimited string }
-var
-  i: Integer;
+//kt var i: Integer;
 begin
+  Result := StrForList(FSkinTests, TPCESkin, pdcSkin, NoHeader);  //kt
+  {//kt
   Result := '';
   with FSkinTests do for i := 0 to Count - 1 do with TPCESkin(Items[i]) do
     if not FDelete then
       Result := Result + GetPCEDataText(pdcSkin, Code, Category, Narrative) + CRLF;
   if Length(Result) > 0 then Result := PCEDataCatText[pdcSkin] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  }
 end;
 
-function TPCEData.StrPatientEds: string;
-var
-  i: Integer;
+function TPCEData.StrPatientEds(NoHeader : boolean = false): string;
+//kt var i: Integer;
 begin
+  Result := StrForList(FPatientEds, TPCEPat, pdcPED, NoHeader);  //kt
+  {//kt
   Result := '';
   with FPatientEds do for i := 0 to Count - 1 do with TPCEPat(Items[i]) do
     if not FDelete then
       Result := Result + GetPCEDataText(pdcPED, Code, Category, Narrative) + CRLF;
   if Length(Result) > 0 then Result := PCEDataCatText[pdcPED] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  }
 end;
 
-function TPCEData.StrHealthFactors: string;
-var
-  i: Integer;
+function TPCEData.StrHealthFactors(NoHeader : boolean = false): string;
+//kt var i: Integer;
 begin
+  Result := StrForList(FHealthFactors, TPCEHealth, pdcHF);  //kt
+  {//kt
   Result := '';
   with FHealthFactors do for i := 0 to Count - 1 do with TPCEHealth(Items[i]) do
     if not FDelete then
       Result := Result + GetPCEDataText(pdcHF, Code, Category, Narrative) + CRLF;
   if Length(Result) > 0 then Result := PCEDataCatText[pdcHF] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  }
 end;
 
-function TPCEData.StrExams: string;
-var
-  i: Integer;
+function TPCEData.StrExams(NoHeader : boolean = false): string;
+//kt var i: Integer;
 begin
+  Result := StrForList(FExams, TPCEExams, pdcExam, NoHeader);  //kt
+  {//kt
   Result := '';
   with FExams do for i := 0 to Count - 1 do with TPCEExams(Items[i]) do
     if not FDelete then
       Result := Result + GetPCEDataText(pdcExam, Code, Category, Narrative) + CRLF;
   if Length(Result) > 0 then Result := PCEDataCatText[pdcExam] + CRLF + Copy(Result, 1, Length(Result) - 2) + CRLF;
+  }
 end;
+
+function TPCEData.StrVisitTypes(NoHeader : boolean = false): string; //kt added. NOTE: this is plural form (added 's')
+var i : integer;
+    AVisit : TPCEProc;
+begin
+  Result := '';
+  for i := 0 to FVisitTypesList.Count - 1 do begin
+    AVisit := FVisitTypesList.Proc[i];
+    Result := Result + StrVisitType(AVisit);
+    if Result<>'' then Result := Result + CRLF;
+  end;
+  if (Length(Result)>0) and (NoHeader=false) then begin
+    Result := SectionHeading(pdcVisit) + CRLF + Result;
+  end;
+end;
+
 
 function TPCEData.StrVisitType(const ASCRelated, AAORelated, AIRRelated,
   AECRelated, AMSTRelated, AHNCRelated, ACVRelated, ASHADRelated: Integer): string;
@@ -3398,7 +3517,6 @@ begin
                                        FECRelated, FMSTRelated, FHNCRelated, FCVRelated, FSHADRelated));
 end;
 
-
 function TPCEData.StandAlone: boolean;
 var
   Sts: integer;
@@ -3441,7 +3559,13 @@ begin
       result := False;
 end;
 
-procedure TPCEData.CopyPCEData(Dest: TPCEData);
+procedure TPCEData.Assign(Src: TPCEData);        //copies Src -> self.   //kt 4/23
+//kt added because A.CopyPCEData(B) is not immediately obvious which direction copy is occurring, whereas B.Assign(A) is clear.
+begin
+  Src.CopyPCEData(Self);
+end;
+
+procedure TPCEData.CopyPCEData(Dest: TPCEData);  //copies self --> Dest
 begin
   Dest.Clear;
   Dest.FEncDateTime  := FEncDateTime;
@@ -3673,8 +3797,9 @@ procedure TPCEData.AddStrData(List: TStrings);
 
 var i : integer;
 begin
-  for i := 0 to FVisitTypesList.Count - 1 do Add(StrVisitType(FVisitTypesList.Proc[i])); //kt
+  //kt for i := 0 to FVisitTypesList.Count - 1 do Add(StrVisitType(FVisitTypesList.Proc[i])); //kt
   //kt Add(StrVisitType);
+  Add(StrVisitTypes);
   Add(StrDiagnoses);
   Add(StrProcedures);
   Add(StrImmunizations);
@@ -3815,6 +3940,7 @@ begin
   for i := 0 to Src.Count - 1 do begin
     //kt  Obj := TObject(Src[i]);
     SrcPCEItem := TPCEItem(Src[i]); //kt
+    if SrcPCEItem.IsCleared then continue; //kt added
     if not SrcPCEItem.FDelete then begin
       AItem := ItemClass.Create;
       AItem.Assign(SrcPCEItem);

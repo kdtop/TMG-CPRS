@@ -27,6 +27,7 @@ var
   procedure SendMessenger(InitialMsg:string);
   function SendOneMessage(ToUser,FromUser:string;MsgArr:TStrings):string;
   function LabOrderMsgRecip(UsrType:string):string;
+  function FollowUpMsgRecip(UsrType:string):string;
   function GetMyName():string;
 
 
@@ -86,6 +87,15 @@ begin
   end;
   CallBroker;
   Result := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
+end;
+
+function FollowUpMsgRecip(UsrType:string):string;
+//Public function to get the User who is to get a Followup Message
+begin
+  Result := sCallV('TMG MESSENGER FOLLOWUP RECIP',[UsrType]);
+  if piece(Result,'^',1)='1' then
+    Result := piece(Result,'^',2);
+
 end;
 
 function LabOrderMsgRecip(UsrType:string):string;

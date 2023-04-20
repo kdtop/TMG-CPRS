@@ -11,8 +11,10 @@ uses
   ORCtrls, Menus;
 
 type
+  tNodeType = (ntNone=0, TopicsDiscussed=1, TopicsUndiscussed=2, ProbList=3, PriorICDs=4, EncounterICDs=5);
+
   TfrmTMGDiagnoses = class(TfrmPCEBaseMain)
-    cmdDiagPrimary: TButton;
+    cmdDiagPrimary: TBitBtn;
     ckbDiagProb: TCheckBox;
     BitBtn1: TBitBtn;
     popSectionRClick: TPopupMenu;
@@ -21,6 +23,8 @@ type
     btnSearch: TBitBtn;
     edtSearchTerms: TEdit;
     btnClearSrch: TBitBtn;
+    procedure lbxSectionMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
     procedure btnClearSrchClick(Sender: TObject);
     procedure lbSectionClick(Sender: TObject);
     procedure edtSearchTermsChange(Sender: TObject);
@@ -66,22 +70,30 @@ type
     FlbxSectionRightClickDown : boolean;
     FlbxSectionRightClickPT : TPoint;
     FlbxSectionIndex : integer;
+    FlbxSectionHoverIndex : integer;
     procedure EnsurePrimaryDiag;
     procedure GetSCTforICD(ADiagnosis: TPCEDiag);
     procedure UpdateProblem(AplIEN: String; AICDCode: String; ASCTCode: String = '');
     function isProblem(diagnosis: TPCEDiag): Boolean;
     function isEncounterDx(problem: string): Boolean;
     procedure LoadTMGDxInfo(IEN8925 : integer; TitlesToAdd : TStringList);
-    procedure LinkTopicToICD(TopicName, ICDInfo : string);
+    procedure LinkTopicToICD(TopicName: string;  ItemDataStr : TDataStr);
     procedure SetSearchMode(Mode : boolean);
     procedure ConfigureForSearchMode(SearchMode : boolean);
-    function ShouldFilter(Entry : string) : boolean;  //fmt: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+    function ShouldFilter(Entry : string) : boolean;
+    function HandleNeedsLink(TopicName : string; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+    function HandleBadICDCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+    function CorrectInactiveSCTCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+    function CorrectBadOrInactiveSCTCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+    function CorrectMissingSCTCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+    procedure GetlbxSectionInfo(Index : integer; var ADataStr : TDataStr; var OutEntryType : tNodetype);
   protected
     procedure UpdateNewItemStr(var x: string); override;
     procedure UpdateControls; override;
     procedure ListTMGDiagnosisCodes(Dest: TStrings; IntEntryType: Integer);
   public
     procedure InitTab(ACopyProc: TCopyItemsMethod; AListProc: TListSectionsProc; SrcPCEData : TPCEData);
+    procedure SendData;
   end;
 
 var
@@ -95,7 +107,7 @@ implementation
 
 uses
   fEncounterFrame, uConst, UBACore, VA508AccessibilityRouter, fPCELex, rPCE, uProbs, rProbs,
-  fDiagnoses, StrUtils, fTopicICDLinkerU, fProbAutoAdd, //kt
+  fDiagnoses, StrUtils, fTopicICDLinkerU, fProbAutoAdd, fNotes, //kt
   rTIU, rCore;  //agp //kt
 
 type
@@ -104,17 +116,36 @@ type
     iiFlatUnChecked, iiFlatChecked, iiFlatGrayed,
     iiRadioUnchecked, iiRadioChecked, iiRadioDisUnchecked, iiRadioDisChecked);
 
-type
-  tNodeType = (TopicsDiscussed=1, TopicsUndiscussed=2, ProbList=3, PriorICDs=4, EncounterICDs=5);
-
 CONST
   tNODE_FIRST = ord(TopicsDiscussed);
   tNODE_LAST = ord(EncounterICDs);
 
+                                                                                                                    // 1     2             3                4               5                 6                      7                  8
+  TOPIC_PROBLEM_FORMAT       = 'Code^TopicName^ThreadText^ProblemIEN^ICDCode^ICDLongName^SnowmedName^ICDCodeSys';   // 1^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
+
+                                                          //  1     2         3
+  SECTION_DATA_FORMAT        = 'Type^Index^DisplayText';  //'Type^Index^DisplayText';
+
+                                                                                                                                                                                                             //     1  2   3       4          5   6         7         8   9       10     11   12     13     14      15       16            17           18                 19              20                 21
+  PROB_LIST_DATA_FORMAT      = 'Type^ifn^status^description^ICDCode^onset^LastModified^SC^SpExp^Cond^Loc^LocType^prov^service^priority^HasComment^DateRecorded^SCCond^InactiveFlag^ICDLongName^ICDCodeSys';  //fmt: 3^ifn^status^description^ICD^onset^last modified^SC^SpExp^Condition^Loc^loc.type^prov^service^priority^has comment^date recorded^SC condition(s)^inactive flag^ICD long description^ICD coding system
+
+                                                                                     //     1      2         3                4               5
+  PRIOR_ICDS_DATA_FORMAT     = 'Type^ICDCode^ICDLongName^FMDTLastUsed^ICDCodeSys';   //fmt: 4^<PRIOR ICD>^<ICD LONG NAME>^<FMDT LAST USED>^<ICD_CODE_SYS>
+
+                                                                                     //    1   2       3           4               5             6
+  ENCOUNTER_ICDS_DATA_FORMAT = 'Type^Entry^ICDCode^DisplayName^ICDLongName^ICDCodeSys';  //fmt 5^ENTRY^<ICD CODE>^<DISPLAY NAME>^<ICD LONG NAME>^<ICDCODESYS>"
+
+  NODE_TYPE_DATA_FORMAT : array[TopicsDiscussed..EncounterICDs] of string = (
+    TOPIC_PROBLEM_FORMAT,
+    TOPIC_PROBLEM_FORMAT,
+    PROB_LIST_DATA_FORMAT,
+    PRIOR_ICDS_DATA_FORMAT,
+    ENCOUNTER_ICDS_DATA_FORMAT
+  );
 
 var
   //NOTICE!!  If multiple instances of TfrmTMGDiagnoses created --> this will cause collision, overridden data, memory leak!
-  NodeTypeSL : array[TopicsDiscussed .. EncounterICDs] of TStringList;  //not owned here.
+  NodeTypeSL : array[TopicsDiscussed .. EncounterICDs] of TStringList;  //TStringList's are not owned here.
   //NOTE: NodeTypeSL[EncounterICDs] is different from the others.  It format is:
   //      NodeTypeSL[EncounterICDs].strings[#] = "section name"
   //      NodeTypeSL[EncounterICDs].objects[#] = TStringList with entries for section
@@ -170,7 +201,7 @@ end;
 
 //=========================================================
 
-function TfrmTMGDiagnoses.ShouldFilter(Entry : string) : boolean;  //fmt: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+function TfrmTMGDiagnoses.ShouldFilter(Entry : string) : boolean;  //fmt: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodeSys
 var i : integer;
     ATerm : string;
 begin
@@ -191,99 +222,140 @@ procedure TfrmTMGDiagnoses.ListTMGDiagnosisCodes(Dest: TStrings; IntEntryType: I
 //It is used for loading lbxSection (right side list) when lbSection (left side list) is clicked
 var i : integer;
     EntryType : tNodeType;
-    t, c, f, p, CodeName, ICDCSYS: string;
+    DisplayText, ICDCode, CodeStatus, ProblemIEN, CodeName, ICDCodeSys: string;
     SL : TStringList;
-    SectionStr, Entry : string;
+    //Entry : string;
+    //SectionStr : string;
     Index : integer;
     SrcIndex : integer;  //index in SL
+    SectionDataStr : TDataStr;
+    EntryDataStr : TDataStr;
+    DestDataStr : TDataStr;
+
 
 begin
   if IntEntryType >= 0 then begin
     ListDiagnosisCodes(Dest, IntEntryType);
     exit;
   end;
-  Dest.Clear;
-  IntEntryType := -IntEntryType;
-  if (IntEntryType < tNODE_FIRST) or (IntEntryType > tNODE_LAST) then exit;
-  EntryType := tNodeType(IntEntryType);
-  SL := NodeTypeSL[EntryType]; //DEFAULT.  NOTE: SL may be changed to different TStringList below...
-  if (EntryType = EncounterICDs) and assigned(frmTMGDiagnoses) then begin
-    Index := lbSection.ItemIndex;
-    SectionStr := lbSection.Items.Strings[Index]; //fmt: -5^<index>^<Display title>  index is # in TStringlist NodeTypeSL[EncounterICDs]
-    Index := StrToIntDef(Piece(SectionStr, '^',2), 0);
-    SL := TStringList(NodeTypeSL[EncounterICDs].Objects[Index]);
-    if not assigned(SL) then exit;
-  end;
-  for i := 0 to SL.Count - 1 do begin
-    Entry := SL.Strings[i];
-    case EntryType of
-      //SET UP VARS, for use below
-      //--------------------------
-      // c = ICDCode
-      // t = ProblemText
-      // f = CodeStatus
-      // p = ProblemIEN
-      //ICDSYS = ICD coding system
-      //--------------------------
-                               //     1       2           3                 4                 5               6                     7                   8
-      TopicsDiscussed,         //fmt: 1^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
-      TopicsUndiscussed: begin //fmt: 2^<TOPIC NAME>^<SUMMARY TEXT>^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
-                           c := Piece(Entry, U, 5);
-                           CodeName := Piece(Entry, U, 6);
-                           t := Piece(Entry, U, 2);
-                           //t2:= Piece(Entry, U, 3);
-                           //if length(t2)>80 then t2 := LeftStr(t2, 80)+'...';
-                           //t := t + IfThen(t2<>'', ' -- ', '') + t2;
-                           if c <> '' then begin
-                             t := t + ' --> {' + CodeName + '}';  // c + ' <-- ' + t;
-                           end else begin
-                             c := '???'; //Piece(Entry, U, 2);
-                           end;
-                           f := '';                        //kt Code Status    e.g. if outdated, has #, $, or both symbols at start
-                           p := Piece(Entry, U, 4);        //kt ProblemIEN
-                           ICDCSYS := Piece(Entry, U, 8);  //kt ICD Coding system  (or TMGTOPIC)
-                         end;
-                                 //    1  2    3        4        5   6        7          8  9         10   11   12       13     14     15         16           17            18            19                20                  21
-      ProbList:          begin  //fmt: 3^ifn^status^description^ICD^onset^last modified^SC^SpExp^Condition^Loc^loc.type^prov^service^priority^has comment^date recorded^SC condition(s)^inactive flag^ICD long description^ICD coding system
-                           //NOTE: This is a duplication of native functionality.  So I ended up not using this stored information.
-                           c := Piece(Entry, U, 5);        //kt ICD Code
-                           t := Piece(Entry, U, 4);        //kt Problem Text
-                           f := Piece(Entry, U, 19);        //kt Code Status ???   e.g. if outdated, has #, $, or both symbols at start
-                           p := '';  //Piece(Entry, U, 4);  //kt ProblemIEN
-                           ICDCSYS := Piece(Entry, U, 21);  //kt ICD Coding system
-                         end;
-                                //     1      2         3                4               5
-      PriorICDs:         begin  //fmt: 4^<PRIOR ICD>^<ICD LONG NAME>^<FMDT LAST USED>^<ICD_CODE_SYS>
-                           c := Piece(Entry, U, 2);         //kt ICD Code
-                           t := Piece(Entry, U, 3);         //kt Problem Text
-                           f := ''; //Piece(Entry, U, 19);  //kt Code Status ???   e.g. if outdated, has #, $, or both symbols at start
-                           p := '';  //Piece(Entry, U, 4);  //kt ProblemIEN
-                           ICDCSYS := Piece(Entry, U, 5);   //kt ICD Coding system
-                         end;
-                                //    1  2         3          4               5             6
-      EncounterICDs:     begin  //fmt 5^ENTRY^<ICD CODE>^<DISPLAY NAME>^<ICD LONG NAME>^<ICDCODESYS>"
-                           c := Piece(Entry, U, 3);         //kt ICD Code
-                           t := Piece(Entry, U, 4);         //kt Display name
-                           CodeName := Piece(Entry, U, 5);
-                           if t= '' then begin
-                             t := CodeName;         //kt ICD Long name
-                           end else begin
-                             t := t + ' (' + CodeName + ')';
-                           end;
-                           f := ''; //Piece(Entry, U, 19);  //kt Code Status ???   e.g. if outdated, has #, $, or both symbols at start
-                           p := '';  //Piece(Entry, U, 4);  //kt ProblemIEN
-                           ICDCSYS := Piece(Entry, U, 6);   //kt ICD Coding system
-                         end;
-    end; //case
-    if (Pos('#', f) > 0) or (Pos('$', f) > 0) then begin
-      t := '#  ' + t;    //kt this is signal that code is inactive.  See doc in AddProbsToDiagnoses()
-    end;
-    SrcIndex := i ;  //NOTE: use lbSection to determine which source list is active.
+  SectionDataStr := TDataStr.Create(SECTION_DATA_FORMAT);
+  EntryDataStr := TDataStr.Create(); //format will vary
+  DestDataStr := TDataStr.Create(STD_ICD_DATA_FORMAT);  //STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
 
-    if not ShouldFilter(c + ' ' + t) then begin
-      Dest.AddObject(c + U + t + U + c + U + f + U + p + U + ICDCSYS, pointer(SrcIndex)); //kt doc: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
-      //Dest.Add(c + U + t + U + c + U + f + U + p + U + ICDCSYS); //kt doc: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+  try
+    Dest.Clear;
+    IntEntryType := -IntEntryType;
+    if (IntEntryType < tNODE_FIRST) or (IntEntryType > tNODE_LAST) then exit;
+    EntryType := tNodeType(IntEntryType);
+    SL := NodeTypeSL[EntryType]; //DEFAULT.  NOTE: SL may be changed to different TStringList below...
+    if (EntryType = EncounterICDs) and assigned(frmTMGDiagnoses) then begin
+      Index := lbSection.ItemIndex;
+      //SectionStr := lbSection.Items.Strings[Index]; //fmt: -5^<index>^<Display title>  index is # in TStringlist NodeTypeSL[EncounterICDs]
+      SectionDataStr.DataStr := lbSection.Items.Strings[Index]; //Format: SECTION_DATA_FORMAT e.g. -5^<index>^<Display title>  index is # in TStringlist NodeTypeSL[EncounterICDs]
+      Index := SectionDataStr.IntValueDef('Index', 0);
+      //Index := StrToIntDef(Piece(SectionStr, '^',2), 0);
+      SL := TStringList(NodeTypeSL[EncounterICDs].Objects[Index]);
+      if not assigned(SL) then exit;
     end;
+    EntryDataStr.FormatStr := NODE_TYPE_DATA_FORMAT[EntryType];
+    for i := 0 to SL.Count - 1 do begin
+      //Entry := SL.Strings[i];
+      DestDataStr.DataStr := ''; //STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
+      EntryDataStr.DataStr := SL.Strings[i];
+      ICDCode      := '';
+      DisplayText  := '';
+      CodeStatus   := '';
+      ProblemIEN   := '';
+      ICDCodeSys   := '';
+      case EntryType of
+        TopicsDiscussed,
+        TopicsUndiscussed: begin
+                             //TOPIC_PROBLEM_FORMAT = 'Code^TopicName^ThreadText^ProblemIEN^ICDCode^ICDLongName^SnowmedName^ICDCodeSys';
+                             //ICDCode    := Piece(Entry, U, 5);
+                             //CodeName   := Piece(Entry, U, 6);
+                             //DisplayText:= Piece(Entry, U, 2);
+                             //ProbIEN    := Piece(Entry, U, 4);         //kt ProblemIEN
+                             //ICDCodeSys := Piece(Entry, U, 8);         //kt ICD Coding system  (or TMGTOPIC)
+                             ICDCode      := EntryDataStr.ValueDef('ICDCode','???');
+                             CodeName     := EntryDataStr.Value['ICDLongName'];
+                             if Pos(ARROW_STR, CodeName)>0 then begin
+                               DisplayText := CodeName;
+                             end else begin
+                               DisplayText := EntryDataStr.Value['TopicName'] + IfThen(ICDCode <> '???', ARROW_STR + CodeName + '}', '');
+                             end;
+                             CodeStatus   := '';
+                             ProblemIEN   := '';
+                             ICDCodeSys   := EntryDataStr.Value['ICDCodeSys'];
+                           end;
+        ProbList:          begin  //NOTE: This is a duplication of native functionality.  So I ended up not using this stored information.
+                             //PROB_LIST_DATA_FORMAT = 'Type^ifn^status^description^ICDCode^onset^LastModified^SC^SC^SpExp^Cond^Loc^LocType^prov^service^priority^HasComment^DateRecorded^SCCond^inactive flag^ICDLongName^ICDCodeSys';
+                             //ICDCode     := Piece(Entry, U, 5);        //kt ICD Code
+                             //DisplayText := Piece(Entry, U, 4);        //kt Problem Text
+                             //CodeStatus  := Piece(Entry, U, 19);       //kt Code Status ???   e.g. if outdated, has #, $, or both symbols at start
+                             //ProbIEN     := '';                        //kt ProblemIEN
+                             //ICDCodeSys  := Piece(Entry, U, 21);       //kt ICD Coding system
+                             ICDCode     := EntryDataStr.ValueDef('ICDCode','???');
+                             DisplayText := EntryDataStr.Value['description'];
+                             CodeStatus  := EntryDataStr.Value['InactiveFlag'];  //e.g. if outdated, has #, $, or both symbols at start
+                             ProblemIEN  := '';
+                             ICDCodeSys  := EntryDataStr.Value['ICDCodeSys'];
+                           end;
+
+        PriorICDs:         begin
+                             //PRIOR_ICDS_DATA_FORMAT     = 'Type^ICDCode^ICDLongName^FMDTLastUsed^ICDCodeSys';
+                             //ICDCode     := Piece(Entry, U, 2);         //kt ICD Code
+                             //DisplayText := Piece(Entry, U, 3);         //kt Problem Text
+                             //CodeStatus  := '';                         //kt Code Status
+                             //ProbIEN     := '';                         //kt ProblemIEN
+                             //ICDCodeSys  := Piece(Entry, U, 5);         //kt ICD Coding system
+                             ICDCode      := EntryDataStr.Value['ICDCode'];
+                             DisplayText  := EntryDataStr.Value['ICDLongName'];
+                             CodeStatus   := '';
+                             ProblemIEN   := '';
+                             ICDCodeSys   := EntryDataStr.Value['ICDCodeSys'];
+                           end;
+
+        EncounterICDs:     begin
+                             //ENCOUNTER_ICDS_DATA_FORMAT = 'Type^Entry^ICDCode^DisplayName^ICDLongName^ICDCodeSys';
+                             //ICDCode     := Piece(Entry, U, 3);   //kt ICD Code
+                             //DisplayText := Piece(Entry, U, 4);   //kt Display name
+                             //CodeName    := Piece(Entry, U, 5);
+                             //if DisplayText= '' then begin
+                             //  DisplayText := CodeName;           //kt ICD Long name
+                             //end else begin
+                             //  DisplayText := DisplayText + ' (' + CodeName + ')';
+                             //end;
+                             //CodeStatus  := ''; //Piece(Entry, U, 19);  //kt Code Status ???   e.g. if outdated, has #, $, or both symbols at start
+                             //ProbIEN     := '';  //Piece(Entry, U, 4);  //kt ProblemIEN
+                             //ICDCodeSys  := Piece(Entry, U, 6);         //kt ICD Coding system
+                             CodeName     := EntryDataStr.Value['ICDLongName'];
+                             DisplayText  := EntryDataStr.Value['DisplayName'];
+                             DisplayText  := DisplayText + IfThen(Displaytext='', CodeName, '('+CodeName+')');
+                             ICDCode      := EntryDataStr.Value['ICDCode'];
+                             CodeStatus   := '';
+                             ProblemIEN   := '';
+                             ICDCodeSys   := EntryDataStr.Value['ICDCodeSys'];
+                           end;
+      end; //case
+      if (Pos('#', CodeStatus) > 0) or (Pos('$', CodeStatus) > 0) then begin
+        DisplayText := '#  ' + DisplayText;    //kt this is signal that code is inactive.  See doc in AddProbsToDiagnoses()
+      end;
+      DestDataStr.Value['ICDCode']     := ICDCode;
+      DestDataStr.Value['ICDCode2']    := ICDCode;
+      DestDataStr.Value['ProblemText'] := DisplayText;
+      DestDataStr.Value['CodeStatus']  := CodeStatus;
+      DestDataStr.Value['ProblemIEN']  := ProblemIEN;
+      DestDataStr.Value['ICDCodeSys']  := ICDCodeSys;
+      SrcIndex := i ;  //NOTE: use lbSection to determine which source list is active.
+      if not ShouldFilter(ICDCode + ' ' + DisplayText) then begin
+        //Dest.AddObject(ICDCode + U + DisplayText + U + ICDCode + U + CodeStatus + U + ProbIEN + U + ICDCSYS, pointer(SrcIndex)); //kt doc: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+        Dest.AddObject(DestDataStr.DataStr, pointer(SrcIndex)); //STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
+      end;
+    end;
+  finally
+    SectionDataStr.Free;
+    EntryDataStr.Free;
+    DestDataStr.Free;
   end;
 end;
 
@@ -300,7 +372,12 @@ var SL, tempSL: TStringList;
     j : tNodeType;
     IsHeader : boolean;
     LastHeaderIdx : integer;
+    Saved : boolean;
+
 begin
+  if (frmNotes.ActiveEditIEN = IEN8925)  then begin
+    frmNotes.SaveCurrentNote(Saved, true);  //ensure server has a saved note to process
+  end;
   LastHeaderIdx := -1;
   SL := TStringList.Create;
   SDT := ''; //can add later...
@@ -469,7 +546,7 @@ begin
                                                      (TPCEDiag(lbGrid.Items.Objects[i]).Category <> PL_ITEMS);
         //TODO: Add check for I10Active
         if TPCEDiag(lbGrid.Items.Objects[i]).AddProb and
-          (Piece(Encounter.GetICDVersion, U, 1) = '10D') and
+          (Encounter.GetICDVersionCode = '10D') and
           (not ((pos('SCT', TPCEDiag(lbGrid.Items.Objects[i]).Narrative) > 0) or
           (pos('SNOMED', TPCEDiag(lbGrid.Items.Objects[i]).Narrative) > 0))) then begin
           GetSCTforICD(TPCEDiag(lbGrid.Items.Objects[i]));
@@ -496,6 +573,31 @@ begin
   inherited;
   FlbxSectionRightClickDown := false;
 
+end;
+
+procedure TfrmTMGDiagnoses.lbxSectionMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var  HoverIndex : integer;
+     MousePos: TPoint;
+     DataStr : TDataStr;
+     EntryType : tNodetype;
+     TopicNarrative : string;
+begin
+  inherited;
+  MousePos.X := X; MousePos.Y := Y;
+  HoverIndex := lbxSection.ItemAtPos(MousePos, true);
+  if HoverIndex = FlbxSectionHoverIndex then exit; //no change, same as last movement event
+  FlbxSectionHoverIndex := HoverIndex;
+  TopicNarrative := '';
+  if HoverIndex >= 0 then begin
+    DataStr := TDataStr.Create();
+    try
+      GetlbxSectionInfo(HoverIndex, DataStr, EntryType);
+      TopicNarrative := DataStr.ValueDef('ThreadText', '');
+    finally
+      DataStr.Free;
+    end;
+  end;
+  memNarrative.Text := TopicNarrative;
 end;
 
 procedure TfrmTMGDiagnoses.lbxSectionMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -544,6 +646,9 @@ begin
   TopicName := Piece(SrcLine,'^',2);
   if Pos(ARROW_STR, TopicName) > 0 then TopicName := Piece2(TopicName, ARROW_STR, 1);
 
+  HandleNeedsLink(TopicName, Index);
+
+  (*
   frmTopicICDLinker := TfrmTopicICDLinker.Create(frmEncounterFrame);
   try
     frmTopicICDLinker.Initialize(TopicName, TMGInfoPriorICDs, TMGInfoEncounterICDs);
@@ -559,20 +664,21 @@ begin
         lbxSection.Checked[Index] := PriorChecked;
         FUpdatingGrid := UpdatingSave;
       end;
-      LinkTopicToICD(TopicName, ItemStr);
+      LinkTopicToICD(TopicName, ItemDataStr);
     end else begin
       //
     end;
   finally
     FreeAndNil(frmTopicICDLinker);
   end;
-
+  *)
 end;
 
 procedure TfrmTMGDiagnoses.popOptRemoveLinkClick(Sender: TObject);
 var
   Index, SrcIndex, IntEntryType, ModalResult : integer;
   ItemStr, SrcLine, TopicName, ICDName : string;
+  ItemDataStr : TDataStr;
   EntryType : tNodeType;
 
 begin
@@ -580,31 +686,39 @@ begin
   if lbSection.ItemIEN >= 0 then exit;
   Index := FlbxSectionIndex;
 
-  TopicName := '';
-  IntEntryType := -lbSection.ItemIEN;
-  if (IntEntryType <> ord(TopicsDiscussed)) and (IntEntryType <> ord(TopicsUndiscussed)) then exit;
-  EntryType := tNodeType(IntEntryType);
-  SrcIndex := Integer(lbxSection.Items.Objects[Index]);
-  if (SrcIndex < 0) or (SrcIndex >= NodeTypeSL[EntryType].Count) then exit;
-  SrcLine := NodeTypeSL[EntryType].Strings[SrcIndex]; //fmt: #^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
-  ICDName := Piece(SrcLine, '^', 6);
-  TopicName := Piece(SrcLine,'^',2);
-  if Pos(ARROW_STR, TopicName) > 0 then begin
-    TopicName := Piece2(TopicName, ARROW_STR, 1);
-    SetPiece(SrcLine,'^',2,TopicName);
+  ItemDataStr := TDataStr.Create();
+  try
+
+    TopicName := '';
+    IntEntryType := -lbSection.ItemIEN;
+    if (IntEntryType <> ord(TopicsDiscussed)) and (IntEntryType <> ord(TopicsUndiscussed)) then exit;
+    EntryType := tNodeType(IntEntryType);
+    SrcIndex := Integer(lbxSection.Items.Objects[Index]);
+    if (SrcIndex < 0) or (SrcIndex >= NodeTypeSL[EntryType].Count) then exit;
+    SrcLine := NodeTypeSL[EntryType].Strings[SrcIndex]; //fmt: #^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
+    ICDName := Piece(SrcLine, '^', 6);
+    TopicName := Piece(SrcLine,'^',2);
+    if Pos(ARROW_STR, TopicName) > 0 then begin
+      TopicName := Piece2(TopicName, ARROW_STR, 1);
+      SetPiece(SrcLine,'^',2,TopicName);
+    end;
+    ModalResult := MessageDlg('Remove link? ' + CRLF +
+                              TopicName + CRLF +
+                              'To:' + CRLF +
+                              ICDName,
+                              mtConfirmation, [mbOK, mbCancel], 0);
+    if ModalResult <> mrOK then exit;
+    SetPiece(SrcLine,'^',5,''); SetPiece(SrcLine,'^',6,''); SetPiece(SrcLine,'^',8,'');
+    NodeTypeSL[EntryType].Strings[SrcIndex] := SrcLine;
+    ItemStr := '???^'+TopicName+'^???^^'+Piece(SrcLine,'^',3)+'^10D';  //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+    lbxSection.Items[Index] := ItemStr; //automatically changes lbxSection.Checked[Index] -> false
+    ItemStr := '@^'+TopicName+'^@^^'+Piece(SrcLine,'^',3)+'^';  //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+    ItemDataStr.FormatStr := STD_ICD_DATA_FORMAT; //'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
+    ItemDataStr.DataStr := ItemStr;
+    LinkTopicToICD(TopicName, ItemDataStr);  //This will delete link because ICD Code = "@"
+  finally
+    ItemDataStr.Free;
   end;
-  ModalResult := MessageDlg('Remove link? ' + CRLF +
-                            TopicName + CRLF +
-                            'To:' + CRLF +
-                            ICDName,
-                            mtConfirmation, [mbOK, mbCancel], 0);
-  if ModalResult <> mrOK then exit;
-  SetPiece(SrcLine,'^',5,''); SetPiece(SrcLine,'^',6,''); SetPiece(SrcLine,'^',8,'');
-  NodeTypeSL[EntryType].Strings[SrcIndex] := SrcLine;
-  ItemStr := '???^'+TopicName+'^???^^'+Piece(SrcLine,'^',3)+'^10D';  //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
-  lbxSection.Items[Index] := ItemStr; //automatically changes lbxSection.Checked[Index] -> false
-  ItemStr := '@^'+TopicName+'^@^^'+Piece(SrcLine,'^',3)+'^';  //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
-  LinkTopicToICD(TopicName, ItemStr);  //This will delete link because ICD Code = "@"
 end;
 
 
@@ -632,6 +746,7 @@ begin
   FSectionTabCount := 3;
 
   FlbxSectionRightClickDown := false;
+  FlbxSectionHoverIndex := -1;
 
   //Make changes to form.  This is inherited from parent, so have to do at runtime (I don't want to change parent, which may break other forms)
   lbxSection.Align := alNone;
@@ -905,76 +1020,348 @@ begin
   UpdateTabPos;
 end;
 
-procedure TfrmTMGDiagnoses.lbxSectionClickCheck(Sender: TObject; Index: Integer);
+function TfrmTMGDiagnoses.HandleNeedsLink(TopicName : string; Index : integer) : boolean; //result is OK, i.e. not Cancelled
 var
-  ICDCode, ICDPar, SCTCode, SCTPar, plIEN, msg, SecItem, InputStr, OrigProbStr, I10Description: String;
   EntryType : tNodeType;
-  IntEntryType: Integer;
-  ItemStr : string;
-  SelICDCode,ProblemText,CodeStatus,ProbIEN,ICDCSYS: string;
-  TopicName,TopicNarrative : string;
+  //ItemStr : string;
   SrcIndex : integer;
-  SrcLine : string;
+  ItemDataStr, SrcDataStr : TDataStr;
   frmTopicICDLinker : TfrmTopicICDLinker;
   ModalResult : integer;
   UpdatingSave : boolean;
-
-  function GetSearchString(AString: String): String;
-  begin
-    if (Pos('#', AString) > 0) then
-      Result := TrimLeft(Piece(AString, '#', 2))
-    else
-      Result := AString;
-  end;
+  StaffToCode : boolean;
+  IntEntryType : integer;
 
 begin
+  Result := true;
+  frmTopicICDLinker := TfrmTopicICDLinker.Create(frmEncounterFrame);
+  SrcDataStr := TDataStr.Create(TOPIC_PROBLEM_FORMAT);
+  ItemDataStr := TDataStr.Create(STD_ICD_DATA_FORMAT);
+  try
+    if lbSection.ItemIEN >= 0 then exit;
+    IntEntryType := -lbSection.ItemIEN;
+    if (IntEntryType < tNODE_FIRST) or (IntEntryType > tNODE_LAST) then exit;
+    EntryType := tNodeType(IntEntryType);
+    SrcIndex := Integer(lbxSection.Items.Objects[Index]);
+    if (SrcIndex < 0) or (SrcIndex >= NodeTypeSL[EntryType].Count) then exit;
+    SrcDataStr.DataStr := NodeTypeSL[EntryType].Strings[SrcIndex];  //  TOPIC_PROBLEM_FORMAT = 'Code^TopicName^ThreadText^ProblemIEN^ICDCode^ICDLongName^SnowmedName^ICDCodeSys';   // 1^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
+
+    frmTopicICDLinker.Initialize(TopicName, TMGInfoPriorICDs, TMGInfoEncounterICDs);
+    ModalResult := frmTopicICDLinker.ShowModal;
+    if ModalResult <> mrOK then begin Result := false; exit; end;
+    ItemDataStr.Assign(frmTopicICDLinker.ResultDataStr); //format: STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodeSys';
+    StaffToCode := (ItemDataStr.Value['ICDCode'] = SIGNAL_ICD_FOR_STAFF_LOOKUP);
+    ItemDataStr.Value['ProblemText'] := TopicName + ARROW_STR + IfThen(StaffToCode, 'Staff to code', ItemDataStr.Value['ProblemText']) + '}';
+    lbxSection.Items[Index] := ItemDataStr.DataStr;  //automatically changes lbxSection.Checked[Index] -> false
+
+    UpdatingSave := FUpdatingGrid; FUpdatingGrid := true;
+    lbxSection.Checked[Index] := true;  //reset to true. NOTE: This triggers a change event -> calls into lbxSectionClickCheck() again
+    FUpdatingGrid := UpdatingSave;
+
+    SrcDataStr.Value['ICDCode']     := ItemDataStr.Value['ICDCode'];
+    SrcDataStr.Value['ICDLongName'] := ItemDataStr.Value['ProblemText'];
+    SrcDataStr.Value['ICDCodeSys']  := ItemDataStr.Value['ICDCodeSys'];
+
+    NodeTypeSL[EntryType].Strings[SrcIndex] := SrcDataStr.DataStr;
+
+    //Link TopicName -> ICD
+    if not StaffToCode then begin
+      LinkTopicToICD(TopicName, ItemDataStr);
+    end else begin
+      //put name into comment in grid somehow.
+    end;
+  finally
+    FreeAndNil(frmTopicICDLinker);
+    SrcDataStr.Free;
+    ItemDataStr.Free;
+    if Result <> true  then lbxSection.Checked[Index] := false;
+  end;
+end;
+
+function TfrmTMGDiagnoses.HandleBadICDCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+var
+  ICDCode  : string;
+  ProblemText : string;
+  CodeStatus  : string;
+  ProbIEN     : string;
+  ICDCSYS     : string;
+  ItemStr, I10Description, SCTCode,SecItem, SCTpar : string;
+  msg, plIEN, InputStr, ICDPar : string;
+  OrigProbStr : string;
+
+begin
+  result := true;
+
+  ICDCode     := ItemDataStr.Value['ICDCode'];
+  ProblemText := ItemDataStr.Value['ProblemText'];
+  CodeStatus  := ItemDataStr.Value['CodeStatus'];
+  ProbIEN     := ItemDataStr.Value['ProblemIEN'];
+  ICDCSYS     := ItemDataStr.Value['ICDCodeSys'];
+
+  msg := IfThen(CodeStatus = '#', TX_INACTIVE_ICD_CODE, TX_NONSPEC_ICD_CODE);
+  OrigProbStr := lbxSection.Items[Index];
+  InputStr := IfThen(Pos('#', ProblemText) > 0, TrimLeft(Piece(ProblemText, '#', 2)), ProblemText);
+
+  LexiconLookup(ICDCode, LX_ICD, 0, True, InputStr, msg);  //ICDCode is an out parameter
+
+  if (Piece(ICDCode, U, 1) <> '') then begin
+    plIEN := ProbIEN;
+
+    FUpdatingGrid := TRUE;
+    lbxSection.Items[Index] := Pieces(ICDCode, U, 1, 2) + U + Piece(ICDCode, U, 1) + U + plIEN;
+    ItemStr := lbxSection.Items[Index]; //kt
+    lbxSection.Checked[Index] := True;
+    if plIEN <> '' then begin
+      if not (Pos('SCT', Piece(ICDCode, U, 2)) > 0) and (Encounter.GetICDVersionCode = '10D') then begin
+        //ask for SNOMED CT
+        //agp //kt prior --> LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, TX_PROB_LACKS_SCT_CODE);
+        I10Description := Piece(ICDCode, U, 2) + ' (' + Piece(ICDCode, U, 4) + #32 + Piece(ICDCode, U, 1) + ')'; //agp //kt
+        LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, TX_PROB_LACKS_SCT_CODE + CRLF + CRLF + I10Description); //agp //kt
+
+        if (Piece(SCTCode, U, 4) <> '') then begin    //agp  //kt changed piece 3 -> 4
+          SecItem := lbxSection.Items[Index];
+          SetPiece(SecItem, U, 2, Piece(SCTCode, U, 2));
+
+          FUpdatingGrid := TRUE;
+          lbxSection.Items[Index] := SecItem;
+          lbxSection.Checked[Index] := True;
+          if plIEN <> '' then begin
+            //agp //kt prior --> SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
+            SCTPar := Piece(SCTCode, U, 4) + U + Piece(SCTCode, U, 4) + U + Piece(SCTCode, U, 2) + U + Piece(SCTCode, U, 3);  //agp //kt
+          end;
+          FUpdatingGrid := FALSE;
+        end else begin
+          //Undo previous ICD-10 updates when cancelling out of the SCT update dialog
+          lbxSection.Items[Index] := OrigProbStr;
+          lbxSection.Checked[Index] := False;
+          FUpdatingGrid := False;
+          Result := false;
+          exit;
+        end;
+      end;
+      ICDPar := Piece(ICDCode, U, 3) + U + Piece(ICDCode, U, 1) + U + Piece(ICDCode, U, 2) + U + Piece(ICDCode, U, 4);
+      UpdateProblem(plIEN, ICDPar, SCTPar);
+      PLUpdated := True; //agp //kt
+    end;
+    FUpdatingGrid := FALSE;
+  end else begin
+    Result := false;
+    lbxSection.Checked[Index] := False;
+    exit;
+  end;
+end;
+
+
+function TfrmTMGDiagnoses.CorrectInactiveSCTCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+var
+  msg, SCTCode, plIEN, SecItem, SCTPar : string;
+  InputStr : string;
+  ICDCode  : string;
+  ProblemText : string;
+  CodeStatus  : string;
+  ProbIEN     : string;
+  ICDCSYS     : string;
+
+begin
+  result := true;
+
+  ICDCode     := ItemDataStr.Value['ICDCode'];
+  ProblemText := ItemDataStr.Value['ProblemText'];
+  CodeStatus  := ItemDataStr.Value['CodeStatus'];
+  ProbIEN     := ItemDataStr.Value['ProblemIEN'];
+  ICDCSYS     := ItemDataStr.Value['ICDCodeSys'];
+
+  // correct inactive SCT Code
+  msg := TX_INACTIVE_SCT_CODE;
+
+  InputStr := '';
+
+  LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, msg);
+
+  if (Piece(SCTCode, U, 3) <> '') then begin
+    plIEN := Piece(lbxSection.Items[Index], U, 5);
+
+    SecItem := lbxSection.Items[Index];
+    SetPiece(SecItem, U, 2, Piece(SCTCode, U, 2));
+
+    FUpdatingGrid := TRUE;
+    lbxSection.Items[Index] := SecItem;
+    lbxSection.Checked[Index] := True;
+    if plIEN <> '' then begin
+      SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
+      UpdateProblem(plIEN, '', SCTPar);
+      PLUpdated := True;  //agp //kt
+    end;
+    FUpdatingGrid := FALSE;
+  end else begin
+    result := false;
+    lbxSection.Checked[Index] := False;
+    exit;
+  end;
+end;
+
+
+function TfrmTMGDiagnoses.CorrectBadOrInactiveSCTCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+var
+  msg, SCTCode, plIEN, SCTPar, ICDPar : string;
+  InputStr : string;
+  ICDCode  : string;
+  ProblemText : string;
+  CodeStatus  : string;
+  ProbIEN     : string;
+  ICDCSYS     : string;
+
+begin
+  result := true;
+  // correct inactive SCT Code
+  msg := TX_INACTIVE_SCT_CODE;
+
+  ICDCode     := ItemDataStr.Value['ICDCode'];
+  ProblemText := ItemDataStr.Value['ProblemText'];
+  CodeStatus  := ItemDataStr.Value['CodeStatus'];
+  ProbIEN     := ItemDataStr.Value['ProblemIEN'];
+  ICDCSYS     := ItemDataStr.Value['ICDCodeSys'];
+
+  InputStr := '';
+
+  LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, msg);
+
+  if (Piece(SCTCode, U, 3) = '') then begin
+    lbxSection.Checked[Index] := False;
+    exit;
+  end;
+
+  // correct inactive ICD Code
+  msg := TX_INACTIVE_ICD_CODE;
+
+  LexiconLookup(ICDCode, LX_ICD, 0, True, '', msg);
+
+  if (Piece(ICDCode, U, 1) <> '') and (Piece(SCTCode, U, 3) <> '') then begin
+    plIEN := Piece(lbxSection.Items[Index], U, 5);
+
+    SetPiece(ICDCode, U, 2, Piece(SCTCode, U, 2));
+
+    FUpdatingGrid := TRUE;
+    lbxSection.Items[Index] := Pieces(ICDCode, U, 1, 2) + U + Piece(ICDCode, U, 1) + U + plIEN;
+    lbxSection.Checked[Index] := True;
+    if plIEN <> '' then begin
+      SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
+      ICDPar := Piece(ICDCode, U, 3) + U + Piece(ICDCode, U, 1) + U + Piece(ICDCode, U, 2) + U + Piece(ICDCode, U, 4);
+      UpdateProblem(plIEN, ICDPar, SCTPar);
+    end;
+    FUpdatingGrid := FALSE;
+  end else begin
+    result := false;
+    lbxSection.Checked[Index] := False;
+    exit;
+  end;
+end;
+
+function TfrmTMGDiagnoses.CorrectMissingSCTCode(ItemDataStr : TDataStr; Index : integer) : boolean; //result is OK, i.e. not Cancelled
+var msg : string;
+    SCTCode, SCTPar, plIEN, SecItem, InputStr : string;
+    ICDCode : string;
+
+begin
+  result := true;
+  ICDCode := ItemDataStr.Value['ICDCode'];
+
+  // Problem Lacks SCT Code
+  //agp //kt prior --> msg := TX_PROB_LACKS_SCT_CODE;
+  //msg := TX_PROB_LACKS_SCT_CODE + CRLF + CRLF + Piece(lbxSection.Items[Index], U, 2);  //agp //kt
+  msg := TX_PROB_LACKS_SCT_CODE + CRLF + CRLF + ICDCode;  //agp //kt
+
+  LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, msg);
+
+  if (Piece(SCTCode, U, 3) <> '') then begin
+    //plIEN := Piece(lbxSection.Items[Index], U, 5);
+    plIEN := ItemDataStr.Value['ProblemIEN'];
+
+    SecItem := lbxSection.Items[Index];
+    SetPiece(SecItem, U, 2, Piece(SCTCode, U, 2));
+
+    FUpdatingGrid := TRUE;
+    lbxSection.Items[Index] := SecItem;
+    lbxSection.Checked[Index] := True;
+    if plIEN <> '' then begin
+      SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
+      UpdateProblem(plIEN, '', SCTPar);
+    end;
+    FUpdatingGrid := FALSE;
+  end else begin
+    result := false;
+    lbxSection.Checked[Index] := False;
+  end;
+end;
+
+
+procedure TfrmTMGDiagnoses.GetlbxSectionInfo(Index : integer; var ADataStr : TDataStr; var OutEntryType : tNodetype);
+var IntEntryType, SrcIndex : integer;
+begin
+  OutEntryType := ntNone;
+  if not Assigned(ADataStr) then exit;
+  ADataStr.Clear;
+  if lbSection.ItemIEN >= 0 then exit;
+  IntEntryType := -lbSection.ItemIEN;
+  if (IntEntryType < tNODE_FIRST) or (IntEntryType > tNODE_LAST) then exit;
+  OutEntryType := tNodeType(IntEntryType);
+  SrcIndex := Integer(lbxSection.Items.Objects[Index]);
+  if (SrcIndex < 0) or (SrcIndex >= NodeTypeSL[OutEntryType].Count) then exit;
+  ADataStr.FormatStr := NODE_TYPE_DATA_FORMAT[outEntryType];
+  ADataStr.DataStr := NodeTypeSL[OutEntryType].Strings[SrcIndex];
+end;
+
+
+procedure TfrmTMGDiagnoses.lbxSectionClickCheck(Sender: TObject; Index: Integer);
+var
+  SCTPar, InputStr: String;
+  EntryType : tNodeType;
+  //ItemStr : string;
+  SelICDCode,ProblemText,CodeStatus,ProbIEN,ICDCSYS: string;
+  TopicName,TopicNarrative : string;
+  SrcDataStr : TDataStr;
+  ItemDataStr : TDataStr;
+  //StaffToCode : boolean;
+  SectionStr : string;
+
+begin
+  frmEncounterFrame.SelectTab(CT_TMG_DiagNm);//for some reason, at this point, the frmEncounterFrame.TabControl.TabIndex = -1.  Will select this tab again.
+  SrcDataStr := TDataStr.Create(TOPIC_PROBLEM_FORMAT);
+  ItemDataStr := TDataStr.Create(STD_ICD_DATA_FORMAT);
+
   FlbxSectionIndex := -1;
   TopicNarrative := '';
   if (not FUpdatingGrid) and (lbxSection.Checked[Index]) then begin
-    ItemStr := lbxSection.Items[Index];  //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+    SectionStr := lbSection.Items[lbSection.ItemIndex];
+    //ItemStr := lbxSection.Items[Index];  //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
+    ItemDataStr.DataStr := lbxSection.Items[Index];  //STD_ICD_DATA_FORMAT
 
     SCTPar := '';
     InputStr := '';
-    TopicName := '';
-    OrigProbStr := ItemStr;
-    SrcLine := '';
-    SrcIndex := 0;
-    IntEntryType := 0;
-    if lbSection.ItemIEN < 0 then begin  //kt
-      IntEntryType := -lbSection.ItemIEN;
-      if (IntEntryType >= tNODE_FIRST) and (IntEntryType <= tNODE_LAST) then begin
-        EntryType := tNodeType(IntEntryType);
-        SrcIndex := Integer(lbxSection.Items.Objects[Index]);
-        if (SrcIndex < 0) or (SrcIndex >= NodeTypeSL[EntryType].Count) then begin
-          lbxSection.Checked[Index] := false;
-          exit;
-        end;
-        SrcLine := NodeTypeSL[EntryType].Strings[SrcIndex];
-        case EntryType of          //     1       2           3                 4                 5               6                     7                   8
-          TopicsDiscussed,         //fmt: 1^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
-          TopicsUndiscussed: begin //fmt: 2^<TOPIC NAME>^<SUMMARY TEXT>^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
-                               TopicNarrative := Piece(SrcLine,'^',3);
-                               TopicName := Piece(SrcLine,'^',2);
-                               //p2 := piece(ItemStr,'^',2);
-                               //p2 := piece2(p2, ' -- ',1);
-                               //SetPiece(ItemStr,'^',2, p2);
-                             end;
-          ProbList: ;
-          PriorICDs:         begin
-                               TopicNarrative := Piece(SrcLine,'^',3);
-                             end;
-        end;
-      end;
+
+    GetlbxSectionInfo(Index, SrcDataStr, EntryType);
+    if EntryType = ntNone then begin
+      lbxSection.Checked[Index] := false;
+      exit;
     end;
+    TopicNarrative := SrcDataStr.ValueDef('ThreadText', '');
+    TopicName      := SrcDataStr.ValueDef('TopicName', '');
+
     //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
-    SelICDCode := Piece(ItemStr, U, 1);
-    ProblemText := Piece(ItemStr, U, 2);
-    CodeStatus := Piece(ItemStr, U, 4);
-    ProbIEN := Piece(ItemStr, U, 5);
-    ICDCSYS := Piece(ItemStr, U, 6);
+    //SelICDCode  := Piece(ItemStr, U, 1);
+    //ProblemText := Piece(ItemStr, U, 2);
+    //CodeStatus  := Piece(ItemStr, U, 4);
+    //ProbIEN     := Piece(ItemStr, U, 5);
+    //ICDCSYS     := Piece(ItemStr, U, 6);
+
+    SelICDCode  := ItemDataStr.Value['ICDCode'];
+    ProblemText := ItemDataStr.Value['ProblemText'];
+    CodeStatus  := ItemDataStr.Value['CodeStatus'];
+    ProbIEN     := ItemDataStr.Value['ProblemIEN'];
+    ICDCSYS     := ItemDataStr.Value['ICDCodeSys'];
 
     if FlbxSectionRightClickDown and (SelICDCode <> '???') then begin
-      if (IntEntryType <> ord(TopicsDiscussed)) and (IntEntryType <> ord(TopicsUndiscussed)) then begin
+      if (EntryType <> TopicsDiscussed) and (EntryType <> TopicsUndiscussed) then begin
         lbxSection.Checked[Index] := false;
         exit;
       end;
@@ -983,185 +1370,31 @@ begin
       exit;
     end;
 
-    if (SelICDCode = '???') and ((IntEntryType = ord(TopicsDiscussed)) or (IntEntryType = ord(TopicsDiscussed))) then begin
-      frmTopicICDLinker := TfrmTopicICDLinker.Create(frmEncounterFrame);
-      try
-        frmTopicICDLinker.Initialize(TopicName, TMGInfoPriorICDs, TMGInfoEncounterICDs);
-        ModalResult := frmTopicICDLinker.ShowModal;
-        if ModalResult = mrOK then begin
-          TopicName := ProblemText;
-          ItemStr := frmTopicICDLinker.ResultICD; //format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
-          SetPiece(ItemStr, '^', 2, TopicName + ARROW_STR + Piece(ItemStr,'^',2)+'}');
-          lbxSection.Items[Index] := ItemStr; //automatically changes lbxSection.Checked[Index] -> false
-          UpdatingSave := FUpdatingGrid; FUpdatingGrid := true;
-          lbxSection.Checked[Index] := true;  //reset to true
-          FUpdatingGrid := UpdatingSave;
-          SelICDCode := Piece(ItemStr, U, 1);
-          ProblemText := Piece(ItemStr, U, 2);
-          CodeStatus := Piece(ItemStr, U, 4);
-          ProbIEN := Piece(ItemStr, U, 5);
-          ICDCSYS := Piece(ItemStr, U, 6);
-                              //     1       2           3                 4                 5               6                     7                   8
-          //Change SrcLine    //fmt: 1^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
-          SetPiece(SrcLine,'^', 5, SelICDCode);
-          SetPiece(SrcLine,'^', 6, ProblemText);
-          SetPiece(SrcLine,'^', 8, ICDCSYS);
-          NodeTypeSL[EntryType].Strings[SrcIndex] := SrcLine;
-          //Link TopicName -> ICD
-          LinkTopicToICD(TopicName, ItemStr);
-        end else begin
-          lbxSection.Checked[Index] := false;
-          exit;
-        end;
-      finally
-        FreeAndNil(frmTopicICDLinker);
-      end;
+    if (SelICDCode = '???') and ((EntryType = TopicsDiscussed) or (EntryType = TopicsUndiscussed)) then begin
+      if not HandleNeedsLink(TopicName, Index) then exit;
     end;
 
     if (CodeStatus = '#') or (Pos('799.9', SelICDCode) > 0) or (Pos('R69', SelICDCode) > 0) then begin
-      if (CodeStatus = '#') then begin
-        msg := TX_INACTIVE_ICD_CODE
-      end else begin
-        msg := TX_NONSPEC_ICD_CODE;
-      end;
+      if not HandleBadICDCode(ItemDataStr, Index) then exit;
+    end;
 
-      InputStr := GetSearchString(ProblemText);
+    if (CodeStatus = '$') then begin
+      if not CorrectInactiveSCTCode(ItemDataStr, Index) then exit;
+    end;
 
-      LexiconLookup(ICDCode, LX_ICD, 0, True, InputStr, msg);  //ICDCode is an out parameter
+    if (CodeStatus = '#$') then begin
+      if not CorrectBadOrInactiveSCTCode(ItemDataStr, Index) then exit;
+    end;
 
-      if (Piece(ICDCode, U, 1) <> '') then begin
-        plIEN := ProbIEN;
+    //if (Piece(SectionStr, U, 2) = PL_ITEMS) and (Encounter.GetICDVersionCode = '10D')
+    //and not (Pos('SCT', Piece(lbxSection.Items[Index], U, 2)) > 0) then begin
+    if (Entrytype = ProbList) and (Encounter.GetICDVersionCode = '10D') and not (Pos('SCT', ProblemText) > 0) then begin
+      if not CorrectMissingSCTCode(ItemDataStr, Index) then exit
+    end;
 
-        FUpdatingGrid := TRUE;
-        lbxSection.Items[Index] := Pieces(ICDCode, U, 1, 2) + U + Piece(ICDCode, U, 1) + U + plIEN;
-        ItemStr := lbxSection.Items[Index]; //kt
-        lbxSection.Checked[Index] := True;
-        if plIEN <> '' then begin
-          if not (Pos('SCT', Piece(ICDCode, U, 2)) > 0) and (Piece(Encounter.GetICDVersion, U, 1) = '10D') then begin
-            //ask for SNOMED CT
-            //agp //kt prior --> LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, TX_PROB_LACKS_SCT_CODE);
-            I10Description := Piece(ICDCode, U, 2) + ' (' + Piece(ICDCode, U, 4) + #32 + Piece(ICDCode, U, 1) + ')'; //agp //kt
-            LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, TX_PROB_LACKS_SCT_CODE + CRLF + CRLF + I10Description); //agp //kt
-
-            if (Piece(SCTCode, U, 4) <> '') then begin    //agp  //kt changed piece 3 -> 4
-              SecItem := lbxSection.Items[Index];
-              SetPiece(SecItem, U, 2, Piece(SCTCode, U, 2));
-
-              FUpdatingGrid := TRUE;
-              lbxSection.Items[Index] := SecItem;
-              lbxSection.Checked[Index] := True;
-              if plIEN <> '' then begin
-                //agp //kt prior --> SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
-                SCTPar := Piece(SCTCode, U, 4) + U + Piece(SCTCode, U, 4) + U + Piece(SCTCode, U, 2) + U + Piece(SCTCode, U, 3);  //agp //kt
-              end;
-              FUpdatingGrid := FALSE;
-            end else begin
-              //Undo previous ICD-10 updates when cancelling out of the SCT update dialog
-              lbxSection.Items[Index] := OrigProbStr;
-              lbxSection.Checked[Index] := False;
-              FUpdatingGrid := False;
-              exit;
-            end;
-          end;
-          ICDPar := Piece(ICDCode, U, 3) + U + Piece(ICDCode, U, 1) + U + Piece(ICDCode, U, 2) + U + Piece(ICDCode, U, 4);
-          UpdateProblem(plIEN, ICDPar, SCTPar);
-          PLUpdated := True; //agp //kt
-        end;
-        FUpdatingGrid := FALSE;
-      end else begin
-        lbxSection.Checked[Index] := False;
-        exit;
-      end;
-    end else if (Piece(lbxSection.Items[Index], U, 4) = '$') then begin
-      // correct inactive SCT Code
-      msg := TX_INACTIVE_SCT_CODE;
-
-      LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, msg);
-
-      if (Piece(SCTCode, U, 3) <> '') then begin
-        plIEN := Piece(lbxSection.Items[Index], U, 5);
-
-        SecItem := lbxSection.Items[Index];
-        SetPiece(SecItem, U, 2, Piece(SCTCode, U, 2));
-
-        FUpdatingGrid := TRUE;
-        lbxSection.Items[Index] := SecItem;
-        lbxSection.Checked[Index] := True;
-        if plIEN <> '' then begin
-          SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
-          UpdateProblem(plIEN, '', SCTPar);
-          PLUpdated := True;  //agp //kt
-        end;
-        FUpdatingGrid := FALSE;
-      end else begin
-        lbxSection.Checked[Index] := False;
-        exit;
-      end;
-    end else if (Piece(lbxSection.Items[Index], U, 4) = '#$') then begin
-      // correct inactive SCT Code
-      msg := TX_INACTIVE_SCT_CODE;
-
-      LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, msg);
-
-      if (Piece(SCTCode, U, 3) = '') then begin
-        lbxSection.Checked[Index] := False;
-        exit;
-      end;
-
-      // correct inactive ICD Code
-      msg := TX_INACTIVE_ICD_CODE;
-
-      LexiconLookup(ICDCode, LX_ICD, 0, True, '', msg);
-
-      if (Piece(ICDCode, U, 1) <> '') and (Piece(SCTCode, U, 3) <> '') then begin
-        plIEN := Piece(lbxSection.Items[Index], U, 5);
-
-        SetPiece(ICDCode, U, 2, Piece(SCTCode, U, 2));
-
-        FUpdatingGrid := TRUE;
-        lbxSection.Items[Index] := Pieces(ICDCode, U, 1, 2) + U + Piece(ICDCode, U, 1) + U + plIEN;
-        lbxSection.Checked[Index] := True;
-        if plIEN <> '' then begin
-          SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
-          ICDPar := Piece(ICDCode, U, 3) + U + Piece(ICDCode, U, 1) + U + Piece(ICDCode, U, 2) + U + Piece(ICDCode, U, 4);
-          UpdateProblem(plIEN, ICDPar, SCTPar);
-        end;
-        FUpdatingGrid := FALSE;
-      end else begin
-        lbxSection.Checked[Index] := False;
-        exit;
-      end;
-    end else if (Piece(lbSection.Items[lbSection.ItemIndex], U, 2) = PL_ITEMS) and
-      (Piece(Encounter.GetICDVersion, U, 1) = '10D') and
-      not (Pos('SCT', Piece(lbxSection.Items[Index], U, 2)) > 0) then
-    begin
-      // Problem Lacks SCT Code
-      //agp //kt prior --> msg := TX_PROB_LACKS_SCT_CODE;
-      msg := TX_PROB_LACKS_SCT_CODE + CRLF + CRLF + Piece(lbxSection.Items[Index], U, 2);  //agp //kt
-
-      LexiconLookup(SCTCode, LX_SCT, 0, True, InputStr, msg);
-
-      if (Piece(SCTCode, U, 3) <> '') then begin
-        plIEN := Piece(lbxSection.Items[Index], U, 5);
-
-        SecItem := lbxSection.Items[Index];
-        SetPiece(SecItem, U, 2, Piece(SCTCode, U, 2));
-
-        FUpdatingGrid := TRUE;
-        lbxSection.Items[Index] := SecItem;
-        lbxSection.Checked[Index] := True;
-        if plIEN <> '' then begin
-          SCTPar := Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 3) + U + Piece(SCTCode, U, 2);
-          UpdateProblem(plIEN, '', SCTPar);
-        end;
-        FUpdatingGrid := FALSE;
-      end else begin
-        lbxSection.Checked[Index] := False;
-        exit;
-      end;
-    end else if (Piece(Encounter.GetICDVersion, U, 1) = 'ICD') and
-      ((Pos('ICD-10', Piece(lbxSection.Items[Index], U, 2)) > 0) or (Piece(lbxSection.Items[Index], U, 6)='10D')) then
-    begin
+    //if (Piece(Encounter.GetICDVersion, U, 1) = 'ICD') and
+    //  ((Pos('ICD-10', Piece(lbxSection.Items[Index], U, 2)) > 0) or (Piece(lbxSection.Items[Index], U, 6)='10D')) then
+    if (Encounter.GetICDVersionCode = 'ICD') and ((Pos('ICD-10', ProblemText) > 0) or (ICDCSYS='10D')) then begin
       // Attempting to add an ICD10 diagnosis code to an ICD9 encounter
       InfoBox(TX_INV_ICD10_DX, TC_INV_ICD10_DX, MB_ICONERROR or MB_OK);
       lbxSection.Checked[Index] := False;
@@ -1172,7 +1405,7 @@ begin
       exit;
     end;
   end;
-  memNarrative.Lines.Text := TopicNarrative;
+  memNarrative.Text := TopicNarrative;
   inherited;
   EnsurePrimaryDiag;
 end;
@@ -1311,11 +1544,12 @@ begin
 end;
 
 procedure TfrmTMGDiagnoses.lbSectionClick(Sender: TObject);
-var IntEntryType : integer;
+var //IntEntryType : integer;
     SrchEnable : boolean;
 begin
   if not FProgSectionClick then SetSearchMode(false);
-  IntEntryType := -lbSection.ItemIEN;
+  //IntEntryType := -lbSection.ItemIEN;
+  memNarrative.Lines.Text := '';
   SrchEnable := true;
   btnSearch.Visible := SrchEnable;
   if not SrchEnable then SetSearchMode(false);
@@ -1344,7 +1578,7 @@ begin
   lb.Canvas.TextOut(Rect.Left+2, Rect.Top+1, item); {display the text }
 end;
 
-procedure TfrmTMGDiagnoses.LinkTopicToICD(TopicName, ICDInfo : string);
+procedure TfrmTMGDiagnoses.LinkTopicToICD(TopicName: string;  ItemDataStr : TDataStr);
 //ICDInfo format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
 
 var SL : TStringList;
@@ -1357,10 +1591,14 @@ begin
   Results := TStringList.Create;
   try
     //ICDInfo format: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
-    ICDCode := Piece(ICDInfo,'^',1);
-    CodeSys := Piece(ICDInfo,'^',6);
+    //ICDCode := Piece(ICDInfo,'^',1);
+    //CodeSys := Piece(ICDInfo,'^',6);
     CDT     := FMDTToStr(FSrcPCEData.DateTime);
-    ProbIEN := Piece(ICDInfo,'^',5);
+    //ProbIEN := Piece(ICDInfo,'^',5);
+
+    ICDCode := ItemDataStr.Value['ICDCode'];
+    ProbIEN := ItemDataStr.Value['ProblemIEN'];
+    CodeSys := ItemDataStr.Value['ICDCodeSys'];
 
     ICDInfo2 := '0' + ';' + ICDCode + ';' + CodeSys + ';' + CDT;           //Needed format: '<ICD_IEN>;<ICD_CODE>;<ICD_CODING_SYS>;<AS-OF FMDT>'
     SL.Add('SET^' + Patient.DFN + U + TopicName + U + '0' + U + ICDInfo2);  //Needed format: 'SET^<DFN>^<TopicName>^<ProblemIEN>^<ICD_INFO*>^<SCTIEN>'  <-- can have any combo of IENS's
@@ -1377,6 +1615,42 @@ begin
   end;
 
 end;
+
+procedure TfrmTMGDiagnoses.SendData;
+var SL, HTMLTable : TStringList;
+    TempPCE: TPCEData;
+    i : integer;
+    Line : string;
+
+begin
+  exit;  //remove later if feature wanted...
+  if not assigned(frmNotes) then exit;
+  SL := TStringList.Create;
+  HTMLTable := TStringList.Create;
+  TempPCE := TPCEData.Create;
+  try
+    //Assemble Dx listing....
+    TempPCE.SetDiagnoses(lbGrid.Items);
+    SL.Text := TempPCE.StrDiagnoses(True);
+    if SL.Count > 0 then begin
+      HTMLTable.Add('<table border="0" cellspacing="2" cellpadding="0" bgcolor="#d3d3d3" DXs="1">');
+      for i := 0 to SL.Count - 1 do begin
+        Line := SL[i];
+        HTMLTable.Add('<tr bgcolor="#f2f2f2">');
+        HTMLTable.Add('<td>'+Line+'</td>');
+        HTMLTable.Add('</tr>')
+      end;
+      HTMLTable.Add('</table>');
+      HTMLTable.Add('<p><DIV name="'+HTML_TARGET_DX+'"></DIV>');
+      frmNotes.InsertDxGrid(HTMLTable);
+    end;
+  finally
+    SL.Free;
+    HTMLTable.Free;
+    TempPCE.Free;
+  end;
+end;
+
 
 initialization
   SpecifyFormIsNotADialog(TfrmTMGDiagnoses);

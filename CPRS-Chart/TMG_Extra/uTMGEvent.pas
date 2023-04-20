@@ -38,6 +38,7 @@ uses
 
 procedure SaveEvent(Data:string;Event:integer);
 function CheckForOpenEvent(Data:string;Event:integer):boolean;
+function IsJobStillActive():boolean;
 
 implementation
 
@@ -69,14 +70,29 @@ begin
    EventData := 'CHKOPEN^'+inttostr(User.DUZ)+'^'+Patient.DFN+'^'+inttostr(Event)+'^'+DateTimeToFMDTStr(Now)+'^'+Data;
    tCallV(RPCResults,'TMG EVENT CHANNEL',[EventData]);
    if piece(RPCResults.Text,'^',1)='-1' then begin
-      if messagedlg(RPCResults.text+#13#10+#13#10+'Would you like to set an close time for this timer?',mtinformation,[mbYes,mbNo],0)=mrYes then begin
+      if messagedlg(piece(RPCResults.text,'^',2)+#13#10+#13#10+'Would you like to set an close time for this timer?',mtinformation,[mbYes,mbNo],0)=mrYes then begin
          //messagedlg('Here I will ask to set the time');
+         if piece(RPCResults.text,'^',3)<>'' then Data := piece(RPCResults.text,'^',3);   // if a job number was sent back... send it back through the Save as the Data
          DateTime := strToDateTime(InputBox('Please enter the time','Enter the time for the last event to stop',DateTimeToStr(now)));
          EventData := 'SAVE^'+inttostr(User.DUZ)+'^'+Patient.DFN+'^2^'+DateTimeToFMDTStr(DateTime)+'^'+Data;
          tCallV(RPCResults,'TMG EVENT CHANNEL',[EventData]);
       end else begin
          result := false;
-      end;   
+      end;
+   end;
+   RPCResults.free;
+end;
+
+function IsJobStillActive():boolean;
+var RPCResults : TStringList;
+    EventData:string;
+begin
+   result := True;
+   RPCResults := TStringList.Create;
+   EventData := 'CHKACTIV^'+inttostr(User.DUZ)+'^'+Patient.DFN;
+   tCallV(RPCResults,'TMG EVENT CHANNEL',[EventData]);
+   if piece(RPCResults.Text,'^',1)='-1' then begin
+      result := false;
    end;
    RPCResults.free;
 end;

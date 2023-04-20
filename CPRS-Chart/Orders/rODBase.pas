@@ -437,8 +437,7 @@ var
   i, inc, len, numLoop, remain: Integer;
   ocStr, tmpStr, x, y, z: string;
 begin
-  with RPCBrokerV do
-  begin
+  with RPCBrokerV do begin
     ClearParameters := True;
     RemoteProcedure := 'ORWDX SAVE';
     Param[0].PType := literal;

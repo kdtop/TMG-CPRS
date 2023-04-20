@@ -1143,6 +1143,7 @@ var
   GecRemIen, GecRemStr, RemWipe: String;
   HTMLEditing : boolean;  //kt 9/11
   TempString: string;     //kt
+  ForceForegroundSave : boolean; //kt 4/23
 
   procedure Add(PCEItemClass: TPCEItemClass);
   var itm: TPCEItem;
@@ -1199,6 +1200,7 @@ var
   end;
 
 begin  //btnFinishClick();
+  ForceForegroundSave := true;  //kt 4/2023 Could make into parameter later...  Needed so health factors are immediately saved, for prompt availability elsewhere. 
   Kill := FALSE;
   GecRemIen := '0';
   WHList := nil;
@@ -1403,7 +1405,7 @@ begin  //btnFinishClick();
                               if (CurDate = '') then CurDate := FloatToStr(Encounter.DateTime);
                               if (LastDate <> CurDate) or (LastLoc <> CurLoc) then begin
                                 if (assigned(HistData)) then begin
-                                  HistData.Save;
+                                  HistData.Save(ForceForegroundSave);  //kt added ForceForegroundSave parameter
                                   HistData.Free;
                                 end;
                                 LastDate := CurDate;
@@ -1486,14 +1488,14 @@ begin  //btnFinishClick();
                           end; //for loop
                           if (Hist) then begin
                             if (assigned(HistData)) then begin
-                              HistData.Save;
+                              HistData.Save(ForceForegroundSave); //kt added ForceForegroundSave parameter
                               HistData.Free;
                               HistData := nil;
                             end;
                           end else begin
                             while RemForm.PCEObj.NeedProviderInfo do
                               MissingProviderInfo(RemForm.PCEObj, PCEType);
-                            RemForm.PCEObj.Save;
+                            RemForm.PCEObj.Save(ForceForegroundSave);  //kt added added ForceForegroundSave parameter
                             VisitParent := GetVisitIEN(RemForm.NoteList.ItemIEN);
                           end;
                         end;

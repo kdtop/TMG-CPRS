@@ -175,6 +175,7 @@ end;
 procedure TfrmEncounterMDM.SendData;
 begin
   if not assigned(frmNotes) then exit;
+  if SavedHTMLTables.Count = 0 then exit;
   frmNotes.InsertMDMGrid(SavedHTMLTables);
 end;
 

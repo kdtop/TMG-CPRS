@@ -21,10 +21,10 @@ type
     lblSection: TLabel;
     lblList: TLabel;
     lblComment: TLabel;
-    btnRemove: TButton;
+    btnRemove: TBitBtn;
     btnOther: TButton;
     bvlMain: TBevel;
-    btnSelectAll: TButton;
+    btnSelectAll: TBitBtn;
     lbxSection: TORListBox;  //kt doc: CPTCode^CPTName^CPTCode^CPTModifiers^Flag^#   <-- Confirm if this is correct
     pnlMain: TPanel;
     pnlLeft: TPanel;
@@ -90,7 +90,9 @@ const
 implementation
 
 uses fPCELex, fPCEOther, fEncounterFrame, fHFSearch, VA508AccessibilityRouter,
-  ORCtrlsVA508Compatibility, fBase508Form, UBAConst;
+  ORCtrlsVA508Compatibility, fBase508Form, UBAConst,
+  fTopicICDLinkerU  //kt
+  ;
 
 {$R *.DFM}
 
@@ -240,21 +242,20 @@ begin
   inherited;
   FUpdatingGrid := TRUE;
   try
-    for i := lbGrid.Items.Count-1 downto 0 do if(lbGrid.Selected[i]) then
-    begin
+    for i := lbGrid.Items.Count-1 downto 0 do if(lbGrid.Selected[i]) then begin
       CurCategory := GetCat;
       APCEItem := TPCEDiag(lbGrid.Items.Objects[i]);
-      if APCEItem.Category = CurCategory then
-      begin
-        for j := 0 to lbxSection.Items.Count - 1 do
-        begin
+      //kt if APCEItem.Category = CurCategory then begin
+        for j := 0 to lbxSection.Items.Count - 1 do begin
           SCode := Piece(lbxSection.Items[j], U, 1);
           SNarr := Piece(lbxSection.Items[j], U, 2);
-          if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then
-//          if (Pos(APCEItem.Code, SCode) > 0) then
+          //kt original --> if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then
+          if (Pos(APCEItem.Code, SCode) > 0) then begin
+//          if (Pos(APCEItem.Code, SCode) > 0) then   //kt note <-- was in original VA code,  commented out
             lbxSection.Checked[j] := False;
+          end;
         end;
-      end;
+      //kt end;
       APCEItem.Free;
       lbGrid.Items.Delete(i);
     end;
@@ -519,6 +520,9 @@ begin
     UpdateNewItemStr(x);
     APCEItem := FPCEItemClass.Create;
     APCEItem.SetFromString(x);
+    if SCode = SIGNAL_ICD_FOR_STAFF_LOOKUP then begin  //kt added block
+      APCEItem.Comment := SNarr;
+    end;
     GridIndex := lbGrid.Items.AddObject(APCEItem.ItemStr, APCEItem);
     DoSync := TRUE;
   end;
@@ -632,8 +636,9 @@ begin
         for i := 0 to lbxSection.Items.Count - 1 do begin
           SCode := Piece(lbxSection.Items[i], U, 1);
           SNarr := Piece(lbxSection.Items[i], U, 2);
-          if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0)then
-//          if (Pos(APCEItem.Code, SCode) > 0) then
+          //kt original --> if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0)then
+          if (Pos(APCEItem.Code, SCode) > 0) then  //kt
+//          if (Pos(APCEItem.Code, SCode) > 0) then  //kt <--- note, was commented in original VA code. 
           begin
             NewIdx := i;
             break;

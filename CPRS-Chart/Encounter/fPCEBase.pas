@@ -276,9 +276,9 @@ end;
 procedure TfrmPCEBase.btnCancelClick(Sender: TObject);
 begin
   inherited;
-  frmencounterframe.Abort := FALSE;
+  frmEncounterframe.Abort := FALSE;
   frmEncounterFrame.Cancel := true;
-  frmencounterframe.Close;
+  frmEncounterframe.Close;
 end;
 
 {///////////////////////////////////////////////////////////////////////////////

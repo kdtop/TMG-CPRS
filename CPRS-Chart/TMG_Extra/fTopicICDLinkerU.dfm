@@ -2,8 +2,8 @@ object frmTopicICDLinker: TfrmTopicICDLinker
   Left = 0
   Top = 0
   Caption = 'Link Topic Name to ICD Code'
-  ClientHeight = 478
-  ClientWidth = 577
+  ClientHeight = 498
+  ClientWidth = 605
   Color = clBtnFace
   Constraints.MinHeight = 250
   Constraints.MinWidth = 250
@@ -18,89 +18,16 @@ object frmTopicICDLinker: TfrmTopicICDLinker
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object pnlTop: TPanel
-    Left = 0
-    Top = 0
-    Width = 577
-    Height = 49
-    Align = alTop
-    TabOrder = 0
-    DesignSize = (
-      577
-      49)
-    object Label1: TLabel
-      Left = 5
-      Top = 5
-      Width = 100
-      Height = 13
-      Caption = 'Fix missing ICD Code'
-    end
-    object lblTopicTitle: TLabel
-      Left = 5
-      Top = 27
-      Width = 36
-      Height = 16
-      Caption = 'Topic:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object lblTopic: TLabel
-      Left = 47
-      Top = 27
-      Width = 329
-      Height = 16
-      Caption = 'Chronic Atrial Fibrillation with Rapid Ventricular Response'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object btnSearch: TBitBtn
-      Left = 547
-      Top = 18
-      Width = 24
-      Height = 24
-      Anchors = [akRight, akBottom]
-      TabOrder = 0
-      OnClick = btnSearchClick
-      Glyph.Data = {
-        3E020000424D3E0200000000000036000000280000000D0000000D0000000100
-        1800000000000802000000000000000000000000000000000000FFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF606060FFFF
-        FF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF
-        606060A0A0A060606000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFBFBFBF606060A0A0A0606060BFBFBF00FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFBFBFBF606060A0A0A0606060BFBFBFFFFFFF00FFFFFFFFFFFF
-        FFBFBFFF7F7FFF7F7FFFBFBFBFBFBF606060A0A0A0606060BFBFBFFFFFFFFFFF
-        FF00FFFFFFFF3F3FFF0000FF7F7FFF7F7FFF0000DF2020A0A0A0606060BFBFBF
-        FFFFFFFFFFFFFFFFFF00FFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFF3F3F7F
-        4040BFBFBFFFFFFFFFFFFFFFFFFFFFFFFF00FF3F3FFFBFBFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FF0000FFFFFF
-        7F7F7FBFBFBFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FF00FF0000BFBFBFBFBFBFBFBFBFBFBFBFFFFFFFFFFFFFFF0000FFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFF00FF7F7FFF7F7FBFBFBFBFBFBF7F7F7FFFFFFFFF7F7FFF
-        7F7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFF0000FF7F7FBFBFBFFFFF
-        FFFF7F7FFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFBFBF
-        FF3F3FFF0000FF0000FF3F3FFFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FF00}
-    end
-  end
   object pnlBottom: TPanel
     Left = 0
-    Top = 439
-    Width = 577
-    Height = 39
+    Top = 456
+    Width = 605
+    Height = 42
     Align = alBottom
-    TabOrder = 1
+    TabOrder = 0
     DesignSize = (
-      577
-      39)
+      605
+      42)
     object lblResult: TLabel
       Left = 10
       Top = 6
@@ -108,9 +35,9 @@ object frmTopicICDLinker: TfrmTopicICDLinker
       Height = 13
       Caption = 'lblResult'
     end
-    object btnOK: TBitBtn
-      Left = 455
-      Top = 1
+    object btnOK2Link: TBitBtn
+      Left = 483
+      Top = 4
       Width = 120
       Height = 35
       Anchors = [akRight, akBottom]
@@ -172,10 +99,12 @@ object frmTopicICDLinker: TfrmTopicICDLinker
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFCB
         CBCCFF5F5D61FF232226FF201F23FF201F23FF454446FFA2A2A3FFFCFCFCFFFF
         FFFFFFFFFFFF}
+      ExplicitLeft = 440
+      ExplicitTop = 1
     end
     object btnCancel: TBitBtn
-      Left = 329
-      Top = 1
+      Left = 357
+      Top = 4
       Width = 120
       Height = 35
       Anchors = [akRight, akBottom]
@@ -209,20 +138,37 @@ object frmTopicICDLinker: TfrmTopicICDLinker
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      ExplicitLeft = 314
+      ExplicitTop = 1
+    end
+    object btnOK: TBitBtn
+      Left = 483
+      Top = 4
+      Width = 120
+      Height = 35
+      Anchors = [akRight, akBottom]
+      Caption = '&OK'
+      Enabled = False
+      ModalResult = 1
+      TabOrder = 2
+      ExplicitLeft = 440
+      ExplicitTop = 1
     end
   end
   object pnlMain: TPanel
     Left = 0
     Top = 49
-    Width = 577
-    Height = 390
+    Width = 605
+    Height = 407
     Align = alClient
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 1
+    ExplicitWidth = 562
+    ExplicitHeight = 312
     object splSplitter: TSplitter
       Left = 210
       Top = 0
-      Height = 390
+      Height = 407
       ExplicitLeft = 440
       ExplicitTop = 248
       ExplicitHeight = 100
@@ -231,26 +177,28 @@ object frmTopicICDLinker: TfrmTopicICDLinker
       Left = 0
       Top = 0
       Width = 210
-      Height = 390
+      Height = 407
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitHeight = 410
       DesignSize = (
         210
-        390)
+        407)
       object pnlLeftTop: TPanel
         Left = 0
         Top = 0
         Width = 210
-        Height = 342
+        Height = 359
         Align = alTop
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 0
+        ExplicitHeight = 362
         object lbSection: TORListBox
           Left = 1
           Top = 1
           Width = 208
-          Height = 340
+          Height = 357
           Align = alClient
           ItemHeight = 13
           ParentShowHint = False
@@ -260,13 +208,14 @@ object frmTopicICDLinker: TfrmTopicICDLinker
           ItemTipColor = clWindow
           LongList = False
           Pieces = '3'
+          ExplicitHeight = 360
         end
       end
       object btnSrchICD: TBitBtn
         Tag = 12
         Left = 5
-        Top = 345
-        Width = 188
+        Top = 362
+        Width = 199
         Height = 40
         Anchors = [akLeft, akBottom]
         Caption = 'Search For Other ICD Code'
@@ -404,23 +353,26 @@ object frmTopicICDLinker: TfrmTopicICDLinker
           56FFCA8456FFCA8456FFCA8456FFCA8456FFCA8556FFDC915FFFDF9360FFDF93
           60FFDF9360FFDF9360FFDF9360FFDF9360FFDF9360FFDF9360FFDF9360FFDF93
           60FFDF9360FF}
+        ExplicitTop = 365
       end
     end
     object pnlRight: TPanel
       Left = 213
       Top = 0
-      Width = 364
-      Height = 390
+      Width = 392
+      Height = 407
       Align = alClient
       TabOrder = 1
+      ExplicitWidth = 349
+      ExplicitHeight = 410
       DesignSize = (
-        364
-        390)
+        392
+        407)
       object lbxSection: TORListBox
         Left = 1
-        Top = 28
-        Width = 360
-        Height = 360
+        Top = 29
+        Width = 388
+        Height = 376
         Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akRight, akBottom]
         ItemHeight = 16
@@ -436,15 +388,15 @@ object frmTopicICDLinker: TfrmTopicICDLinker
       end
       object edtSearchTerms: TEdit
         Left = 2
-        Top = 2
-        Width = 328
-        Height = 21
+        Top = 3
+        Width = 360
+        Height = 24
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 1
         OnChange = edtSearchTermsChange
       end
       object btnClearSrch: TBitBtn
-        Left = 332
+        Left = 364
         Top = 2
         Width = 24
         Height = 24
@@ -487,6 +439,80 @@ object frmTopicICDLinker: TfrmTopicICDLinker
           ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
           80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
       end
+    end
+  end
+  object pnlTop: TPanel
+    Left = 0
+    Top = 0
+    Width = 605
+    Height = 49
+    Align = alTop
+    TabOrder = 2
+    DesignSize = (
+      605
+      49)
+    object Label1: TLabel
+      Left = 5
+      Top = 5
+      Width = 100
+      Height = 13
+      Caption = 'Fix missing ICD Code'
+    end
+    object lblTopicTitle: TLabel
+      Left = 5
+      Top = 27
+      Width = 36
+      Height = 16
+      Caption = 'Topic:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object lblTopic: TLabel
+      Left = 47
+      Top = 27
+      Width = 329
+      Height = 16
+      Caption = 'Chronic Atrial Fibrillation with Rapid Ventricular Response'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object btnSearch: TBitBtn
+      Left = 575
+      Top = 18
+      Width = 24
+      Height = 24
+      Anchors = [akRight, akBottom]
+      TabOrder = 0
+      OnClick = btnSearchClick
+      Glyph.Data = {
+        3E020000424D3E0200000000000036000000280000000D0000000D0000000100
+        1800000000000802000000000000000000000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF606060FFFF
+        FF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF
+        606060A0A0A060606000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFBFBFBF606060A0A0A0606060BFBFBF00FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFBFBFBF606060A0A0A0606060BFBFBFFFFFFF00FFFFFFFFFFFF
+        FFBFBFFF7F7FFF7F7FFFBFBFBFBFBF606060A0A0A0606060BFBFBFFFFFFFFFFF
+        FF00FFFFFFFF3F3FFF0000FF7F7FFF7F7FFF0000DF2020A0A0A0606060BFBFBF
+        FFFFFFFFFFFFFFFFFF00FFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFF3F3F7F
+        4040BFBFBFFFFFFFFFFFFFFFFFFFFFFFFF00FF3F3FFFBFBFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FF0000FFFFFF
+        7F7F7FBFBFBFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FF00FF0000BFBFBFBFBFBFBFBFBFBFBFBFFFFFFFFFFFFFFF0000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFF00FF7F7FFF7F7FBFBFBFBFBFBF7F7F7FFFFFFFFF7F7FFF
+        7F7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFF0000FF7F7FBFBFBFFFFF
+        FFFF7F7FFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFBFBF
+        FF3F3FFF0000FF0000FF3F3FFFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FF00}
+      ExplicitLeft = 532
     end
   end
 end

@@ -67,6 +67,46 @@ type
     function IndexOfPiece(PieceNum : integer; SearchValue : string) : integer;
   end;
 
+  TDataStr = class(TObject)   //kt added entire class 4/2023
+  //Class to work with data strings, i.e. if s='123^abc^apple^pear^dog^cat', then data is being stored at each piece
+  //E.g. FormatStr = 'Index^Name^Best^Worst^First^Last',
+  //     TDataStr(obj).Value['Worst'] = 'pear'     <-- index name must match (case sensitive) with item from FormatStr
+  //     TDataStr(obj).Piece[6] = 'cat'
+  private
+    FDataStr : string;
+    FFormatStr : string;
+    FDelimChar : char;   //default is '^'
+    FFormatSL : TStringList;
+    procedure SetPieceValue(index : integer; Value : string);
+    procedure SetValue(index : string; Value : string);
+    procedure SetIntValue(index : string; Value : integer);
+    function GetPieceValue(index : integer) : string;
+    function GetValue(index : String) : string;
+    function GetIntValue(index : string) : integer;
+    procedure SetFormatStr(value : string);
+    procedure SetDelimChar(value : char);
+    function GetIntIndex(Index : string; SuppressException : boolean = false) : integer;
+  public
+    procedure Clear;
+    procedure Assign(ASource : TDataStr);
+    procedure AssignViaMap(ASource : TDataStr; MapStr : string);  //MapStr format: '<local index>=<source index>;...'
+    function IntValueDef(Index : string; DefaultValue : integer) : integer;
+    function ValueDef(index : string; DefaultValue : string) : string;
+    function HasIndex(index : string) : boolean;
+    constructor Create(AFormatStr: string = ''; ADataStr : string=''; ADelimChar : char = '^');
+    destructor Destroy;
+    property Piece[index : integer] : string read GetPieceValue write SetPieceValue;
+    property Value[index : string] : string read GetValue write SetValue;
+    property IntValue[index : string] : integer read GetIntValue write SetIntValue;
+    property FormatStr : string read FFormatStr write SetFormatStr;
+    property DelimChar : char read FDelimChar write SetDelimChar;
+    property DataStr : string read FDataStr write FDataStr;
+  end;
+
+
+
+
+
 { sundries }
 function CharInSet(AChar: Char; ASetOfChar: TCharacterSet) : Boolean;
 
@@ -2895,6 +2935,148 @@ begin
   end;
 end;
 
+//------ TDataStr ------------
+//kt added
+
+function TDataStr.HasIndex(index : string) : boolean;
+begin
+  Result := (FFormatSL.IndexOf(index) > -1);
+end;
+
+function TDataStr.GetIntIndex(Index : string; SuppressException : boolean = false) : integer;
+begin
+  Result := FFormatSL.IndexOf(index);
+  if (Result = -1) and not SuppressException then begin
+    raise Exception.Create('Index ['+index+'] not defind in DataString');
+  end;
+end;
+
+procedure TDataStr.SetPieceValue(index : integer; Value : string);
+begin
+  SetPiece(FDataStr, FDelimChar, index, value);
+end;
+
+procedure TDataStr.SetValue(index : string; Value : string);
+var intIndex : integer;
+begin
+  intIndex := GetIntIndex(index);
+  SetPiece(FDataStr, FDelimChar, intIndex+1, Value);
+end;
+
+procedure TDataStr.SetIntValue(index : string; Value : integer);
+begin
+  SetValue(index, IntToStr(Value));
+end;
+
+function TDataStr.IntValueDef(Index : string; DefaultValue : integer) : integer;
+begin
+  Result := StrToIntDef(GetValue(index), DefaultValue);
+end;
+
+function TDataStr.GetIntValue(index : string) : integer;
+begin
+  Result := StrToIntDef(GetValue(index), -1);
+end;
+
+function TDataStr.GetPieceValue(index : integer) : string;
+begin
+  Result := ORFN.piece(FDataStr, FDelimChar, index);
+end;
+
+function TDataStr.ValueDef(index : string; DefaultValue : string) : string;
+var intIndex : integer;
+begin
+  Result := '';
+  intIndex := GetIntIndex(index, true);
+  if intIndex > -1 then Result := ORFn.piece(FDataStr, FDelimChar, intIndex+1);
+  if Result = '' then Result := DefaultValue;
+end;
+
+function TDataStr.GetValue(index : String) : string;
+begin
+  Result := ValueDef(index, '');
+end;
+
+procedure TDataStr.SetFormatStr(value : string);
+begin
+  FFormatStr := value;
+  PiecesToList(FFormatStr, FDelimChar, FFormatSL);
+end;
+
+procedure TDataStr.SetDelimChar(value : char);
+begin
+  FDelimChar := value;
+  PiecesToList(FFormatStr, FDelimChar, FFormatSL);  //reparce format string.
+end;
+
+procedure TDataStr.Clear;
+begin
+  FDataStr := '';
+  FDelimChar := '^';
+  FFormatStr := '';
+  FFormatSL.Clear;
+end;
+
+procedure TDataStr.Assign(ASource : TDataStr);
+begin
+  FDataStr := ASource.DataStr;
+  FDelimChar := ASource.DelimChar;
+  FFormatStr := ASource.FormatStr;
+  FFormatSL.Assign(ASource.FFormatSL);
+end;
+
+procedure TDataStr.AssignViaMap(ASource : TDataStr; MapStr : string);
+//MapStr format: '<local index>=<source index>^<local index>=<source index>^...'
+//      or       '<source index>^<source index>^...'   <-- in this case local index is based by position.  1st source index goes to 1st index occuring in local formatStr
+var
+  MapSL : TStringList;
+  LocalIndex, SourceIndex : string;
+  entry : string;
+  i : integer;
+  SourceValue : string;
+
+begin
+  MapSL := TStringList.Create;
+  try
+    PiecesToList(MapStr, '^', MapSL);
+    for i := 0 to MapSL.Count - 1 do begin
+      entry := MapSL.Strings[i];
+      if Pos('=', entry)>0 then begin  //<local index>=<source index>^<local index>=<source index>^
+        LocalIndex := ORFn.Piece(entry,'=',1);
+        SourceIndex := ORFn.Piece(entry,'=',1);
+      end else begin  //<source index>^<source index>^
+        LocalIndex := IfThen(i < FFormatSL.Count, FFormatSL.Strings[i], '');
+        SourceIndex := entry;
+      end;
+      if SourceIndex <> '' then begin
+        SourceValue := ASource.Value[SourceIndex];
+      end else begin
+        SourceValue := '';
+      end;
+      Self.Value[LocalIndex] := SourceValue;
+    end;
+  finally
+    MapSL.Free;
+  end;
+end;
+
+constructor TDataStr.Create(AFormatStr: string=''; ADataStr : string=''; ADelimChar : char = '^');
+begin
+  inherited Create;
+  FDataStr := ADataStr;
+  FDelimChar := ADelimChar;
+  FFormatSL := TStringList.Create;
+  SetFormatStr(AFormatStr);
+end;
+
+destructor TDataStr.Destroy;
+begin
+  FFormatSL.Free;
+  Inherited;
+end;
+
+
+//--------------------------------
 
 initialization
   FBaseFont := TFont.Create;

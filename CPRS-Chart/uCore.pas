@@ -232,6 +232,7 @@ type
     procedure EmptySaved();
     procedure CreateSaved(Reason: string);
     function GetICDVersion: String;
+    function GetICDVersionCode: String;  //kt added
     function NeedVisit: Boolean;
     function NeedVisitWVerification: Boolean;     //TMG added entire function 8/2/22
     property DateTime:        TFMDateTime read FDateTime  write SetDateTime;
@@ -1194,6 +1195,12 @@ begin
     Result := '10D^ICD-10-CM';
 end;
 
+function TEncounter.GetICDVersionCode: String;  //kt added
+begin
+  Result := piece(GetICDVersion,'^',1);
+end;
+
+
 function TEncounter.NeedVisit: Boolean;
 { returns true if required fields for visit creation are present }
 begin
@@ -1383,9 +1390,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TChanges.Add(ItemType: Integer; const AnID, ItemText, GroupName: string;
-  SignState: Integer; AParentID: string; User: int64; OrderDG: String;
-  DCOrder, Delay, ProblemAdded: Boolean);
+procedure TChanges.Add(ItemType: Integer;
+                       const AnID, ItemText, GroupName: string;
+                       SignState: Integer; AParentID: string;
+                       User: int64;
+                       OrderDG: String;
+                       DCOrder, Delay, ProblemAdded: Boolean);
 var
   i: Integer;
   Found: Boolean;
@@ -1404,38 +1414,37 @@ begin
   FRefreshCoverPL := ProblemAdded;
   FRefreshProblemList := ProblemAdded;
   Found := False;
-  if ChangeList <> nil then with ChangeList do for i := 0 to Count - 1 do
-    with TChangeItem(Items[i]) do if ID = AnID then
-    begin
+  if ChangeList <> nil then with ChangeList do for i := 0 to Count - 1 do begin
+    with TChangeItem(Items[i]) do if ID = AnID then begin
       Found := True;
       // can't change ItemType, ID, or GroupName, must call Remove first
       FText := ItemText;
       FSignState := SignState;
     end;
-  if not Found then
-  begin
+  end;
+  if not Found then begin
     NewChangeItem := TChangeItem.Create(ItemType, AnID, ItemText, GroupName, SignState, AParentID, User, OrderDG, DCOrder, Delay);
     case ItemType of
-    CH_DOC: begin
-              FDocuments.Add(NewChangeItem);
-            end;
-    CH_SUM: begin     {*REV*}
-              FDocuments.Add(NewChangeItem);
-            end;
-    CH_CON: begin
-              FDocuments.Add(NewChangeItem);
-            end;
-    CH_SUR: begin
-              FDocuments.Add(NewChangeItem);
-            end;
-    CH_ORD: begin
-              FOrders.Add(NewChangeItem);
-              with FOrderGrp do if IndexOf(GroupName) < 0 then Add(GroupName);
-            end;
-    CH_PCE: begin
-              FPCE.Add(NewChangeItem);
-              with FPCEGrp do if IndexOf(GroupName) < 0 then Add(GroupName);
-            end;
+      CH_DOC: begin
+                FDocuments.Add(NewChangeItem);
+              end;
+      CH_SUM: begin     {*REV*}
+                FDocuments.Add(NewChangeItem);
+              end;
+      CH_CON: begin
+                FDocuments.Add(NewChangeItem);
+              end;
+      CH_SUR: begin
+                FDocuments.Add(NewChangeItem);
+              end;
+      CH_ORD: begin
+                FOrders.Add(NewChangeItem);
+                with FOrderGrp do if IndexOf(GroupName) < 0 then Add(GroupName);
+              end;
+      CH_PCE: begin
+                FPCE.Add(NewChangeItem);
+                with FPCEGrp do if IndexOf(GroupName) < 0 then Add(GroupName);
+              end;
     end;
     Inc(FCount);
   end;
@@ -1447,12 +1456,15 @@ var
   i: Integer;
 begin
   Result := False;
-  with FDocuments do for i := 0 to Count - 1 do
-    with TChangeItem(Items[i]) do if FSignState <> CH_SIGN_NA then
-    begin
-      Result := True;
-      Exit;
+  with FDocuments do for i := 0 to Count - 1 do begin
+    with TChangeItem(Items[i]) do begin
+      //kt added, then removed --> if (TChangeItem(Items[i]).FID = frmNotes.EditingIEN) and (frmNotes.AllowSignature(true) = false) then continue;
+      if FSignState <> CH_SIGN_NA then begin
+        Result := True;
+        Exit;
+      end;
     end;
+  end;
   with FOrders do for i := 0 to Count - 1 do
     with TChangeItem(Items[i]) do if FSignState <> CH_SIGN_NA then
     begin

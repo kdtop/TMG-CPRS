@@ -237,6 +237,8 @@ type
     tabPageR: TTabControl;                                   //kt-tabs 11/26/22
     pnlMainR: TPanel;                                        //kt-tabs 11/26/22
     pnlPageR: TPanel;
+    timerCheckStopwatch: TTimer;
+    procedure timerCheckStopwatchTimer(Sender: TObject);
     procedure pnlMainRResize(Sender: TObject);                                        //kt-tabs 11/26/22
     procedure mnuToggleSidePanelClick(Sender: TObject);      //kt-tabs 11/26/22
     procedure timHideSplitterHandleTimer(Sender: TObject);   //kt-tabs 11/26/22
@@ -631,6 +633,7 @@ uses
   fTaskEvents,      //tmg 11/1/22
   fMailbox,         //kt
   fUploadImages,    //kt
+  fEncounterFrame,  //kt 4/2/23
   fODDiet, fODMisc, fODGen, fODMedIn, fODMedOut, fODText, fODConsult, fODProc, fODRad,   //kt added line
   fODLab, fODBBank, fODMeds, fODMedIV, fODVitals, fODAuto, fOMNavA,                      //kt added line
   fOMSet, uODBase, rODMeds, fOMAction, fARTAllgy, fOMHTML, fODChild, fODMedNVA,          //kt added line
@@ -690,6 +693,20 @@ const
 function TfrmFrame.TimeoutCondition: boolean;
 begin
   Result := (FCreateProgress < FCP_PTSEL);
+end;
+
+procedure TfrmFrame.timerCheckStopwatchTimer(Sender: TObject);
+begin
+  inherited;
+  if IsJobStillActive = false then begin
+    pnlTimer.Caption := '00:00';
+    pnlTimer.Color := clBtnFace;
+    timerStopwatch.enabled := False;
+    timerCheckStopwatch.Enabled := False;
+    pnlTimer.color := colorTimerOff;
+    bTimerOn := False;
+    if uTMGOptions.ReadBool('ShowStoppedTimerMsg',false) = True then ShowMessage('Timer was stopped by another session.');
+  end;
 end;
 
 procedure TfrmFrame.timerStopwatchTimer(Sender: TObject);
@@ -816,6 +833,7 @@ begin
   inherited;
   bTimerOn := (bTimerOn=False);
   timerStopwatch.enabled := bTimerOn;
+  timerCheckStopwatch.Enabled := bTimerOn;
   if bTimerOn then begin
      pnlTimer.color := colorTimerOn;
      SaveEvent('',1);
@@ -836,6 +854,7 @@ begin
   pnlTimer.Caption := '00:00';
   pnlTimer.Color := clBtnFace;
   timerStopwatch.enabled := False;
+  timerCheckStopwatch.Enabled := False;
   pnlTimer.color := colorTimerOff;
   bTimerOn := False;
 end;
@@ -912,7 +931,24 @@ begin
              end;
         '0': begin
                Silent := (TimedOut) or (Reason = 'COMMIT');
-               if frmNotes.AllowSignature=False then exit;  //FPG for Intracare 2/10/15
+               //kt 4/19/23 -- Rationalle for removing.
+               //           We have issues where we are trying to close a patient, and the
+               //           user is notified that the note is not ready for signature.
+               //           However, they were not trying to sign the note-- just trying to close it.
+               //           And above, frmNotes.AllowContextChange(Reason) has already been
+               //           called, and the note gets saved there.
+               //kt 4/19/23 -- rationalle for putting it back....
+               //           Current behavior is such that when CPRS is closed or a changed
+               //           to a new patient, CPRS asks for orders to be signed, notes to be
+               //           signed etc.  This is to ensure that everything has been taken
+               //           care of before the user leaves.
+               //           If the line below is commented out, then the user is
+               //           given opportunity to sign a note in ReviewChanges().  And if the
+               //           not is not ready for signature, then this will be a problem.
+               //Needed change.  Need to figure out how to allow user to choose option
+               //       for not signing (and then leaving) even if note not ready for signature.
+               // EDDIE COMMENTED FOR TEST   if frmNotes.AllowSignature(true)=False then exit;  //FPG for Intracare 2/10/15
+               if frmNotes.AllowSignature(true)=False then Silent := true;
                Result := ReviewChanges(Silent);
              end;
       end; //case
@@ -1338,6 +1374,7 @@ begin
   SetUpResizeButtons; //kt 4/28/21
   StartTimer := 0;  //11/2/21
   menuNurseNote.Visible := uTMGOptions.ReadBool('Use Quick Nurse Note',false);
+  timerCheckStopwatch.Interval := uTMGOptions.ReadInteger('ActiveCheckInterval',10000);
 
   TControlCracker(frameLRSplitter).OnMouseEnter := frameLRSplitterMouseEnter;  //kt-tabs 11/26/22
   TControlCracker(frameLRSplitter).OnMouseLeave := frameLRSplitterMouseLeave;  //kt-tabs 11/26/22
@@ -1876,6 +1913,7 @@ var
   OrderAct: string;
 begin
   with Message do begin
+    if assigned(frmEncounterFrame) then frmEncounterFrame.NotifyOrder(WParam, TOrder(LParam));  //kt added
     frmCover.NotifyOrder(WParam, TOrder(LParam));
     frmProblems.NotifyOrder(WParam, TOrder(LParam));
     frmMeds.NotifyOrder(WParam, TOrder(LParam));

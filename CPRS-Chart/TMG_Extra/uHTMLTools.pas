@@ -141,6 +141,8 @@ interface
   function HTMLResize(ImageFName: string) : string;
   function GetInsertImgHTMLName(Name: string; PropSL : TStringList = nil): string;
   function SelectExistingImageClick() : string;
+  function Make2ColHTMLTable(SourceSL : TStringList; Options : TStringList=nil) : string;
+
 
 implementation
 
@@ -2432,6 +2434,75 @@ begin
     FreeAndNil(frmImagePickExisting);
   end;
 end;
+
+function Make2ColHTMLTable(SourceSL : TStringList; Options : TStringList=nil) : string;
+//Input: SourceSL is source input.  Format: every other line will be right vs left column.
+//       Options.  OPTIONAL.  This is TStringList in Key-Value mode.  E.g. Title=My Title.  Supported key names
+//             l-title
+//             r-title
+//             border
+
+//Output is string with HTML for table.
+var
+  i : integer;
+  StrL, StrR : string;
+  s : string;
+  Output : TStringList;
+  LTableTitle, RTableTitle, BorderSize : string;
+
+  function ItemDef(Items : TStrings; i : integer; default : string = '') : string;
+  begin
+    Result := default;
+    if not assigned(Items) then exit;
+    if (i < 0) or (i >= Items.Count) then exit;
+    Result := Items[i];
+  end;
+
+begin
+  if Assigned(Options) then begin
+    s := Options.Values['l-title'];
+    LTableTitle := IfThen(s<>'', s, 'Table');
+
+    s := Options.Values['r-title'];
+    RTableTitle := IfThen(s<>'', s, 'VALUE');
+
+    s := Options.Values['border'];
+    BorderSize := IfThen(s<>'', s, '1');
+  end else begin
+    LTableTitle := 'Table';
+    RTableTitle := 'VALUE';
+    BorderSize := '1';
+  end;
+
+  Output := TStringList.Create;
+  try
+    i := 0;
+    while i< SourceSL.count do begin
+      StrL := ItemDef(SourceSL, i);
+      StrR := ItemDef(SourceSL, i+1);
+      inc(i, 2);
+    end;
+
+    Output.Add('<table border='+BorderSize+'>');
+    Output.Add('<TR><th>'+LTableTitle+'</th> <th>'+RTableTitle+'</th></TR>');
+
+    i := 0;
+    while i< SourceSL.count do begin
+      StrL := ItemDef(SourceSL, i);
+      StrR := ItemDef(SourceSL, i+1);
+      s := '<tr><td>' + strL + '</td><td>' + strR + '</td></tr>';
+      Output.Add(s);
+      inc(i, 2);
+    end;
+
+    Output.Add('</table>');
+  finally
+    Result := Output.Text;
+    Output.Free;
+  end;
+end;
+
+
 
 
 initialization

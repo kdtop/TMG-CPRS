@@ -4,6 +4,7 @@ inherited frmTMGVisitTypes: TfrmTMGVisitTypes
   Caption = 'E/M Visit'
   ClientWidth = 622
   ExplicitWidth = 638
+  ExplicitHeight = 240
   PixelsPerInch = 96
   TextHeight = 13
   object lblProcQty: TLabel [0]
@@ -226,14 +227,14 @@ inherited frmTMGVisitTypes: TfrmTMGVisitTypes
     Visible = False
     OnChange = edtSearchTermsChange
   end
-  inherited btnRemove: TButton
+  inherited btnRemove: TBitBtn
     Left = 454
     Top = 371
     TabOrder = 7
     ExplicitLeft = 454
     ExplicitTop = 371
   end
-  inherited btnSelectAll: TButton
+  inherited btnSelectAll: TBitBtn
     Left = 374
     Top = 371
     Height = 21

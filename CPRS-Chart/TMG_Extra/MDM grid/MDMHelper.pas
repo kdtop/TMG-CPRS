@@ -280,6 +280,8 @@ const
 
 implementation
 
+uses uHTMLTools;
+
 {$R *.dfm}
 
 const
@@ -788,11 +790,26 @@ procedure TfrmMDMGrid.MakeHTMLTable(SL : TStringList);  //NOTE: This is to outpu
 //    for SL input, every other line will be right vs left column.
 //Output is FHTMLTable
 var
-    i : integer;
-    StrL, StrR : string;
-    s : string;
+    //i : integer;
+    //StrL, StrR : string;
+    //s : string;
+    Options : TStringList;
 begin
   FHTMLTable.Clear;
+
+  Options := TStringList.Create;
+  try
+    Options.Add('l-title=MEDICAL DECISION MAKING ITEM');
+    Options.Add('r-title=VALUE');
+    Options.Add('border=1');
+
+    FHTMLTable.Text := uHTMLTools.Make2ColHTMLTable(SL, Options);
+  finally
+    Options.Free;
+  end;
+
+
+  {
 
   i := 0;
   while i< SL.count do begin
@@ -815,6 +832,7 @@ begin
   end;
 
   FHTMLTable.Add('</table>');
+  }
 end;
 
 

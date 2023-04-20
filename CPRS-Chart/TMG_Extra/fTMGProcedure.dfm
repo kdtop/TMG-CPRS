@@ -4,7 +4,6 @@ inherited frmTMGProcedures: TfrmTMGProcedures
   Caption = 'Encounter Procedure'
   ClientWidth = 622
   ExplicitWidth = 638
-  ExplicitHeight = 438
   PixelsPerInch = 96
   TextHeight = 13
   object lblProcQty: TLabel [0]
@@ -95,8 +94,8 @@ inherited frmTMGProcedures: TfrmTMGProcedures
     TabOrder = 2
   end
   object spnProcQty: TUpDown [11]
-    Left = 348
-    Top = 371
+    Left = 332
+    Top = 370
     Width = 15
     Height = 21
     Associate = txtProcQty
@@ -108,7 +107,7 @@ inherited frmTMGProcedures: TfrmTMGProcedures
   object txtProcQty: TCaptionEdit [12]
     Left = 288
     Top = 371
-    Width = 60
+    Width = 41
     Height = 21
     Enabled = False
     TabOrder = 4
@@ -119,7 +118,7 @@ inherited frmTMGProcedures: TfrmTMGProcedures
   object cboProvider: TORComboBox [13]
     Left = 56
     Top = 371
-    Width = 177
+    Width = 165
     Height = 21
     Style = orcsDropDown
     AutoSelect = True
@@ -226,21 +225,23 @@ inherited frmTMGProcedures: TfrmTMGProcedures
     Visible = False
     OnChange = edtSearchTermsChange
   end
-  inherited btnRemove: TButton
+  inherited btnRemove: TBitBtn
     Left = 454
     Top = 371
     TabOrder = 7
     ExplicitLeft = 454
     ExplicitTop = 371
   end
-  inherited btnSelectAll: TButton
-    Left = 374
+  inherited btnSelectAll: TBitBtn
+    Left = 356
     Top = 371
+    Width = 93
     Height = 21
     TabOrder = 6
     TabStop = True
-    ExplicitLeft = 374
+    ExplicitLeft = 356
     ExplicitTop = 371
+    ExplicitWidth = 93
     ExplicitHeight = 21
   end
   inherited pnlMain: TPanel

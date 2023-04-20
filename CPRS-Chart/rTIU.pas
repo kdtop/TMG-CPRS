@@ -110,6 +110,7 @@ procedure ReadProblemLink(RPCResult : TStrings; ProbIEN : string);  //kt 5/15
 procedure ProblemTopics(RPCResult : TStrings; Command : string; Section : string = 'HPI'; Option: string=''; SDT : string = ''; EDT : string = '');  //kt 5/15
 procedure TMGTopicLinks(RPCResult : TStrings; Input: TStringList);  //kt 5/15
 procedure ProblemTopicLinkSubset(RPCResult : TStrings; DFN: string; Starting : string=''; Dir : string = ''; Max : string = '');  //kt 5/15
+procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string);  //kt 4/2023
 function GetTMGPSCode(IEN: Int64): string;  //kt //elh  5/13/14
 function TMGSearchTemplates(OutSL : TStringList; SearchTerm : string; DUZ : Int64; CaseSensitiveStr : string = '0') : string;  //kt 5/15
 procedure PutNewNote(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec);
@@ -898,6 +899,45 @@ procedure ProblemTopicLinkSubset(RPCResult : TStrings; DFN: string;
 begin
   CallV('TMG CPRS TOPIC SUBSET', [DFN, Starting, Dir, Max]);
   FastAssign(RPCBrokerV.Results, RPCResult);
+end;
+
+procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string);
+//kt added entired function 4/2023
+{
+  OUT is filled as follows.
+      OUT(0)="1^OK" or "-1^Error Message"
+      OUT(#)=<TopicName>^<ICD CodeSystem>^<ICD CODE>^<ICD NAME>^<ProbIEN>^<SCT CODE>^<SCT NAME>
+
+  Topic name is a prior topic name found to match.
+    e.g. if input is "edema", and a prior topic of "CHF WITH PEDAL EDEMA" is
+    found, then TopicName returned would be "CHF WITH PEDAL EDEMA"
+
+  ICD CodeSystem will typicall by "ICD" or "10D", though others are possible.
+    "ICD" means ICD9 coding system
+    "10D" means ICD10 coding system
+
+  ICD CODE
+    e.g. I10. for ICD-10 system,  or 401.1 for ICD9 syste
+
+  ICD Name
+    This is the long name, or description, of the ICD code
+
+  ProbIEN
+    This is a link to file 9000011 (PROBLEM)
+    This and subsequent nodes are provided only if a linked PROBLEM is found.
+
+  SCT code -- the Snomed code (if any)
+
+  SCT Name -- the Snomed code description (if any)
+
+  If multiple matches found, then multiple will be returned.
+  If no entries are found, then none returned.
+  Either way, OUT(0) will be "1^OK"
+}
+begin
+  CallV('TMG CPRS TOPIC CODE SUGGEST', [TopicName]);  //WAS TMG CPRS TOPIC PROB SUGGEST
+  FastAssign(RPCBrokerV.Results, RPCResult);
+  if RPCResult.Count>0 then RPCResult.Delete(0);  //This should be "1^OK"  
 end;
 
 procedure PutNewNote(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec);

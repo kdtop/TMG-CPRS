@@ -124,7 +124,9 @@ procedure ListSkinCodes(Dest: TStrings; SectionIndex: Integer);
 procedure ListSCDisabilities(Dest: TStrings);
 procedure LoadPCEDataForNote(Dest: TStrings; ANoteIEN: Integer; VStr: string);
 function GetVisitIEN(NoteIEN: Integer): string;
-procedure SavePCEData(PCEList: TStringList; ANoteIEN, ALocation: integer);
+//kt procedure SavePCEData(PCEList: TStringList; ANoteIEN, ALocation: integer);
+procedure SavePCEData(PCEList: TStringList; ANoteIEN, ALocation: integer; ForceForegroundSave : boolean = false);  //kt added ForceForegroundSave
+
 
 function DataHasCPTCodes(AList: TStrings): boolean;
 function GetAskPCE(Loc: integer): TAskPCE;
@@ -1236,9 +1238,10 @@ begin
     Result := '0';
 end;
 
-procedure SavePCEData(PCEList: TStringList; ANoteIEN, ALocation: integer);
+//kt procedure SavePCEData(PCEList: TStringList; ANoteIEN, ALocation: integer);
+procedure SavePCEData(PCEList: TStringList; ANoteIEN, ALocation: integer; ForceForegroundSave : boolean = false);  //kt added ForceForegroundSave
 begin
-  CallV('ORWPCE SAVE', [PCEList, ANoteIEN, ALocation]);
+  CallV('ORWPCE SAVE', [PCEList, ANoteIEN, ALocation, ForceForegroundSave]);  //kt added ForceForegroundSave
 end;
 
 {-----------------------------------------------------------------------------}

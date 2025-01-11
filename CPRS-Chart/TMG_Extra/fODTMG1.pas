@@ -23,29 +23,39 @@ type
                   ttdtOrderOptions,
                   ttdtItemData,
                   ttdtTextFld,
-                  ttdtWPFld
+                  ttdtWPFld,
+                  ttdtPriorICD,     //added custom for this form.
+                  ttdtEncounterICD  //added custom for this form.
                   );
   TTMGDataList = class;
   TTMGData = class(TObject)
   private
+    FAllowedLinkedDxList : TTMGDataList; //Doesn't own objects
   public
-    SourceIndex : integer; // index in FDialogItemList that was source of this data
-    ID : string;
-    Instance : integer;
-    IEN : string;  //IEN22751
-    Name : string;
-    DataType : tTMGDataType;
-    Items : TStringList; //doesn't own objects
-    Fasting : boolean;
-    Checked : boolean;
-    Index : integer; //for TCheckListBox entries, this will store items index
-                     //for TRadioGroup entries, this will store items index
-                     //for TRadioGroup parents (those with child entries), this will store selecte ItemIndex
-    SavedValue : string;
-    InternalValue : string;
-    ExternalValue : string;
-    LinkedControl : TControl;
+    SourceIndex       : integer; // index in FDialogItemList that was source of this data
+    ID                : string;
+    Instance          : integer;
+    IEN               : string;  //IEN22751
+    ICD               : string;
+    Name              : string;
+    NeedsLinkedDx     : boolean;
+    LinkedDxStr       : string;  //comma separated list of IEN's 22751.  E.g. PSA might needs Dx of H/O Prostate CA, or ScreeningPSA
+    DataType          : tTMGDataType;
+    Items             : TStringList; //doesn't own objects
+    Fasting           : boolean;
+    Checked           : boolean;
+    Index             : integer; //for TCheckListBox entries, this will store items index
+                                 //for TRadioGroup entries, this will store items index
+                                 //for TRadioGroup parents (those with child entries), this will store selecte ItemIndex
+    SavedValue        : string;
+    InternalValue     : string;
+    ExternalValue     : string;
+    LinkedControl     : TControl;
     function Modified : boolean;  //Is InternalValue different from SavedInternalValue?
+    procedure SetCheckedEtc(Value : boolean);  //kt 12/3/23
+    procedure SetCheckedIVEV(Value : boolean; InternalValue, ExternalValue : string);  //kt 12/3/23
+    function AllowedLinkedDxList(ListOfAllData : TTMGDataList) : TTMGDataList;
+    function IsLinkedDxChecked(ListOfAllData : TTMGDataList) : boolean;
     constructor Create; overload;
     constructor Create(IEN : string; DataType : tTMGDataType); overload;
     destructor Destroy; override;
@@ -62,8 +72,9 @@ type
     function DataByIDInstance(ID : string; Instance : integer) : TTMGData;
     function CountOfType(DataType : tTMGDataType) : integer;
     function CountOfID(ID : string) : integer;
+    function CountOfIEN(IEN : string) : integer;
     function CreateAndAdd(IEN : string; DataType : tTMGDataType) : integer; //create TTMGData object and add to list
-    function IndexOfIEN(IEN : string) : integer;
+    function IndexOfIEN(IEN : string; StartingIndex : integer = 0) : integer;
     function IndexOfNameType(Name : string; DataType : tTMGDataType) : integer;
     function IndexOfIDInstance(ID : string; Instance : integer) : integer;
     function SublistByType(Arr : array of tTMGDataType) : TTMGDataList; overload; //returned list is created, but not considered owner of objects
@@ -74,12 +85,10 @@ type
   end;
 
   TfrmODTMG1 = class(TfrmODGen)
-    gbICDCodes: TGroupBox;
     gbBundles: TGroupBox;
     cboBundles: TComboBox;
-    edtDx0: TEdit;
-    edtDx1: TEdit;
-    edtDx2: TEdit;
+    edtOtherOrder: TEdit;
+    edtOtherTime: TEdit;
     rgGetLabsTiming: TRadioGroup;
     btnClear: TButton;
     cklbOther: TCheckListBox;
@@ -89,16 +98,39 @@ type
     pnlFlags: TPanel;
     cklbFlags: TCheckListBox;
     btnToggleSpecialProc: TSpeedButton;
-    cklbCommonDxs: TCheckListBox;
-    edtDx3: TEdit;
     tcProcTabs: TTabControl;
     pnlProcedures: TPanel;
     pnlProcCaption: TPanel;
     cklbProcedures: TCheckListBox;
-    edtOtherOrder: TEdit;
     Label1: TLabel;
     lblComments: TLabel;
     rgProvider: TRadioGroup;
+    lblWhen: TLabel;
+    pnlOrderAreaMain: TPanel;
+    pnlOrderAreaLeft: TPanel;
+    splitterleft: TSplitter;
+    pnlOrderAreaRight: TPanel;
+    pnlRightTop: TPanel;
+    tcDxSelect: TTabControl;
+    cklbDisplayedDxs: TCheckListBox;
+    pnlRightBottom: TPanel;
+    pnlCustomDx: TPanel;
+    splitterRight: TSplitter;
+    btnToggleSpecialDx: TSpeedButton;
+    edtDx0: TEdit;
+    edtDx1: TEdit;
+    edtDx2: TEdit;
+    edtDx3: TEdit;  //This will be used to store 'PriorICD' type entries.
+    pnlLeftTop: TPanel;
+    splitterLeftPanel: TSplitter;
+    pnlRightTopHeading: TPanel;
+    memDxInstructions: TMemo;
+    btnSrchICD: TBitBtn;
+    memProcInfo: TMemo;
+    tmrDelayProcInfo: TTimer;
+    procedure tmrDelayProcInfoTimer(Sender: TObject);
+    procedure btnSrchICDClick(Sender: TObject);
+    procedure tcDxSelectChange(Sender: TObject);
     procedure cmdQuitClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure cmdAcceptClick(Sender: TObject);
@@ -113,22 +145,31 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    FTMGOrderData : TTMGDataList;
+    FTMGOrderData : TTMGDataList;  //This is the repository of ALL the lab data info, including which objects are checked/selected.
+    FAllDxList    : TTMGDataList;  //will NOT own objects.  Will have pointers to objects owned by FTMGOrderData
+    FPriorDxList  : TTMGDataList;  //will NOT own objects.  Will have pointers to objects owned by FTMGOrderData
+    FEnctrDxList  : TTMGDataList;  //will NOT own objects.  Will have pointers to objects owned by FTMGOrderData
     FEditsList    : TList; //doesn't own objects
     FCklbList     : TList; //doesn't own objects
     FRgList       : TList; //doesn't own objects
     FPromptToPrint: boolean;
+    FObjToStoreDxLinks : TTMGData; //doesn't own object.  The edit field of this object will hold link between LabProc and needed Dx object.
+    FProcAndDxLinksList : TTMGDataList; //will NOT own objects.  List[x]=Ptr to LabProc TTMGData object, List[x+1]=Ptr to Dx TTMGData object
     FFasting      : boolean;
     FLabTimingStr : string;
+    //kt FLabTimingStrOther : string;   //used to hold text for Other
     FCustomProcOpen : boolean;
     FOrderFlagFastingIndex : integer;
     FOnClosing : TNotifyODTMGClosing;
-    procedure SetCustomProcArea(Open : boolean);
-    procedure ToggleCustomProcArea;
+    FLastSelectedProc : TTMGData; //doesn't own data.  NOTE: A checkbox item can be selected, but not checked.  Two separate states.
+    procedure SetCustomProcArea(Open : boolean; Sender: TSpeedButton);
+    procedure ToggleCustomProcArea(Sender:TSpeedButton);
     procedure GetChangedObjsList(ListBox : TCheckListBox; ChangedDataObjs : TTMGDataList);
     procedure CheckedGUI2Data(ListBox : TCheckListBox; ChangedDataObjs : TTMGDataList);
+    procedure TriggerDelayedProcInfo();
     procedure HandleCheckListBoxChange(Sender : TObject);
     procedure CheckForFastingLabs();
+    procedure CheckForPromptToPrint();
     procedure InitData();
     procedure Responses2Data();
     procedure Data2Responses(Arr : array of TTMGData);         overload;
@@ -138,21 +179,30 @@ type
     procedure ClearData(ChangedDataObjs : TTMGDataList);
     function rgExternalValue(DataObj : TTMGData) : string;
     procedure SetupLabOrderMsg(SL : TStringList);
+    function OkToClose:boolean;
+    procedure SetOtherTimeEnable(Enable : boolean);
+    procedure PopulateCkLb(CkLb : TCheckListBox; Source : TTMGDataList); overload;
+    procedure PopulateCkLb(CkLb : TCheckListBox; Source : TStringList);  overload;
+    procedure Items2DataList(Items : TStringList; DL : TTMGDataList);
+    procedure ChangeDxSelect4Mode(ShowSpecificDx : Boolean);
+    function AddOrRemovePriorDx(EditCtrl: TEdit; Checked : boolean; Str : string; DivChar : char = '^') : boolean;
   protected
     procedure PlaceControls; override;
     procedure ControlChange(Sender: TObject); override;
+    procedure StoreLinkedDxs;
   public
     { Public declarations }
     LaunchedFromEncounter : boolean;
-    procedure SetupDialog(OrderAction: Integer; const ID: string); override;
-    function SelectOrder(OrderName : string; var ErrMsg : string) : boolean;
-    function SelectDx(DxName : string; var ErrMsg : string) : boolean;
-    function SelectName(Name : string; DataType: tTMGDataType; var ErrMsg : string) : boolean;
-    function SelectIEN(IEN22751 : string; var ErrMsg : string) : boolean;
-    procedure AutoCheckPerOrderedLabs();
+    procedure   SetupDialog(OrderAction: Integer; const ID: string); override;
+    function    SelectOrder(OrderName : string; var ErrMsg : string) : boolean;
+    function    SelectDx(DxName : string; var ErrMsg : string) : boolean;
+    function    SelectName(Name : string; DataType: tTMGDataType; var ErrMsg : string) : boolean;
+    function    SelectIEN(IEN22751 : string; var ErrMsg : string) : boolean;
+    procedure   AutoCheckPerOrderedLabs();
+    procedure   LoadUserDxList(DxInfoList : TStringList);
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-    property  OnClosing : TNotifyODTMGClosing read FOnClosing write FOnClosing;  //kt
+    destructor  Destroy; override;
+    property    OnClosing : TNotifyODTMGClosing read FOnClosing write FOnClosing;  //kt
   end;
 
   procedure TMGLabOrderAutoPopulateIfActive();
@@ -164,7 +214,7 @@ implementation
 
 uses
   rODBase, ORFn, rCore, rOrders, uConst, ORDtTm, fFrame, fOrders,
-  fPage, uOrders,
+  fPage, uOrders, fTMGEncounterICDPicker, 
   fNetworkMessengerClient, uTMG_WM_API, StrUtils;
 
 const
@@ -176,8 +226,13 @@ const
 
   N_Y : array[false..true] of char = ('0','1');
 
-  FREE_TEXT_DX  = 'FREE TEXT DX ';
-  FREE_TEXT_LAB = 'FREE TEXT LAB';
+  FREE_TEXT_DX              = 'FREE TEXT DX ';
+  FREE_TEXT_DX_SPECIAL      = 'FREE TEXT DX 4';
+  FREE_TEXT_LAB             = 'FREE TEXT LAB';
+  FREE_TEXT_OTHER_TIME      = 'FREE TEXT OTHER TIME';
+  FREE_TEXT_LINK_LABPROC2DX = 'FREE TEXT LINK TEST TO DX';
+
+type tDxTCTabs = (tDxTCAll, tDxTCSpecific, tDxTCPrior, tDxTCEncounter);  //NOTE: Must be 1:1 with the actual tab order in Dx Tab control
 
 //=================================================================
 //=================================================================
@@ -277,6 +332,8 @@ begin
   Instance           := 0;
   IEN                := '';
   Name               := '';
+  NeedsLinkedDx      := false;
+  LinkedDxStr        := '';
   DataType           := ttdtNone;
   Items              := TStringList.Create;   //doesn't own objects
   Fasting            := false;
@@ -286,6 +343,8 @@ begin
   InternalValue      := '';
   ExternalValue      := '';
   LinkedControl      := nil;
+  FAllowedLinkedDxList:= nil; //only instantiated if needed.  //Doesn't own objects
+
 end;
 
 constructor TTMGData.Create(IEN : string; DataType : tTMGDataType);
@@ -299,7 +358,63 @@ end;
 destructor TTMGData.Destroy;
 begin
  Items.Free;
+ FAllowedLinkedDxList.Free;  //Doesn't own objects
  inherited;
+end;
+
+function TTMGData.AllowedLinkedDxList(ListOfAllData : TTMGDataList) : TTMGDataList;
+var SL : TStringList;
+    IEN : string;
+    TempObj: TTMGData;
+    i, k : integer;
+begin
+  Result := FAllowedLinkedDxList;
+  if Assigned(FAllowedLinkedDxList) then exit;
+  FAllowedLinkedDxList := TTMGDataList.Create;
+  SL := TStringList.Create;
+  try
+    PiecesToList(LinkedDxStr,',', SL);
+    for i := 0 to SL.Count-1 do begin
+      IEN := SL.Strings[i];
+      k := ListOfAllData.IndexOfIEN(IEN);
+      if k < 0 then continue;
+      TempObj := ListOfAllData.Data[k];
+      FAllowedLinkedDxList.Add(TempObj);
+    end;
+  finally
+    SL.Free;
+  end;
+  Result := FAllowedLinkedDxList;
+end;
+
+function TTMGData.IsLinkedDxChecked(ListOfAllData : TTMGDataList) : boolean;
+var
+  LinkedDxList: TTMGDataList;
+  TempObj : TTMGData;
+  i : integer;
+begin
+  Result := false; //default
+  LinkedDxList := AllowedLinkedDxList(ListOfAllData);
+  for i := 0 to LinkedDxList.Count - 1 do begin
+    TempObj := LinkedDxList[i];
+    if not TempObj.Checked then continue;
+    Result := true;
+    break;
+  end;
+end;
+
+procedure TTMGData.SetCheckedEtc(Value : boolean);  //kt 12/3/23
+begin
+  Checked := Value;
+  InternalValue := N_Y[Value];
+  ExternalValue := IfThen(Checked, Name, '');
+end;
+
+procedure TTMGData.SetCheckedIVEV(Value : boolean; InternalValue, ExternalValue : string);  //kt 12/3/23
+begin
+  Checked := Value;
+  Self.InternalValue := InternalValue;
+  Self.ExternalValue := ExternalValue;
 end;
 
 
@@ -394,6 +509,15 @@ begin
   end;
 end;
 
+function TTMGDataList.CountOfIEN(IEN : string) : integer;
+var i : integer;
+begin
+  Result := 0;
+  for i := 0 to Self.Count - 1 do begin
+    if Self.Data[i].IEN = IEN then inc(Result);
+  end;
+end;
+
 function TTMGDataList.DataByType(DataType : tTMGDataType; IndexByType : integer) : TTMGData;
 var
   i,Index : integer;
@@ -432,11 +556,11 @@ begin
   Self.Items[Index] := Value;
 end;
 
-function TTMGDataList.IndexOfIEN(IEN : string) : integer;
+function TTMGDataList.IndexOfIEN(IEN : string; StartingIndex : integer = 0) : integer;
 var i : integer;
 begin
   Result := -1;
-  for i := 0 to Self.Count-1 do begin
+  for i := StartingIndex to Self.Count-1 do begin
     if Self.Data[i].IEN <> IEN then continue;
     Result := i;
     break;
@@ -470,7 +594,7 @@ end;
 
 //==============================================================================
 //==============================================================================
-{ NOTE: All user selection (i.e. clicking a checkbox) must ultimately generates a RESPONSE.
+{ NOTE: All user selection (e.g. clicking a checkbox) must ultimately generate a RESPONSE.
         These Responses will be sent back to the server and saved, and used on the server
         to compile the ouput display text of the order. And if the order is later
         edited, these Responses will be used to repopulate the dialog with the
@@ -517,13 +641,13 @@ begin
   Changing := true;
 
   cklbProcedures.Items.Clear;
-  cklbCommonDxs.Items.Clear;
+  cklbDisplayedDxs.Items.Clear;
   cboBundles.Items.Clear;
   tcProcTabs.Tabs.Clear;
 
   InitData();  //load it all in
 
-  AutoCheckPerOrderedLabs();
+  //kt 12/3/23 -- AutoCheckPerOrderedLabs();     //duplicate.  Done in SetupDialog
 
   FFirstCtrl := cklbProcedures;
   tcProcTabs.TabIndex :=0;
@@ -567,10 +691,12 @@ procedure TfrmODTMG1.InitData();
                                                     W for WP fields
            - ITEMS    e.g. ITEMS=54,28,194,73   -- Used by [B/BUNDLE],[P/GROUP], a way of defining elements in list
            - FASTING  e.g. FASTING=1            -- Used by lab/proc elements to show that default for labs should be fasting
+           - LINKDX   e.g. LINKDX=1             -- Used by elements that need a specific linked Dx to be attached to them when ordering.
+           - DX       e.g. DX=56,21,19,103      -- List of known Dx's that can be used when LINKDX=1
 
         Handling of types:
         [P]  -- Item should be added to cklbProcedures
-        [I]  -- Item should be added to cklbCommonDxs
+        [I]  -- Item should be added to cklbDisplayedDxs
         [B]  -- Item should be added to cboBundles
         [P]  -- Item describes the name of a display groups.  E.g.: Basic, Rheum, Cardio, Renal, GI, Metab
         [O]  -- Item should be added to rgProvider, for ORDERING PROVIDER
@@ -641,7 +767,7 @@ procedure TfrmODTMG1.InitData();
         rg.ItemIndex := 0;
         DataObj.Index := 0;
       end;
-      DataObj.SavedValue := '-1'; //will ensure that value gets saved even if user leaves value at default initial value. 
+      DataObj.SavedValue := '-1'; //will ensure that value gets saved even if user leaves value at default initial value.
     end;
   end; //{TfrmODTMG1.InitData.}LoadRadioGroup
 
@@ -679,13 +805,18 @@ procedure TfrmODTMG1.InitData();
       for i := 0 to TempSubTMGDataList.Count - 1 do begin
         index := -1;
         DataObj := TempSubTMGDataList.Data[i];
-        if Pos(FREE_TEXT_LAB, DataObj.Name)>0 then begin
-          index := 5;
+        if Pos(FREE_TEXT_LINK_LABPROC2DX, DataObj.Name)>0 then begin
+          //This Text edit field obj is different.  It is not shown on GUI, and exists only to store linkage between a LabProc and any required Dx.
+          continue;
+        end else if Pos(FREE_TEXT_LAB, DataObj.Name)>0 then begin
+          index := 5;  //NOTE: this number is determined by load sequence in TfrmODTMG1.InitData.  See details there
         end else if Pos(FREE_TEXT_DX, DataObj.Name)>0 then begin
           index := StrToIntDef(Piece2(DataObj.Name, FREE_TEXT_DX, 2),0);
-          if (Index < 1) or (Index > 4) then continue;
+          if (Index < 1) or (Index > 4) then continue;  //NOTE: these numbers are determined by load sequence in TfrmODTMG1.InitData.  See details there
+        end else if DataObj.Name = FREE_TEXT_OTHER_TIME then begin
+          index := 6;  //NOTE: this number is determined by load sequence in TfrmODTMG1.InitData.  See details there
         end;
-        if (Index < 1) or (Index > 5) then continue;
+        if (Index < 1) or (Index > 6) then continue; //NOTE: these numbers are determined by load sequence in TfrmODTMG1.InitData.  See details there
         edit := TEdit(FEditsList[index]);
         edit.tag := Integer(pointer(DataObj));  //this is DataObj that will link to response storage
         DataObj.LinkedControl := edit;
@@ -712,13 +843,72 @@ procedure TfrmODTMG1.InitData();
     DataObj.LinkedControl := AControl;
   end;
 
+  procedure {TfrmODTMG1.InitData.}LoadPriorICDs;
+  var
+    TempSL : TStringList;
+    SortSL : TStringList;
+    PartA,PartB : string;
+    i,mode : integer;
+    S,Name,ICD : string;
+    DataStr : TDataStr;
+    DataObj : TTMGData;
+
+  CONST
+    PROB_FORMAT        = 'ifn^status^LongName^ICD^onset^last modified^SC^SpExp^Condition^Loc^loc.type^prov^service^priority^has comment^date recorded^SC condition(s)^inactive flag^ICD long description^ICD coding system';
+    PRIOR_CODE_FORMAT  = 'ICD^LongName^FMDT_LastUsed^ICDCODESYS';
+    FORMATS : ARRAY[2..3] of string = (PROB_FORMAT, PRIOR_CODE_FORMAT);
+
+  begin
+    TempSL := TStringList.Create;
+    SortSL := TStringList.Create;
+    DataStr := TDataStr.Create;
+    try
+      CallV('TMG CPRS LAB ORDER GET DX LIST', [Patient.DFN]);
+      FastAssign(RPCBrokerV.Results, TempSL);
+      for i := 0 to TempSL.Count - 1 do begin
+        s := TempSL[i];
+        mode := StrToIntDef(piece(s,'^',1),0);
+        if not (mode in [2,3]) then continue;
+        s := pieces(s,'^',2,9999);
+        DataStr.FormatStr := FORMATS[mode];
+        DataStr.DataStr := s;
+        DataObj := TTMGData.Create('-1', ttdtPriorICD);  //will be owned by FTMGOrderData
+        Name := DataStr['LongName'];
+        if Pos('<INACTIVE>', Name)>0 then continue;
+        IF Pos('(SCT ',Name) > 0 then begin
+          PartA := piece2(Name,'(SCT ',1);
+          PartB := piece2(Name,'(SCT ',2);
+          PartB := pieces2(PartB, ')',2,999);
+          Name := Trim(PartA + PartB);
+        end;
+        ICD := DataStr['ICD'];
+        DataObj.Name := Name + ' - ' + ICD;
+        DataObj.ICD := ICD;
+        SortSL.AddObject(DataObj.Name, DataObj); //won't ultimately own objects.
+      end;
+      SortSL.Sort;  //sort alphabetically by name.
+      for i := 0 to SortSL.Count - 1 do begin
+        DataObj := TTMGData(SortSL.Objects[i]);
+        FTMGOrderData.Add(DataObj);  //owns objects
+        FPriorDxList.Add(DataObj);  //Doesn't own objects
+      end;
+    finally
+      TempSL.Free;
+      SortSL.Free;
+      DataStr.Free;
+    end;
+  end;
+
+
 var
   i,j,k                             : Integer;
-  IEN, DataStr, ItemsStr            : string;
+  IEN, DataStr, ItemsStr, DxLstStr  : string;
   DialogItem                        : TDialogItem;
   AllProcsDataObj, DataObj, TempObj : TTMGData;
+  TempSL                            : TStringList;
 
 begin //TfrmODTMG1.InitData
+  FObjToStoreDxLinks := nil;
   //first load all items before potentially interlinking objects
   for i := 0 to FDialogItemList.Count - 1 do begin
     DialogItem := TDialogItem(FDialogItemList.Items[i]);
@@ -731,33 +921,45 @@ begin //TfrmODTMG1.InitData
     DataObj.IEN := GetValue(DataStr, 'IEN', '0');
     DataObj.DataType := GetDataType(GetValue(DataStr, 'TYPE', '?'));
     if DataObj.DataType in [ttdtDx, ttdtProc, ttdtOrderFlags, ttdtOrderOptions] then begin
-      DataObj.Checked := false;
-      DataObj.InternalValue := N_Y[DataObj.Checked];
+      DataObj.SetCheckedEtc(false);  //kt 12/3/23
       DataObj.ExternalValue := DataObj.Name;
     end;
-    DataObj.Fasting := (GetValue(DataStr, 'FASTING') = '1');
     ItemsStr := GetValue(DataStr, 'ITEMS');
-    if ItemsStr <> '' then begin
-      PiecesToList(ItemsStr,',', DataObj.Items);
+    PiecesToList(ItemsStr,',', DataObj.Items); //doesn't do anything if ItemsStr = ''
+    if DataObj.DataType = ttdtProc then begin
+      DataObj.Fasting := (GetValue(DataStr, 'FASTING') = '1');
+      DataObj.NeedsLinkedDx := (GetValue(DataStr, 'LINKDX') = '1');
+      DxLstStr := GetValue(DataStr, 'DX');  //csv list
+      DataObj.LinkedDxStr := DxLstStr;
+      //this causes problems --> if DxLstStr <> '' then PiecesToList(DxLstStr,',', DataObj.Items);
+      //Normal Dx entries should not have 'ITEMS' data in DataStr.  Top level PROCS does.
     end;
+    if (DataObj.DataType = ttdtDx) and (DataObj.Items.Count = 0) then FAllDxList.Add(DataObj);
     FTMGOrderData.Add(DataObj);
+    if DataObj.Name = FREE_TEXT_LINK_LABPROC2DX then begin
+      //NOTE: This data object is not shown on GUI.  It exists just as DATA to store linkage
+      //      between LabProcs and needed linked Dx's
+      FObjToStoreDxLinks := DataObj;
+    end;
   end; //for loop
+  LoadPriorICDs;
 
   //Make Entry to contain ALL labs/procedures
-  AllProcsDataObj := TTMGData.Create;   //will be owned by FTMGDataFTMGOrderData
+  AllProcsDataObj := TTMGData.Create;   //will be owned by FTMGOrderData
   AllProcsDataObj.Name := 'All';
   AllProcsDataObj.IEN := '0';
   AllProcsDataObj.DataType := ttdtPageGroup;
   FTMGOrderData.Insert(0,AllProcsDataObj);
   //added later .... tcProcTabs.Tabs.AddObject('All',AllProcsDataObj);
 
+  //NOTE: Below is putting data into the GUI.  Really this could be done by Data2GUI(), I think;
   for i := 0 to FTMGOrderData.Count-1 do begin
     DataObj := FTMGOrderData.Data[i];
     case DataObj.DataType of
-      ttdtDx:        LoadItems(cklbCommonDxs,   cklbCommonDxs.Items,   DataObj, true);
-      ttdtProc:      LoadItems(cklbProcedures,  AllProcsDataObj.Items, DataObj, true);
-      ttdtBundle:    LoadItems(cboBundles,      cboBundles.Items,      DataObj, false);
-      ttdtPageGroup: LoadItems(tcProcTabs,      tcProcTabs.Tabs,       DataObj, false);
+      ttdtDx:        LoadItems(cklbDisplayedDxs, cklbDisplayedDxs.Items, DataObj, true);
+      ttdtProc:      LoadItems(cklbProcedures,   AllProcsDataObj.Items,  DataObj, true);
+      ttdtBundle:    LoadItems(cboBundles,       cboBundles.Items,       DataObj, false);
+      ttdtPageGroup: LoadItems(tcProcTabs,       tcProcTabs.Tabs,        DataObj, false);
       else           //do nothing....
     end; //case
 
@@ -770,18 +972,19 @@ begin //TfrmODTMG1.InitData
     end;
   end; //for
 
-  FCklbList.Add(cklbCommonDxs);
+  FCklbList.Add(cklbDisplayedDxs);
   FCklbList.Add(cklbProcedures);
   FCklbList.Add(cklbFlags);
   FCklbList.Add(cklbOther);
   FRgList.Add(rgProvider);
   FRgList.Add(rgGetLabsTiming);
   FEditsList.Add(nil);
-  FEditsList.Add(edtDx0);        edtDx0.tag := 0;        //index 1
-  FEditsList.Add(edtDx1);        edtDx1.tag := 0;        //index 2
-  FEditsList.Add(edtDx2);        edtDx2.tag := 0;        //index 3
-  FEditsList.Add(edtDx3);        edtDx3.tag := 0;        //index 4
-  FEditsList.Add(edtOtherOrder); edtOtherOrder.tag := 0; //index 5
+  FEditsList.Add(edtDx0);        edtDx0.tag := 0;        //index 1 <-- used in LoadEdits
+  FEditsList.Add(edtDx1);        edtDx1.tag := 0;        //index 2 <-- used in LoadEdits
+  FEditsList.Add(edtDx2);        edtDx2.tag := 0;        //index 3 <-- used in LoadEdits
+  FEditsList.Add(edtDx3);        edtDx3.tag := 0;        //index 4 <-- used in LoadEdits
+  FEditsList.Add(edtOtherOrder); edtOtherOrder.tag := 0; //index 5 <-- used in LoadEdits
+  FEditsList.Add(edtOtherTime);  edtOtherTime.tag := 0;  //index 6 <-- used in LoadEdits
 
   LoadRadioGroup(rgProvider, ttdtOrderingProvider);
   LoadRadioGroup(rgGetLabsTiming, ttdtLabTiming);
@@ -795,7 +998,6 @@ begin //TfrmODTMG1.InitData
     FOrderFlagFastingIndex := i;
     break;
   end;
-
 end; //{TfrmODTMG1.InitData}
 
 //-------------------------------------------------------------------------
@@ -809,9 +1011,11 @@ var
    LabName,DfltICD,OneTest : string;
    SubList, IEN22751 : string;
    NetErr, AnErr : string;
+   CheckedTest:boolean;
 begin
   //Call RPC to get list of items to auto-check.
   LabList := sCallV('TMG GET ORDERED LABS',[Patient.DFN]);
+  CheckedTest := False;
   if LabList = 'NONE' then exit;
   NetErr := '';
   for i := 1 to NumPieces(LabList,'^') do begin
@@ -821,6 +1025,7 @@ begin
     SubList := piece(OneTest,':',3);
     if LabName <> '' then begin
       SelectOrder(LabName, AnErr);
+      CheckedTest := True;
       if NetErr <> '' then NetErr := NetErr + ';';
       NetErr := NetErr + AnErr; AnErr := '';
     end;
@@ -836,8 +1041,54 @@ begin
       NetErr := NetErr + AnErr; AnErr := '';
     end;
   end;
-  if NetErr <> '' then ShowMsg(NetErr);
+  //if CheckedTest then begin       //added if 11/28/23
+  //   HandleCheckListBoxChange(cklbProcedures);
+  //   UpdateOrderMemoDisplay;  //11/28/23 added in case
+  //end;
+  if NetErr <> '' then begin
+    ShowMsg(NetErr);
+  end;
 end;
+
+procedure TfrmODTMG1.LoadUserDxList(DxInfoList : TStringList);
+//DxInfoList.Strings[x] should hold 1 selected Dx, in format: STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
+var i : integer;
+    S,Name,ICD : string;
+    SortSL : TStringList;
+    DataStr : TDataStr;
+    DataObj : TTMGData;
+begin
+  if not assigned(DxInfoList) then exit;
+  SortSL := TStringList.Create;
+  DataStr := TDataStr.Create;
+  DataStr.FormatStr := STD_ICD_DATA_FORMAT;
+  try
+    for i:= 0 to DxInfoList.Count - 1 do begin
+      DataStr.DataStr := DxInfoList[i];  //STD_ICD_DATA_FORMAT
+      DataObj := TTMGData.Create('-1', ttdtEncounterICD);  //will be owned by FTMGOrderData
+      Name := DataStr['ProblemText'];
+      if Pos('<INACTIVE>', Name)>0 then continue;
+      ICD := DataStr['ICDCode'];
+      DataObj.Name := Name + ' - ' + ICD;
+      DataObj.ICD := ICD;
+      SortSL.AddObject(DataObj.Name, DataObj);  //won't ultimately own objects.
+    end;
+    SortSL.Sort;  //sort alphabetically by name.
+    for i := 0 to SortSL.Count - 1 do begin
+      DataObj := TTMGData(SortSL.Objects[i]);
+      FTMGOrderData.Add(DataObj);  //owns objects
+      FEnctrDxList.Add(DataObj);   //Doesn't own objects
+    end;
+  finally
+    SortSL.Free;
+    DataStr.Free;
+  end;
+  //type tDxTCTabs = (tDxTCAll, tDxTCSpecific, tDxTCPrior, tDxTCEncounter);
+  if tcDxSelect.Tabs.Count<4 then begin  //Ensure TabControl has code.
+    tcDxSelect.Tabs.Add('Encounter Dx''s');
+  end;
+end;
+
 
 function TfrmODTMG1.SelectOrder(OrderName : string; var ErrMsg : string) : boolean;
 //Result is true if successful, false if failure (details in ErrMsg)
@@ -862,11 +1113,13 @@ begin
   i := FTMGOrderData.IndexOfIEN(IEN22751);
   if i >= 0 then begin
     DataObj := FTMGOrderData.Data[i];
-    DataObj.Checked := true;
+    //DataObj.Checked := true;
+    DataObj.SetCheckedEtc(true);  //kt 12/3/23
+    Data2Responses([DataObj]); //kt 12/3/23
     Data2GUI();
   end else begin
     Result := false;
-    ErrMsg := 'Unable to find order matching "' + Name + '"';
+    ErrMsg := 'Unable to find order matching IEN "' + IEN22751 + '" in file 22751.';
   end;
 end;
 
@@ -882,10 +1135,13 @@ begin
   i := FTMGOrderData.IndexOfNameType(Name, DataType);
   if i >= 0 then begin
     DataObj := FTMGOrderData.Data[i];
-    DataObj.Checked := true;
+    //DataObj.Checked := true;
+    DataObj.SetCheckedEtc(true); //kt 12/3/23
     Data2GUI();
+    Data2Responses([DataObj]);  //kt 12/3/23
   end else begin
     Result := false;
+    if Name='FUCPE' then exit;    //Don't show error for FUCPE   5/17/24
     ErrMsg := 'Unable to find order matching "' + Name + '"';
   end;
 end;
@@ -991,9 +1247,12 @@ begin
     if (Length(ID) > 0) and (DialogIEN = 0) then SetDialogIEN(DialogForOrder(ID));  // for copy & edit, SetDialogIEN hasn't been called yet
 
     Changing := false;
-    rgClick(rgProvider);      //this will ensure value is saved, even is user leaves initial (default) value unchanged.
-    rgClick(rgGetLabsTiming); //this will ensure value is saved, even is user leaves initial (default) value unchanged.
 
+    if OrderAction<>ORDER_EDIT then begin //Only should autoclick during creation but not editing   4/5/24
+        //kt 9/10/23 NOTE: Calls below set Gui->Data->Responses, thus saved responses from server are NOT getting put into GUI.
+      rgClick(rgProvider);      //this will ensure value is saved, even is user leaves initial (default) value unchanged.
+      rgClick(rgGetLabsTiming); //this will ensure value is saved, even is user leaves initial (default) value unchanged.
+    end;
     Changing := True;
     Responses2Data();
     Data2GUI();
@@ -1057,9 +1316,10 @@ begin
   memo := TMemo(Sender);
   DataObj := TTMGData(memo.Tag);
   if not Assigned(DataObj) then exit;
-  DataObj.InternalValue := memo.Text;
-  DataObj.ExternalValue := memo.Text;
-  DataObj.Checked := (DataObj.ExternalValue <> '');
+  //DataObj.InternalValue := memo.Text;
+  //DataObj.ExternalValue := memo.Text;
+  //DataObj.Checked := (DataObj.ExternalValue <> '');
+  DataObj.SetCheckedIVEV(DataObj.ExternalValue <> '', memo.Text, memo.Text);
   Data2Responses([DataObj]);
   UpdateOrderMemoDisplay;
 end;
@@ -1083,9 +1343,10 @@ begin
     for i := 0 to DataObj.Items.Count - 1 do begin
       ProcObj := TTMGData(DataObj.Items.Objects[i]);
       if not Assigned(ProcObj) then continue;
-      ProcObj.Checked := true;
-      ProcObj.InternalValue := '1';
-      ProcObj.ExternalValue := ProcObj.Name;
+      //ProcObj.Checked := true;
+      //ProcObj.InternalValue := '1';
+      //ProcObj.ExternalValue := ProcObj.Name;
+      ProcObj.SetCheckedIVEV(true, '1', ProcObj.Name);
     end;
     GetChangedObjsList(cklbProcedures, ChangedDataObjs);
     Data2Responses(ChangedDataObjs);
@@ -1136,21 +1397,144 @@ begin
   end;
 end;
 
+procedure TfrmODTMG1.CheckForPromptToPrint();  //Called by a GUI Change Handler
+begin
+end;
+
+procedure TfrmODTMG1.StoreLinkedDxs;  //Called (indirectly) by a GUI Change handler <-- HandleCheckListBoxChange
+  //Store the linkage state of all linked LabProcs.
+  //NOTE: This linkage is about a test, such as PSA, being linked to 1 specific Diagnosis.  E.g. 'Personal History of Prostate Cancer'
+  //Items stored into FObjToStoreDxLinks
+var
+  i, j : integer;
+  TempObj  : TTMGData;    //doesn't own object
+  LinkedObj : TTMGData;  //doesn't own object
+  LinkStr : string;
+  LinkedDxList : TTMGDataList;
+begin
+  if not assigned(FObjToStoreDxLinks) then exit;
+  if not assigned(FProcAndDxLinksList) then exit;
+  FProcAndDxLinksList.Clear;        //EDDIE Added this. Duplicates were being added with each run
+  LinkStr := '';
+  //Scan through all Procs, and see if they have linked Dx's that have been selected.
+  for i := 0 to FTMGOrderData.Count - 1 do begin
+    TempObj := FTMGOrderData[i];
+    if TempObj.DataType <> ttdtProc then continue;
+    if TempObj.LinkedDxStr = '' then continue;
+    if TempObj.Checked=False then continue;   //ELH added 4/2/24
+    LinkedDxList := TempObj.AllowedLinkedDxList(FTMGOrderData);
+    for j := 0 to LinkedDxList.Count - 1 do begin
+      LinkedObj := LinkedDxList[j];
+      if not LinkedObj.Checked then continue;
+      FProcAndDxLinksList.Add(TempObj); FProcAndDxLinksList.Add(LinkedObj);  //always added in pairs 
+      if LinkStr <>'' then LinkStr := LinkStr + ',';
+      LinkStr := LinkStr + TempObj.IEN + ':' + LinkedObj.IEN;  // IEN1:IEN2,.....  IEN1 LabProc is linked to IEN2 Dx
+    end;
+  end;
+  FObjToStoreDxLinks.SetCheckedIVEV(LinkStr <> '', LinkStr, LinkStr);
+  Data2Responses([FObjToStoreDxLinks]);
+end;
+
+function TfrmODTMG1.AddOrRemovePriorDx(EditCtrl: TEdit; Checked : boolean; Str : string; DivChar : char = '^') : boolean;
+//Returns TRUE if EditCtrl was changed.
+var StartPos : integer;
+    PartA,PartB : string;
+begin
+  Result := false;
+  StartPos := Pos(Str, EditCtrl.Text);
+  if Checked then begin
+    if StartPos = 0 then begin
+      EditCtrl.Text := EditCtrl.Text + Str + DivChar;
+      Result := true;
+    end;
+  end else begin
+    if StartPos > 0 then begin
+      PartA := LeftStr(EditCtrl.Text, StartPos-1);
+      PartB := MidStr(EditCtrl.Text, StartPos + Length(Str) + 1, 9999999);
+      EditCtrl.Text := PartA + PartB;
+      Result := true;
+    end;
+  end;
+end;
+
+procedure TfrmODTMG1.TriggerDelayedProcInfo();
+begin
+  tmrDelayProcInfo.Enabled := true;
+end;
+
+procedure TfrmODTMG1.tmrDelayProcInfoTimer(Sender: TObject);
+var
+    LabDataMemo:TStringList;
+begin
+  inherited;
+  tmrDelayProcInfo.Enabled := false;
+  //finish.
+  memProcInfo.Text := ''; //clear prior.
+  if not assigned(FLastSelectedProc) then exit;
+  LabDataMemo := TStringList.create();
+  tCallV(LabDataMemo,'TMG CPRS ENC LAB DATA',[Patient.DFN,FLastSelectedProc.IEN,FLastSelectedProc.Name]);
+  memProcInfo.Lines.Assign(LabDataMemo);
+  LabDataMemo.Free;
+  //call RPC to get info about FLastSelectedProc, and put output into memProcInfo
+  //NOTE: FLastSelectedProc is TTMGData
+end;
+
 procedure TfrmODTMG1.HandleCheckListBoxChange(Sender : TObject);  //Called by a GUI Change handler
+
 //GUI2Data
 var ChangedDataObjs : TTMGDataList;
+    CkLb            : TCheckListBox;
+    i, num          : integer;
+    DataObj         : TTMGData;
+    ShowSpecificDx  : Boolean;
 begin
   if Changing then Exit;
   inherited;
   if not (Sender is TCheckListBox) then exit;
+  CkLb := TCheckListBox(Sender);
+
+  //If user selected a Test / Proc, then adjust Dx control tabs so that relevant Dx panel is shown.
+  if CkLb = cklbProcedures then begin
+    //remember last selected entry if Lab/Proc selected.
+    //NOTE: If a checkbox is toggled, then .Checked[i] and .Selected[i] will be modified
+    //      But if just the name of the item is selected then just .Selected[i] will be changed, regardless of its checked status
+    FLastSelectedProc := nil;
+    for i := 0 to CkLb.Items.Count - 1 do begin
+      if not CkLb.Selected[i] then continue;
+      FLastSelectedProc := TTMGData(CkLb.Items.Objects[i]);
+      Break;
+    end;
+    if Assigned(FLastSelectedProc) then begin
+      ShowSpecificDx := FLastSelectedProc.NeedsLinkedDx or (FLastSelectedProc.LinkedDxStr <> '');
+      TriggerDelayedProcInfo();
+    end else begin
+      ShowSpecificDx := False;
+    end;
+    ChangeDxSelect4Mode(ShowSpecificDx);
+  end;
+
   ChangedDataObjs := TTMGDataList.Create;  //doesn't own objects
   try
     CheckedGUI2Data(TCheckListBox(Sender),ChangedDataObjs);
     Data2Responses(ChangedDataObjs);
-    if Sender = cklbProcedures then CheckForFastingLabs();
+    if CkLb = cklbDisplayedDxs then begin
+      for i := 0 to CkLb.Items.Count - 1 do begin
+        if not CkLb.Selected[i] then continue;
+        DataObj := TTMGData(CkLb.Items.Objects[i]);
+        if not (DataObj.DataType in [ttdtPriorICD, ttdtEncounterICD]) then break; //Types are not mixed.  If one is not present, then none are.
+        //if AddOrRemovePriorDx(edtDx3, DataObj.Checked, DataObj.Name) then begin
+        if AddOrRemovePriorDx(edtDx3, DataObj.Checked, DataObj.ICD) then begin
+          Data2Responses([TTMGData(edtDx3.Tag)]);
+        end;
+      end;
+    end;
+    if CkLb = cklbProcedures then begin
+      CheckForFastingLabs();
+    end;
   finally
     ChangedDataObjs.Free; //doesn't own objects
   end;
+  StoreLinkedDxs;
   //ControlChange(Sender);
 end;
 
@@ -1164,9 +1548,10 @@ begin
   if not (Sender is TEdit) then exit;
   Edit:= TEdit(Sender);
   DataObj := TTMGData(Edit.Tag);
-  DataObj.InternalValue := Edit.Text;
-  DataObj.ExternalValue := Edit.Text;
-  DataObj.Checked := (Edit.Text <> '');
+  //DataObj.InternalValue := Edit.Text;
+  //DataObj.ExternalValue := Edit.Text;
+  //DataObj.Checked := (Edit.Text <> '');
+  DataObj.SetCheckedIVEV(Edit.Text <> '', Edit.Text, Edit.Text);
   Data2Responses([DataObj]);
   UpdateOrderMemoDisplay;
 end;
@@ -1184,6 +1569,7 @@ procedure TfrmODTMG1.rgClick(Sender: TObject);   //GUI Change handler
 //GUI2Data
 var DataObj : TTMGData;
     rg : TRadioGroup;
+    tempS : string;
 begin
   if Changing then Exit;
   inherited;
@@ -1194,8 +1580,24 @@ begin
   DataObj.Index := rg.ItemIndex;
   DataObj.InternalValue := IntToStr(rg.ItemIndex);
   DataObj.ExternalValue := rgExternalValue(DataObj);
+  if DataObj.ExternalValue='Other Time' then begin         //elh    8/22/23
+    tempS := InputBox('Lab Order','What is the timeframe for these labs.','');
+    SetOtherTimeEnable(true);
+    edtOtherTime.Text := tempS; //NOTE: this will fire edtEditChange() putting GUI->data
+  end else begin
+    SetOtherTimeEnable(false);
+    edtOtherTime.Text := '';   //NOTE: this will fire edtEditChange() putting GUI->data
+  end;
+  if DataObj.ExternalValue='Today' then cklbOther.Checked[3] := True;  //ELH added 10/13/23
   Data2Responses([DataObj]);
   UpdateOrderMemoDisplay;
+end;
+
+procedure TfrmODTMG1.SetOtherTimeEnable(Enable : boolean);
+begin
+  lblWhen.Enabled := Enable;
+  edtOtherTime.Enabled := Enable;
+  edtOtherTime.Visible := Enable;
 end;
 
 procedure TfrmODTMG1.GetChangedObjsList(ListBox : TCheckListBox; ChangedDataObjs : TTMGDataList);  //Called by a GUI Change handler
@@ -1212,16 +1614,17 @@ end;
 
 procedure TfrmODTMG1.CheckedGUI2Data(ListBox : TCheckListBox; ChangedDataObjs : TTMGDataList);  //Called by a GUI Change handler
 var i : integer;
-  ProcObj  : TTMGData;
+  DataObj  : TTMGData;
 begin
   for i := 0 to ListBox.Items.Count-1 do begin
-    ProcObj := TTMGData(ListBox.Items.Objects[i]);
-    if not Assigned(ProcObj) then continue;
-    ProcObj.Checked := ListBox.Checked[i];
-    ProcObj.InternalValue := N_Y[ProcObj.Checked];
-    ProcObj.ExternalValue := IfThen(ProcObj.Checked, ProcObj.Name, '');
-    if ProcObj.Modified then begin
-      ChangedDataObjs.Add(ProcObj);
+    DataObj := TTMGData(ListBox.Items.Objects[i]);
+    if not Assigned(DataObj) then continue;
+    DataObj.SetCheckedEtc(ListBox.Checked[i]);  //kt 12/3/23
+    //DataObj.Checked := ListBox.Checked[i];
+    //DataObj.InternalValue := N_Y[DataObj.Checked];
+    //DataObj.ExternalValue := IfThen(DataObj.Checked, DataObj.Name, '');
+    if DataObj.Modified then begin
+      ChangedDataObjs.Add(DataObj);
     end;
   end;
 end;
@@ -1261,7 +1664,7 @@ var i : integer;
     end;
   end;
 
-begin
+begin //TfrmODTMG1.Data2GUI()
   Changing := true;
   //Clear all prior GUI selections or user input
   for i := 0 to FCklbList.Count - 1  do UncheckLB(TCheckListBox(FCklbList[i]));
@@ -1275,7 +1678,8 @@ begin
     if not assigned(AControl) then continue;
     if AControl is TCheckListBox then begin
       lb := TCheckListBox(AControl);
-      if lb = cklbProcedures then continue;  //this will be handled separately by triggering a pseudo tab page change: tcProcTabsChange()
+      if lb = cklbProcedures then continue;    //this will be handled separately by triggering a pseudo tab page change: tcProcTabsChange()
+      if lb = cklbDisplayedDxs then continue;  //this will be handled separately by triggering a pseudo tab page change: tcDxSelectChange()   //kt add 7/2/24
       if DataObj.Items.Count > 0 then continue; //Parent object isn't part of GUI -- only child objects have separate data stores.  So skip.
       index := DataObj.Index;
       lb.Checked[Index] := DataObj.Checked;
@@ -1287,23 +1691,128 @@ begin
     end else if AControl is TEdit then begin
       edit := TEdit(AControl);
       edit.Text := DataObj.ExternalValue;
+      if DataObj.Name = FREE_TEXT_OTHER_TIME then begin
+        SetOtherTimeEnable(edit.Text <> '');
+      end;
     end else if AControl is TMemo then begin
       memo := TMemo(AControl);
       memo.Text := DataObj.ExternalValue;
     end;
   end;
-  BubbleUpCheckedItems(cklbCommonDxs);
   tcProcTabsChange(self);  //handle cklbProcedures for currently displayed tab page.
+  tcDxSelectChange(tcDxSelect); //kt add 7/2/24
+  BubbleUpCheckedItems(cklbDisplayedDxs);
   Changing := false;
   UpdateOrderMemoDisplay;
+end;
+
+procedure TfrmODTMG1.ChangeDxSelect4Mode(ShowSpecificDx : Boolean);
+var NewIndex : integer;
+const  TAB_INDEX : array[false..true] of integer = (ord(tDxTCAll), ord(tDxTCSpecific));
+begin
+  NewIndex := TAB_INDEX[ShowSpecificDx];
+  if (tcDxSelect.TabIndex = NewIndex) and not ShowSpecificDx then exit; //avoid trigger event if no actual change.
+  tcDxSelect.TabIndex := NewIndex; //doesn't seem to triggers event.
+  tcDxSelectChange(tcDxSelect);    //so manually trigger event now.
+end;
+
+procedure TfrmODTMG1.tcDxSelectChange(Sender: TObject);
+var  TC : TTabControl;
+     SelTab : tDxTCTabs;
+     Source : TTMGDataList;  //doesn't own objects
+begin
+  inherited;
+  if not (Sender is TTabControl) then exit;
+  TC := TTabControl(Sender);
+  SelTab := tDxTCTabs(TC.TabIndex);
+  memDxInstructions.Lines.Clear;
+  case SelTab of
+    tDxTCAll:       begin
+                      PopulateCkLb(cklbDisplayedDxs, FAllDxList);
+                      memDxInstructions.Lines.Add('Select Diagnosis');
+                    end;
+    tDxTCSpecific:  begin
+                      if assigned(FLastSelectedProc) then begin
+                        Source := FLastSelectedProc.AllowedLinkedDxList(FTMGOrderData);
+                        PopulateCkLb(cklbDisplayedDxs, Source);
+                        if Source.Count > 0 then begin
+                          memDxInstructions.Lines.Add('Select SPECIFIC Diagnosis');
+                        end else begin
+                          memDxInstructions.Lines.Add('No SPECIFIC Diagnosis defined');
+                          memDxInstructions.Lines.Add('for this selected test.');
+                        end;
+                      end;
+                    end;
+    tDxTCPrior:     begin
+                      cklbDisplayedDxs.Items.Clear;   //<-- shouldn't be needed.  Remove later?
+                      PopulateCkLb(cklbDisplayedDxs, FPriorDxList);
+                      memDxInstructions.Lines.Add('Select Custom prior Dx');
+                    end;
+    tDxTCEncounter: begin
+                      PopulateCkLb(cklbDisplayedDxs, FEnctrDxList);
+                      memDxInstructions.Lines.Add('Select Dx from Encounter');
+                    end;
+  end;
+end;
+
+procedure TfrmODTMG1.PopulateCkLb(CkLb : TCheckListBox; Source : TTMGDataList);
+//Data2GUI
+  procedure PopulateByCheckedState(State : boolean);
+  var
+    i,j      : integer;
+    DataObj  : TTMGData;
+  begin
+    for i := 0 to Source.Count-1 do begin
+      DataObj := Source.Data[i];
+      if not Assigned(DataObj) then continue;
+      if DataObj.Checked <> State then continue;
+      j := CkLb.Items.AddObject(DataObj.Name, DataObj);  // CkLb does not own objects
+      DataObj.Index := j;
+      CkLb.Checked[j] := DataObj.Checked;
+    end;
+  end;
+
+begin
+  CkLb.Items.Clear;  //doesn't own objects
+  if not Assigned(Source) then exit;
+  PopulateByCheckedState(true);    //First, just add checked items
+  PopulateByCheckedState(false);   //Next, add just NON-checked items
+end;
+
+procedure TfrmODTMG1.PopulateCkLb(CkLb : TCheckListBox; Source : TStringList);
+//Data2GUI
+var
+  DL : TTMGDataList;
+begin
+  DL := TTMGDataList.Create; //won't own objects
+  try
+    Items2DataList(Source, DL);
+    PopulateCkLb(CkLb, DL);
+  finally
+    DL.Free;
+  end;
+end;
+
+procedure TfrmODTMG1.Items2DataList(Items : TStringList; DL : TTMGDataList);
+//NOTE:  This is for a Items that is populated with TTMGData objects.
+var
+  i          : integer;
+  DataObj    : TTMGData;
+  Obj        : TObject;
+begin
+  for i := 0 to Items.Count-1 do begin
+    Obj := Items.Objects[i];
+    if not (Obj is TTMGData) then continue;
+    DataObj := TTMGData(Items.Objects[i]);
+    DL.Add(DataObj);
+  end;
 end;
 
 procedure TfrmODTMG1.tcProcTabsChange(Sender: TObject);
 //Data2GUI
 var
-  i,j        : integer;
-  DataObj, ProcObj  : TTMGData;
-
+  i        : integer;
+  DataObj  : TTMGData;
 begin
   inherited;
   //Handle loading / showing labs
@@ -1312,25 +1821,9 @@ begin
   if i < 0  then exit;
   DataObj := TTMGData(tcProcTabs.Tabs.Objects[i]);
   if not Assigned(DataObj) then exit;
-  //First, just add checked items
-  for i := 0 to DataObj.Items.Count-1 do begin
-    ProcObj := TTMGData(DataObj.Items.Objects[i]);
-    if not Assigned(ProcObj) then continue;
-    if ProcObj.Checked = false then continue;
-    j := cklbProcedures.Items.AddObject(ProcObj.Name, ProcObj);
-    ProcObj.Index := j;
-    cklbProcedures.Checked[j] := ProcObj.Checked;
-  end;
-  //next, add just NON-checked items
-  for i := 0 to DataObj.Items.Count-1 do begin
-    ProcObj := TTMGData(DataObj.Items.Objects[i]);
-    if not Assigned(ProcObj) then continue;
-    if ProcObj.Checked = true then continue;
-    j := cklbProcedures.Items.AddObject(ProcObj.Name, ProcObj);
-    ProcObj.Index := j;
-    cklbProcedures.Checked[j] := ProcObj.Checked;
-  end;
+  PopulateCkLb(cklbProcedures, DataObj.Items);
 end;
+
 
 //-------------------------------------------------------------------------
 // Data -> Responses
@@ -1366,14 +1859,21 @@ begin
   for i := 0 to ChangedDataObjs.Count-1 do begin
     DataObj := ChangedDataObjs.Data[i];
     if not DataObj.Modified then continue;
-    if not (DataObj.Datatype in [ttdtDx, ttdtProc, ttdtTextFld,
-                                 ttdtOrderFlags, ttdtOrderOptions,
-                                ttdtOrderingProvider, ttdtLabTiming,
-                                ttdtWPFld]) then continue;
+    if not (DataObj.Datatype in [ttdtDx,
+                                 ttdtProc,
+                                 ttdtTextFld,
+                                 ttdtOrderFlags,
+                                 ttdtOrderOptions,
+                                 ttdtOrderingProvider,
+                                 ttdtLabTiming,
+                                 ttdtWPFld
+                                ]                      ) then continue;
     IV := IfThen(DataObj.Datatype = ttdtWPFld, TX_WPTYPE, DataObj.InternalValue);
     Responses.Update(DataObj.ID, DataObj.Instance, IV, DataObj.ExternalValue);
     DataObj.SavedValue := DataObj.InternalValue;
   end;  //for
+
+  //TO DO  12/19/23  cycle through all objects and get any linked diagnoses, and output them to storage responses element.
 
   { -- Below is copied VA code ... Delete later after getting the Responses stuff working.
   for i := 0 to FDialogCtrlList.Count - 1 do begin
@@ -1401,14 +1901,15 @@ end;
 //-------------------------------------------------------------------------
 function TfrmODTMG1.UpdateOrderMemoDisplay : string;
 
-var OrderProvider, LabTiming, ProcString, DxStr : string;
+var OrderProvider, LabTiming, LabTimingOther, ProcString, DxStr : string;
     SickPt, StandingOrder, Fasting : boolean;
     BalladOrder, OutsideOrder, PrintPrompt, AutoSign, ForHospital : boolean;
-    DataObj : TTMGData;
+    DataObj, DxObj : TTMGData;
     i,j,k : integer;
     SelectedDxList, SelectedProcList, CommentSL : TStringList;
     Str : string;
     TempSubTMGDataList : TTMGDataList;
+    WorkingProcAndDxLinksList : TTMGDataList; //doesn't own objects
 
   function GetBool(ListBox : TCheckListBox; Index: integer) : boolean;  //default is false
   begin
@@ -1432,6 +1933,23 @@ var OrderProvider, LabTiming, ProcString, DxStr : string;
     Result := ChildObj.Name;
   end;
 
+  function SearchEditText(SrchStr : string) : string;
+  var  TempSubTMGDataList : TTMGDataList;
+       DataObj            : TTMGData;
+       i                  : integer;
+  begin
+    Result := ''; //default
+    TempSubTMGDataList := FTMGOrderData.SublistByType(ttdtTextFld);
+    for i := 0 to TempSubTMGDataList.Count - 1 do begin
+      DataObj := TempSubTMGDataList.Data[i];
+      if DataObj.Name <> SrchStr then continue;
+      Result := DataObj.ExternalValue;
+      break;
+    end;
+    TempSubTMGDataList.Free;
+  end;
+
+
   function SearchCKLBbool(AType: tTMGDataType; SrchStr : string) : bool;
   var  TempSubTMGDataList : TTMGDataList;
        DataObj            : TTMGData;
@@ -1448,7 +1966,7 @@ var OrderProvider, LabTiming, ProcString, DxStr : string;
     TempSubTMGDataList.Free;
   end;
 
-begin
+begin //TfrmODTMG1.UpdateOrderMemoDisplay
   OrderProvider  := GetRGValue(ttdtOrderingProvider);
   LabTiming      := GetRGValue(ttdtLabTiming);
   SickPt         := SearchCKLBbool(ttdtOrderFlags,   'Sick Patient');
@@ -1460,11 +1978,18 @@ begin
   AutoSign       := SearchCKLBbool(ttdtOrderOptions, 'AutoSign Order');
   FPromptToPrint := PrintPrompt;  //used during form close out
   FFasting       := Fasting;      //used during form close out
+  if LabTiming='Other Time' then begin
+    //LabTiming := FLabTimingStrOther;  //elh    8/22/23
+    LabTimingOther := SearchEditText(FREE_TEXT_OTHER_TIME);
+    if LabTimingOther <> '' then LabTiming := LabTiming + ': ' + LabTimingOther;
+  end;
   FLabTimingStr  := LabTiming;    //used during form close out
 
   SelectedDxList   := TStringList.Create;
   SelectedProcList := TStringList.Create;
   CommentSL        := TStringList.Create;
+  WorkingProcAndDxLinksList := TTMGDataList.Create;
+
   TempSubTMGDataList := FTMGOrderData.SublistByType(ttdtDx);  //TempSubTMGDataList doesn't own objects, but does need to be freed, not reused.
   try
     for i := 0 to TempSubTMGDataList.Count-1 do begin
@@ -1479,6 +2004,7 @@ begin
     for i := 0 to FTMGOrderData.CountOfType(ttdtProc)-1 do begin
       DataObj := FTMGOrderData.DataByType(ttdtProc, i);
       if not DataObj.Checked then continue;
+      if FProcAndDxLinksList.IndexOf(DataObj) > -1 then continue;  //These selected LabProcs will be handled separately.
       Str := DataObj.ExternalValue;
       SelectedProcList.Add(Str);
     end;
@@ -1489,7 +2015,22 @@ begin
       if not DataObj.Checked then continue;
       Str := DataObj.ExternalValue;
       //NOTE: if Str is data from edit field, then perhaps it contains multiple items, comma-separated.  Might need to split out...
-      if Contains(DataObj.Name, FREE_TEXT_DX) then begin
+      if DataObj.Name = FREE_TEXT_DX_SPECIAL then begin
+        //kt NOTE: Below is a bit hacky.  But the output of this function, into the TMemo field, is NOT the real order.
+        //           It is just something for the user to see while choosing tests.  The real text of the order is
+        //           determined by the server later.
+        //         The reason for the changes is because the single text field ultimately gets stored into
+        //           a data field on the server, and I think it is not long enough to store both
+        //           the ICD codes AND their names. The names can be quite long.  So I will cheat and
+        //           store only the ICD codes in the text field, but still show the ICD names for the user, and get
+        //           the the names directly from FEnctrDxList for the purposes of output to TMemoField.
+        for j := 0 to FEnctrDxList.Count - 1 do begin
+          DxObj := FEnctrDxList[j];
+          if not DxObj.Checked then continue;
+          if not (DxObj.DataType in [ttdtPriorICD, ttdtEncounterICD]) then break; //Types are not mixed.  If one is not present, then none are.
+          SelectedDxList.Add(DxObj.Name);
+        end;
+      end else if Contains(DataObj.Name, FREE_TEXT_DX) then begin
         SelectedDxList.Add(Str);
       end else if DataObj.Name = FREE_TEXT_LAB then begin
         SelectedProcList.Add(Str);
@@ -1513,11 +2054,39 @@ begin
     i := SelectedProcList.IndexOf('TSH');
     j := SelectedProcList.IndexOf('CMP');
     k := SelectedProcList.IndexOf('CBC-Platelet With Diff.');
-    if (i>0) and (j>0) and (k > 0) then begin
+    if (i>-1) and (j>-1) and (k>-1) then begin
       SelectedProcList.Delete(i);
       SelectedProcList.Delete(j);
       SelectedProcList.Delete(k);
       SelectedProcList.Add('General Health 80050 (CBC w/ diff & CMP & TSH)');
+    end;
+
+    //Handle tests that have a linked Dx.  E.g. 'PSA' with 'Personal Hx of Prostate CA'
+    WorkingProcAndDxLinksList.Assign(FProcAndDxLinksList);
+    //FProcAndDxLinksList holds linked Test->Dx items.  List[x]=Ptr to LabProc TTMGData object, List[x+1]=Ptr to Dx TTMGData object
+    i := 0; while i < WorkingProcAndDxLinksList.Count do begin
+      Str := '';
+      DataObj := WorkingProcAndDxLinksList[i]; inc(i);  //LabProc object.
+      if i >= WorkingProcAndDxLinksList.Count then break;
+      DxObj := WorkingProcAndDxLinksList[i]; inc(i);
+      j := WorkingProcAndDxLinksList.IndexOfIEN(DataObj.IEN, i);
+      if (j > -1) and (j+1 < WorkingProcAndDxLinksList.count) then begin
+        //In this situation a given Lab/procedure is linked to more than one Dx.  Will combine them here.
+        Str := DataObj.ExternalValue +' (Dx: '+DxObj.ExternalValue;   //out first match
+        repeat
+          Str := Str + ', ';
+          DxObj := WorkingProcAndDxLinksList[j+1];
+          Str := Str + DxObj.ExternalValue;
+          WorkingProcAndDxLinksList.Delete(j+1);
+          WorkingProcAndDxLinksList.Delete(j);
+          j := WorkingProcAndDxLinksList.IndexOfIEN(DataObj.IEN, i);
+        until (j = -1) or (j+1 >= WorkingProcAndDxLinksList.count);
+        Str := Str + ') '
+      end else begin
+        Str := DataObj.ExternalValue;
+        Str := Str+' (Dx: '+DxObj.ExternalValue+')';
+      end;
+      SelectedProcList.Add(Str);
     end;
 
     //Add tests ordered
@@ -1556,6 +2125,7 @@ begin
     SelectedProcList.Free;
     CommentSL.Free;
     TempSubTMGDataList.Free;
+    WorkingProcAndDxLinksList.Free;
   end;
 
   memOrder.Text := Result;
@@ -1564,19 +2134,20 @@ end;
 procedure TfrmODTMG1.cmdAcceptClick(Sender: TObject);
 var MessageArr : TStringList;
 begin
-  inherited;
+  if OkToClose() = False then exit;
   MessageArr := TStringList.Create;
   try
     SetupLabOrderMsg(MessageArr);
     //if dialog launched from Encounter, then delay sending until Encounter form is closed.
     if LaunchedFromEncounter then begin
-      if assigned(FOnClosing) then FOnClosing(Self,MessageArr);
+      if assigned(FOnClosing) then FOnClosing(Self,MessageArr);    // --> TfrmEnounterLabs.HandleLabDlgClosing(Dlg : TfrmODTMG1; Data : TStringList);
     end else begin
       SendLabOrderMsg(MessageArr);
     end;
   finally
     MessageArr.Free;
   end;
+  inherited;
 end;
 
 procedure TfrmODTMG1.cmdQuitClick(Sender: TObject);
@@ -1629,11 +2200,10 @@ begin
 
   SL.Add(MyName+' ORDERED LABS');
   SL.Add('');
-  SL.Add(Patient.Name);
+  SL.Add(Patient.TMGMsgString);
   SL.Add('');
   SL.Add(FastingMsg);
   SL.Add('');
-  //MessageArr.Add(uppercase(LabTimingMsg));
   SL.Add(UpperCase(FLabTimingStr));
 end;
 
@@ -1642,13 +2212,19 @@ begin
   AutoSizeDisabled := true;  //<--- this turns off crazy form resizing from parent forms.
 
   FTMGOrderData := TTMGDataList.Create;
+  FAllDxList    := TTMGDataList.Create;  //doesn't own objects
+  FPriorDxList  := TTMGDataList.Create;  //doesn't own objects
+  FEnctrDxList  := TTMGDataList.Create;  //doesn't own objects
+
   FEditsList    := TList.Create; //doesn't own objects
   FCklbList     := TList.Create; //doesn't own objects
   FRgList       := TList.Create; //doesn't own objects
+  FProcAndDxLinksList := TTMGDataList.Create; //doesn't own objects
   FPromptToPrint:= false;
   FFasting      := false;
   FLabTimingStr := '';
-  FOnClosing := nil;
+  FOnClosing    := nil;
+  FLastSelectedProc := nil;
 
   inherited;  //<-- I think this may trigger a call to init data etc, so above needs to be done BEFORE inherited
   FOrderFlagFastingIndex := -1;;
@@ -1659,9 +2235,13 @@ var i : integer;
 begin
   for i := 0 to FTMGOrderData.Count-1 do FTMGOrderData.Data[i].Free;
   FTMGOrderData.Free;
-  FEditsList.Free; //doesn't own objects
-  FCklbList.Free;  //doesn't own objects
-  FRgList.Free;    //doesn't own objects
+  FEditsList.Free;   //doesn't own objects
+  FCklbList.Free;    //doesn't own objects
+  FRgList.Free;      //doesn't own objects
+  FAllDxList.Free;   //doesn't own objects
+  FPriorDxList.Free; //doesn't own objects
+  FEnctrDxList.Free; //doesn't own objects
+  FProcAndDxLinksList.Free; //doesn't own objects
   inherited;
 end;
 
@@ -1672,13 +2252,14 @@ begin
   inherited;
   tcProcTabs.Width := w;  //restore width
   LaunchedFromEncounter := false;
-  SetCustomProcArea(false);
+  SetCustomProcArea(false,btnToggleSpecialProc);
+  SetCustomProcArea(false,btnToggleSpecialDx);
 end;
 
 
 procedure TfrmODTMG1.FormShow(Sender: TObject);
 var APage : TFrmPage;
-    TopLeft, ScrnPt : TPoint;
+    //TopLeft, ScrnPt : TPoint;
 begin
   inherited;
   //consider positioning if (R) tab open.
@@ -1697,34 +2278,189 @@ begin
   }
 end;
 
-procedure TfrmODTMG1.SetCustomProcArea(Open : boolean);
+procedure TfrmODTMG1.SetCustomProcArea(Open : boolean; Sender: TSpeedButton);
 const
   CUST_AREA_HT = 90;
   BOTTOM_HT = 150;
   LABEL_STR : array[false..true] of string = ('OPEN','CLOSE');
   BTN_BOTTOM_SPACE = 5;
 begin
+
+  //EDDIE - Look here for calculations to be wrong
+     //             btnToggleSpecialProc);
+//  SetCustomProcArea(false,btnToggleSpecialDx
   FCustomProcOpen := Open;
   if Open then begin
-    sbxMain.Height := Self.Height - BOTTOM_HT - CUST_AREA_HT;
-    pnlBottom.Height := CUST_AREA_HT;
-    pnlBottom.Visible := true;
-    tcProcTabs.Height := btnToggleSpecialProc.Top - tcProcTabs.Top - BTN_BOTTOM_SPACE;
-    btnToggleSpecialProc.Top := sbxMain.Height - BTN_BOTTOM_SPACE - btnToggleSpecialProc.Height;
+    if Sender=btnToggleSpecialProc then begin
+      pnlBottom.Height := 117;
+      pnlLeftTop.Height := pnlOrderAreaLeft.height - btnToggleSpecialProc.Height - pnlBottom.Height - splitterleftpanel.height;
+      pnlBottom.Visible := true;
+    end else begin
+      pnlRightBottom.Height := 130; // 117;
+      pnlRightTop.Height := pnlOrderAreaRight.height - btnToggleSpecialDx.Height - pnlRightBottom.Height - splitterright.height;
+      pnlRightBottom.Visible := true;
+    end;
   end else begin
-    pnlBottom.Visible := false;
-    pnlBottom.Height := 0;
-    sbxMain.Height := Self.Height - BOTTOM_HT;
-    btnToggleSpecialProc.Top := sbxMain.Height - BTN_BOTTOM_SPACE - btnToggleSpecialProc.Height;
-    tcProcTabs.Height := btnToggleSpecialProc.Top - tcProcTabs.Top - BTN_BOTTOM_SPACE;
+    if Sender=btnToggleSpecialProc then begin
+      pnlLeftTop.Height := pnlOrderAreaLeft.height - btnToggleSpecialProc.Height - splitterleftpanel.height;
+      pnlBottom.Visible := false;
+      pnlBottom.Height := 0;
+    end else begin
+      pnlRightBottom.Height := 0;
+      pnlRightTop.Height := pnlOrderAreaRight.height - btnToggleSpecialDx.Height - splitterright.height;
+      pnlRightBottom.Visible := false;
+    end;
   end;
-  btnToggleSpecialProc.Caption := LABEL_STR[Open] + ' Custom Lab / Procedure / Comments';
+  //btnToggleSpecialProc.Caption := LABEL_STR[Open] + ' Custom Lab / Procedure / Comments';
+  Sender.Caption := StringReplace(Sender.Caption,LABEL_STR[Not Open],LABEL_STR[Open],[rfReplaceAll]);
 end;
 
 
-procedure TfrmODTMG1.ToggleCustomProcArea;
+function TfrmODTMG1.OkToClose : boolean;
+
+  {
+    TempSubTMGDataList : TTMGDataList;
+    DataObj : TTMGData;
+
+  begin  //TfrmODTMG1.OkToClose
+   TempSubTMGDataList := FTMGOrderData.SublistByType(ttdtDx);  //TempSubTMGDataList doesn't own objects, but does need to be freed, not reused.
+   try
+     for i := 0 to TempSubTMGDataList.Count-1 do begin
+       DataObj := TempSubTMGDataList.Data[i];
+       if not DataObj.Checked then continue;
+       dxpicked := true;
+     end;
+   finally
+     TempSubTMGDataList.Free;
+   end;
+  }
+
+  function GetDiagStr:string;
+  var i:integer;
+      TempSubTMGDataList : TTMGDataList;
+      DataObj : TTMGData;
+      AnEdit : TEdit;
+
+      procedure AddToResult(var result: string; S : string);
+      begin
+        result:= result + IfThen(result='','','^') + S;
+      end;
+
+  begin
+     result := '';
+     TempSubTMGDataList := FTMGOrderData.SublistByType(ttdtDx);  //TempSubTMGDataList doesn't own objects, but does need to be freed, not reused.
+     try
+       for i := 0 to TempSubTMGDataList.Count-1 do begin
+         DataObj := TempSubTMGDataList.Data[i];
+         if not DataObj.Checked then continue;
+         AddToResult(result, DataObj.Name);
+       end;
+     finally
+       TempSubTMGDataList.Free;
+     end;
+
+     {for i := 0 to cklbDisplayedDxs.Items.Count - 1 do begin
+       if not cklbDisplayedDxs.Checked[i] then continue;
+       AddToResult(result, cklbDisplayedDxs.Items[i]);
+     end; }
+
+     for i := 0 to 3 do begin   //edtDx0 ..edtDx3
+       AnEdit := TEdit(FEditsList[i]);  //get custom diagnosis edit boxes.
+       if AnEdit.text = '' then continue;
+       AddToResult(result, AnEdit.text);
+     end;
+  end;
+
+  function GetTestStr:string;
+  var i:integer;
+  begin
+     result := '';
+     for i := 0 to cklbProcedures.Items.Count - 1 do begin
+       if not cklbProcedures.Checked[i] then continue;
+       if result<>'' then result := result+'^';
+       result:=result+cklbProcedures.Items[i];
+     end;
+     if edtOtherOrder.text<>'' then result := result+'^'+StringReplace(edtOtherOrder.text,',','^',[rfReplaceAll,rfIgnoreCase]);
+  end;
+
+  function RequiredLinkedDxsSatisfied : boolean;
+  var
+    i, j : integer;
+    TempObj  : TTMGData;    //doesn't own object
+    LinkedObj : TTMGData;  //doesn't own object
+    Msg : string;
+    LinkedDxList : TTMGDataList;
+  begin
+    Result := true; //default to success
+    //Scan through all Procs, and see if they have linked Dx's are required
+    for i := 0 to FTMGOrderData.Count - 1 do begin
+      TempObj := FTMGOrderData[i];
+      if TempObj.DataType <> ttdtProc then continue;
+      if TempObj.NeedsLinkedDx = false then continue;
+      if TempObj.Checked = false then continue;
+      if TempObj.LinkedDxStr = '' then continue;
+      if TempObj.IsLinkedDxChecked(FTMGOrderData) then continue;
+      //Object has a list of linked Dx's, and one is required, but none are checked.
+      Msg := 'Text "'+TempObj.Name+'" has 1 or more required diagnosis' +  CRLF;
+      LinkedDxList := TempObj.AllowedLinkedDxList(FTMGOrderData);
+      for j := 0 to LinkedDxList.Count - 1 do begin
+        LinkedObj := LinkedDxList[j];
+        Msg := Msg + '  '+LinkedObj.Name + CRLF;
+      end;
+      Msg := Msg + 'Please select Dx, or unselect '+TempObj.Name;
+      Result := false;
+      ShowMsg(Msg);
+    end;
+  end;
+
+var i:integer;
+    dxpicked:boolean;
+    TestStr,DiagStr:string;
+    PretestResult:string;
+    TempSubTMGDataList : TTMGDataList;
+    DataObj : TTMGData;
+
+begin  //TfrmODTMG1.OkToClose
+   result := True;
+   if not RequiredLinkedDxsSatisfied then begin
+     result := false;    //added 9/9/24
+     exit;
+   end;
+   dxpicked := false;
+   TempSubTMGDataList := FTMGOrderData.SublistByType(ttdtDx);  //TempSubTMGDataList doesn't own objects, but does need to be freed, not reused.
+   try
+     for i := 0 to TempSubTMGDataList.Count-1 do begin
+       DataObj := TempSubTMGDataList.Data[i];
+       if not DataObj.Checked then continue;
+       dxpicked := true;
+     end;
+   finally
+     TempSubTMGDataList.Free;
+   end;
+   //ELH end addition
+   if (edtDx0.text<>'') or (edtDx1.text<>'') or (edtDx2.text<>'') or (edtDx3.text<>'') then dxpicked := True;  //tmg 7/25/23
+   if dxpicked=false then begin
+     Showmsg('You must select at least one diagnosis');
+     result := false;
+     exit;
+   end;
+   //Added 12/4/23
+   TestStr := GetTestStr;
+   DiagStr := GetDiagStr;
+   PretestResult := sCallV('TMG LAB SAVE PRETEST',[Patient.DFN,TestStr,DiagStr]);
+   if piece(PretestResult,'^',1)='-1' then begin
+     PretestResult := piece(PretestResult,'^',2);
+     PretestResult := StringReplace(PretestResult,'@@BR@@',#13#10,[rfReplaceAll]);
+     if messagedlg(PretestResult,mtConfirmation,[mbYes,mbNo,mbCancel],0) <> mrNo then begin
+        result := false;
+     end;
+   end;
+   //end 12/4/23 addition
+end;
+
+procedure TfrmODTMG1.ToggleCustomProcArea(Sender:TSpeedButton);
 begin
-  SetCustomProcArea(not FCustomProcOpen);
+  SetCustomProcArea(not FCustomProcOpen,Sender);
 end;
 
 procedure TfrmODTMG1.btnClearClick(Sender: TObject);
@@ -1742,10 +2478,63 @@ begin
   end;
 end;
 
+procedure TfrmODTMG1.btnSrchICDClick(Sender: TObject);
+var
+  EntryType : tDxNodeType;
+  ItemDataStr : TDataStr;
+  frmICDPicker : TfrmEncounterICDPicker;
+  ModalResult : integer;
+  EditCtrl : TEdit;
+  EditIndex, MaxLen : integer;
+  Str : string;
+  i, L : integer;
+
+CONST
+  tNODE_FIRST = ord(TopicsDiscussed);
+  tNODE_LAST = ord(EncounterICDs);
+
+  //copied from fTMGDiagnoses                                                                                                                    // 1     2             3                4               5                 6                      7                  8
+  //TOPIC_PROBLEM_FORMAT       = 'Code^TopicName^ThreadText^ProblemIEN^ICDCode^ICDLongName^SnowmedName^ICDCodeSys';   // 1^<TOPIC NAME>^<THREAD TEXT >^<LINKED PROBLEM IEN>^<LINKED ICD>^<LINKED ICD LONG NAME>^<LINKED SNOWMED NAME>^<ICD_SYS_NAME>
+  //SECTION_DATA_FORMAT        = 'Type^Index^DisplayText';  //'Type^Index^DisplayText';
+  //PROB_LIST_DATA_FORMAT      = 'Type^ifn^status^description^ICDCode^onset^LastModified^SC^SpExp^Cond^Loc^LocType^prov^service^priority^HasComment^DateRecorded^SCCond^InactiveFlag^ICDLongName^ICDCodeSys';  //fmt: 3^ifn^status^description^ICD^onset^last modified^SC^SpExp^Condition^Loc^loc.type^prov^service^priority^has comment^date recorded^SC condition(s)^inactive flag^ICD long description^ICD coding system
+  //PRIOR_ICDS_DATA_FORMAT     = 'Type^ICDCode^ICDLongName^FMDTLastUsed^ICDCodeSys';   //fmt: 4^<PRIOR ICD>^<ICD LONG NAME>^<FMDT LAST USED>^<ICD_CODE_SYS>
+  //ENCOUNTER_ICDS_DATA_FORMAT = 'Type^Entry^ICDCode^DisplayName^ICDLongName^ICDCodeSys';  //fmt 5^ENTRY^<ICD CODE>^<DISPLAY NAME>^<ICD LONG NAME>^<ICDCODESYS>"
+
+begin
+  //Result := true;
+  frmICDPicker := TfrmEncounterICDPicker.Create(nil);;
+  ItemDataStr := TDataStr.Create(STD_ICD_DATA_FORMAT);
+  try
+    frmICDPicker.Initialize(Self, 'TestMessage');
+    ModalResult := frmICDPicker.ShowModal;
+    if ModalResult = mrOK then begin
+      ItemDataStr.Assign(frmICDPicker.ResultDataStr); //format: STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodeSys';
+      EditIndex := 0; MaxLen := 99999999;
+      for i := 1 to 3 do begin
+        EditCtrl := TEdit(FEditsList[i]);
+        L := Length(EditCtrl.Text);
+        if L >= MaxLen then continue;
+        MaxLen := L;
+        EditIndex := i;
+      end;
+      EditCtrl := TEdit(FEditsList[EditIndex]);  //the one with the shortest amount of text
+      Str := ItemDataStr.Value['ProblemText'] + ' - ' + ItemDataStr.Value['ICDCode'];
+      if AddOrRemovePriorDx(EditCtrl, true, Str, ';') then begin  //true --> store (but -- can't automatically removed....)
+        Data2Responses([TTMGData(EditCtrl.Tag)]);
+      end;
+    end;
+  finally
+    FreeAndNil(frmICDPicker);
+    ItemDataStr.Free;
+    //if Result <> true  then lbxSection.Checked[Index] := false;
+  end;
+
+end;
+
 procedure TfrmODTMG1.btnToggleSpecialProcClick(Sender: TObject);
 begin
   inherited;
-  ToggleCustomProcArea;
+  ToggleCustomProcArea(TSpeedButton(Sender));
 end;
 
 

@@ -1,7 +1,6 @@
 object frmGUIEditFMFile: TfrmGUIEditFMFile
   Left = 0
   Top = 0
-  Align = alClient
   Caption = 'Edit Information'
   ClientHeight = 526
   ClientWidth = 682
@@ -30,18 +29,14 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
     Top = 0
     Width = 682
     Height = 487
-    ActivePage = tsBasic
+    ActivePage = tsAdvanced
     Align = alTop
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     OnChange = PageControlChange
     OnChanging = PageControlChanging
-    ExplicitWidth = 578
-    ExplicitHeight = 361
     object tsBasic: TTabSheet
       Caption = '&Standard'
-      ExplicitWidth = 570
-      ExplicitHeight = 333
       object pnlTop: TPanel
         Left = 0
         Top = 0
@@ -50,7 +45,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
         Align = alTop
         BevelOuter = bvLowered
         TabOrder = 0
-        ExplicitWidth = 570
         DesignSize = (
           674
           41)
@@ -82,7 +76,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
           SynonymChars = '<>'
           TabOrder = 0
           CharsNeedMatch = 1
-          ExplicitWidth = 324
         end
         object btnEdit: TBitBtn
           Left = 543
@@ -106,7 +99,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
             0000500000000008FF803007000050EEEEEEEE70880B43000000500000000000
             00FBB43000005555555555550BFFBB43000055555555555550BFFBB400005555
             55555555550BFFBB0000}
-          ExplicitLeft = 439
         end
         object btnAdd: TBitBtn
           Left = 612
@@ -152,7 +144,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
             FFFFFBFFFFFFFEFFFFFFFFFFFFFFFFFFFFFF3830EFFFFFFFFFFFFFFFFFFFFFFF
             FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD7D6FCFFFFFF
             FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ExplicitLeft = 508
         end
       end
       object sgBasic: TSortStringGrid
@@ -162,40 +153,39 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
         Height = 418
         Align = alClient
         BevelInner = bvLowered
+        Color = 11075574
+        FixedColor = 12183481
         TabOrder = 1
         OnSelectCell = GridSelectCell
         OnSetEditText = GridSetEditText
-        ExplicitWidth = 570
-        ExplicitHeight = 292
       end
     end
     object tsAdvanced: TTabSheet
       Caption = '&Advanced'
       ImageIndex = 1
-      ExplicitWidth = 597
-      ExplicitHeight = 328
       object sgAdvanced: TSortStringGrid
         Left = 0
         Top = 0
         Width = 674
         Height = 459
         Align = alClient
+        Color = 11075574
+        FixedColor = 12183481
         TabOrder = 0
-        ExplicitWidth = 597
-        ExplicitHeight = 328
+        OnSelectCell = GridSelectCell
+        OnSetEditText = GridSetEditText
       end
     end
   end
   object CancelBtn: TButton
-    Left = 592
+    Left = 594
     Top = 493
     Width = 80
     Height = 25
     Anchors = [akRight, akBottom]
     Caption = '&Done'
+    ModalResult = 1
     TabOrder = 1
-    ExplicitLeft = 488
-    ExplicitTop = 367
   end
   object btnApply: TBitBtn
     Left = 504
@@ -234,8 +224,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
       FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF046B0B2DB851046B0BFF00FFFF00
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
-    ExplicitLeft = 400
-    ExplicitTop = 367
   end
   object btnRevert: TBitBtn
     Left = 418
@@ -282,7 +270,5 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
       FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
       80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
-    ExplicitLeft = 314
-    ExplicitTop = 367
   end
 end

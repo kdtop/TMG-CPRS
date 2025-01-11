@@ -351,10 +351,8 @@ type
     procedure ClearDropDownStatus;
     function EditControl: TWinControl;
     procedure AdjustSizeOfSelf;
-    procedure DropButtonDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-      X, Y: Integer);
-    procedure DropButtonUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-      X, Y: Integer);
+    procedure DropButtonDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;  X, Y: Integer);
+    procedure DropButtonUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FwdChange(Sender: TObject);
     procedure FwdChangeDelayed;
     procedure FwdClick(Sender: TObject);
@@ -362,10 +360,8 @@ type
     procedure FwdKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FwdKeyPress(Sender: TObject; var Key: Char);
     procedure FwdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FwdMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-      X, Y: Integer);
-    procedure FwdNeedData(Sender: TObject; const StartFrom: string;
-      Direction, InsertAt: Integer);
+    procedure FwdMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FwdNeedData(Sender: TObject; const StartFrom: string; Direction, InsertAt: Integer);
     procedure SetNumForMatch(const NumberForMatch: integer);
     function GetAutoSelect: Boolean;
     function GetColor: TColor;
@@ -3084,26 +3080,22 @@ begin
     SaveItems := TList.Create;
     FLongList := False; // so don't have to track WaterMark
     FFromSelf := True;
-    for i := 0 to Items.Count - 1 do // put pointers to TItemRec in SaveItems
-    begin
+    for i := 0 to Items.Count - 1 do begin // put pointers to TItemRec in SaveItems
       ItemRec := PItemRec(SendMessage(Handle, LB_GETITEMDATA, i, 0));
       SaveItems.Add(ItemRec);
     end;
     Strings.Assign(Items);
     Items.Clear; // still FromSelf so don't dispose recs
     FFromSelf := False;
-    for i := 0 to SaveItems.Count - 1 do // use saved ItemRecs to rebuild listbox
-    begin
+    for i := 0 to SaveItems.Count - 1 do begin// use saved ItemRecs to rebuild listbox
       ItemRec := SaveItems[i];
-      if (assigned(ItemRec)) then
-      begin
+      if (assigned(ItemRec)) then begin
         Pos := Items.AddObject(Strings[i], ItemRec^.UserObject);
         // CQ 11491 - Changing TabPositions, etc. was wiping out check box status.
         FFromSelf := True;
         ItemRec2 := PItemRec(SendMessage(Handle, LB_GETITEMDATA, Pos, 0));
         FFromSelf := False;
-        if (assigned(ItemRec2)) then
-        begin
+        if (assigned(ItemRec2)) then begin
           ItemRec2^.Reference := ItemRec^.Reference;
           ItemRec2^.CheckedState := ItemRec^.CheckedState;
         end;
@@ -3120,15 +3112,14 @@ end;
 procedure TORListBox.SetLongList(Value: Boolean);
 { changes the list box so that it runs in LongList mode (calls OnNeedData) }
 begin
-  if Value <> FLongList then
-  begin
+  if Value <> FLongList then begin
     if Value = True then
       CreateScrollBar
-    else
-    begin
+    else begin
       FreeScrollBar;
-      if (FHideSynonyms) then
+      if (FHideSynonyms) then begin
         SetHideSynonyms(FALSE);
+      end;
     end;
   end;
 end;
@@ -3211,19 +3202,19 @@ procedure TORListBox.InitLongList(S: string);
 var
   index: integer;
 begin
-  if FLongList then
-  begin
-    if LookUpPiece <> 0 then
-    begin
+  if FLongList then begin
+    if LookUpPiece <> 0 then begin
       index := GetStringIndex(S);
-      if index > -1 then
+      if index > -1 then begin
         S := Piece(Items[index], Delimiter, LookUpPiece);
+      end;
     end;
-    if CaseChanged then
+    if CaseChanged then begin
       S := UpperCase(S);
+    end;
     // decrement last char & concat '~' for $ORDER
     if Length(S) > 0 then S := Copy(S, 1, Length(S) - 1) + Pred(S[Length(S)]) + '~';
-    NeedData(LL_POSITION, S);
+    NeedData(LL_POSITION, S); //LL_POSITION == long list thumb moved
     if S = '' then TopIndex := 0 else TopIndex := FWaterMark;
     FScrollBar.Position := PositionThumb;
   end;
@@ -3231,8 +3222,7 @@ end;
 
 procedure TORListBox.InsertSeparator;
 begin
-  if FWaterMark > 0 then
-  begin
+  if FWaterMark > 0 then begin
     Items.Insert(FWaterMark, LLS_LINE);
     Items.Insert(FWaterMark, LLS_SPACE);
   end;
@@ -3278,31 +3268,32 @@ begin {NeedData}
     LL_REVERSE: if FWaterMark < Items.Count then StartFrom := DisplayText[FWaterMark];
     LL_POSITION: begin
         ClearLong;
-        if StartFrom = #127#127#127 then
-        begin
+        if StartFrom = #127#127#127 then begin
           FDirection := LL_REVERSE;
           StartFrom := '';
-        end
-        else FDirection := LL_FORWARD;
+        end else begin
+          FDirection := LL_FORWARD;
+        end;
       end;
-    LL_FORWARD: if (FWaterMark < Items.Count) and (Items.Count > 0)
-      then StartFrom := DisplayText[Items.Count - 1];
+    LL_FORWARD: if (FWaterMark < Items.Count) and (Items.Count > 0) then begin
+                  StartFrom := DisplayText[Items.Count - 1];
+                end;
   end;
-  if LookupPiece <> 0 then
-  begin
+  if LookupPiece <> 0 then begin
     index := GetStringIndex(StartFrom);
-    if index > -1 then
+    if index > -1 then begin
       StartFrom := Piece(Items[index], Delimiter, LookUpPiece);
+    end;
   end;
-  if CaseChanged then
+  if CaseChanged then begin
     StartFrom := Uppercase(StartFrom);
+  end;
   StartFrom := Copy(StartFrom, 1, 128); // limit length to 128 characters
   CtrlPos := 0; // make sure no ctrl characters
-  for CharPos := 1 to Length(StartFrom) do if StartFrom[CharPos] in [#0..#31] then
-    begin
-      CtrlPos := CharPos;
-      break;
-    end;
+  for CharPos := 1 to Length(StartFrom) do if StartFrom[CharPos] in [#0..#31] then begin
+    CtrlPos := CharPos;
+    break;
+  end;
   if CtrlPos > 0 then StartFrom := Copy(StartFrom, 1, CtrlPos - 1);
   if FDirection = LL_FORWARD then FInsertAt := Items.Count else FInsertAt := FWaterMark;
   if Assigned(FOnNeedData) then FOnNeedData(Self, copy(StartFrom, 1, MaxNeedDataLen), FDirection, FInsertAt);
@@ -3428,24 +3419,18 @@ var
   i: Integer;
 begin
   Result := -1;
-  if Length(AString) > 0 then {*KCM*}
-  begin
-    if not FLongList then // Normal List
-    begin
+  if Length(AString) > 0 then begin {*KCM*}
+    if not FLongList then begin // Normal List
       Result := SendMessage(Handle, LB_FINDSTRING, -1, Longint(PChar(AString)));
       if Result = LB_ERR then Result := -1;
-    end else // Long List
-    begin
-      if FScrollBar.Position = 0 then for i := 0 to FWatermark - 1 do
-        begin
-          if CompareText(AString, Copy(DisplayText[i], 1, Length(AString))) = 0 then
-          begin
-            Result := i;
-            break;
-          end;
+    end else begin // Long List
+      if FScrollBar.Position = 0 then for i := 0 to FWatermark - 1 do begin
+        if CompareText(AString, Copy(DisplayText[i], 1, Length(AString))) = 0 then begin
+          Result := i;
+          break;
         end;
-      if Result < 0 then
-      begin
+      end;
+      if Result < 0 then begin
         Result := SendMessage(Handle, LB_FINDSTRING, FWaterMark - 1, Longint(PChar(AString)));
         if Result < FWaterMark then Result := -1;
       end; {if Result}
@@ -3461,41 +3446,37 @@ var
   index: integer;
 begin
   Result := -1;
-  if Length(AString) > 0 then {*KCM*}
-  begin
-    if not FLongList then // Normal List
-    begin
+  if Length(AString) > 0 then begin {*KCM*}
+    if not FLongList then begin// Normal List
       Result := SendMessage(Handle, LB_FINDSTRING, -1, Longint(PChar(AString)));
       if Result = LB_ERR then Result := -1;
       // use FFocusIndex instead of FocusIndex to reduce flashing
       FFocusIndex := Result;
-    end else // Long List
-    begin
-      if FScrollBar.Position = 0 then for i := 0 to FWatermark - 1 do
-        begin
-          if CompareText(AString, Copy(DisplayText[i], 1, Length(AString))) = 0 then
-          begin
-            Result := i;
-            break;
-          end;
+    end else begin // Long List
+      if FScrollBar.Position = 0 then for i := 0 to FWatermark - 1 do begin
+        if CompareText(AString, Copy(DisplayText[i], 1, Length(AString))) = 0 then begin
+          Result := i;
+          break;
         end;
-      if not StringBetween(AString, DisplayText[FWaterMark], DisplayText[Items.Count - 1]) then
-      begin
+      end;
+      if not StringBetween(AString, DisplayText[FWaterMark], DisplayText[Items.Count - 1]) then begin
         x := AString;
-        if LookupPiece <> 0 then
-        begin
+        if LookupPiece <> 0 then begin
           index := GetStringIndex(x);
-          if index > -1 then
+          { //kt commented block out 7/1/24 because it causes lookup of only the first match item.
+          if index > -1 then begin
             x := Piece(Items[index], Delimiter, LookUpPiece);
+          end;
+          }
         end;
-        if CaseChanged then
+        if CaseChanged then begin
           x := UpperCase(x);
+        end;
         // decrement last char & concat '~' for $ORDER
         if Length(x) > 0 then x := Copy(x, 1, Length(x) - 1) + Pred(x[Length(x)]) + '~';
         NeedData(LL_POSITION, x);
       end;
-      if Result < 0 then
-      begin
+      if Result < 0 then begin
         Result := SendMessage(Handle, LB_FINDSTRING, FWaterMark - 1, Longint(PChar(AString)));
         if Result < FWaterMark then Result := -1;
         if Result >= FWatermark then FocusIndex := Result;
@@ -4177,8 +4158,18 @@ begin
   SelectIndex := -1;
   if Length(x) >= CharsNeedMatch then
     SelectIndex := FListBox.SelectString(x);
-  if (Length(x) < CharsNeedMatch) and (FListBox.ItemIndex > -1) then
-    SelectIndex := FListBox.SelectString(x);
+  //kt begin mod  7/1/24 -------------------------------------------
+  //kt orginal --> if (Length(x) < CharsNeedMatch) and (FListBox.ItemIndex > -1) then    //kt 7/1/24
+  //kt orginal -->   SelectIndex := FListBox.SelectString(x);
+  //Purpose of mod -- if user deletes all input, should revert to initial state.
+  if (Length(x) < CharsNeedMatch) then begin
+    if (FListBox.ItemIndex > -1) then begin
+      SelectIndex := FListBox.SelectString(x);
+    end else if x='' then begin
+      InitLongList('');
+    end;
+  end;
+  //kt end mod ----------------------------------------------------
   if UniqueAutoComplete then
     SelectIndex := FListBox.VerifyUnique(SelectIndex, x);
   if FListItemsOnly and (SelectIndex < 0) and (x <> '') then

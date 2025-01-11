@@ -255,7 +255,7 @@ begin
         AList.Add('Adm^Inpatient Notes' + U + IntToStr(Context));
         AList.Add('Vis^Outpatient Notes' + U + IntToStr(Context));
       end;
-      if (Context=9) or (Context=10) then
+      if (Context=9) or (Context=10) or (Context=11) then
         Dest.Insert(0, IntToStr(Context) + '^' + NC_TV_TEXT[TabIndex, Context]+' ('+inttostr(SrcList.Count)+')' + '^^^^^^^^^^^%^0')
       else
         Dest.Insert(0, IntToStr(Context) + '^' + NC_TV_TEXT[TabIndex, Context] + '^^^^^^^^^^^%^0');

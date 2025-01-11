@@ -105,6 +105,7 @@ type
     Category:  string;
     Narrative: string;
     FGecRem: string;
+    TMGData : string; //kt added 12/28/23
     procedure Assign(Src: TPCEItem); virtual;
     procedure Clear; virtual;
     function IsCleared : boolean;
@@ -335,7 +336,8 @@ type
     procedure GetHasCPTList(AList: TStrings);
     procedure CopyPCEItems(Src: TList; Dest: TObject; ItemClass: TPCEItemClass);
   public
-    constructor Create;
+    constructor Create; overload;
+    constructor Create(ASrc : TPCEData); overload;  //kt added 5/23
     destructor Destroy; override;
     procedure Clear;
     procedure CopyPCEData(Dest: TPCEData);  //Copies self -> Dest
@@ -366,7 +368,7 @@ type
     function  GetVisitType(index : integer) : TPCEProc; //kt added
     procedure SetExtraVisitTypes(Src: TStrings; FromForm: boolean = TRUE); //kt
 
-    function StrForList(AList : TList; AClass : TPCEItemClass; CatType: TPCEDataCat; NoHeader : boolean = false) : string;  //kt added
+    function StrForList(AList : TList; AClass : TPCEItemClass; CatType: TPCEDataCat; NoHeader : boolean = false; CodeOnly : boolean = false) : string;  //kt added
     function StrDiagnoses(NoHeader : boolean = false): string;               // Diagnoses: ...               //kt added NoHeader param
     function StrImmunizations(NoHeader : boolean = false): string;           // Immunizzations: ...          //kt added NoHeader param
     function StrProcedures(NoHeader : boolean = false): string;              // Procedures: ...              //kt added NoHeader param
@@ -379,6 +381,8 @@ type
     //kt function StrVisitType: string; overload;
     function StrVisitType(AVisitType : TPCEProc) : string; overload; //kt added
     function StrVisitTypes(NoHeader : boolean = false) : string; //kt added. NOTE: this is plural form (added 's')
+    function StrDiagCodes(): string;   //elh 10/19/23
+    function StrCPTCodes(): string;   //elh 10/19/23
     function StandAlone: boolean;
     procedure AddStrData(List: TStrings);
     procedure AddVitalData(Data, List: TStrings);
@@ -406,23 +410,41 @@ type
     property SHADRelated:  Integer  read FSHADRelated write SetSHADRelated;
     //kt property VisitType:    TPCEProc read FVisitType   write SetVisitType;
     property VisitType[index : integer] : TPCEProc read GetVisitType   write SetVisitType;  //kt added
-    property VisitTypesList: TPCEProcList read FVisitTypesList; //kt added
-    property VisitString:  string   read GetVisitString;
-    property VisitCategory:char     read FEncSvcCat   write FEncSvcCat;
-    property DateTime:     TFMDateTime read FEncDateTime write FEncDateTime;
-    property NoteDateTime: TFMDateTime read FNoteDateTime write FNoteDateTime;
-    property Location:     Integer  Read FEncLocation;
-    property NoteTitle:    Integer read FNoteTitle write FNoteTitle;
-    property NoteIEN:      Integer read FNoteIEN write FNoteIEN;
-    property DocCOunt:     Integer read GetDocCount;
-    property Providers:    TPCEProviderList read FProviders;
-    property Parent:       string read FParent write FParent;
-    property HistoricalLocation: string read FHistoricalLocation write FHistoricalLocation;
-    property Updated: boolean read FUpdated write FUpdated;
+    property VisitTypesList:     TPCEProcList      read FVisitTypesList; //kt added
+    property VisitString:        string            read GetVisitString;
+    property VisitCategory:      char              read FEncSvcCat   write FEncSvcCat;
+    property DateTime:           TFMDateTime       read FEncDateTime write FEncDateTime;
+    property NoteDateTime:       TFMDateTime       read FNoteDateTime write FNoteDateTime;
+    property Location:           Integer           read FEncLocation;
+    property NoteTitle:          Integer           read FNoteTitle write FNoteTitle;
+    property NoteIEN:            Integer           read FNoteIEN write FNoteIEN;
+    property DocCOunt:           Integer           read GetDocCount;
+    property Providers:          TPCEProviderList  read FProviders;
+    property Parent:             string            read FParent write FParent;
+    property HistoricalLocation: string            read FHistoricalLocation write FHistoricalLocation;
+    property Updated:            boolean           read FUpdated write FUpdated;
   end;
 
 type
   TPCEType = (ptEncounter, ptReminder, ptTemplate);
+
+  TNotifyPCEEventList = class;  //kt added
+  TNotifyPCEEvent = procedure(PCEData: TPCEData; CallBackProcs : TNotifyPCEEventList);  //kt added
+  TNotifyPCEEventList = class(TStringList) //kt added
+  private
+    function GetProc(index: integer) : TNotifyPCEEvent;
+  public
+    function IndexIsData(index : integer) : boolean;
+    procedure PopAndCall(PCEData: TPCEData);
+    function GetAndRemoveData(Name : string) : pointer;
+    function GetAndRemoveDataInt(Name : string) : integer;
+    function GetAndRemoveDataBool(Name : string) : boolean;
+    procedure AddDataObj(Name : string; Data : pointer);
+    procedure AddDataInt(Name : string; Data : integer);
+    procedure AddDataBool(Name : string; Data : boolean);
+    property Proc[index : integer] : TNotifyPCEEvent read GetProc;
+  end;
+
 
 
 const
@@ -888,6 +910,7 @@ begin
               end;
     pdcProc:  begin
                Result := Narrative;
+               if Code <> '' then Result := Result + ' (CPT ' + Code + ')';  //kt added 4/25/22 
                if Qty > 1 then Result := Result + ' (' + IntToStr(Qty) + ' times)';
               end;
     else      Result := Narrative;
@@ -1665,6 +1688,82 @@ begin
   end;
 end;
 
+{ TNotifyPCEEventList methods ------------------------------------------------------------------------- }
+//kt added section
+
+function TNotifyPCEEventList.GetProc(index: integer) : TNotifyPCEEvent;
+begin
+  Result := nil;
+  if (index > -1) and (index < Self.count) then begin
+    Result := TNotifyPCEEvent(Self.Objects[index]);
+  end;
+end;
+
+function TNotifyPCEEventList.IndexIsData(index : integer) : boolean;
+begin
+  Result := false;
+  if (index < 0) or (index >= Count) then exit;
+  Result := (Pos('DATA=', Self.Strings[index])>0) ;
+end;
+
+function TNotifyPCEEventList.GetAndRemoveData(Name : string) : pointer;
+var i : integer;
+    s : string;
+begin
+  Result := nil;
+  Name := 'DATA='+Name;
+  for i := Count - 1 downto 0 do begin
+    s := Self.Strings[i];
+    if s <> Name then continue;
+    Result := Self.Objects[i];
+    Delete(i);
+    break;
+  end;
+end;
+
+function TNotifyPCEEventList.GetAndRemoveDataInt(Name : string) : integer;
+begin
+  Result := Integer(GetAndRemoveData(Name));
+end;
+
+function TNotifyPCEEventList.GetAndRemoveDataBool(Name : string) : boolean;
+begin
+  Result := (GetAndRemoveDataInt(Name) = 1);
+end;
+
+procedure TNotifyPCEEventList.AddDataObj(Name : string; Data : pointer);
+begin
+  AddObject('DATA='+Name, Data);
+end;
+
+procedure TNotifyPCEEventList.AddDataInt(Name : string; Data : integer);
+begin
+  AddDataObj(name, pointer(Data));
+end;
+
+procedure TNotifyPCEEventList.AddDataBool(Name : string; Data : boolean);
+const BOOL_TO_INT : array[false..true] of integer = (0,1);
+begin
+  AddDataInt(name, BOOL_TO_INT[Data]);
+end;
+
+
+procedure TNotifyPCEEventList.PopAndCall(PCEData: TPCEData);
+var AProc : TNotifyPCEEvent;
+    i : integer;
+    ID : string;
+begin
+  for i := Count - 1 downto 0 do begin
+    if IndexIsData(i) then continue;
+    AProc := GetProc(i);
+    ID := Self.Strings[i];
+    Delete(i);
+    AProc(PCEData, Self);
+    break;
+  end;
+end;
+
+
 { TPCEProcList methods ------------------------------------------------------------------------- }
 
   function TPCEProcList.GetProc(index : integer) : TPCEProc;
@@ -2013,26 +2112,33 @@ end;
 
 constructor TPCEData.Create;
 begin
-  FVisitTypesList := TPCEProcList.Create;  //kt added
+  FVisitTypesList   := TPCEProcList.Create;  //kt added
   FVisitTypesList.Add(TPCEProc.Create); //ensure a [0] entry
-  FDiagnoses   := TList.Create;
-  FProcedures  := TList.Create;
-  FImmunizations := TList.Create;
-  FSkinTests   := TList.Create;
-  //FVisitType   := TPCEProc.Create;
-  FPatientEds  := TList.Create;
-  FHealthFactors := TList.Create;
-  fExams       := TList.Create;
-  FProviders := TPCEProviderList.Create;
-  FSCRelated   := SCC_NA;
-  FAORelated   := SCC_NA;
-  FIRRelated   := SCC_NA;
-  FECRelated   := SCC_NA;
-  FMSTRelated  := SCC_NA;
-  FHNCRelated  := SCC_NA;
-  FCVRelated   := SCC_NA;
-  FSHADRelated := SCC_NA;
-  FSCChanged   := False;
+  FDiagnoses        := TList.Create;
+  FProcedures       := TList.Create;
+  FImmunizations    := TList.Create;
+  FSkinTests        := TList.Create;
+  //FVisitType      := TPCEProc.Create;
+  FPatientEds       := TList.Create;
+  FHealthFactors    := TList.Create;
+  fExams            := TList.Create;
+  FProviders        := TPCEProviderList.Create;
+  FSCRelated        := SCC_NA;
+  FAORelated        := SCC_NA;
+  FIRRelated        := SCC_NA;
+  FECRelated        := SCC_NA;
+  FMSTRelated       := SCC_NA;
+  FHNCRelated       := SCC_NA;
+  FCVRelated        := SCC_NA;
+  FSHADRelated      := SCC_NA;
+  FSCChanged        := False;
+end;
+
+constructor TPCEData.Create(ASrc : TPCEData);
+//kt added 5/23
+begin
+  Create;
+  Self.Assign(ASrc);
 end;
 
 destructor TPCEData.Destroy;
@@ -2706,15 +2812,6 @@ begin
           FVisitTypesList.Delete(i);
         end;
       end;
-      //kt added block below
-      {
-      if FVisitTypesList.Count = 0 then begin
-        FVisitTypesList.EnsureFromString('');
-        AVisitType := FVisitTypesList.Proc[0];
-        AVisitType.Clear;
-        AVisitType.FSend := false;
-      end;
-      }
       //kt original --> if FVisitType.FDelete then FVisitType.Clear else FVisitType.FSend := False;
 
     end; {with PCEList}
@@ -3308,7 +3405,8 @@ end;
 function TPCEData.StrForList(AList : TList;
                              AClass : TPCEItemClass;
                              CatType: TPCEDataCat;
-                             NoHeader : boolean = false) : string;
+                             NoHeader : boolean = false;
+                             CodeOnly : boolean = false) : string;  //ELH added 10/19/23
 //kt added to unify functionality.
 var i : integer;
     AnItem : TPCEItem;
@@ -3332,12 +3430,39 @@ begin
         Quant := TPCEProc(AnItem).Quantity;
         PrimeDx := false;
       end;
-      Result := Result + GetPCEDataText(CatType, AnItem.Code, AnItem.Category, AnItem.Narrative, PrimeDx, Quant) + ModText + CRLF;
+      if CodeOnly then begin  // ELH added if
+        if Result<>'' then Result := Result + '^';
+        Result := Result + AnItem.Code;
+      end else begin
+        Result := Result + GetPCEDataText(CatType, AnItem.Code, AnItem.Category, AnItem.Narrative, PrimeDx, Quant) + ModText + CRLF;
+      end;
     end;
     if (Length(Result)>0) and (NoHeader=false) then Result := SectionHeading(CatType) + CRLF + Result;
   end;
 end;
 
+function TPCEData.StrDiagCodes(): string;
+begin
+  Result := StrForList(FDiagnoses, TPCEDiag, pdcDiag, true,true);  //kt
+end;
+
+function TPCEData.StrCPTCodes(): string;
+var i : integer;
+    AVisit : TPCEProc;
+    ProcStr : string;
+begin
+  Result := '';
+  for i := 0 to FVisitTypesList.Count - 1 do begin
+    AVisit := FVisitTypesList.Proc[i];
+    if Result <> '' then Result := Result + '^';
+    Result := Result + AVisit.Code;
+  end;
+  ProcStr := StrForList(FProcedures, TPCEProc, pdcProc, true,true);
+  if ProcStr<>'' then begin
+    if Result <> '' then Result := Result+'^';    
+    Result := Result + ProcStr;  //kt
+  end;
+end;
 
 function TPCEData.StrDiagnoses(NoHeader : boolean = false): string;
 { returns the list of diagnoses for this encounter as a single comma delimited string }
@@ -3587,7 +3712,6 @@ begin
   Dest.FSHADRelated  := FSHADRelated;
   Dest.FProviders.Assign(FProviders);
   //kt  FVisitType.CopyProc(Dest.VisitType);
-  //kt  FVisitType.CopyProc(Dest.VisitType);
   Dest.FVisitTypesList.Assign(FVisitTypesList); //kt  Don't copy again via CopyPCEItems below.
 
   CopyPCEItems(FDiagnoses,       Dest.FDiagnoses,       TPCEDiag);
@@ -3670,26 +3794,22 @@ var
   end;
 
 begin
-  if not CanEditPCE(Self) then
-  begin
+  if not CanEditPCE(Self) then begin
     Result := TRUE;
     exit;
   end;
-  if IsNonCountClinic(FEncLocation) then
-  begin
+  if IsNonCountClinic(FEncLocation) then begin
     Result := TRUE;
     exit;
   end;
-  if IsCancelOrNoShow(NoteIEN) then
-  begin
+  if IsCancelOrNoShow(NoteIEN) then begin
     Result := TRUE;
     exit;
   end;
   Ask := GetAskPCE(FEncLocation);
   if(Ask = apNever) or (Ask = apDisable) then
     Result := TRUE
-  else
-  begin
+  else begin
     DoSave := FALSE;
     try
       Asked := FALSE;
@@ -3700,15 +3820,12 @@ begin
         Done := TRUE;
         Req := NeededPCEData;
         Needed := (Req <> []);
-        if(First) then
-        begin
+        if(First) then begin
           if Needed and (not Outpatient) then
             OutPatient := TRUE;
-          if((Ask = apPrimaryAlways) or Needed or
-             ((Ask = apPrimaryOutpatient) and Outpatient)) then
-          begin
-            if(Providers.PrimaryIdx < 0) then
-            begin
+          if((Ask = apPrimaryAlways) or Needed
+          or ((Ask = apPrimaryOutpatient) and Outpatient)) then begin
+            if(Providers.PrimaryIdx < 0) then begin
               NoPrimaryPCEProvider(FProviders, Self);
               if(not DoSave) then
                 DoSave := (Providers.PrimaryIdx >= 0);
@@ -3729,23 +3846,18 @@ begin
           else
         { apPrimaryNeeded }    DoAsk := (Primary and Needed);
         end;
-        if(DoAsk) then
-        begin
+        if(DoAsk) then begin
           if(Asked and ((not Needed) or (not Primary))) then
             exit;
-          if(Needed) then
-          begin
+          if(Needed) then begin
             msg := TX_NEED1;
             Add(ndDiag, TX_NEED_DIAG);
             Add(ndProc, TX_NEED_PROC);
             Add(ndSC,   TX_NEED_SC);
-            if(Primary and ForcePCEEntry(FEncLocation)) then
-            begin
+            if(Primary and ForcePCEEntry(FEncLocation)) then begin
               Flags := MB_OKCANCEL;
               msg :=  msg + CRLF + TX_NEED3;
-            end
-            else
-            begin
+            end else begin
               if(Primary) then
                 Flags := MB_YESNOCANCEL
               else
@@ -3753,24 +3865,19 @@ begin
               msg :=  msg + CRLF + TX_NEED2;
             end;
             Flags := Flags + MB_ICONWARNING;
-          end
-          else
-          begin
+          end else begin
             Flags := MB_YESNO + MB_ICONQUESTION;
             msg :=  TX_NEED2;
           end;
           Ans := InfoBox(msg, TX_NEED_T, Flags);
-          if(Ans = ID_CANCEL) then
-          begin
+          if(Ans = ID_CANCEL) then begin
             Result := FALSE;
             InfoBox(TX_NEEDABORT, TX_NEED_T, MB_OK);
             exit;
           end;
           Result := (Ans = ID_NO);
-          if(not Result) then
-          begin
-            if(not MissingProviderInfo(Self)) then
-            begin
+          if(not Result) then begin
+            if(not MissingProviderInfo(Self)) then begin
               NeedSave := UpdatePCE(Self, FALSE);
               if(not DoSave) then
                 DoSave := NeedSave;

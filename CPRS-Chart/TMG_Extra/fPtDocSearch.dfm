@@ -39,8 +39,8 @@ object frmPtDocSearch: TfrmPtDocSearch
       431)
     object lblSearchTerms: TLabel
       Left = 8
-      Top = 12
-      Width = 156
+      Top = 6
+      Width = 157
       Height = 19
       Caption = 'Enter Search Terms:'
       Font.Charset = ANSI_CHARSET
@@ -52,14 +52,14 @@ object frmPtDocSearch: TfrmPtDocSearch
     end
     object Label1: TLabel
       Left = 10
-      Top = 34
+      Top = 28
       Width = 90
       Height = 13
       Caption = 'Not Case Sensitive'
     end
     object edtSearchTerms: TEdit
       Left = 8
-      Top = 53
+      Top = 45
       Width = 171
       Height = 21
       Hint = 'Enter Search Terms Here'
@@ -71,9 +71,9 @@ object frmPtDocSearch: TfrmPtDocSearch
     end
     object cboFoundNotes: TORComboBox
       Left = 1
-      Top = 82
+      Top = 104
       Width = 183
-      Height = 348
+      Height = 326
       Style = orcsSimple
       Align = alBottom
       AutoSelect = True
@@ -95,6 +95,20 @@ object frmPtDocSearch: TfrmPtDocSearch
       OnDblClick = cboFoundNotesDblClick
       OnNeedData = cboFoundNotesNeedData
       CharsNeedMatch = 1
+    end
+    object radSearchType: TRadioGroup
+      Left = 8
+      Top = 64
+      Width = 170
+      Height = 34
+      Caption = 'Search '
+      Columns = 2
+      ItemIndex = 0
+      Items.Strings = (
+        'Text'
+        'Title')
+      TabOrder = 2
+      OnClick = radSearchTypeClick
     end
   end
   object pnlRight: TPanel

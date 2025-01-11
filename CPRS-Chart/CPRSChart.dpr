@@ -369,7 +369,6 @@ uses
   fTMGServerSearch in 'TMG_Extra\fTMGServerSearch.pas' {frmTMGServerSearch},
   fSearchResults in 'TMG_Extra\fSearchResults.pas' {frmSrchResults},
   rTMGRPCs in 'TMG_Extra\rTMGRPCs.pas',
-  uTMGGrid in 'TMG_Extra\uTMGGrid.pas',
   PostU in 'TMG_Extra\PostU.pas' {PostForm},
   fProbEdt in 'fProbEdt.pas' {frmdlgProb},
   fProbLex in 'fProbLex.pas' {frmPLLex},
@@ -429,32 +428,57 @@ uses
   fTMGDiagnoses in 'TMG_Extra\fTMGDiagnoses.pas' {frmTMGDiagnoses},
   fTopicICDLinkerU in 'TMG_Extra\fTopicICDLinkerU.pas' {frmTopicICDLinker},
   fTMGProcedure in 'TMG_Extra\fTMGProcedure.pas' {frmTMGProcedures},
-  fTMGVisitType in 'TMG_Extra\fTMGVisitType.pas' {frmTMGVisitTypes};
+  fTMGVisitType in 'TMG_Extra\fTMGVisitType.pas' {frmTMGVisitTypes},
+  fTMGEditEncounterInfo in 'TMG_Extra\fTMGEditEncounterInfo.pas' {frmTMGEditEncounterInfo},
+  uTMGGrid in 'TMG_Extra\uTMGGrid.pas',
+  fTMGEncounterEditor in 'TMG_Extra\fTMGEncounterEditor.pas' {frmTMGEncounterEditor},
+  fTMGEncounterICDPicker in 'TMG_Extra\fTMGEncounterICDPicker.pas' {Form1},
+  fNoteTOC in 'TMG_Extra\fNoteTOC.pas' {frmNoteTOC},
+  fAddSuspectConditions in 'TMG_Extra\fAddSuspectConditions.pas' {frmAddSuspectConditions},
+  fEncounterReview in 'TMG_Extra\fEncounterReview.pas' {frmEncounterReview},
+  fDashboard in 'TMG_Extra\fDashboard.pas' {frmDashboard},
+  fChartExportHistory in 'TMG_Extra\fChartExportHistory.pas' {frmChartExportHistory},
+  fPopHealth in 'TMG_Extra\fPopHealth.pas' {frmPopHealth},
+  fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog};
 
 {$R *.TLB}
 
 {$R *.RES}
 
+var
+  i : integer; //kt 1/11/24
+  x, msg : string; //kt 1/11/24
+
 begin
   if not UpdateSelf then begin                    // only start if not copying new version
     if not BorlandDLLVersionOK then exit;         // Exit immediately if old or missing BORLNDMM.DLL
-    RegisterCPRSTypeLibrary;                      // will halt program if /regserver or /unregserver param
-    Application.Initialize;
-    frmSplash := nil;
-    if ParamSearch('SPLASH') <> 'OFF' then begin
-      frmSplash := TfrmSplash.Create(nil);        // show splash screen
-      frmSplash.Show;                             //         "
-      frmSplash.Refresh;                          //         "
-    end;
-    Application.Title := 'CPRS - Patient Chart';
-    Application.HelpFile := 'cprs.hlp';
-    Application.CreateForm(TdmodShared, dmodShared);
+  RegisterCPRSTypeLibrary;                      // will halt program if /regserver or /unregserver param
+  Application.Initialize;
+  frmSplash := nil;
+  if ParamSearch('SPLASH') <> 'OFF' then begin
+    frmSplash := TfrmSplash.Create(nil);        // show splash screen
+    //kt temp 1/11/24
+    msg := '';
+    for i := 1 to ParamCount do begin
+      x := ParamStr(i);
+      if msg <> '' then msg := msg + ' ';
+      msg := msg + x;
+    end; {for i}
+    //frmSplash.lblMessage.Caption := 'Running with parameters: "' + msg + '"';
+    //kt end temp
+    frmSplash.Show;                             //         "
+    frmSplash.Refresh;                          //         "
+  end;
+  Application.Title := 'CPRS - Patient Chart';
+  Application.HelpFile := 'cprs.hlp';
+  Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
-  Application.CreateForm(TfrmConfirmTimer, frmConfirmTimer);
-  Application.CreateForm(TfrmNoteSelector, frmNoteSelector);
-  Application.CreateForm(TfrmNetworkMessagerClient, frmNetworkMessagerClient);
+  Application.CreateForm(TfrmAddSuspectConditions, frmAddSuspectConditions);
+  Application.CreateForm(TfrmDashboard, frmDashboard);
+  Application.CreateForm(TfrmPopHealth, frmPopHealth);
+  Application.CreateForm(TfrmChangeLog, frmChangeLog);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
-      Application.Run;
-    end;
+    Application.Run;
+  end;
 end.

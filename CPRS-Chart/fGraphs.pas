@@ -294,6 +294,7 @@ type
     FBHighTime, FBLowTime: Double;
     FCreate: boolean;
     FDisplayFreeText: boolean;
+    FDisplayNonNumeric: boolean;    //TMG 3/26/24
     FFastData: boolean;
     FFastItems: boolean;
     FFastLabs: boolean;
@@ -800,6 +801,7 @@ begin
   FBLowTime := BIG_NUMBER;
   FCreate := true;
   FDisplayFreeText := true;
+  //FDisplayNonNumeric := uTMGOptions.ReadBool('Graph Non Numerics',False);
   FGraphType := Char(32);
   FFirstClick := true;
   FFirstSwitch := true;
@@ -3122,7 +3124,7 @@ procedure TfrmGraphs.MakeOtherSeries(aChart: TChart);
 begin
   if GtslNonNum.Count > 0 then
   begin
-    MakeNonNumerics(aChart);
+    if uTMGOptions.ReadBool('Graph Non Numerics',False) = true then MakeNonNumerics(aChart);       //kt 3/26/24
     if FDisplayFreeText = true then DisplayFreeText(aChart);
   end;
   if length(aChart.Hint) > 0 then
@@ -6208,7 +6210,7 @@ begin
   if getdata then begin
     FastAssign(rpcGetItemData(aItemType, FMTimeStamp, Patient.DFN), GtslScratchLab);
   end;
-  SpecRefCheck(aItemType, aItemName, singlespec);
+  SpecRefCheck(aItemType, aItemName, singlespec);    //modifies GtslSpec1, which is sorted
   if singlespec then begin
     FastAddStrings(GtslScratchLab, GtslData)
   end else begin
@@ -6261,6 +6263,7 @@ procedure TfrmGraphs.SpecRefCheck(aItemType, aItemName: string; var singlespec: 
 var
   i: integer;
   aitem, aspec, checkstring, datastring, refrange, low, high, srcheck, srcheck1, units: string;
+  aValue : string; //kt
 begin
   GtslSpec1.Sorted := true;
   GtslSpec1.Clear;
@@ -6270,8 +6273,15 @@ begin
   for i := 0 to GtslScratchLab.Count - 1 do
   begin
     datastring := GtslScratchLab[i];
+    //datastring format:   //kt documentation added
+    //       63^item^date^date2^labValue^AbnormalFlag^Specimen^Comment^^RefLo!RefHi^Units
+    //piece: 1   2    3    4     5           6           7       8    9  10          11
     aitem := Piece(datastring, '^', 2);
     aspec := Piece(datastring, '^', 7);
+    //kt begin mod 7/11/24
+    aValue := Piece(datastring, '^', 5);
+    if (AValue = '') then continue;
+    //kt end mod
     refrange := Piece(datastring, '^', 10);
     units := Piece(datastring, '^', 11);
     if length(refrange) = 0 then

@@ -1,10 +1,11 @@
 unit fEncounterLabs;
+//kt I *think* I added this entire form.
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  ORFn,
+  ORFn, StrUtils,
   fODTMG1, rOrders, //kt
   Dialogs, fPCEBase, VA508AccessibilityManager, StdCtrls, Buttons, ExtCtrls;
 
@@ -18,13 +19,19 @@ type
     lblOutput: TLabel;
     memOutput: TMemo;
     btnClearMemo: TButton;
-    btnMsg1: TButton;
-    btnMsg2: TButton;
     pnlTop: TPanel;
     pnlTopLeft: TPanel;
     Splitter1: TSplitter;
-    procedure btnMsg2Click(Sender: TObject);
-    procedure btnMsg1Click(Sender: TObject);
+    btnSameNonFastingLabs: TButton;
+    btnNoNewLabs: TButton;
+    btnSameFastingLabs: TButton;
+    btnSameLabs: TButton;
+    btnPreexistingLabsToday: TButton;
+    procedure btnPreexistingLabsTodayClick(Sender: TObject);
+    procedure btnSameLabsClick(Sender: TObject);
+    procedure btnSameFastingLabsClick(Sender: TObject);
+    procedure btnNoNewLabsClick(Sender: TObject);
+    procedure btnSameNonFastingLabsClick(Sender: TObject);
     procedure btnClearMemoClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
@@ -33,8 +40,8 @@ type
   private
     { Private declarations }
     OrderIDSL : TStringList;  //kt  This will hold Order.ID of every order that has been created.
-    OrderTextSLs : TList;     //kt  Each element will be a TStringList, holding 1 OrderTextSL      
-    LabOrderMessages : TList; //kt each element will be a TStringList, holding 1 lab order message.
+    OrderTextSLs : TList;     //kt  Each element will be a TStringList, holding 1 OrderTextSL
+    LabOrderMessages : TList; //kt  Each element will be a TStringList, holding 1 lab order message.  These are messages sent, via TMG Messenger application, to other members of staff.
                               //Data FORMAT:  -- as created by TfrmODTMG1.SetupLabOrderMsg(SL : TStringList)
                               //              Data[0] = Recipient^Recipient^.....
                               //              Data[1] = 'T' or 'F' for boolean for FPromptToPrint
@@ -44,13 +51,17 @@ type
     DialogActive : boolean;
     procedure DiscontinueLabsOrdered;
     procedure HandleCancelClosure;
-    procedure HandleSuccessfulClosure;
     procedure SetReadyDisplayMode(Ready: boolean);
+    procedure ClearOrderSL;
     procedure SaveOrderText(Text : string);  overload;
     procedure SaveOrderText(SL : TStringList);  overload;
+    procedure DoPseudoOrder(Msg : string; FastingYNU : char);
+    procedure SetupLabMsg(Msg : String; FastingYNU : char; SL : TStringList);
   public
     { Public declarations }
-    procedure SendData;  //kt
+    IsDirty : boolean;  //11/14/23
+    procedure SetDirtyStatus(DirtyStatus:boolean);  //11/14/23
+    procedure SendData(var SendErrors,UnpastedHTML:string);  //kt
     procedure NotifyOrder(OrderAction: Integer; AnOrder: TOrder);    //kt added
     procedure HandleLabDlgClosing(Dlg : TfrmODTMG1; Data : TStringList);
     function OK2Close(Cancel : boolean) : boolean;   //kt added
@@ -88,7 +99,7 @@ Design considerations
 1) If a lab is ordered through the encounter form, and then the encounter form is cancelled,
    it is felt that the labs order(s) should also be cancelled.
 2) Often more than one lab order is generated.  I.e. some for now, some for next visit,
-   so process needs to be able to handle multiple orders (and multiple cancels if needed.
+   so process needs to be able to handle multiple orders (and multiple cancels if needed.)
 }
 
 
@@ -96,7 +107,9 @@ implementation
 
 {$R *.dfm}
 
-uses fEncounterFrame, fOrders, uOrders, fNotes;
+uses fEncounterFrame, fOrders, uOrders, fNotes, fNetworkMessengerClient,
+     fTMGDiagnoses,
+     uCore;
 
 procedure TfrmEnounterLabs.btnClearMemoClick(Sender: TObject);
 var MsgResult : integer;
@@ -106,15 +119,28 @@ begin
   if OrderIDSL.Count>0 then begin
     MsgResult := MessageDlg('Are you sure you want to Clear output AND Cancel Orders', mtConfirmation, [mbOK, mbCancel], 0);
     if MsgResult <> mrOK then exit;
+    OrderTextSLs.Clear;
+    LabOrderMessages.Clear;
     DiscontinueLabsOrdered;
   end;
+  if OrderTextSLs.Count>0 then OrderTextSLs.Clear;
+  if LabOrderMessages.Count>0 then LabOrderMessages.Clear;
   memOutput.Lines.Clear;
+  SetDirtyStatus(False);
 end;
 
+procedure TfrmEnounterLabs.ClearOrderSL;
+  var i : integer;
+begin
+  for i := 0 to OrderTextSLs.Count - 1 do begin
+    TStringList(OrderTextSLs[i]).Free; //kt each element is a TStringList, holding 1 lab OrderTextSL.
+  end;
+end;
 
 procedure TfrmEnounterLabs.btnLaunchLabDlgClick(Sender: TObject);
 var i, index : integer;
     ItemName : string;
+    SelectedDxInfo : TStringList;
     //SavedNeedsModal : boolean;
 
 const TMG_LAB_ORDER_NAME = 'TMG Lab Order';
@@ -133,6 +159,7 @@ begin
     exit;
   end;
 
+  frmOrders.CheckInit;
   frmOrders.lstWrite.ItemIndex := index;
   frmOrders.lstWriteClick(self);    //this should create and setup uOrderDialog
   if Assigned(uOrderDialog) and (uOrderDialog is TfrmODTMG1) then begin
@@ -142,26 +169,118 @@ begin
     DialogActive := true;
     SetReadyDisplayMode(false);
     //kt doesn't work--> FLabDlg.Parent := Self;
+    if assigned(frmTMGDiagnoses) then begin
+      SelectedDxInfo := TStringList.Create;
+      try
+        frmTMGDiagnoses.GetSelectedDxs(SelectedDxInfo);
+        FLabDlg.LoadUserDxList(SelectedDxInfo);
+      finally
+        SelectedDxInfo.Free;
+      end;
+    end;
   end;
 end;
 
-procedure TfrmEnounterLabs.btnMsg1Click(Sender: TObject);
+procedure TfrmEnounterLabs.btnSameNonFastingLabsClick(Sender: TObject);
 begin
   inherited;
-  SaveOrderText('OK with Existing Lab Order.');
+  DoPseudoOrder('OK with Existing NON-FASTING Lab Order.', 'N');
 end;
 
-procedure TfrmEnounterLabs.btnMsg2Click(Sender: TObject);
+procedure TfrmEnounterLabs.btnNoNewLabsClick(Sender: TObject);
 begin
   inherited;
-  SaveOrderText('No new labs.');
+  DoPseudoOrder('No new labs.', '?');
 end;
+
+procedure TfrmEnounterLabs.btnPreexistingLabsTodayClick(Sender: TObject);
+begin
+  inherited;
+  DoPseudoOrder('Preexisting Lab Order To Be Done Today.', '?');
+end;
+
+procedure TfrmEnounterLabs.btnSameFastingLabsClick(Sender: TObject);
+begin
+  inherited;
+  DoPseudoOrder('OK with Existing FASTING Lab Order.', 'Y');
+end;
+
+procedure TfrmEnounterLabs.btnSameLabsClick(Sender: TObject);
+begin
+  inherited;
+  DoPseudoOrder('OK with Existing Lab Order.', '?');
+end;
+
+procedure TfrmEnounterLabs.DoPseudoOrder(Msg : string; FastingYNU : char);
+var
+  ALabOrderMessageSL : TStringList;
+begin
+  SaveOrderText(Msg);
+
+  ALabOrderMessageSL := TStringList.Create;  //owned by LabOrderMessages
+  SetupLabMsg(Msg, FastingYNU, ALabOrderMessageSL);
+  LabOrderMessages.Add(ALabOrderMessageSL); // LabOrderMessages will own TStringList
+end;
+
+procedure TfrmEnounterLabs.SetupLabMsg(Msg : String; FastingYNU : char; SL : TStringList);
+//SL is an output parameter.
+//FORMAT:  SL[0] = Recipient^Recipient^.....
+//         SL[1] = 'T' or 'F' for boolean for FPromptToPrint
+//         SL[2] = MyName
+//         SL[3...] = the usual content of the message.
+//
+var s, MyName, User, LabUser, FastingMsg : string;
+begin
+  if not assigned(SL) then exit;
+  SL.Clear;
+  if FastingYNU = 'Y' then begin
+    FastingMsg := 'FASTING';
+  end else if FastingYNU = 'N' then begin
+    FastingMsg := 'NON-FASTING';
+  end else begin
+    FastingMsg := 'FASTING STATUS UNSPECIFIED or N/A';
+  end;
+  //
+  //GET USERS AND PREPARE MESSAGE
+  User := LabOrderMsgRecip('1');
+  if piece(User,'^',1)='-1' then begin
+    ShowMessage('Error getting User Name: '+piece(User,'^',2));
+    exit;
+  end;
+  LabUser := LabOrderMsgRecip('2');
+  if piece(LabUser,'^',1)='-1' then begin
+    ShowMessage('Error getting Lab User Name: '+piece(LabUser,'^',2));
+    exit;
+  end;
+  MyName :=  GetMyName;
+  if MyName='' then begin
+    ShowMessage('Error getting Current User Name');
+    exit;
+  end;
+
+  s := User + '^';
+
+  SL.Add(s);       // index 0
+  SL.Add('F');     // index 1    // s := IfThen(FPromptToPrint, 'T','F');
+  SL.Add(MyName);  // index 2
+
+  SL.Add(MyName+' ORDERED LABS');
+  SL.Add('');
+  SL.Add(Patient.TMGMsgString);
+  SL.Add('');
+  SL.Add(FastingMsg);
+  SL.Add('');
+  SL.Add(Msg);
+end;
+
 
 procedure TfrmEnounterLabs.SetReadyDisplayMode(Ready: boolean);
 begin
   btnLaunchLabDlg.Visible := Ready;
-  btnMsg1.Visible := Ready;
-  btnMsg2.Visible := Ready;
+  btnSameNonFastingLabs.Visible := Ready;
+  btnNoNewLabs.Visible := Ready;
+  btnSameFastingLabs.Visible := Ready;
+  btnSameLabs.Visible := Ready;
   lblLabActive.Visible := not Ready;
   lblLabActive2.Visible := not Ready;
 end;
@@ -222,13 +341,16 @@ begin
   AnOrderTextSL := TStringList.Create;
   AnOrderTextSL.Assign(SL);
   OrderTextSLs.Add(AnOrderTextSL); //AnOrderTextSL will be owned by OrderTextSLs
+  SetDirtyStatus(True);
 end;
 
 
 procedure TfrmEnounterLabs.NotifyOrder(OrderAction: Integer; AnOrder: TOrder);    //kt added
 //NOTE: This gets called when a new order is created, by TfrmFrame.UMNewOrder();
 var OrderTextSL : TStringList;
+    ALine : string;
     i : integer;
+const UNSIGNED_STR = '*UNSIGNED*';
 begin
   if AnOrder.ID <> '0' then begin   //if ID='0' then skip....
     OrderIDSL.Add(AnOrder.ID);
@@ -238,6 +360,18 @@ begin
         OrderTextSL.Assign(FLabDlg.memOrder.Lines);
       end else begin
         OrderTextSL.Text := AnOrder.Text;
+      end;
+      //Remove '*UNSIGNED*' if found
+      for i := OrderTextSL.Count - 1 downto 0 do begin
+        ALine := OrderTextSL.Strings[i];
+        if Pos(UNSIGNED_STR, ALine)=0 then continue;
+        ALine := Trim(Piece2(ALine,UNSIGNED_STR,1) + Piece2(ALine,UNSIGNED_STR,2));
+        if ALine <> '' then begin
+          OrderTextSL.Strings[i] := ALine;
+        end else begin
+          OrderTextSL.Delete(i);
+        end;
+        break;
       end;
       SaveOrderText(OrderTextSL);
     finally
@@ -281,52 +415,6 @@ begin
   DiscontinueLabsOrdered;
 end;
 
-procedure TfrmEnounterLabs.HandleSuccessfulClosure;
-var i,j : integer;
-    OrderSelected : boolean;
-    MessageArray : TStringList;
-    AnOrderTextSL : TStringList;
-    Result, ErrMsg : string;
-    HTMLTable : TStringList;
-    line : string;
-
-begin
-  HTMLTable := TStringList.Create;
-  try
-    for i := 0 to OrderTextSLs.Count - 1 do begin
-      AnOrderTextSL := TStringList(OrderTextSLs[i]);
-      HTMLTable.Clear;
-      HTMLTable.Add('<table border="0" cellspacing="2" cellpadding="0" bgcolor="#d3d3d3" TMGLABS="1">');
-      for j := 0 to AnOrderTextSL.Count - 1 do begin
-        Line := AnOrderTextSL[j];
-        HTMLTable.Add('<tr bgcolor="#f2f2f2">');
-        HTMLTable.Add('<td>'+Line+'</td>');
-        HTMLTable.Add('</tr>')
-      end;
-      HTMLTable.Add('</table>');
-      HTMLTable.Add('<p><DIV name="'+HTML_TARGET_LABS+'"></DIV>');
-      frmNotes.InsertLabOrderTextBox(HTMLTable);  //Push order text to note.
-    end;
-  finally
-    HTMLTable.Free;
-  end;
-  {
-    Result := frmNotes.InsertLabOrderTextBox(AnOrderTextSL);  //Push order text to note.
-    if Piece(Result,'^',1) = '-1' then begin
-      ErrMsg := Piece(Result,'^',2);
-      MessageDlg(ErrMsg, mtError, [mbOK], 0);
-      break;
-    end;
-  end;
-  }
-  //Send LabOrderMessages
-  for i := 0 to LabOrderMessages.Count - 1 do begin
-    MessageArray := TStringList(LabOrderMessages[i]);
-    fODTMG1.SendLabOrderMsg(MessageArray);   //this is a global UNIT function, not a class function
-  end;
-end;
-
-
 function TfrmEnounterLabs.OK2Close(Cancel : boolean) : boolean;  //kt added
 //If user clicked on Cancel, then Cancel will = TRUE;
 begin
@@ -335,7 +423,7 @@ begin
     if Cancel then begin
       HandleCancelClosure;
     end else begin
-      //kt moved to SendData -->  HandleSuccessfulClosure;
+      //kt moved to SendData;
     end;
   end else begin
     MessageDlg('Close Lab Order Dialog First', mtWarning, [mbOK], 0);
@@ -372,6 +460,7 @@ begin
   OrderTextSLs := TList.Create; //kt   Each element will be a TStringList, holding 1 Order.Text
   LabOrderMessages := TList.Create; //kt each element will be a TStringList, holding 1 lab order message.
 
+  IsDirty := True;
 end;
 
 
@@ -391,10 +480,55 @@ begin
   inherited;
 end;
 
-procedure TfrmEnounterLabs.SendData;  //kt
+procedure TfrmEnounterLabs.SendData(var SendErrors,UnpastedHTML:string);  //kt
+var i,j : integer;
+    OrderSelected : boolean;
+    MessageArray : TStringList;
+    AnOrderTextSL : TStringList;
+    Result, ErrMsg : string;
+    HTMLTable : TStringList;
+    line : string;
+
 begin
-  TMGLabOrderAutoPopulateIfActive; //kt added
-  HandleSuccessfulClosure;  //kt
+  if IsDirty=False then exit;
+  
+  TMGLabOrderAutoPopulateIfActive;
+
+  //Insert HTML order table into note text.
+  HTMLTable := TStringList.Create;
+  try
+    for i := 0 to OrderTextSLs.Count - 1 do begin
+      AnOrderTextSL := TStringList(OrderTextSLs[i]);
+      HTMLTable.Clear;
+      HTMLTable.Add('<table border="0" cellspacing="2" cellpadding="0" bgcolor="#d3d3d3" TMGLABS="1">');
+      for j := 0 to AnOrderTextSL.Count - 1 do begin
+        Line := AnOrderTextSL[j];
+        HTMLTable.Add('<tr bgcolor="#f2f2f2">');
+        HTMLTable.Add('<td>'+Line+'</td>');
+        HTMLTable.Add('</tr>')
+      end;
+      HTMLTable.Add('</table>');
+      HTMLTable.Add('<p><DIV name="'+HTML_TARGET_LABS+'"></DIV>');
+      frmNotes.InsertLabOrderTextBox(HTMLTable,SendErrors,UnpastedHTML);  //Push order text to note.
+    end;
+    OrderTextSLs.Clear;
+  finally
+    HTMLTable.Free;
+  end;
+
+  //Send LabOrderMessages to other members of staff
+  for i := 0 to LabOrderMessages.Count - 1 do begin
+    MessageArray := TStringList(LabOrderMessages[i]);
+    fODTMG1.SendLabOrderMsg(MessageArray);   //this is a global UNIT function, not a class function
+  end;
+  LabOrderMessages.Clear;
+
+end;
+
+procedure TfrmEnounterLabs.SetDirtyStatus(DirtyStatus:boolean);
+begin
+  IsDirty := DirtyStatus;
+  frmEncounterFrame.SetCurrentTabAsDirty(DirtyStatus);
 end;
 
 end.

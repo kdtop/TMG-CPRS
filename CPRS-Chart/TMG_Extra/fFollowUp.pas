@@ -5,7 +5,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  VAUtils,  Math, StrUtils,
+  VAUtils,  Math, StrUtils, ORNet,
   Dialogs, fPCEBase, VA508AccessibilityManager, StdCtrls, Buttons, ExtCtrls,
   ComCtrls;
 
@@ -46,6 +46,8 @@ type
     rgInOffice: TRadioButton;
     memOutput: TMemo;
     btnNext: TBitBtn;
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure btnNextClick(Sender: TObject);
     procedure btnIntervalClick(Sender: TObject);
     procedure edtApptWithChange(Sender: TObject);
@@ -85,7 +87,11 @@ type
     procedure SetupFollowUpMsg(SL : TStringList);
   public
     { Public declarations }
-    procedure SendData;  //kt
+    IsDirty : boolean;
+    procedure SetDirtyStatus(DirtyStatus:boolean);  //11/14/23
+    procedure SendData(var SendErrors,UnpastedHTML:string);  //kt
+    //procedure SendData;  //kt
+    function HasText:boolean;  //ELH
     constructor CreateLinked(AParent: TWinControl);
   end;
 
@@ -97,7 +103,7 @@ implementation
 {$R *.dfm}
 
 uses
-  fEncounterFrame, fNetworkMessengerClient, fNotes;
+  fEncounterFrame, fNetworkMessengerClient, fNotes, uCore;
 
 const BTN_BACKGROUND_COLOR = $8080FF;  //light red.  was clMaroon;
 
@@ -157,6 +163,9 @@ begin
   FIntervalList := TStringList.Create;   //doesn't own objects.
 
   InitData;
+  DateTimePicker.DateTime := Now;
+
+  IsDirty := False;
 end;
 
 procedure TfrmFollowUp.FormDestroy(Sender: TObject);
@@ -181,6 +190,18 @@ begin
   FAllBtns.Free; //doesn't own objects
 
   inherited;
+end;
+
+procedure TfrmFollowUp.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  inherited;
+  SetDirtyStatus(True);
+end;
+
+procedure TfrmFollowUp.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmFollowUp.DateTimePickerChange(Sender: TObject);
@@ -239,6 +260,7 @@ begin
     Str := Str + Btn.Caption;
   end;
   edtGroupFreeTxt.Text := Str;
+  SetDirtyStatus(True);
   //NOTE: By setting text, this should trigger it's onchange handler, which will trigger UpdateNetOutput
 end;
 
@@ -253,6 +275,7 @@ begin
   ToggleBtnState(Btn);
   TurnOffOtherIntervals(Btn);
   edtFreeTxtFU.Text := Btn.Caption;    //this will trigger change handler --> update net output.
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmFollowUp.btnNextClick(Sender: TObject);
@@ -285,6 +308,7 @@ begin
     Str := Btn.Caption;
   end;
   edtApptWith.Text := Str; //this will trigger change handler --> UpdateNetOutput
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmFollowUp.btnReasonClick(Sender: TObject);
@@ -311,6 +335,7 @@ begin
     Str := Str + IfThen(i = NO_PAP_INDEX, ') ', '');
   end;
   edtFUReason.Text := Str;   //this will trigger event handler --> UpdateNetOutput
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmFollowUp.rgLocationClick(Sender: TObject);
@@ -383,7 +408,7 @@ var ForString:String;
 const PREFIX = 'FOLLOW UP APPT: ';
 begin
   ForString := IfThen(ReasonStr <> '', ReasonStr, '');
-  ForString := ForString + IfThen(ForString <> '', ' and ', '') + IfThen(GrpStr <> '', GrpStr, '');
+  ForString := ForString + IfThen(GrpStr <> '', ' and ', '') + IfThen(GrpStr <> '', GrpStr, '');
   ForString := IfThen(ForString <> '', 'for ', '') + ForString;
   NetOutput := '';
   NetOutput := Add(NetOutput, FUInterval);
@@ -523,17 +548,32 @@ begin
   s := User + '^';
   SL.Add(s);       // index 0
   SL.Add(MyName);  // index 1
+  //SL.Add('PATIENT: ' + Patient.Name + ' (' + FMDateToStr(Patient.DOB) + ') ' +
+  //SL.Add(sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]));
+  SL.Add(Patient.TMGMsgString);
   for i := 0 to memOutput.Lines.Count - 1 do begin
     SL.Add(memOutput.Lines.Strings[i]);
   end;
 end;
 
-procedure TfrmFollowUp.SendData;  //kt
+function TfrmFollowup.HasText():boolean;  //ELH added to determine if anything was entered in the Followup tab
+var
+  InsertStr:string;
+begin
+  InsertStr := Trim(memOutput.Text);
+  Result := (InsertStr <> '');
+end;
+
+//procedure TfrmFollowUp.SendData;  //kt
+procedure TfrmFollowUp.SendData(var SendErrors,UnpastedHTML:string);  //kt
 var Tag, InsertStr, Result : string;
     MessageArr : TStringList;
 begin
+  if IsDirty=False then exit;   //Don't continue if nothing has been changed.  11/14/23
+  
   InsertStr := Trim(memOutput.Text);
   if InsertStr = '' then exit;
+  InsertStr := piece2(InsertStr,'FOLLOW UP APPT: ',2);
   MessageArr := TStringList.Create;
   try
     SetupFollowUpMsg(MessageArr);
@@ -543,12 +583,22 @@ begin
     InsertStr := '<B>FOLLOW UP APPT:</B>' + InsertStr + '<DIV name="*FOLLOWUP*"></DIV>';
     Result := frmNotes.WMReplaceHTMLText(Tag,InsertStr);
     if piece(Result,'^',1) <> '1' then begin
-      MessageDlg(piece(Result,'^',2), mtError, [mbOK], 0);
+      //ORIGINAL LINE MessageDlg(piece(Result,'^',2), mtError, [mbOK], 0);
+      //ADDED CODE BELOW  11/6/23
+      if SendErrors<>'' then SendErrors:=SendErrors+#13#10;
+      SendErrors := SendErrors + piece(Result,'^',2);
+      if UnpastedHTML<>'' then UnpastedHTML := UnpastedHTML + '<p>';
+      UnpastedHTML := UnpastedHTML + InsertStr;
     end;
   finally
     MessageArr.Free;
   end;
 end;
 
+procedure TfrmFollowUp.SetDirtyStatus(DirtyStatus:boolean);
+begin
+  IsDirty := DirtyStatus;
+  frmEncounterFrame.SetCurrentTabAsDirty(DirtyStatus);
+end;
 
 end.

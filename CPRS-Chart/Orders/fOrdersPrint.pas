@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ORfn, ExtCtrls, rOrders, fFrame, fBase508Form,
-  VA508AccessibilityManager, Buttons, ComCtrls;
+  VA508AccessibilityManager, Buttons, ComCtrls, uTMGOptions;
 
 type
   TfrmOrdersPrint = class(TfrmBase508Form)

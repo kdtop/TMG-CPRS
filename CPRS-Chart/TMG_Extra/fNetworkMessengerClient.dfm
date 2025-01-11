@@ -41,7 +41,7 @@ object frmNetworkMessagerClient: TfrmNetworkMessagerClient
     Top = 32
     Width = 345
     Height = 21
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 1
     Text = 'ComboBox1'
   end

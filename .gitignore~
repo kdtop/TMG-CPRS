@@ -1,5 +1,9 @@
 *.lnk
-**/*.dcu
+*.dcu
+*~
+*~dsk
+DCU/*.dcu
 DCU_OLD
 __history
 ReaderProblems
+CPRS-Chart/TMG_Extra/TestWebICDLookupProject*

@@ -2,8 +2,6 @@ inherited frmImmunizations: TfrmImmunizations
   Left = 373
   Top = 169
   Caption = 'Encouner Immunization'
-  ExplicitLeft = 373
-  ExplicitTop = 169
   PixelsPerInch = 96
   TextHeight = 13
   object lblReaction: TLabel [0]
@@ -34,6 +32,7 @@ inherited frmImmunizations: TfrmImmunizations
     WordWrap = True
   end
   inherited btnOK: TBitBtn
+    Caption = '&Done'
     TabOrder = 8
   end
   inherited btnCancel: TBitBtn
@@ -138,10 +137,10 @@ inherited frmImmunizations: TfrmImmunizations
     TabOrder = 6
     OnClick = ckbContraClick
   end
-  inherited btnRemove: TButton
+  inherited btnRemove: TBitBtn
     TabOrder = 7
   end
-  inherited btnSelectAll: TButton
+  inherited btnSelectAll: TBitBtn
     TabOrder = 2
     TabStop = True
   end

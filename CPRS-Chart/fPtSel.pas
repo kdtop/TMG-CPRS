@@ -48,7 +48,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ExtCtrls, ORFn, ORNet, ORDtTmRng, Gauges, Menus, ComCtrls,
-  fImagePatientPhotoID,  //kt
+  fImagePatientPhotoID,strUtils,  //kt
   UBAGlobals, UBACore, fBase508Form, VA508AccessibilityManager, uConst, Buttons;
 
 type
@@ -89,6 +89,9 @@ type
     txtCmdProcess: TVA508StaticText;
     btnRefresh: TButton;
     mnuMultiTIUSign: TMenuItem;
+    chkInactivePatients: TCheckBox;
+    procedure cboPatientResize(Sender: TObject);
+    procedure chkInactivePatientsClick(Sender: TObject);
     procedure mnuMultiTIUSignClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
     procedure PatientImageMouseLeave(Sender: TObject);
@@ -614,7 +617,7 @@ begin
         FastAssign(ReadRPLPtList(RPLJob, NoAlias, Direction), PatientList)
       else
       begin
-        FastAssign(SubSetOfPatients(NoAlias, Direction), PatientList);
+        FastAssign(SubSetOfPatients(NoAlias, Direction,IfThen(chkInactivePatients.Checked,'0','1')), PatientList);
         for i := 0 to PatientList.Count - 1 do  // Add " - Alias" to alias names:
         begin
           Patient := PatientList[i];
@@ -631,6 +634,25 @@ begin
   finally
     PatientList.Free;
   end;
+end;
+
+procedure TfrmPtSel.cboPatientResize(Sender: TObject);
+begin
+  inherited;
+  //chkInactivePatients.Left := (cboPatient.Left+cboPatient.Width);  //-chkInactivePatients.Width;
+end;
+
+procedure TfrmPtSel.chkInactivePatientsClick(Sender: TObject);
+var EnteredText:string;
+begin
+  inherited;
+  //cboPatientNeedData(cboPatient,cboPatient.Text,1,0);
+  EnteredText := cboPatient.Text;
+  cboPatient.InitLongList('zzzzz');
+  if pos(' -- ',EnteredText)>0 then begin
+     EnteredText := piece2(EnteredText,' -- ',1);
+  end;
+  cboPatient.InitLongList(EnteredText);
 end;
 
 procedure TfrmPtSel.ClearIDInfo;
@@ -746,8 +768,8 @@ begin
     Encounter.DateTime := Patient.AdmitTime;
     Encounter.VisitCategory := 'H';
   end;
-  //if User.IsProvider then Encounter.Provider := User.DUZ;    //ELH commented out for code below  9/7/18  //TMG //kt
-  Encounter.Provider := StrToInt(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN, IntToStr(User.DUZ)]));
+  if User.IsProvider then Encounter.Provider := User.DUZ;    //ELH commented out for code below  9/7/18  //TMG //kt
+  //elh ADDED ABOVE BACK 7/14/23 Encounter.Provider := StrToInt(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN, IntToStr(User.DUZ)]));
 
   GetBAStatus(Encounter.Provider,Patient.DFN);
   //HDS00005025
@@ -1047,6 +1069,7 @@ begin
   frmPtSelDemog.Width := pnlPtSel.Width - frmPtSelDemog.Left - 5;
 //  frmPtSelDemog.Width := frmPtSel.CmdCancel.Left - frmPtSelDemog.Left-2;// before vwpt enhancements pnlPtSel.Width - frmPtSelDemog.Left - 2;
   frmPtSelOptns.Width := cboPatient.Left-8;
+  chkInactivePatients.Left := (cboPatient.Left+cboPatient.Width);  //-chkInactivePatients.Width;
   FixPatientImageSize;
 end;
 

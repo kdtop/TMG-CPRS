@@ -103,5 +103,27 @@
     <Transaction>2023/03/22 10:59:34.731.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Encounter\fVisitType.dfm=</Transaction>
     <Transaction>2023/03/22 12:27:38.314.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.pas=</Transaction>
     <Transaction>2023/03/22 12:27:38.318.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGVisitType.dfm=</Transaction>
+    <Transaction>2023/04/30 12:12:01.638.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEditEncounterDx.pas</Transaction>
+    <Transaction>2023/04/30 12:12:01.638.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEditEncounterDx.dfm</Transaction>
+    <Transaction>2023/04/30 12:19:25.286.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEditEncounterDx.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEditEncounterInfo.pas</Transaction>
+    <Transaction>2023/04/30 12:19:25.286.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEditEncounterDx.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEditEncounterInfo.dfm</Transaction>
+    <Transaction>2023/09/21 13:44:20.564.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEncounterEditor.pas</Transaction>
+    <Transaction>2023/09/21 13:44:20.564.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEncounterEditor.dfm</Transaction>
+    <Transaction>2023/12/27 14:24:11.819.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEncounterICDPicker.pas</Transaction>
+    <Transaction>2023/12/27 14:24:11.819.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit1.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fTMGEncounterICDPicker.dfm</Transaction>
+    <Transaction>2024/01/23 10:09:16.641.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteTOC.pas</Transaction>
+    <Transaction>2024/01/23 10:09:16.710.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fNoteTOC.dfm</Transaction>
+    <Transaction>2024/03/19 15:19:29.963.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fAddSuspectConditions.pas</Transaction>
+    <Transaction>2024/03/19 15:19:29.963.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fAddSuspectConditions.dfm</Transaction>
+    <Transaction>2024/04/07 13:03:12.800.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterReview.pas</Transaction>
+    <Transaction>2024/04/07 13:03:12.800.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fEncounterReview.dfm</Transaction>
+    <Transaction>2024/04/19 17:52:04.745.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fDashboard.pas</Transaction>
+    <Transaction>2024/04/19 17:52:04.745.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fDashboard.dfm</Transaction>
+    <Transaction>2024/05/10 18:47:03.612.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fChartExportHistory.pas</Transaction>
+    <Transaction>2024/05/10 18:47:03.612.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fChartExportHistory.dfm</Transaction>
+    <Transaction>2024/08/06 12:12:37.131.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPopHealth.pas</Transaction>
+    <Transaction>2024/08/06 12:12:37.131.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fPopHealth.dfm</Transaction>
+    <Transaction>2024/10/15 11:02:48.188.pas,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.pas=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fChangeLog.pas</Transaction>
+    <Transaction>2024/10/15 11:02:48.188.dfm,P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\Unit2.dfm=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\fChangeLog.dfm</Transaction>
   </Transactions>
 </BorlandProject>

@@ -71,7 +71,7 @@ type
     procedure BeginUpdate;
     procedure EndUpdate;
     function NotUpdating: boolean;
-    procedure CheckOffEntries;
+    function CheckOffEntries : boolean;  //kt modified by changing procedure to function, returning bool
     procedure UpdateTabPos;
     procedure Sync2Grid;
     procedure Sync2Section;
@@ -91,7 +91,7 @@ implementation
 
 uses fPCELex, fPCEOther, fEncounterFrame, fHFSearch, VA508AccessibilityRouter,
   ORCtrlsVA508Compatibility, fBase508Form, UBAConst,
-  fTopicICDLinkerU  //kt
+  fTMGEncounterICDPicker  //kt
   ;
 
 {$R *.DFM}
@@ -353,7 +353,8 @@ begin
   Result := (FUpdateCount = 0);
 end;
 
-procedure TfrmPCEBaseMain.CheckOffEntries;
+function TfrmPCEBaseMain.CheckOffEntries : boolean;   //kt modified by changing procedure to function, returning bool
+  //Result: returns TRUE of something was checked in lbxSection, otherwise FALSE
 { TODO -oRich V. -cCode Set Versioning : Uncomment these lines to prevent acceptance of existing inactive DX codes. }
 const
   TX_INACTIVE_CODE1 = 'The diagnosis of "';
@@ -372,6 +373,7 @@ var
 
 begin
   FUpdatingGrid := TRUE;
+  Result := false; //kt
   try
     //kt mod -----
     if(lbSection.Items.Count < 1) then exit;
@@ -398,6 +400,7 @@ begin
           lbGrid.Items.Delete(i);
         end else begin
           lbxSection.Checked[j] := True;
+          Result := true;  //kt
         end;
       end;
       //kt end;
@@ -436,8 +439,6 @@ begin
         end;
       end;
     end;
-
-
 }
   finally
     FUpdatingGrid := FALSE;
@@ -502,8 +503,9 @@ begin
   //Scan through Grid, and any prior unwanted items are deleted.
   for j := lbGrid.Items.Count - 1 downto 0 do begin
     APCEItem := TPCEItem(lbGrid.Items.Objects[j]);
-    if (SCat = APCEItem.Category) and (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then
+    // THIS IS THE ORIGINAL CODE, TESTING TO SEE IF CAT IS NEEDED.... if (SCat = APCEItem.Category) and (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then
 //      if (SCat = APCEItem.Category) and (Pos(APCEItem.Code, SCode) > 0) then
+    if (Pos(APCEItem.Code, SCode) > 0) and (Pos(SNarr, APCEItem.Narrative) > 0) then      //EDDIE TEST 10/15/24
     begin
       Found := TRUE;
       if ItemChecked then break;
@@ -520,6 +522,7 @@ begin
     UpdateNewItemStr(x);
     APCEItem := FPCEItemClass.Create;
     APCEItem.SetFromString(x);
+    APCEItem.TMGData := ItemStr; //kt 12/28/23  I think ItemStr is STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
     if SCode = SIGNAL_ICD_FOR_STAFF_LOOKUP then begin  //kt added block
       APCEItem.Comment := SNarr;
     end;

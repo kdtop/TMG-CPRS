@@ -11,16 +11,16 @@ File_8=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\VA\VAUtils.pas',0,1,228,3,244
 File_9=TSourceModule,'P:\vista\TMGCPRS v30A - GOOD\VA\VAClasses.pas',0,1,1,1,1,0,0,,
 
 [Modules]
-Module0=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas
+Module0=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\CollapsablePanelU.pas
 Module1=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
-Module2=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\CollapsablePanelU.pas
+Module2=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas
 Module3=default.htm
 Count=4
 EditWindowCount=2
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\CollapsablePanelU.pas]
 ModuleType=TSourceModule
-FormState=1
+FormState=0
 FormOnTop=0
 
 [P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas]
@@ -28,9 +28,9 @@ ModuleType=TSourceModule
 FormState=1
 FormOnTop=0
 
-[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\CollapsablePanelU.pas]
+[P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas]
 ModuleType=TSourceModule
-FormState=0
+FormState=1
 FormOnTop=0
 
 [default.htm]
@@ -50,7 +50,7 @@ Top=1309
 Width=6905
 Height=6682
 MaxLeft=0
-MaxTop=4966
+MaxTop=2246
 ClientWidth=6818
 ClientHeight=6253
 DockedToMainForm=0
@@ -75,7 +75,7 @@ EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Collapsa
 
 [EditWindow0]
 ViewCount=4
-CurrentEditView=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas
+CurrentEditView=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\CollapsablePanelU.pas
 View0=1
 View1=2
 View2=3
@@ -87,11 +87,11 @@ Docked=0
 State=0
 Left=1485
 Top=1084
-Width=7080
+Width=6987
 Height=8499
 MaxLeft=0
-MaxTop=7223
-ClientWidth=6992
+MaxTop=5779
+ClientWidth=6900
 ClientHeight=8070
 DockedToMainForm=0
 MessageView=MessageView@EditWindow0
@@ -99,9 +99,9 @@ BorlandEditorCodeExplorer=BorlandEditorCodeExplorer@EditWindow0
 TopPanelSize=0
 LeftPanelSize=0
 RightPanelSize=0
-BottomPanelSize=1069
+BottomPanelSize=0
 BottomPanelClients=MessageView@EditWindow0
-BottomPanelData=000008000102000000000A36000000000000022D0400000000000001000000000A3600000B0000004D65737361676556696577FFFFFFFF
+BottomPanelData=000008000100010000000B0000004D657373616765566965770000000000000000000000000000000000FFFFFFFF
 BottomMiddlePanelSize=0
 
 [View1]
@@ -112,8 +112,8 @@ WelcomePageURL=bds:/default.htm
 CustomEditViewType=TEditView
 Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\MDMHelper.pas
 CursorX=1
-CursorY=1
-TopLine=1
+CursorY=750
+TopLine=736
 LeftCol=1
 Elisions=
 Bookmarks={2,750,19}
@@ -133,12 +133,12 @@ EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Collapsa
 [View4]
 CustomEditViewType=TEditView
 Module=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas
-CursorX=5
-CursorY=82
-TopLine=54
+CursorX=36
+CursorY=56
+TopLine=37
 LeftCol=1
 Elisions=
-Bookmarks={2,51,1}
+Bookmarks={2,50,1}
 EditViewName=P:\vista\TMGCPRS v30A - GOOD\CPRS-Chart\TMG_Extra\MDM grid\Main.pas
 
 [Watches]
@@ -338,14 +338,14 @@ Create=1
 Visible=0
 Docked=0
 State=0
-Left=5044
-Top=2122
-Width=4285
-Height=5621
+Left=0
+Top=0
+Width=2828
+Height=3747
 MaxLeft=-5
 MaxTop=-11
-ClientWidth=4198
-ClientHeight=5237
+ClientWidth=2740
+ClientHeight=3363
 TBDockHeight=3747
 LRDockWidth=2828
 Dockable=1
@@ -616,13 +616,13 @@ Visible=1
 Docked=0
 State=0
 Left=27
-Top=5158
+Top=3172
 Width=1447
-Height=4944
+Height=6930
 MaxLeft=-5
 MaxTop=-11
 ClientWidth=1359
-ClientHeight=4560
+ClientHeight=6546
 TBDockHeight=4221
 LRDockWidth=972
 Dockable=1
@@ -695,18 +695,18 @@ StayOnTop=0
 [MessageView@EditWindow0]
 PercentageSizes=1
 Create=1
-Visible=1
+Visible=0
 Docked=1
 State=0
-Left=0
-Top=23
-Width=6992
-Height=858
+Left=-269
+Top=-684
+Width=6900
+Height=0
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=6992
-ClientHeight=858
-TBDockHeight=858
+ClientWidth=6900
+ClientHeight=0
+TBDockHeight=1095
 LRDockWidth=2347
 Dockable=1
 StayOnTop=0

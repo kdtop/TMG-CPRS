@@ -57,14 +57,20 @@ function IsBaseContext: boolean;
 procedure CallBrokerInContext;
 procedure CallBroker;
 function RetainedRPCCount: Integer;
+function IndexOfRPCID(ID : integer) : integer;
+function IDOfRPCIndex(Index : integer) : integer;
 procedure SetRetainedRPCMax(Value: Integer);
 function GetRPCMax: integer;
 procedure LoadRPCData(Dest: TStrings; ID: Integer);
+function AccessRPCDataByIndex(Index : integer; var ID: Integer) : TStringList; //kt 9/9/23 added  -- Caller DOESN'T own object
 function AccessRPCData(ID: Integer) : TStringList; //kt 9/11 added  -- Caller DOESN'T own object
+function RPCDataChanged : boolean; //kt 9/23
+procedure SetRPCDataAsReviewed; //kt 9/23
+function PrevRPCDataID(CurrentID : integer) : integer; //kt
+function NextRPCDataID(CurrentID : integer) : integer; //kt
 function DottedIPStr: string;
 procedure CallRPCWhenIdle(CallProc: TORIdleCallProc; Msg: String);
 function ShowRPCList: Boolean;
-
 procedure RPCCallsClear;  //kt 9/11 added
 function RPCBrokerBusy : boolean; //kt added 11/4/21
 procedure EnsureBroker;
@@ -93,18 +99,163 @@ uses
   DateUtils, //kt 9/11
   Winsock;
 
+type
+  TRPCCallList = class(TStringList)  //kt added class 9/9/23
+    //The purpose of this class is to all each RPC call data record to have an ID
+    //   that doesn't change when the list fills up and old records start getting
+    //   deleted.
+    //NOTE: obj.strings[i] will hold ID value
+    //      obj.objects[i] will hold pointer to TStringList for 1 RPC call
+    private
+      FLastID : integer;
+      FReviewedID : integer;
+      function GetNextID : integer;
+      function GetSL(ID : integer) : TStringList;
+      function GetSLByIndex(Index : integer) : TStringList;
+    public
+      constructor Create();
+      destructor Destroy();
+      function Add(AStringList : TStringList) : integer;  //returns ID
+      procedure DeleteAndFree(ID : Integer);  //this will delete entry and free contained TStringList, if ID is valid;
+      procedure DeleteAndFreeIndex(Index : integer);
+      procedure ClearAndFree;
+      procedure SetAsReviewed;
+      function ModifiedSinceLastReview : boolean;
+      function IndexOfID(ID : integer): integer;
+      function IDofIndex(index : integer) : integer;
+      property ItemsByIndex[AnIndex : Integer]: TStringList read GetSLByIndex;
+      property Items[ID: Integer]: TStringList read GetSL;
+      property LastID : integer read FLastID;
+  end;
+
 const
   // *** these are constants from RPCBErr.pas, will broker document them????
   XWB_M_REJECT =  20000 + 2;  // M error
   XWB_BadSignOn = 20000 + 4;  // SignOn 'Error' (happens when cancel pressed)
 
 var
-  uCallList: TList;
+  //kt uCallList: TList;
+  TMGCallList : TRPCCallList; //kt 9/9/23
   uMaxCalls: Integer;
   uShowRPCs: Boolean;
   uBaseContext: string = '';
   uCurrentContext: string = '';
   TMGRPCCallInProcess : boolean; //kt 7/2018 //Variable to signal busy status.  Access via RPCBrokerBusy
+
+  //=====================================================================================
+  //=====================================================================================
+
+  constructor TRPCCallList.Create();
+  //kt added 9/2023
+  begin
+    inherited Create;
+    FLastID := -1;
+    SetAsReviewed;
+  end;
+
+  destructor TRPCCallList.Destroy();
+  begin
+    ClearAndFree;
+    inherited Destroy;
+  end;
+
+  function TRPCCallList.GetNextID : integer;
+  //kt added 9/2023
+  begin
+    inc(FLastID);
+    result := FLastID;
+  end;
+
+  function TRPCCallList.Add(AStringList : TStringList) : integer;  //returns ID
+  //kt added 9/2023
+  var ID : integer;
+  begin
+    ID := GetNextID;
+    Self.AddObject(IntToStr(ID), AStringList);
+    result := ID;
+  end;
+
+  function TRPCCallList.IndexOfID(ID : integer): integer;
+  begin
+    result := Self.IndexOf(IntToStr(ID));
+  end;
+
+  function TRPCCallList.IDofIndex(index : integer) : integer;
+  var s : string;
+  begin
+    if (index >= 0) and (index < self.Count) then begin
+      s := self.Strings[index];
+      result := StrToIntDef(s, -1);
+    end else begin
+      result := -1;
+    end;
+  end;
+
+  function TRPCCallList.GetSLByIndex(Index : integer) : TStringList;
+  begin
+    if (index >= 0) and (index < self.Count) then begin
+      result := TStringList(self.Objects[index]);
+    end else begin
+      result := nil;
+    end;
+  end;
+
+  function TRPCCallList.GetSL(ID : integer) : TStringList;
+  //kt added 9/2023
+  var index : integer;
+  begin
+    index := IndexOfID(ID);
+    if index >= 0 then begin
+      result := TStringList(Self.Objects[index]);
+    end else begin
+      result := nil;
+    end;
+  end;
+
+  procedure TRPCCallList.SetAsReviewed;
+  begin
+    FReviewedID := FLastID;
+  end;
+
+  function TRPCCallList.ModifiedSinceLastReview : boolean;
+  begin
+    result := (FReviewedID <> FLastID);
+  end;
+
+  procedure TRPCCallList.DeleteAndFreeIndex(Index : integer);
+  //kt added 9/2023
+  var SL : TStringList;
+  begin
+    if (Index < 0) or (Index >= Self.Count) then exit;
+    SL := TStringList(Self.Objects[Index]);
+    SL.Free;
+    Self.Delete(Index);
+  end;
+
+  procedure TRPCCallList.DeleteAndFree(ID : Integer);  //this will delete entry and free contained TStringList;
+  //kt added 9/2023
+  var index : integer;
+  begin
+    index := Self.IndexOf(IntToStr(ID));
+    if index < 0 then exit;
+    DeleteAndFreeIndex(index);
+  end;
+
+  procedure TRPCCallList.ClearAndFree;
+  //kt added 9/2023
+  var index : integer;
+      SL : TStringList;
+  begin
+    for index := self.Count-1 downto 0 do begin
+      SL := TStringList(self.objects[index]);
+      SL.Free;
+    end;
+    inherited Clear;
+    FLastID := -1;
+  end;
+
+  //=====================================================================================
+  //=====================================================================================
 
 function RPCBrokerBusy : boolean;
 //kt added 11/4/21
@@ -255,10 +406,15 @@ begin
       ClearResults := True;
       Exit;
     end;
+    {//kt 
     if uCallList.Count = uMaxCalls then begin
       AStringList := uCallList.Items[0];
       AStringList.Free;
       uCallList.Delete(0);
+    end;
+    }
+    if TMGCallList.Count = uMaxCalls then begin  //kt added
+      TMGCallList.DeleteAndFreeIndex(0);
     end;
     AStringList := TStringList.Create;
     TMGFiltered := (FilteredRPCCalls.IndexOf(RPCBrokerV.RemoteProcedure) >= 0); //kt 9/11
@@ -329,7 +485,8 @@ begin
     Time2 := GetTime;      //kt 9/11
     AStringList.Add('Elapsed Time: ' + IntToStr(Round(MilliSecondSpan(Time2,Time1))) + ' ms');  //kt 9/11
     if not TMGFiltered then begin //kt 9/11
-      uCallList.Add(AStringList);
+      //kt uCallList.Add(AStringList);
+      TMGCallList.Add(AStringList); //kt
     end;                         //kt 9/11
     if uShowRPCs then StatusText('');
     RPCLastCall := RPCBrokerV.RemoteProcedure + ' (completed)';
@@ -517,7 +674,8 @@ end;
 
 function RetainedRPCCount: Integer;
 begin
-  Result := uCallList.Count;
+  //kt Result := uCallList.Count;
+  Result := TMGCallList.Count;  //kt
 end;
 
 procedure SetRetainedRPCMax(Value: Integer);
@@ -531,19 +689,73 @@ begin
 end;
 
 procedure LoadRPCData(Dest: TStrings; ID: Integer);
+var SL : TStringList;  //kt
 begin
-  if (ID > -1) and (ID < uCallList.Count) then FastAssign(TStringList(uCallList.Items[ID]), Dest);
+  //kt if (ID > -1) and (ID < uCallList.Count) then FastAssign(TStringList(uCallList.Items[ID]), Dest);
+  SL := TMGCallList.GetSL(ID);  //kt
+  if Assigned(SL) then FastAssign(SL, Dest) else Dest.Clear; //kt
 end;
+
+function AccessRPCDataByIndex(Index : integer; var ID: Integer) : TStringList; //kt 9/9/23 added  -- Caller DOESN'T own object
+begin
+  Result := TMGCallList.GetSLByIndex(Index);
+  ID := TMGCallList.IDofIndex(Index);
+end;
+
 
 function AccessRPCData(ID: Integer) : TStringList;
 //kt 9/11 added  -- Caller DOESN'T own object
 begin
+  result := TMGCallList.GetSL(ID);  //kt
+  {  //kt 9/9/23
   Result := nil;
   if (ID > -1) and (ID < uCallList.Count) then begin
     Result := TStringList(uCallList.Items[ID]);
   end;
+  }
 end;
 
+function RPCDataChanged : boolean; //kt 9/23
+begin
+  result := TMGCallList.ModifiedSinceLastReview;
+end;
+
+procedure SetRPCDataAsReviewed; //kt 9/23
+begin
+  TMGCallList.SetAsReviewed;
+end;
+
+function PrevRPCDataID(CurrentID : integer) : integer; //kt
+var index: integer;
+begin
+  index := TMGCallList.IndexOfID(CurrentID);
+  if index > 0 then begin
+    Result := TMGCallList.IDofIndex(index-1);
+  end else begin
+    Result := CurrentID;
+  end;
+end;
+
+function NextRPCDataID(CurrentID : integer) : integer; //kt
+var index: integer;
+begin
+  index := TMGCallList.IndexOfID(CurrentID);
+  if index < TMGCallList.Count-1 then begin
+    Result := TMGCallList.IDofIndex(index+1);
+  end else begin
+    Result := CurrentID;
+  end;
+end;
+
+function IndexOfRPCID(ID : integer) : integer;
+begin
+  Result := TMGCallList.IndexOfID(ID);
+end;
+
+function IDOfRPCIndex(Index : integer) : integer;
+begin
+  Result := TMGCallList.IDofIndex(Index);
+end;
 
 function DottedIPStr: string;
 { return the IP address of the local machine as a string in dotted form: nnn.nnn.nnn.nnn }
@@ -592,12 +804,15 @@ end;
 procedure RPCCallsClear;
 //kt 9/11 -- Added entire fuction.
 begin
-  while uCallList.Count > 0 do
-  begin
+  TMGCallList.ClearAndFree;
+  {//kt 9/9/23
+  while uCallList.Count > 0 do begin
     TStringList(uCallList.Items[0]).Free;
     uCallList.Delete(0);
   end;
+  }
 end;
+
 function ShowRPCList: Boolean;
 begin
   if uShowRPCS then Result := True
@@ -608,19 +823,21 @@ end;
 initialization
   RPCBrokerV := nil;
   RPCLastCall := 'No RPCs called';
-  uCallList := TList.Create;
+  //kt uCallList := TList.Create;
+  TMGCallList := TRPCCallList.Create;
   uMaxCalls := 500;  //kt -- was 100
   uShowRPCs := False;
   FilteredRPCCalls := TStringList.Create;  //kt 9/11
 
 finalization
+  { //kt 9/9/23
   while uCallList.Count > 0 do
   begin
     TStringList(uCallList.Items[0]).Free;
     uCallList.Delete(0);
   end;
   uCallList.Free;
+  }
+  TMGCallList.Destroy; //kt  -- frees all owned TStringLists
   FilteredRPCCalls.Free;  //kt 9/11
-
-
 end.

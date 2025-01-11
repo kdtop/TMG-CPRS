@@ -14,16 +14,17 @@ inherited frmEncounterFrame: TfrmEncounterFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 648
-  ExplicitHeight = 462
+  ExplicitWidth = 640
+  ExplicitHeight = 458
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel [0]
     Left = 0
-    Top = 0
+    Top = 22
     Width = 632
     Height = 2
     Align = alTop
+    ExplicitTop = 0
   end
   object StatusBar1: TStatusBar [1]
     Left = 0
@@ -49,7 +50,7 @@ inherited frmEncounterFrame: TfrmEncounterFrame
   end
   object TabControl: TTabControl [3]
     Left = 0
-    Top = 2
+    Top = 0
     Width = 632
     Height = 22
     Align = alTop

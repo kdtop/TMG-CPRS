@@ -73,6 +73,7 @@ function GetCurrentPatientLoad(pnl:TPanel):string;
 implementation
 
   uses
+    uCore,  //kt added
     uTMGOptions;
 
   var
@@ -369,7 +370,7 @@ implementation
   begin
     if RPCBrokerBusy then exit; //kt 11/4/21
     SchArray := TStringList.Create();
-    tCallV(SchArray,'TMG CPRS GET PATIENT LOAD',[nil]);
+    tCallV(SchArray,'TMG CPRS GET PATIENT LOAD',[User.DUZ]);  //kt added passing DUZ 4/18/24
     FillPGBars(pnl,SchArray);
     SchArray.Free;
   end;

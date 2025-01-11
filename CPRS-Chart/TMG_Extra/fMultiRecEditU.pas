@@ -83,6 +83,8 @@ type
     Root  : TTreeNode;
     FSubFileNum : string;
     FParentIENS : string;
+    FFields     : string;
+    FIdentifier : string;
     IENS_Store : TStringList;
     BlankFileInfo : TStringList;
     //FLastSelectedRow : integer;
@@ -113,9 +115,10 @@ type
     { Public declarations }
     ActionOnShowMode : integer;
     ParentEditForm : TVariantPopupEdit;
-    procedure PrepForm(subFileNum : string; ParentIENS : string);
+    procedure PrepForm(subFileNum, ParentIENS : string; Fields : String='';
+                       Identifier : String=''; CustomPtrFieldEditors : TStringList = nil);
     function TransferSubfileRecord(subFileNum : string; CurrentIENS, NewIENS : string) : boolean;
-    procedure GetAllSubRecords(SubRecsList : TStringList; Fields : string = ''); overload;
+    procedure GetAllSubRecords(SubRecsList : TStringList; Fields : string = ''; Identifier : string = '');
     property GridInfo : TGridInfo read GetGridInfo;
     property Posted : boolean read FPosted;
     property ChangesMade : boolean read GetChangesMade;  //Signal that data was changed somehow.
@@ -163,7 +166,11 @@ uses
     //FGridInfo.Free;  <-- done in UnRegisterGridInfo
   end;
 
-  procedure TfrmMultiRecEdit.PrepForm(subFileNum : string; ParentIENS : string);
+  procedure TfrmMultiRecEdit.PrepForm(subFileNum, ParentIENS : string;
+                                      Fields : String='';
+                                      Identifier : String='';
+                                      CustomPtrFieldEditors : TStringList = nil
+                                      );
   //Format is: FileNum^IENS^FieldNum^ExternalValue^DDInfo...
   var DispIENS, ExpandedFileName : string;
   begin
@@ -176,8 +183,12 @@ uses
     FGridInfo.Grid := SubFileGrid;
     FGridInfo.FileNum := subFileNum;
     FGridInfo.IENS := ParentIENS;
+    FGridInfo.Fields := Fields;
+    FGridInfo.IdentifierCode := Identifier;
     FGridInfo.ApplyBtn := ApplyBtn;
     FGridInfo.RevertBtn := RevertBtn;
+    FGridInfo.CustomPtrFieldEditors.Assign(CustomPtrFieldEditors); //no ownership
+
     RegisterGridInfo(FGridInfo);  //FGridInfo becomes owned by GlobalsU.DataForGrid
 
     BlankFileInfo.Clear;
@@ -188,6 +199,8 @@ uses
     FChangesMade := true;
 
     FParentIENS := ParentIENS;
+    FFields     := Fields;
+    FIdentifier := Identifier;
     DispIENS := ParentIENS;
     if (DispIENS <> '') and (DispIENS[Length(DispIENS)] = ',') then begin
       DispIENS := StrUtils.LeftStr(DispIENS, Length(DispIENS)-1);
@@ -202,7 +215,7 @@ uses
   var tempMap : string;
   begin
     IgnoreSelections := true;
-    GetAllSubRecordsRPC(FSubFileNum,FParentIENS, AllSubRecords, tempMap);
+    GetAllSubRecordsRPC(FSubFileNum,FParentIENS, AllSubRecords, tempMap, FFields, FIdentifier);
     ClearGrid(SubFileGrid);
     LoadTreeView(AllSubRecords);
     Root.Expand(true);
@@ -278,9 +291,9 @@ uses
     result := IENS_Store.Add(IENS);
   end;
 
-  procedure TfrmMultiRecEdit.GetAllSubRecords(SubRecsList : TStringList; Fields : string = '');
+  procedure TfrmMultiRecEdit.GetAllSubRecords(SubRecsList : TStringList; Fields : string = ''; Identifier : string = '');
   begin
-    GetAllSubRecordsRPC(FSubFileNum,FParentIENS, SubRecsList, Fields);
+    GetAllSubRecordsRPC(FSubFileNum,FParentIENS, SubRecsList, Fields, Identifier);
   end;
 
   function GetSubRecCount(SubFileNum, ParentIENS : string) : integer;
@@ -330,11 +343,9 @@ uses
 
 
   procedure TfrmMultiRecEdit.AddBtnClick(Sender: TObject);
-  var Name,IENS, tempS, onEntry : string;
+  var Name,IENS : string;
       tempNode : TTreeNode;
-      i, dataLine : integer;
-      SilentMode  : boolean;
-      PostResult : integer;
+      dataLine : integer;
   begin
     ApplyBtnClick(self);  //post changes.
     RevertBtn.Enabled := True;
@@ -389,7 +400,7 @@ uses
   end;
 
   procedure TfrmMultiRecEdit.ApplyBtnClick(Sender: TObject);
-  var  Name, IENS : string;
+  var  IENS : string;
 
   begin
     if FIgnoreOneApplyBtnCycle then begin

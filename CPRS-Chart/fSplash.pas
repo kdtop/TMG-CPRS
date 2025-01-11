@@ -53,6 +53,7 @@ type
     lblSplash: TStaticText;
     lblTMGCustVer: TLabel;
     pnlBottom: TPanel;
+    lblMessage: TLabel;
     //pnl508Disclaimer: TPanel;  //kt <-- missing for some reason...
     //Memo1: TMemo;              //kt <-- missing for some reason...
     procedure FormCreate(Sender: TObject);

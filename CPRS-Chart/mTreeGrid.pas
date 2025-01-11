@@ -21,6 +21,8 @@ type
     FTargetCodeDescription: string;
     FParentIndex: string;
     FResultLine: string;
+    FColor : string;    //TMG added 4/11/24
+    FLongDescr : string; //TMG addedd 11/13/24
   public
 //    Columns: TStrings;
     property VUID: string read FVUID write FVUID;
@@ -34,6 +36,8 @@ type
     property TargetCodeDescription: string read FTargetCodeDescription write FTargetCodeDescription;
     property ParentIndex: string read FParentIndex write FParentIndex;
     property ResultLine: string read fResultLine write FResultLine;
+    property Color: string read FColor write FColor;   //TMG added 4/11/24
+    property LongDescr: string read FLongDescr write FLongDescr;   //TMG added 11/13/24
   end;
 
   TTreeGridFrame = class(TFrame)
@@ -235,7 +239,16 @@ procedure TTreeGridFrame.PopulatePanels;
 begin
   if assigned(SelectedNode) then begin
     if mmoDesc.Visible then begin
-      mmoDesc.Lines.Text := SelectedNode.CodeDescription;
+      if SelectedNode.LongDescr <> '' then begin  //kt added blocks
+        mmoDesc.Lines.Text := SelectedNode.LongDescr;
+        mmoDesc.ShowHint := false;
+        mmoDesc.Hint := '';
+      end else begin
+        mmoDesc.Lines.Text := SelectedNode.CodeDescription;
+        mmoDesc.ShowHint := true;
+        mmoDesc.Hint := mmoDesc.Lines.Text;
+      end;
+      //kt original --> mmoDesc.Lines.Text := SelectedNode.CodeDescription;
     end;
     if pnlCodeSys.Visible and (SelectedNode.CodeSys <> '') then begin
       CodeTitle := SelectedNode.CodeSys + ':  ';
@@ -334,8 +347,8 @@ begin
   if not assigned(ResultSet) or (ResultSet.Text = '') then begin
     ClearData;
   end else begin
-    //  1     2        3      4       5       6         7          8     9
-    //VUID^SCT TEXT^ICDCODE^ICDIEN^CODE SYS^CONCEPT^DESIGNATION^ICDVER^PARENT
+    //  1     2        3      4       5       6         7          8     9     15
+    //VUID^SCT TEXT^ICDCODE^ICDIEN^CODE SYS^CONCEPT^DESIGNATION^ICDVER^PARENT^COLOR
     tv.Items.Clear;
     tv.Refresh;
 
@@ -359,6 +372,7 @@ begin
 
         if Piece(RecStr, '^', 9) <> '' then
           Node.ParentIndex := IntToStr(StrToInt(Piece(RecStr, '^', 9)) - 1);
+        Node.Color := Piece(RecStr, '^', 15);     //TMG added 4/11/24
       end;
     end;
     //sort tree nodes

@@ -13,8 +13,8 @@ inherited frmPLLex: TfrmPLLex
   OnHelp = nil
   OnKeyDown = nil
   OnShow = FormShow
-  ExplicitWidth = 632
-  ExplicitHeight = 476
+  ExplicitWidth = 640
+  ExplicitHeight = 480
   PixelsPerInch = 96
   TextHeight = 13
   object pnlDialog: TPanel [0]

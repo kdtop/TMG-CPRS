@@ -95,16 +95,15 @@ type
     function HasIndex(index : string) : boolean;
     constructor Create(AFormatStr: string = ''; ADataStr : string=''; ADelimChar : char = '^');
     destructor Destroy;
+    class function StaticValue(DataStr, FormatStr, Index : string) : string; static;
+    class function StaticIntValue(DataStr, FormatStr, Index : string) : integer; static;
     property Piece[index : integer] : string read GetPieceValue write SetPieceValue;
-    property Value[index : string] : string read GetValue write SetValue;
+    property Value[index : string] : string read GetValue write SetValue; default;
     property IntValue[index : string] : integer read GetIntValue write SetIntValue;
     property FormatStr : string read FFormatStr write SetFormatStr;
     property DelimChar : char read FDelimChar write SetDelimChar;
     property DataStr : string read FDataStr write FDataStr;
   end;
-
-
-
 
 
 { sundries }
@@ -172,6 +171,7 @@ function PiecesNonQT(const S : string; Delim : string; PieceStart : integer; Pie
 function FindPiecesNodes(SL : TStringList; Delim : char; NodeA : string = ''; NodeB : string = ''; NodeC : string = ''; nodeD : string = '') : integer;  //kt 5/15 addeed
 function FindPiece(SL : TStringList; Delim : char; PieceNum : Integer; Value : string) : integer;  //kt 6/15 added
 function NumPieces(const s : string; ADelim : char) : integer;                             //kt 11/13
+function NumPieces2(const s : string; ADelim : string) : integer;                          //kt 1/24/24
 function PiecesNCS(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string;  //kt 8/09 added
 function LeftMatch(SubStr, Str : string) : boolean;  //kt added 6/15
 function RightMatch(SubStr, Str : string) : boolean;  //kt added 6/15
@@ -1058,6 +1058,19 @@ begin
   Result := 0;
   try
     PiecesToList(s, ADelim, SL);
+    Result := SL.Count;
+  finally
+    SL.Free;
+  end;
+end;
+
+function NumPieces2(const s : string; ADelim : string) : integer;   //kt 1/24/24
+var SL : TStringList;
+begin
+  Result := 0;
+  try
+    SL := TStringList.Create;
+    PiecesToList2(s, ADelim, SL);
     Result := SL.Count;
   finally
     SL.Free;
@@ -2947,7 +2960,7 @@ function TDataStr.GetIntIndex(Index : string; SuppressException : boolean = fals
 begin
   Result := FFormatSL.IndexOf(index);
   if (Result = -1) and not SuppressException then begin
-    raise Exception.Create('Index ['+index+'] not defind in DataString');
+    raise Exception.Create('Index ['+index+'] not defined in DataString');
   end;
 end;
 
@@ -2991,6 +3004,32 @@ begin
   if intIndex > -1 then Result := ORFn.piece(FDataStr, FDelimChar, intIndex+1);
   if Result = '' then Result := DefaultValue;
 end;
+
+class function TDataStr.StaticValue(DataStr, FormatStr, Index : string) : string;
+var FFormatSL : TStringList;
+    i : integer;
+begin
+  Result := '';
+  FFormatSL := TStringList.Create;
+  try
+    PiecesToList(FormatStr, '^', FFormatSL);
+    i := FFormatSL.IndexOf(Index);
+    if (i = -1) then begin
+      raise Exception.Create('Index ['+index+'] not defined in DataString');
+    end;
+    Result := ORFn.piece(DataStr, '^', i+1);
+  finally
+    FFormatSL.Free;
+  end;
+end;
+
+class function TDataStr.StaticIntValue(DataStr, FormatStr, Index : string) : integer;
+var val : string;
+begin
+  val := StaticValue(DataStr, FormatStr, Index);
+  Result := StrToIntDef(val, -1);
+end;
+
 
 function TDataStr.GetValue(index : String) : string;
 begin

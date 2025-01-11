@@ -249,7 +249,6 @@ inherited frmDrawers: TfrmDrawers
       Caption = 'Templates'
       NodePiece = 2
       OnDragging = tvTemplatesDragging
-      ExplicitTop = 33
     end
     object pnlTemplateSearch: TPanel
       Left = 0
@@ -365,8 +364,8 @@ inherited frmDrawers: TfrmDrawers
     HelpContext = 11300
     Align = alTop
     HideSelection = False
-    Images = dmodShared.imgReminders
-    Indent = 23
+    Images = dmodShared.imgReminders2
+    Indent = 35
     ReadOnly = True
     RightClickSelect = True
     StateImages = dmodShared.imgReminders

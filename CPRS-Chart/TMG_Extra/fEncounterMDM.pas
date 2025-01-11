@@ -23,6 +23,8 @@ type
     btnClearCPT: TButton;
     btnNext: TBitBtn;
     btnClearMemo: TButton;
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnClearMemoClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnClearCPTClick(Sender: TObject);
@@ -37,7 +39,9 @@ type
     procedure HandleFrameSize(Sender: TObject);
   public
     { Public declarations }
-    procedure SendData;  //kt
+    IsDirty : boolean;    //11/14/23
+    procedure SetDirtyStatus(DirtyStatus:boolean);  //11/14/23
+    procedure SendData(var SendErrors,UnpastedHTML:string);  //kt
     constructor CreateLinked(AParent: TWinControl);
   end;
 
@@ -56,6 +60,7 @@ begin
   inherited;
   //TO DO, confirm that clear is desired.
   cklbCodes.Items.Clear;
+  SetDirtyStatus(False);
 end;
 
 procedure TfrmEncounterMDM.btnClearMemoClick(Sender: TObject);
@@ -64,6 +69,7 @@ begin
   memOutput.Lines.Clear;
   SavedTextTables.Clear;
   SavedHTMLTables.Clear;
+  SetDirtyStatus(False);
 end;
 
 procedure TfrmEncounterMDM.btnNextClick(Sender: TObject);
@@ -105,12 +111,15 @@ begin
   SavedHTMLTables := TStringList.Create;
 
   AnMDMGrid := TfrmMDMGrid.Create(Self);
+  AnMDMGrid.FormStyle := fsNormal; //kt 9/21/23
   AnMDMGrid.Parent := pnlLeft;
   AnMDMGrid.OnCloseForm := HandleMDMOK;
   AnMDMGrid.OnFrameSize := HandleFrameSize;
-  AnMDMGrid.EmbeddedMode := true;
+  AnMDMGrid.SetEmbeddedMode(true, frmEncounterFrame);
   HandleFrameSize(nil);
   AnMDMGrid.Show;
+
+  IsDirty := False;
 end;
 
 procedure TfrmEncounterMDM.FormDestroy(Sender: TObject);
@@ -121,6 +130,18 @@ begin
   SavedHTMLTables.Free;
 
   inherited;
+end;
+
+procedure TfrmEncounterMDM.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  inherited;
+  SetDirtyStatus(True);
+end;
+
+procedure TfrmEncounterMDM.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmEncounterMDM.HandleFrameSize(Sender: TObject);
@@ -170,13 +191,22 @@ begin
   Append(AnMDMGrid.HTMLTable, SavedHTMLTables);
 
   AnMDMGrid.Reset;
+
+  SetDirtyStatus(True);
 end;
 
-procedure TfrmEncounterMDM.SendData;
+procedure TfrmEncounterMDM.SendData(var SendErrors,UnpastedHTML:string);
 begin
   if not assigned(frmNotes) then exit;
+  if IsDirty=False then exit;   //11/14/23  
   if SavedHTMLTables.Count = 0 then exit;
-  frmNotes.InsertMDMGrid(SavedHTMLTables);
+  frmNotes.InsertMDMGrid(SavedHTMLTables, SendErrors, UnpastedHTML);
+end;
+
+procedure TfrmEncounterMDM.SetDirtyStatus(DirtyStatus:boolean);
+begin
+  IsDirty := DirtyStatus;
+  frmEncounterFrame.SetCurrentTabAsDirty(DirtyStatus);
 end;
 
 

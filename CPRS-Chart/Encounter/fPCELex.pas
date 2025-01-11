@@ -43,9 +43,14 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, uCore,
   fAutoSz, StdCtrls, ORFn, ORCtrls, ExtCtrls, Buttons, VA508AccessibilityManager,
+  StrUtils, //kt
   ComCtrls, fBase508Form, CommCtrl, mTreeGrid;
 
 type
+  TfrmPCELex = class;
+  TPCELexFormTweaker = procedure(PCELexForm : TfrmPCELex) of object; //kt added
+  TPCELexFormCBClick = procedure(PCELexForm : TfrmPCELex; value : boolean) of object; //kt added
+
   TfrmPCELex = class(TfrmBase508Form)
     txtSearch: TCaptionEdit;
     cmdSearch: TButton;
@@ -61,6 +66,14 @@ type
     lblSelect: TVA508StaticText;
     lblSearch: TLabel;
     tgfLex: TTreeGridFrame;
+    cbShowCodes: TCheckBox;
+    cbAddToTMGEncounter: TCheckBox;
+    timerAutoSearch: TTimer;
+    procedure timerAutoSearchTimer(Sender: TObject);  //kt added
+    procedure tgfLextvCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState;
+      var DefaultDraw: Boolean);
+    procedure cbAddToTMGEncounterClick(Sender: TObject);   //kt added
+    procedure cbShowCodesClick(Sender: TObject);
     procedure cmdSearchClick(Sender: TObject);
     procedure cmdCancelClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -75,10 +88,8 @@ type
     procedure tgfLextvDblClick(Sender: TObject);
     procedure tgfLextvEnter(Sender: TObject);
     procedure tgfLextvExit(Sender: TObject);
-    procedure tgfLextvHint(Sender: TObject; const Node: TTreeNode;
-      var Hint: string);
-    procedure tgfLextvExpanding(Sender: TObject; Node: TTreeNode;
-      var AllowExpansion: Boolean);
+    procedure tgfLextvHint(Sender: TObject; const Node: TTreeNode; var Hint: string);
+    procedure tgfLextvExpanding(Sender: TObject; Node: TTreeNode; var AllowExpansion: Boolean);
   private
     FLexApp: Integer;
     FSuppressCodes: Boolean;
@@ -90,6 +101,15 @@ type
     FMessage: String;
     FSingleCodeSys: Boolean;
     FCodeSys: String;
+    FShowCodes : boolean; //kt
+    FDisplayPieces : string; //kt
+    FLexResults : TStringList; //kt
+    FAutoSearchLastTime : TDateTime;  //kt
+    FAutoSearchLastText : string;  //kt
+    FEncounterCBChangeHandler : TPCELexFormCBClick; //kt added
+    procedure SetNodeData(Node : TLexTreeNode; DataStr : string);
+    procedure SearchClickAction();  //kt added
+    function NodeDisplayText(Data : string) : string;  //kt added
     function ParseNarrCode(ANarrCode: String): String;
     procedure SetApp(LexApp: Integer);
     procedure SetDate(ADate: TFMDateTime);
@@ -98,23 +118,45 @@ type
     procedure disableExtend;
     procedure updateStatus(status: String);
     procedure SetColumnTreeModel(ResultSet: TStrings);
-    procedure processSearch;
+    procedure ProcessSearch;
+    procedure DisplayLexResults(LexResults : TStringList); //kt
     procedure setClientWidth;
     procedure CenterForm(w: Integer);
+    procedure SetOKEnable(Value : boolean);  //kt added
+  public
+    procedure SetupforTMGEncounter(OnChangeHandler : TPCELexFormCBClick); //kt added
   end;
 
-procedure LexiconLookup(var Code: string; ALexApp: Integer; ADate: TFMDateTime = 0; AExtend: Boolean = False; AInputString: String = ''; AMessage: String = ''; ADefaultToInput: Boolean = False);
+procedure LexiconLookup(var Code: string;
+                        ALexApp: Integer;
+                        ADate: TFMDateTime = 0;
+                        AExtend: Boolean = False;
+                        AInputString: String = '';
+                        AMessage: String = '';
+                        ADefaultToInput: Boolean = False;
+                        FormTweaker : TPCELexFormTweaker = nil //kt added
+                       );
 
 implementation
 
 {$R *.DFM}
 
-uses rPCE, uProbs, rProbs, UBAGlobals;
+uses rPCE, uProbs, rProbs, UBAGlobals,
+   DateUtils  //kt
+   ;
 
 var
   TriedExtend: Boolean = false;
 
-procedure LexiconLookup(var Code: string; ALexApp: Integer; ADate: TFMDateTime = 0; AExtend: Boolean = False; AInputString: String = ''; AMessage: String = ''; ADefaultToInput: Boolean = False);
+procedure LexiconLookup(var Code: string;
+                        ALexApp: Integer; //  This will be LX_ICD (12), LX_CPT(13), or LX_SCT(14);
+                        ADate: TFMDateTime = 0;
+                        AExtend: Boolean = False;
+                        AInputString: String = '';
+                        AMessage: String = '';
+                        ADefaultToInput: Boolean = False;
+                        FormTweaker : TPCELexFormTweaker = nil //kt added
+                        );
 var
   frmPCELex: TfrmPCELex;
 begin
@@ -133,6 +175,9 @@ begin
     frmPCELex.FExtend := AExtend;
     if (ALexApp = LX_ICD) then
       frmPCELex.FExtend := True;
+    if assigned(FormTweaker) then begin  //kt added this block.
+      FormTweaker(frmPCELex);
+    end;
     frmPCELex.ShowModal;
     Code := frmPCELex.FCode;
     if (AInputString <> '') and (Pos('(SCT', AInputString) > 0) and (ALexApp <> LX_SCT) then
@@ -142,9 +187,29 @@ begin
   end;
 end;
 
+//======================================================================
+procedure TfrmPCELex.SetupforTMGEncounter(OnChangeHandler : TPCELexFormCBClick);
+//kt added
+//NOTE: This will be called by one of the forms that uses this form.
+begin
+  cbAddToTMGEncounter.Visible := true;
+  cbAddToTMGEncounter.Enabled := false;
+  FEncounterCBChangeHandler := OnChangeHandler;
+end;
+
+procedure TfrmPCELex.cbAddToTMGEncounterClick(Sender: TObject);
+//kt added
+begin
+  inherited;
+  if assigned(FEncounterCBChangeHandler) then begin
+    FEncounterCBChangeHandler(self, cbAddToTMGEncounter.checked);
+  end;
+end;
+
 procedure TfrmPCELex.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   inherited;
+  FLexResults.Free; //kt
   Release;
 end;
 
@@ -158,6 +223,10 @@ begin
   FI10Active := False;
   FSingleCodeSys := True;
   FExtend := False;
+  FShowCodes := false; //kt
+  FDisplayPieces := '2'; //kt
+  FLexResults := TStringList.Create; //kt
+  FEncounterCBChangeHandler := nil; //kt
   UserProps := TStringList.Create;
   FastAssign(InitUser(User.DUZ), UserProps);
   PLUser := TPLUserParams.create(UserProps);
@@ -209,6 +278,7 @@ begin
 end;
 
 procedure TfrmPCELex.SetApp(LexApp: Integer);
+var w : integer;
 begin
   FLexApp := LexApp;
   case LexApp of
@@ -258,15 +328,59 @@ begin
   cmdOK.Default := False;
   cmdCancel.Default := False;
   disableExtend;
-  if tgfLex.tv.Items.Count > 0 then
-  begin
-    tgfLex.tv.Selected := nil;
-    tgfLex.tv.Items.Clear;
-    CenterForm(Constraints.MinWidth);
+  //kt begin mod
+  if not timerAutoSearch.Enabled then begin
+    //Only turn on autosearch with CPT's.  Other searches are not fast enough to return results dynamically
+    if false and (FLexApp = LX_CPT) then begin
+      timerAutoSearch.Enabled := true;
+      timerAutoSearch.Interval := 500;
+      FAutoSearchLastTime := Now;
+      FAutoSearchLastText := txtSearch.Text;
+    end;
+    //original block
+    if tgfLex.tv.Items.Count > 0 then begin
+      tgfLex.tv.Selected := nil;
+      tgfLex.tv.Items.Clear;
+      CenterForm(Constraints.MinWidth);
+    end;
+    //end original block
+  end;
+  //kt end mod
+end;
+
+procedure TfrmPCELex.timerAutoSearchTimer(Sender: TObject);
+//kt added
+begin
+  inherited;
+  if FAutoSearchLastText = txtSearch.Text then begin
+    FAutoSearchLastTime := now;
+    exit;
+  end;
+  if (MilliSecondsBetween(now, FAutoSearchLastTime) >1000) then begin
+    FAutoSearchLastTime := now;
+    FAutoSearchLastText := txtSearch.Text;
+    SearchClickAction();
+    txtSearch.SetFocus;
   end;
 end;
 
 procedure TfrmPCELex.cmdSearchClick(Sender: TObject);
+begin
+  //kt timerAutoSearch.Enabled := true;  //kt
+  SearchClickAction();
+  {//kt split to SearchClickAction below.
+  TriedExtend := false;
+  FCodeSys := '';
+  FSingleCodeSys := True;
+  if not FI10Active and (FLexApp = LX_ICD) then
+    FExtend := False;
+  if not tgfLex.pnlTarget.Visible then tgfLex.pnlTarget.Visible := True;
+  processSearch;
+  }
+end;
+
+procedure TfrmPCELex.SearchClickAction();
+//kt added, splitting out from cmdSearchClick()
 begin
   TriedExtend := false;
   FCodeSys := '';
@@ -305,6 +419,21 @@ begin
   end;
 end;
 
+procedure TfrmPCELex.cbShowCodesClick(Sender: TObject);
+//kt added
+begin
+  inherited;
+  FShowCodes := cbShowCodes.Checked;
+  //  1       2         3     4       5            6            7           8
+  //VUID^Description^CodeSys^Code^TargetCodeSys^TargetCode^DesignationID^Parent
+  if FShowCodes then begin
+    FDisplayPieces := '2,4';
+  end else begin
+    FDisplayPieces := '2';
+  end;
+  DisplayLexResults(FLexResults);
+end;
+
 procedure TfrmPCELex.CenterForm(w: Integer);
 var
   wdiff, mainw: Integer;
@@ -324,27 +453,53 @@ begin
   invalidate;
 end;
 
+function TfrmPCELex.NodeDisplayText(Data : string) : string;  //kt added
+var i : integer;
+    PceStr : string;
+    Pce : integer;
+begin
+  Result := '';
+  for i := 1 to NumPieces(FDisplayPieces,',') do begin
+    if Result <> '' then Result := Result + ' - ';
+    PceStr := Piece(FDisplayPieces, ',', i);
+    Pce := StrToIntDef(PceStr,-1);
+    if Pce = -1 then continue;
+    Result := Result + Piece(Data,'^',Pce);
+  end;
+end;
+
+
 procedure TfrmPCELex.SetColumnTreeModel(ResultSet: TStrings);
+//kt added DisplayPieces.  Example: '6,2,3'
 var
   i: Integer;
   Node, StubNode: TLexTreeNode;
-  RecStr: String;
+  RecStr: string;
+  NodeText : string; //kt
+
 begin
   tgfLex.tv.Items.Clear;
-  for i := 0 to ResultSet.Count - 1 do
-  begin
+  for i := 0 to ResultSet.Count - 1 do begin
     //RecStr = VUID^Description^CodeSys^Code^TargetCodeSys^TargetCode^DesignationID^Parent
     RecStr := ResultSet[i];
-    if Piece(RecStr, '^', 8) = '' then
-      Node := (tgfLex.tv.Items.Add(nil, Piece(RecStr, '^', 2))) as TLexTreeNode
-    else
-      Node := (tgfLex.tv.Items.AddChild(tgfLex.tv.Items[(StrToInt(Piece(RecStr, '^', 8))-1)], Piece(RecStr, '^', 2))) as TLexTreeNode;
+    NodeText := NodeDisplayText(RecStr);  //kt added
+    if Piece(RecStr, '^', 8) = '' then begin
+      //kt Node := (tgfLex.tv.Items.Add(nil, Piece(RecStr, '^', 2))) as TLexTreeNode
+      Node := (tgfLex.tv.Items.Add(nil, NodeText)) as TLexTreeNode;  //kt
+    end else begin
+      //kt Node := (tgfLex.tv.Items.AddChild(tgfLex.tv.Items[(StrToInt(Piece(RecStr, '^', 8))-1)], Piece(RecStr, '^', 2))) as TLexTreeNode;
+      Node := (tgfLex.tv.Items.AddChild(tgfLex.tv.Items[(StrToInt(Piece(RecStr, '^', 8))-1)], NodeText)) as TLexTreeNode;
+    end;
 
-    with Node do
-    begin
+    SetNodeData(Node, RecStr); //kt
+
+    {
+    with Node do begin
       VUID := Piece(RecStr, '^', 1);
-      Text := Piece(RecStr, '^', 2);
-      CodeDescription := Text;
+      //kt Text := Piece(RecStr, '^', 2);
+      Text := NodeText;   //kt
+      //kt CodeDescription := Text;
+      CodeDescription := Piece(RecStr, '^', 2);  //kt
       CodeSys := Piece(RecStr, '^', 3);
 
       if ((FCodeSys <> '') and (CodeSys <> FCodeSys)) then
@@ -358,19 +513,19 @@ begin
         ParentIndex := IntToStr(StrToInt(Piece(RecStr, '^', 8)) - 1);
 
       //TODO: Need to accommodate Designation Code in ColumnTreeNode...
-      if CodeSys = 'SNOMED CT' then
+      if CodeSys = 'SNOMED CT' then begin
         CodeIEN := Code
-      else
+      end else begin
         CodeIEN := Piece(RecStr, '^', 9);
+      end;
 
       TargetCode := Piece(RecStr, '^', 6);
-
     end;
-    if (Node.VUID = '+') then
-    begin
+    }
+
+    if (Node.VUID = '+') then begin
       StubNode := (tgfLex.tv.Items.AddChild(Node, 'Searching...')) as TLexTreeNode;
-      with StubNode do
-      begin
+      with StubNode do begin
         VUID := '';
         Text := 'Searching...';
         CodeDescription := Text;
@@ -392,59 +547,71 @@ begin
   tgfLex.tv.AlphaSort(True);
 end;
 
-procedure TfrmPCELex.processSearch;
+procedure TfrmPCELex.SetOKEnable(Value : boolean);  //kt added
+begin
+  cmdOK.Default := Value;
+  cmdOK.Enabled := Value;
+  cbAddToTMGEncounter.Enabled := Value;
+end;
+
+procedure TfrmPCELex.ProcessSearch;
 const
   TX_SRCH_REFINE1 = 'Your search ';
   TX_SRCH_REFINE2 = ' matched ';
   TX_SRCH_REFINE3 = ' records, too many to display.' + CRLF + CRLF + 'Suggestions:' + CRLF +
                     #32#32#32#32#42 + '   Refine your search by adding more words' + CRLF + #32#32#32#32#42 + '   Try different keywords';
   MaxRec = 5000;
+
 var
-  LexResults: TStringList;
-  found, subset, SearchStr: String;
+  //kt LexResults: TStringList;
+  //found : string;
+  subset, SearchStr: String;
   FreqOfText: integer;
-  Match: TLexTreeNode;
+  //Match: TLexTreeNode;
+
 begin
-  if Length(txtSearch.Text) = 0 then
-  begin
+  if Length(txtSearch.Text) = 0 then begin
    InfoBox('Enter a term to search for, then click "SEARCH"', 'Information', MB_OK or MB_ICONINFORMATION);
    exit; {don't bother to drop if no text entered}
   end;
 
-  if (FLexApp = LX_ICD) or (FLexApp = LX_SCT) then
-  begin
-    if FExtend and (FLexApp = LX_ICD) then
+  if (FLexApp = LX_ICD) or (FLexApp = LX_SCT) then begin
+    if FExtend and (FLexApp = LX_ICD) then begin
       subset := Piece(FICDVersion, '^', 2) + ' Diagnoses'
-    else
+    end else begin
       subset := 'SNOMED CT Concepts';
-  end
-  else if FLexApp = LX_CPT then
+    end;
+  end else if FLexApp = LX_CPT then begin
     subset := 'Current Procedural Terminology (CPT)'
-  else
+  end else begin
     subset := 'Clinical Lexicon';
+  end;
 
-  LexResults := TStringList.Create;
+  //kt LexResults := TStringList.Create;
 
-  try
+  //try
     Screen.Cursor := crHourGlass;
     updateStatus('Searching ' + subset + '...');
     SearchStr := Uppercase(txtSearch.Text);
     FreqOfText := GetFreqOfText(SearchStr);
-    if FreqOfText > MaxRec then
-    begin
+    if (FreqOfText > MaxRec) and (FLexApp <> LX_CPT) then begin  //kst added  'and (FLexApp <> LX_CPT)'
       InfoBox(TX_SRCH_REFINE1 + #39 + SearchStr + #39 + TX_SRCH_REFINE2 + IntToStr(FreqOfText) + TX_SRCH_REFINE3,'Refine Search', MB_OK or MB_ICONINFORMATION);
       lblStatus.Caption := '';
+      Screen.Cursor := crDefault;
       Exit;
     end;
-    ListLexicon(LexResults, SearchStr, FLexApp, FDate, FExtend, FI10Active);
+    //kt ListLexicon(LexResults, SearchStr, FLexApp, FDate, FExtend, FI10Active);
+    ListLexicon(FLexResults, SearchStr, FLexApp, FDate, FExtend, FI10Active);  //kt
 
-    if (Piece(LexResults[0], u, 1) = '-1') then
-    begin
+    DisplayLexResults(FLexResults); //kt
+    { //kt split out to below.
+    if (Piece(LexResults[0], u, 1) = '-1') then begin
       found := '0 matches found';
-      if FExtend then
+      if FExtend then begin
         found := found + ' by ' + subset + ' Search.'
-      else
+      end else begin
         found := found + '.';
+      end;
       lblSelect.Visible := False;
       txtSearch.SetFocus;
       txtSearch.SelectAll;
@@ -454,19 +621,17 @@ begin
       tgfLex.tv.Items.Clear;
       cmdCancel.Default := False;
       cmdSearch.Default := True;
-      if not FExtend and (FLexApp = LX_ICD) then
-      begin
+      if not FExtend and (FLexApp = LX_ICD) then begin
         cmdExtendedSearch.Click;
         Exit;
       end;
-    end
-    else
-    begin
+    end else begin
       found := inttostr(LexResults.Count) + ' matches found';
-      if FExtend then
+      if FExtend then begin
         found := found + ' by ' + subset + ' Search.'
-      else
+      end else begin
         found := found + '.';
+      end;
 
       SetColumnTreeModel(LexResults);
 
@@ -477,18 +642,16 @@ begin
 
       Match := tgfLex.FindNode(SearchStr);
 
-      if Match <> nil then
-      begin  {search term is on return list, so highlight it}
+      if Match <> nil then begin  //search term is on return list, so highlight it
         cmdOk.Enabled := True;
         ActiveControl := tgfLex.tv;
-      end
-      else
-        begin
-          tgfLex.tv.Items[0].Selected := False;
-        end;
+      end else begin
+        tgfLex.tv.Items[0].Selected := False;
+      end;
 
-      if (not FExtend) and (FLexApp = LX_ICD) and (not isNumeric(txtSearch.Text)) then
+      if (not FExtend) and (FLexApp = LX_ICD) and (not isNumeric(txtSearch.Text)) then begin
         enableExtend;
+      end;
       cmdSearch.Default := False;
     end;
     updateStatus(found);
@@ -497,6 +660,74 @@ begin
     LexResults.Free;
     Screen.Cursor := crDefault;
   end;
+  }
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfrmPCELex.DisplayLexResults(LexResults : TStringList);
+//kt added, splitting out of processSearch
+
+var
+  found, subset, SearchStr: String;
+  //FreqOfText: integer;
+  Match: TLexTreeNode;
+  SrchResults : string;
+
+begin
+  SrchResults := IfThen(LexResults.Count>0, LexResults[0], '-1'); //kt
+  if (Piece(SrchResults, u, 1) = '-1') then begin
+    found := '0 matches found';
+    if FExtend then begin
+      found := found + ' by ' + subset + ' Search.'
+    end else begin
+      found := found + '.';
+    end;
+    lblSelect.Visible := False;
+    txtSearch.SetFocus;
+    txtSearch.SelectAll;
+    //kt cmdOK.Default := False;
+    //kt cmdOK.Enabled := False;
+    SetOKEnable(False) ;//kt
+    tgfLex.tv.Enabled := False;
+    tgfLex.tv.Items.Clear;
+    cmdCancel.Default := False;
+    cmdSearch.Default := True;
+    if not FExtend and (FLexApp = LX_ICD) then begin
+      cmdExtendedSearch.Click;
+      Exit;
+    end;
+  end else begin
+    found := inttostr(LexResults.Count) + ' matches found';
+    if FExtend then begin
+      found := found + ' by ' + subset + ' Search.'
+    end else begin
+      found := found + '.';
+    end;
+
+    SetColumnTreeModel(LexResults);
+
+    setClientWidth;
+    lblSelect.Visible := True;
+    tgfLex.tv.Enabled := True;
+    tgfLex.tv.SetFocus;
+
+    Match := tgfLex.FindNode(SearchStr);
+
+    if Match <> nil then begin  {search term is on return list, so highlight it}
+      //kt cmdOk.Enabled := True;
+      SetOKEnable(True) ;//kt
+      ActiveControl := tgfLex.tv;
+    end else begin
+      tgfLex.tv.Items[0].Selected := False;
+    end;
+
+    if (not FExtend) and (FLexApp = LX_ICD) and (not isNumeric(txtSearch.Text)) then begin
+      enableExtend;
+    end;
+    cmdSearch.Default := False;
+  end;
+  updateStatus(found);
+  if FExtend then tgfLex.pnlTarget.Visible := False;
 end;
 
 procedure TfrmPCELex.cmdExtendedSearchClick(Sender: TObject);
@@ -546,13 +777,16 @@ begin
   tgfLex.tvChange(Sender, Node);
   if (tgfLex.SelectedNode = nil) or (tgfLex.SelectedNode.VUID = '+')  then
   begin
-    cmdOK.Enabled := false;
-    cmdOk.Default := false;
+    //kt cmdOK.Enabled := false;
+    //kt cmdOk.Default := false;
+    SetOKEnable(False) ;//kt
+
   end
   else  // valid Node selected
   begin
-    cmdOK.Enabled := true;
-    cmdOK.Default := true;
+    //kt cmdOK.Enabled := true;
+    //kt cmdOK.Default := true;
+    SetOKEnable(True) ;//kt
     cmdSearch.Default := false;
   end;
 end;
@@ -562,10 +796,42 @@ begin
   inherited;
   if(tgfLex.SelectedNode <> nil) and (tgfLex.SelectedNode.VUID <> '+') then
   begin
-    cmdOK.Enabled := true;
+    //kt cmdOK.Enabled := true;
+    //kt cmdOK.Default := True;
+    SetOKEnable(True) ;//kt
     cmdSearch.Default := False;
-    cmdOK.Default := True;
   end;
+end;
+
+procedure TfrmPCELex.tgfLextvCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState;
+  var DefaultDraw: Boolean);
+
+  function HTMLToColor(const HTMLColor:string):TColor;
+  var
+    Red,Green,Blue: Byte;
+    HexColor:string;
+  begin
+    if HTMLColor[1] = '#' then
+      HexColor := Copy(HTMLColor, 2, Length(HTMLColor) - 1)
+    else
+      HexColor := HTMLColor;
+
+    Red := StrToInt('$' + Copy(HexColor,1,2));
+    Green := StrToInt('$' + Copy(HexColor,3,2));
+    Blue := StrToInt('$' + Copy(HexColor,5,2));
+
+    Result := (Blue shl 16) or (Green shl 8) or Red;
+  end;
+
+var
+  ctn: TLexTreeNode;
+begin
+  inherited;
+  ctn := Node as TLexTreeNode;
+  if ctn.color<>'' then begin
+    Sender.Canvas.Brush.Color := HTMLToColor(ctn.color);
+  end;
+  DefaultDraw := True;
 end;
 
 procedure TfrmPCELex.tgfLextvDblClick(Sender: TObject);
@@ -579,20 +845,64 @@ end;
 procedure TfrmPCELex.tgfLextvEnter(Sender: TObject);
 begin
   inherited;
+  SetOKEnable(tgfLex.SelectedNode <> nil) ;//kt
+  {//kt
   if (tgfLex.SelectedNode = nil) then
     cmdOK.Enabled := false
   else
     cmdOK.Enabled := true;
+  } //kt
 end;
 
 procedure TfrmPCELex.tgfLextvExit(Sender: TObject);
 begin
   inherited;
+  SetOKEnable(tgfLex.SelectedNode <> nil) ;//kt
+  {  //kt
   if (tgfLex.SelectedNode = nil) then
     cmdOK.Enabled := false
   else
     cmdOK.Enabled := true;
+  }
 end;
+
+procedure TfrmPCELex.SetNodeData(Node : TLexTreeNode; DataStr : string);
+//kt added, combining common code for nodes and child nodes.
+var
+  NodeText : string;
+begin
+  NodeText := NodeDisplayText(DataStr);  //kt added
+  with Node do begin
+    VUID := Piece(DataStr, '^', 1);
+    //kt Text := Piece(DataStr, '^', 2);
+    Text := NodeText;   //kt
+    //kt CodeDescription := Text;
+    CodeDescription := Piece(DataStr, '^', 2);  //kt
+    CodeSys := Piece(DataStr, '^', 3);
+
+    if ((FCodeSys <> '') and (CodeSys <> FCodeSys)) then
+      FSingleCodeSys := False;
+
+    FCodeSys := CodeSys;
+
+    Code := Piece(DataStr, '^', 4);
+
+    Color := Piece(DataStr, '^', 15);     //TMG added 4/11/24
+    LongDescr := AnsiReplaceStr(Piece(DataStr, '^', 16),'\n',#13#10); //TMG added 11/13/24
+
+    if Piece(DataStr, '^', 8) <> '' then
+      ParentIndex := IntToStr(StrToInt(Piece(DataStr, '^', 8)) - 1);
+
+    //TODO: Need to accommodate Designation Code in ColumnTreeNode...
+    if CodeSys = 'SNOMED CT' then
+      CodeIEN := Code
+    else
+      CodeIEN := Piece(DataStr, '^', 9);
+
+    TargetCode := Piece(DataStr, '^', 6);
+  end;
+end;
+
 
 procedure TfrmPCELex.tgfLextvExpanding(Sender: TObject; Node: TTreeNode;
   var AllowExpansion: Boolean);
@@ -614,13 +924,13 @@ begin
     ctNode.DeleteChildren;
 
     //create children
-    for i := 0 to ChildRecs.Count - 1 do
-    begin
+    for i := 0 to ChildRecs.Count - 1 do begin
       RecStr := ChildRecs[i];
       ChildNode := (tgfLex.tv.Items.AddChild(ctNode, Piece(RecStr, '^', 2))) as TLexTreeNode;
 
-      with ChildNode do
-      begin
+      SetNodeData(ChildNode, RecStr); //kt
+      {
+      with ChildNode do begin
         VUID := Piece(RecStr, '^', 1);
         Text := Piece(RecStr, '^', 2);
         CodeDescription := Text;
@@ -644,6 +954,7 @@ begin
 
         TargetCode := Piece(RecStr, '^', 6);
       end;
+      }
 
       if (ChildNode.VUID = '+') then
       begin

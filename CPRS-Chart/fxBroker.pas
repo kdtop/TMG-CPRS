@@ -46,6 +46,8 @@ uses
   ORCtrls, ORSystem, fBase508Form, VA508AccessibilityManager;
 
 type
+  tViewModes = (rpcvTime=0, rpcvName=1, rpcvTree=2, rpcvOther);  //kt added
+
   TfrmBroker = class(TfrmBase508Form)
     pnlTop: TORAutoPanel;
     lblMaxCalls: TLabel;
@@ -64,20 +66,24 @@ type
     PanelBottomLeft: TPanel;   //kt 3/23
     Splitter1: TSplitter;      //kt 3/23
     pnlbottomRight: TPanel;    //kt 3/23
-    tabRPCViewMode: TTabControl;  //kt 3/23
-    lbRPCList: TListBox;
+    tabRPCViewMode: TTabControl;
+    lbTimeRPCList: TListBox;
     tvRPC: TTreeView;
     pnlBanner: TPanel;
     edtSearch: TEdit;
     btnSearch: TBitBtn;
     btnClearSrch: TBitBtn;
+    RefreshTimer: TTimer;
+    lbNameRPCList: TListBox;
+    procedure lbNameRPCListClick(Sender: TObject);
+    procedure RefreshTimerTimer(Sender: TObject);
     procedure btnClearSrchClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure tvRPCDblClick(Sender: TObject);       //kt 3/23
     procedure tvRPCCollapsing(Sender: TObject; Node: TTreeNode; var AllowCollapse: Boolean); //kt 3/23
     procedure tvRPCClick(Sender: TObject);  //kt 3/23
-    procedure lbRPCListClick(Sender: TObject);    //kt 3/23
+    procedure lbTimeRPCListClick(Sender: TObject);    //kt 3/23
     procedure tabRPCViewModeChange(Sender: TObject);        //kt 9/11
     procedure btnFilterClick(Sender: TObject); //kt 9/11
     procedure btnClearClick(Sender: TObject);  //kt 9/11
@@ -93,11 +99,21 @@ type
   private
     { Private declarations }
     FSearchTerms : TStringList;
-    FRetained: Integer;
-    FCurrent: Integer;
+    FSelectedTVNode : TTreeNode;
+    FTVRootNode : TTreeNode;
+    //kt FRetained: Integer;
+    //kt  FCurrent: Integer;
+    FCurrentID : integer;
     FCollapsing : boolean;
-    procedure UpdateDisplay; //kt 9/11
+    procedure SetCurrentID(ID : integer); //kt 9/23
+    procedure DisplayIDRPCData(ID : integer); //kt 9/11
     function ExcludeBySearchTerms(SL : TStringList) : boolean;  //kt
+    procedure LoadRPCDataIntoControls();  //kt added
+    procedure SyncSelectedID(ID : integer; CalledFrom : tViewModes);
+    procedure lbNameRPCListSelectByID(ID : integer);  //kt added
+    procedure lbTimeRPCListSelectByID(ID : integer);  //kt added
+    procedure tvRPCSelectByID(ID : integer);          //kt added
+    procedure DoTVSelectNode(Node : TTreeNode);       //kt added
   public
     { Public declarations }
   end;
@@ -111,33 +127,41 @@ implementation
 uses
   fMemoEdit;  //kt 9/11 added
 
-procedure ShowBroker;
 var
-  frmBroker: TfrmBroker;
+  frmBroker: TfrmBroker;  //kt added here
+
+
+
+procedure ShowBroker;
+//kt var
+//kt   frmBroker: TfrmBroker;
 begin
   frmBroker := TfrmBroker.Create(Application);
   try
     ResizeAnchoredFormToFont(frmBroker);
     with frmBroker do begin
-      FRetained := RetainedRPCCount - 1;
-      FCurrent := FRetained;
-      UpdateDisplay; //kt
+      //kt FRetained := RetainedRPCCount - 1;
+      //kt FCurrent := FRetained;
+      LoadRPCDataIntoControls();  //kt
+      tabRPCViewModeChange(nil); //kt
+      SetCurrentID(IDOfRPCIndex(RetainedRPCCount - 1)); //kt 9/23
       { //kt 9/11 moved to UpdateDisplay
       LoadRPCData(memData.Lines, FCurrent);
       memData.SelStart := 0;
       lblCallID.Caption := 'Last Call Minus: ' + IntToStr(FRetained - FCurrent);
       }
-      ShowModal;
+      //kt 9/9/23  ShowModal;
+      Show;  //note: will be released in the OnClose event
     end;
   finally
-    frmBroker.Release;
+    //kt 9/9/23 frmBroker.Release;
   end;
 end;
 
 procedure TfrmBroker.cmdPrevClick(Sender: TObject);
 begin
-  FCurrent := HigherOf(FCurrent - 1, 0);
-  UpdateDisplay; //kt 9/11
+  SetCurrentID(PrevRPCDataID(FCurrentID)); //kt 9/23
+  //kt FCurrent := HigherOf(FCurrent - 1, 0);
   { //kt 9/11 moved to UpdateDisplay
   LoadRPCData(memData.Lines, FCurrent);
   memData.SelStart := 0;
@@ -147,8 +171,8 @@ end;
 
 procedure TfrmBroker.cmdNextClick(Sender: TObject);
 begin
-  FCurrent := LowerOf(FCurrent + 1, FRetained);
-  UpdateDisplay; //kt 9/11
+  SetCurrentID(NextRPCDataID(FCurrentID)); //kt 9/23
+  //kt FCurrent := LowerOf(FCurrent + 1, FRetained);
   { //kt 9/11 moved to UpdateDisplay
   LoadRPCData(memData.Lines, FCurrent);
   memData.SelStart := 0;
@@ -156,41 +180,61 @@ begin
   }
 end;
 
-procedure TfrmBroker.UpdateDisplay; //kt 9/11 added
+procedure TfrmBroker.SetCurrentID(ID : integer); //kt 9/23
+var CurrentIndex, LastIndex, Delta : integer;
 begin
-  LoadRPCData(memData.Lines, FCurrent);
+  FCurrentID := ID;
+  SyncSelectedID(FCurrentID, rpcvOther);  //kt added
+  DisplayIDRPCData(FCurrentID); //kt 9/11
+  CurrentIndex := IndexOfRPCID(FCurrentID);
+  LastIndex := RetainedRPCCount - 1;
+  Delta := LastIndex - CurrentIndex;
+  lblCallID.Caption := 'Last Call Minus: ' + IntToStr(Delta);
+  cmdNext.Enabled := (CurrentIndex <> LastIndex);
+  cmdPrev.Enabled := (CurrentIndex <> 0);
+end;
+
+procedure TfrmBroker.DisplayIDRPCData(ID : integer); //kt 9/11 added
+begin
+  LoadRPCData(memData.Lines, ID);
   memData.SelStart := 0;
-  lblCallID.Caption := 'Last Call Minus: ' + IntToStr(FRetained - FCurrent);
 end;
 
 procedure TfrmBroker.cboJumpToDropDown(Sender: TObject);
 //kt 9/11 added
 var i : integer;
+    ID : integer;   //kt
     s : string;
     Info : TStringList;   //Not owned here...
 begin
   cboJumpTo.Items.Clear;
   for i := 0 to RetainedRPCCount - 1 do begin
-    Info := AccessRPCData(i);
+    //kt Info := AccessRPCData(i);
+    Info := AccessRPCDataByIndex(i, ID);  //kt 9/9/23  ID is an OUT parameter
     if Info.Count < 2 then continue;
     s := Info.Strings[1];
     s := piece2(s,'Called at: ',2);
     s := s + ':  ' + Info.Strings[0];
-    cboJumpTo.Items.Insert(0,s);
+    //kt 9/9/23 -- cboJumpTo.Items.Insert(0,s);
+    cboJumpTo.Items.InsertObject(0, s, TObject(ID)); //kt 9/9/23
   end;
 end;
 
 procedure TfrmBroker.cboJumpToChange(Sender: TObject);
 //kt 9/11 added
+var ID : integer;
 begin
   if cboJumpTo.Items.count > 0 then begin
-    FCurrent := (cboJumpTo.Items.count-1) - cboJumpTo.ItemIndex;
-    UpdateDisplay;
+    ID := integer(cboJumpTo.Items.Objects[cboJumpTo.ItemIndex]);  //kt 9/9/23
+    SetCurrentID(ID); //kt 9/23
   end;
 end;
+
 procedure TfrmBroker.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  SetRetainedRPCMax(StrToIntDef(txtMaxCalls.Text, 5))
+  SetRetainedRPCMax(StrToIntDef(txtMaxCalls.Text, 5));
+  frmBroker := nil; //kt 9/9/23 NOTE: This is just modifying the pointer.  The object still exists in memory
+  Self.Release;     //kt 9/9/23 NOTE: This posts message to object, which will then free itself.
 end;
 
 procedure TfrmBroker.FormResize(Sender: TObject);
@@ -198,36 +242,140 @@ begin
   Refresh;
 end;
 
-procedure TfrmBroker.lbRPCListClick(Sender: TObject);
+procedure TfrmBroker.lbNameRPCListClick(Sender: TObject);
 //kt added
 var i : integer;
 begin
   inherited;
-  i := lbRPCList.ItemIndex;
-  if (i<0) or (i>= lbRPCList.Items.Count) then exit;
-  FCurrent := integer(lbRPCList.Items.Objects[i]);
-  UpdateDisplay;
+  if not lbNameRPCList.Visible then exit;
+  i := lbNameRPCList.ItemIndex;
+  if (i<0) or (i>= lbNameRPCList.Items.Count) then exit;
+  SetCurrentID(integer(lbNameRPCList.Items.Objects[i])); //kt 9/23
 end;
 
-procedure TfrmBroker.tabRPCViewModeChange(Sender: TObject);
+procedure TfrmBroker.lbTimeRPCListClick(Sender: TObject);
+//kt added
+var i : integer;
+begin
+  inherited;
+  if not lbTimeRPCList.Visible then exit;
+  i := lbTimeRPCList.ItemIndex;
+  if (i<0) or (i>= lbTimeRPCList.Items.Count) then exit;
+  SetCurrentID(integer(lbTimeRPCList.Items.Objects[i])); //kt 9/23
+end;
+
+procedure TfrmBroker.tvRPCClick(Sender: TObject);
+//kt 3/23
+var ANode : TTreeNode;
+    value : integer;
+begin
+  inherited;
+  if FCollapsing then exit;
+  if not tvRPC.Visible then exit;
+  ANode := tvRPC.Selected;
+  if not Assigned(ANode) then begin
+    memData.Lines.Clear;
+    exit;
+  end;
+  value := integer(ANode.Data);
+  if value < 0 then begin
+    memData.Lines.Clear;
+    exit;
+  end;
+  SetCurrentID(value); //kt 9/23
+end;
+
+procedure TfrmBroker.RefreshTimerTimer(Sender: TObject);   //kt added
+begin
+  inherited;
+  if not RPCDataChanged then exit;
+  LoadRPCDataIntoControls();
+  SyncSelectedID(FCurrentID, rpcvOther);
+  DisplayIDRPCData(FCurrentID);
+end;
+
+
+procedure TfrmBroker.SyncSelectedID(ID : integer; CalledFrom : tViewModes);   //kt added
+//  tViewModes = (rpcvTime=0, rpcvName=1, rpcvTree=2);  //kt added
+begin
+  if CalledFrom <> rpcvTime then lbTimeRPCListSelectByID(ID);
+  if CalledFrom <> rpcvName then lbNameRPCListSelectByID(ID);
+  if CalledFrom <> rpcvTree then tvRPCSelectByID(ID);
+end;
+
+procedure TfrmBroker.lbNameRPCListSelectByID(ID : integer); //kt added
+var i : integer;
+    OneID : integer;
+begin
+  for i := 0 to lbNameRPCList.Items.Count-1 do begin
+    oneID := Integer(lbNameRPCList.Items.Objects[i]);
+    if oneID <> ID then continue;
+    lbNameRPCList.ItemIndex := i;
+    break;
+  end;
+end;
+
+procedure TfrmBroker.lbTimeRPCListSelectByID(ID : integer); //kt added
+var i : integer;
+    OneID : integer;
+begin
+  for i := 0 to lbTimeRPCList.Items.Count-1 do begin
+    oneID := Integer(lbTimeRPCList.Items.Objects[i]);
+    if oneID <> ID then continue;
+    lbTimeRPCList.ItemIndex := i;
+    break;
+  end;
+end;
+
+procedure TfrmBroker.DoTVSelectNode(Node : TTreeNode); //kt added
+var ANode : TTreeNode;
+begin
+  tvRPC.FullCollapse;
+  //FTVRootNode.Collapse(false); //collapse all
+  ANode := Node;
+  while (ANode <> nil) do begin
+    ANode.Expand(false);
+    ANode := ANode.Parent;
+  end;
+  tvRPC.Select(Node);
+  FSelectedTVNode := Node;
+end;
+
+procedure TfrmBroker.tvRPCSelectByID(ID : integer); //kt added
+var i : integer;
+    ANode : TTreeNode;
+    OneID : integer;
+begin
+  for i := 0 to tvRPC.Items.Count-1 do begin
+    ANode := tvRPC.Items[i];
+    oneID := Integer(ANode.Data);
+    if oneID <> ID then continue;
+    DoTVSelectNode(ANode);
+    break;
+  end;
+end;
+
+
+procedure TfrmBroker.LoadRPCDataIntoControls();
 //kt added
 type
-  tViewModes = (rpcvTime=0, rpcvName=1, rpcvTree=2);
   tTimePos = (tFirst, tLast, tNone, tTagged);
 
-var Mode : tViewModes;
-    SL : TStringList;
-    i : integer;
-    RootNode : TTreeNode;
+var SL : TStringList;
+    i, index : integer;
+    ANode, CurrentNode : TTreeNode;
 
-  procedure LoadRPCs(SL : TStrings; TimePos: tTimePos);
+  function LoadRPCs(SL : TStrings; TimePos: tTimePos; CurrentID : integer) : integer;
   var
     i : integer;
+    index : integer;
+    ID : integer;   //kt
     TimeStr, s : string;
     Info : TStringList;   //Not owned here...
   begin
+    result := -1;
     for i := RetainedRPCCount - 1 downto 0 do begin
-      Info := AccessRPCData(i);
+      Info := AccessRPCDataByIndex(i, ID);  //kt 9/9/23  ID is an OUT parameter
       if ExcludeBySearchTerms(Info) then continue;
       if Info.Count < 2 then continue;
       s := Info.Strings[1];
@@ -239,7 +387,8 @@ var Mode : tViewModes;
         tTagged :  s := s + '^' + TimeStr;
         tNone:     s := s;
       end;
-      SL.AddObject(s,TObject(i));  //linked 'object' will really be index into RetainedRPCCount
+      index := SL.AddObject(s,TObject(ID));  //linked 'object' will really be ID of RPC data
+      if CurrentID = ID then result := index;
     end;
   end;
 
@@ -267,7 +416,7 @@ var Mode : tViewModes;
     Result.Data := Data;
   end;
 
-  procedure AddToTV(TV : TTreeView; s : string; Data : pointer);
+  function AddToTV(TV : TTreeView; s : string; Data : pointer) : TTreeNode;
   var TimeStr : string;
       InsertNode: TTreeNode;
   begin
@@ -277,88 +426,92 @@ var Mode : tViewModes;
     if Pos(' ',s) > 0 then begin
       InsertNode := EnsureNode(TV, InsertNode, piece(s,' ', 1), pointer(-1));
     end;
-    InsertNode := EnsureNode(TV, InsertNode, s, Data);
+    InsertNode := EnsureNode(TV, InsertNode, s, nil);  //data
     InsertNode := EnsureNode(TV, InsertNode, ' call time: ' + TimeStr, Data);
+    result := InsertNode;
   end;
+
+begin //LoadRPCDataIntoControls
+  inherited;
+  SL := TStringList.Create;
+  try
+    //Load Time listbox
+    index := LoadRPCs(SL, tFirst, FCurrentID);  //load with name set for time sequence order
+    lbTimeRPCList.Items.Assign(SL);
+    lbTimeRPCList.ItemIndex := index;
+    SL.Clear;
+
+    //Load Name listbox
+    index := LoadRPCs(SL, tLast, FCurrentID);  //load by name set for RPC Name order
+    SL.Sort;  //sort by name
+    lbNameRPCList.Items.Assign(SL);
+    lbNameRPCList.ItemIndex := index;
+    SL.Clear;
+
+    //Load treeview
+    tvRPC.Items.BeginUpdate;
+    tvRPC.Items.Clear;
+    CurrentNode := nil;
+    FTVRootNode := tvRPC.Items.Add(nil,'RPC''s by Name');  //a root note
+    index := LoadRPCs(SL, tTagged, FCurrentID);  //load with formatted name
+    for i := 0 to SL.Count - 1 do begin
+      ANode := AddToTV(tvRPC, SL.Strings[i], SL.Objects[i]);
+      if i = index then begin
+        CurrentNode := ANode;
+      end;
+    end;
+    tvRPC.Items.AlphaSort(true);
+    //DoTVSelectNode(CurrentNode);
+    tvRPC.Items.EndUpdate;
+
+    //Mark as reviewed (loaded)
+    SetRPCDataAsReviewed;
+  finally
+    SL.Free;
+  end;
+  lblStoredCallsNum.Caption := 'Stored Calls: ' + IntToStr(RetainedRPCCount);
+end;
+
+procedure TfrmBroker.tabRPCViewModeChange(Sender: TObject);
+//kt added
+var Mode : tViewModes;
 
 begin //tabRPCViewModeChange
   inherited;
   Mode := tViewModes(tabRPCViewMode.TabIndex);
   case Mode of
     rpcvTime: begin
-      lbRPCList.Align := alClient;
-      lbRPCList.Visible := true;
+      lbTimeRPCList.Align := alClient;
+      lbTimeRPCList.Visible := true;
       tvRPC.Visible := false;
-      lbRPCList.Items.Clear;
-      LoadRPCs(lbRPCList.Items, tFirst);  //load by sequence (time) order
+      lbNameRPCList.Visible := false;
     end;
     rpcvName: begin
-      lbRPCList.Align := alClient;
-      lbRPCList.Visible := true;
+      lbNameRPCList.Align := alClient;
+      lbNameRPCList.Visible := true;
       tvRPC.Visible := false;
-      lbRPCList.Items.Clear;
-      SL := TStringList.Create;
-      try
-        LoadRPCs(SL, tLast);  //load by sequence (time) order
-        SL.Sort;  //sort by name
-        lbRPCList.Items.Assign(SL);
-      finally
-        SL.Free;
-      end;
+      lbTimeRPCList.Visible := false;
     end;
     rpcvTree: begin
       tvRPC.Align := alClient;
-      lbRPCList.Visible := false;
       tvRPC.Visible := true;
-      tvRPC.Items.BeginUpdate;
-      tvRPC.Items.Clear;
-      RootNode := tvRPC.Items.Add(nil,'RPC''s by Name');  //a root note
-      //load tree by name
-      SL := TStringList.Create;
-      try
-        LoadRPCs(SL, tTagged);  //load by sequence (time) order
-        for i := 0 to SL.Count - 1 do begin
-          AddToTV(tvRPC, SL.Strings[i], SL.Objects[i]);
-        end;
-        tvRPC.Items.AlphaSort(true);
-      finally
-        SL.Free;
-      end;
-      RootNode.Expand(false);
-      tvRPC.Items.EndUpdate;
+      lbNameRPCList.Visible := false;
+      lbTimeRPCList.Visible := false;
+      DoTVSelectNode(FSelectedTVNode);
     end;
   end;
-end;
-
-procedure TfrmBroker.tvRPCClick(Sender: TObject);
-//kt 3/23
-var ANode : TTreeNode;
-    value : integer;
-begin
-  inherited;
-  if FCollapsing then exit;
-  ANode := tvRPC.Selected;
-  if not Assigned(ANode) then begin
-    memData.Lines.Clear;
-    exit;
-  end;
-  value := integer(ANode.Data);
-  if value < 0 then begin
-    memData.Lines.Clear;
-    exit;
-  end;
-  FCurrent := value;
-  UpdateDisplay;
 end;
 
 procedure TfrmBroker.tvRPCCollapsing(Sender: TObject; Node: TTreeNode; var AllowCollapse: Boolean);
 //kt 3/23
 begin
   inherited;
+  {
   FCollapsing := true;
   tvRPC.Selected := Node;
   Application.ProcessMessages;
   FCollapsing := false;
+  }
 end;
 
 procedure TfrmBroker.tvRPCDblClick(Sender: TObject);
@@ -373,6 +526,7 @@ procedure TfrmBroker.FormCreate(Sender: TObject);
 begin
   FCollapsing := false;     //kt 3/23
   udMax.Max := GetRPCMax;   //kt 3/23
+  FSelectedTVNode := nil;   //kt 9/23
   udMax.Position := GetRPCMax;
   txtMaxCalls.Text := IntToStr(GetRPCMax);
   FSearchTerms := TStringList.Create; //kt
@@ -421,18 +575,17 @@ const
   TX_OPTION  = 'OR CPRS GUI CHART';
   disclaimer = 'NOTE: Strictly relative indicator:';
 begin
+  clientVer := clientVersion(Application.ExeName); // Obtain before starting.
 
-clientVer := clientVersion(Application.ExeName); // Obtain before starting.
+  // Check time lapse between a standard RPC call:
+  startTime := now;
+  serverVer :=  serverVersion(TX_OPTION, clientVer);
+  endTime := now;
+  theDiff := milliSecondsBetween(endTime, startTime);
+  diffDisplay := intToStr(theDiff);
 
-// Check time lapse between a standard RPC call:
-startTime := now;
-serverVer :=  serverVersion(TX_OPTION, clientVer);
-endTime := now;
-theDiff := milliSecondsBetween(endTime, startTime);
-diffDisplay := intToStr(theDiff);
-
-// Show the results:
-infoBox('Lapsed time (milliseconds) = ' + diffDisplay + '.', disclaimer, MB_OK);
+  // Show the results:
+  infoBox('Lapsed time (milliseconds) for sample RPC = ' + diffDisplay + '.', disclaimer, MB_OK);
 end;
 
 procedure TfrmBroker.btnClearSrchClick(Sender: TObject);
@@ -448,7 +601,8 @@ begin
   inherited;
   SearchText := UpperCase(edtSearch.Text);
   PiecesToList(SearchText, ' ', FSearchTerms);
-  tabRPCViewModeChange(Sender);
+  LoadRPCDataIntoControls();  //this will filter based in FSearchTerms
+  DisplayIDRPCData(FCurrentID);
 end;
 
 function TfrmBroker.ExcludeBySearchTerms(SL : TStringList) : boolean;
@@ -484,8 +638,10 @@ begin
   ORNet.RPCCallsClear;
   memData.Lines.Clear; //kt 4/15/10
   cboJumpTo.Text := '-- Select a call to jump to --';
-  FCurrent := 0;
-  FRetained := RetainedRPCCount - 1;
+  LoadRPCDataIntoControls();
+  //kt FCurrent := 0;
+  FCurrentID := 0;  //kt
+  //kt FRetained := RetainedRPCCount - 1;
   cmdNextClick(Sender);
   tabRPCViewModeChange(Sender);
 end;

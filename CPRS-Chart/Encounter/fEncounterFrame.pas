@@ -7,26 +7,27 @@ uses
   Tabs, ComCtrls, ExtCtrls, Menus, StdCtrls, Buttons, fPCEBase,
   {fVisitType,} fDiagnoses, {fProcedure,} fImmunization, fSkinTest, fPatientEd,
   fHealthFactor, fExam, uPCE, rPCE, rTIU, ORCtrls, ORFn, fEncVitals, rvitals, fBase508Form,
-  fFollowUp,
+  fFollowUp, ORNet,uTMGOptions,
   fTMGDiagnoses, fTMGProcedure, fTMGVisitType, rOrders, //kt
   VA508AccessibilityManager;
 
 const
   //tab names
-  CT_DiagNm         = 'Diagnoses';
-  CT_ImmNm          = 'Immunizations';
-  CT_SkinNm         = 'Skin Tests';
-  CT_PedNm          = 'Patient Ed';
-  CT_HlthNm         = 'Health Factors';
-  CT_XamNm          = 'Exams';
-  CT_VitNm          = 'Vitals';
-  CT_GAFNm          = 'GAF';
-  CT_TMG_FolwUpNm   = 'Follow Up';  //kt added
-  CT_TMG_EnctrMDMNm = 'MDM';        //kt added
-  CT_TMG_LabsNm     = 'Labs';       //kt added
-  CT_TMG_DiagNm     = 'Dx''s';      //kt added
-  CT_TMG_ProcNm     = 'Procedures'; //kt added, was CT_ProcNm
-  CT_TMG_VisitNm    = 'E/M';        //kt added and renamed from CT_VisitNm.  Was -> 'Visit Type';
+  CT_DiagNm           = 'Diagnoses';
+  CT_ImmNm            = 'Immunizations';
+  CT_SkinNm           = 'Skin Tests';
+  CT_PedNm            = 'Patient Ed';
+  CT_HlthNm           = 'Health Factors';
+  CT_XamNm            = 'Exams';
+  CT_VitNm            = 'Vitals';
+  CT_GAFNm            = 'GAF';
+  CT_TMG_FolwUpNm     = 'Follow Up';  //kt added
+  CT_TMG_EnctrMDMNm   = 'MDM';        //kt added
+  CT_TMG_LabsNm       = 'Labs';       //kt added
+  CT_TMG_DiagNm       = 'Dx''s';      //kt added
+  CT_TMG_ProcNm       = 'Procedures'; //kt added, was CT_ProcNm
+  CT_TMG_VisitNm      = 'E/M';        //kt added and renamed from CT_VisitNm.  Was -> 'Visit Type';
+  CT_TMG_Enc_ReviewNm = 'Review';     //kt added.
 
   //Numbers assigned to tabs to make changes easier.  NOTE!--they must be sequential
   CT_NOPAGE          = -1;
@@ -44,7 +45,8 @@ const
   CT_TMG_FOLLOWUP    = 11;                //kt
   CT_TMG_MDM         = 12;                //kt
   CT_TMG_LABS        = 13;                //kt
-  CT_TMG_DIAGNOSIS   = 14;  CT_LAST = 14; //kt
+  CT_TMG_DIAGNOSIS   = 14;                //kt
+  CT_TMG_ENC_REVIEW  = 15;  CT_LAST = 15; //kt
 
   //------------------------
   //NUM_TABS           = 3;       //kt removed, not used.
@@ -66,6 +68,9 @@ const
   TC_PROV_REQ = 'Missing Primary Provider for Encounter';
 
 type
+  TfrmEncounterFrame = class;  //kt added forward
+  TNotifyPCEFrmEvent = procedure(PCEData: TPCEData; Frame: TfrmEncounterFrame);  //kt added
+
   TfrmEncounterFrame = class(TfrmBase508Form)
     StatusBar1: TStatusBar;
     pnlPage: TPanel;
@@ -94,6 +99,7 @@ type
     FGiveMultiTabMessage: boolean;
     PCEData: TPCEData;  //kt added.  Pointer to object owned elsewhere.
     FInitialPageIndex : integer;
+    AllowInitTabChange:boolean;    //elh added as temp fix for initial tab  5/26/23
     procedure CreateChildForms(Sender: TObject; Location: integer);
     procedure SynchPCEData(SrcPCEData :TPCEData);  //kt added SrcPCEData parameter
     procedure SwitchToPage(NewForm: TfrmPCEBase);   //was tfrmPage
@@ -104,15 +110,18 @@ type
     procedure FreeChildForms;  //kt added
     procedure AddTabs;
     function FormListContains(item: string): Boolean;
-    procedure SendData;
+    procedure SendData(CopyHTML:boolean);
     procedure UpdateEncounter(DestPCE: TPCEData);
     procedure SetFormFonts;
   public
+    CallBackProcs : TNotifyPCEEventList; //kt added.  Owned elsewhere.
     uProviders: TPCEProviderList;  //kt added, moving from global scope in this unit.  NOTE: Probably should be renamed later to just 'Providers'.
+    procedure SetCurrentTabAsDirty(DirtyStatus:boolean);   //11/14/23
     procedure SelectTab(NewTabName: string);
     procedure SelectNextTab; //kt added 2/1/23
     procedure Initialize(SrcPCEData : TPCEData; InitialPageIndex : byte = 0);  //kt added
     procedure NotifyOrder(OrderAction: Integer; AnOrder: TOrder);    //kt added
+    function TestData(HTML:string='0'):string;         //TMG ELH added entire 10/17/23
     property ChangeSource:    Integer read FChangeSource;
     property Forms:           tstringlist read FormList;
     property Cancel:          Boolean read FCancel write FCancel;
@@ -131,6 +140,8 @@ var
 // Returns true if PCE data still needs to be saved - vitals/gaf are always saved
 //kt original --> function UpdatePCE(PCEData: TPCEData; SaveOnExit: boolean = TRUE): boolean;
 function UpdatePCE(SrcPCEData: TPCEData; SaveOnExit: boolean = TRUE; InitialPageIndex : byte = 0): boolean;  //kt 5/16/16
+procedure UpdatePCENonModal(SrcPCEData: TPCEData; CallBackProcs : TNotifyPCEEventList; SaveOnExit: boolean = TRUE; InitialPageIndex : byte = 0); //kt 5/11/23
+function PCEUpdateActive : boolean;  //kt added
 
 
 implementation
@@ -138,7 +149,7 @@ implementation
 uses
   uCore,
   fGAF, uConst,
-  fEncounterMDM,  //kt
+  fEncounterMDM, fEncounterReview, //kt
   rCore, fPCEProvider, rMisc, VA508AccessibilityRouter, VAUtils, fEncounterLabs,
   fNotes;  //kt
 
@@ -154,13 +165,15 @@ uses
 //kt original --> function UpdatePCE(PCEData: TPCEData; SaveOnExit: boolean = TRUE): boolean;
 function UpdatePCE(SrcPCEData: TPCEData; SaveOnExit: boolean = TRUE; InitialPageIndex : byte = 0): boolean;
 //Called from many CPRS tabs
+//   KT note: Most places that call this do not make use of result value.
+//          OK2SignNote does use it.
 
 //var
 //  FontHeight,
 //  FontWidth: Integer;
  //kt moved to Initialize() -->  AUser: string;
 
-begin
+ begin
   uEncPCEData := SrcPCEData;
 
   if SrcPCEData.Empty and ((SrcPCEData.Location=0) or (SrcPCEData.VisitDateTime=0)) and (not Encounter.NeedVisit) then begin
@@ -217,6 +230,80 @@ begin
   end;
 end;
 
+
+{///////////////////////////////////////////////////////////////////////////////
+//Name: function PCEUpdateActive : boolean;
+//Created: 5/11/23
+//By: Kevin Toppenberg
+//Location: TMG
+//Description: return if frmEncounterFrame is active
+///////////////////////////////////////////////////////////////////////////////}
+function PCEUpdateActive : boolean;
+begin
+  Result := assigned(frmEncounterFrame);
+end;
+
+{///////////////////////////////////////////////////////////////////////////////
+//Name: procedure HandleUpdatePCEDone();
+//Created: 5/11/23
+//By: Kevin Toppenberg
+//Location: TMG
+//Description: Handle any tasks needed when form is closing.
+///////////////////////////////////////////////////////////////////////////////}
+procedure HandleUpdatePCEDone(PCEData: TPCEData; CallBackProcs : TNotifyPCEEventList);
+begin
+  //kt NOTE: When frmEncounterFrame is closed then PCE data is typically saved in FormCloseQuery()
+  //         If it is NOT saved, then .SaveNeeded set to true.
+  //         HOWEVER, after the form is released, any data saved in the form
+  //         will be lost, so I'm not sure how it can later be saved.
+  //         Must be some aspect of this I don't understand...
+  //  The data that gets saved is actually uEncPCEData, a globally scoped pointer
+  //    variable, which is set to the SrcPCEData that is passed into this UpdatePCE()
+  //    So must be that the data is stored there, not in frmEncounterFrame,
+  //    and so not lost when form is closed.
+
+  //At this point, the memory object pointed to by frmEncounterFrame still exists.
+  //  But, because this was called by FormClose event, which sets Action to caFree, it will free itself
+  frmEncounterFrame := nil;
+  CallBackProcs.PopAndCall(PCEData);
+end;
+
+
+{///////////////////////////////////////////////////////////////////////////////
+//Name: procedure UpdatePCENonModal(PCEData: TPCEData);
+//Created: 5/11/23
+//By: Kevin Toppenberg
+//Location: TMG
+//Description: Open the encounter frame and capture encounter information, in non-modal manner
+///////////////////////////////////////////////////////////////////////////////}
+procedure UpdatePCENonModal(SrcPCEData: TPCEData;
+                            CallBackProcs : TNotifyPCEEventList;
+                            SaveOnExit: boolean = TRUE;
+                            InitialPageIndex : byte = 0);
+
+begin
+  if PCEUpdateActive then exit;
+
+  uEncPCEData := SrcPCEData;
+
+  if SrcPCEData.Empty
+  and ((SrcPCEData.Location=0) or (SrcPCEData.VisitDateTime=0))
+  and (not Encounter.NeedVisit) then begin
+    SrcPCEData.UseEncounter := TRUE;
+  end;
+
+  CallBackProcs.AddObject('CALLER=UpdatePCENonModal', @HandleUpdatePCEDone);
+
+  frmEncounterFrame := TfrmEncounterFrame.Create(Application);
+  frmEncounterFrame.FormStyle := fsStayOnTop;
+  frmEncounterFrame.CallBackProcs := CallBackProcs;
+  frmEncounterFrame.AutoSave := SaveOnExit;
+  frmEncounterFrame.PCEData := SrcPCEData;    //kt added.  Pointer to object owned elsewhere.
+
+  frmEncounterFrame.Initialize(SrcPCEData, InitialPageIndex);
+  frmEncounterFrame.Show;
+end;
+
 //========================================================================
 //========================================================================
 
@@ -243,16 +330,33 @@ begin
     CT_EXAMS:           Result := CT_XamNm;
     CT_VITALS:          Result := CT_VitNm;
     CT_GAF:             Result := CT_GAFNm;
-    CT_TMG_FOLLOWUP:    Result := CT_TMG_FolwUpNm;    //kt added
-    CT_TMG_MDM:         Result := CT_TMG_EnctrMDMNm;  //kt added
-    CT_TMG_LABS:        Result := CT_TMG_LabsNm;      //kt added
-    CT_TMG_DIAGNOSIS:   Result := CT_TMG_DiagNm;      //kt added
-    CT_TMG_PROCEDURES:  Result := CT_TMG_ProcNm;      //kt added  was CT_PROCEDURES:    Result := CT_ProcNm;
-    CT_TMG_VISITTYPE:   Result := CT_TMG_VisitNm;     //kt added  was CT_VISITTYPE:     Result := CT_VisitNm;
+    CT_TMG_FOLLOWUP:    Result := CT_TMG_FolwUpNm;     //kt added
+    CT_TMG_MDM:         Result := CT_TMG_EnctrMDMNm;   //kt added
+    CT_TMG_LABS:        Result := CT_TMG_LabsNm;       //kt added
+    CT_TMG_DIAGNOSIS:   Result := CT_TMG_DiagNm;       //kt added
+    CT_TMG_PROCEDURES:  Result := CT_TMG_ProcNm;       //kt added  was CT_PROCEDURES:    Result := CT_ProcNm;
+    CT_TMG_VISITTYPE:   Result := CT_TMG_VisitNm;      //kt added  was CT_VISITTYPE:     Result := CT_VisitNm;
+    CT_TMG_ENC_REVIEW:  Result := CT_TMG_Enc_ReviewNm; //kt added
   end;
 end;
 
 
+procedure TfrmEncounterFrame.SetCurrentTabAsDirty(DirtyStatus:boolean);  //11/14/23
+var
+  ClickedForm : TForm;
+begin
+  inherited;
+  //ClickedForm := TForm(FormName);
+  if TabControl.TabIndex > -1 then begin
+    if DirtyStatus then begin
+      if pos('*',TabControl.Tabs[TabControl.TabIndex])=0 then
+        TabControl.Tabs[TabControl.TabIndex] := TabControl.Tabs[TabControl.TabIndex]+'*';
+    end else begin
+      if pos('*',TabControl.Tabs[TabControl.TabIndex])>0 then
+         TabControl.Tabs[TabControl.TabIndex] := piece(TabControl.Tabs[TabControl.TabIndex],'*',1);
+    end;
+  end;
+end;
 {///////////////////////////////////////////////////////////////////////////////
 //Name: function TfrmEncounterFrame.PageIDToForm(PageID: Integer): TfrmPCEBase;
 //Created: Jan 1999
@@ -277,6 +381,7 @@ begin
     CT_TMG_DIAGNOSIS:  Result := frmTMGDiagnoses;  //kt added
     CT_TMG_VISITTYPE:  Result := frmTMGVisitType;  //kt added  was CT_VISITTYPE:     Result := frmVisitType;
     CT_TMG_PROCEDURES: Result := frmTMGProcedures; //kt added  was CT_PROCEDURES:    Result := frmProcedures;
+    CT_TMG_ENC_REVIEW: Result := frmEncounterReview; //kt added
   else  //not a valid form
     result := frmPCEBase;
   end;
@@ -313,12 +418,12 @@ begin
   //NOTE: The order of entry here will determine order of tabs displayed.
   EditingNote := frmNotes.EditingNoteSelected;
   FormList.clear;
-  if EditingNote then FormList.add(CT_TMG_FolwUpNm);   //kt added
-  if EditingNote then FormList.add(CT_TMG_LabsNm);     //kt added
-  if EditingNote then FormList.add(CT_TMG_EnctrMDMNm); //kt added
-  FormList.add(CT_TMG_VisitNm);    //kt added   was FormList.add(CT_VisitNm);
-  FormList.add(CT_TMG_DiagNm);     //kt added   was FormList.add(CT_DiagNm);
-  FormList.add(CT_TMG_ProcNm);     //kt added   was FormList.add(CT_ProcNm);
+  FormList.add(CT_TMG_DiagNm);                                                //kt added   was FormList.add(CT_DiagNm);
+  if EditingNote then FormList.add(CT_TMG_EnctrMDMNm);                        //kt added
+  FormList.add(CT_TMG_VisitNm);                                               //kt added   was FormList.add(CT_VisitNm);
+  FormList.add(CT_TMG_ProcNm);                                                //kt added   was FormList.add(CT_ProcNm);
+  if EditingNote then FormList.add(CT_TMG_FolwUpNm);                          //kt added
+  if EditingNote then FormList.add(CT_TMG_LabsNm);                            //kt added
   //kt removed 1/19/2023 --> formList.add(CT_VitNm);
   //kt removed --> formList.add(CT_ImmNm);
   //kt removed --> formList.add(CT_SkinNm);
@@ -326,6 +431,7 @@ begin
   formList.add(CT_HlthNm);
   //kt removed --> formList.add(CT_XamNm);
   //kt removed --> if MHClinic(Location) then formList.add(CT_GAFNm);
+  formList.add(CT_TMG_Enc_ReviewNm);                                          //kt added.
 end;
 
 
@@ -357,22 +463,23 @@ var
 begin
   //could this be placed in a loop using PagedIdToTab & PageIDToFOrm & ?
 
-  if FormListContains(CT_TMG_FolwUpNm)   then frmFollowUp      := TfrmFollowUp.CreateLinked(pnlPage);      //kt added
-  if FormListContains(CT_TMG_EnctrMDMNm) then frmEncounterMDM  := TfrmEncounterMDM.CreateLinked(pnlPage);  //kt added
-  if FormListContains(CT_TMG_LabsNm)     then frmEnounterLabs  := TfrmEnounterLabs.CreateLinked(pnlPage);  //kt added
-  if FormListContains(CT_TMG_DiagNm)     then frmTMGDiagnoses  := TfrmTMGDiagnoses.CreateLinked(pnlPage);  //kt added
-  if FormListContains(CT_TMG_ProcNm)     then frmTMGProcedures := TfrmTMGProcedures.CreateLinked(pnlPage); //kt added
-  if FormListContains(CT_TMG_VisitNm)    then frmTMGVisitType  := TfrmTMGVisitTypes.CreateLinked(pnlPage); //kt added
-  if FormListContains(CT_DiagNm)         then frmDiagnoses     := TfrmDiagnoses.CreateLinked(pnlPage);
-  if FormListContains(CT_VitNm)          then frmEncVitals     := TfrmEncVitals.CreateLinked(pnlPage);
-  if FormListContains(CT_ImmNm)          then frmImmunizations := TfrmImmunizations.CreateLinked(pnlPage);
-  if FormListContains(CT_SkinNm)         then frmSkinTests     := TfrmSkinTests.CreateLinked(pnlPage);
-  if FormListContains(CT_PedNm)          then frmPatientEd     := TfrmPatientEd.CreateLinked(pnlPage);
-  if FormListContains(CT_HlthNm)         then frmHealthFactors := TfrmHEalthFactors.CreateLinked(pnlPage);
-  if FormListContains(CT_XamNm)          then frmExams         := TfrmExams.CreateLinked(pnlPage);
-  if FormListContains(CT_GAFNm)          then frmGAF           := TfrmGAF.CreateLinked(pnlPage);
-  //kt if FormListContains(CT_VisitNm)   then frmVisitType     := TfrmVisitType.CreateLinked(pnlPage);
-  //kt if FormListContains(CT_ProcNm)    then frmProcedures    := TfrmProcedures.CreateLinked(pnlPage);
+  if FormListContains(CT_TMG_DiagNm)       then frmTMGDiagnoses    := TfrmTMGDiagnoses.CreateLinked(pnlPage);  //kt added
+  if FormListContains(CT_TMG_ProcNm)       then frmTMGProcedures   := TfrmTMGProcedures.CreateLinked(pnlPage); //kt added
+  if FormListContains(CT_TMG_FolwUpNm)     then frmFollowUp        := TfrmFollowUp.CreateLinked(pnlPage);      //kt added
+  if FormListContains(CT_TMG_EnctrMDMNm)   then frmEncounterMDM    := TfrmEncounterMDM.CreateLinked(pnlPage);  //kt added
+  if FormListContains(CT_TMG_LabsNm)       then frmEnounterLabs    := TfrmEnounterLabs.CreateLinked(pnlPage);  //kt added
+  if FormListContains(CT_TMG_VisitNm)      then frmTMGVisitType    := TfrmTMGVisitTypes.CreateLinked(pnlPage); //kt added
+  if FormListContains(CT_TMG_Enc_ReviewNm) then frmEncounterReview := TfrmEncounterReview.CreateLinked(pnlPage); //kt added;
+  if FormListContains(CT_DiagNm)           then frmDiagnoses       := TfrmDiagnoses.CreateLinked(pnlPage);
+  if FormListContains(CT_VitNm)            then frmEncVitals       := TfrmEncVitals.CreateLinked(pnlPage);
+  if FormListContains(CT_ImmNm)            then frmImmunizations   := TfrmImmunizations.CreateLinked(pnlPage);
+  if FormListContains(CT_SkinNm)           then frmSkinTests       := TfrmSkinTests.CreateLinked(pnlPage);
+  if FormListContains(CT_PedNm)            then frmPatientEd       := TfrmPatientEd.CreateLinked(pnlPage);
+  if FormListContains(CT_HlthNm)           then frmHealthFactors   := TfrmHealthFactors.CreateLinked(pnlPage);
+  if FormListContains(CT_XamNm)            then frmExams           := TfrmExams.CreateLinked(pnlPage);
+  if FormListContains(CT_GAFNm)            then frmGAF             := TfrmGAF.CreateLinked(pnlPage);
+  //kt if FormListContains(CT_VisitNm)     then frmVisitType       := TfrmVisitType.CreateLinked(pnlPage);
+  //kt if FormListContains(CT_ProcNm)      then frmProcedures      := TfrmProcedures.CreateLinked(pnlPage);
 
   //must switch based on caption, as all tabs may not be present.
   for i := CT_FIRST to CT_LAST do begin
@@ -392,22 +499,23 @@ end;
 ///////////////////////////////////////////////////////////////////////////////}
 procedure TfrmEncounterFrame.FreeChildForms;
 begin
-  if FormListContains(CT_TMG_FolwUpNm)   then FreeAndNil(frmFollowUp);      //kt added
-  if FormListContains(CT_TMG_EnctrMDMNm) then FreeAndNil(frmEncounterMDM);  //kt added
-  if FormListContains(CT_TMG_EnctrMDMNm) then FreeAndNil(frmEnounterLabs);  //kt added
-  if FormListContains(CT_TMG_VisitNm)    then FreeAndNil(frmTMGVisitType);  //kt added
-  if FormListContains(CT_TMG_DiagNm)     then FreeAndNil(frmTMGDiagnoses);  //kt added
-  if FormListContains(CT_TMG_ProcNm)     then FreeAndNil(frmTMGProcedures); //kt added
-  if FormListContains(CT_VitNm)          then FreeAndNil(frmEncVitals);
-  if FormListContains(CT_ImmNm)          then FreeAndNil(frmImmunizations);
-  if FormListContains(CT_SkinNm)         then FreeAndNil(frmSkinTests);
-  if FormListContains(CT_PedNm)          then FreeAndNil(frmPatientEd);
-  if FormListContains(CT_HlthNm)         then FreeAndNil(frmHealthFactors);
-  if FormListContains(CT_XamNm)          then FreeAndNil(frmExams);
-  if FormListContains(CT_GAFNm)          then FreeAndNil(frmGAF);
-  //kt if FormListContains(CT_VisitNm)   then FreeAndNil(frmVisitType);
-  //kt if FormListContains(CT_ProcNm)    then FreeAndNil(frmProcedures);
-  //kt if FormListContains(CT_DiagNm)    then FreeAndNil(frmDiagnoses);
+  if FormListContains(CT_TMG_FolwUpNm)     then FreeAndNil(frmFollowUp);        //kt added
+  if FormListContains(CT_TMG_EnctrMDMNm)   then FreeAndNil(frmEncounterMDM);    //kt added
+  if FormListContains(CT_TMG_EnctrMDMNm)   then FreeAndNil(frmEnounterLabs);    //kt added
+  if FormListContains(CT_TMG_VisitNm)      then FreeAndNil(frmTMGVisitType);    //kt added
+  if FormListContains(CT_TMG_DiagNm)       then FreeAndNil(frmTMGDiagnoses);    //kt added
+  if FormListContains(CT_TMG_ProcNm)       then FreeAndNil(frmTMGProcedures);   //kt added
+  if FormListContains(CT_TMG_Enc_ReviewNm) then FreeAndNil(frmEncounterReview); //kt added;
+  if FormListContains(CT_VitNm)            then FreeAndNil(frmEncVitals);
+  if FormListContains(CT_ImmNm)            then FreeAndNil(frmImmunizations);
+  if FormListContains(CT_SkinNm)           then FreeAndNil(frmSkinTests);
+  if FormListContains(CT_PedNm)            then FreeAndNil(frmPatientEd);
+  if FormListContains(CT_HlthNm)           then FreeAndNil(frmHealthFactors);
+  if FormListContains(CT_XamNm)            then FreeAndNil(frmExams);
+  if FormListContains(CT_GAFNm)            then FreeAndNil(frmGAF);
+  //kt if FormListContains(CT_VisitNm)     then FreeAndNil(frmVisitType);
+  //kt if FormListContains(CT_ProcNm)      then FreeAndNil(frmProcedures);
+  //kt if FormListContains(CT_DiagNm)      then FreeAndNil(frmDiagnoses);
 end;
 
 
@@ -443,6 +551,7 @@ var
   i: integer;
 begin
   if NewTab = -1 then exit; //kt added
+
   //must switch based on caption, as all tabs may not be present.
   for i := CT_FIRST to CT_LAST do begin
     With Formlist do begin
@@ -468,8 +577,10 @@ var
   i: integer;
 begin
  for i := CT_FIRST to CT_LAST do
-   if (FormList.IndexOf(PageIdToTab(i)) <> -1) then
-     MoveWindow(PageIdToForm(i).Handle, 0, 0, pnlPage.ClientWidth, pnlpage.ClientHeight, true);
+   if (FormList.IndexOf(PageIdToTab(i)) <> -1) then begin
+     //tmg added if assigned below 5/26/23
+     if assigned(PageIDToForm(i)) then MoveWindow(PageIdToForm(i).Handle, 0, 0, pnlPage.ClientWidth, pnlpage.ClientHeight, true);
+  end;
   self.repaint;
 end;
 
@@ -504,21 +615,22 @@ procedure TfrmEncounterFrame.SynchPCEData(SrcPCEData : TPCEData);
 
 begin //SynchPCEData
   //Load any existing data from PCEData.  NOTE: Rather than use globally scoped uEncPCEData, I pass this in as SrcPCEData
-  if FormListContains(CT_ImmNm)         then frmImmunizations.InitTab(SrcPCEData.CopyImmunizations, ListImmunizSections);
-  if FormListContains(CT_SkinNm)        then frmSkinTests.InitTab    (SrcPCEData.CopySkinTests,     ListSkinSections);
-  if FormListContains(CT_PedNm)         then frmPatientEd.InitTab    (SrcPCEData.CopyPatientEds,    ListPatientSections);
-  if FormListContains(CT_HlthNm)        then frmHealthFactors.InitTab(SrcPCEData.CopyHealthFactors, ListHealthSections);
-  if FormListContains(CT_XamNm)         then frmExams.InitTab        (SrcPCEData.CopyExams,         ListExamsSections);
-  if FormListContains(CT_TMG_VisitNm)   then frmTMGVisitType.InitTab (SrcPCEData.CopyVisits,        SrcPCEData);                         //kt added
-  if FormListContains(CT_TMG_DiagNm)    then frmTMGDiagnoses.InitTab (SrcPCEData.CopyDiagnoses,     ListDiagnosisSections, SrcPCEData);  //kt added
-  if FormListContains(CT_TMG_ProcNm)    then frmTMGProcedures.InitTab(SrcPCEData.CopyProcedures,    ListProcedureSections, SrcPCEData);  //kt added
-  if FormListContains(CT_TMG_FolwUpNm)  then begin end; //kt added  //consider code here if I want to load any existing PCEData ...
-  if FormListContains(CT_TMG_EnctrMDMNm)then begin end; //kt added  //consider code here if I want to load any existing PCEData ...
-  if FormListContains(CT_TMG_LabsNm)    then begin end; //kt added  //consider code here if I want to load any existing PCEData ...
-  if FormListContains(CT_GAFNm)         then frmGAF.InitTab          ();  //kt added, but in the end not really needed...
+  if FormListContains(CT_ImmNm)             then frmImmunizations.InitTab(SrcPCEData.CopyImmunizations, ListImmunizSections);
+  if FormListContains(CT_SkinNm)            then frmSkinTests.InitTab    (SrcPCEData.CopySkinTests,     ListSkinSections);
+  if FormListContains(CT_PedNm)             then frmPatientEd.InitTab    (SrcPCEData.CopyPatientEds,    ListPatientSections);
+  if FormListContains(CT_HlthNm)            then frmHealthFactors.InitTab(SrcPCEData.CopyHealthFactors, ListHealthSections);
+  if FormListContains(CT_XamNm)             then frmExams.InitTab        (SrcPCEData.CopyExams,         ListExamsSections);
+  if FormListContains(CT_TMG_VisitNm)       then frmTMGVisitType.InitTab (SrcPCEData.CopyVisits,        SrcPCEData);                         //kt added
+  if FormListContains(CT_TMG_DiagNm)        then frmTMGDiagnoses.InitTab (SrcPCEData.CopyDiagnoses,     ListDiagnosisSections, SrcPCEData);  //kt added
+  if FormListContains(CT_TMG_ProcNm)        then frmTMGProcedures.InitTab(SrcPCEData.CopyProcedures,    ListProcedureSections, SrcPCEData);  //kt added
+  if FormListContains(CT_TMG_Enc_ReviewNm)  then frmEncounterReview.InitTab(SrcPCEData);  //kt added
+  if FormListContains(CT_TMG_FolwUpNm)      then begin end; //kt added  //consider code here if I want to load any existing PCEData ...
+  if FormListContains(CT_TMG_EnctrMDMNm)    then begin end; //kt added  //consider code here if I want to load any existing PCEData ...
+  if FormListContains(CT_TMG_LabsNm)        then begin end; //kt added  //consider code here if I want to load any existing PCEData ...
+  if FormListContains(CT_GAFNm)             then frmGAF.InitTab          ();  //kt added, but in the end not really needed...
 
-  //kt if FormListContains(CT_ProcNm)   then frmProcedures.InitTab   (SrcPCEData.CopyProcedures, ListProcedureSections);
-  //kt if FormListContains(CT_DiagNm)   then frmDiagnoses.InitTab    (SrcPCEData.CopyDiagnoses,     ListDiagnosisSections);
+  //kt if FormListContains(CT_ProcNm)       then frmProcedures.InitTab   (SrcPCEData.CopyProcedures, ListProcedureSections);
+  //kt if FormListContains(CT_DiagNm)       then frmDiagnoses.InitTab    (SrcPCEData.CopyDiagnoses,     ListDiagnosisSections);
   //kt removed.  Will achieve via frmTMGVisitType.InitFromPCE above.  Was -->  uVisitType.Assign(VisitType);
   //kt removed.  Will achieve via frmTMGVisitType.InitFromPCE above.  Was -->  frmVisitType.MatchVType;
   {//kt removed
@@ -613,6 +725,7 @@ begin
   //uVitalOld  := TStringList.create;
   //uVitalNew  := TStringList.create;
   FLastPage := nil; //kt
+  CallBackProcs := nil; //kt
   FormList := TStringList.create;
   fCancel := False;
   FAbort := TRUE;
@@ -628,7 +741,7 @@ end;
 //Location: ISL
 //Description: Send Data back to the M side sor storing.
 ///////////////////////////////////////////////////////////////////////////////}
-procedure TfrmEncounterFrame.SendData;
+procedure TfrmEncounterFrame.SendData(CopyHTML:boolean);
 //send PCE data to the RPC
 {
 var
@@ -637,9 +750,12 @@ var
   GAFDate: TFMDateTime;
   GAFStaff: Int64;
 }
-
+var SendErrors,UnpastedHTML : string;
+    Response:integer;
 begin
   inherited;
+  SendErrors := '';
+  UnpastedHTML := '';
   // do validation for vitals & anything else here
 
   if FormListContains(CT_VitNm) then frmEncVitals.SendData;  //kt
@@ -669,10 +785,31 @@ begin
   end;
   }
 
-  if FormListContains(CT_TMG_FolwUpNm)   then frmFollowUp.SendData;      //kt added.
-  if FormListContains(CT_TMG_LabsNm)     then frmEnounterLabs.SendData;  //kt added.
-  if FormListContains(CT_TMG_EnctrMDMNm) then frmEncounterMDM.SendData;  //kt added.
-  if FormListContains(CT_TMG_DiagNm)     then frmTMGDiagnoses.SendData;  //kt added.
+  if FormListContains(CT_TMG_FolwUpNm)   then frmFollowUp.SendData(SendErrors,UnpastedHTML);      //TMG changed added.  11/6/23
+  //if FormListContains(CT_TMG_FolwUpNm)   then frmFollowUp.SendData;      //kt added.
+  if FormListContains(CT_TMG_LabsNm)     then frmEnounterLabs.SendData(SendErrors,UnpastedHTML);  //TMG changed added.  11/6/23
+  //if FormListContains(CT_TMG_LabsNm)     then frmEnounterLabs.SendData;  //kt added.
+
+  //if FormListContains(CT_TMG_EnctrMDMNm) then frmEncounterMDM.SendData;  //kt added.
+  //if FormListContains(CT_TMG_DiagNm)     then frmTMGDiagnoses.SendData;  //kt added.
+  //if FormListContains(CT_TMG_ProcNm)     then frmTMGProcedures.SendData;  //kt added.
+  //if FormListContains(CT_TMG_Enc_ReviewNm) then frmEncounterReview.SendData;  //kt added.
+  if FormListContains(CT_TMG_EnctrMDMNm) then frmEncounterMDM.SendData(SendErrors,UnpastedHTML);  //kt added.
+  if FormListContains(CT_TMG_DiagNm)     then frmTMGDiagnoses.SendData(SendErrors,UnpastedHTML);  //kt added.
+  if FormListContains(CT_TMG_ProcNm)     then frmTMGProcedures.SendData(SendErrors,UnpastedHTML);  //kt added.
+
+  if (SendErrors<>'') and (CopyHTML=True) then begin
+    //Response := messagedlg('The following errors occurred in saving data into the note:'+#13#10+#13#10+SendErrors+#13#10+#13#10+'Save HTML to the Clipboard?',mtError,[mbYes,mbNo,mbCancel],0);
+    //if Response=mrCancel then begin    //Added 6/20/24
+    //  Result := False;
+    //  exit;      //We need to rewrite this logic a bit to the form doesn't go away  6/18/24
+    //end;
+    //if Response=mrYes then begin
+      frmNotes.SetClipText(UnpastedHTML);
+      ShowMsg('You can paste the text into a note.');
+      //HTMLEditor.InsertHTMLAtCaret(TotalHTML.text);
+    //end;
+  end;
 
   //PCE
 
@@ -691,7 +828,7 @@ begin
   end;
   }
 
-  Close;
+  //kt removed 5/23/23 --> Close;
   //kt NOTE: this seems out of place.  Seems like this should be done elsewhere....  Will leave VA standard
   //
   //Since this is only called by FormCloseQuery (in respones to frmEnounterFrame.OnCloseQuery event)
@@ -709,13 +846,32 @@ end;
 ///////////////////////////////////////////////////////////////////////////////}
 //kt NOTE: Called by frmEncounterFrame OnCloseQuery event.
 procedure TfrmEncounterFrame.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+
+    function CreateCustomMessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): TForm;
+    var
+       i:integer;
+       DialogButton:TButton;
+    begin
+       Result := CreateMessageDialog(Msg,DlgType,Buttons);
+       for i := 0 to Result.ComponentCount - 1 do begin
+           if Result.Components[i] is TButton then begin
+               DialogButton := TButton(Result.Components[i]);
+               if DialogButton.Modalresult = mrYes then DialogButton.Caption := '&Edit';
+               if DialogButton.Modalresult = mrNo then DialogButton.Caption := '&Ignore';
+            end;
+       end;
+    end;
+
 const
   TXT_SAVECHANGES = 'Save Changes?';
 
 var
   TmpPCEData: TPCEData;
   ask, ChangeOK: boolean;
-
+  DataTest:String;
+  CustomDialog: TForm;
+  CopyHTML:boolean;
+  Response : integer;
 begin
   CanClose := True;
   if FAbort then FCancel := (InfoBox(TXT_SAVECHANGES, TXT_SAVECHANGES, MB_YESNO) = ID_NO);
@@ -787,7 +943,61 @@ begin
     end;
   end;
 
-  if CanClose then SendData;  //*KCM*   //kt NOTE: SendData calls TfrmEncounterFrame.Close
+  if (CanClose) and (uTMGOptions.ReadBool('Pretest enc',True)=True) and (frmEncounterReview.IsDirty=False) then begin   //TMG ELH added entire IF  //4/23/24, added IsDirty to see if Review page was looked at
+    DataTest := TestData;
+    if piece(DataTest,'^',1)='-1' then begin
+      DataTest := piece(DataTest,'^',2);
+      DataTest := StringReplace(DataTest,'@@BR@@',#13#10,[rfReplaceAll]);
+
+      CustomDialog := CreateCustomMessageDialog(DataTest,mtConfirmation,[mbYes,mbNo]);
+      CustomDialog.ShowModal;
+      //if messagedlg(DataTest,mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+      if CustomDialog.ModalResult = mrYes then begin
+        CanClose := False;
+        Exit;
+      end;
+      CustomDialog.Free;
+    end;
+    if (CanClose) and (assigned(frmFollowup)) and (frmFollowUp.HasText=False) then begin   //TMG ELH added entire IF, inside the Pretest IF so it can be turned off and on with the code testing
+      if messagedlg('No Followup Data entered'+#13#10+'Would you like to return to the encounter to edit Followup information?',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+        CanClose := False;
+        Exit;
+      end;
+    end;
+  end;
+
+  CopyHTML:=false;
+  if not frmNotes.InEditMode then begin
+     Response := messagedlg('The current note is not in Edit Mode'+#13#10+#13#10+'Save HTML to the Clipboard?',mtError,[mbYes,mbNo,mbCancel],0);
+     if Response = mrCancel then begin
+       CanClose := False;
+       exit;
+     end;
+     if Response = mrYes then CopyHTML := True;
+  end;
+  
+  if CanClose then SendData(CopyHTML);  //*KCM*   //kt NOTE: SendData calls TfrmEncounterFrame.Close
+end;
+
+function TfrmEncounterFrame.TestData(HTML:string='0'):string;         //TMG ELH added entire 10/17/23
+var
+  ProcList,DiagList:TStringList;
+  ProcStr,DiagStr,VstTypesStr:string;
+  TmpPCEData: TPCEData;
+begin
+  TmpPCEData := TPCEData.Create;
+  try
+    uEncPCEData.CopyPCEData(TmpPCEData);
+    UpdateEncounter(TmpPCEData);
+    //ProcStr := TmpPCEData.StrProcedures(True);
+    //DiagStr := TmpPCEData.StrDiagnoses(True);
+    //VstTypesStr := TmpPCEData.StrVisitTypes(True);
+    DiagStr := TmpPCEData.StrDiagCodes;
+    ProcStr := TmpPCEData.StrCPTCodes;
+  finally
+    TmpPCEData.Free;
+  end;
+  result := sCallV('TMG ENC SAVE PRETEST',[Patient.DFN,ProcStr,DiagStr,HTML]);
 end;
 
 procedure TfrmEncounterFrame.TabControlChange(Sender: TObject);
@@ -821,17 +1031,18 @@ end;
 procedure TfrmEncounterFrame.UpdateEncounter(DestPCE: TPCEData);
 //kt note:  This is GUI's --> PCE data
 begin
-  if FormListContains(CT_ImmNm)          then DestPCE.SetImmunizations(frmImmunizations.lbGrid.Items);
-  if FormListContains(CT_SkinNm)         then DestPCE.SetSkinTests(frmSkinTests.lbGrid.Items);
-  if FormListContains(CT_PedNm)          then DestPCE.SetPatientEds(frmPatientEd.lbGrid.Items);
-  if FormListContains(CT_HlthNm)         then DestPCE.SetHealthFactors(frmHealthFactors.lbGrid.Items);
-  if FormListContains(CT_XamNm)          then DestPCE.SetExams(frmExams.lbGrid.Items);
-  if FormListContains(CT_TMG_DiagNm)     then DestPCE.SetDiagnoses(frmTMGDiagnoses.lbGrid.Items);     //kt added
-  if FormListContains(CT_TMG_ProcNm)     then DestPCE.SetProcedures(frmTMGProcedures.lbGrid.Items);   //kt added
-  if FormListContains(CT_TMG_VisitNm)    then DestPCE.SetVisits(frmTMGVisitType.VisitTypesList);      //kt added.
-  if FormListContains(CT_TMG_FolwUpNm)   then begin end; //kt added -- consider code here putting form data into Encounter
-  if FormListContains(CT_TMG_EnctrMDMNm) then begin end; //kt added -- consider code here putting form data into Encounter
-  if FormListContains(CT_TMG_LabsNm)     then begin end; //kt added -- consider code here putting form data into Encounter
+  if FormListContains(CT_ImmNm)              then DestPCE.SetImmunizations(frmImmunizations.lbGrid.Items);
+  if FormListContains(CT_SkinNm)             then DestPCE.SetSkinTests(frmSkinTests.lbGrid.Items);
+  if FormListContains(CT_PedNm)              then DestPCE.SetPatientEds(frmPatientEd.lbGrid.Items);
+  if FormListContains(CT_HlthNm)             then DestPCE.SetHealthFactors(frmHealthFactors.lbGrid.Items);
+  if FormListContains(CT_XamNm)              then DestPCE.SetExams(frmExams.lbGrid.Items);
+  if FormListContains(CT_TMG_DiagNm)         then DestPCE.SetDiagnoses(frmTMGDiagnoses.lbGrid.Items);     //kt added
+  if FormListContains(CT_TMG_ProcNm)         then DestPCE.SetProcedures(frmTMGProcedures.lbGrid.Items);   //kt added
+  if FormListContains(CT_TMG_VisitNm)        then DestPCE.SetVisits(frmTMGVisitType.VisitTypesList);      //kt added.
+  if FormListContains(CT_TMG_FolwUpNm)       then begin end; //kt added -- consider code here putting form data into Encounter
+  if FormListContains(CT_TMG_EnctrMDMNm)     then begin end; //kt added -- consider code here putting form data into Encounter
+  if FormListContains(CT_TMG_LabsNm)         then begin end; //kt added -- consider code here putting form data into Encounter
+  if FormListContains(CT_TMG_Enc_ReviewNm)   then begin end; //kt added -- consider code here putting form data into Encounter
   //kt if FormListContains(CT_ProcNm)    then DestPCE.SetProcedures(frmProcedures.lbGrid.Items);
   //kt if FormListContains(CT_DiagNm)    then DestPCE.SetDiagnoses(frmDiagnoses.lbGrid.Items);
   DestPCE.Providers.Merge(uProviders);  //kt moved, was inside handling CT_TMG_VisitNm
@@ -840,6 +1051,7 @@ end;
 procedure TfrmEncounterFrame.SelectTab(NewTabName: string);
 var  AllowChange: boolean;
 begin
+  if AllowInitTabChange = false then exit;    //temp fix
   AllowChange := True;
   tabControl.TabIndex := FormList.IndexOf(NewTabName);
   tabPageChange(Self, tabControl.TabIndex, AllowChange);
@@ -901,27 +1113,28 @@ procedure TfrmEncounterFrame.SetFormFonts;
 var NewFontSize: integer;
 begin
   NewFontSize := MainFontsize;
-  if FormListContains(CT_DiagNm)         then frmDiagnoses.Font.Size := NewFontSize;
-  if FormListContains(CT_ImmNm)          then frmImmunizations.Font.Size := NewFontSize;
-  if FormListContains(CT_SkinNm)         then frmSkinTests.Font.Size := NewFontSize;
-  if FormListContains(CT_PedNm)          then frmPatientEd.Font.Size := NewFontSize;
-  if FormListContains(CT_HlthNm)         then frmHealthFactors.Font.Size := NewFontSize;
-  if FormListContains(CT_XamNm)          then frmExams.Font.Size := NewFontSize;
-  if FormListContains(CT_VitNm)          then frmEncVitals.Font.Size := NewFontSize;
-  if FormListContains(CT_GAFNm)          then frmGAF.SetFontSize(NewFontSize);
-  if FormListContains(CT_TMG_VisitNm)    then frmTMGVisitType.Font.Size := NewFontSize;     //kt added
-  if FormListContains(CT_TMG_DiagNm)     then frmTMGDiagnoses.Font.Size := NewFontSize;     //kt added
-  if FormListContains(CT_TMG_ProcNm)     then frmTMGProcedures.Font.Size := NewFontSize;    //kt added
-  if FormListContains(CT_TMG_FolwUpNm)   then frmFollowUp.SetFontSize(NewFontSize);         //kt added
-  if FormListContains(CT_TMG_EnctrMDMNm) then frmEncounterMDM.SetFontSize(NewFontSize);     //kt added
-  if FormListContains(CT_TMG_LabsNm)     then frmEnounterLabs.SetFontSize(NewFontSize);     //kt added
+  if FormListContains(CT_DiagNm)             then frmDiagnoses.Font.Size := NewFontSize;
+  if FormListContains(CT_ImmNm)              then frmImmunizations.Font.Size := NewFontSize;
+  if FormListContains(CT_SkinNm)             then frmSkinTests.Font.Size := NewFontSize;
+  if FormListContains(CT_PedNm)              then frmPatientEd.Font.Size := NewFontSize;
+  if FormListContains(CT_HlthNm)             then frmHealthFactors.Font.Size := NewFontSize;
+  if FormListContains(CT_XamNm)              then frmExams.Font.Size := NewFontSize;
+  if FormListContains(CT_VitNm)              then frmEncVitals.Font.Size := NewFontSize;
+  if FormListContains(CT_GAFNm)              then frmGAF.SetFontSize(NewFontSize);
+  if FormListContains(CT_TMG_VisitNm)        then frmTMGVisitType.Font.Size := NewFontSize;     //kt added
+  if FormListContains(CT_TMG_DiagNm)         then frmTMGDiagnoses.Font.Size := NewFontSize;     //kt added
+  if FormListContains(CT_TMG_ProcNm)         then frmTMGProcedures.Font.Size := NewFontSize;    //kt added
+  if FormListContains(CT_TMG_FolwUpNm)       then frmFollowUp.SetFontSize(NewFontSize);         //kt added
+  if FormListContains(CT_TMG_EnctrMDMNm)     then frmEncounterMDM.SetFontSize(NewFontSize);     //kt added
+  if FormListContains(CT_TMG_LabsNm)         then frmEnounterLabs.SetFontSize(NewFontSize);     //kt added
+  if FormListContains(CT_TMG_Enc_ReviewNm)   then frmEncounterReview.SetFontSize(NewFontSize);  //kt added
   //kt if FormListContains(CT_ProcNm)    then frmProcedures.Font.Size := NewFontSize;
   //kt if FormListContains(CT_VisitNm)   then frmVisitType.Font.Size := NewFontSize;
 end;
 
 procedure TfrmEncounterFrame.NotifyOrder(OrderAction: Integer; AnOrder: TOrder);
 //kt added
-//NOTE: This gets called from fFrame.  When an arder is created, a windows message is sent out
+//NOTE: This gets called from fFrame.  When an order is created, a windows message is sent out
 //      that is handled in TfrmFrame.UMNewOrder(var Message: TMessage);
 begin
   if FormListContains(CT_TMG_LabsNm) then frmEnounterLabs.NotifyOrder(OrderAction, AnOrder);
@@ -931,6 +1144,10 @@ end;
 procedure TfrmEncounterFrame.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   SaveUserBounds(Self);
+  if Assigned(CallBackProcs) then begin
+    CallBackProcs.PopAndCall(PCEData);
+    Action := caFree;  //will cause form to call Release() when this procedure finishes
+  end;
 end;
 
 procedure TfrmEncounterFrame.FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
@@ -945,16 +1162,19 @@ end;
 procedure TfrmEncounterFrame.FormShow(Sender: TObject);
 begin
   inherited;
-
+  AllowInitTabChange := True;
   TabControl.Tabindex := FInitialPageIndex;  //kt added
   TabControlChange(Self.TabControl);         //kt added
+  AllowInitTabChange := false;
 
   //kt I think below is redundant.  
   if TabControl.CanFocus then begin
     TabControl.SetFocus;
   end;
+  AllowInitTabChange := True;
 end;
 
 initialization
   frmEncounterFrame := nil; //kt
 end.
+

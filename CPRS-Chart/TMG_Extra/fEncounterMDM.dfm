@@ -1,28 +1,30 @@
 inherited frmEncounterMDM: TfrmEncounterMDM
   Caption = 'Medical Decision Making'
-  ClientHeight = 486
+  ClientHeight = 489
   ClientWidth = 684
+  OnMouseDown = FormMouseDown
   ExplicitWidth = 700
-  ExplicitHeight = 524
+  ExplicitHeight = 527
   PixelsPerInch = 96
   TextHeight = 13
   inherited btnOK: TBitBtn
     Left = 526
-    Top = 462
+    Top = 465
+    Caption = '&Done'
     ExplicitLeft = 526
-    ExplicitTop = 462
+    ExplicitTop = 465
   end
   inherited btnCancel: TBitBtn
     Left = 607
-    Top = 462
+    Top = 465
     ExplicitLeft = 607
-    ExplicitTop = 462
+    ExplicitTop = 465
   end
   object pnlMain: TPanel [2]
     Left = -2
     Top = 0
     Width = 684
-    Height = 447
+    Height = 450
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvLowered
     TabOrder = 2
@@ -30,17 +32,18 @@ inherited frmEncounterMDM: TfrmEncounterMDM
       Left = 1
       Top = 1
       Width = 369
-      Height = 445
+      Height = 448
       Align = alLeft
       BevelOuter = bvNone
       Color = clMoneyGreen
       TabOrder = 0
+      OnMouseDown = FormMouseDown
     end
     object pnlRight: TPanel
       Left = 370
       Top = 1
       Width = 313
-      Height = 445
+      Height = 448
       Align = alClient
       BevelOuter = bvNone
       Color = clSkyBlue
@@ -103,13 +106,13 @@ inherited frmEncounterMDM: TfrmEncounterMDM
         Left = 0
         Top = 340
         Width = 313
-        Height = 105
+        Height = 108
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
         DesignSize = (
           313
-          105)
+          108)
         object lblCodes: TLabel
           Left = 6
           Top = 6
@@ -121,14 +124,14 @@ inherited frmEncounterMDM: TfrmEncounterMDM
           Left = 0
           Top = 25
           Width = 313
-          Height = 58
+          Height = 61
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
           TabOrder = 0
         end
         object btnClearCPT: TButton
           Left = 6
-          Top = 87
+          Top = 90
           Width = 75
           Height = 15
           Anchors = [akLeft, akBottom]
@@ -141,7 +144,7 @@ inherited frmEncounterMDM: TfrmEncounterMDM
   end
   object btnNext: TBitBtn [3]
     Left = 8
-    Top = 453
+    Top = 456
     Width = 129
     Height = 32
     Anchors = [akLeft, akBottom]

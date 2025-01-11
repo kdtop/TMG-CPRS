@@ -22,8 +22,8 @@ inherited frmRemDlg: TfrmRemDlg
   TextHeight = 13
   object splTxtData: TSplitter [0]
     Left = 0
-    Top = 207
-    Width = 529
+    Top = 211
+    Width = 537
     Height = 3
     Cursor = crVSplit
     Align = alBottom
@@ -33,8 +33,8 @@ inherited frmRemDlg: TfrmRemDlg
   object sb1: TScrollBox [1]
     Left = 0
     Top = 0
-    Width = 529
-    Height = 207
+    Width = 537
+    Height = 211
     HorzScrollBar.Tracking = True
     VertScrollBar.Tracking = True
     Align = alClient
@@ -47,14 +47,12 @@ inherited frmRemDlg: TfrmRemDlg
     TabOrder = 0
     Visible = False
     OnResize = sbResize
-    ExplicitWidth = 537
-    ExplicitHeight = 211
   end
   object sb2: TScrollBox [2]
     Left = 0
     Top = 0
-    Width = 529
-    Height = 207
+    Width = 537
+    Height = 211
     HorzScrollBar.Tracking = True
     VertScrollBar.Tracking = True
     Align = alClient
@@ -66,23 +64,19 @@ inherited frmRemDlg: TfrmRemDlg
     ParentFont = False
     TabOrder = 1
     OnResize = sbResize
-    ExplicitWidth = 537
-    ExplicitHeight = 211
   end
   object pnlFrmBottom: TPanel [3]
     Left = 0
-    Top = 210
-    Width = 529
+    Top = 214
+    Width = 537
     Height = 159
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 214
-    ExplicitWidth = 537
     object lblFootnotes: TLabel
       Left = 0
       Top = 144
-      Width = 529
+      Width = 537
       Height = 15
       Align = alBottom
       AutoSize = False
@@ -92,15 +86,14 @@ inherited frmRemDlg: TfrmRemDlg
     object pnlBottom: TPanel
       Left = 0
       Top = 0
-      Width = 529
+      Width = 537
       Height = 144
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 537
       object splText: TSplitter
         Left = 1
         Top = 94
-        Width = 527
+        Width = 535
         Height = 3
         Cursor = crVSplit
         Align = alBottom
@@ -109,7 +102,7 @@ inherited frmRemDlg: TfrmRemDlg
       object reData: TRichEdit
         Left = 1
         Top = 97
-        Width = 527
+        Width = 535
         Height = 46
         Align = alBottom
         Color = clCream
@@ -122,7 +115,7 @@ inherited frmRemDlg: TfrmRemDlg
       object reText: TRichEdit
         Left = 1
         Top = 25
-        Width = 527
+        Width = 535
         Height = 69
         Align = alClient
         Color = clCream
@@ -142,7 +135,7 @@ inherited frmRemDlg: TfrmRemDlg
       object gpButtons: TGridPanel
         Left = 1
         Top = 1
-        Width = 527
+        Width = 535
         Height = 24
         Align = alTop
         ColumnCollection = <
@@ -208,7 +201,6 @@ inherited frmRemDlg: TfrmRemDlg
             Value = 100.000000000000000000
           end>
         TabOrder = 2
-        ExplicitWidth = 535
         object btnClear: TButton
           Left = 1
           Top = 1

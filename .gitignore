@@ -1,6 +1,25 @@
 *.lnk
 *.dcu
+*~
+*~dsk
 DCU/*.dcu
 DCU_OLD
 __history
 ReaderProblems
+CPRS-Chart/TMG_Extra/TestWebICDLookupProject*
+CPRS-Chart/.vs/
+CPRS-Chart/TMG_Extra/Delphi-Hunspell-master/
+CPRS-Chart/TMG_Extra/HTMLEdit/IeConst.pas.test
+CPRS-Chart/TMG_Extra/fODTMG1 - Copy.dfm
+CPRS-Chart/TMG_Extra/fODTMG1 - Copy.pas
+CPRS-Chart/TMG_Extra/fTMGEncounterICDPicker0.dfm
+CPRS-Chart/TMG_Extra/fTMGEncounterICDPicker0.pas
+CPRS-Chart/TMG_Extra/fTMGVisitType0.dfm
+CPRS-Chart/TMG_Extra/fTMGVisitType0.pas
+CPRS-Chart/TMG_Extra/testWebICDLookupU.dfm
+CPRS-Chart/TMG_Extra/testWebICDLookupU.pas
+CPRS-Chart/fFrame.pas.bak
+CPRS-Chart/fFrame.safe.1.pas
+CPRS-Chart/fFrame.safe.2.pas
+CPRS-Chart/fNotes_safe.txt
+CPRS-Chart/tEncounterLabs_safe.txt

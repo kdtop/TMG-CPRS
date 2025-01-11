@@ -8,6 +8,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, fHSplit, StdCtrls,
   ExtCtrls, Menus, ORCtrls, ComCtrls, ORFn, rOrders, fODBase, uConst, uCore, uOrders,UBACore,
   UBAGlobals, VA508AccessibilityManager, fBase508Form, Buttons,
+  ORNet,    //TMG    11/11/24
   DateUtils;   //TMG   12/14/17
 
 type
@@ -248,6 +249,7 @@ type
     procedure InitOrderSheets2(AnItem: string = '');
     procedure SetFontSize( FontSize: integer); override;
     procedure TMGLoadColors;  //TMG  12/14/17
+    procedure CheckInit;  //TMG  5/9/23
     procedure EnsureLstWriteLoaded(); //tmg //kt 2/1/23
     property IsDefaultDlg: boolean         read FIsDefaultDlg         write FIsDefaultDlg;
     property SendDelayOrders: Boolean      read FSendDelayOrders      write FSendDelayOrders;
@@ -2635,6 +2637,8 @@ var
   AName, ASvc, DeviceInfo: string;
   Nature: char;
   PrintIt: Boolean;
+  Skip : Boolean;  //tmg 11/11/24
+  WarningArr: TStringList;  //tmg 11/11/24
 begin
   inherited;
   if NoneSelected(TX_NOSEL) then Exit;
@@ -2642,8 +2646,23 @@ begin
   SelectedList := TStringList.Create;
   Nature := #0;
   try
-    with lstOrders do for i := 0 to Items.Count - 1 do
-      if Selected[i] then SelectedList.Add(Piece(TOrder(Items.Objects[i]).ID, U, 1));
+    with lstOrders do for i := 0 to Items.Count - 1 do begin    //TMG added begin    11/11/24
+      //  ORIGINAL LINE  --> if Selected[i] then SelectedList.Add(Piece(TOrder(Items.Objects[i]).ID, U, 1));
+      {BEGIN TMG ADDITION   11/11/24}
+      if Selected[i] then begin
+        Skip := False;
+        WarningArr:=TStringList.create();
+        tCallV(WarningArr,'TMG CPRS TEST ORDER PRINT',[Patient.DFN,Piece(TOrder(Items.Objects[i]).ID, U, 1)]);
+        if WarningArr.Text<>'' then begin
+          Skip := (messagedlg(WarningArr.Text,mtConfirmation,[mbYes,mbNo],0)=mrNo);
+        end;
+        WarningArr.Free;
+        if not Skip then
+          SelectedList.Add(Piece(TOrder(Items.Objects[i]).ID, U, 1));
+      end;
+      {END TMG ADDITION   11/11/24}
+    end;  //11/11/24
+    if SelectedList.count<1 then exit;  //11/11/24
     CurrentLocationForPatient(Patient.DFN, ALocation, AName, ASvc);
     if (ALocation > 0) and (ALocation <> Encounter.Location) then
     begin
@@ -3538,6 +3557,12 @@ begin
   FontColor0to6 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Font Color 0-6','$000000')));
   FontColor7to12 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Font Color 7-12','$000000')));
   FontColor13 := TColor(StringToColor(uTMGOptions.ReadString('Nursing Order Font Color 13+','$000000')));
+end;
+
+procedure TfrmOrders.CheckInit;
+   //TMG entire procedure 5/9/23
+begin
+  if FCurrentView=nil then DisplayPage;         //Manually initialize the form
 end;
 
 initialization

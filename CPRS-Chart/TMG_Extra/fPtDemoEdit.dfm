@@ -59,7 +59,7 @@ object frmPtDemoEdit: TfrmPtDemoEdit
     Top = 0
     Width = 634
     Height = 427
-    ActivePage = tsDemographics
+    ActivePage = tsBasic
     Align = alTop
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 3
@@ -1243,76 +1243,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
         TabOrder = 0
         OnSelectCell = gridPatientDemoSelectCell
         OnSetEditText = gridPatientDemoSetEditText
-      end
-    end
-    object tsKeene: TTabSheet
-      Caption = 'Account'
-      ImageIndex = 2
-      OnHide = tsKeeneHide
-      OnShow = tsKeeneShow
-      object Label4: TLabel
-        Left = 84
-        Top = 43
-        Width = 78
-        Height = 13
-        Caption = ' Record Number'
-      end
-      object Label5: TLabel
-        Left = 50
-        Top = 115
-        Width = 114
-        Height = 13
-        Caption = 'Keane Account Number'
-        Visible = False
-      end
-      object Label6: TLabel
-        Left = 89
-        Top = 147
-        Width = 73
-        Height = 13
-        Caption = 'Admission Date'
-      end
-      object KeeneAcctNo: TEdit
-        Left = 168
-        Top = 40
-        Width = 121
-        Height = 21
-        TabOrder = 0
-        Text = ' '
-        OnChange = KeeneAcctNoChange
-      end
-      object KeeneAdmissionNumber: TEdit
-        Left = 168
-        Top = 112
-        Width = 121
-        Height = 21
-        TabOrder = 1
-        Text = 'KeeneAdmissionNumber'
-        Visible = False
-        OnChange = KeeneAdmissionNumberChange
-      end
-      object KeeneAdmissionDate: TDateTimePicker
-        Left = 168
-        Top = 144
-        Width = 121
-        Height = 21
-        Date = 40499.575817662040000000
-        Time = 40499.575817662040000000
-        TabOrder = 2
-        OnChange = KeeneAdmissionDateChange
-      end
-    end
-    object tsExtra: TTabSheet
-      Caption = 'Advanced 2'
-      ImageIndex = 3
-      object Button1: TButton
-        Left = 80
-        Top = 72
-        Width = 169
-        Height = 25
-        Caption = 'Test FM Edit'
-        TabOrder = 0
-        OnClick = Button1Click
       end
     end
   end

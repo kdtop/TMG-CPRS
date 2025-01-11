@@ -53,7 +53,7 @@ object frmMDMGrid: TfrmMDMGrid
         Items.Strings = (
           'COMPLEXITY based billing'
           'TIME based billing'
-          'TELEMEDICINE time-based billing'
+          'TELEPHONE AUDIO ONLY time-based billing'
           'Preventative / CPE billing')
         ParentFont = False
         TabOrder = 0
@@ -857,10 +857,10 @@ object frmMDMGrid: TfrmMDMGrid
     end
     object pnlBottom: TPanel
       Left = 0
-      Top = 802
+      Top = 0
       Width = 1194
       Height = 70
-      Align = alBottom
+      Align = alTop
       ParentBackground = False
       TabOrder = 7
       DesignSize = (
@@ -1541,7 +1541,7 @@ object frmMDMGrid: TfrmMDMGrid
         Top = 5
         Width = 263
         Height = 92
-        Caption = 'TELEMEDICINE Time Amount'
+        Caption = 'TELEPHONE AUDIO ONLY Time Amount'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -13
@@ -1607,7 +1607,7 @@ object frmMDMGrid: TfrmMDMGrid
           '40 - 64 yrs            - 99386'
           '65+  yrs                - 99387'
           'Initial Medicare AWV   - G0438'
-          'Medicare Annual          - G0439'
+          'Subq.Medicare AWV   - G0439'
           'Welcome to Medicare -  G0402')
         ParentFont = False
         TabOrder = 0
@@ -1624,7 +1624,6 @@ object frmMDMGrid: TfrmMDMGrid
         Color = clSkyBlue
         Lines.Strings = (
           'NOTES:'
-          ' -- For Medicare exam, applies to initial or subsequent visits.'
           ' -- For age 12-17 yrs, use Dx: Z00.129')
         ReadOnly = True
         TabOrder = 1
@@ -1659,7 +1658,7 @@ object frmMDMGrid: TfrmMDMGrid
           '40 - 64 yrs                  - 99396'
           '65+  yrs                      - 99397'
           'Initial Medicare AWV   - G0438'
-          'Medicare Annual          - G0439'
+          'Subq.Medicare AWV    - G0439'
           'Welcome to Medicare -  G0402')
         ParentFont = False
         TabOrder = 0
@@ -1676,9 +1675,6 @@ object frmMDMGrid: TfrmMDMGrid
         Color = clSkyBlue
         Lines.Strings = (
           'NOTES:'
-          
-            ' -- For Medicare annual exam, applies to initial or subsequent v' +
-            'isits.'
           ' -- For age 12-17 yrs, use Dx: Z00.129')
         ReadOnly = True
         TabOrder = 1

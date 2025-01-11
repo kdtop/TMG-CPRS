@@ -38,7 +38,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   ORNet, ORFn,
-  rFileTransferU, uImages,
+  rFileTransferU, uImages,uHTMLTools,
   Dialogs, ExtCtrls, StdCtrls, OleCtrls, SHDocVw, Buttons;
 
 const
@@ -188,11 +188,25 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
   end;
 
   procedure TfrmPatientPhotoID.ShowPhotoSet(InfoRec : TPatientIDPhotoInfoRec);
+  var HTMLText : string;
   begin
     EnsureDownloaded(InfoRec,dlBoth);
-    if FileExists(InfoRec.LocalFPath) then
-      WebBrowser.Navigate(InfoRec.LocalFPath)
-    else begin
+    if FileExists(InfoRec.LocalFPath) then begin
+      {TEST FUNCTION
+      HTMLText := '<!DOCTYPE html>';
+      HTMLText := HTMLText+'<html>';
+      HTMLText := HTMLText+'<head>';
+      HTMLText := HTMLText+'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
+      HTMLText := HTMLText+'<style>';
+      HTMLText := HTMLText+'html,body { width: 100%; height: 100%; }{';
+      HTMLText := HTMLText+'</style>';
+      HTMLText := HTMLText+'</head>';
+      HTMLText := HTMLText+'<body style="background: url(''''file:///C:/mysigimage.jpg'''');background-position: center;background-repeat: no-repeat;">';
+      HTMLText := HTMLText+'</body>';
+      HTMLText := HTMLText+'</html>';
+      WBLoadHTML(Webbrowser,HTMLText);}
+      WebBrowser.Navigate(InfoRec.LocalFPath);
+    end else begin
       WebBrowser.Navigate(frmImages.NullImageName);
     end;
     if FileExists(InfoRec.LocalThumbPath) then begin

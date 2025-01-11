@@ -4,7 +4,7 @@ inherited frmPtSel: TfrmPtSel
   BorderIcons = []
   Caption = 'Patient Selection'
   ClientHeight = 559
-  ClientWidth = 786
+  ClientWidth = 784
   OldCreateOrder = True
   Position = poMainFormCenter
   OnClose = FormClose
@@ -12,14 +12,14 @@ inherited frmPtSel: TfrmPtSel
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 802
+  ExplicitWidth = 800
   ExplicitHeight = 597
   PixelsPerInch = 96
   TextHeight = 13
   object sptVert: TSplitter [0]
     Left = 0
     Top = 290
-    Width = 786
+    Width = 784
     Height = 4
     Cursor = crVSplit
     Align = alTop
@@ -28,7 +28,7 @@ inherited frmPtSel: TfrmPtSel
   object pnlDivide: TORAutoPanel [1]
     Left = 0
     Top = 294
-    Width = 786
+    Width = 784
     Height = 17
     Align = alTop
     BevelOuter = bvNone
@@ -64,14 +64,14 @@ inherited frmPtSel: TfrmPtSel
   object pnlPtSel: TORAutoPanel [2]
     Left = 0
     Top = 0
-    Width = 786
+    Width = 784
     Height = 290
     Align = alTop
     BevelWidth = 2
     TabOrder = 3
     OnResize = pnlPtSelResize
     DesignSize = (
-      786
+      784
       290)
     object lblPatient: TLabel
       Left = 216
@@ -115,11 +115,12 @@ inherited frmPtSel: TfrmPtSel
       OnKeyPause = cboPatientKeyPause
       OnMouseClick = cboPatientMouseClick
       OnNeedData = cboPatientNeedData
+      OnResize = cboPatientResize
       CharsNeedMatch = 1
       UniqueAutoComplete = True
     end
     object cmdOK: TButton
-      Left = 698
+      Left = 696
       Top = 9
       Width = 78
       Height = 21
@@ -129,7 +130,7 @@ inherited frmPtSel: TfrmPtSel
       OnClick = cmdOKClick
     end
     object cmdCancel: TButton
-      Left = 698
+      Left = 696
       Top = 36
       Width = 78
       Height = 21
@@ -149,7 +150,7 @@ inherited frmPtSel: TfrmPtSel
       OnClick = cmdSaveListClick
     end
     object TMGcmdAdd: TButton
-      Left = 529
+      Left = 527
       Top = 20
       Width = 75
       Height = 27
@@ -159,7 +160,7 @@ inherited frmPtSel: TfrmPtSel
       OnClick = TMGcmdAddClick
     end
     object btnSearchPt: TBitBtn
-      Left = 498
+      Left = 496
       Top = 20
       Width = 25
       Height = 27
@@ -211,11 +212,21 @@ inherited frmPtSel: TfrmPtSel
       TabOrder = 4
       OnClick = onclick1
     end
+    object chkInactivePatients: TCheckBox
+      Left = 348
+      Top = 3
+      Width = 142
+      Height = 17
+      Anchors = [akTop, akRight]
+      Caption = 'Include Inactive Patients'
+      TabOrder = 7
+      OnClick = chkInactivePatientsClick
+    end
   end
   object pnlNotifications: TORAutoPanel [3]
     Left = 0
     Top = 524
-    Width = 786
+    Width = 784
     Height = 35
     Align = alBottom
     BevelOuter = bvNone
@@ -340,7 +351,7 @@ inherited frmPtSel: TfrmPtSel
   object lstvAlerts: TCaptionListView [4]
     Left = 0
     Top = 311
-    Width = 786
+    Width = 784
     Height = 213
     Align = alClient
     Columns = <
@@ -399,7 +410,7 @@ inherited frmPtSel: TfrmPtSel
     Caption = 'Notifications'
   end
   object pnlPatientImage: TPanel [5]
-    Left = 626
+    Left = 624
     Top = 10
     Width = 45
     Height = 45
@@ -566,6 +577,9 @@ inherited frmPtSel: TfrmPtSel
         'Status = stsDefault')
       (
         'Component = btnRefresh'
+        'Status = stsDefault')
+      (
+        'Component = chkInactivePatients'
         'Status = stsDefault'))
   end
   object popNotifications: TPopupMenu

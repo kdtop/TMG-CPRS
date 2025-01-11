@@ -122,6 +122,7 @@ type
     FOnFrameSize : TNotifyEvent;
     FFormSuccess : boolean;
     FEmbeddedMode : boolean;
+    FEncounterFrame : TForm;
     InHandleReviewTestsChange : boolean;
     FNumIssuesScore: TComplexityLevel;
     FNumIssuesNarrrative : string;
@@ -201,12 +202,12 @@ type
     procedure LoadPaymentInformation(CPTAvgPayments:TStringList);
     {$ENDIF}
     procedure LogEvent(S : string);
-    procedure SetEmbeddedMode(value : boolean);
     procedure InitVars;
   public
     { Public declarations }
     CommonLog : TStrings;
     procedure Reset;
+    procedure SetEmbeddedMode(value : boolean; HolderForm : TForm = nil);
     property CPT : string read GetCPTOutput;
     property Narrative : string read GetNarrative;
     property TextTable : TStringList read FTextTable;
@@ -214,7 +215,7 @@ type
     property OnCloseForm : TNotifyEvent read FOnCloseForm write FOnCloseForm;
     property OnFrameSize : TNotifyEvent read FOnFrameSize write FOnFrameSize;
     property Result : boolean read FFormSuccess write FFormSuccess;
-    property EmbeddedMode : boolean read FEmbeddedMode write SetEmbeddedMode;
+    //kt property EmbeddedMode : boolean read FEmbeddedMode write SetEmbeddedMode;
 
   end;
 
@@ -280,7 +281,9 @@ const
 
 implementation
 
-uses uHTMLTools;
+uses
+  fEncounterFrame,
+  uHTMLTools;
 
 {$R *.dfm}
 
@@ -453,7 +456,7 @@ begin
   Cat1CheckBoxes.Add(ckbReview3ExtDocs);
 
   cpPanelNewOrOldPt := TCollapsablePanel.Create('cpNewOrOldPt', sbMain, nil, OpensUpDown, pnlNewOrOldPatient, CommonLog);
-  cpPanelNewOrOldPt.Top := 0;
+  cpPanelNewOrOldPt.Top := pnlBottom.Height;     //Was 0... moved to accomodate pnlBottom to be on the top
   cpPanelNewOrOldPt.Left := 0;
   cpPanelNewOrOldPt.Width := 600;
   cpFirst := cpPanelNewOrOldPt;
@@ -653,7 +656,7 @@ begin
     cpNewPtTimeAmount.OnStartOpenStateClick := HandleStartOpenStateChange;
     cpNewPtTimeAmount.OnEndOpenStateClick := HandleEndOpenStateChange;
     memNewPtTimeInfo.Lines.Clear;
-    memNewPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE|');
+    memNewPtTimeInfo.Lines.Add('|TMG TIME WITH PATIENT TODAY VERBOSE W MSG|');
     {$IFNDEF STAND_ALONE_APP}
     GetTemplateText(memNewPtTimeInfo.Lines);
     {$ENDIF}
@@ -696,6 +699,10 @@ begin
 end;
 
 procedure TfrmMDMGrid.SetupComplexityView(AUnitBefore : TCollapsablePanel);
+var NeededHt : integer;
+    FrmEncounterFrame : TfrmEncounterFrame;
+    Delta : integer;
+    ExtraHeight:integer;
 begin
   LogEvent('SetupComplexityView');
   FreeAndNil(cpMDM3ColHolder);
@@ -719,6 +726,20 @@ begin
   cpRisk := TCollapsablePanel.Create('cpRisk', cpMDM3ColHolder.DisplayPanel, cpTestsData, OpensLeftRight, pnlRisk, CommonLog);
   cpRisk.Initialize(ClosedPanel);
   cpRisk.RefreshHandler := rgRiskClick;
+
+  //kt 1/9/24
+  if FEmbeddedMode and Assigned(FEncounterFrame) and (FEncounterFrame is TfrmEncounterFrame) then begin
+    FrmEncounterFrame := TfrmEncounterFrame(FEncounterFrame);
+    //Ensure HolderForm is large enough to show MDM content.
+    ExtraHeight := 140;
+    NeededHt := cpMDM3ColHolder.Top +  cpMDM3ColHolder.Height + ExtraHeight;
+    Delta := NeededHt - FrmEncounterFrame.Height;
+    if Delta > 0 then begin
+      FrmEncounterFrame.Height := FrmEncounterFrame.Height + Delta;  //resizing entire for should automatically resize pnlLeft (I think)
+    end;
+  end;
+
+
 end;
 
 procedure TfrmMDMGrid.SetupCPEView(AUnitBefore : TCollapsablePanel);
@@ -789,7 +810,25 @@ procedure TfrmMDMGrid.MakeHTMLTable(SL : TStringList);  //NOTE: This is to outpu
 //SL is source input.
 //    for SL input, every other line will be right vs left column.
 //Output is FHTMLTable
-var
+var i : integer;
+    Line,StrL,StrR,s : string;
+
+begin
+  //exit;  //remove later if feature wanted...
+  Line := '<table border="0" cellspacing="2" cellpadding="0" bgcolor="#d3d3d3">';
+  Line := Line+'<tr><th>MEDICAL DECISION MAKING ITEM</th><th>VALUE</th></tr>';
+  i := 0;
+  while i< SL.count do begin
+    StrL := SL[i];
+    StrR := SL[i+1];
+    s := '<tr bgcolor="#f2f2f2"><td>' + strL + '</td><td>' + strR + '</td></tr>';
+    Line := Line+s;
+    inc(i, 2);
+  end;
+  Line := Line+'</table>';
+  FHTMLTable.Text := Line;
+end;
+{var
     //i : integer;
     //StrL, StrR : string;
     //s : string;
@@ -801,12 +840,12 @@ begin
   try
     Options.Add('l-title=MEDICAL DECISION MAKING ITEM');
     Options.Add('r-title=VALUE');
-    Options.Add('border=1');
+    Options.Add('border=0');
 
     FHTMLTable.Text := uHTMLTools.Make2ColHTMLTable(SL, Options);
   finally
     Options.Free;
-  end;
+  end;    }
 
 
   {
@@ -832,8 +871,8 @@ begin
   end;
 
   FHTMLTable.Add('</table>');
-  }
-end;
+
+end;}
 
 
 procedure TfrmMDMGrid.MakeTextTable(SL : TStringList);  //NOTE: This is to output ASCII text table.  For HTML table, see MakeHTMLTable
@@ -1341,10 +1380,11 @@ begin
   end;
 end;
 
-procedure TfrmMDMGrid.SetEmbeddedMode(value : boolean);
+procedure TfrmMDMGrid.SetEmbeddedMode(value : boolean; HolderForm : TForm = nil);
 begin
   if value = FEmbeddedMode then exit;
   FEmbeddedMode := value;
+  FEncounterFrame := HolderForm;
   if FEmbeddedMode then begin
     btnOK.Caption := '&Use Code';
     //btnOK.Enabled := true;

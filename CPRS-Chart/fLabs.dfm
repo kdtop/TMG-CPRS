@@ -3,24 +3,24 @@ inherited frmLabs: TfrmLabs
   Top = 237
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
-  ClientHeight = 614
+  ClientHeight = 674
   ClientWidth = 1042
   HelpFile = 'qnoback'
   Menu = mnuLabs
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 1058
-  ExplicitHeight = 672
+  ExplicitWidth = 1050
+  ExplicitHeight = 728
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 609
+    Top = 669
     Width = 1042
     ExplicitTop = 748
     ExplicitWidth = 714
   end
   inherited sptHorz: TSplitter
-    Height = 609
+    Height = 669
     ExplicitHeight = 748
   end
   object Label1: TLabel [2]
@@ -38,12 +38,12 @@ inherited frmLabs: TfrmLabs
     Visible = False
   end
   inherited pnlLeft: TPanel
-    Height = 609
+    Height = 669
     Constraints.MinWidth = 37
-    ExplicitHeight = 609
+    ExplicitHeight = 649
     object Splitter1: TSplitter
       Left = 0
-      Top = 349
+      Top = 409
       Width = 97
       Height = 10
       Cursor = crVSplit
@@ -58,11 +58,12 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 0
       Width = 97
-      Height = 349
+      Height = 409
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
+      ExplicitHeight = 389
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -80,7 +81,7 @@ inherited frmLabs: TfrmLabs
         Left = 0
         Top = 19
         Width = 97
-        Height = 330
+        Height = 390
         Align = alClient
         HideSelection = False
         Indent = 18
@@ -92,15 +93,17 @@ inherited frmLabs: TfrmLabs
         OnKeyDown = tvReportsKeyDown
         Caption = 'Available Reports'
         NodePiece = 0
+        ExplicitHeight = 370
       end
     end
     object pnlLeftBottom: TPanel
       Left = 0
-      Top = 359
+      Top = 419
       Width = 97
       Height = 250
       Align = alBottom
       TabOrder = 1
+      ExplicitTop = 399
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -228,11 +231,11 @@ inherited frmLabs: TfrmLabs
   end
   inherited pnlRight: TPanel
     Width = 941
-    Height = 609
+    Height = 669
     Constraints.MinWidth = 30
     OnResize = pnlRightResize
     ExplicitWidth = 941
-    ExplicitHeight = 609
+    ExplicitHeight = 649
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -249,9 +252,10 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 300
       Width = 941
-      Height = 289
+      Height = 349
       Align = alClient
       TabOrder = 0
+      ExplicitHeight = 329
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -277,7 +281,7 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 939
-        Height = 268
+        Height = 328
         Align = alClient
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -293,12 +297,13 @@ inherited frmLabs: TfrmLabs
         Visible = False
         WantReturns = False
         WordWrap = False
+        ExplicitHeight = 308
       end
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 20
         Width = 939
-        Height = 268
+        Height = 328
         TabStop = False
         Align = alClient
         TabOrder = 2
@@ -306,7 +311,7 @@ inherited frmLabs: TfrmLabs
         ExplicitWidth = 773
         ExplicitHeight = 448
         ControlData = {
-          4C0000000C610000B31B00000000000000000000000000000000000000000000
+          4C0000000C610000E62100000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -640,7 +645,7 @@ inherited frmLabs: TfrmLabs
             OnClick = cmdOldClick
           end
           object btnViewReport: TBitBtn
-            Left = 690
+            Left = 693
             Top = 11
             Width = 116
             Height = 30
@@ -773,7 +778,7 @@ inherited frmLabs: TfrmLabs
               0000000000000000000000000000000000000000000000000000}
           end
           object btnViewLinkedNote: TBitBtn
-            Left = 569
+            Left = 570
             Top = 11
             Width = 116
             Height = 30
@@ -829,6 +834,78 @@ inherited frmLabs: TfrmLabs
               0E1010060504040302020202030E0E0E0E0E0E010101010302020202030E0C0E
               0C0E0614140A030202020202030C0C0C0C0C07170803020202020202030B0B0B
               0B0B060803020202020202020303030303030303020202020202}
+          end
+          object btnViewLinkedOrder: TBitBtn
+            Left = 447
+            Top = 11
+            Width = 116
+            Height = 30
+            Caption = 'View Order'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'MS Sans Serif'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 8
+            OnClick = btnViewLinkedOrderClick
+            Glyph.Data = {
+              F6060000424DF606000000000000360000002800000018000000180000000100
+              180000000000C0060000130B0000130B00000000000000000000FF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FF13007C13007C13007C13007C13007C13007C13007C13
+              007CFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FF1B099113008D13008D13008D13008D1300
+              8D13008D13008D13008C2F1E9BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF13009D13009C13009C13009C
+              13009C13009C13009C13009C13009C13009C13009C1A08A1FF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF1400A61400A614
+              00A61400A61400A61400A61200A61300A61400A61400A61400A61400A61400A6
+              1400A6FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FF1500AF1500AF1500AE1500AE1500AE1907AE574CB74A3DB61100AE1500AF15
+              00AE1500AE1500AF1B07B1FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FF1600B71600B71600B71600B71600B71400B76054C3D4D4D7C9C7
+              D63C2CBE1500B71600B71600B71600B71600B71600B7FF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FF1700BF1700BF1700BF1700BF1701BF1C06C0
+              7A6ED1E5E5E4DCDBE35344CA1C06C01600BF1700BF1700BF1700BF1700BFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF1700C71700C71700C817
+              01C57A71D1A8A3DDC8C5E6EEEDEDEAE9ECBBB7E3A6A1DD594DCF1200C71700C8
+              1700C71700C7FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF1900
+              D11900D01800D03524CBDFDEE8F1F1F0F3F3F2F3F3F3F3F3F3F3F3F2F0F0EECF
+              CEE40F00CA1900D01900D01A01D6FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FF1A01D61A01D61A01D61600D1ACA6E0E1E0F2EBEAF5F8F8F8F6F6
+              F7E7E5F3E3E1F1786FD81300D51A01D61A01D61A01D6FF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FF1A01D61D06D81D06D71D06D81500D5210AD5
+              8479E5FBFBFAF0EFF85B4CDF1E08D61600D71E06D81D06D81E07D81D06D7FF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF2813DA210BD921
+              0BD9210BD91F08D9766AE1FDFDFBF4F3F94A39D9200AD9210BD9210BD9210BD9
+              301ADCFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FF1D06D72712DB2712DB2712DB2712DB2613D67E77D6665BD2200AD92712DB27
+              12DB2712DB2712DB2712DBFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FF311DDF2C19DD2C18DE2C18DD2C18DE2511DE2713
+              DE2C19DE2C18DD2C18DE2C18DE2C18DEFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF3827E23120E03120E03120E0
+              3120E03120E03120E03120E03120E03120E03B2AE13B2AE1FF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF38
+              27E23827E23827E23827E23827E23827E23827E23827E23A2AE23827E2FF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FF3827E23E30E53D2FE53D30E53D30E53D30E53E2FE53E
+              2FE5FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF3827E24438E84438E84438
+              E84438E84438E8FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+              3827E24B41EA4B41EB4B41EBFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FF615AF0615AF0FF00FFFF00FFFF00FFFF00FFFF00FF
+              FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+              FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+              00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
           end
         end
       end
@@ -1075,11 +1152,15 @@ inherited frmLabs: TfrmLabs
     end
     object pnlFooter: TORAutoPanel
       Left = 0
-      Top = 589
+      Top = 649
       Width = 941
       Height = 20
       Align = alBottom
       TabOrder = 3
+      ExplicitTop = 629
+      DesignSize = (
+        941
+        20)
       object lblSpecimen: TLabel
         Left = 4
         Top = 28
@@ -1124,6 +1205,28 @@ inherited frmLabs: TfrmLabs
         Visible = False
         ItemTipColor = clWindow
         LongList = False
+      end
+      object btnSharedResults: TBitBtn
+        Left = 840
+        Top = 1
+        Width = 100
+        Height = 20
+        Hint = 'Click to view '
+        Anchors = [akTop, akRight]
+        Caption = 'Shared Results'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+        OnClick = btnSharedResultsClick
+        Glyph.Data = {
+          F6000000424DF600000000000000760000002800000010000000100000000100
+          04000000000080000000130B0000130B00001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00DDDD00000000
+          DDDDDD0000CCCC0000DDD0CCCCFF0CCCCC0DD0CCC0FFF0CCCC0D00CCC0F078CC
+          CC0000CCCCFF00CCCC000CCCCC7FF0CCCCC00CCCCC0FF7CCCCC00CCCC070FFCC
+          CCC00CCCCCFFFFCCCCC000CCCCC00CCCCC0000CCCCCC00CCCC00D0CCCCC0FFCC
+          CC0DD0CCCCC0FFCCCC0DDD0000CCCC0000DDDDDD00000000DDDD}
       end
     end
   end
@@ -1277,6 +1380,12 @@ inherited frmLabs: TfrmLabs
         'Status = stsDefault')
       (
         'Component = btnViewLinkedNote'
+        'Status = stsDefault')
+      (
+        'Component = btnViewLinkedOrder'
+        'Status = stsDefault')
+      (
+        'Component = btnSharedResults'
         'Status = stsDefault'))
   end
   object popChart: TPopupMenu

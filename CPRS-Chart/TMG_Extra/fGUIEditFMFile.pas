@@ -41,15 +41,17 @@ uses
   SortStringGrid, ORFn, rTMGRPCs, uTMGPtInfo, UTMGTypes, ORCtrls;
 
 type
+  tShowGrids = (tsgBasic=0, tsgAdvanced=1);
+
   TfrmGUIEditFMFile = class(TForm)
     PageControl: TPageControl;
     CancelBtn: TButton;
     tsBasic: TTabSheet;
     tsAdvanced: TTabSheet;
     pnlTop: TPanel;
-    sgBasic: TSortStringGrid;
     ORComboBox1: TORComboBox;
     lblTemplate: TLabel;
+    sgBasic: TSortStringGrid;
     sgAdvanced: TSortStringGrid;
     btnApply: TBitBtn;
     btnRevert: TBitBtn;
@@ -72,13 +74,17 @@ type
     FileData : TStringList;
     BasicTemplate : TStringList;
     GridList : TList;
+    FGridsToShow : set of tShowGrids; //will be set to [tsgBasic, tsgAdvanced] as default
     procedure GetFileDataAndLoadIntoGrids(GridInfo : TGridInfo);
     procedure HandleOnAfterPost(GridInfo: TGridInfo; Changes : TStringList);
     procedure InitBasicTemplate(BasicTemplate : TStringList);
     procedure Clear;
   public
     { Public declarations }
-    procedure PrepForm(FileNumber, IENS, DUZ : string);
+    procedure SetGridsToShow(GridsToShow : array of const); //note: if never called, default is [tsgBasic, tsgAdvanced];
+    procedure PrepForm(FileNumber, IENS : string; DUZ : integer); overload;
+    procedure PrepForm(FileNumber, IENS : string; DUZ : string); overload;
+    function GridInfo(AGrid : tShowGrids) : TGridInfo;  //may return nil
   end;
 
 //var
@@ -95,6 +101,7 @@ implementation
 
   procedure TfrmGUIEditFMFile.FormCreate(Sender: TObject);
   begin
+    FGridsToShow := [tsgBasic, tsgAdvanced];
     FileData := TStringList.Create;
     BasicTemplate := TStringList.Create;
     GridList := TList.Create;
@@ -131,7 +138,34 @@ implementation
     AllowChange := (result <> mrNO);
   end;
 
-  procedure TfrmGUIEditFMFile.PrepForm(FileNumber, IENS, DUZ : string);
+  procedure TfrmGUIEditFMFile.SetGridsToShow(GridsToShow : array of const); //note: if never called, default is [tsgBasic, tsgAdvanced];
+  var i : integer;
+      Item : tShowGrids;
+  begin
+    FGridsToShow := [];
+    for i := 0 to High(GridsToShow) do begin
+      if GridsToShow[i].VType = vtInteger then begin
+        Item := tShowGrids(GridsToShow[i].VInteger);
+        FGridsToShow := FGridsToShow + [Item];
+      end;
+    end;
+  end;
+
+  function TfrmGUIEditFMFile.GridInfo(AGrid : tShowGrids) : TGridInfo;
+  begin
+    case AGrid of
+      tsgBasic    : Result := GetInfoObjectForGrid(sgBasic);
+      tsgAdvanced : Result := GetInfoObjectForGrid(sgAdvanced);
+    end;
+  end;
+
+
+  procedure TfrmGUIEditFMFile.PrepForm(FileNumber, IENS : string; DUZ : integer);
+  begin
+    PrepForm(FileNumber, IENS, IntToStr(DUZ));
+  end;
+
+  procedure TfrmGUIEditFMFile.PrepForm(FileNumber, IENS: string; DUZ : string);
   //Input: FileNumber -- the FM file number (not name)
   //       IENS -- IEN + ',' of record to show
   //       DUZ -- current user record number, for permission checking.
@@ -149,19 +183,45 @@ implementation
   begin
     Clear;
     FDUZ := DUZ;
+    GridInfo := nil;
 
-    {           Name,           Grid        Data       BasicTemplate    DataLoader                    FileNum      ApplyBtn   RevertBtn          RecSelector       }
-    AddGridInfo('BasicGrid',    sgBasic,    FileData,  BasicTemplate,   GetFileDataAndLoadIntoGrids,  FileNumber,  btnApply,  btnRevert);
-    AddGridInfo('AdvancedGrid', sgAdvanced, FileData,  nil,             GetFileDataAndLoadIntoGrids,  FileNumber,  btnApply,  btnRevert);
+    if tsgBasic in FGridsToShow then begin
+      {           Name,           Grid        Data       BasicTemplate    DataLoader Procedure Name     FileNum      ApplyBtn   RevertBtn          RecSelector       }
+      AddGridInfo('BasicGrid',    sgBasic,    FileData,  BasicTemplate,   GetFileDataAndLoadIntoGrids,  FileNumber,  btnApply,  btnRevert);
+      GridList.Add(sgBasic);
+      SetupAfterPostHandler(sgBasic,    HandleOnAfterPost);
+      InitBasicTemplate(BasicTemplate);
+      GridInfo := GetInfoObjectForGrid(sgBasic);
+      GridInfo.IENS := IENS;
+      tsBasic.PageControl := PageControl; //just in case removed previously
+    end;
+    if tsgAdvanced in FGridsToShow then begin
+      {           Name,           Grid        Data       BasicTemplate    DataLoader Procedure Name     FileNum      ApplyBtn   RevertBtn          RecSelector       }
+      AddGridInfo('AdvancedGrid', sgAdvanced, FileData,  nil,             GetFileDataAndLoadIntoGrids,  FileNumber,  btnApply,  btnRevert);
+      GridList.Add(sgAdvanced);
+      SetupAfterPostHandler(sgAdvanced, HandleOnAfterPost);
+      if not assigned(GridInfo) then begin
+        GridInfo := GetInfoObjectForGrid(sgAdvanced);
+        GridInfo.IENS := IENS;
+      end;
+      tsAdvanced.PageControl := PageControl; //just in case removed previously
+      PageControl.ActivePage := tsAdvanced;
+    end;
 
-    GridList.Add(sgBasic);
-    GridList.Add(sgAdvanced);
-    SetupAfterPostHandler(sgBasic,    HandleOnAfterPost);
-    SetupAfterPostHandler(sgAdvanced, HandleOnAfterPost);
-    InitBasicTemplate(BasicTemplate);
+    if not (tsgBasic in FGridsToShow) then begin
+      tsBasic.PageControl := nil;
+      tsBasic.Enabled := false;
+      tsBasic.Visible := false;
+    end;
+    if not (tsgAdvanced in FGridsToShow) then begin
+      tsAdvanced.PageControl := nil;
+      tsAdvanced.Enabled := false;
+      tsAdvanced.Visible := false;
+    end;
 
-    GridInfo := GetInfoObjectForGrid(sgBasic);
-    GridInfo.IENS := IENS;
+    if not assigned(GridInfo) then begin
+      raise Exception.Create('GridsToShow set is invalid (doesn''t contain tsgBasic or tsgAdvanced)');
+    end;
     GetFileDataAndLoadIntoGrids(GridInfo);
   end;
 

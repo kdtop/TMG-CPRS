@@ -366,6 +366,7 @@ procedure TfrmPCEBase.DoEnter;
 begin
   inherited;
   frmEncounterFrame.SelectTab(FTabName);
+
 end;
 
 procedure TfrmPCEBase.FocusFirstControl;

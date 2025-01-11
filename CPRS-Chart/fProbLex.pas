@@ -529,16 +529,16 @@ begin  {processSearch body}
 
   FICDLookup := False;
 
-  if ebLex.text = '' then
-  begin
+  if ebLex.text = '' then begin
    InfoBox('Enter a term to search for, then click "SEARCH"', 'Information', MB_OK or MB_ICONINFORMATION);
    exit; {don't bother to drop if no text entered}
   end;
 
-  if Extend then
+  if Extend then begin
     subset := ' by Extended Search'
-  else
+  end else begin
     subset := '';
+  end;
 
   FBuildingList := True;
 
@@ -549,28 +549,27 @@ begin  {processSearch body}
 
     v := uppercase(ebLex.text);
     FreqOfText := GetFreqOfText(v);
-    if FreqOfText > MaxRec then
-      begin
-        InfoBox(TX_SRCH_REFINE1 + #39 + v + #39 + TX_SRCH_REFINE2 + IntToStr(FreqOfText) + TX_SRCH_REFINE3,'Refine Search', MB_OK or MB_ICONINFORMATION);
-        lblStatus.Caption := '';
-        Exit;
-      end;
+    if FreqOfText > MaxRec then begin
+      InfoBox(TX_SRCH_REFINE1 + #39 + v + #39 + TX_SRCH_REFINE2 + IntToStr(FreqOfText) + TX_SRCH_REFINE3,'Refine Search', MB_OK or MB_ICONINFORMATION);
+      lblStatus.Caption := '';
+      Exit;
+    end;
 
     SvcCat := Encounter.VisitCategory;
-    if (SvcCat = 'E') or (SvcCat = 'H') then
+    if (SvcCat = 'E') or (SvcCat = 'H') then begin
       DateOfInterest := FMNow
-    else
+    end else begin
       DateOfInterest := Encounter.DateTime;
-
-    if (v <> '') then
-    begin
-      if Extend then
-        ProblemList.Assign(ProblemLexiconSearch(v, DateOfInterest, True))
-      else
-        ProblemList.Assign(ProblemLexiconSearch(v, DateOfInterest));
     end;
-    if ProblemList.count > 0 then
-    begin
+
+    if (v <> '') then begin
+      if Extend then begin
+        ProblemList.Assign(ProblemLexiconSearch(v, DateOfInterest, True))
+      end else begin
+        ProblemList.Assign(ProblemLexiconSearch(v, DateOfInterest));
+      end;
+    end;
+    if ProblemList.count > 0 then begin
       Max := ProblemList[pred(ProblemList.count)]; {get max number found}
       ProblemList.delete(pred(ProblemList.count)); {shed max# found}
       SetColumnTreeModel(ProblemList);
@@ -580,46 +579,35 @@ begin  {processSearch body}
       EnableExtend;
       ActiveControl := bbCan;
 
-      if Max = 'Code search failed' then
-      begin
+      if Max = 'Code search failed' then begin
        bbOk.Enabled := False;
        Exit;
       end;
       Match := tgfLex.FindNode(v);
 
-      if Match <> nil then
-      begin
+      if Match <> nil then begin
         bbOk.Enabled := True;
-      end
-      else
-      begin
+      end else begin
         tgfLex.tv.Items[0].MakeVisible;
       end;
-      if Piece(ProblemList.Strings[0],U,1) = 'icd' then
-        begin
-          bbOK.Enabled := False;
-          bbExtendedSearch.Enabled := False;
-        end
-      else
-        begin
-          ActiveControl := tgfLex.tv;
-          tgfLex.tv.Items[0].Selected := False;
-        end;
-    end
-    else {search results are empty}
-    begin
+      if Piece(ProblemList.Strings[0],U,1) = 'icd' then begin
+        bbOK.Enabled := False;
+        bbExtendedSearch.Enabled := False;
+      end else begin
+        ActiveControl := tgfLex.tv;
+        tgfLex.tv.Items[0].Selected := False;
+      end;
+    end else begin {search results are empty}
       updateStatus('No Entries Found ' + subset + ' for "' + ebLex.text + '"');
-      if TriedExtend then
-      begin
+      if TriedExtend then begin
         if not SaveFreetext then
           Exit;
         PLProblem := SetFreetextProblem;
-        if (not Application.Terminated) and (not uInit.TimedOut) then
+        if (not Application.Terminated) and (not uInit.TimedOut) then begin
           if Assigned(frmProblems) then PostMessage(frmProblems.Handle, UM_PLLex, 0, 0);
+        end;
         Close;
-      end
-      else
-      begin
+      end else begin
         EnableExtend;
         FExtendOffered := true;
       end;

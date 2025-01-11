@@ -40,7 +40,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fPage, StdCtrls, ExtCtrls, Menus, ComCtrls, ORCtrls, ORFn, uConst, ORDtTm,
   uPCE, ORClasses, fDrawers, ImgList, rTIU, uTIU, uDocTree, fRptBox, fPrintList,
-  OleCtrls, SHDocVw, ShellAPI,
+  OleCtrls, SHDocVw, ShellAPI,Variants,
   VAUtils,  TMGHTML2, ActiveX,
   fImageTransferProgress, fUploadImages, rFileTransferU, uImages,
   ORNet, TRPCB, fHSplit, Buttons, ExtDlgs, VA508AccessibilityManager;
@@ -112,6 +112,14 @@ type
     Splitter1: TSplitter;
     ThumbnailsImageList: TImageList;
     btnOpenLinkedDoc: TBitBtn;
+    btnEditZoomOut: TSpeedButton;
+    btnEditNormalZoom: TSpeedButton;
+    btnEditZoomIn: TSpeedButton;
+    btnSort: TBitBtn;
+    procedure btnSortClick(Sender: TObject);
+    procedure btnEditZoomInClick(Sender: TObject);
+    procedure btnEditNormalZoomClick(Sender: TObject);
+    procedure btnEditZoomOutClick(Sender: TObject);
     procedure btnOpenLinkedDocClick(Sender: TObject);
     procedure lvThumbnailsClick(Sender: TObject);
     procedure FormHide(Sender: TObject);
@@ -135,6 +143,10 @@ type
     FImageDeleteMode : TImgDelMode;
     AllPatientImagesInfoList : TList; //contains TImageInfo items, and owns them.  This is different from uImages.DownloadQueInfoList
     ThumbnailDisplayMode: TIconDispMode;
+    FZoom : integer;
+    //FZoomStep : integer;  //e.g. 5% change with each zoom in
+    FInitZoomValue : integer;
+    Descending:boolean;    //elh
     procedure ExecuteFileIfNeeded(Selected: integer);
     procedure UpdateNoteInfoMemo(IEN : string);
     procedure UpdateImageInfoMemo(Rec: TImageInfo);
@@ -148,6 +160,11 @@ type
     procedure LoadAllPatientImagesInfoList();
     procedure AddThumbToImageList(Rec: TImageInfo);
     function ParseNoteInfo(s : string) : TNoteInfo;
+    procedure ApplyZoom(Zoom:integer;WB: TWebBrowser);
+    //procedure SetZoom(Pct : integer);
+    //procedure ZoomReset;
+    //procedure ZoomIn;
+    //procedure ZoomOut;
   public
     NullImageName : AnsiString;
     procedure NewNoteSelected(EditIsActive : boolean);
@@ -187,6 +204,13 @@ Const
 
   INSIDE_BROWSER : string = '.JPG,.JPEG,.GIF,.PNG,.TIF,.PDF';
   OUTSIDE_BROWSER : string = '.DCM,.DCM30,.AVI,.MOV,.MP4,.BMP';
+
+  //Zoom Constants
+  OLECMDID_OPTICAL_ZOOM = $0000003F;
+  MIN_ZOOM = 10;
+  MAX_ZOOM = 1000;
+  ZOOM_FACTOR = 40;
+  DEFAULT_ZOOM = 100;
 
 
 var
@@ -233,6 +257,8 @@ begin
   //  uTMGOptions.WriteString('Dropbox directory','');
   //end;
   mnuAutoScanUpload.Checked := uTMGOptions.ReadBool('Scan Enabled',false);
+  //FZoomValue := 100;  //100%
+  //FZoomStep := 20;  //e.g. 5% change with each zoom in
 end;
 
 procedure TfrmImages.FormDestroy(Sender: TObject);
@@ -256,6 +282,9 @@ begin
   TIUIEN := ActiveTIUIENForImages;
   ThumbnailDisplayMode := tThumbnail;
   if AllPatientImagesInfoList.Count = 0 then LoadAllPatientImagesInfoList();
+  FZoom := DEFAULT_ZOOM;
+  //ZoomReset;
+  Descending := False;
 end;
 
 { TPage common methods --------------------------------------------------------------------- }
@@ -436,6 +465,33 @@ end;
 
 procedure TfrmImages.DisplayMediaInBrowser(MediaName : string);
 
+    procedure LoadMedia(MediaName:string);
+      var   HTMLFile: textfile;
+        HTMLText: string;
+        SR: TSearchRec;
+        FileList:TStringList;
+        i : integer;
+      begin
+        FileList := TStringList.Create();
+        HTMLText := '<html><head><title>'+Medianame+'</title></head><body>';
+        for i := 0 to FileList.Count - 1 do begin
+          HTMLText := HTMLText+'<img width=800 height=1200 src="'+MediaName+'">';
+        end;
+        HTMLText := HTMLText+'</body></html>';
+
+        AssignFile(HTMLFile,GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\temp.html');
+        Rewrite(HTMLFile);
+        Write(HTMLFile,HTMLText);
+        CloseFile(HTMLFile);
+
+        if FZoom <> DEFAULT_ZOOM then begin
+          FZoom := DEFAULT_ZOOM;
+          ApplyZoom(FZoom,WebBrowser);
+        end;
+
+        WebBrowser.Navigate(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\temp.html');
+        end;
+
     function GetHTMLText(TextArray : TStrings) : string;
     var i : integer;
     begin
@@ -466,7 +522,8 @@ begin
     Result := MyRPCResults[0];
     P1Result := piece(Result,'^',1);
     if P1Result ='0' then begin
-      WebBrowser.Navigate(MediaName);
+      //WebBrowser.Navigate(MediaName);
+      LoadMedia(MediaName);
     end else if P1Result='1' then begin
       MyRPCResults.Delete(0);
       WBLoadHTML(WebBrowser,GetHTMLText(MyRPCResults));
@@ -507,12 +564,50 @@ begin
 end;
 
 
+procedure TfrmImages.btnEditNormalZoomClick(Sender: TObject);
+begin
+  inherited;
+  if FZoom <> DEFAULT_ZOOM then begin
+    FZoom := DEFAULT_ZOOM;
+    ApplyZoom(FZoom,WebBrowser);
+  end;
+end;
+
+procedure TfrmImages.ApplyZoom(Zoom:integer;WB: TWebBrowser);
+var
+  pvaIn, pvaOut: OleVariant;
+begin
+  pvaIn := Zoom;
+  pvaOut := null;
+  //pnlData.Caption := piece(pnlData.Caption,'@',1)+'@'+inttostr(Zoom)+'%';
+  //lblZoom.Caption := 'Zoom: '+inttostr(Zoom)+' %';
+  WB.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, pvaIn, pvaOut);
+  Application.ProcessMessages;
+end;
+
+procedure TfrmImages.btnEditZoomInClick(Sender: TObject);
+begin
+  inherited;
+  //ZoomIn;
+  System.Dec(FZoom, ZOOM_FACTOR);
+  if FZoom < MIN_ZOOM then
+    FZoom := MIN_ZOOM;
+  ApplyZoom(FZoom,WebBrowser);
+end;
+
+procedure TfrmImages.btnEditZoomOutClick(Sender: TObject);
+begin
+  inherited;
+  //Zoomout;
+  System.Inc(FZoom, ZOOM_FACTOR);
+  if FZoom > MAX_ZOOM then
+    FZoom := MAX_ZOOM;
+  ApplyZoom(FZoom,WebBrowser);
+end;
+
 procedure TfrmImages.btnOpenLinkedDocClick(Sender: TObject);
 var Item : TListItem;
     Rec  : TImageInfo; //not owned here
-    DownloadResult : TDownloadResult;
-    TryNum : integer;
-    HideProgress : boolean;
     TreeNode : TORTreeNode;
 
 begin
@@ -533,6 +628,35 @@ begin
   end;
   frmNotes.tvNotes.Selected := TreeNode;
   frmFrame.SelectChartTab(CT_NOTES);
+end;
+
+procedure TfrmImages.btnSortClick(Sender: TObject);
+var
+  SDT, EDT : TFMDateTime;
+  ExcludeSL : TStringList; //Implement later....
+  i : integer;
+  Rec  : TImageInfo;
+
+begin
+  Clear;
+  SDT := 0;   //Later allow user to change
+  EDT := 9999999.999999;   //Later allow user to change
+  ExcludeSL := nil; //implement later.
+  Descending := (Descending<>True);
+  GetAllImages(AllPatientImagesInfoList, SDT, EDT, ExcludeSL,Descending);
+  //Data is returned in ascending chronological order.  I want to display in decending chronological order.
+  for i := 0 to AllPatientImagesInfoList.Count - 1 do begin
+    Rec := GetImageInfo(AllPatientImagesInfoList, i);
+    if not assigned(Rec) then continue;
+    Rec.Tag := -1;
+  end;
+  lvThumbnails.Items.Count := AllPatientImagesInfoList.Count;
+  btnSort.Caption := IfThen(Descending=False,'Currently In Ascending Order','Currently In Descending Order');
+  if Descending then  
+    btnSort.Glyph.LoadFromFile('\\server1\public\vista\vista-art\icons\arrows\down-arrow-glyph-2.bmp')
+  else
+    btnSort.Glyph.LoadFromFile('\\server1\public\vista\vista-art\icons\arrows\up-arrow-glyph-2.bmp');
+  WebBrowser.Navigate(NullImageName);
 end;
 
 procedure TfrmImages.mnuAddSignatureImageClick(Sender: TObject);
@@ -622,7 +746,6 @@ end;
 
 procedure TfrmImages.lvThumbnailsData(Sender: TObject; Item: TListItem);
 var
-  ImageIndex : integer;
   Rec  : TImageInfo; //not owned here
   DownloadResult : TDownloadResult;
   TryNum : integer;
@@ -871,9 +994,51 @@ begin
   FileTypeIconsImageList.GetBitmap(index,Bitmap);
 end;
 
+{procedure TfrmImages.SetZoom(Pct : integer);
+//copied and modified from TMGHTML2
+var
+  pvaIn, pvaOut: OleVariant;
+const
+  OLECMDID_OPTICAL_ZOOM = $0000003F;
+  MinZoom = 10;
+  MaxZoom = 1000;
+begin
+  if Pct = FZoomValue then exit;
+  Showmessage('Step 2:'+inttostr(FZoomValue)+'->'+inttostr(Pct));
+  FZoomValue := Pct;
+  if FZoomValue < MinZoom then FZoomValue := MinZoom;
+  if FZoomValue > MaxZoom then FZoomValue := MaxZoom;
+  Showmessage('Step 3: FZoomValue is-'+inttostr(FZoomValue));
+  pvaIn := FZoomValue;
+  Showmessage('Step 4: pvaIn is-'+inttostr(pvaIn));
+  pvaOut := #0;
+  try
+    WebBrowser.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, pvaIn, pvaOut);
+  except
+    On E : exception do messagedlg('Error on setting Zoom.'+#13#10+E.Message,mtError,[mbok],0);
+    //
+  end;
+end;
 
+procedure TfrmImages.ZoomReset;
+//copied and modified from TMGHTML2
+begin
+  SetZoom(100);
+end;
 
+procedure TfrmImages.ZoomIn;
+//copied and modified from TMGHTML2
+begin
+  Showmessage('Step 1:'+inttostr(FZoomValue)+'+'+inttostr(FZoomStep));
+  SetZoom(FZoomValue + FZoomStep);
+end;
 
+procedure TfrmImages.ZoomOut;
+//copied and modified from TMGHTML2
+begin
+  Showmessage('Step 1:'+inttostr(FZoomValue)+'-'+inttostr(FZoomStep));
+  SetZoom(FZoomValue - FZoomStep);
+end;}
 
 end.
 

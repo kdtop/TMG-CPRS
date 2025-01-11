@@ -251,7 +251,8 @@ implementation
   //Expected DataStr format:  none
   begin
     //Result := Patient.Name+' ('+FormatFMDateTime('MM/DD/YY', Patient.DOB)+','+Patient.)';
-    Result := sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]);
+    //Result := sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]);
+    Result := Patient.TMGMsgString;
   end;
 
   function TTMGWMAPI.Handle_HTML_PASTE(Command, DataStr: string; DestHandle : THandle) : string;  //MUST follow format of TWMAPIHandler

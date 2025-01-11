@@ -159,6 +159,7 @@ uses fNotes, uPCE, uOrders, rOrders, uCore, rMisc, rReminders,
   fReminderTree, uVitals, rVitals, RichEdit, fConsults, fTemplateDialog,
   {uTemplateFields,} fRemVisitInfo, rCore, uVA508CPRSCompatibility,
   TMGHTML2, //kt 4/8/21
+  fSingleNote,   //8/13/24
   VA508AccessibilityRouter, VAUtils, uHTMLTools;
 
 {$R *.DFM}
@@ -240,6 +241,8 @@ begin
             if FutureEncounter(RemForm.PCEObj) then Err := 'Can not process a reminder dialog for a future encounter date.';
           end else if (OwningForm = frmConsults) then begin
             frmConsults.AssignRemForm
+          end else if (OwningForm = frmSingleNote) then begin    //8/13/24
+            frmSingleNote.AssignRemForm
           end else begin
             Err := 'Can not process reminder dialogs on this tab.';
           end;
@@ -1257,6 +1260,8 @@ begin  //btnFinishClick();
           try
             if (RemForm.Form is TfrmNotes) and Assigned(RemForm.NewNoteHTMLE) then begin //kt 9/11
               HTMLEditing := (vmHTML in TfrmNotes(RemForm.Form).ViewMode);               //kt 9/11
+            end else if (RemForm.Form is TfrmSingleNote) and Assigned(RemForm.NewNoteHTMLE) then begin //8/13/24
+              HTMLEditing := True;
             end else HTMLEditing := false;                                               //kt 9/11
             if HTMLEditing then begin  //kt added this entire block                      //kt 9/11
               if (not FProcessingTemplate) and (not InsertRemTextAtCursor) then begin    //kt 9/11
@@ -1324,7 +1329,7 @@ begin  //btnFinishClick();
                       //RemForm.NewNoteHTMLE.InsertTextAtCaret(TmpText.strings[i]);
                       TempString := Text2HTML(TmpText.Strings[i], false);               //kt 9/11
                       TempString := ANSIReplaceText(TempString,'<P>','<BR>');
-                      if TempString = '' then TempString := '<P>';
+                      if TempString = '' then TempString := '<BR>';    //ELH changed from P to BR, per Dr. Dee's request   8/21/23
                       HTMLStringToAdd := HTMLStringToAdd + TempString;  //kt //elh added 7/17/13
                     end;
                     //RemForm.NewNoteHTMLE.InsertTextAtCaret('Cursor HERE>');

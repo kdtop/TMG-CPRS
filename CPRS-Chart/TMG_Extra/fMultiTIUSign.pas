@@ -28,7 +28,7 @@ type
     Signed : boolean;
     PromptToLinkToConsult : boolean;
     DeferredMoveToLoose : boolean;
-    DeferredMoveToLooseTitle : String;
+    //DeferredMoveToLooseTitle : String;
     DeferredConsultItemIEN : integer;
     DeferredConsultCompletionDesired : boolean;
     DeferredToDelete : boolean;
@@ -237,7 +237,7 @@ begin
   Signed := false;
   PromptToLinkToConsult := false;
   DeferredMoveToLoose := false;
-  DeferredMoveToLooseTitle := '';
+  //DeferredMoveToLooseTitle := '';
   DeferredConsultItemIEN := 0;
   DeferredConsultCompletionDesired := false;
   DeferredToDelete := false;
@@ -533,7 +533,7 @@ begin
     ItemInfo.ProcessDeferredConsultAfterSignature := false;
   end;
   ItemInfo.DeferredMoveToLoose := false;
-  ItemInfo.DeferredMoveToLooseTitle := '';
+  //ItemInfo.DeferredMoveToLooseTitle := '';
   ItemInfo.DeferredToDelete := false;
   j := lbSelected.ItemIndex;
   MoveItemBetweenLists(j, lbSelected, lvUnSelected);
@@ -627,13 +627,14 @@ begin
   ItemInfo := SelectedItemInfoFromLV(lvUnSelected);
   if not assigned(ItemInfo) then exit;
 
-  Title := Trim(pieces(ItemInfo.AlertMsg,' ',2,999));
-  Title := piece2(Title,'available',1);
-  Answered := InputQuery('Move to Loose Documents','What would you like to call this file?',Title);
+  //Title := Trim(pieces(ItemInfo.AlertMsg,' ',2,999));
+  //Title := piece2(Title,'available',1);
+  //Answered := InputQuery('Move to Loose Documents','What would you like to call this file?',Title);
   //Title := InputBox('Move to Loose Documents','What would you like to call this file?',Suggestion);
-  if (Title = '')or(Answered<>True) then exit;
+  //if (Title = '')or(Answered<>True) then exit;
+  //if Title = '' then exit;
   ItemInfo.DeferredMoveToLoose := true;
-  ItemInfo.DeferredMoveToLooseTitle := Title;
+  //ItemInfo.DeferredMoveToLooseTitle := Title;
 
   TransferCurrentFromUnselectedToActionList();
 {
@@ -691,10 +692,15 @@ begin
   Result := False;
   if not assigned(ItemInfo) then exit;
 
-  Title := ItemInfo.DeferredMoveToLooseTitle;
-  Success := frmNotes.MoveTIUToLoose(ItemInfo.DFN,ItemInfo.IEN8925, Title, False);
-  if Success=False then exit;
-
+  //Title := ItemInfo.DeferredMoveToLooseTitle;
+  //Success := frmNotes.MoveTIUToLoose(ItemInfo.DFN,ItemInfo.IEN8925, Title, False);
+  RPCResult := sCallV('TMG TIU CHANGE STATUS',[ItemInfo.IEN8925,'LOOSE']);
+  if piece(RPCResult,'^',1)='-1' then begin
+    ShowMessage(piece(RPCResult,'^',2));
+  end else begin
+    Result := True;
+  end;
+  {                   OLD LOOSE DOCUMENT METHOD... KEEPING FOR NOW
   ActOnDocument(ActionSts, StrToInt(ItemInfo.IEN8925), 'DELETE RECORD');
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
     ImageList := TList.Create;
@@ -717,7 +723,7 @@ begin
     MessageDlg(DeleteSts.Reason,mtError,[mbOk],0);
     exit;
   end;
-  Result := True;
+  Result := True;     }
 end;
 
 
@@ -775,7 +781,7 @@ procedure TfrmMultiTIUSign.DisplayFromListView(LV : TListView);
 var
   ItemInfo : TItemInfo;
 begin
-  SelectedDFN := '';
+  if not lbSelected.Focused then SelectedDFN := ''; // elh added. don't reset if not focuses
   ItemInfo := SelectedItemInfoFromLV(LV);
   if not assigned(ItemInfo) then exit;
   LoadNoteForView(ItemInfo);
@@ -785,7 +791,7 @@ begin
   LoadMostRecentPhotoIDThumbNail(ItemInfo.DFN,PatientImage.Picture.Bitmap);
   pnlPatientID.Color := ItemInfo.PtRec.DueColor;
   UpdateButtonEnableStates;
-  SelectedDFN := ItemInfo.DFN;
+  if not lbSelected.Focused then SelectedDFN := ItemInfo.DFN;     // elh added. don't set if not focuses
 end;
 
 function TfrmMultiTIUSign.SelectedItemInfoFromLB(LB : TListBox) : TItemInfo;
@@ -815,7 +821,7 @@ end;
 function TfrmMultiTIUSign.PatientDisplayName(ItemInfo : TItemInfo) : string;
 begin
   //Could enhance later
-  lblNextAppt.Caption := piece(sCallV('TMG CPRS GET NEXT APPOINTMENT',[ItemInfo.DFN,'0']),';',1);
+  lblNextAppt.Caption := piece(sCallV('TMG CPRS GET NEXT APPOINTMENT',[ItemInfo.DFN,'2']),';',1);
   Result := ItemInfo.PtRec.Name + ' (' + ItemInfo.PtRec.DOB + ') ';
 end;
 

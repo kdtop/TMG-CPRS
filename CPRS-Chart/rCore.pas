@@ -216,7 +216,8 @@ procedure ListPtByFullSSN(Dest: TStrings; const FullSSN: string);
 procedure ListPtByRPLFullSSN(Dest: TStrings; const FullSSN: string);
 procedure ListPtTop(Dest: TStrings);
 procedure ListPtByHx (Dest: Tstrings; Mode : Int64; FirstDt, LastDt: string);  //kt added 11/11/13
-function SubSetOfPatients(const StartFrom: string; Direction: Integer): TStrings;
+//ORIGINAL LINE function SubSetOfPatients(const StartFrom: string; Direction: Integer): TStrings;
+function SubSetOfPatients(const StartFrom: string; Direction: Integer; IgnoreInactivePats:String='0'): TStrings;
 function DfltDateRangeClinic: string;
 function MakeRPLPtList(RPLList: string): string;
 function ReadRPLPtList(RPLJobNumber: string; const StartFrom: string; Direction: Integer) : TStrings;
@@ -1091,11 +1092,12 @@ begin
   FastAssign(RPCBrokerV.Results, Dest);
 end;
 
-function SubSetOfPatients(const StartFrom: string; Direction: Integer): TStrings;
+function SubSetOfPatients(const StartFrom: string; Direction: Integer; IgnoreInactivePats:String='0'): TStrings;
+//6/25/24  TMG added InactivePats
 { returns a pointer to a list of patients (for use in a long list box) -  The return value is
   a pointer to RPCBrokerV.Results, so the data must be used BEFORE the next broker call! }
 begin
-  CallV('ORWPT LIST ALL', [StartFrom, Direction]);
+  CallV('ORWPT LIST ALL', [StartFrom, Direction, IgnoreInactivePats]);
   MixedCaseList(RPCBrokerV.Results);
   Result := RPCBrokerV.Results;
 end;

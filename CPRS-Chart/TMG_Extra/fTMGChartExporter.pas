@@ -8,7 +8,7 @@ uses
  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, ORNet, uCore,rConsults,
   Dialogs, fAutoSz, StdCtrls, ORCtrls, fConsult513Prt, VA508AccessibilityManager, rReports, ShellAPI,
   CheckLst, ComCtrls, ORDtTm, ORFn, OleCtrls, SHDocVw, ExtCtrls, Buttons, FileCtrl, Math,
-  ImgList;
+  ImgList, uTMGOptions, Clipbrd;
 
 type
   TfrmTMGChartExporter = class(TfrmAutoSz)
@@ -95,6 +95,16 @@ type
     Label14: TLabel;
     Label15: TLabel;
     chkStoreData: TCheckBox;
+    chkAllLabs: TCheckBox;
+    cmbRecentFaxNumbers: TORComboBox;
+    Label16: TLabel;
+    chkCopyFaxNumber: TCheckBox;
+    chkCheckAllRads: TCheckBox;
+    procedure chkCheckAllRadsClick(Sender: TObject);
+    procedure chkCopyFaxNumberClick(Sender: TObject);
+    procedure cklbTitlesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure cmbRecentFaxNumbersChange(Sender: TObject);
+    procedure chkAllLabsClick(Sender: TObject);
     procedure edtREChange(Sender: TObject);
     procedure chkStoreDataClick(Sender: TObject);
     procedure edtToFaxChange(Sender: TObject);
@@ -148,6 +158,7 @@ type
     OtherDocToPrint : TStringList;
     DirtyForm:boolean;
     DownloadedFile : string;
+    clTMGHighlight : TColor;
     //
     procedure LoadPrintLists;
     function AreSomeSelectedInList(ChkLBox:TCheckListBox) : boolean;
@@ -155,6 +166,7 @@ type
     //Load listboxes
     procedure LoadNoteListbox;
     procedure LoadLabsListbox;
+    procedure LoadOtherLabsListbox;
     procedure LoadRadListbox;
     procedure LoadOrderListbox;
     procedure LoadScannedListbox;
@@ -226,7 +238,7 @@ procedure ExportOneChart(InitialTab:integer);
     AFrmTMGChartExporter.LoadNoteListbox;
     AFrmTMGChartExporter.LoadLabsListbox;
     AFrmTMGChartExporter.LoadRadListbox;
-    AFrmTMGChartExporter.LoadOrderListbox;
+    // dont autoload orders. this speeds up loading AFrmTMGChartExporter.LoadOrderListbox;
     AFrmTMGChartExporter.LoadScannedListbox;
     AFrmTMGChartExporter.ExportPageControl.ActivePageIndex := 0;
     AFrmTMGChartExporter.RadCoverGroupClick(nil);
@@ -283,10 +295,21 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.FormShow(Sender: TObject);
+var RPCResults:TStringList;
+    I : integer;
 begin
   inherited;
-  tCallV(cmbTemplateCover.Items,'TMG CPRS EXPORT GET TEMPLATES',[]);
+  //NOT CURRENTLY USED -> tCallV(cmbTemplateCover.Items,'TMG CPRS EXPORT GET TEMPLATES',[]);
+  RPCResults := TStringList.Create();
+  tCallV(RPCResults,'TMG GET RECENT FAX NUMBERS',[Patient.DFN]);
+  for I := 0 to RPCResults.Count - 1 do begin
+    cmbRecentFaxNumbers.Items.Add(RPCResults[i]);
+  end;
+  RPCResults.free;
+  cmbRecentFaxNumbers.Enabled := cmbRecentFaxNumbers.Items.Count>0  ;
   DirtyForm := False;
+  clTMGHighlight := TColor(StringToColor(uTMGOptions.ReadString('color for TIU highlight','$FFFFB3')));
+  chkCopyFaxNumber.checked := uTMGOptions.ReadBool('ChartExport_CopyFaxNum',False);
 end;
 
 //---------------FORM CONTROLS
@@ -337,7 +360,7 @@ end;
 
 procedure TfrmTMGChartExporter.btnLoadLabsClick(Sender: TObject);
 begin
-  LoadLabsListbox;
+  LoadOtherLabsListbox;
 end;
 
 procedure TfrmTMGChartExporter.btnLoadRadClick(Sender: TObject);
@@ -459,16 +482,88 @@ begin
       DownloadedFile := piece(ExportResult,'^',2);
       AFrmTMGChartExporter.WebBrowser1.Navigate(DownloadedFile);
     end;
+    if chkCopyFaxNumber.Checked then begin
+      ClipBoard.Clear;
+      ClipBoard.AsText := edtToFax.Text;
+    end;
+    
     DirtyForm := True;
 end;
 
-procedure TfrmTMGChartExporter.chkHighlightOnlyClick(Sender: TObject);
+procedure TfrmTMGChartExporter.chkAllLabsClick(Sender: TObject);
 const
-  HIGHLIGHT_LABEL : array [false .. true] of string = ('Show Highlighted Items Only','Show All Items');
+  CKBTN_LABEL : array [false .. true] of string = ('Select','Deselect');
+var
+  i : integer;
+begin
+  inherited;
+  chkAllLabs.Caption := CKBTN_LABEL[chkAllLabs.Checked] + ' &All';
+  for i := 0 to lstLabs.Items.Count - 1 do begin
+    lstLabs.Checked[i] := chkAllLabs.Checked;
+  end;
+end;
+
+procedure TfrmTMGChartExporter.chkCheckAllRadsClick(Sender: TObject);
+const
+  CKBTN_LABEL : array [false .. true] of string = ('Select','Deselect');
+var
+  i : integer;
+begin
+  inherited;
+  chkCheckAllRads.Caption := CKBTN_LABEL[chkCheckAllRads.Checked] + ' &All';
+  for i := 0 to lstRad.Items.Count - 1 do begin
+    lstRad.Checked[i] := chkCheckAllRads.Checked;
+  end;
+end;
+
+procedure TfrmTMGChartExporter.chkCopyFaxNumberClick(Sender: TObject);
+begin
+  inherited;
+  uTMGOptions.WriteBool('ChartExport_CopyFaxNum',chkCopyFaxNumber.Checked);
+end;
+
+procedure TfrmTMGChartExporter.chkHighlightOnlyClick(Sender: TObject);
+
+    function IgnoreTitle(Title:string):boolean;
+    //This is a very crud function. It could be fleshed out better, but with the small amount of time it will be used it isn't worth making an RPC
+    begin
+        result := False;
+        if Title='PHONE NOTE' then result := True;
+        if Title='RECORDS SENT (IMAGE)' then result := True;
+        if Title='CONSULTANT VISIT NOT KEPT' then result := True;
+        if Title='INSURANCE NOTE' then result := True;
+        if Title='LETTER' then result := True;
+        if Title='RECORDS SENT' then result := True;
+        if Title='TICKLER' then result := True;
+        if Title='CANCELLED APPT' then result := True;
+        if Title='INSURANCE CARD (IMAGE)' then result := True;
+        if Title='HIPAA AGREEMENT (IMAGE)' then result := True;
+        if Title='NOTE' then result := True;
+        if Title='NURSE NOTE' then result := True;
+        if Title='CPE EXPLANATION' then result := True;
+        if Title='ADVANCE DIRECTIVES (IMAGE)' then result := True;
+        if Title='NO SHOW' then result := True;
+        if Title='CANCELLED APPOINTMENT' then result := True;
+        if Title='CANCELLED APPT' then result := True;
+        if Title='NURSE ORDER' then result := True;
+        if Title='OUTSIDE ORDER (IMAGE)' then result := True;                    
+    end;
+const
+  //HIGHLIGHT_LABEL : array [false .. true] of string = ('Show Highlighted Items Only','Show All Items');
+  HIGHLIGHT_LABEL : array [false .. true] of string = ('Select All (Ignoring Admin Notes)','Deselect All');
+var
+  i : integer;
+  Ignore:boolean;
 begin
   inherited;
   chkHighlightOnly.Caption := HIGHLIGHT_LABEL[chkHighlightOnly.checked];
-  LoadNoteListbox;
+  for i := 0 to cklbTitles.Items.Count - 1 do begin
+    Ignore := IgnoreTitle(piece(piece(DataSL[i],'^',2),';',1));
+    if (Ignore=True)and chkHighlightOnly.Checked then continue;
+    cklbTitles.Checked[i] := chkHighlightOnly.Checked;
+  end;
+  btnExport.Enabled := chkHighlightOnly.Checked;
+  //LoadNoteListbox;
 end;
 
 procedure TfrmTMGChartExporter.chkScannedClick(Sender: TObject);
@@ -542,6 +637,63 @@ procedure TfrmTMGChartExporter.cklbTitlesClick(Sender: TObject);
 begin
   inherited;
   btnExport.Enabled := SomeSelected;
+end;
+
+procedure TfrmTMGChartExporter.cklbTitlesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect;
+  State: TOwnerDrawState);
+//kt added 6/15
+  function LeftMatch(SubStr, Str : string) : boolean;
+  begin
+    Result := (Pos(SubStr, Str) = 1) and (Length (SubStr) <= Length(Str));
+  end;
+
+var s, ThisIEN, SelectedIEN, ParentTitle,ItemText : string;
+    ThisColor:TColor;
+begin
+  inherited;
+  if not assigned(DataSL) then exit;
+  s := DataSL[index];
+  ThisColor := clWindow;
+  //ELH added to highlight office notes
+  if piece(s,'^',16)='1' then begin
+     ThisColor := clTMGHighlight;  //server side set
+  end;
+  if piece(s,'^',17)<>'' then begin
+     ThisColor := TColor(StringToColor(piece(s,'^',17)));  //TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
+  end;
+  cklbTitles.Canvas.Brush.Color := ThisColor;
+  cklbTitles.Canvas.FillRect(Rect);
+  ItemText := cklbTitles.Items[Index];
+  cklbTitles.Canvas.TextOut(Rect.Left + 1,Rect.Top,ItemText);
+  //ELH added to highlight other colors
+  {if piece(TORTreeNode(Node).StringData,'^',17)<>'' then begin
+     clTMGHospitalColor := TColor(StringToColor(piece(TORTreeNode(Node).StringData,'^',17)));//TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
+     tvNotes.Canvas.Brush.Color := clTMGHospitalColor;  //server side set
+  end;
+
+  if not assigned(tvNotes.Selected) then exit;
+  if pos('Loose documents (',piece(TORTreeNode(Node).StringData,'^',2))>0 then begin
+       tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
+  end;
+  if pos('Loose notes (',piece(TORTreeNode(Node).StringData,'^',2))>0 then begin
+       tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
+  end;
+  SelectedIEN := piece(TORTreeNode(tvNotes.Selected).StringData, '^', 1);
+  ThisIEN := piece(TORTreeNode(Node).StringData, '^', 1);
+  if (ThisIEN = SelectedIEN) and (ThisIEN <> '') then begin
+    //tvNotes.Canvas.Brush.Color := clSkyBlue;
+    tvNotes.Canvas.Brush.Color := clHighlight;
+    tvNotes.Canvas.Font.Color := clMenuText;
+  end;       }
+end;
+
+procedure TfrmTMGChartExporter.cmbRecentFaxNumbersChange(Sender: TObject);
+var FaxTo,FaxNumber:string;
+begin
+  inherited;
+  if cmbRecentFaxNumbers.Text='' then exit;
+  edtTo.Text := piece2(cmbRecentFaxNumbers.Text,' = ',1);
+  edtToFax.Text := piece2(cmbRecentFaxNumbers.Text,' = ',2);
 end;
 
 procedure TfrmTMGChartExporter.DirectoryListBox1Change(Sender: TObject);
@@ -667,7 +819,7 @@ begin
   lstLabs.Sorted := FALSE;
   RPCResults := TStringList.Create();
   //tCallV(RPCResults,'TMG CPRS LAB GET DATES',[Patient.DFN,'1']);
-  tCallV(RPCResults,'TMG CPRS LAB PDF LIST',[Patient.DFN,dtLabsStartDt.FMDateTime,dtLabsEndDt.FMDateTime]);
+  tCallV(RPCResults,'TMG CPRS LAB PDF LIST',[Patient.DFN,dtLabsStartDt.FMDateTime,dtLabsEndDt.FMDateTime,'1']);
   RPCResults.Delete(0);
   for i := 0 to RPCResults.Count - 1 do begin
    x := RPCResults[i];
@@ -675,24 +827,42 @@ begin
    //if (ThisDate>dtNotesStart.FMDateTime) AND (ThisDate<dtNotesEnd.FMDateTime) then begin
      //TitleName := FormatFMDateTime('mm/dd/yy', strtofloat(piece(x,'^',1)))+' '+piece(x,'^',2);
    LabDataSL.Add(piece(x,'^',2)+'^'+piece(x,'^',3));
-   lstLabs.Items.Add(FormatFMDateTime('mmm dd, yyyy hh:nn', strtofloat(piece(x,'^',4))));
+   TitleName :=FormatFMDateTime('mmm dd, yyyy hh:nn', strtofloat(piece(x,'^',4)));
+   if pos('00:00',TitleName)>0 then TitleName:=TitleName+' Outside lab results';
+   lstLabs.Items.Add(TitleName);
    //end;
   end;
   RPCResults.free;
 end;
 
+procedure TfrmTMGChartExporter.LoadOtherLabsListbox;
+var RPCResults:TStringList;
+    i : integer;
+    x,TitleName : string;
+    ThisDate:TFMdatetime;
+begin
+  inherited;
+  LoadLabsListbox;
+end;
+
 procedure TfrmTMGChartExporter.LoadRadListbox;
 var RadList : TStringList;
     i : integer;
+    BDate,EDate,RadDate:TDateTime;
 begin
   RadDataSL.Clear;
   lstRad.Clear;
   RadList := TStringList.create();
   ListImagingExams(RadList);
+  BDate := FMDateTimeToDateTime(dtRadStartDt.FMDateTime);
+  EDate := FMDateTimeToDateTime(dtRadEndDt.FMDateTime);
   for I := 0 to RadList.Count - 1 do begin
     //check data here
-     lstRad.Items.Add(piece(RadList[i],'^',3)+' '+piece(RadList[i],'^',4));
-     RadDataSL.Add(piece(piece(RadList[i],'^',2),'i',2)+'#'+piece(RadList[i],'^',7));
+     RadDate := strtodatetime(piece(RadList[i],'^',3));
+     if (RadDate>BDate)and(RadDate<EDate) then begin
+       lstRad.Items.Add(piece(RadList[i],'^',3)+' '+piece(RadList[i],'^',4));
+       RadDataSL.Add(piece(piece(RadList[i],'^',2),'i',2)+'#'+piece(RadList[i],'^',7));
+     end;
   end;
   RadList.Free;
 end;
@@ -883,3 +1053,5 @@ begin
 end;
 
 end.
+
+

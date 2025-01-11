@@ -4,10 +4,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, StrUtils,
-  Dialogs, StdCtrls, ComCtrls, ORCtrls, rTIU, uHTMLTools, OleCtrls, SHDocVw, ExtCtrls;
+  Dialogs, StdCtrls, ComCtrls, ORCtrls, rTIU, uHTMLTools, OleCtrls, SHDocVw, ExtCtrls, Buttons;
 
 type
-  TnsMode = (nsSelect,nsView);
+  TnsMode = (nsSelect,nsView,nsViewMulti);
 
   TfrmNoteSelector = class(TForm)
     Panel1: TPanel;
@@ -18,6 +18,11 @@ type
     WebBrowser1: TWebBrowser;
     btnOK: TButton;
     btnCancel: TButton;
+    Panel3: TPanel;
+    btnMailZoomOut: TBitBtn;
+    btnMailZoomIn: TBitBtn;
+    procedure btnMailZoomOutClick(Sender: TObject);
+    procedure btnMailZoomInClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure tvnotesClick(Sender: TObject);
@@ -25,11 +30,15 @@ type
     procedure btnOKClick(Sender: TObject);
   private
     { Private declarations }
+    FZoom : integer;
     Mode : TnsMode;
     IENList : string;
     SelectedNote:string;
+    procedure ApplyZoom(Zoom:integer;WB: TWebBrowser);
   public
     { Public declarations }
+    procedure DisplayOneNote(NoteIEN:string);
+    procedure DisplayMultiNote(NoteIEN:string);
   end;
 
 var
@@ -44,6 +53,14 @@ uses
 
 {$R *.dfm}
 
+const
+  //FaxViewer Zoom Constants
+  OLECMDID_OPTICAL_ZOOM = $0000003F;
+  MIN_ZOOM = 10;
+  MAX_ZOOM = 1000;
+  ZOOM_FACTOR = 10;
+  DEFAULT_ZOOM = 100;
+
 function SelectNote(IENList:string):string;
 var
   frmNoteSelector : TfrmNoteSelector;
@@ -54,7 +71,7 @@ begin
   frmNoteSelector.Caption := 'Note Selector';
   frmNoteSelector.btnOK.visible := True;
   frmNoteSelector.btnCancel.visible := True;
-  //frmNoteSelector.Mode :=
+  frmNoteSelector.Mode := nsSelect;
   frmNoteSelector.ShowModal;
   result := frmNoteSelector.SelectedNote;
   frmNoteSelector.free;
@@ -66,22 +83,70 @@ var
 begin
   frmNoteSelector := TfrmNoteSelector.create(nil);
   frmNoteSelector.IENList := IENList;
+  if pos(',',IENList)>0 then begin
+    frmNoteSelector.Mode := nsViewMulti;
+    //frmNoteSelector.DisplayMultiNote(IENList);
+  end else begin
+    frmNoteSelector.Mode := nsView;
+    frmNoteSelector.DisplayOneNote(IENList);
+    frmNoteSelector.Panel1.Height := 0;
+  end;
   frmNoteSelector.ShowModal;
   frmNoteSelector.free;
 end;
 
-
 procedure TfrmNoteSelector.FormShow(Sender: TObject);
 var
+  i, AnImg: integer;
+  x, TitleName: string;
+  HighlightedItem : boolean;
+  //ThisDate:TFMdatetime;
+  tmpList:TStringList;
   OneIEN: string;
-  i,NumOfNotes : integer;
+  NumOfNotes : integer;
   Node: TORTreeNode;
 begin
-  if IENList='ALL' then begin
+  //if IENList='ALL' then begin
+  if Mode=nsSelect then begin
+    tmpList := TStringList.create();
+
+    ListNotesForTree(tmpList, 1 ,0 , 0, 0, 99999, False);
+
+    for i := 0 to tmpList.Count - 1 do begin
+       x := tmpList[i];
+       //ThisDate := strtofloat(piece(x,'^',3));
+       TitleName := MakeNoteDisplayText(x);
+       x := piece(x,'^',1)+'^'+TitleName;
+       tvnotes.Items.Add(x);
+    end;
+    tmplist.free;
+    SelectedNote := '-1';
+    tvnotes.ItemIndex := 0;
+    tvnotesClick(nil);
+   end else if Mode=nsViewMulti then begin
+    tmpList := TStringList.create();
+    ListNotesForTree(tmpList, 1 ,0 , 0, 0, 99999, False);
+
+    for i := 0 to tmpList.Count - 1 do begin
+       x := tmpList[i];
+       if pos(piece(x,'^',1),IENList)<1 then continue;          
+       //ThisDate := strtofloat(piece(x,'^',3));
+       TitleName := MakeNoteDisplayText(x);
+       x := piece(x,'^',1)+'^'+TitleName;
+       tvnotes.Items.Add(x);
+    end;
+    tmplist.free;
+    SelectedNote := '-1';
+    tvnotes.ItemIndex := 0;
+    tvnotesClick(nil);
+   end;
+   FZoom := DEFAULT_ZOOM;
+   {
     IENList := '';
     for i := 0 to frmNotes.tvNotes.Items.Count - 1 do begin
       Node := TORTreeNode(frmNotes.tvNotes.Items[i]);
-      if (Assigned(Node.Parent))AND(ContainsText(Node.Parent.Text,'All signed')) then begin
+      //if (Assigned(Node.Parent))AND(ContainsText(Node.Parent.Text,'All signed')) then begin
+      if (Assigned(Node.Parent)) then begin
         if IENList<>'' then IENList := IENList+',';
         IENList := IENList+piece(Node.StringData,'^',1);
       end;
@@ -97,13 +162,10 @@ begin
      //frmNoteSelector.tvnotes.
   end;
   if tvnotes.Items.Count<1 then begin
-     ShowMessage('Selected notes are not in the Notes tab. Load more notes and try again.');
+    // ShowMessage('Selected notes are not in the Notes tab. Load more notes and try again.');
      exit;
-  end;
-  if tvnotes.Items.count=1 then Panel1.Height := 0;      
-  SelectedNote := '-1';
-  tvnotes.ItemIndex := 0;
-  tvnotesClick(nil);
+  end;                                           }
+  //if tvnotes.Items.count<1 then Panel1.Height := 0;
 end;
 
 
@@ -111,6 +173,35 @@ end;
 procedure TfrmNoteSelector.btnCancelClick(Sender: TObject);
 begin
   SelectedNote := '';
+end;
+
+procedure TfrmNoteSelector.btnMailZoomInClick(Sender: TObject);
+begin
+  System.Inc(FZoom, ZOOM_FACTOR);
+  if FZoom > MAX_ZOOM then
+    FZoom := MAX_ZOOM;
+  ApplyZoom(FZoom,WebBrowser1);
+end;
+
+
+procedure TfrmNoteSelector.btnMailZoomOutClick(Sender: TObject);
+begin
+  System.Dec(FZoom, ZOOM_FACTOR);
+  if FZoom < MIN_ZOOM then
+    FZoom := MIN_ZOOM;
+  ApplyZoom(FZoom,WebBrowser1);
+end;
+
+procedure TfrmNoteSelector.ApplyZoom(Zoom:integer;WB: TWebBrowser);
+var
+  pvaIn, pvaOut: OleVariant;
+begin
+  pvaIn := Zoom;
+  pvaOut := Null;
+  //pnlData.Caption := piece(pnlData.Caption,'@',1)+'@'+inttostr(Zoom)+'%';
+  //lblZoom.Caption := 'Zoom: '+inttostr(Zoom)+' %';
+  WB.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, pvaIn, pvaOut);
+  Application.ProcessMessages;
 end;
 
 procedure TfrmNoteSelector.btnOKClick(Sender: TObject);
@@ -128,10 +219,37 @@ procedure TfrmNoteSelector.tvnotesClick(Sender: TObject);
 var Lines:TStringList;
     HTMLFile:string;
 begin
-  Lines := TStringList.Create();
+  {Lines := TStringList.Create();
   LoadDocumentText(Lines,strtoint(piece(tvNotes.Items[tvNotes.ItemIndex],'^',1)));
   uHTMLTools.FixHTML(Lines);
   HTMLFile := CPRSCacheDir+piece(tvNotes.Items[tvNotes.ItemIndex],'^',1)+'.html';
+  Lines.SaveToFile(HTMLFile);
+  WebBrowser1.Navigate(HTMLFile);
+  Lines.free;}
+  DisplayOneNote(piece(tvNotes.Items[tvNotes.ItemIndex],'^',1));
+end;
+
+procedure TfrmNoteSelector.DisplayOneNote(NoteIEN:string);
+var Lines:TStringList;
+    HTMLFile:string;
+begin
+  Lines := TStringList.Create();
+  LoadDocumentText(Lines,strtoint(NoteIEN));
+  uHTMLTools.FixHTML(Lines);
+  HTMLFile := CPRSCacheDir+NoteIEN+'.html';
+  Lines.SaveToFile(HTMLFile);
+  WebBrowser1.Navigate(HTMLFile);
+  Lines.free;
+end;
+
+procedure TfrmNoteSelector.DisplayMultiNote(NoteIEN:string);
+var Lines:TStringList;
+    HTMLFile:string;
+begin
+  Lines := TStringList.Create();
+  LoadDocumentText(Lines,strtoint(NoteIEN));
+  uHTMLTools.FixHTML(Lines);
+  HTMLFile := CPRSCacheDir+NoteIEN+'.html';
   Lines.SaveToFile(HTMLFile);
   WebBrowser1.Navigate(HTMLFile);
   Lines.free;

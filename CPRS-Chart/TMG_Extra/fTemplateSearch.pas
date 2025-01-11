@@ -38,10 +38,10 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   fDrawers,fNotes,fReminderDialog,uReminders,uTMGOptions,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons;
+  Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons, TMGHTML2;
 
 type
-  TSearchMode = (TsmTemplate, TsmDialog, TsmAll);
+  TSearchMode = (TsmTemplate, TsmDialog, TsmAll, TsmTempOnly, TsmTopic);
 
   TfrmTemplateSearch = class(TForm)
     Timer: TTimer;
@@ -53,6 +53,7 @@ type
     btnTemCancel: TBitBtn;
     lbTemMatches: TListBox;
     StatusBar: TStatusBar;
+    tsTopics: TTabSheet;
     tsAll: TTabSheet;
     procedure FormShow(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
@@ -71,6 +72,7 @@ type
     procedure DoTemplateSearch(AllSearch:Boolean = False);
     procedure DoDialogSearch(AllSearch:Boolean = False);
     procedure DoAllSearch;
+    procedure DoTopicSearch;
     procedure GetSearchResults();
   public
     { Public declarations }
@@ -193,16 +195,27 @@ const
       SelectedInfo : string;
       ModalResult : integer;
       i,node_index,ParentNode : integer;
+      TopicText : TStringList;
+      Topic,TIUIEN : string;
+      HTMLEditor : THTMLObj;
   begin
     fTemplateSearch.SearchMode := Mode;
     frmTemplateSearch := TfrmTemplateSearch.Create(frmFrame);
-    if uTMGOptions.ReadBool('TemplateReminder Search Begins With All',False) then begin
-      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsAll;
+    if Mode=TsmTempOnly then begin
+      frmTemplateSearch.tsAll.TabVisible := false;
+      frmTemplateSearch.tsReminders.TabVisible := false;
+      frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTemplates;
     end else begin
-      if Mode=TsmDialog then
-        frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsReminders
-      else
-        frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTemplates;
+      if uTMGOptions.ReadBool('TemplateReminder Search Begins With All',False) then begin
+        frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsAll;
+      end else begin
+        if Mode=TsmDialog then
+          frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsReminders
+        else if Mode=TsmDialog then
+          frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTopics
+        else
+          frmTemplateSearch.PageControl1.ActivePage := frmTemplateSearch.tsTemplates;
+      end;
     end;
     frmTemplateSearch.PageControl1Change(nil);
     ModalResult := frmTemplateSearch.ShowModal;
@@ -238,6 +251,16 @@ const
           end;
 
         end;
+      end else if fTemplateSearch.SearchMode = TsmTopic then begin
+        TopicText := TStringList.create;
+        TIUIEN := piece(SelectedInfo,'^',2);
+        Topic := piece(SelectedInfo,'^',3);
+        tCallV(TopicText,'TMG CPRS GET ONE PATIENT TOPIC',[TIUIEN,Topic,inttostr(User.DUZ)]);
+        //ShowMessage(TopicText.Text);
+        HTMLEditor := Drawers.HTMLEditControl;
+        HTMLEditor.InsertHTMLAtCaret(TopicText.Text);
+        //frmNotes.InsertText(TopicText.Text);
+        TopicText.free;
       end;
     end;
   end;
@@ -270,6 +293,24 @@ const
           //So as long as user keeps changing search terms, search will not launch
           //until there has been a 0.5 second pause.
         end;
+     end else if fTemplateSearch.SearchMode = TsmTempOnly then begin
+        if LastChar=' ' then begin
+          DoTemplateSearch; //Launch search directly after every space
+        end else begin
+          Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
+          Timer.Enabled := true;
+          //So as long as user keeps changing search terms, search will not launch
+          //until there has been a 0.5 second pause.
+        end;
+      {end else if fTemplateSearch.SearchMode = TsmTopic then begin
+        if LastChar=' ' then begin
+          DoTopicSearch; //Launch search directly after every space
+        end else begin
+          Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
+          Timer.Enabled := true;
+          //So as long as user keeps changing search terms, search will not launch
+          //until there has been a 0.5 second pause.
+        end;}
       end else if fTemplateSearch.SearchMode = TsmAll then begin
         if LastChar=' ' then begin
           DoAllSearch; //Launch search directly after every space
@@ -280,7 +321,16 @@ const
           //until there has been a 0.5 second pause.
         end;
       end;
-    end;
+    end else if fTemplateSearch.SearchMode = TsmTopic then begin
+        if LastChar=' ' then begin
+          DoTopicSearch; //Launch search directly after every space
+        end else begin
+          Timer.Interval := TIMER_DELAY; // I think this starts the countdown again
+          Timer.Enabled := true;
+          //So as long as user keeps changing search terms, search will not launch
+          //until there has been a 0.5 second pause.
+        end;
+      end;
   end;
 
 
@@ -314,6 +364,7 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       SelType := piece2(SavedResults.Strings[lbTemMatches.ItemIndex],'#@@#',3);
       if SelType='DIALOG' then SearchMode := TsmDialog;
       if SelType='TEMPLATE' then SearchMode := TsmTemplate;
+      if SelType='TOPIC' then SearchMode := TsmTopic;
     end;
     if SearchMode=TsmAll then begin  //Shouldn't be needed but just in case
       messagedlg('There was an unknown error determining the type of selection.'+#13#10+'Try changing to the appropriate tab and select from there.',mtError,[mbOk],0);
@@ -361,6 +412,21 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
           end;
           TempResults.free;
       end;
+
+      procedure GetTopicResults(SearchString:string;User:Int64; DFN:string; var SavedResults:TStringList);
+      var
+         TempResults:TStringList;
+         i : integer;
+         Topic:string;
+      begin
+         TempResults := TStringList.create();
+         tCallV(TempResults,'TMG CPRS PATIENT TOPIC SEARCH',[DFN,SearchString]);
+         for I := 0 to TempResults.Count - 1 do begin
+           Topic := piece(TempResults[i],'^',1);
+           SavedResults.Add(Topic+'#@@#'+TempResults[i]+'#@@#TOPIC');
+         end;
+         TempResults.free;
+      end;
   var
     OneLine:string;
     i:integer;
@@ -375,9 +441,16 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       TsmDialog: begin
         GetDialogResults(edtTemSearchTerms.Text,SavedResults);
       end;
+      TsmTempOnly: begin
+        GetTemplateResults(edtTemSearchTerms.Text,User.DUZ,SavedResults);
+      end;
+      TsmTopic: begin
+        GetTopicResults(edtTemSearchTerms.Text,User.DUZ,Patient.DFN,SavedResults);
+      end;
       TsmAll: begin
         GetTemplateResults(edtTemSearchTerms.Text,User.DUZ,SavedResults);
         GetDialogResults(edtTemSearchTerms.Text,SavedResults);
+        GetTopicResults(edtTemSearchTerms.Text,User.DUZ,Patient.DFN,SavedResults);
       end;
     end;
     //NowLoadTheResultsHere
@@ -458,6 +531,13 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
     }
   end;
 
+  procedure TfrmTemplateSearch.DoTopicSearch;
+  var OneLine:string;
+      i : integer;
+  begin
+    GetSearchResults;
+  end;
+
   procedure TfrmTemplateSearch.lbTemMatchesClick(Sender: TObject);
   var SourceLine, Part: string;
       i : integer;
@@ -505,6 +585,11 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
       DoDialogSearch;
       end;
     2: begin
+      fTemplateSearch.SearchMode := TsmTopic;
+      Caption := 'Search Patient''s Topics';
+      DoTopicSearch;
+      end;
+    3: begin
       fTemplateSearch.SearchMode := TsmAll;
       Caption := 'Search Both Reminder Dialogs and Templates';
       DoAllSearch;
@@ -519,6 +604,10 @@ procedure TfrmTemplateSearch.TimerTimer(Sender: TObject);
       DoDialogSearch;
     end else if SearchMode=TsmTemplate then begin
       DoTemplateSearch;
+    end else if SearchMode=TsmTempOnly then begin
+      DoTemplateSearch;
+    end else if SearchMode=TsmTopic then begin
+      DoTopicSearch;
     end else begin
       DoAllSearch;
     end;

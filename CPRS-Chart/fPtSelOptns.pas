@@ -115,6 +115,8 @@ var
   clinDoSave, clinSaveToday: boolean;
   clinDefaults: string;
   LastSelectedOption : Integer; //stores the last selected button
+  LastDateRange : String;      //Stores the last date range  //TMG
+  LastPhysicianSelected : Integer; //Stores last selected physician   //TMG
 
 implementation
 
@@ -355,6 +357,9 @@ begin
                        if piece(cboList.Items.Strings[i],'^',1)=inttostr(User.DUZ) then begin
                           cboList.ItemIndex := i;
                           cboListMouseClick(Sender);
+                       end else if LastPhysicianSelected>-1 then begin   //TMG
+                          cboList.ItemIndex := LastPhysicianSelected;
+                          cboListMouseClick(Sender);
                        end;
                     end;
                   end;
@@ -389,7 +394,11 @@ end;
 
 procedure TfrmPtSelOptns.cboListMouseClick(Sender: TObject);
 begin
-  with cboList do if ItemIEN > 0 then FSetPtListTop(ItemIEN);
+  with cboList do if ItemIEN > 0 then begin
+    FSetPtListTop(ItemIEN);
+    //LastPhysicianSelected := ItemIEN;      //TMG  8/8/23
+    LastPhysicianSelected := cboList.ItemIndex;      //TMG  8/8/23
+  end;
 end;
 
 procedure TfrmPtSelOptns.cboListNeedData(Sender: TObject; const StartFrom: String; Direction, InsertAt: Integer);
@@ -467,6 +476,8 @@ begin
         cboDateRange.ItemIndex := cboDateRange.Items.Add(DRStart + ';' +
           DREnd + U + DRStart + ' to ' + DREnd);
     end;
+  if LastDateRange<>'' then cboDateRange.ItemIndex := cboDateRange.Items.Add(LastDateRange);  //TMG    8/8/23
+
   cboList.Height := lblDateRange.Top - cboList.Top - 4;
   lblDateRange.Show;
   cboDateRange.Show;
@@ -491,9 +502,14 @@ begin
   if (cboDateRange.ItemID = 'S') then
   begin
     with calApptRng do if Execute
-      then cboDateRange.ItemIndex := cboDateRange.Items.Add(RelativeStart + ';' +
-           RelativeStop + U + TextOfStart + ' to ' + TextOfStop)
-      else cboDateRange.ItemIndex := -1;
+      then begin   //TMG added begin ... end   8/8/23
+        cboDateRange.ItemIndex := cboDateRange.Items.Add(RelativeStart + ';' +
+            RelativeStop + U + TextOfStart + ' to ' + TextOfStop);
+        LastDateRange := RelativeStart + ';' + RelativeStop + U + TextOfStart + ' to ' + TextOfStop;  //TMG
+      end else begin
+        cboDateRange.ItemIndex := -1;
+        LastDateRange := '';  //TMG
+      end;
   end;
   FLastDateIndex := cboDateRange.ItemIndex;
   if cboList.ItemIEN > 0 then FSetPtListTop(cboList.ItemIEN);
@@ -568,6 +584,7 @@ end;
 procedure TfrmPtSelOptns.FormCreate(Sender: TObject);
 begin
   FLastDateIndex := -1;
+
 end;
 
 procedure TfrmPtSelOptns.SetDefaultPtList(Dflt: string);
@@ -597,6 +614,7 @@ begin
         TAG_SRC_ALL: radAll.Checked := True;
       end;
     end;
+    
 end;
 
 procedure TfrmPtSelOptns.UpdateDefault;

@@ -296,6 +296,8 @@ type
     function HTMLEditActive : boolean;  //kt 9/11
     procedure HandleLaunchTemplateQuickSearch(Sender: TObject);  //kt 10/2014
     procedure HandleLaunchDialogQuickSearch(Sender: TObject);
+    procedure HandleLaunchTempOnlyQuickSearch(Sender: TObject);
+    procedure HandleLaunchTopicsQuickSearch(Sender: TObject);    //7/29/24
     procedure HandleLaunchConsole(Sender: TObject);              //kt 6/2015
     procedure InsertTemplateText(Template : TTemplate);          //kt added 6/15
     function InsertTemplatebyName(TemplateName : string) : boolean;       //kt added 6/16
@@ -1546,6 +1548,18 @@ begin
   fTemplateSearch.LaunchTemplateSearch(self,TsmDialog);
 end;
 
+procedure TfrmDrawers.HandleLaunchTempOnlyQuickSearch(Sender: TObject);
+//kt added 10/28/14
+begin
+  fTemplateSearch.LaunchTemplateSearch(self,TsmTempOnly);
+end;
+
+procedure TfrmDrawers.HandleLaunchTopicsQuickSearch(Sender: TObject);   //7/29/24
+//kt added 10/28/14
+begin
+  fTemplateSearch.LaunchTemplateSearch(self,TsmTopic);
+end;
+
 procedure TfrmDrawers.HandleLaunchConsole(Sender: TObject);
 //kt added 6/2015
 begin
@@ -1964,7 +1978,28 @@ begin
   end;
 end;
 
+
+
 procedure TfrmDrawers.ReminderSearch(ReturnData: TStrings; SearchTerm:string);
+    function ContainsWords(Dialog,Terms:string):boolean;   //TMG added entire function  11/6/23
+    var
+      NumOfPieces,i:integer;
+      OneWord:string;
+    begin
+      if Terms='' then begin
+        result := false;
+        exit;
+      end;
+      result := true;
+      NumOfPieces := NumPieces(Terms,' ');
+      for i := 1 to NumOfPieces do begin
+        OneWord := piece(Terms,' ',i);
+        if OneWord='' then continue;        
+        if pos(OneWord,Dialog)<1 then
+          result := false;
+      end;
+    end;
+
 var Node:TORTreeNode;
     FoundIENS : string;
     ThisIEN:string;
@@ -1978,7 +2013,8 @@ begin
   FoundIENS := '-';  //Delimiter
   while Assigned(Node) do
   begin
-    if (pos(UpSearchTerm,Uppercase(Node.Text))>0)or(SearchTerm='') then begin
+    //if (pos(UpSearchTerm,Uppercase(Node.Text))>0)or(SearchTerm='') then begin   //ORIGINAL LINE
+    if (ContainsWords(Uppercase(Node.Text),UpSearchTerm))or(SearchTerm='') then begin    //TMG added 11/6/23
       ParentNode := Node.Parent;
       if ParentNode<>nil then begin
         ThisIEN := piece(Node.StringData,'^',1)+'-';

@@ -2393,7 +2393,9 @@ end;
 procedure OrderPrintDeviceInfo(OrderList: TStringList; var PrintParams: TPrintParams; Nature: Char; PrintLoc: Integer = 0);
 var
   x: string;
+  UserPrinter:string;
 begin
+  UserPrinter := uTMGOptions.ReadString('ORDER PRINTER','');   //TMG added 11/14/23
   if Nature <> #0 then
     begin
        if PrintLoc > 0 then CallV('ORWD2 DEVINFO', [PrintLoc, Nature, OrderList])
@@ -2405,6 +2407,7 @@ begin
       else CallV('ORWD2 MANUAL', [Encounter.Location, OrderList]);
     end;
   x := RPCBrokerV.Results[0];
+  if UserPrinter<>'' then x := StringReplace(UserPrinter,'@','^',[rfReplaceAll]);   //TMG added 11/14/23
   FillChar(PrintParams, SizeOf(PrintParams), #0);
   with PrintParams do
   begin
@@ -2568,4 +2571,5 @@ finalization
   if uDGroupMap <> nil then uDGroupMap.Free;
 
 end.
+
 

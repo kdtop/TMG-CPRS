@@ -9,6 +9,7 @@ inherited frmEnounterLabs: TfrmEnounterLabs
   inherited btnOK: TBitBtn
     Left = 601
     Top = 428
+    Caption = '&Done'
     ExplicitLeft = 601
     ExplicitTop = 428
   end
@@ -139,8 +140,8 @@ inherited frmEnounterLabs: TfrmEnounterLabs
       end
       object btnLaunchLabDlg: TBitBtn
         Left = 8
-        Top = 8
-        Width = 193
+        Top = 12
+        Width = 230
         Height = 73
         Caption = 'Open Lab Dialog'
         TabOrder = 0
@@ -533,23 +534,50 @@ inherited frmEnounterLabs: TfrmEnounterLabs
           FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
       end
-      object btnMsg1: TButton
+      object btnSameNonFastingLabs: TButton
         Left = 8
         Top = 133
-        Width = 193
+        Width = 230
         Height = 25
-        Caption = 'OK with Existing Lab Order'
+        Caption = 'OK with Existing NON-FASTING Lab Order'
         TabOrder = 1
-        OnClick = btnMsg1Click
+        OnClick = btnSameNonFastingLabsClick
       end
-      object btnMsg2: TButton
+      object btnNoNewLabs: TButton
         Left = 8
-        Top = 164
-        Width = 193
+        Top = 195
+        Width = 230
         Height = 25
         Caption = 'No New Labs.  '
         TabOrder = 2
-        OnClick = btnMsg2Click
+        OnClick = btnNoNewLabsClick
+      end
+      object btnSameFastingLabs: TButton
+        Left = 8
+        Top = 102
+        Width = 230
+        Height = 25
+        Caption = 'OK with Existing FASTING Lab Order'
+        TabOrder = 3
+        OnClick = btnSameFastingLabsClick
+      end
+      object btnSameLabs: TButton
+        Left = 8
+        Top = 164
+        Width = 230
+        Height = 25
+        Caption = 'OK with Existing Lab Order'
+        TabOrder = 4
+        OnClick = btnSameLabsClick
+      end
+      object btnPreexistingLabsToday: TButton
+        Left = 8
+        Top = 226
+        Width = 230
+        Height = 25
+        Caption = 'Preexisting Lab Order To Be Done Today'
+        TabOrder = 5
+        OnClick = btnPreexistingLabsTodayClick
       end
     end
     object pnlRightTop: TPanel
@@ -624,16 +652,25 @@ inherited frmEnounterLabs: TfrmEnounterLabs
         'Component = btnClearMemo'
         'Status = stsDefault')
       (
-        'Component = btnMsg1'
+        'Component = btnSameNonFastingLabs'
         'Status = stsDefault')
       (
-        'Component = btnMsg2'
+        'Component = btnNoNewLabs'
         'Status = stsDefault')
       (
         'Component = pnlTop'
         'Status = stsDefault')
       (
         'Component = pnlTopLeft'
+        'Status = stsDefault')
+      (
+        'Component = btnSameFastingLabs'
+        'Status = stsDefault')
+      (
+        'Component = btnSameLabs'
+        'Status = stsDefault')
+      (
+        'Component = btnPreexistingLabsToday'
         'Status = stsDefault'))
   end
 end

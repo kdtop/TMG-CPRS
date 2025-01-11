@@ -2,13 +2,15 @@ inherited frmFollowUp: TfrmFollowUp
   Caption = 'FollowUp'
   ClientHeight = 588
   ClientWidth = 1004
-  ExplicitWidth = 1020
-  ExplicitHeight = 626
+  OnMouseDown = FormMouseDown
+  ExplicitWidth = 1012
+  ExplicitHeight = 622
   PixelsPerInch = 96
   TextHeight = 13
   inherited btnOK: TBitBtn
     Left = 846
     Top = 564
+    Caption = '&Done'
     ExplicitLeft = 846
     ExplicitTop = 564
   end
@@ -230,7 +232,7 @@ inherited frmFollowUp: TfrmFollowUp
       Top = 80
       Width = 100
       Height = 25
-      Caption = 'As Previous Sched'
+      Caption = 'As Prev Sched'
       OnClick = btnIntervalClick
     end
     object edtFreeTxtFU: TEdit

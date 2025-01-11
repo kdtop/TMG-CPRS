@@ -106,7 +106,9 @@ type
                                   GridInfo : TGridInfo;
                                   var Changed, CanSelect : boolean;
                                   ExtraInfo : string = '';
-                                  ExtraInfoSL : TStringList = nil) : string;
+                                  ExtraInfoSL : TStringList = nil;
+                                  Fields : string = '';
+                                  Identifier : string = '') : string;
 
   TGridInfo = class (TObject)
   public
@@ -114,6 +116,8 @@ type
     Grid         : TSortStringGrid;   //doesn't own object
     FileNum      : string;
     IENS         : string;
+    Fields       : string;            //Optional. To be ultimately passed as Fields parameter to LIST^DIC in server RPC. '' --> default
+    IdentifierCode : string;          //Optional. Valid mumps code. To be ultimately passed as Idenfier parameter to LIST^DIC in server RPC.
     BasicMode    : Boolean;
     BasicTemplate: TStringList;       //doesn't own object
     Data         : TStringList;       //doesn't own object
@@ -134,6 +138,7 @@ type
     NumFieldEditor : THandleTableCellEdit;
     WPFieldEditor : THandleTableCellEdit;
     SubfileFieldEditor : THandleTableCellEdit;
+    CustomPtrFieldEditors : TStringList;  //Format:  .Strings=<PointedToFile#>, e.g. '80'  .Object must be pointer of type THandleTableCellEdit.  No Ownership.
     procedure Clear; dynamic;
     procedure Assign(Source : TGridInfo); dynamic;
     function DDInfo(FieldNum : string) : string;
@@ -141,6 +146,8 @@ type
     function FieldType(FieldNum : string) : TFieldType;
     procedure ExtractVarPtrInfo(FieldNum : string; VarPtrInfo : TStringList);
     function SubfileNum(FieldNum : string) : string;
+    constructor Create;
+    destructor Destroy;
   end;
 
   TCompleteGridInfo = class (TGridInfo)
@@ -258,29 +265,44 @@ implementation
   //---------------------------------------------------
   //---------------------------------------------------
 
+  constructor TGridInfo.Create;
+  begin
+    inherited;
+    CustomPtrFieldEditors := TStringList.Create;
+  end;
+
+  destructor TGridInfo.Destroy;
+  begin
+    CustomPtrFieldEditors.Free;
+    inherited;
+  end;
+
   procedure TGridInfo.Clear;
   begin
-    Grid         := nil;
-    FileNum      := '';
-    IENS         := '';
-    BasicTemplate:= nil;
-    Data         := nil;
-    MessageStr   := '';
-    DataLoadProc := nil;
-    ApplyBtn     := nil;
-    RevertBtn    := nil;
-    RecordSelector := nil;
-    ReadOnly     := false;
-    LoadingGrid  := false;
-    DisplayRefreshIndicated := false;
-    DateFieldEditor := nil;
-    FreeTextFieldEditor := nil;
-    PtrFieldEditor := nil;
-    VarPtrFieldEditor := nil;
-    SetFieldEditor := nil;
-    NumFieldEditor := nil;
-    WPFieldEditor := nil;
-    SubfileFieldEditor := nil;
+    Grid                           := nil;
+    FileNum                        := '';
+    IENS                           := '';
+    Fields                         := '';
+    IdentifierCode                 := '';
+    BasicTemplate                  := nil;
+    Data                           := nil;
+    MessageStr                     := '';
+    DataLoadProc                   := nil;
+    ApplyBtn                       := nil;
+    RevertBtn                      := nil;
+    RecordSelector                 := nil;
+    ReadOnly                       := false;
+    LoadingGrid                    := false;
+    DisplayRefreshIndicated        := false;
+    DateFieldEditor                := nil;
+    FreeTextFieldEditor            := nil;
+    PtrFieldEditor                 := nil;
+    VarPtrFieldEditor              := nil;
+    SetFieldEditor                 := nil;
+    NumFieldEditor                 := nil;
+    WPFieldEditor                  := nil;
+    SubfileFieldEditor             := nil;
+    CustomPtrFieldEditors.Clear;
   end;
 
   procedure TGridInfo.Assign(Source : TGridInfo);

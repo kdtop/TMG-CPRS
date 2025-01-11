@@ -12,8 +12,8 @@ inherited frmPCELex: TfrmPCELex
   OnCreate = FormCreate
   OnKeyDown = nil
   OnShow = FormShow
-  ExplicitWidth = 632
-  ExplicitHeight = 476
+  ExplicitWidth = 640
+  ExplicitHeight = 480
   PixelsPerInch = 96
   TextHeight = 13
   object pnlDialog: TPanel [0]
@@ -41,6 +41,9 @@ inherited frmPCELex: TfrmPCELex
       Padding.Right = 11
       Padding.Bottom = 3
       TabOrder = 2
+      DesignSize = (
+        624
+        31)
       object cmdOK: TButton
         AlignWithMargins = True
         Left = 467
@@ -89,6 +92,27 @@ inherited frmPCELex: TfrmPCELex
         OnClick = cmdExtendedSearchClick
         NumGlyphs = 2
       end
+      object cbShowCodes: TCheckBox
+        Left = 104
+        Top = 8
+        Width = 161
+        Height = 17
+        Anchors = [akLeft, akBottom]
+        Caption = 'Show Codes With Names'
+        TabOrder = 3
+        OnClick = cbShowCodesClick
+      end
+      object cbAddToTMGEncounter: TCheckBox
+        Left = 256
+        Top = 8
+        Width = 137
+        Height = 17
+        Anchors = [akLeft, akBottom]
+        Caption = 'Add To Encounter Form'
+        TabOrder = 4
+        Visible = False
+        OnClick = cbAddToTMGEncounterClick
+      end
     end
     object pnlSearch: TPanel
       Left = 0
@@ -103,12 +127,14 @@ inherited frmPCELex: TfrmPCELex
       Padding.Right = 11
       Padding.Bottom = 3
       TabOrder = 0
+      DesignSize = (
+        624
+        52)
       object lblSearch: TLabel
         Left = 11
         Top = 3
-        Width = 602
+        Width = 442
         Height = 15
-        Align = alTop
         AutoSize = False
         Caption = 'Search for Diagnosis:'
         Constraints.MinHeight = 15
@@ -119,23 +145,21 @@ inherited frmPCELex: TfrmPCELex
         Font.Style = [fsBold]
         ParentFont = False
         WordWrap = True
-        ExplicitWidth = 442
       end
       object txtSearch: TCaptionEdit
         AlignWithMargins = True
         Left = 11
-        Top = 21
+        Top = 24
         Width = 526
-        Height = 25
+        Height = 19
         Margins.Left = 0
-        Align = alClient
-        Constraints.MinHeight = 20
+        Anchors = [akLeft, akTop, akRight]
+        Constraints.MinHeight = 19
         Ctl3D = False
         ParentCtl3D = False
         TabOrder = 0
         OnChange = txtSearchChange
         Caption = 'Search for Diagnosis'
-        ExplicitHeight = 20
       end
       object cmdSearch: TButton
         AlignWithMargins = True
@@ -145,7 +169,7 @@ inherited frmPCELex: TfrmPCELex
         Height = 25
         Hint = 'Click to execute the search.'
         Margins.Right = 0
-        Align = alRight
+        Anchors = [akTop, akRight]
         Caption = '&Search'
         Default = True
         TabOrder = 1
@@ -207,6 +231,7 @@ inherited frmPCELex: TfrmPCELex
           BorderStyle = bsSingle
           OnChange = tgfLextvChange
           OnClick = tgfLextvClick
+          OnCustomDrawItem = tgfLextvCustomDrawItem
           OnDblClick = tgfLextvDblClick
           OnEnter = tgfLextvEnter
           OnExit = tgfLextvExit
@@ -371,6 +396,18 @@ inherited frmPCELex: TfrmPCELex
         'Status = stsDefault')
       (
         'Component = tgfLex.pnlSpace'
+        'Status = stsDefault')
+      (
+        'Component = cbShowCodes'
+        'Status = stsDefault')
+      (
+        'Component = cbAddToTMGEncounter'
         'Status = stsDefault'))
+  end
+  object timerAutoSearch: TTimer
+    Enabled = False
+    OnTimer = timerAutoSearchTimer
+    Left = 504
+    Top = 56
   end
 end

@@ -19,7 +19,6 @@ inherited frmOrdersPrint: TfrmOrdersPrint
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = -8
     object lblDevice: TLabel
       Left = 127
       Top = 74

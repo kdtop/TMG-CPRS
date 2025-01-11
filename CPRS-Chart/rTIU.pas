@@ -110,7 +110,7 @@ procedure ReadProblemLink(RPCResult : TStrings; ProbIEN : string);  //kt 5/15
 procedure ProblemTopics(RPCResult : TStrings; Command : string; Section : string = 'HPI'; Option: string=''; SDT : string = ''; EDT : string = '');  //kt 5/15
 procedure TMGTopicLinks(RPCResult : TStrings; Input: TStringList);  //kt 5/15
 procedure ProblemTopicLinkSubset(RPCResult : TStrings; DFN: string; Starting : string=''; Dir : string = ''; Max : string = '');  //kt 5/15
-procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string);  //kt 4/2023
+procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string; Filtered : boolean = false);  //kt 4/2023
 function GetTMGPSCode(IEN: Int64): string;  //kt //elh  5/13/14
 function TMGSearchTemplates(OutSL : TStringList; SearchTerm : string; DUZ : Int64; CaseSensitiveStr : string = '0') : string;  //kt 5/15
 procedure PutNewNote(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec);
@@ -153,6 +153,7 @@ function UserInactive(EIN: String): boolean;
 function TIUPatch175Installed: boolean;
 //function ExportChart(NotesList,LabList,RadList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
 function ExportChart(NotesList,LabList,RadList,OrdersList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
+function ReExportChart(ExportIEN:String): String;
 
 const
   CLS_PROGRESS_NOTES = 3;
@@ -901,7 +902,7 @@ begin
   FastAssign(RPCBrokerV.Results, RPCResult);
 end;
 
-procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string);
+procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string; Filtered : boolean = false);
 //kt added entired function 4/2023
 {
   OUT is filled as follows.
@@ -934,10 +935,30 @@ procedure GetSuggestedCodesForTopic(RPCResult : TStrings; TopicName : string);
   If no entries are found, then none returned.
   Either way, OUT(0) will be "1^OK"
 }
+var i1, i2 : integer;
+    S1, S2 : string;
+    Code1, Code2 : string;
 begin
   CallV('TMG CPRS TOPIC CODE SUGGEST', [TopicName]);  //WAS TMG CPRS TOPIC PROB SUGGEST
   FastAssign(RPCBrokerV.Results, RPCResult);
-  if RPCResult.Count>0 then RPCResult.Delete(0);  //This should be "1^OK"  
+  if RPCResult.Count>0 then RPCResult.Delete(0);  //This should be "1^OK"
+  if Filtered then begin
+    //Filter out duplicate ICD code entries.....
+    //  SL(#)=<TopicName>^<ICD CodeSystem>^<ICD CODE>^<ICD NAME>^<ProbIEN>^<SCT CODE>^<SCT NAME>
+    for i2 := RPCResult.Count - 1 downto 1 do begin
+      s2 := RPCResult.Strings[i2];
+      Code2 := piece(s2, U, 3);
+      for i1 := 0 to i2-1 do begin
+        s1 := RPCResult.Strings[i1];
+        Code1 := piece(s1, U, 3);
+        if Code1 <> Code2 then continue;
+        if piece(s1, U, 2) <> piece(s2, U, 2) then continue;
+        RPCResult.Delete(i2);
+        break;
+      end;
+    end;
+  end;
+
 end;
 
 procedure PutNewNote(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec);
@@ -1535,6 +1556,78 @@ begin
 
   CallBroker;
 
+
+  if RPCBrokerV.Results.Count=0 then RPCBrokerV.Results.Add('-1^Unknown download error.');
+  BrokerResult := RPCBrokerV.Results[0];
+  if Piece(BrokerResult,'^',1)='1' then begin
+
+    FileName := UniqueFName;
+    //OutFile := TFileStream.Create(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\ChartExport.pdf',fmCreate);
+    OutFile := TFileStream.Create(FileName,fmCreate);
+    for i:=1 to (RPCBrokerV.Results.Count-1) do begin
+      //s :=frmImages.Decode(RPCBrokerV.Results[i]);
+      s :=Decode64(RPCBrokerV.Results[i]);
+      count := Length(s);
+      if count>1024 then begin
+        bResult := false; //failure of load.
+        break;
+      end;
+      for j := 1 to count do Buffer[j-1] := ord(s[j]);
+      OutFile.Write(Buffer,count);
+    end;
+    OutFile.Free;
+    result := '1^'+FileName;
+  end else begin
+    ErrMsg := Piece(BrokerResult,'^',2);
+    bresult := false;
+  end;
+  if ErrMsg <> '' then begin
+    result := '0^ERROR: '+ErrMsg;
+  end;
+
+end;
+
+function ReExportChart(ExportIEN:String): String;
+//Export selected chart items into one PDF files and download to client
+
+  function UniqueFName : AnsiString;
+  //NOTE: Could also consider using uHTMLTool.UniqueCacheFName(FName : string) : AnsiString;
+  var  FName,tempFName : AnsiString;
+       count : integer;
+  begin
+    FName := 'ChartExport';
+    count := 0;
+    repeat
+      tempFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\' + FName + inttostr(count) + '.pdf';
+      //FName := FName + '1';
+      count := count+1;
+    until (fileExists(tempFName)=false);
+    result := tempFName;
+  end;
+
+var
+  RPCResult : string;
+  i : integer;
+  FileName                      : string;
+  count                         : integer;
+  j                             : word;
+  OutFile                       : TFileStream;
+  s                             : AnsiString;
+  Buffer                        : array[0..1024] of byte;
+  RefreshCountdown              : integer;
+  bResult                       : boolean;
+  BrokerResult                  : string;
+  ErrMsg                        : string;
+
+begin
+  result := '1';
+  RPCBrokerV.remoteprocedure := 'TMG CPRS REEXPORT CHART';
+  RPCBrokerV.Param[0].Value := Patient.DFN;
+  RPCBrokerV.Param[0].ptype := literal;
+  RPCBrokerV.Param[1].Value := ExportIEN;  // not used
+  RPCBrokerV.param[1].ptype := literal;
+
+  CallBroker;
 
   if RPCBrokerV.Results.Count=0 then RPCBrokerV.Results.Add('-1^Unknown download error.');
   BrokerResult := RPCBrokerV.Results[0];

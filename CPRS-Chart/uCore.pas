@@ -129,7 +129,7 @@ type
     FLocation:   Integer;                        // IEN in Hosp Loc if inpatient
     FWardService: string;
     FSpecialty:  Integer;                        // IEN of the treating specialty if inpatient
-    FSpecialtySvc: string;                       // treating specialty service if inpatient                                                                               
+    FSpecialtySvc: string;                       // treating specialty service if inpatient
     FAdmitTime:  TFMDateTime;                    // Admit date/time if inpatient
     FSrvConn:    Boolean;                        // True if patient is service connected
     FSCPercent:  Integer;                        // Per Cent Service Connection
@@ -148,6 +148,7 @@ type
     FDueHint : string;                           // Hint for due status   //kt
     FSyncWebPages : boolean;                     // If true changing patient will change web pages  //kt
     FMostRecentPhoto : string;                   // FPath for most recent patient photo
+    FTMGMsgString : string;                      // A string giving patients name, DOB, Telephone number, SequelMed#
     //vwpt  HRN
     FHRN:  string ;                              //HRN
     FAltHRN : string ;                           //alternate HRN (future)
@@ -155,6 +156,7 @@ type
     procedure SetDFN(const Value: string);
     function GetDateDied: TFMDateTime;
     function GetCombatVet: TCombatVet;       // *DFN*
+    function GetTMGMsgString : string;       //kt 4/24/23
   public
     procedure Clear;
     procedure ClearWithoutWebSync;  //kt
@@ -191,6 +193,7 @@ type
     property DueHint:          string      read FDueHint;
     property DueInfo:          TStringList read FDueInfo;
     property SyncWebPages:     boolean     read FSyncWebPages write FSyncWebPages;   //kt
+    property TMGMsgString:     string      read GetTMGMsgString;  //kt 4/24/23
     //vwpt HRN AltHRN
     property HRN:              string      read FHRN ;
     property AltHRN:           string      read FAltHRN;
@@ -989,10 +992,11 @@ begin
   if FSyncWebPages = True then frmFrame.SetWebTabsPerServer;  //kt 4/19/15
   FreeAndNil(FCombatVet);
   //vwpt hrn althrn
-  FHRN         := '';
-  FAltHRN      := '';
+  FHRN          := '';
+  FAltHRN       := '';
   //end vwpt
-  FNickName      := '';    //TMG 8/29/22
+  FNickName     := '';    //TMG 8/29/22
+  FTMGMsgString := '';     //kt 4/24/22
 end;
 
 destructor TPatient.Destroy;
@@ -1033,6 +1037,15 @@ begin
     FDateDiedLoaded := TRUE;
   end;
   Result := FDateDied;
+end;
+
+function TPatient.GetTMGMsgString : string;
+//kt added 4/24/23
+begin
+  if FTMGMsgString = '' then begin
+    FTMGMsgString := sCallV('TMG CPRS GET PT MSG STRING',[DFN]);
+  end;
+  Result := FTMGMsgString;
 end;
 
 procedure TPatient.SetDFN(const Value: string);  //*DFN*
@@ -1235,7 +1248,7 @@ begin
   Result := False;
   ADate := FMDateTimeToDateTime(Trunc(FDateTime));
   if uTMGOptions.ReadBool('OldVisitDateAlert',false) then begin
-    if Piece(FloatToStr(FDateTime),'.',1)<>FloatToStr(FMToday) then begin
+    if Piece(FloatToStr(FDateTime),'.',1)<FloatToStr(FMToday) then begin
       datemsg := uTMGOptions.ReadString('OldVisitDateMessage','Note: Selected date is in the past. ('+FormatFMDateTime('mm/dd/yy',FDateTime)+')');
       datemsg := datemsg+#13#10+'Use past date?';
       response := messagedlg(frmframe,datemsg,mterror,[mbYes,mbNo],0);
@@ -1458,7 +1471,6 @@ begin
   Result := False;
   with FDocuments do for i := 0 to Count - 1 do begin
     with TChangeItem(Items[i]) do begin
-      //kt added, then removed --> if (TChangeItem(Items[i]).FID = frmNotes.EditingIEN) and (frmNotes.AllowSignature(true) = false) then continue;
       if FSignState <> CH_SIGN_NA then begin
         Result := True;
         Exit;

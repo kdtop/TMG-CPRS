@@ -43,6 +43,7 @@ uses
   uTMGOptions, //kt 4/1/21
   fNoteSelector, //kt 9/20/22
   ShellAPI, //kt 12/21/21
+  ORNet,
   VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR;
 
 type
@@ -107,6 +108,8 @@ type
     mnuCopyResultsTable1: TMenuItem;
     mnuViewInBrowser: TMenuItem;
     mnuViewHL7: TMenuItem;
+    mnuDeleteOneStudy: TMenuItem;
+    procedure mnuDeleteOneStudyClick(Sender: TObject);
     procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName,
       PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure mnuViewHL7Click(Sender: TObject);
@@ -1264,6 +1267,7 @@ begin
     mnuCreateResultNote.Enabled := EnabledImagingMenuOptions;
   end;
   mnuViewInBrowser.Visible := (tvReports.Selected.Text='Imaging (local only)');
+  mnuDeleteOneStudy.Visible := User.HasKey('TMGDELRAD');
   //kt end addition
 end;
 
@@ -1962,11 +1966,11 @@ begin
   if MsgType='NoteSelect' then MsgVerb := nvNoteSelect;   //<--this needs to be changed to convert the string to a type or nvNone
   case MsgVerb of
     nvNoteSelect: begin
-      ItemIEN := piece(URL,'@',2);
+      ItemIEN := piece(URL,'^',2);
       Cancel := True;
       //if pos(',',ItemIEN)>0 then begin
-        ItemIEN := SelectNote(ItemIEN);
-        if ItemIEN='-1' then exit;
+        //ItemIEN := SelectNote(ItemIEN);
+      ViewNotes(ItemIEN);
       //end;
       //ChangeToNote(ItemIEN);
     end;
@@ -3238,6 +3242,43 @@ begin
   fSingleNote.CreateSingleNote(snmReport);
 end;
 
+
+procedure TfrmReports.mnuDeleteOneStudyClick(Sender: TObject);
+    function DeleteOneStudy(StudyNumber:string):string;
+    var DateTime,CaseNum,IENS : string;
+    begin
+        CaseNum := piece(StudyNumber,'-',2);
+        DateTime := piece(StudyNumber,'-',1);
+        DateTime := piece(DateTime,'i',2);
+        IENS := CaseNum+','+DateTime+','+Patient.DFN+',';
+        Result := sCallV('TMG DELETE ONE RAD STUDY',[IENS]);
+    end;
+var
+  i,j: integer;
+  line: string;
+  ListItem: TListItem;
+  DelResult: String;
+  IEN:string;
+  StudyName:string;
+  StudyDeleted:boolean;
+begin
+  inherited;
+  StudyDeleted := False;
+  for i := 0 to lvReports.Items.Count - 1 do begin
+    if lvReports.Items[i].Selected then begin
+      ListItem := lvReports.Items[i];
+      IEN := ListItem.SubItems[0];
+      StudyName := ListItem.SubItems[2];
+      if messagedlg('Are you sure you want to delete this '+StudyName+'?'+#13#10+'This cannot be undone',mtConfirmation,[mbYes,mbNo],0)=mrYes then begin
+        DelResult := DeleteOneStudy(IEN);
+        if piece(DelResult,'^',1)='1' then StudyDeleted := True;
+        ShowMessage(piece(DelResult,'^',2));
+      end;
+    end;
+  end;
+  if StudyDeleted then tvReportsClick(Sender);
+  
+end;
 
 procedure TfrmReports.mnuNotifyOKClick(Sender: TObject);
 begin

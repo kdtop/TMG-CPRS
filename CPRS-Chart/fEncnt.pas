@@ -505,7 +505,7 @@ begin
           ADate := FMDateTimeToDateTime(Trunc(FDateTime));
           //elh added if here to test date   6/6/22
           if uTMGOptions.ReadBool('OldVisitDateAlert',false) then begin
-             if Piece(FloatToStr(FDateTime),'.',1)<>FloatToStr(FMToday) then begin
+             if Piece(FloatToStr(FDateTime),'.',1)<FloatToStr(FMToday) then begin
                 datemsg := uTMGOptions.ReadString('OldVisitDateMessage','Note: Selected date is in the past. Continue?');
                 response := messagedlg(self,datemsg,mterror,[mbYes,mbNo],0);
                 if response = mrNo then exit;

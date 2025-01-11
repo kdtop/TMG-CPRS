@@ -106,16 +106,7 @@ type
     Label3: TLabel;
     EMailEdit: TEdit;
     tsAdvanced: TTabSheet;
-    tsKeene: TTabSheet;
-    KeeneAcctNo: TEdit;
-    Label4: TLabel;
-    KeeneAdmissionNumber: TEdit;
-    Label5: TLabel;
-    Label6: TLabel;
-    KeeneAdmissionDate: TDateTimePicker;
-    tsExtra: TTabSheet;
     gridPatientDemo: TSortStringGrid;
-    Button1: TButton;
     tsBasic: TTabSheet;
     gridBasicPatientDemo: TSortStringGrid;
     tsNotes: TTabSheet;
@@ -1643,6 +1634,7 @@ end;
       oneEntry : string;
       FMErrorForm: TFMErrorForm;
   begin
+    FMErrorForm := nil;
     Data.Clear;
     if (IENS='') then exit;
     if Pos('+',IENS)=0 then begin //don't ask server to load +1 records.
@@ -1674,7 +1666,7 @@ end;
         Data.Add(oneEntry);
       end;
     end;
-    FMErrorForm.Free;
+    if assigned(FMErrorForm) then FMErrorForm.Free;
   end;
 
   function TfrmPtDemoEdit.GetUserLine(CurrentUserData : TStringList; Grid : TSortStringGrid; ARow: integer) : integer;
@@ -1791,6 +1783,7 @@ var
    strDate: string;
 begin
   //kt if uTMGOptions.ReadString('SpecialLocation','')<>'INTRACARE' then exit;
+  {
   if not AtIntracareLoc() then exit;
   boolKeeneDirty := False;
   boolKeeneLoading := True;
@@ -1804,7 +1797,7 @@ begin
   end else begin
     KeeneAdmissionDate.Date := Date;
   end;
-  boolKeeneLoading := False;
+  boolKeeneLoading := False;     }
 end;
 
 procedure TfrmPtDemoEdit.tsKeeneHide(Sender: TObject);
@@ -1849,6 +1842,7 @@ procedure TfrmPtDemoEdit.ApplyKeene;
 var
    RPCResult : string;
 begin
+{
   //kt if uTMGOptions.ReadString('SpecialLocation','')<>'INTRACARE' then exit;
   if not AtIntracareLoc() then exit;
   if KeeneAcctNo.text <> '' then begin
@@ -1856,7 +1850,7 @@ begin
     if Piece(RPCResult,'^',1)= '-1' then begin
       messagedlg('Error saving Keene account number.' + #10#13 + 'Error: '+Piece(RPCResult,'^',2),mtError,[mbOK],0);
     end;
-  end;
+  end;}
   {    //REMOVING KEENE ADMISSION NUMBER
   if (KeeneAdmissionNumber.text <> '') AND (DateToStr(KeeneAdmissionDate.Date) <> '') then begin
     RPCResult := sCallV('TMG KEENE SET ADMISSION NUMBER', [Patient.DFN,KeeneAdmissionNumber.text,DateToStr(KeeneAdmissionDate.Date)]);
@@ -1864,9 +1858,9 @@ begin
       messagedlg('Error saving Keene admission number.' + #10#13 + 'Error: '+Piece(RPCResult,'^',2),mtError,[mbOK],0);
     end;
   end;                            }
-
+{
   boolKeeneDirty := False;
-  ApplyBtn.enabled := False;
+  ApplyBtn.enabled := False;}
 end;
 
 

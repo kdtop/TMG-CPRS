@@ -98,7 +98,7 @@ type
 
 procedure ImageDownloadInitialize();
 function  GetImagesForIEN(IEN: AnsiString; AImageInfoList : TList): integer;
-function  GetAllImages(AImageInfoList : TList; SDT : TFMDateTime = 0; EDT : TFMDateTime= 9999999.999999; ExcludeSL : TStringList=nil): integer;
+function  GetAllImages(AImageInfoList : TList; SDT : TFMDateTime = 0; EDT : TFMDateTime= 9999999.999999; ExcludeSL : TStringList=nil;Reverse:boolean=False): integer;
 function  ParseOneImageListLine(s : string) : TImageInfo;
 procedure SplitLinuxFilePath(FullPathName : AnsiString; var Path : AnsiString; var FName : AnsiString);
 procedure AddNoteImagesToList(ImagesInHTMLNote: TStringList; AImageInfoList: TList);
@@ -326,7 +326,7 @@ begin
 end;
 
 
-function GetAllImages(AImageInfoList : TList; SDT : TFMDateTime = 0; EDT : TFMDateTime= 9999999.999999; ExcludeSL : TStringList=nil): integer;
+function GetAllImages(AImageInfoList : TList; SDT : TFMDateTime = 0; EDT : TFMDateTime= 9999999.999999; ExcludeSL : TStringList=nil;Reverse:boolean=False): integer;
 //NOTE: This will ignore records found matching those already in AImageInfoList.
 //Input: AImageInfoList -- an OUT parameter
 //       SDT, EDT -- optional start and end of search range
@@ -340,22 +340,42 @@ var
 begin
   BrokerResults := TStringList.Create;
   tCallV(BrokerResults,'TMG CPRS IMAGE LIST ALL', [Patient.DFN, SDT, EDT, ExcludeSL]);
-  for i:=0 to (BrokerResults.Count-1) do begin
-    s := BrokerResults.Strings[i];
-    if i=0 then begin
-      if piece(s,'^',1)='0' then break //i.e. abort due to error signal
-      else continue;   //ignore rest of header (record #0)
+  if Reverse=True then begin
+    for i:=BrokerResults.Count-1 downto 0 do begin
+      s := BrokerResults.Strings[i];
+      if i=0 then begin
+        if piece(s,'^',1)='0' then break //i.e. abort due to error signal
+        else continue;   //ignore rest of header (record #0)
+      end;
+      TIUIEN := piece(s, '^', 1);
+      s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
+      Rec := ParseOneImageListLine(s);
+      if Rec = nil then continue;
+      if IndexOfIEN(AImageInfoList, Rec.IEN) > -1 then begin
+        FreeAndNil(Rec);
+        continue;  //ensure not added twice.
+      end;
+      Rec.LinkedTIUIEN := TIUIEN;
+      AImageInfoList.Add(Rec);  // AImageInfoList will own Rec.
     end;
-    TIUIEN := piece(s, '^', 1);
-    s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
-    Rec := ParseOneImageListLine(s);
-    if Rec = nil then continue;
-    if IndexOfIEN(AImageInfoList, Rec.IEN) > -1 then begin
-      FreeAndNil(Rec);
-      continue;  //ensure not added twice.
+  end else begin
+    for i:=0 to (BrokerResults.Count-1) do begin
+      s := BrokerResults.Strings[i];
+      if i=0 then begin
+        if piece(s,'^',1)='0' then break //i.e. abort due to error signal
+        else continue;   //ignore rest of header (record #0)
+      end;
+      TIUIEN := piece(s, '^', 1);
+      s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
+      Rec := ParseOneImageListLine(s);
+      if Rec = nil then continue;
+      if IndexOfIEN(AImageInfoList, Rec.IEN) > -1 then begin
+        FreeAndNil(Rec);
+        continue;  //ensure not added twice.
+      end;
+      Rec.LinkedTIUIEN := TIUIEN;
+      AImageInfoList.Add(Rec);  // AImageInfoList will own Rec.
     end;
-    Rec.LinkedTIUIEN := TIUIEN;
-    AImageInfoList.Add(Rec);  // AImageInfoList will own Rec.
   end;
   Result := AImageInfoList.Count;
   BrokerResults.Free;

@@ -13,6 +13,8 @@ type
     lblHealthLevel: TLabel;
     cboHealthLevel: TORComboBox;
     btnEditDiscreteData: TBitBtn;
+    btnNext: TBitBtn;
+    procedure btnNextClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnEditDiscreteDataClick(Sender: TObject);
 
@@ -52,6 +54,13 @@ begin
   frmPtDiscreteData.Initialize(Patient.DFN, AVisitStr, IEN8925);
   frmPtDiscreteData.ShowModal;
   frmPtDiscreteData.Free;
+end;
+
+procedure TfrmHealthFactors.btnNextClick(Sender: TObject);
+//kt added
+begin
+  inherited;
+  frmEncounterFrame.SelectNextTab;
 end;
 
 procedure tfrmHealthFactors.cboHealthLevelChange(Sender: TObject);

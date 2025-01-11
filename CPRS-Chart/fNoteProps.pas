@@ -175,7 +175,8 @@ implementation
 
 {$R *.DFM}
 
-uses uCore, rCore, rConsults, uConsults, rSurgery, fRptBox;
+uses uCore, rCore, rConsults, uConsults, rSurgery, fRptBox
+     ,uTMGOptions;    //TMG added 8/16/24
 
 { Initial values in ANote
 
@@ -679,6 +680,7 @@ end;
 procedure TfrmNoteProperties.cmdOKClick(Sender: TObject);
 var
   ErrMsg, WhyNot, AlertMsg: string;
+  TitleCheck:string;
 begin
   cmdOK.SetFocus;                                // make sure cbo exit events fire
   Application.ProcessMessages;
@@ -702,6 +704,10 @@ begin
                     end;
   end;*)
   SetCosignerRequired(False);
+  TitleCheck := sCallV('TMG TIU TITLE CHECK',[Patient.DFN,cboNewTitle.ItemIEN]);
+  if piece(TitleCheck,'^',1)='-1' then begin
+    if messagedlg(StringReplace(piece(TitleCheck,'^',2),'@@BR@@',#13#10,[rfReplaceAll]),mtConfirmation,[mbYes,mbNo],0)=mrNo then exit;
+  end;
   ErrMsg := '';
   if cboNewTitle.ItemIEN = 0 then
     ErrMsg := ErrMsg + TX_REQ_TITLE ;
@@ -744,7 +750,10 @@ begin
     end;
   if cboAuthor.ItemIEN = 0   then ErrMsg := ErrMsg + TX_REQ_AUTHOR;
   if not calNote.IsValid     then ErrMsg := ErrMsg + TX_REQ_REFDATE;
-  if calNote.IsValid and (calNote.FMDateTime > FMNow)    then ErrMsg := ErrMsg + TX_NO_FUTURE;
+  //Original line -> if calNote.IsValid and (calNote.FMDateTime > FMNow) then  ErrMsg := ErrMsg + TX_NO_FUTURE;
+  if calNote.IsValid and (calNote.FMDateTime > FMNow)    then begin     //TMG added begin
+    if uTMGOptions.ReadBool('AllowFutureNoteDates',False)=False then ErrMsg := ErrMsg + TX_NO_FUTURE;    //TMG added if  8/16/24
+  end;
   if cboCosigner.Visible then
     begin
        if (cboCosigner.ItemIEN = 0)     then ErrMsg := ErrMsg + TX_REQ_COSIGNER;

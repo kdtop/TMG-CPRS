@@ -1508,6 +1508,12 @@ inherited frmSplash: TfrmSplash
         Height = 13
         Caption = 'Runtime changed to <Info:FileDescription>'
       end
+      object lblMessage: TLabel
+        Left = 16
+        Top = 52
+        Width = 3
+        Height = 13
+      end
       object lblCopyright: TStaticText
         Left = 160
         Top = 0

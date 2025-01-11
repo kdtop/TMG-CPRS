@@ -286,10 +286,6 @@ inherited frmGraphs: TfrmGraphs
           TabOrder = 1
           object tsTopItems: TTabSheet
             Caption = 'Items'
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object lvwItemsTop: TListView
               Left = 0
               Top = 0
@@ -337,10 +333,6 @@ inherited frmGraphs: TfrmGraphs
           object tsTopViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object splViewsTop: TSplitter
               Left = 0
               Top = 392
@@ -394,10 +386,6 @@ inherited frmGraphs: TfrmGraphs
           object tsTopCustom: TTabSheet
             Caption = 'Custom'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
         end
       end
@@ -654,10 +642,6 @@ inherited frmGraphs: TfrmGraphs
           TabOrder = 1
           object tsBottomItems: TTabSheet
             Caption = 'Items'
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object lvwItemsBottom: TListView
               Left = 0
               Top = 0
@@ -705,10 +689,6 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object splViewsBottom: TSplitter
               Left = 0
               Top = 45
@@ -761,10 +741,6 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomCustom: TTabSheet
             Caption = 'Custom'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
         end
       end

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs,uTMGOptions, StdCtrls, ORNet, VAUtils, Trpcb;
+  Dialogs,uTMGOptions, StdCtrls, ORNet, VAUtils, Trpcb, uCore;
 
 type
   TfrmNetworkMessagerClient = class(TForm)
@@ -85,6 +85,10 @@ begin
   for I := 0 to MsgArr.Count - 1 do begin
     RPCBrokerV.Param[2].Mult[inttostr(i)] := MsgArr.Strings[i];
   end;
+  RPCBrokerV.Param[3].Value := '0';
+  RPCBrokerV.param[3].ptype := literal;
+  RPCBrokerV.Param[4].Value := Patient.DFN;
+  RPCBrokerV.param[4].ptype := literal;
   CallBroker;
   Result := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
 end;

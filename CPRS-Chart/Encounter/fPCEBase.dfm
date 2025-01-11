@@ -7,8 +7,8 @@ inherited frmPCEBase: TfrmPCEBase
   Position = poMainFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
-  ExplicitWidth = 640
-  ExplicitHeight = 438
+  ExplicitWidth = 632
+  ExplicitHeight = 434
   DesignSize = (
     624
     400)

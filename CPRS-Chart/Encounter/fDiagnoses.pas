@@ -13,6 +13,8 @@ type
   TfrmDiagnoses = class(TfrmPCEBaseMain)
     cmdDiagPrimary: TButton;
     ckbDiagProb: TCheckBox;
+    btnNext: TBitBtn;
+    procedure btnNextClick(Sender: TObject);
     procedure cmdDiagPrimaryClick(Sender: TObject);
     procedure ckbDiagProbClicked(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -678,6 +680,12 @@ begin
   ARect.Left := CodeTab;
   ARect.Right := ItemRight;
   DrawText((Control as TListBox).Canvas.Handle, PChar(Code), Length(Code), ARect, Format);
+end;
+
+procedure TfrmDiagnoses.btnNextClick(Sender: TObject);
+begin
+  inherited;
+  frmEncounterFrame.SelectNextTab;
 end;
 
 procedure TfrmDiagnoses.btnOKClick(Sender: TObject);

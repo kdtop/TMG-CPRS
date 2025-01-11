@@ -238,6 +238,23 @@ type
     pnlMainR: TPanel;                                        //kt-tabs 11/26/22
     pnlPageR: TPanel;
     timerCheckStopwatch: TTimer;
+    menuPatientTask: TMenuItem;
+    mnuAddSuspectCond: TMenuItem;
+    timUpdateNoPat: TTimer;
+    mnuExportHistory: TMenuItem;
+    menuRecordsTask: TMenuItem;
+    mnuQuickNotes: TMenuItem;
+    mnuReminderNote: TMenuItem;
+    mnuChangelog: TMenuItem;
+    procedure mnuChangelogClick(Sender: TObject);
+    procedure mnuReminderNoteClick(Sender: TObject);
+    procedure menuRecordsTaskClick(Sender: TObject);
+    procedure mnuExportHistoryClick(Sender: TObject);
+    procedure timUpdateNoPatTimer(Sender: TObject);
+    procedure wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+      TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+    procedure mnuAddSuspectCondClick(Sender: TObject);
+    procedure menuPatientTaskClick(Sender: TObject);
     procedure timerCheckStopwatchTimer(Sender: TObject);
     procedure pnlMainRResize(Sender: TObject);                                        //kt-tabs 11/26/22
     procedure mnuToggleSidePanelClick(Sender: TObject);      //kt-tabs 11/26/22
@@ -634,6 +651,11 @@ uses
   fMailbox,         //kt
   fUploadImages,    //kt
   fEncounterFrame,  //kt 4/2/23
+  fDashboard,     //TMG   4/19/24
+  fPopHealth,       //TMG 8/6/24
+  fChartExportHistory,   //TMG 5/14/24
+  fAddSuspectConditions,     //kt 3/19/24
+  fChangeLog,         //TMG  10/15/24
   fODDiet, fODMisc, fODGen, fODMedIn, fODMedOut, fODText, fODConsult, fODProc, fODRad,   //kt added line
   fODLab, fODBBank, fODMeds, fODMedIV, fODVitals, fODAuto, fOMNavA,                      //kt added line
   fOMSet, uODBase, rODMeds, fOMAction, fARTAllgy, fOMHTML, fODChild, fODMedNVA,          //kt added line
@@ -743,6 +765,19 @@ begin
   GetCurrentPatientLoad(pnlSchedule);
 end;
 
+procedure TfrmFrame.timUpdateNoPatTimer(Sender: TObject);
+var MessageArr:TStringList;
+begin
+  if pnlNoPatientSelected.Visible = False then begin
+      timUpdateNoPat.enabled := False;
+      exit;
+  end;
+  MessageArr := TStringList.Create();
+  tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[User.DUZ]);
+  WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT);
+  MessageArr.Free;
+end;
+
 function TfrmFrame.GetTimedOut: boolean;
 begin
   Result := uInit.TimedOut;
@@ -767,6 +802,7 @@ var
 begin
   ClosingCPRS := FALSE;
   try
+    if bTimerOn then btnTimerResetClick(nil);    //10/15/24
     if assigned(frmOtherSchedule) then frmOtherSchedule.Close;
     if assigned (frmIVRoutes) then frmIVRoutes.Close;
     if frmFrame.DLLActive then
@@ -931,24 +967,8 @@ begin
              end;
         '0': begin
                Silent := (TimedOut) or (Reason = 'COMMIT');
-               //kt 4/19/23 -- Rationalle for removing.
-               //           We have issues where we are trying to close a patient, and the
-               //           user is notified that the note is not ready for signature.
-               //           However, they were not trying to sign the note-- just trying to close it.
-               //           And above, frmNotes.AllowContextChange(Reason) has already been
-               //           called, and the note gets saved there.
-               //kt 4/19/23 -- rationalle for putting it back....
-               //           Current behavior is such that when CPRS is closed or a changed
-               //           to a new patient, CPRS asks for orders to be signed, notes to be
-               //           signed etc.  This is to ensure that everything has been taken
-               //           care of before the user leaves.
-               //           If the line below is commented out, then the user is
-               //           given opportunity to sign a note in ReviewChanges().  And if the
-               //           not is not ready for signature, then this will be a problem.
-               //Needed change.  Need to figure out how to allow user to choose option
-               //       for not signing (and then leaving) even if note not ready for signature.
                // EDDIE COMMENTED FOR TEST   if frmNotes.AllowSignature(true)=False then exit;  //FPG for Intracare 2/10/15
-               if frmNotes.AllowSignature(true)=False then Silent := true;
+               if frmNotes.AllowSignature(true)=False then Silent := true;  //kt 4/20/23
                Result := ReviewChanges(Silent);
              end;
       end; //case
@@ -1026,6 +1046,7 @@ procedure TfrmFrame.mnuClosePatientClick(Sender: TObject);
 //kt added fnction
   var Reason:string;
 begin
+  if frmNotes.NonModalEncounterDialogActive() then exit; //kt 5/23/23
   inherited;
   if not AllowContextChangeAll(Reason) then begin
     messagedlg('Cannot close patient'+#13#10+Reason,mtError,[mbOk],0);
@@ -1034,10 +1055,11 @@ begin
   SetActiveTab(0); //12/28/20
   frmNotes.CheckForLock;    //kt  11/11/21
   if bTimerOn then btnTimerResetClick(nil);    //3/21/22
-   HideEverything();
+    HideEverything();
+    Patient.DFN := '';   //4/19/24
   if assigned(frmPatientPhotoID) then begin
-     frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
-     Application.Processmessages;
+    frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
+    Application.Processmessages;
   end;
   FContextChanging := False;  //5/2/22, ELH added because this got set to TRUE and Consults wouldn't load afterwards
 end;
@@ -1052,6 +1074,7 @@ end;
 
 procedure TfrmFrame.DisplayEncounterText;
 { updates the display in the header bar of encounter related information (location & provider) }
+var PCPName : string;
 begin
   if DoNotChangeEncWindow = true then exit;
   with Encounter do
@@ -1059,9 +1082,15 @@ begin
     if Length(LocationText) > 0
       then lblPtLocation.Caption := LocationText
       else lblPtLocation.Caption := 'Visit Not Selected';
-    if Length(ProviderName) > 0
+    PCPName := sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ),1]);   //added 7/14/23
+    {old code if Length(ProviderName) > 0
       then lblPtProvider.Caption := 'PCP:  ' + ProviderName //TMG  9/7/18  original line -> lblPtProvider.Caption := 'Provider:  ' + ProviderName
+      else lblPtProvider.Caption := 'Current PCP Not Selected'; //TMG  9/7/18  original lie -> lblPtProvider.Caption := 'Current Provider Not Selected';}
+    if Length(PCPName) > 0
+      then lblPtProvider.Caption := 'PCP:  ' + PCPName //TMG  9/7/18  original line -> lblPtProvider.Caption := 'Provider:  ' + ProviderName
       else lblPtProvider.Caption := 'Current PCP Not Selected'; //TMG  9/7/18  original line -> lblPtProvider.Caption := 'Current Provider Not Selected';
+
+
   end;
   pnlVisit.Caption := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
   FitToolBar;
@@ -1252,6 +1281,8 @@ begin
     end;
   end;
 
+  ViewChangeLog(piece(FileVersionValue(Application.ExeName, FILE_VER_FILEDESCRIPTION),' ',1));      //10/15/24
+
   // Add future tabs here as they are created/implemented:
   if (
      (not User.HasCorTabs) and
@@ -1291,6 +1322,7 @@ begin
   FfrmPagesList := nil;             //kt-tabs
   ImagesEnabled := uTMGOptions.ReadBool('EnableImages',false);           //kt 9/11
 
+  CreateTab(tpsLeft, CT_DASHBOARD,'Dashboard');  //tmg 4/19/24
   CreateTab(tpsLeft, CT_COVER,    'Cover Sheet');
   CreateTab(tpsLeft, CT_PROBLEMS, 'Problems');
   CreateTab(tpsLeft, CT_MEDS,     'Meds');
@@ -1303,6 +1335,8 @@ begin
   CreateTab(tpsLeft, CT_REPORTS,  'Reports');
   CreateTab(tpsLeft, CT_IMAGES,   'Images', ImagesEnabled);  //kt 9/11
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
+  CreateTab(tpsLeft, CT_POPHEALTH,'Pop. Health');  //kt 9/11
+
   for APageID := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                   //kt 9/11
     CreateTab(tpsLeft, APageID, 'WebTab ' + IntToStr(integer(APageID)-CT_WEBTAB1+1), false);  //Hide until activated by RPC     //kt 9/11
   end;
@@ -2055,6 +2089,13 @@ begin
   ChangeES;
 end;
 
+procedure TfrmFrame.mnuChangelogClick(Sender: TObject);
+var ChangeLog:TStringList;
+begin
+  inherited;
+  ViewChangeLog('ALL');
+end;
+
 procedure TfrmFrame.mnuChartTabClick(Sender: TObject);
 { use the Tag property of the menu item to switch to proper page }
 var APageID : TPageID;
@@ -2218,6 +2259,11 @@ var
   OtherSide : TTabPageSide;
 
 begin
+  //tmg Check for opened TOC    2/27/24
+  if assigned(frmNotes.frmNoteTOC) then begin
+    frmNotes.frmNoteTOC.AnimateClose := False;
+    frmNotes.SetTOCButtonStatus(1);
+  end;  //end TMG addition
   ATabPage := FTabPages[ASide];
   OtherSide := OtherPageSide(ASide);
   OtherTabPage := TabPage(OtherSide);
@@ -2246,19 +2292,21 @@ begin
     end;
   end;
   case PageID of
-    CT_NOPAGE:   SwitchToPage(Aside,nil);
-    CT_COVER:    SwitchToPage(Aside,frmCover);
-    CT_PROBLEMS: SwitchToPage(Aside,frmProblems);
-    CT_MEDS:     SwitchToPage(Aside,frmMeds);
-    CT_ORDERS:   SwitchToPage(Aside,frmOrders);
-    CT_NOTES:    SwitchToPage(Aside,frmNotes);
-    CT_CONSULTS: SwitchToPage(Aside,frmConsults);
-    CT_DCSUMM:   SwitchToPage(Aside,frmDCSumm);
-    CT_SURGERY:  SwitchToPage(Aside,frmSurgery);
-    CT_LABS:     SwitchToPage(Aside,frmLabs);
-    CT_REPORTS:  SwitchToPage(Aside,frmReports);
-    CT_IMAGES:   SwitchToPage(Aside,frmImages);     //kt 9/11
-    CT_MAILBOX:  SwitchToPage(Aside,frmMailbox);    //tmg
+    CT_NOPAGE:    SwitchToPage(Aside,nil);
+    CT_COVER:     SwitchToPage(Aside,frmCover);
+    CT_PROBLEMS:  SwitchToPage(Aside,frmProblems);
+    CT_MEDS:      SwitchToPage(Aside,frmMeds);
+    CT_ORDERS:    SwitchToPage(Aside,frmOrders);
+    CT_NOTES:     SwitchToPage(Aside,frmNotes);
+    CT_CONSULTS:  SwitchToPage(Aside,frmConsults);
+    CT_DCSUMM:    SwitchToPage(Aside,frmDCSumm);
+    CT_SURGERY:   SwitchToPage(Aside,frmSurgery);
+    CT_LABS:      SwitchToPage(Aside,frmLabs);
+    CT_REPORTS:   SwitchToPage(Aside,frmReports);
+    CT_IMAGES:    SwitchToPage(Aside,frmImages);     //kt 9/11
+    CT_MAILBOX:   SwitchToPage(Aside,frmMailbox);    //tmg
+    CT_DASHBOARD: SwitchToPage(Aside,frmDashboard);  //tmg  4/19/24
+    CT_POPHEALTH: SwitchToPage(Aside,frmPopHealth);
     CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
   end; {case}
   if ScreenReaderSystemActive and FCtrlTabUsed then
@@ -2498,8 +2546,8 @@ var
       Encounter.DateTime := Patient.AdmitTime;
       Encounter.VisitCategory := 'H';
     end;
-    //if User.IsProvider then Encounter.Provider := User.DUZ;  //TMG commented out for code below  11/1/18
-    Encounter.Provider := strtoint(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ)]));
+    if User.IsProvider then Encounter.Provider := User.DUZ;  //TMG commented out for code below  11/1/18  Added back 7/7/23
+    //Reverting back    7/7/23 Encounter.Provider := strtoint(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ)]));
     SetupPatient(FlaggedPTList);
     if (FlaggedPTList.IndexOf(Patient.DFN) < 0) then
       FlaggedPTList.Add(Patient.DFN);
@@ -2707,6 +2755,7 @@ var
   InitialTime:string;
   StartTimerOrigSetting : integer;
 begin
+  if frmNotes.NonModalEncounterDialogActive() then exit; //kt 5/23/23  
   pnlPatient.Enabled := false;
   if (Sender = mnuFileOpen) or (FRefreshing) then PTSwitchRefresh := True
   else PTSwitchRefresh := False;  //part of a change to CQ #11529
@@ -3924,6 +3973,12 @@ begin
   fTMGChartExporter.ExportOneChart(0);
 end;
 
+procedure TfrmFrame.mnuExportHistoryClick(Sender: TObject);
+begin
+  inherited;
+  ViewChartExportHistory;
+end;
+
 procedure TfrmFrame.mnuEditRedoClick(Sender: TObject);
 begin
   FEditCtrl.Perform(EM_REDO, 0, 0);
@@ -4529,6 +4584,7 @@ end;
 
 procedure TfrmFrame.mnuFileRefreshClick(Sender: TObject);
 begin
+  if frmNotes.NonModalEncounterDialogActive() then exit; //kt 5/23/23  
   FRefreshing := TRUE;
   try
     mnuFileOpenClick(Self);
@@ -4655,12 +4711,22 @@ begin
                     frmMailbox := TfrmMailbox.Create(Self);           //kt 9/11
                     frmMailbox.Parent := HolderPanel;                 //kt 9/11
                     FfrmPagesList.AddObject(frmMailbox.Name, frmMailbox);   //kt-tabs
-                  end;                                                //kt 9/11
+                  end;
+    CT_DASHBOARD : begin                                                //kt 9/11
+                    frmDashboard := TfrmDashboard.Create(Self);         //kt 9/11
+                    frmDashboard.Parent := HolderPanel;                 //kt 9/11
+                    FfrmPagesList.AddObject(frmDashboard.Name, frmDashboard);   //kt-tabs
+                  end;
+    CT_POPHEALTH : begin                                                //kt 9/11
+                    frmPopHealth := TfrmPopHealth.Create(Self);         //kt 9/11
+                    frmPopHealth.Parent := HolderPanel;                 //kt 9/11
+                    FfrmPagesList.AddObject(frmPopHealth.Name, frmPopHealth);   //kt-tabs
+                  end;                                                                 //kt 9/11
     CT_WEBTAB1..CT_LAST_WEBTAB : begin                                //kt 9/11
                     TempFrmWebTab := TfrmWebTab.Create(Self);         //kt 9/11
                     TempFrmWebTab.Parent := HolderPanel;              //kt 9/11
                     Application.ProcessMessages;                      //kt 8/5/17
-                    //12/6/22 TempFrmWebTab.WebBrowser.Loaded;                  //kt 8/5/17
+                    //12/6/22 TempFrmWebTab.WebBrowser.Loaded;        //kt 8/5/17
                     TempFrmWebTab.NagivateTo('about:blank');          //kt 8/5/17
                     FfrmPagesList.AddObject(TempFrmWebTab.Name, TempFrmWebTab);    //kt-tabs
                     WebTabsList[APageID-CT_WEBTAB1] := TempFrmWebTab;  //kt 9/11
@@ -4671,7 +4737,8 @@ begin
 
   if Visible then for APageSide := tpsLeft to tpsRight do begin  //insert all tabs into both tab controllers.       //kt-tabs
     //only allow specified tabs to be on right side.
-    if (APageSide = tpsRight )and not (APageID in [CT_COVER,
+    if (APageSide = tpsRight )and not (APageID in [CT_DASHBOARD,
+                                                   CT_COVER,
                                                    CT_PROBLEMS,
                                                    CT_MEDS,
                                                    CT_ORDERS,
@@ -4696,8 +4763,9 @@ var i : integer;
     value : longword;
     DefColor : integer;
 const
-  DEF_COLORS : array[0..11] of integer =
-    (255,
+  DEF_COLORS : array[0..12] of integer =
+    (65535,
+     255,
      33023,
      16711935,
      65280,
@@ -4862,11 +4930,15 @@ var
   NewTabIndex: integer;
 begin
   inherited;
+  //if (GetKeyState(VK_LWIN)<0) and (Key=91) then begin
+
   FCtrlTabUsed := FALSE;
   //CQ2844: Toggle Remote Data button using Alt+R
    case Key of
      82,114:  if (ssAlt in Shift) then
                  frmFrame.pnlCIRNClick(Sender);
+     //83,115:      if (ssCtrl in Shift) then  //kt tmg added 10/9/23
+     //            menuPatientTaskClick(Sender);
      end;
 
   if (Key = VK_TAB) then begin
@@ -4979,6 +5051,7 @@ end;
 
 procedure TfrmFrame.pnlVisitClick(Sender: TObject);
 begin
+  if frmNotes.NonModalEncounterDialogActive() then exit; //kt 5/23/23  
  //if (not User.IsReportsOnly) then // Reports Only tab.
  //  mnuFileEncounterClick(Self);
   ViewInfo(mnuViewVisits);
@@ -5539,7 +5612,7 @@ begin
   FNoPatientSelected := TRUE;
   //pnlNoPatientSelected.Caption := AMessage;
   MessageArr := TStringList.Create();
-  tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[]);
+  tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[User.DUZ]);
   WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT);
   MessageArr.Free;
   pnlNoPatientSelected.Visible := True;
@@ -5566,6 +5639,7 @@ begin
   mnuPrintAdmissionLabel.Enabled := false; //kt 11/16/20
   if assigned(mnuPrintFormLetters) then mnuPrintFormLetters.Enabled := false; //kt 11/16/20
   if assigned(frmPatientPhotoID) then frmPatientPhotoID.hide;  //6/7/22
+  timUpdateNoPat.Enabled := True;
 end;
 
 procedure TfrmFrame.ShowEverything;
@@ -5601,6 +5675,7 @@ begin
   mnuPrintLabels.Enabled := true; //kt 11/16/20
   mnuPrintAdmissionLabel.Enabled := true; //kt 11/16/20
   if assigned(mnuPrintFormLetters) then mnuPrintFormLetters.Enabled := true; //kt 11/16/20
+  timUpdateNoPat.Enabled := False;
 end;
 
 
@@ -5673,6 +5748,24 @@ procedure TfrmFrame.menuNurseNoteClick(Sender: TObject);
 begin
   inherited;
   fSingleNote.CreateSingleNote(snmNurse,False);
+end;
+
+procedure TfrmFrame.menuPatientTaskClick(Sender: TObject);
+begin
+  inherited;
+  fSingleNote.CreateSingleNote(snmMessenger,False);
+end;
+
+procedure TfrmFrame.menuRecordsTaskClick(Sender: TObject);
+begin
+  inherited;
+  fSingleNote.CreateSingleNote(snmRecordsRequest,False);
+end;
+
+procedure TfrmFrame.mnuAddSuspectCondClick(Sender: TObject);
+begin
+  inherited;
+  AddSuspectMedicalConditions;
 end;
 
 procedure TfrmFrame.mnuAlertForwardClick(Sender: TObject);
@@ -6020,6 +6113,53 @@ begin
   end;
 end;
 
+procedure TfrmFrame.wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+  TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+var MsgType:string;
+    DFN:string;
+
+begin
+  //MsgType := piece(piece(URL,'^',1),':',2);  //trim out the about: and the command
+  if pos('DFN-',URL)>0 then begin
+    DFN := piece2(URL,'DFN-',2);
+    //Patient.DFN := '0';
+    pnlNoPatientSelected.Visible := False;
+    pnlNoPatientSelected.SendToBack;
+    //ShowEverything;
+    Patient.DFN := DFN;     // The patient object in uCore must have been created already!
+    try
+      //Encounter.Clear;
+      //Changes.Clear;
+      //frmFrame.UpdatePtInfoOnRefresh;
+      //if Patient.Inpatient then Encounter.VisitCategory := 'H';
+
+      mnuFileOpenClick(Self);
+      //DisplayEncounterText;
+    finally
+      //OrderPrintForm := FALSE;
+    end;
+    Cancel := True;
+  end;
+
+
+  {
+  MsgVerb := nvNone;
+  if MsgType='NoteSelect' then MsgVerb := nvNoteSelect;   //<--this needs to be changed to convert the string to a type or nvNone
+  case MsgVerb of
+    nvNoteSelect: begin
+      ItemIEN := piece(URL,'^',2);
+      Cancel := True;
+      //if pos(',',ItemIEN)>0 then begin
+        //ItemIEN := SelectNote(ItemIEN);
+      //ViewNotes(ItemIEN);  
+        //if ItemIEN='-1' then exit;
+      //end;
+      //ChangeToNote(ItemIEN);
+    end;
+  end;        }
+  //if MsgType<>'TIUIEN' then exit;
+end;
+
 procedure TfrmFrame.mnuViewInformationClick(Sender: TObject);
 begin
   mnuViewDemo.Enabled := frmFrame.pnlPatient.Enabled;
@@ -6273,6 +6413,12 @@ begin
   frmPtLabelPrint.Free;  //kt 10/15
 end;
 
+procedure TfrmFrame.mnuReminderNoteClick(Sender: TObject);
+begin
+  inherited;
+  fSingleNote.CreateSingleNote(snmReminder,False,'');
+end;
+
 procedure TfrmFrame.mnuResetTimerPromptClick(Sender: TObject);
 begin
   inherited;
@@ -6293,7 +6439,8 @@ procedure TfrmFrame.mnuSendMessageClick(Sender: TObject);
 var InitialMsg:string;
 begin
   inherited;
-  InitialMsg := sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]);
+  //InitialMsg := sCallV('TMG CPRS GET PT MSG STRING',[Patient.DFN]);
+  InitialMsg := Patient.TMGMsgString;
   SendMessenger(InitialMsg);
 end;
 
@@ -6464,6 +6611,7 @@ begin
 
     mnuFileOpenClick(Self);
     //DisplayEncounterText;
+    SelectChartTab(tpsLeft, CT_NOTES);
   finally
     FRefreshing := FALSE;
     OrderPrintForm := FALSE;

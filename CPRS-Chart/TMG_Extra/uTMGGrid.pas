@@ -107,35 +107,44 @@ procedure SetCursorImage(Cursor : TCursor);
 function HandleDateEdit(InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = '';
+                        Identifier : string = '') : string;
 function HandleTextEdit(InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 function HandlePtrEdit (InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 function HandleVarPtrEdit(InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 function HandleSetEdit (InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 function HandleNumEdit (InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 function HandleWPEdit  (InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 function HandleSubFileEdit(InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil) : string;
+                        ExtraInfo : string=''; ExtraInfoSL : TStringList=nil;
+                        Fields : string = ''; Identifier : string = '') : string;
 
 const
   GRID_FILTER = 'GRID_FILTER';
@@ -313,7 +322,10 @@ implementation
             Grid.Cells[2,GridRow] := fMultiRecEditU.GetPreviewText(subFileNum, IENS);
           end;
         end else if Pos('C',fieldDef)>0 then begin
-          Grid.Cells[2,GridRow] := COMPUTED_FIELD;
+          Grid.Cells[1,GridRow] := fieldName + ' ' + COMPUTED_FIELD;
+          Grid.ColWidths[1] := 250;
+          //kt Grid.Cells[2,GridRow] := COMPUTED_FIELD;
+          Grid.Cells[2,GridRow] := value;
         end else begin
           Grid.Cells[2,GridRow] := value;
         end;
@@ -459,7 +471,8 @@ implementation
       if (Trim(Entry.oldValue) <> Trim(Entry.newValue)) or NewRecMode then begin
         if (Entry.newValue <> COMPUTED_FIELD) and
           (Entry.newValue <> CLICK_TO_ADD_TEXT) and
-          (Pos(CLICK_TO, Entry.newValue)=0)
+          (Pos(CLICK_TO, Entry.newValue)=0) and
+          (Pos(COMPUTED_FIELD, Entry.FieldName)=0)
         then begin
           oneEntry := Entry.FileNum + '^' + Entry.IENS + '^' + Entry.Field + '^' + Entry.FieldName;
           oneEntry := oneEntry + '^' + Entry.newValue + '^' + Entry.oldValue;
@@ -578,8 +591,8 @@ implementation
     if CurrentData.Count = 0 then exit;
     IENS := GridInfo.IENS;
     if IENS='' then exit;
+    PostForm:= TPostForm.Create(nil);
     try
-      PostForm:= TPostForm.Create(nil);
       CompileChanges(Grid,CurrentData, Changes, AddingNewRecord);
       if Changes.Count>0 then begin
         if AddingNewRecord then begin
@@ -769,10 +782,11 @@ implementation
       //GridInfo : TGridInfo;
       VarPtrInfo : TStringList;
       FieldType : TFieldType;
-      AResult : TModalResult;
       Changed : boolean;
       NewValue, InitValue : string;
       ExtraInfo : string;
+      Index : integer;
+      Fields, Identifier : string;
       FieldEditHandler : THandleTableCellEdit;
 
   begin
@@ -824,6 +838,11 @@ implementation
         begin
           ExtraInfo := ExtractNum (FieldDef,Pos('P',FieldDef)+1) + EXTRA_INFO_PIECE_DIV +
                        BoolToStr(AutoPressEditButtonInDetailDialog);
+          TargetFileNum := piece2(ExtraInfo, EXTRA_INFO_PIECE_DIV, 1);
+          Index := GridInfo.CustomPtrFieldEditors.IndexOf(TargetFileNum);
+          if Index >= 0 then begin
+            FieldEditHandler := THandleTableCellEdit(GridInfo.CustomPtrFieldEditors.Objects[Index]);
+          end;
           NewValue := FieldEditHandler(InitValue, FileNum, IENS, FieldNum,
                                     GridInfo, Changed, CanSelect, ExtraInfo);
           AutoPressEditButtonInDetailDialog := false;
@@ -875,8 +894,11 @@ implementation
             IENS := GridInfo.RecordSelector; //get info from selected record
           end;
           if IENS <> '' then begin
+            Fields := GridInfo.Fields;
+            Identifier := GridInfo.IdentifierCode;
             NewValue := FieldEditHandler(InitValue, SubFileNum, IENS, FieldNum,
-                                          GridInfo, Changed, CanSelect);
+                                          GridInfo, Changed, CanSelect,
+                                          '',nil, Fields, Identifier);
           end else begin
             MessageDlg('IENS for File="".  Can''t process.',mtInformation,[MBOK],0);
           end;
@@ -931,7 +953,10 @@ implementation
   function HandleDateEdit(InitValue, FileNum, IENS, FieldNum : string;
                           GridInfo : TGridInfo;
                           var Changed, CanSelect : boolean;
-                          ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                          ExtraInfo : string;
+                          ExtraInfoSL : TStringList;
+                          Fields : string;
+                          Identifier : string) : string;
   var date,time : string;
       FormResult : integer;
       EditDateTimeForm: TEditDateTimeForm;
@@ -962,7 +987,9 @@ implementation
   function HandleTextEdit(InitValue, FileNum, IENS, FieldNum : string;
                           GridInfo : TGridInfo;
                           var Changed, CanSelect : boolean;
-                          ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                          ExtraInfo : string; ExtraInfoSL : TStringList;
+                          Fields : string;
+                          Identifier : string) : string;
   var
     EditFreeTextForm: TEditFreeTextForm;
 
@@ -981,10 +1008,11 @@ implementation
   function HandlePtrEdit(InitValue, FileNum, IENS, FieldNum : string;
                           GridInfo : TGridInfo;
                           var Changed, CanSelect : boolean;
-                          ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                          ExtraInfo : string; ExtraInfoSL : TStringList;
+                          Fields : string;
+                          Identifier : string) : string;
   var
     TargetFileNum, tempS : string;
-    AutoPress : boolean;
     FieldLookupForm: TFieldLookupForm;
 
   begin
@@ -1006,10 +1034,10 @@ implementation
   function HandleVarPtrEdit(InitValue, FileNum, IENS, FieldNum : string;
                             GridInfo : TGridInfo;
                             var Changed, CanSelect : boolean;
-                            ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                            ExtraInfo : string; ExtraInfoSL : TStringList;
+                            Fields : string;
+                            Identifier : string) : string;
   var
-    TargetFileNum, tempS : string;
-    AutoPress : boolean;
     FieldLookupForm: TFieldLookupForm;
     VarPtrInfo : TStringList;
 
@@ -1032,7 +1060,9 @@ implementation
   function HandleSetEdit(InitValue, FileNum, IENS, FieldNum : string;
                          GridInfo : TGridInfo;
                          var Changed, CanSelect : boolean;
-                         ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                         ExtraInfo : string; ExtraInfoSL : TStringList;
+                         Fields : string;
+                         Identifier : string) : string;
   var
     SetSelForm: TSetSelForm;
   begin
@@ -1049,7 +1079,10 @@ implementation
   function HandleNumEdit(InitValue, FileNum, IENS, FieldNum : string;
                          GridInfo : TGridInfo;
                          var Changed, CanSelect : boolean;
-                         ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                         ExtraInfo : string; ExtraInfoSL : TStringList;
+                         Fields : string;
+                         Identifier : string) : string;
+
   var FieldDef, FldName : string;
       EditNumber: TEditNumber;
 
@@ -1070,7 +1103,9 @@ implementation
   function HandleWPEdit(InitValue, FileNum, IENS, FieldNum : string;
                         GridInfo : TGridInfo;
                         var Changed, CanSelect : boolean;
-                        ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                        ExtraInfo : string; ExtraInfoSL : TStringList;
+                        Fields : string;
+                        Identifier : string) : string;
   var
     EditWPTextForm: TEditTextForm;
   begin
@@ -1090,13 +1125,15 @@ implementation
   function HandleSubFileEdit(InitValue, FileNum, IENS, FieldNum : string;
                              GridInfo : TGridInfo;
                              var Changed, CanSelect : boolean;
-                             ExtraInfo : string; ExtraInfoSL : TStringList) : string;
+                             ExtraInfo : string; ExtraInfoSL : TStringList;
+                             Fields : string;
+                             Identifier : string) : string;
   var
     SubFileForm : TfrmMultiRecEdit;
   begin
     Result := InitValue;
     SubFileForm := TfrmMultiRecEdit.Create(nil);
-    SubFileForm.PrepForm(FileNum,IENS);
+    SubFileForm.PrepForm(FileNum,IENS,Fields, Identifier, GridInfo.CustomPtrFieldEditors);
     SubFileForm.ParentEditForm.RecType := ActivePopupEditForm.RecType;
     SubFileForm.ParentEditForm.EditForm := ActivePopupEditForm.EditForm;
     ActivePopupEditForm.RecType := vpefSubFile;

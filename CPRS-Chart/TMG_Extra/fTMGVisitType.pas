@@ -54,6 +54,8 @@ type
     btnSearch: TBitBtn;
     btnClearSrch: TBitBtn;
     edtSearchTerms: TEdit;
+    btnNext: TBitBtn;
+    procedure btnNextClick(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure btnClearSrchClick(Sender: TObject);
     procedure edtSearchTermsChange(Sender: TObject);
@@ -111,6 +113,7 @@ type
     procedure Grid2Data;  //kt
     procedure Data2Grid;  //kt
   public
+    IsDirty : boolean;    //11/14/23
     function OK2SaveVisits: boolean;
     procedure InitTab(ACopyProc: TCopyVisitsMethod; SrcPCEData : TPCEData);
     procedure EnsureCPTs(List : TStringList);
@@ -170,6 +173,8 @@ var i,j : integer;
     //data : string;
     x : string;
     Data,AddData : TDataStr;
+    SomethingChecked : boolean;
+    DoneIndex : integer;
 
 const
   FORMAT_PotentialVisitCodes = 'CPT^Category^CPTLongName';
@@ -223,7 +228,17 @@ begin
         break;
       end;
     end;
-    CheckOffEntries;
+    SomethingChecked := CheckOffEntries;
+    if not SomethingChecked then begin
+      DoneIndex := lbSection.ItemIndex;
+      for i := 0 to lbSection.Items.Count - 1 do begin  //loop through all sections until something found to click.
+        if i = DoneIndex then continue;
+        lbSection.ItemIndex := i;
+        lbSectionClick(nil);  //is this needed or does line above already trigger this handler?
+        SomethingChecked := CheckOffEntries;
+        if SomethingChecked then break;
+      end;
+    end;
   finally
     Data.Free;
     AddData.Free;
@@ -476,7 +491,7 @@ begin
   TMGInfoVisitCPTs          := TStringList.Create;  //kt
   NodeTypeSL[Visit_CPTs]    := TMGInfoVisitCPTs;
 
-  FTabName := CT_TMG_VisitNm;
+  FTabName := CT_TMG_VisitNm;   // <-- required!
   FPCEListCodesProc := ListTMGVisitCodesExternal;     //this is a callback. Will be called by ancestor(s) of this class
 
   cboProvider.InitLongList(FProviders.PCEProviderName);
@@ -491,6 +506,7 @@ begin
   FProgSrchEditChange := false;  //kt
   FProgSectionClick := false;    //kt
 
+  IsDirty := False;
 end;
 
 procedure TfrmTMGVisitTypes.FormDestroy(Sender: TObject);
@@ -877,6 +893,12 @@ procedure TfrmTMGVisitTypes.btnClearSrchClick(Sender: TObject);
 begin
   inherited;
   SetSearchMode(false);
+end;
+
+procedure TfrmTMGVisitTypes.btnNextClick(Sender: TObject);
+begin
+  inherited;
+  frmEncounterFrame.SelectNextTab;
 end;
 
 procedure TfrmTMGVisitTypes.btnOtherClick(Sender: TObject);

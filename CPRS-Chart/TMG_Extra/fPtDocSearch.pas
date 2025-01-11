@@ -55,6 +55,8 @@ type
     btnDone: TBitBtn;
     Label1: TLabel;
     FocusTimer: TTimer;
+    radSearchType: TRadioGroup;
+    procedure radSearchTypeClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure cboFoundNotesDblClick(Sender: TObject);
     procedure FocusTimerTimer(Sender: TObject);
@@ -142,7 +144,7 @@ procedure TfrmPtDocSearch.FormCreate(Sender: TObject);
     RPCBrokerV.Param[0].Value := '.X';
     RPCBrokerV.param[0].ptype := list;
     cmd := 'PT DOCS SEARCH';
-    cmd := cmd + '^' + Patient.DFN + '^' + edtSearchTerms.Text;
+    cmd := cmd + '^' + Patient.DFN + '^' + edtSearchTerms.Text + '^' + inttostr(radSearchType.ItemIndex);
     RPCBrokerV.Param[0].Mult['"REQUEST"'] := cmd;
     CallBroker;  //I will ignore results -- it is always 1^Success
     SearchInProgress := true;
@@ -151,7 +153,20 @@ procedure TfrmPtDocSearch.FormCreate(Sender: TObject);
     Timer.Enabled := true;
   end;
 
-  procedure TfrmPtDocSearch.edtSearchTermsChange(Sender: TObject);
+procedure TfrmPtDocSearch.radSearchTypeClick(Sender: TObject);
+var cmd  : string;
+  begin
+    RPCBrokerV.remoteprocedure := 'TMG SEARCH CHANNEL';
+    RPCBrokerV.Param[0].Value := '.X';
+    RPCBrokerV.param[0].ptype := list;
+    cmd := 'PT DOCS CLEAR';
+    RPCBrokerV.Param[0].Mult['"REQUEST"'] := cmd;
+    CallBroker;
+    cboFoundNotes.Items.Clear;
+    edtSearchTerms.Text := '';
+end;
+
+procedure TfrmPtDocSearch.edtSearchTermsChange(Sender: TObject);
   var LastChar : Char;
       Len : integer;
   begin

@@ -183,6 +183,10 @@ type
     btnViewHL7: TBitBtn;
     btnViewLinkedNote: TBitBtn;
     mnuLinkToNote: TMenuItem;
+    btnViewLinkedOrder: TBitBtn;
+    btnSharedResults: TBitBtn;
+    procedure btnSharedResultsClick(Sender: TObject);
+    procedure btnViewLinkedOrderClick(Sender: TObject);
     procedure mnuLinkToNoteClick(Sender: TObject);
     procedure btnViewLinkedNoteClick(Sender: TObject);
     procedure btnViewHL7Click(Sender: TObject);
@@ -318,6 +322,7 @@ type
     procedure BlankWeb;
     procedure CheckForHiddenRows();   //tmg  3/12/19
     function GridVisibleHeight(aGrid : TStringGrid) : integer;  //TMG 10/25/21
+    function SelectUserDefaultReport() : boolean;   //TMG 11/9/23
   public
     procedure ClearPtData; override;
     function AllowContextChange(var WhyNot: string): Boolean; override;
@@ -358,6 +363,7 @@ var
   uSortOrder: string;
   uMaxOcc: string;
   LinkedNote:string;                 //TMG added 11/15/22
+  LinkedOrder:string;                //TMG added 7/20/23
   UpdatingLvReports: Boolean;        //Currently updating lvReports
   uColumns: TStringList;
   uNewColumn: TListColumn;
@@ -376,7 +382,7 @@ implementation
 uses uCore, rLabs, rCore, rCover, rOrders, fLabPrint, fFrame, fRptBox, Printers, fReportsPrint,
      clipbrd, rReports, rGraphs, activex, mshtml, VA508AccessibilityRouter, uReports, fLabEntry,
      uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools,
-     fLabSelector, fViewLabPDF,fNoteSelector,//kt
+     fLabSelector, fViewLabPDF,fNoteSelector,fChartExportHistory,//kt
      VAUtils;
 
 const
@@ -532,8 +538,8 @@ begin
   uEmptyImageList.Width := 0;
   uLocalReportData := TStringList.Create;
   uRemoteReportData := TStringList.Create;
-  uPrevReportNode := tvReports.Items.GetFirstNode;
-  tvReports.Selected := uPrevReportNode;
+  //uPrevReportNode := tvReports.Items.GetFirstNode;  //TMG, handled in Display Page
+  //tvReports.Selected := uPrevReportNode;
   if Patient.Inpatient then lstDates.ItemIndex := 2 else lstDates.ItemIndex := 4;
   lblSingleTest.Caption := '';
   lblSpecimen.Caption := '';
@@ -544,6 +550,27 @@ begin
   memo1.Visible := false;
   FLabData := TStringList.Create;   //kt added 2/17
   FNotes := TStringList.Create;     //kt added 2/17
+end;
+
+function TfrmLabs.SelectUserDefaultReport() : boolean;
+//TMG added procedure.
+//Results:  TRUE if a default report was found for user.  Otherwise FALSE
+//
+var
+  RptName: String;
+  i: integer;
+  ANode: TTreeNode;
+begin
+  Result := false; //default
+  RptName := uTMGOptions.ReadString('Last Selected Lab Report',''); //'Imaging (local only)'; //<--- change later to user stored data...
+  if RptName <> '' then for i := 0 to tvReports.Items.Count - 1 do begin
+    ANode := tvReports.Items[i];
+    if ANode.Text <> RptName then continue;
+    tvReports.Selected := ANode;
+    tvReportsClick(self);
+    Result := True;
+    break;
+  end;
 end;
 
 procedure TfrmLabs.UpdateRemoteStatus(aSiteID, aStatus: string);
@@ -657,8 +684,16 @@ begin
   begin
     uColChange := '';
     if Patient.Inpatient then lstDates.ItemIndex := 2 else lstDates.ItemIndex := 4;
-    tvReports.Selected := tvReports.Items.GetFirstNode;
-    tvReportsClick(self);
+    if not SelectUserDefaultReport then begin  //tmg added wrapper to this preexisting bloc  11/9/23
+      with tvReports do begin
+        if Items.Count > 0 then begin
+          tvReports.Selected := tvReports.Items.GetFirstNode;
+          tvReportsClick(self);
+        end;
+      end;
+    end;
+    //tvReports.Selected := tvReports.Items.GetFirstNode;
+    //tvReportsClick(self);
   end;
   if InitPatient and not (CallingContext = CC_NOTIFICATION) then
     begin
@@ -682,8 +717,16 @@ begin
       with tvReports do
         if Items.Count > 0 then
           begin
-            tvReports.Selected := tvReports.Items.GetFirstNode;
-            tvReportsClick(self);
+            if not SelectUserDefaultReport then begin  //tmg added wrapper to this preexisting bloc  11/9/23
+              with tvReports do begin
+                if Items.Count > 0 then begin
+                  tvReports.Selected := tvReports.Items.GetFirstNode;
+                  tvReportsClick(self);
+                end;
+              end;
+            end;
+            //tvReports.Selected := tvReports.Items.GetFirstNode;
+            //tvReportsClick(self);
           end;
     end;
   case CallingContext of
@@ -703,8 +746,16 @@ begin
         with tvReports do
           if Items.Count > 0 then
             begin
-              tvReports.Selected := tvReports.Items.GetFirstNode;
-              tvReportsClick(self);
+              if not SelectUserDefaultReport then begin  //tmg added wrapper to this preexisting bloc 11/9/23
+                with tvReports do begin
+                  if Items.Count > 0 then begin
+                    tvReports.Selected := tvReports.Items.GetFirstNode;
+                    tvReportsClick(self);
+                  end;
+                end;
+              end;
+              //tvReports.Selected := tvReports.Items.GetFirstNode;
+              //tvReportsClick(self);
             end;
       end;
     CC_NOTIFICATION:  ProcessNotifications;
@@ -1175,8 +1226,16 @@ begin
           end;
     end;
   if tvReports.Items.Count > 0 then begin
-    tvReports.Selected := tvReports.Items.GetFirstNode;
-    tvReportsClick(self);
+      if not SelectUserDefaultReport then begin  //tmg added wrapper to this preexisting bloc  11/9/23
+        with tvReports do begin
+          if Items.Count > 0 then begin
+            tvReports.Selected := tvReports.Items.GetFirstNode;
+            tvReportsClick(self);
+          end;
+        end;
+      end;
+    //tvReports.Selected := tvReports.Items.GetFirstNode;
+    //tvReportsClick(self);
   end;
 end;
 
@@ -1824,7 +1883,8 @@ begin
       //memLab.Clear;
       //WebBrowser1.Navigate('http://www.yahoo.com');
       HTMLReport := TStringList.create();
-      tCallV(HTMLReport,'TMG CPRS LAB GET HTML REPORT',[Patient.DFN,lstTests.Items]);
+      //tCallV(HTMLReport,'TMG CPRS LAB GET HTML REPORT',[Patient.DFN,lstTests.Items]);
+      tCallV(HTMLReport,'TMG CPRS LAB HTML DATE REPORT',[Patient.DFN,9999999,2222222]);
       uLabLocalReportData.Text := HTMLReport.Text;
 
       HTMLReport.free;
@@ -2191,6 +2251,7 @@ procedure TfrmLabs.FillGrid(agrid: TStringGrid; aitems: TStrings);
 var
   testcnt, x, y, i: integer;
   FirstSeen: string;
+  LabsSent:string;
 begin
   testcnt := strtoint(Piece(aitems[0], '^', 1));
   if LastCheckedLabs<>Patient.DFN+'^'+Piece(aitems[0], '^', 3) then begin
@@ -2270,6 +2331,7 @@ var
   TMGHeight : integer;
   TMGMinHeight:integer;
   pnlRightTopPct : Real;
+  LabsSent : string;
 begin
   tmpList := TStringList.Create;
   GetNewestOldest(Patient.DFN, newest, oldest);  //****** PATCH
@@ -2287,6 +2349,7 @@ begin
       uFormat := strtointdef(Piece(tmpList[0], '^', 9), 1);
       LinkedNote := Piece(tmpList[0], '^', 11);
       btnViewLinkedNote.Enabled := (LinkedNote<>'');
+      btnViewLinkedOrder.Enabled := (LinkedOrder<>'');  //7/20/23
       mnuLinkToNote.Enabled := (LinkedNote='');
       //------------------------------------------------------------------------------------------
       //v27.1 - RV - PSI-05-118 / Remedy HD0000000123277 - don't show "00:00" if no time present
@@ -2372,6 +2435,17 @@ begin
     cmdOld.Enabled := prevon;
     btnViewReport.enabled := TMGHasLabReport(Patient.DFN,DisplayDate);  //kt    10/23/20
     btnViewHL7.enabled := TMGHasHL7Report(Patient.DFN,DisplayDate);  //kt    10/23/20
+    btnSharedResults.visible := False;
+    btnSharedResults.Hint := '';
+    if btnViewReport.enabled then begin   //TMG   added IF 5/3/24
+      LabsSent := sCallV('TMG CPRS WERE LABS EXPORTED',[Patient.DFN,piece(DisplayDate,'.',1)+'.0001',piece(DisplayDate,'.',1)+'.9999']);  //TMG 5/3/24
+      if piece(LabsSent,'^',1)='1' then begin
+         btnSharedResults.Visible := True;
+         btnSharedResults.Hint := StringReplace(piece(LabsSent,'^',2),'@@BR@@',#13#10,[rfReplaceAll]);
+      end;
+    end;
+    LinkedOrder := TMGHasLinkedOrder(Patient.DFN,DisplayDate);
+    btnViewLinkedOrder.enabled := (LinkedOrder<>'');   //7/20/23
     if cmdOld.Enabled and cmdRecent.Enabled then
       lblMostRecent.Visible := false
     else
@@ -3743,6 +3817,7 @@ var
   CurrentNode: TTreeNode;
 begin
   inherited;
+  uTMGOptions.WriteString('Last Selected Lab Report',tvReports.Selected.Text); //tmg    11/9/23
   //wv The following if was included in v29. Added back here but can be removed if desired
   if (Length(lblHeading.Caption) > 0) and (Length(frmFrame.stsArea.Panels.Items[1].Text) > 0) then
     begin                                           //ProcessNotfications post-cleanup and clearing of notification message text
@@ -4108,17 +4183,17 @@ begin
                     end;
                   end
 
-             else if aID = '606:SELECTED LAB REPORT BY DATE' then
+             else if aID = '606:HTML LAB REPORT' then
                   begin               // TMG added this else    11/5/18
                     if uPrevReportNode <> tvReports.Selected then
                     begin
                      lstTests.Clear;
                      lblSpecimen.Caption := '';
                     end;
-                    SelectLabsForReport(Font.Size);
+                    //SelectLabsForReport(Font.Size);
                     {if lstTests.Items.Count > 0 then
                     begin}
-                     CommonComponentVisible(false,false,true,true,true,false,false,false,true,false,false,false);
+                     CommonComponentVisible(false,false,true,true,true,true{wasfalse},false,false,true,false,false,false);
                      pnlRighttop.Height := lblHeading.Height + lblTitle.Height;
                      pnlRightTop.Visible := false;
                      memLab.Clear;
@@ -5069,6 +5144,13 @@ begin
   end;
 end;
                   
+procedure TfrmLabs.btnSharedResultsClick(Sender: TObject);
+begin
+  inherited;
+  //Showmsg(btnSharedResults.Hint);
+  ViewChartExportHistory;
+end;
+
 procedure TfrmLabs.btnViewHL7Click(Sender: TObject);
 var
   InitFMDateTime : TFMDateTime;
@@ -5082,6 +5164,18 @@ procedure TfrmLabs.btnViewLinkedNoteClick(Sender: TObject);
 begin
   inherited;
   ViewNotes(LinkedNote);
+end;
+
+procedure TfrmLabs.btnViewLinkedOrderClick(Sender: TObject);
+var tmpList: TStringList;
+    BigOrderID:string;
+begin
+  inherited;
+  if LinkedOrder='' then exit;
+  tmpList := TStringList.Create;
+  BigOrderID := LinkedOrder+';1';
+  FastAssign(DetailOrder(BigOrderID), tmpList);
+  ReportBox(tmpList, 'Order Details - ' + BigOrderID, True);
 end;
 
 procedure TfrmLabs.btnViewReportClick(Sender: TObject);
@@ -5229,6 +5323,8 @@ procedure TfrmLabs.mnuUploadLabPDFClick(Sender: TObject);
 const
   RefreshInterval = 250;
   BlockSize = 512;
+  MaxRetries = 5;
+  RetryDelay = 500; //milliseconds
 
 var
   LocalFNamePath,FPath,FName    : AnsiString;
@@ -5243,22 +5339,38 @@ var
   RPCResult                     : AnsiString;
   Abort                         : boolean;
   frmImagePickPDF               : TfrmImagePickPDF;
+  Retries                       : integer;
+  FileOpened                    : boolean;
 begin
+  Retries := 0;
+  FileOpened := False;
   frmImagePickPDF := TfrmImagePickPDF.Create(Self);   //free'd in OnHide  <-- no longer true
   if frmImagePickPDF.Execute then begin
       LocalFNamePath := frmImagePickPDF.Files.Strings[0];
+  end else begin
+      ShowMessage('PDF picker was cancelled');
   end;
   FName := Patient.DFN+'-'+DateTimeToFMDTStr(Now)+'.pdf';
   frmImagePickPDF.Free;
   Application.ProcessMessages;
   LocalFileSize := FileSize(LocalFNamePath);
-  try
-    InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
-  except
-    InFile.Free;
-    exit;
+  while (not FileOpened) and (Retries < MaxRetries) do begin
+    try
+      InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
+      FileOpened := True;
+    except
+      on E:EFOpenError do begin
+        Inc(Retries);
+        Sleep(RetryDelay);
+      end;
+    end;
   end;
 
+  if not FileOpened then begin
+     InFile.Free;
+     ShowMessage('Error with streaming PDF to local variable');
+     exit;
+  end;
   RPCBrokerV.remoteprocedure := 'TMG LAB UPLOAD ONE PDF';
   RPCBrokerV.ClearParameters := true;
 
@@ -5360,6 +5472,12 @@ begin
 end;
 
 function TfrmLabs.InfoToHTMLTable(LabInfo: tLabsInfoRec) : string;
+  function ProtectChars(Instr:string):string;
+  begin
+      result := Instr;
+      result := StringReplace(result,'<','&lt;',[rfReplaceAll]);
+      result := StringReplace(result,'>','&gt;',[rfReplaceAll]);
+  end;
 //kt added 2/17
 //Input:  Record containing lab data
 //Output:  A string containing HTML that displays data in an HTML table.
@@ -5400,7 +5518,7 @@ begin
       if i = 0 then s := LabInfo.Date else s := '';
       result := result+'<tr><td>'+ s +'</td>'; //begin row and date cell
       for j := 1 to 5 do begin //cycle through each piece for cell value
-        result := result+'<td>'+piece(LabInfo.Data[i],'^',j)+'</td>';
+        result := result+'<td>'+piece(ProtectChars(LabInfo.Data[i]),'^',j)+'</td>';
       end;
       result := result+'</tr>';  //end row
     end;
@@ -5409,7 +5527,7 @@ begin
   if HasNotes then begin
     result := result+'<table border=1 RULES=NONE FRAME=BOX CELLSPACING=0 bgcolor='+BG_COLOR+'><tr><td>';  //<pre>';
     for k := 0 to LabInfo.Notes.Count - 1 do
-      result := result + StringReplace(LabInfo.Notes[k],' ','&nbsp;',[rfReplaceAll]) + '<br>';
+      result := result + StringReplace(ProtectChars(LabInfo.Notes[k]),' ','&nbsp;',[rfReplaceAll]) + '<br>'; //Added HTMLDecode for < and > symbols
       //result := result + '<tr><td><pre>' + LabInfo.Notes[k] + '</pre></td></tr>';
     result := result+'</td></tr></table>';
   end;
@@ -5525,5 +5643,7 @@ end;
 
 initialization
   SpecifyFormIsNotADialog(TfrmLabs);
+
+
 
 end.

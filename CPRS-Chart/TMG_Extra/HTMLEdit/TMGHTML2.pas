@@ -684,9 +684,11 @@ var
     HTMLArray :TStringList;
 begin
    AllowPaste := True;
+   exit;
    HTML := GetClipboardHTML;
    //HTML := GetClipHTMLText;
    if uTMGOptions.ReadBool('AlterPastedHTML',false)=false then exit;
+   if Pos('E-Scribe',HTML)>0 then exit; //escribe already formatted
    if HTML='' then begin
      if Clipboard.HasFormat(CF_TEXT) then begin
        TEXT := Clipboard.AsText;

@@ -41,7 +41,7 @@ uses
   Dialogs, StdCtrls, Buttons, ExtCtrls, StrUtils, ComCtrls, uTMGTypes,
   ORNet, ORFn, Trpcb, FMErrorU;
 
-procedure GetAllSubRecordsRPC(SubFileNum, ParentIENS : string; SubRecsList : TStringList; OUT Map : string; Fields : string = '');
+procedure GetAllSubRecordsRPC(SubFileNum, ParentIENS : string; SubRecsList : TStringList; OUT Map : string; Fields : string = ''; Identifier : string = '');
 procedure ReminderTest(ReminderIEN, DFNorPtName, AsOfDate : string; DisplayAllTerms : boolean; Result : TStrings);
 procedure TaxonomyInquire(IEN : string; Result : TStrings);
 function  ExpandFileNumber(var FileNumberOrName : string) : string;
@@ -123,11 +123,15 @@ end;
 procedure GetAllSubRecordsRPC(SubFileNum, ParentIENS : string;
                               SubRecsList : TStringList;
                               OUT Map : string;
-                              Fields : string = '');
+                              Fields : string = '';
+                              Identifier : string = '');
 var  RPCResult : string;
 begin
   SubRecsList.Clear;
-  PrepRPC('GET SUB RECS LIST', [SubFileNum, ParentIENS, Fields]);
+  if Pos('^', Identifier)>0 then begin
+    Identifier := StringReplace(Identifier, '^', '%', [rfReplaceAll]);  //This will be converted back in server RPC code.   
+  end;
+  PrepRPC('GET SUB RECS LIST', [SubFileNum, ParentIENS, Fields, Identifier]);
   if CallBrokerAndErrorCheck(RPCResult) then begin
     Map := MidStr(RPCResult, Length('1^Success^')+1, Length(RPCResult));
     SubRecsList.Assign(RPCBrokerV.Results);

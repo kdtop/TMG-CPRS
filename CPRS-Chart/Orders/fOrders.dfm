@@ -9,8 +9,8 @@ inherited frmOrders: TfrmOrders
   Menu = mnuOrders
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 851
-  ExplicitHeight = 613
+  ExplicitWidth = 843
+  ExplicitHeight = 609
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -30,7 +30,7 @@ inherited frmOrders: TfrmOrders
     Width = 117
     Height = 550
     ExplicitWidth = 117
-    ExplicitHeight = 530
+    ExplicitHeight = 550
     object OROffsetLabel1: TOROffsetLabel
       Left = 0
       Top = 0
@@ -141,7 +141,6 @@ inherited frmOrders: TfrmOrders
       ItemTipColor = clWindow
       LongList = False
       Pieces = '2'
-      ExplicitHeight = 414
     end
     object btnDelayedOrder: TORAlignButton
       Left = 0
@@ -165,7 +164,7 @@ inherited frmOrders: TfrmOrders
     OnResize = pnlRightResize
     ExplicitLeft = 121
     ExplicitWidth = 714
-    ExplicitHeight = 530
+    ExplicitHeight = 550
     object lblOrders: TOROffsetLabel
       Left = 0
       Top = 0
@@ -287,7 +286,6 @@ inherited frmOrders: TfrmOrders
       OnDrawItem = lstOrdersDrawItem
       OnMeasureItem = lstOrdersMeasureItem
       Caption = 'Active Orders'
-      ExplicitHeight = 494
     end
   end
   inherited amgrMain: TVA508AccessibilityManager

@@ -153,7 +153,7 @@ function MHTestAuthorized(Test: string): boolean;
 function AnytimeEncounters: boolean;
 function AutoCheckout(Loc: integer): boolean;
 
-{ Encounter }
+// Encounter
 //function RequireExposures(ANote: Integer): Boolean;      {RAB}
 function RequireExposures(ANote, ATitle: Integer): Boolean;
 function PromptForWorkload(ANote, ATitle: Integer; VisitCat: Char; StandAlone: boolean): Boolean;
@@ -167,10 +167,20 @@ function IsNonCountClinic(ALocation: integer): boolean;
 // HNC Flag
 //function HNCOK: boolean;
 
+//TMG edit TMG encounter stuff
+procedure EditTMGCommon(Data, Result : TStringList);
+function Edit1TMGCommon(Str : string) : string;
+function AddTMGSection(SectionName: string; Sequence: string='') : string;
+function EditTMGSection(OldSectName, NewSectName : string; Sequence: string='') : string;
+function DelTMGSection(SectionName : string) : string;
+function AddTMGEntry(SectionName, ICDName : string; DisplayName : string = ''; Sequence : string = ''; DisplayMode : string = '') : string;
+function EditTMGEntry(SectionName, OldICDName : string; ICDName: string = ''; DisplayName : string = ''; Sequence : string = ''; DisplayMode : string = '') : string;
+function DelTMGEntry(SectionName, OldICDName : string) : string;
+
 implementation
  //agp WV INTEGRATE CPRS30.70 CHANGES
 uses TRPCB, rCore, uCore, uConst, fEncounterFrame, UBAGlobals, UBAConst
-     , rMisc, fDiagnoses; //agp //kt
+     , rMisc, fDiagnoses, StrUtils; //agp //kt
 
 var
   //kt  NOTE: I wish the data below was held in an object.  But apparently only one
@@ -285,7 +295,10 @@ begin
   else
     ExtInt := 0;
   if (LexApp = LX_ICD) and AExtend and AI10Active then
-    CallV('ORWLEX GETI10DX', [x, ADate])
+    CallV('TMG ORWLEX GETI10DX', [x, ADate])    //TMG 4/11/2024 THIS WAS ORWLEX GETI10DX
+  //kt TO DO, INSERT WEDGE FOR CPT LOOKUP
+  else if (LexApp = LX_CPT) then   //kt added this block
+    CallV('TMG CPRS GET CPT', [x, ADate])
   else
     CallV('ORWPCE4 LEX', [x, CodeSys, ADate, ExtInt, True]);
   FastAssign(RPCBrokerV.Results, Dest);
@@ -343,7 +356,7 @@ var
   i: integer;
   uTempList: TStringList;
   EncDt: TFMDateTime;
-  
+
 begin
   uLastLocation := uEncLocation;
   EncDt := Trunc(uEncPCEData.VisitDateTime);
@@ -541,10 +554,12 @@ begin
   //agp //kt prior --> if (uLastLocation <> uEncLocation) or (uLastDFN <> patient.DFN) then LoadEncounterForm; // reinstated, since CIDC is gone.
 
   //AGP WV INTEGRATE CPRS30.70 CHANGES begin
-  if (uLastLocation <> uEncLocation) or (uLastDFN <> patient.DFN) or
-  (uLastEncDt <> Trunc(uEncPCEData.VisitDateTime)) or PLUpdated then begin
-    LoadEncounterForm; // reinstated, since CIDC is gone.
-  end;
+  if assigned(uEncPCEData) then begin  //kt <-- added 12/27/23
+    if (uLastLocation <> uEncLocation) or (uLastDFN <> patient.DFN) or
+      (uLastEncDt <> Trunc(uEncPCEData.VisitDateTime)) or PLUpdated then begin
+      LoadEncounterForm; // reinstated, since CIDC is gone.
+    end;
+  end;  //kt <-- added
   if PLUpdated  then PLUpdated := False;
   //agp end
   for i := 0 to uDiagnoses.Count - 1 do if CharAt(uDiagnoses[i], 1) = U then begin
@@ -557,6 +572,7 @@ end;
 procedure ListDiagnosisCodes(Dest: TStrings; SectionIndex: Integer);
 { return diagnoses within section in format:
     diagnosis <TAB> ICDInteger <TAB> .ICDDecimal <TAB> ICD Code }  //kt <---- this format doesn't seem to match code below.
+//Source of data is globally scoped uDiagnoses from here in rPCE
 var
   i: Integer;
   t, c, f, p, ICDCSYS: string;
@@ -925,7 +941,8 @@ begin
     SetPiece(Tmp,U,5,'1');
     Dest[Index] := Tmp;
     idx := StrToIntDef(piece(Tmp,U,6),-1);
-    if(idx >= 0) then
+    // 7/17/23 -> PRIOR LINE if (idx >= 0) then
+    if(idx >= 0)and(idx<uProcedures.count) then   //Added the AND as a sanity check because some indexes were beyond the count   ELH  7/17/23
     begin
       Tmp := uProcedures[idx];
       SetPiece(Tmp,U,12,Result);
@@ -1599,6 +1616,112 @@ function IsUserAUSRProvider(AUser: Int64; ADate: TFMDateTime): boolean;
 begin
   Result := (sCallV('TIU IS USER A USR PROVIDER', [AUser, ADate]) = '1');
 end;
+
+
+procedure EditTMGCommon(Data, Result : TStringList); //kt added
+//Data Format.
+//        Data[#]=CMD^CATEGORY^IENINFO^DATA(FLD=VALUE)^DATA^DATA...
+//             CMD: DEL, ADD, or EDIT
+//            Category: ENTRY or SECTION
+//             IEN: IEN22753 value, OR '.01=<value>'  <-- this is value to match when searching for record to edit
+//             DATA: Will be FLD=VALUE  <-- this is data to be filed.
+//                NOTE: If dealing with EDIT^ENTRY (subfile entry), then first FLD=VALUE must be .01=<value> to search for subrecord to edit.
+//             Examples of expected input
+//               Data[#]="ADD^SECTION^0^.01=Misc^.02=12"                        ; <-- ADD new section named Misc with sequence of 12.  NOTE: don't include any child entries here.
+//               Data[#]="EDIT^SECTION^.01=Misc^.01=Misc-Stuff"                 ; <-- rename .01 field
+//               Data[#]="ADD^ENTRY^.01=Misc-Stuff^.01=`572555^.03=Pes Planus"  ; <-- add 'Pes Planus', for ICD (IEN80) 667788, into section `4567
+//               Data[#]="EDIT^ENTRY^.01=Misc-Stuff^.01=`572555^.03=Planus,Pes" ; <-- edit ICD (IEN80) 667788, in section `4567, to have new .03 value
+//               Data[#]="DEL^ENTRY^.01=Misc-Stuff^.01=`572555"                 ; <-- delete entry for ICD (IEN80) 667788, in section `4567
+//               Data[#]="DEL^SECTION^.01=Misc-Stuff"                           ; <-- DELETE entry NOTE: this will kill all contained child entries!
+
+var i : integer;
+begin
+  {
+  RPCBrokerV.ClearParameters := True;
+  RPCBrokerV.RemoteProcedure := 'TMG CPRS ENCOUNTER EDIT';
+  RPCBrokerV.Param[1].PType := list;
+  for i := 0 to Data.Count-1 do begin
+    RPCBrokerV.Param[1].Mult[IntToStr(i+1)] := Data[i];
+  end;
+  CallBroker;
+  FastAssign(RPCBrokerV.Results, Result);
+  }
+  CallV('TMG CPRS ENCOUNTER EDIT',[Data]);
+  FastAssign(RPCBrokerV.Results, Result);
+end;
+
+function Edit1TMGCommon(Str : string) : string;
+//kt added
+var DataSL, ResultSL : TStringList;
+begin
+  Result := '';
+  DataSL := TStringList.Create;
+  ResultSL := TStringList.Create;
+  try
+    DataSL.Add(Str);
+    EditTMGCommon(DataSL, ResultSL);
+    if ResultSL.Count>0 then begin
+      Result := ResultSL.Strings[0];
+    end;
+  finally
+    DataSL.Free;
+    ResultSL.Free;
+  end;
+end;
+
+function AddTMGSection(SectionName: string; Sequence: string='') : string;
+//kt added
+var Str : string;
+begin
+  Str := 'ADD^SECTION^0^.01=' + SectionName + IfThen(Sequence<>'', '^.02='+Sequence, '');
+  Result := Edit1TMGCommon(Str);
+end;
+
+function EditTMGSection(OldSectName, NewSectName : string; Sequence: string='') : string;
+//kt added
+var Str : string;
+begin
+  Str := 'EDIT^SECTION^.01='+OldSectName+'^.01='+NewSectName + IfThen(Sequence<>'', '^.02='+Sequence, '');
+  Result := Edit1TMGCommon(Str);
+end;
+
+function DelTMGSection(SectionName : string) : string;
+//kt added
+begin
+  Result := Edit1TMGCommon('DEL^SECTION^0^.01=' + SectionName);
+end;
+
+function AddTMGEntry(SectionName, ICDName : string; DisplayName : string = ''; Sequence : string = ''; DisplayMode : string = '') : string;
+//kt added
+var Str : string;
+begin
+  Str := 'ADD^ENTRY^.01='+SectionName+'^.01='+ICDName
+    + IfThen(Sequence<>'',    '^.02='+Sequence, '')
+    + IfThen(DisplayName<>'', '^.03='+DisplayName, '')
+    + IfThen(DisplayMode<>'', '^.04='+DisplayMode, '');
+  Result := Edit1TMGCommon(Str);
+end;
+
+function EditTMGEntry(SectionName, OldICDName : string; ICDName: string = ''; DisplayName : string = ''; Sequence : string = ''; DisplayMode : string = '') : string;
+//kt added
+var Str : string;
+begin
+  Str := 'EDIT^ENTRY^.01='+SectionName+'^.01='+OldICDName
+    + IfThen(ICDName<>'',     '^.01='+ICDName, '')
+    + IfThen(Sequence<>'',    '^.02='+Sequence, '')
+    + IfThen(DisplayName<>'', '^.03='+DisplayName, '')
+    + IfThen(DisplayMode<>'', '^.04='+DisplayMode, '');
+  Result := Edit1TMGCommon(Str);
+end;
+
+function DelTMGEntry(SectionName, OldICDName : string) : string;
+//kt added
+var Str : string;
+begin
+  Str := 'DEL^ENTRY^.01='+SectionName+'^.01='+OldICDName;
+  Result := Edit1TMGCommon(Str);
+end;
+
 
 //function HNCOK: boolean;
 //begin

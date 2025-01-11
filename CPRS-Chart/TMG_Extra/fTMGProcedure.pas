@@ -25,6 +25,11 @@ type
     btnSearch: TBitBtn;
     btnClearSrch: TBitBtn;
     edtSearchTerms: TEdit;
+    btnNext: TBitBtn;
+    procedure btnNextClick(Sender: TObject);
+    procedure clbListMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnSearchClick(Sender: TObject);
     procedure btnClearSrchClick(Sender: TObject);
     procedure edtSearchTermsChange(Sender: TObject);
@@ -66,6 +71,7 @@ type
     FProgSrchEditChange : boolean;
     FProgSectionClick : boolean;
     function MissingProvider: boolean;
+    function ProcedureWarning: string;
     procedure SetSearchMode(Mode : boolean);
     procedure ConfigureForSearchMode(SearchMode : boolean);
     function ShouldFilter(Entry : string) : boolean;  //fmt: ICDCode^ProblemText^ICDCode^CodeStatus^ProblemIEN^ICDCodingSystem
@@ -77,9 +83,12 @@ type
     procedure ListTMGProcedureCodes(Dest: TStrings; IntEntryType: Integer); //kt
     procedure LoadTMGProcedureInfo(TitlesToAdd : TStringList);  //kt
   public
+    IsDirty : boolean;  //11/14/23
+    procedure SetDirtyStatus(DirtyStatus:boolean);  //11/14/23
     function OK2SaveProcedures: boolean;
     //procedure InitTab(ACopyProc: TCopyItemsMethod; AListProc: TListSectionsProc);
     procedure InitTab(ACopyProc: TCopyItemsMethod; AListProc: TListSectionsProc; SrcPCEData : TPCEData);
+    procedure SendData(var SendErrors,UnpastedHTML:string);
   end;
 
 var
@@ -90,7 +99,8 @@ implementation
 {$R *.DFM}
 
 uses
-  fEncounterFrame, uConst, rCore, VA508AccessibilityRouter;
+  fEncounterFrame, uConst, rCore, fNotes, //kt
+  VA508AccessibilityRouter;
 
 const
   TX_PROC_PROV = 'Each procedure requires selection of a Provider before it can be saved.';
@@ -239,6 +249,43 @@ begin
     TPCEProc(lbGrid.Items.Objects[i]).fIsOldProcedure := True;
 end;
 }
+
+procedure TfrmTMGProcedures.SendData(var SendErrors,UnpastedHTML:string);
+var SL, HTMLTable : TStringList;
+    TempPCE: TPCEData;
+    i : integer;
+    Line : string;
+begin
+  //exit;  //remove later if feature wanted...
+  if not assigned(frmNotes) then exit;
+  if IsDirty=False then exit;  //11/14/23
+
+  SL := TStringList.Create;
+  HTMLTable := TStringList.Create;
+  TempPCE := TPCEData.Create;
+  try
+    //Assemble Dx listing....
+    TempPCE.SetProcedures(lbGrid.Items);
+    SL.Text := TempPCE.StrProcedures(True);
+    if SL.Count > 0 then begin
+      HTMLTable.Add('<table border="0" cellspacing="2" cellpadding="0" bgcolor="#d3d3d3" DXs="1">');
+      HTMLTable.Add('<tr><th colspan="2">PROCEDURES</th></tr>');
+      for i := 0 to SL.Count - 1 do begin
+        Line := SL[i];
+        HTMLTable.Add('<tr bgcolor="#f2f2f2">');
+        HTMLTable.Add('<td>'+Line+'</td>');
+        HTMLTable.Add('</tr>')
+      end;
+      HTMLTable.Add('</table>');
+      HTMLTable.Add('<p><DIV name="'+HTML_TARGET_PROCS+'"></DIV>');
+      frmNotes.InsertProcsGrid(HTMLTable, SendErrors, UnpastedHTML);
+    end;
+  finally
+    SL.Free;
+    HTMLTable.Free;
+    TempPCE.Free;
+  end;
+end;
 
 
 procedure TfrmTMGProcedures.InitTab(ACopyProc: TCopyItemsMethod; AListProc: TListSectionsProc; SrcPCEData : TPCEData);
@@ -398,7 +445,7 @@ begin
   NodeTypeSL[PriorCPTs]         := TMGInfoPriorCPTs;
   NodeTypeSL[EncounterCPTs]     := TMGInfoEncounterCPTs;
 
-  FTabName := CT_TMG_ProcNm;
+  FTabName := CT_TMG_ProcNm;   // <-- required!
   FPCEListCodesProc := ListTMGProcedureCodesExternal;
   // FPCEListCodesProc := ListTMGDiagnosisCodesExternal;  //this is a callback. Will be called by ancestor(s) of this class
 
@@ -414,6 +461,7 @@ begin
   FProgSrchEditChange := false;  //kt
   FProgSectionClick := false;    //kt
 
+  IsDirty := False;
 end;
 
 procedure TfrmTMGProcedures.FormDestroy(Sender: TObject);
@@ -421,6 +469,12 @@ begin
   inherited;
   TMGInfoPriorCPTs.Free; //kt
   FSearchTerms.Free;  //kt
+end;
+
+procedure TfrmTMGProcedures.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  inherited;
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmTMGProcedures.UpdateNewItemStr(var x: string);
@@ -547,6 +601,12 @@ begin
   Sync2Section;
   UpdateControls;
   ShowModifiers;
+end;
+
+procedure TfrmTMGProcedures.clbListMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  SetDirtyStatus(True);
 end;
 
 procedure TfrmTMGProcedures.lbGridSelect(Sender: TObject);
@@ -825,6 +885,12 @@ begin
   SetSearchMode(false);
 end;
 
+procedure TfrmTMGProcedures.btnNextClick(Sender: TObject);
+begin
+  inherited;
+  frmEncounterFrame.SelectNextTab;
+end;
+
 procedure TfrmTMGProcedures.btnOtherClick(Sender: TObject);
 begin
   inherited;
@@ -869,6 +935,28 @@ begin
     InfoBox(TX_PROC_PROV, TC_PROC_PROV, MB_OK or MB_ICONWARNING);
     Result := False;
   end;
+  if ProcedureWarning<>'' then
+  begin
+    InfoBox(TX_PROC_PROV, TC_PROC_PROV, MB_OK or MB_ICONWARNING);
+    Result := False;
+  end;
+end;
+
+function TfrmTMGProcedures.ProcedureWarning: string;
+var arrProcedures:TStringList;
+    strProcedures:string;
+    i:integer;
+begin
+    arrProcedures := TStringList.create();
+    FSrcPCEData.CopyProcedures(arrProcedures);
+    strProcedures := '';
+    for I := 0 to arrProcedures.Count - 1 do begin
+      if strProcedures<>'' then strProcedures := strProcedures+'^';
+      strProcedures := strProcedures+arrProcedures[i];
+    end;
+    //ShowMessage(strProcedures);
+    arrProcedures.Free;
+    result := '';
 end;
 
 function TfrmTMGProcedures.MissingProvider: boolean;
@@ -945,8 +1033,18 @@ begin
   end;
 end;
 
+procedure TfrmTMGProcedures.SetDirtyStatus(DirtyStatus:boolean);
+begin
+  IsDirty := DirtyStatus;
+  frmEncounterFrame.SetCurrentTabAsDirty(DirtyStatus);
+end;
 
 
+procedure TfrmTMGProcedures.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  SetDirtyStatus(True);
+end;
 
 initialization
   SpecifyFormIsNotADialog(TfrmTMGProcedures);

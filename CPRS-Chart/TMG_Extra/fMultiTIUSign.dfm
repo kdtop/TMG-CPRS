@@ -12,6 +12,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -60,7 +61,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         Align = alTop
         BevelOuter = bvLowered
         TabOrder = 0
-        object lblAlerts: TLabel
+        object lblItemsTitle: TLabel
           Left = 1
           Top = 1
           Width = 228
@@ -110,7 +111,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         OnCompare = lvUnSelectedCompare
         OnResize = lvUnSelectedResize
         Caption = 'lvUnSelected'
-        ExplicitLeft = 3
       end
     end
     object pnlCenter: TPanel

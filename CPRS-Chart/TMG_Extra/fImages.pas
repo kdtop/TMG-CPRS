@@ -556,6 +556,7 @@ function TfrmImages.AllowContextChange(var WhyNot: string): Boolean;
 //Return: TRUE if OK to exit or change.
 begin
   Result := true; //default
+  WebBrowser.Navigate(NullImageName);
   exit; //later could deny quit if doing something important...
   {
   WhyNot := 'Images busy';
@@ -653,9 +654,9 @@ begin
   lvThumbnails.Items.Count := AllPatientImagesInfoList.Count;
   btnSort.Caption := IfThen(Descending=False,'Currently In Ascending Order','Currently In Descending Order');
   if Descending then
-    btnSort.Glyph.LoadFromFile('\\server1\public\vista\vista-art\icons\arrows\down-arrow-glyph-2.bmp')
+    btnSort.Glyph.LoadFromFile('\\server2\public\vista\vista-art\icons\arrows\down-arrow-glyph-2.bmp')
   else
-    btnSort.Glyph.LoadFromFile('\\server1\public\vista\vista-art\icons\arrows\up-arrow-glyph-2.bmp');
+    btnSort.Glyph.LoadFromFile('\\server2\public\vista\vista-art\icons\arrows\up-arrow-glyph-2.bmp');
   WebBrowser.Navigate(NullImageName);
 end;
 

@@ -77,7 +77,6 @@ object frmChartExportHistory: TfrmChartExportHistory
     Height = 551
     Align = alClient
     TabOrder = 1
-    ExplicitHeight = 550
     object pnlLowerTop: TPanel
       Left = 1
       Top = 1
@@ -86,7 +85,6 @@ object frmChartExportHistory: TfrmChartExportHistory
       Align = alTop
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
-      ExplicitHeight = 510
       object Splitter2: TSplitter
         Left = 186
         Top = 1
@@ -102,8 +100,6 @@ object frmChartExportHistory: TfrmChartExportHistory
         Height = 509
         Align = alLeft
         TabOrder = 0
-        ExplicitTop = 42
-        ExplicitHeight = 538
         object tvOneExport: TORTreeView
           Left = 1
           Top = 1
@@ -116,7 +112,6 @@ object frmChartExportHistory: TfrmChartExportHistory
           NodeDelim = '-'
           NodePiece = 1
           ShortNodeCaptions = True
-          ExplicitHeight = 536
         end
       end
       object pnlLowerMiddleRight: TPanel
@@ -126,10 +121,6 @@ object frmChartExportHistory: TfrmChartExportHistory
         Height = 509
         Align = alClient
         TabOrder = 1
-        ExplicitLeft = 4
-        ExplicitTop = 42
-        ExplicitWidth = 840
-        ExplicitHeight = 538
         object wbOneSentItem: TWebBrowser
           Left = 1
           Top = 1
@@ -315,6 +306,35 @@ object frmChartExportHistory: TfrmChartExportHistory
           FFFFFFFFFFFFFFFFFFFFFFFFFFFF565A9C3337872B30844448965256A05C60A5
           5C60A55256A04448962B3084333787565A9CFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFF}
+      end
+      object btnEdit: TBitBtn
+        Left = 215
+        Top = 8
+        Width = 155
+        Height = 32
+        Anchors = [akLeft, akBottom]
+        Caption = 'E&dit Selected'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Microsoft Sans Serif'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 2
+        OnClick = btnEditClick
+        Glyph.Data = {
+          66010000424D6601000000000000760000002800000014000000140000000100
+          040000000000F000000000000000000000001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+          5555555500005577777777777777777500005000000000000000007500005088
+          80FFFFFF0FFFF0750000508180F4444F0F44F0750000508880FFFFFF0FFFF075
+          0000508180F4444F0F44F0750000508880FFFFFF0FFFF0750000508180F4444F
+          0F44F0750000508880FF0078088880750000508180F400007844807500005088
+          80FF7008007880750000508180F4408FF80080750000508880FFF70FFF800075
+          0000500000000008FF803007000050EEEEEEEE70880B43000000500000000000
+          00FBB43000005555555555550BFFBB43000055555555555550BFFBB400005555
+          55555555550BFFBB0000}
       end
     end
   end

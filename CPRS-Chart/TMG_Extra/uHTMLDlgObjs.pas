@@ -124,8 +124,9 @@ const
   //-------------------------------------------------------
 
 implementation
-  uses uHTMLDlg, uHTMLTemplateFields
-       {,Monkey_Datepicker} , TMGInlineHTMLDatePicker
+  uses uHTMLDlg, uHTMLTemplateFields, uConst,
+       Variants, ActiveX, math,
+       TMGInlineHTMLDatePicker
        ;
 
   var IDMasterIndex : LongWord;  //Will be a master ID counter for all objects
@@ -305,7 +306,6 @@ implementation
   var
     FnName : string;
     DlgEntry : THTMLTemplateDialogEntry;
-    OnChangeHandler : string;
   begin
     Result := '';
     if HtmlDlg is THTMLTemplateDialogEntry then begin
@@ -317,6 +317,16 @@ implementation
       Result := 'onchange="'+FnName+'"';
       if assigned(Attrs) then Attrs.Add(Result);
     end;
+  end;
+
+  function VarIsNull(const V: Variant): Boolean;
+  begin
+    Result := (TVarData(V).VType = varNull);
+  end;
+
+  function VarNotNull(const V: Variant): Boolean;
+  begin
+    Result := (TVarData(V).VType <> varNull);
   end;
 
   //================================================================================
@@ -472,20 +482,19 @@ implementation
       ScriptCode.Add('}');
     end;
 
-  var OnChange, Text : string;
+  var Text : string;
   begin
-    //OnChange := SetupOnChangeEvent(HtmlDlg, Attrs, ScriptCode);  <-- no handler here means parent onchange will catch event
     AddValGetter(ScriptCode);
     AddValSetter(ScriptCode);
     Attrs.Add('tmgtype="checkbox"');    //tmgtype attrib must match end of getter & setter function names
-    //AddHandlerCode(ScriptCode);
     Id := EnsureID(Attrs);
     Text := SLStr(Content);
     Attrs.Add('type="checkbox"');
     Attrs.Add('tmgvalue="'+Text+'"');
-    AddElement('input', Attrs, Content, Output, true);  //<input> doesn't use end tag
+    AddElement(HTML_TAG_INPUT, Attrs, Content, Output, true);  //<input> doesn't use end tag
   end;
 
+  (* //kt 5/21/25 -- delete later
   function GetCheckBoxVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var inner, outer: string;
       Attrs : TStringList;
@@ -493,7 +502,7 @@ implementation
     inner := Elem.innerHTML;
     outer := Elem.outerHTML;
     Attrs := TStringList.Create;
-    ExtractAttribs('<INPUT', outer, Attrs);
+    ExtractAttribs(HTML_TAG_INPUT_OPEN, outer, Attrs);
     if AttribIdx('checked', Attrs) >= 0 then begin
       Result := GetAttrib('tmgvalue', Attrs);
     end else begin
@@ -501,6 +510,25 @@ implementation
     end;
     Attrs.Free;
   end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetCheckBoxVal(HtmlDlg: TObject; Elem: IHTMLElement; NoCommas: boolean = false): string;
+  var
+    InputElem: IHTMLInputElement;
+    ValueVar: OleVariant;
+  begin
+    Result := '';
+    if not assigned(Elem) then exit;
+    // Try to cast to input element (to access .checked)
+    if Supports(Elem, IHTMLInputElement, InputElem) then begin  //if supported, InputElem is OUT parameter.
+      if InputElem.checked then begin
+        ValueVar := Elem.getAttribute('tmgvalue', 0);  //0 = case-insensitive
+        Result := IfThen(not VarIsNull(ValueVar), ValueVar, '');
+      end;
+    end;
+  end;
+
 
   //================================================================================
   //CheckBox Group
@@ -517,7 +545,7 @@ implementation
       FnDeclaration := 'function ValGet_cbgroup(elem) {';   //'cbgroup' must match tmgtype attrib
       if ScriptCode.IndexOf(FnDeclaration) > -1 then exit;
       ScriptCode.Add(FnDeclaration);
-      ScriptCode.Add('  //Example result: "Apple^Pear^^Grape" if items 0,1,3 are true, 2 is false');
+      //kt ScriptCode.Add('  //Example result: "Apple^Pear^^Grape" if items 0,1,3 are true, 2 is false');
       ScriptCode.Add('  if (!isObj(elem)) return "";');
       ScriptCode.Add('  var result="";');
       ScriptCode.Add('  var id = getAttrib(elem,"id");');
@@ -545,7 +573,7 @@ implementation
       FnDeclaration := 'function ValSet_cbgroup(elem, textVal) {';  //'cbgroup' must match tmgtype attrib
       if ScriptCode.IndexOf(FnDeclaration) > -1 then exit;
       ScriptCode.Add(FnDeclaration);
-      ScriptCode.Add(' //Sample input textVal: "T^T^F^T" or "TRUE^TRUE^FALSE^TRUE"');
+      //kt ScriptCode.Add(' //Sample input textVal: "T^T^F^T" or "TRUE^TRUE^FALSE^TRUE"');
       ScriptCode.Add('  if (!isObj(elem)) return;');
       ScriptCode.Add('  var Arr = ensureStr(textVal).toUpperCase().split("^");');
       ScriptCode.Add('  var id = getAttrib(elem,"id");');
@@ -577,33 +605,36 @@ implementation
       end;
     end;
     SL := TStringList.Create;  //empty SL
-    AddElement('div', Attrs, SL, Output, true);  //true= no close element.
+    AddElement(HTML_TAG_DIV, Attrs, SL, Output, true);  //true= no close element.
     SL.Free;
     if HtmlDlg is THTMLDlg then begin
       THTMLDlg(HtmlDlg).AddFromSource(Content);  //recursive call.
     end else if HtmlDlg is THTMLTemplateDialogEntry then begin
       THTMLTemplateDialogEntry(HtmlDlg).AddFromPseudoHTML(Content, StyleCodes, ScriptCode);  //recursive call.
     end;
-    Output.add('</div>');
+    Output.add(HTML_TAG_DIV_CLOSE);
   end;   //AddCBGroup()
 
   function GetCBGroupVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
-  var {inner,} outer: string;
-      Attrs : TStringList;
+  var outer: string;
+      //Attrs : TStringList;
       i, count : integer;
       ID, SubID : string;
       SubResult : string;
+      ValueVar: OleVariant;
   begin
     Result := '';
-    //inner := Elem.innerHTML;
+    if not assigned(Elem) then exit;
     outer := Elem.outerHTML;
-    Attrs := TStringList.Create;
-    ExtractAttribs('<DIV', outer, Attrs);
-    count := StrToIntDef(GetAttrib('count', Attrs),0);
-    ID := GetAttrib('id', Attrs);
+    //Attrs := TStringList.Create;
+    //ExtractAttribs(HTML_TAG_DIV_OPEN, outer, Attrs);
+    //count := StrToIntDef(GetAttrib('count', Attrs),0);
+    ValueVar := Elem.getAttribute('count', 0);  //0 = case-insensitive
+    count := IfThen(VarNotNull(ValueVar), ValueVar, 0);
+    //ID := GetAttrib('id', Attrs);
+    ID := Elem.id;
     for i := 0 to Count - 1 do begin
       SubID := ID + 'd' + IntToStr(i);
-      //SubResult := THTMLDlg(HTMLDlg).GetValueByID(SubID, NoCommas);
       if HtmlDlg is THTMLDlg then begin
         SubResult := THTMLDlg(HTMLDlg).GetValueByID(SubID, NoCommas);
       end else if HtmlDlg is THTMLTemplateDialogEntry then begin
@@ -616,7 +647,7 @@ implementation
       end;
       Result := Result + SubResult;
     end;
-    Attrs.Free;
+    //Attrs.Free;
   end;
 
   //================================================================================
@@ -665,26 +696,26 @@ implementation
     IEN := StringReplace(IEN, '"', '', [rfReplaceAll]);
     SL := TStringList.Create;  //empty SL -- for first SPAN
     //kt 6/21/16 AddElement('SPAN', Attrs, SL, Output, true);  //true= no close element.
-    AddElement('DIV', Attrs, SL, Output, true);  //true= no close element.
+    AddElement(HTML_TAG_DIV, Attrs, SL, Output, true);  //true= no close element.
     if HtmlDlg is THTMLDlg then begin
       THTMLDlg(HtmlDlg).AddFromSource(Content);  //recursive call.
     end else if HtmlDlg is THTMLTemplateDialogEntry then begin
       THTMLTemplateDialogEntry(HtmlDlg).AddFromPseudoHTML(Content, StyleCodes, ScriptCode);  //recursive call.
     end;
     //kt 6/21/16 Output.add('</SPAN>');
-    Output.add('</DIV>');
+    Output.add(HTML_TAG_DIV_CLOSE);
     //Add <SPAN> to store output/result view of dialog
     SL.clear;
     Attrs.Clear;
     Attrs.Add('class="' + EMBEDDED_DLG_RESULT_CLASS + ' ' + HIDDEN_CLASS + '"');
     Attrs.Add('id="'+Id + EMBEDDED_RESULT_SUFFIX+'"');  //NOTE: if [ID]_result below is changed, must also change THTMLTemplateDialogEntry.ResolveIntoResultDIV
     Attrs.Add('IEN="' + IEN + '"');
-    AddElement('SPAN', Attrs, SL, Output);
+    AddElement(HTML_TAG_SPAN, Attrs, SL, Output);
     Attrs.Clear;
     //Add <SPAN> to store data back into server database.
     Attrs.Add('class="' + EMBEDDED_DLG_STORE_CLASS + ' ' + HIDDEN_CLASS + '"');
     Attrs.Add('id="'+Id + EMBEDDED_STORE_SUFFIX+'"');
-    AddElement('SPAN', Attrs, SL, Output);
+    AddElement(HTML_TAG_SPAN, Attrs, SL, Output);
     SL.Free;
   end;  //AddDialogGrp()
 
@@ -743,7 +774,7 @@ implementation
     Attrs.Add('value="'+SLStr(Content)+'"');
     Content.clear;
     SL := TStringList.Create;
-    AddElement('input', Attrs, Content, SL, true);  //<input> doesn't use end tag
+    AddElement(HTML_TAG_INPUT, Attrs, Content, SL, true);  //<input> doesn't use end tag
     for i := 0 to SL.Count - 1 do begin
       if i = 0 then begin
         Output.Add(LabelStr + SL.Strings[i]);
@@ -754,6 +785,7 @@ implementation
     SL.Free;
   end;  //AddEditBox()
 
+  (* 5/21/25 -- delete later
   function GetEditBoxVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var HTML : string;
       Attrs : TStringList;
@@ -761,9 +793,23 @@ implementation
     Result := '';
     HTML := Elem.outerHTML;
     Attrs := TStringList.Create;
-    ExtractAttribs('<INPUT', HTML, Attrs);
+    ExtractAttribs(HTML_TAG_INPUT_OPEN, HTML, Attrs);
     Result := GetAttrib('value', Attrs);
     Attrs.Free;
+  end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetEditBoxVal(HtmlDlg: TObject; Elem: IHTMLElement; NoCommas: boolean = false): string;
+  var
+    InputElem: IHTMLInputElement;
+  begin
+    Result := '';
+    if not assigned(Elem) then exit;
+    // Cast to input element to access .value
+    if Supports(Elem, IHTMLInputElement, InputElem) then begin // if supported InputElem is OUT parmeter
+      Result := InputElem.value;
+    end;
   end;
 
 
@@ -846,11 +892,10 @@ implementation
 
   function GetWPBoxVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var inner: string;
-      //outer: string;
   begin
     Result := '';
+    if not assigned(Elem) then exit;
     inner := Elem.innerHTML;
-    //outer := Elem.outerHTML;
     Result := inner;
   end;
 
@@ -884,17 +929,20 @@ implementation
       FnDeclaration := 'function ValSet_combobox(elem, textVal) {';    //'combobox' must match tmgtype attrib
       if ScriptCode.IndexOf(FnDeclaration) > -1 then exit;
       ScriptCode.Add(FnDeclaration);
-      ScriptCode.Add(' //Expected input: numeric index, or value to select (inner or outer value)');
+      //kt ScriptCode.Add(' //Expected input: numeric index, or value to select (inner or outer value)');
       ScriptCode.Add(' if (!isObj(elem)) return;');
       ScriptCode.Add(' try {');
       ScriptCode.Add('  if (elem.getAttribute("tmgtype") !== "combobox") return;');
       ScriptCode.Add('  textVal = ensureStr(textVal);');
       ScriptCode.Add('  var index = parseInt(textVal);');
-      ScriptCode.Add('  if (!isNaN(index)) {  //handle numeric input');
+      //ktScriptCode.Add('  if (!isNaN(index)) {  //handle numeric input');
+      ScriptCode.Add('  if (!isNaN(index)) {  ');
       ScriptCode.Add('   elem.selectedIndex = index;');
-      ScriptCode.Add('  } else {  //text input');
+      //kt ScriptCode.Add('  } else {  //text input');
+      ScriptCode.Add('  } else { ');
       ScriptCode.Add('   elem.value = textVal;');
-      ScriptCode.Add('   if (elem.selectedIndex == -1) {  //match not automatic.');
+      //kt ScriptCode.Add('   if (elem.selectedIndex == -1) {  //match not automatic.');
+      ScriptCode.Add('   if (elem.selectedIndex == -1) {  ');
       ScriptCode.Add('    var upperVal = textVal.toUpperCase();');
       ScriptCode.Add('    for (var i=0; i < elem.childNodes.length; i++) {');
       ScriptCode.Add('     var node = elem.childNodes[i];');
@@ -920,9 +968,9 @@ implementation
         itemtext:=piece(Comboitems[i],'|',2);
         if itemtext='' then itemtext:=item;
         if item=InitialValue then
-          Content.Add('<OPTION value="'+item+'" selected>'+itemtext+'</OPTION>')
+          Content.Add(HTML_TAG_OPTION_OPEN + ' value="'+item+'" selected>'+itemtext + HTML_TAG_OPTION_CLOSE)
         else
-          Content.Add('<OPTION value="'+item+'">'+itemtext+'</OPTION>');
+          Content.Add(HTML_TAG_OPTION_OPEN + ' value="'+item+'">'+itemtext + HTML_TAG_OPTION_CLOSE);
       end;
     end;
 
@@ -939,7 +987,7 @@ implementation
       ScriptCode.Add('  var strSelected = "", Arr = elem.options;');
       ScriptCode.Add('  if ((newIndex > -1) && (newIndex < Arr.length)) strSelected = Arr[newIndex].text;');
       //NOTE: the reason for having internal and external values was so that value displayed to the user
-      //      can be more verbose than the final result. 
+      //      can be more verbose than the final result.
     //ScriptCode.Add('  elem.setAttribute("tmgvalue", strSelected)');  //<-- this is external (shown) value
       ScriptCode.Add('  elem.setAttribute("tmgvalue", elem.value)');   //<-- this is the internal value
       if OnChangeAttrib <> '' then ScriptCode.Add('  fireOnChange(e,"onchange2");');
@@ -965,10 +1013,11 @@ implementation
     GetAndRemoveAttrib(InitialValue, 'initial', Attrs);
     Attrs.Add('tmgvalue="'+InitialValue+'"');
     AddComboboxItems(ComboItems,Content,InitialValue);
-    AddElement('SELECT', Attrs, Content, Output);
+    AddElement(HTML_TAG_SELECT, Attrs, Content, Output);
     ComboItems.Free;
   end;
 
+  (* //kt 5/21/25 delete later
   function GetComboBoxVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var HTML, outer: string;
       //inner: string;
@@ -977,12 +1026,54 @@ implementation
     Result := '';
     //inner := Elem.innerHTML;
     outer := Elem.outerHTML;
-    HTML := piece2(outer,'<OPTION',1);
+    HTML := piece2(outer, HTML_TAG_OPTION_OPEN, 1);
     Attrs := TStringList.Create;
-    ExtractAttribs('<SELECT', HTML, Attrs);
+    ExtractAttribs(HTML_TAG_SELECT_OPEN, HTML, Attrs);
     Result := GetAttrib('tmgvalue', Attrs);
     Attrs.Free;
   end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  (*
+  function GetComboBoxVal(HtmlDlg: TObject; Elem: IHTMLElement; NoCommas: boolean = false): string;
+  var
+    SelectElem: IHTMLSelectElement;
+    OptionElem: IHTMLOptionElement;
+    SelectedIndex: Integer;
+    OptionNode: IHTMLElement;
+    EmptyParam: OleVariant;
+    ValueVar: OleVariant;
+
+  begin
+    Result := '';
+    if not Assigned(Elem) then Exit;
+    // Try to cast to a SELECT element
+    if Supports(Elem, IHTMLSelectElement, SelectElem) then begin  //if supported SelectElem is OUT parameter.
+      SelectedIndex := SelectElem.selectedIndex;
+      // Get the selected option
+      if (SelectedIndex >= 0) and (SelectedIndex < SelectElem.length) then begin
+        OptionNode := SelectElem.item(SelectedIndex, EmptyParam) as IHTMLElement;
+        if Assigned(OptionNode) then begin
+          ValueVar := OptionNode.getAttribute('tmgvalue', 0);  // 0 = case-insensitive search
+          Result := IfThen(not VarIsNull(ValueVar), ValueVar, '');
+        end;
+      end;
+    end;
+  end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetComboBoxVal(HtmlDlg: TObject; Elem: IHTMLElement; NoCommas: boolean = false): string;
+  var
+    ValueVar: OleVariant;
+  begin
+    Result := '';
+    if not assigned(Elem) then exit;
+    ValueVar := Elem.getAttribute('tmgvalue', 0);  //0 = case-insensitive
+    Result := IfThen(VarNotNull(ValueVar), ValueVar, '');
+  end;
+
 
   //================================================================================
   //Radio Group
@@ -1002,7 +1093,7 @@ implementation
       FnDeclaration := 'function ValGet_radiogroup(elem) {';   //'radiogroup' must match tmgtype attrib
       if ScriptCode.IndexOf(FnDeclaration) > -1 then exit;
       ScriptCode.Add(FnDeclaration);
-      ScriptCode.Add('  //returns: "Index^Name", or "^" if none');
+      //kt ScriptCode.Add('  //returns: "Index^Name", or "^" if none');
       ScriptCode.Add('  if (elem == null) return "";');
       ScriptCode.Add('  var Result = getAttrib(elem,"tmgselected") + "^" + getAttrib(elem,"tmgvalue");');
       ScriptCode.Add('  return Result;');
@@ -1017,7 +1108,7 @@ implementation
       FnDeclaration := 'function ValSet_radiogroup(elem, textVal) {';    //'radiogroup' must match tmgtype attrib
       if ScriptCode.IndexOf(FnDeclaration) > -1 then exit;
       ScriptCode.Add(FnDeclaration);
-      ScriptCode.Add(' //textVal should be index or name to be selected');
+      //kt ScriptCode.Add(' //textVal should be index or name to be selected');
       ScriptCode.Add(' if (!isObj(elem)) return;');
       ScriptCode.Add(' if (getAttrib(elem,"tmgtype") !== "radiogroup") return;');
       ScriptCode.Add(' textVal = ensureStr(textVal).toUpperCase();');
@@ -1075,7 +1166,7 @@ implementation
     GetAndRemoveAttrib(InitialStr, 'initial', Attrs);
     Attrs.Add('tmgvalue='+InitialStr);
     Attrs.Add('count='+IntToStr(RadioItems.Count));
-    AddElement('RADIO', Attrs, Content, Output, true);  //KT
+    AddElement(HTML_TAG_RADIO, Attrs, Content, Output, true);  //KT
     //HTML := '<RADIO id="' + id + '" tmgvalue="' + InitialStr + '">';
     InitialStr := UpperCase(InitialStr);
     Output.Add(HTML);
@@ -1096,61 +1187,37 @@ implementation
       Content.Add(DisplayValue);
       AddElement('INPUT', Attrs, Content, Output, true);  //KT
       if (not ShowInline) and (i < RadioItems.Count - 1) then Output.Add('<BR>');
-      {
-      HTML := '<INPUT type=radio name="'+id+'" onClick="HandleRGChange(this)" value="'+Value+'" ';
-      if UpperCase(Value) = InitialStr then HTML := HTML + 'CHECKED=true ';
-      HTML := HTML + 'tmgindex='+IntToStr(i) + '>' + DisplayValue;
-      if not ShowInline then HTML := HTML + '<BR>';
-      Output.Add(HTML);
-      }
     end;
-    Output.Add('</RADIO>');
-    { /// delete later...
-    Attrs.Add('tmgtype="radiogroup"');    //tmgtype attrib must match end of getter & setter function names
-    Id := EnsureID(Attrs);
-    RadioItems := TStringList.Create();
-    ItemCount := ParseItems(Content,RadioItems); //each item is 'ItemValue|DisplayValue' or just 'ItemValue'
-    if GetAndRemoveAttrib(id, 'id', Attrs) = false then exit;  //can't add without an id.
-    //id := 'rg-' + id;
-    GetAndRemoveAttrib(InlineStr, 'inline', Attrs); ShowInline := (Trim(UpperCase(InlineStr)) = 'TRUE');
-    GetAndRemoveAttrib(InitialStr, 'initial', Attrs);
-    AddElement('RADIO', Attrs, Content, Output, true);  //KT
-
-    HTML := '<RADIO id="' + id + '" tmgvalue="' + InitialStr + '">';
-    InitialStr := UpperCase(InitialStr);
-    Output.Add(HTML);
-    for i := 0 to RadioItems.Count - 1 do begin
-      s := RadioItems.Strings[i];
-      if s = '' then continue;  //don't allow blank entries.
-      Value := piece(s,'|',1);  DisplayValue := piece(s,'|',2);
-      if DisplayValue='' then DisplayValue := Value;
-      HTML := '  <INPUT type=radio name="'+id+'" onClick="HandleRGChange(this)" value="'+Value+'" ';
-      if UpperCase(Value) = InitialStr then begin
-        HTML := HTML + 'CHECKED=true ';
-      end;
-      HTML := HTML + '>' + DisplayValue;
-      if not ShowInline then HTML := HTML + '<BR>';
-      Output.Add(HTML);
-    end;
-    Output.Add('</RADIO>');
-
-    }
+    Output.Add(HTML_TAG_RADIO_CLOSE);
     RadioItems.Free;
   end;
 
+  (* //kt 5/21/25 delete alter
   function GetRadioGroupVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var outer: string;
-      //inner: string;
       Attrs : TStringList;
   begin
     Result := '';
-    //inner := Elem.innerHTML;
     outer := Elem.outerHTML;
     Attrs := TStringList.Create;
-    ExtractAttribs('<RADIO', outer, Attrs);
+    ExtractAttribs(HTML_TAG_RADIO_OPEN, outer, Attrs);
     Result := GetAttrib('tmgvalue', Attrs);
     Attrs.Free;
   end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetRadioGroupVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
+  var
+    InputElem: IHTMLInputElement;
+    ValueVar: OleVariant;
+  begin
+    Result := '';
+    if not assigned(Elem) then exit;
+    ValueVar := Elem.getAttribute('tmgvalue', 0);  //0 = case-insensitive
+    Result := IfThen(not VarIsNull(ValueVar), ValueVar, '');
+  end;
+
 
   //================================================================================
   //CycButton
@@ -1180,7 +1247,7 @@ implementation
       FnDeclaration := 'function ValSet_cycbutton(elem, textVal) {';    //'cycbutton' must match tmgtype attrib
       if ScriptCode.IndexOf(FnDeclaration) > -1 then exit;
       ScriptCode.Add(FnDeclaration);
-      ScriptCode.Add('  //textVal should be index or name of option to set');
+      //kt ScriptCode.Add('  //textVal should be index or name of option to set');
       ScriptCode.Add('  if (!isObj(elem)) return;');
       ScriptCode.Add('  textVal = ensureStr(textVal);');
       ScriptCode.Add('  var max= getNumAttrib(elem, "max",0)+1;');
@@ -1293,7 +1360,8 @@ implementation
   var inner: string;
       //outer: string;
   begin
-    //Result := '';
+    Result := '';
+    if not assigned(Elem) then exit;
     inner := Elem.innerHTML;
     //outer := Elem.outerHTML;
     Result := inner;
@@ -1328,14 +1396,14 @@ implementation
     ScriptCode.Add('  if (!isObj(elem)) return;');
     ScriptCode.Add('  var min=getNumAttrib(elem,"min",0);');
     ScriptCode.Add('  var max=getNumAttrib(elem,"max",99999);');
-    ScriptCode.Add('  //var value=getAttrib(elem,"value");');
+    //kt ScriptCode.Add('  //var value=getAttrib(elem,"value");');
     ScriptCode.Add('  var value=elem.value;');
     ScriptCode.Add('  var newValue=ensureNum(value.replace(/[^\d-]/g,''''),0);');
     ScriptCode.Add('  if (newValue>max) newValue=max;');
     ScriptCode.Add('  if (newValue<min) newValue=min;');
     ScriptCode.Add('  if (newValue == value) return;');
     ScriptCode.Add('  elem.value=newValue.toString();');
-    ScriptCode.Add('  //elem.setAttribute("value", newValue.toString());');
+    //kt ScriptCode.Add('  //elem.setAttribute("value", newValue.toString());');
     ScriptCode.Add('  elem.setAttribute("tmgvalue", newValue.toString());');
     ScriptCode.Add('}');
     ScriptCode.Add('function handleNumKeyup(elem) {ValidateNumValue(elem);}');
@@ -1401,7 +1469,7 @@ implementation
     Content.clear;
 
     SL := TStringList.Create;
-    AddElement('input', Attrs, Content, SL, true);   //<input> doesn't use end tag
+    AddElement(HTML_TAG_INPUT, Attrs, Content, SL, true);   //<input> doesn't use end tag
     for i := 0 to SL.Count - 1 do begin
       if i = 0 then begin
         Output.Add(LabelStr + SL.Strings[i]);
@@ -1439,6 +1507,7 @@ implementation
     AddElement('button', Attrs, Content, Output);
   end;
 
+  (*  //kt 5/21/25 delete later
   function GetNumberVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var HTML : string;
       Attrs : TStringList;
@@ -1446,10 +1515,24 @@ implementation
     Result := '';
     HTML := Elem.outerHTML;
     Attrs := TStringList.Create;
-    ExtractAttribs('<INPUT', HTML, Attrs);
+    ExtractAttribs(HTML_TAG_INPUT_OPEN, HTML, Attrs);
     Result := GetAttrib('tmgvalue', Attrs);
     Attrs.Free;
   end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetNumberVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
+  var
+    InputElem: IHTMLInputElement;
+    ValueVar: OleVariant;
+  begin
+    Result := '';
+    if not assigned(Elem) then exit;
+    ValueVar := Elem.getAttribute('tmgvalue', 0);  //0 = case-insensitive
+    Result := IfThen(not VarIsNull(ValueVar), ValueVar, '');
+  end;
+
 
   //================================================================================
   //Date
@@ -1460,9 +1543,10 @@ implementation
   //      OR, HtmlDlg is really of type THTMLTemplateDialogEntry, and should be cast as such before use
   //NOTE: For non-US locations, a date format string can be passed in via 'format' element in Attrs.  See format in code below.
   var
-    DT : TDateTime;
-    UnixTime : Int64;
-    DTFormat, InitialValue, FMDTValue : string;
+    //DT : TDateTime;
+    //UnixTime : Int64;
+    //DTFormat : string;
+    InitialValue, FMDTValue : string;
     FormatStr : string;
     DTMode : integer;
     TagName : string;
@@ -1556,7 +1640,7 @@ implementation
     }
       //AddTMGInlineHTMLDatepicker(Id, InitialValue, DTMode, ScriptCode, StyleCodes);
       AddTMGInlineHTMLDatepickerCode(Id, ScriptCode, StyleCodes);
-      TagName :=  'SPAN';
+      TagName :=  HTML_TAG_SPAN; //'SPAN';
     {
     end;
     }
@@ -1592,7 +1676,8 @@ implementation
       'Apr','May','June','July','Aug','Sept','Oct','Nov','Dec');
   var
     Yr, Mo, Day, Hr24, Min, Sec, idx : integer;
-    YrStr, ShortYrStr, MoStr, DayStr, Hr24Str, Hr12Str, MinStr, SecStr, ampm : String;
+    //YrStr, ShortYrStr, MoStr, DayStr, Hr24Str, Hr12Str, MinStr, SecStr, ampm : String;
+    YrStr, ShortYrStr, Hr24Str, Hr12Str, ampm : String;
     Date,Time : string;
     FormatArr : TStringList;
   begin
@@ -1642,24 +1727,42 @@ implementation
     Result := StringReplace(Result, '{ampm}', AMPM, [rfReplaceAll]);
   end;
 
+  (*
   function GetDateVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
-  var StrVal, HTML, DTFormat : string;
+  var StrVal, HTML: string;
       Attrs : TStringList;
       //NumVal : Int64;
       //DTVal : TDateTime;
-      FMDT : TFMDateTime;
+      //FMDT : TFMDateTime;
       FormatStr : string;
-      DTMode : integer;
+      //DTMode : integer;
   begin
     HTML := Elem.outerHTML;
     Attrs := TStringList.Create;
-    ExtractAttribs('<SPAN', HTML, Attrs);   //was '<INPUT'
+    ExtractAttribs(HTML_TAG_SPAN_OPEN, HTML, Attrs);   //was '<INPUT'
     FormatStr := GetAttrib('dtformat', Attrs);
     Result := GetAttrib('fmdtvalue', Attrs);
     //if FormatStr <> '' then Result := FormatFMDateTimeStr(FormatStr, Result);
     if FormatStr <> '' then Result := FormatFMDT(FormatStr, Result);
     Attrs.Free;
   end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetDateVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
+  var
+    ValueVar: OleVariant;
+     FormatStr: string;
+  begin
+    Result := '';
+    if not assigned(Elem) then exit;
+    ValueVar := Elem.getAttribute('dtformat', 0);  //0 = case-insensitive
+    FormatStr := IfThen(not VarIsNull(ValueVar), ValueVar, '');
+    ValueVar := Elem.getAttribute('fmdtvalue', 0);  //0 = case-insensitive
+    Result := IfThen(not VarIsNull(ValueVar), ValueVar, '');
+    if FormatStr <> '' then Result := FormatFMDT(FormatStr, Result);
+  end;
+
 
   //================================================================================
   //Enabler Controller CheckBox
@@ -1690,14 +1793,14 @@ implementation
       ScriptCode.Add('    if (Enabled) {');
       ScriptCode.Add('      elem.className = subtractString(elem.className, ["TMGDisabledControl","TMGDisabledContainer"]);');
       ScriptCode.Add('      elem.removeAttribute("disabled");');
-      ScriptCode.Add('      //elList[i].style.backgroundColor = "blue";');
+      //kt ScriptCode.Add('      //elList[i].style.backgroundColor = "blue";');
       ScriptCode.Add('    } else {');
       ScriptCode.Add('      if (hasClass(elem, "TMGContainer")) {');
       ScriptCode.Add('        elem.className = ensureString(elem.className, "TMGDisabledContainer");');
       ScriptCode.Add('      } else {');
       ScriptCode.Add('        elem.className = ensureString(elem.className, "TMGDisabledControl");');
       ScriptCode.Add('        elem.disabled = true;');
-      ScriptCode.Add('        //elList[i].style.backgroundColor = "red";');
+      //kt ScriptCode.Add('        //elList[i].style.backgroundColor = "red";');
       ScriptCode.Add('      }');
       ScriptCode.Add('    }');
       ScriptCode.Add('  }');
@@ -1822,32 +1925,42 @@ implementation
     Attrs.Add('ControlGroup="'+GroupID+'"');
     Attrs.Add('onclick="HandleEnableCBClick(this)"');
     SL := TStringList.Create;  //empty SL
-    AddElement('input', Attrs, SL, Output, true); // <-- add the control checkbox.  //<input> doesn't use end tag
+    AddElement(HTML_TAG_INPUT, Attrs, SL, Output, true); // <-- add the control checkbox.  //<input> doesn't use end tag
     SL.Free;
-    Output.add('<div class="' + GroupID + ' TMGContainer TMGDisabledContainer">');  //disabled view by default
+    Output.add(HTML_TAG_DIV_OPEN + ' class="' + GroupID + ' TMGContainer TMGDisabledContainer">');  //disabled view by default
     if HtmlDlg is THTMLDlg then begin
       THTMLDlg(HtmlDlg).AddFromSource(Content, GroupID);  //recursive call.
     end else if HtmlDlg is THTMLTemplateDialogEntry then begin
       //CHECK LATER.... GroupID is not being passed in below.  Is this going to be a problem??
       THTMLTemplateDialogEntry(HtmlDlg).AddFromPseudoHTML(Content, StyleCodes, ScriptCode);  //recursive call.
     end;
-    Output.add('</div>');
+    Output.add(HTML_TAG_DIV_CLOSE);
   end;
 
+  (* //kt 5/21/25 -- delete later
   function GetEnableCBVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var inner, outer: string;
       Attrs : TStringList;
   begin
+    Result := '';
+    if not assigned(Elem) then exit;
     inner := Elem.innerHTML;
     outer := Elem.outerHTML;
     Attrs := TStringList.Create;
-    ExtractAttribs('<INPUT', outer, Attrs);
+    ExtractAttribs(HTML_TAG_INPUT_OPEN, outer, Attrs);
     if AttribIdx('checked', Attrs) >= 0 then begin
       Result := GetAttrib('tmgvalue', Attrs);
     end else begin
       Result := '';
     end;
     Attrs.Free;
+  end;
+  *)
+
+  //kt 5/21/25 -- update to more robust method
+  function GetEnableCBVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
+  begin
+    Result := GetCheckBoxVal(HtmlDlg, Elem, NoCommas);
   end;
 
   //================================================================================
@@ -1873,17 +1986,17 @@ implementation
     inherited Create;
     ObjsList := TStringList.Create;
     FWebBrowser := AWebBrowser;
-    ObjsList.AddObject('<CHECKBOX',  THTMLObjHandler.Create(FWebBrowser, '<CHECKBOX',  '</CHECKBOX>',  AddCheckBox,   GetCheckBoxVal   ));
-    ObjsList.AddObject('<EDITBOX',   THTMLObjHandler.Create(FWebBrowser, '<EDITBOX',   '</EDITBOX>',   AddEditBox,    GetEditBoxVal    ));
-    ObjsList.AddObject('<WPBOX',     THTMLObjHandler.Create(FWebBrowser, '<WPBOX',     '</WPBOX>',     AddWPBox,      GetWPBoxVal      ));
-    ObjsList.AddObject('<COMBO',     THTMLObjHandler.Create(FWebBrowser, '<COMBO',     '</COMBO>',     AddComboBox,   GetComboBoxVal   ));
-    ObjsList.AddObject('<RADIO',     THTMLObjHandler.Create(FWebBrowser, '<RADIO',     '</RADIO>',     AddRadioGroup, GetRadioGroupVal ));
-    ObjsList.AddObject('<CYCBUTTON', THTMLObjHandler.Create(FWebBrowser, '<CYCBUTTON', '</CYCBUTTON>', AddCycButton,  GetCycButtonVal  ));
-    ObjsList.AddObject('<NUMBER',    THTMLObjHandler.Create(FWebBrowser, '<NUMBER',    '</NUMBER>',    AddNumber,     GetNumberVal     ));
-    ObjsList.AddObject('<DATE',      THTMLObjHandler.Create(FWebBrowser, '<DATE',      '</DATE>',      AddDate,       GetDateVal       ));
-    ObjsList.AddObject('<ENABLECB',  THTMLObjHandler.Create(FWebBrowser, '<ENABLECB',  '</ENABLECB>',  AddEnableCB,   GetEnableCBVal   ));
-    ObjsList.AddObject('<CBGROUP',   THTMLObjHandler.Create(FWebBrowser, '<CBGROUP',   '</CBGROUP>',   AddCBGroup,    GetCBGroupVal    ));
-    ObjsList.AddObject('<DIALOG',    THTMLObjHandler.Create(FWebBrowser, '<DIALOG',    '</DIALOG>',    AddDialogGrp,  GetDialogGpVal   ));
+    ObjsList.AddObject(HTML_TAG_CHECKBOX_OPEN,  THTMLObjHandler.Create(FWebBrowser, HTML_TAG_CHECKBOX_OPEN,  HTML_TAG_CHECKBOX_CLOSE,  AddCheckBox,   GetCheckBoxVal   ));
+    ObjsList.AddObject(HTML_TAG_EDITBOX_OPEN,   THTMLObjHandler.Create(FWebBrowser, HTML_TAG_EDITBOX_OPEN,   HTML_TAG_EDITBOX_CLOSE,   AddEditBox,    GetEditBoxVal    ));
+    ObjsList.AddObject(HTML_TAG_WPBOX_OPEN,     THTMLObjHandler.Create(FWebBrowser, HTML_TAG_WPBOX_OPEN,     HTML_TAG_WPBOX_CLOSE,     AddWPBox,      GetWPBoxVal      ));
+    ObjsList.AddObject(HTML_TAG_COMBO_OPEN,     THTMLObjHandler.Create(FWebBrowser, HTML_TAG_COMBO_OPEN,     HTML_TAG_COMBO_CLOSE,     AddComboBox,   GetComboBoxVal   ));
+    ObjsList.AddObject(HTML_TAG_RADIO_OPEN,     THTMLObjHandler.Create(FWebBrowser, HTML_TAG_RADIO_OPEN,     HTML_TAG_RADIO_CLOSE,     AddRadioGroup, GetRadioGroupVal ));
+    ObjsList.AddObject(HTML_TAG_CYCBUTTON_OPEN, THTMLObjHandler.Create(FWebBrowser, HTML_TAG_CYCBUTTON_OPEN, HTML_TAG_CYCBUTTON_CLOSE, AddCycButton,  GetCycButtonVal  ));
+    ObjsList.AddObject(HTML_TAG_NUMBER_OPEN,    THTMLObjHandler.Create(FWebBrowser, HTML_TAG_NUMBER_OPEN,    HTML_TAG_NUMBER_CLOSE,    AddNumber,     GetNumberVal     ));
+    ObjsList.AddObject(HTML_TAG_DATE_OPEN,      THTMLObjHandler.Create(FWebBrowser, HTML_TAG_DATE_OPEN,      HTML_TAG_DATE_CLOSE,      AddDate,       GetDateVal       ));
+    ObjsList.AddObject(HTML_TAG_ENABLECB_OPEN,  THTMLObjHandler.Create(FWebBrowser, HTML_TAG_ENABLECB_OPEN,  HTML_TAG_ENABLECB_CLOSE,  AddEnableCB,   GetEnableCBVal   ));
+    ObjsList.AddObject(HTML_TAG_CBGROUP_OPEN,   THTMLObjHandler.Create(FWebBrowser, HTML_TAG_CBGROUP_OPEN,   HTML_TAG_CBGROUP_CLOSE,   AddCBGroup,    GetCBGroupVal    ));
+    ObjsList.AddObject(HTML_TAG_DIALOG_OPEN,    THTMLObjHandler.Create(FWebBrowser, HTML_TAG_DIALOG_OPEN,    HTML_TAG_DIALOG_CLOSE,    AddDialogGrp,  GetDialogGpVal   ));
   end;
 
   destructor THTMLObjHandlersList.Destroy;
@@ -1956,15 +2069,17 @@ implementation
     Found := (Pos(Msg, Outer) >0);
   end;
 
+
+  (*//kt 5/21/25 delete later
   function THTMLObjHandlersList.IsDisabledByControlGroup(HtmlDlg : TObject; Elem : IHTMLElement) : boolean;
-    //finish....
   var ControlBlockElem : IHTMLElement;
-      ClassStr, StartTag, Msg, outer {,value} : string;
+      InputElem: IHTMLInputElement;
+      ClassStr, StartTag, Msg, outer  : string;
       ClassList, Attrs : TStringList;
       Idx : integer;
   begin
-    Result := false;
-    if not assigned(Elem) then exit;    
+    Result := false;   //assume not disabled as default
+    if not assigned(Elem) then exit;
     outer := Elem.outerHTML;
     Attrs := TStringList.Create;
     StartTag := ORFn.piece2(outer, ' ', 1);
@@ -1980,17 +2095,57 @@ implementation
         if Pos('ControlGroup', Msg) = 0 then continue;
         ControlBlockElem := FWebBrowser.SearchElements(FindControlGroupProperty, Msg, Nil);
         if ControlBlockElem = nil then break;
+        //kt mod 5/21/25
+        // Try to cast to IHTMLInputElement to access .checked
+        if Supports(ControlBlockElem, IHTMLInputElement, InputElem) then begin  //if supported, InputElem is output variable
+          Result := not InputElem.checked;  // If not checked, then disabled
+        end;
+        // NOTE: Fallback already set false above.  Assume not disabled if we can't determine checked status
+        //kt end mod 5/21/25
+        { //kt notes 5/21/25.  Older IE7 put dynamic 'checked' property into attributes list.  IE11 doesn't do that
+          //                   So more proper way is to check property directly, as per new code above.
         outer := ControlBlockElem.outerHTML;
-        ExtractAttribs('<INPUT', outer, Attrs);
+        ExtractAttribs(HTML_TAG_INPUT_OPEN, outer, Attrs);
         Result := (AttribIdx('checked', Attrs) = -1);
         break;
+        }
       end;
       ClassList.Free;
     end;
     Attrs.Free;
   end;
+  *)
 
-
+  //kt 5/21/25 -- more robust version
+  function THTMLObjHandlersList.IsDisabledByControlGroup(HtmlDlg: TObject; Elem: IHTMLElement): boolean;
+  var
+    ControlBlockElem: IHTMLElement;
+    InputElem: IHTMLInputElement;
+    ClassStr, AClassName: string;
+    ClassList: TStringList;
+    i: Integer;
+  begin
+    Result := False;
+    if not Assigned(Elem) then Exit;
+    ClassStr := Elem.className;  //className property returns space delim list of classnames
+    if Pos('TMGDisabledControl', ClassStr) > 0 then begin
+      Result := True;
+    end else begin
+      ClassList := TStringList.Create;
+      ORFn.PiecesToList(ClassStr, ' ', ClassList);  // split classes into words
+      for i := 0 to ClassList.Count - 1 do begin
+        AClassName := ClassList.Strings[i];
+        if Pos('ControlGroup', AClassName) = 0 then Continue;
+        ControlBlockElem := FWebBrowser.SearchElements(FindControlGroupProperty, AClassName, nil);
+        if ControlBlockElem = nil then Break;
+        if Supports(ControlBlockElem, IHTMLInputElement, InputElem) then begin
+          Result := not InputElem.checked;
+          Break;  // Only process the first ControlGroup match
+        end;
+      end;
+      ClassList.Free;
+    end;
+  end;
 
 initialization
   IDMasterIndex := 0;

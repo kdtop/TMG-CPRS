@@ -132,6 +132,8 @@ type
     procedure HandleGetByTagNameCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
     procedure HandleGetOneByTagNameCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
     procedure PostKeyEx32(key: Word; const shift: TShiftState; specialkey: Boolean);
+    procedure SanitizeHTML(var HTML : string);    //kt
+    function IsSafeToPasteHTML(const WB: TWebBrowser): Boolean;  //11/11/25
   public
     {end public}
     PopupMenu:     TPopupMenu;
@@ -181,6 +183,7 @@ type
     function  CustomRange(RangeInfo : TRangeInfo) : IHtmlTxtRange;  overload; //kt 4/8/21
     function  CustomRange(StartPos, EndPos : longint) : IHtmlTxtRange;  overload; //kt 4/8/21
     function  GetTextRange:IHtmlTxtRange;
+    procedure ClearSelection;
     procedure ReplaceSelection(HTML:string);
     function  Find(Text : string; Flags : THTMLSearchFlags = [hsPartial]; Mode : TFindMode = fmFirst) : boolean;  //kt 6/16
     function  FindFirst(Text : string; Flags : THTMLSearchFlags = [hsPartial]) : boolean;  //kt 6/16
@@ -250,7 +253,7 @@ implementation
 
 
 uses
-  WinProcs,Variants,Clipbrd, StrUtils, Math, ORFn,
+  WinProcs,Variants,Clipbrd, StrUtils, Math, ORFn, VAUtils,
   uHTMLTools, uTMGOptions,
   Windows;
 
@@ -331,9 +334,72 @@ begin
   end;
 end;
 
+procedure THtmlObj.SanitizeHTML(var HTML : string);
+//kt 5/6/25
+var i, p1, p2, len : integer;
+    OpenTag, CloseTag : string;
+    partA,partB,partC : string;
+    matchFound : boolean;
+    lowerHTML : string;
+
+const
+  NUM_MATCHES = 2;
+  MATCH  : array[1..NUM_MATCHES] of string = ('pre','script');
+
+begin
+  //Purpose: In older versions of IE, CRLF in HTML was ignored.  In newer versions
+  //         it is converted to an extra <BR>.
+  //         So goal is to STRIP CRLF'S
+  //HOWEVER: we don't want to strip them from inside <pre> ... </pre> tags.
+  //         And don't strip inside <script> ... </script>
+
+  //NOTE: This matches the first openTag with the first closeTag.  If these tags are nested, this
+  //      may well cause problems, and a more robust solution would have to be created.
+
+  len := length(HTML);
+  lowerHTML := LowerCase(HTML);  //will use for searching only. Will be 1-to-1 with original MixedCase HTML
+  matchFound := false;
+  for i := 1 to NUM_MATCHES do begin
+    OpenTag := '<' + MATCH[i] + '>';
+    if Pos(OpenTag, lowerHTML) > 0 then begin
+      matchFound := true;
+      break;
+    end;
+  end;
+
+  if matchFound then begin
+    for i := 1 to NUM_MATCHES do begin
+      OpenTag := '<' + MATCH[i] + '>';
+      CloseTag := '</' + MATCH[i] + '>';
+      repeat
+        p1 := Pos(OpenTag, lowerHTML);
+        if p1>0 then begin
+          partA := LeftStr(HTML, p1-1);
+          SanitizeHTML(partA); //recursive call
+          p2 := PosEx(CloseTag, lowerHTML, p1+length(OpenTag));
+          if p2>0 then begin
+            partB := MidStr(HTML, p1, p2-p1 + length(CloseTag));  //this should be block to NOT sanitize
+            partC := MidStr(HTML, p2 + length(CloseTag), len);
+            SanitizeHTML(partC);  //recursive call
+          end else begin
+            //In this case, we have an open tag, but no matching close tag, so don't sanitize anything in remaining string.
+            PartB := '';
+            PartC := MidStr(HTML, p1, len)
+          end;
+          HTML := partA + partB + partC;
+          p1 := 0;
+        end;
+      until p1=0;
+    end;
+  end else begin
+    HTML := StringReplace(HTML, CRLF, '', [rfReplaceAll]);
+  end;
+  //Later, if other items need sanitization, can add below...
+end;
 
 procedure THtmlObj.SetHTMLText(Html : String);
 begin
+  SanitizeHTML(Html);  //kt 5/6/25
   DocumentHTML := Html;
   SetEditableState(FEditable);
 end;
@@ -376,12 +442,30 @@ var WS:WideString;
     n:integer;
     w:word;
     s:string;}
+  Doc3: IHTMLDocument3;
+  HtmlElement: IHTMLElement;
 begin
   //Result:=DocumentHTML;
   Result:='';
   if Doc=nil then exit;
-  WS:=Doc.body.innerHTML;
+  //kt 10/5/25 --> WS:=Doc.body.innerHTML;
+
+  //kt 10/5/25 -- mod ----
+  Doc3 := Doc as IHTMLDocument3;  // Cast to IHTMLDocument3
+  if Doc3 = nil then Exit;
+  HtmlElement := Doc3.documentElement;  // Get the <html> element
+  if HtmlElement = nil then Exit;
+  WS := HtmlElement.outerHTML;  // Get full HTML content
+  // 10/5/25 -- END mod ----
+
   result := ConvertedWS(WS);
+  (*
+
+
+  Result := ConvertedWS(WS);
+end;
+
+  *)
 end;
 
 function THtmlObj.GetText:string;
@@ -408,6 +492,7 @@ end;
 
 procedure THtmlObj.SetText(HTML:string);
 begin
+  SanitizeHTML(HTML);  //kt 5/6/25
   if (DOC=nil)or(DOC.body=nil) then SetHTMLText(HTML)
   else DOC.body.innerHTML:=HTML;
 end;
@@ -1014,8 +1099,27 @@ begin
   Result:=SelEnd-SelStart;
 end;
 
+procedure THtmlObj.ClearSelection;
+//kt added 5/22/25
+begin
+  exit;   //EDDIE TO TEST
+
+  if DOC=nil then exit;
+  while DOC.body=nil do begin
+    WaitForDocComplete;
+    if DOC.body=nil then begin
+      if MessageDlg('Wait for document loading?',mtConfirmation,
+                    [mbOK,mbCancel],0) <> mrOK then begin
+        exit;
+      end;
+    end;
+  end;
+  Doc.Selection.empty;
+end;
+
 
 function THtmlObj.GetTextRange:IHtmlTxtRange;
+
 begin
   Result:=nil;
   try
@@ -1030,11 +1134,16 @@ begin
         end;
       end;
     end;
+    if (DOC.Selection.type_ = 'Control') then Exit;  //skip this type, as it can cause problems.
     if (DOC.Selection.type_='Text') or (DOC.Selection.type_='None') then begin
+      //Doc.Selection.empty;     //elh added   //kt  5/16/25
       Result:=DOC.Selection.CreateRange as IHtmlTxtRange;
     end;
   except
-    on E:Exception do EError('This type of selection cannot be processed',E);
+    on E:Exception do begin
+      //kt EError('This type of selection cannot be processed',E);
+      EError('This type of selection cannot be processed'+CRLF+'Message: ' + E.Message, E);
+    end;
   end;
 end;
 
@@ -1060,6 +1169,7 @@ begin
   try
     TextRange:=GetTextRange;
     if TextRange=nil then exit;
+    SanitizeHTML(HTML);  //kt 5/6/25
     TextRange.PasteHTML(HTML);
     //Modified:=true;   //kt 9/4/15
     SetAsModified;   //kt 9/4/15
@@ -1073,11 +1183,11 @@ begin
   end;
 end;
 
-
+(*
 function THtmlObj.MoveCaretToEnd : boolean;
 //kt added
-var //TextRange:IHtmlTxtRange;
-    count : integer;
+var
+  count : integer;
 begin
   if not assigned (FTMGDisplayPointer) then begin
     Result := false;
@@ -1093,14 +1203,7 @@ begin
   Result:=(S_OK = FCaret.MoveCaretToPointer(FTMGDisplayPointer,
                                             integer(FALSE),
                                             CARET_DIRECTION_SAME));
-  {
-  SendMessage(FmsHTMLwinHandle, WM_KEYDOWN, VK_END, 0);
-  SendMessage(FmsHTMLwinHandle, WM_KEYUP, VK_END, 0);
-  SendMessage(FmsHTMLwinHandle, WM_KEYDOWN, VK_END, 0);
-  SendMessage(FmsHTMLwinHandle, WM_KEYUP, VK_END, 0);
-  }
-
-    if not assigned (FTMGDisplayPointer) then begin
+  if not assigned (FTMGDisplayPointer) then begin
     Result := false;
     exit;
   end;
@@ -1114,12 +1217,42 @@ begin
   Result:=(S_OK = FCaret.MoveCaretToPointer(FTMGDisplayPointer,
                                             integer(FALSE),
                                             CARET_DIRECTION_SAME));
-  {
-  SendMessage(FmsHTMLwinHandle, WM_KEYDOWN, VK_END, 0);
-  SendMessage(FmsHTMLwinHandle, WM_KEYUP, VK_END, 0);
-  SendMessage(FmsHTMLwinHandle, WM_KEYDOWN, VK_END, 0);
-  SendMessage(FmsHTMLwinHandle, WM_KEYUP, VK_END, 0);
-  }
+  ClearSelection;
+
+end;
+*)
+
+function THtmlObj.MoveCaretToEnd: Boolean;
+var
+  Doc2: IHTMLDocument2;
+  Body: IHTMLElement;
+  Sel: IHTMLSelectionObject;
+  TxtRange: IHTMLTxtRange;
+begin
+  Result := False;
+
+  if not Assigned(DOC) then Exit;
+
+  // Get IHTMLDocument2 interface
+  //KT NOTE: I think this is not needed.  DOC is already a IHTMLDocument2
+  Doc2 := DOC as IHTMLDocument2;
+  if not Assigned(Doc2) then Exit;
+
+  Body := Doc2.body;
+  if not Assigned(Body) then Exit;
+
+  Sel := Doc2.selection;
+  if not Assigned(Sel) then Exit;
+
+  // Make a range covering the whole body
+  TxtRange := (Body as IHTMLBodyElement).createTextRange;
+  if not Assigned(TxtRange) then Exit;
+
+  // Collapse to the end and select
+  TxtRange.collapse(False);  // False = collapse to end
+  TxtRange.select;
+
+  Result := True;
 end;
 
 
@@ -1134,12 +1267,69 @@ begin
   FCaret.Show(Integer(True));
 end;
 
+function THtmlObj.IsSafeToPasteHTML(const WB: TWebBrowser): Boolean;
+var
+  Doc: IHTMLDocument2;
+  Sel: IHTMLSelectionObject;
+  Disp: IDispatch;
+  Range: IHTMLTxtRange;
+  ParentEl, TD: IHTMLElement;
+  Html: WideString;
+begin
+  Result := False;
+
+  if (WB = nil) or (WB.Document = nil) then Exit;
+
+  Doc := WB.Document as IHTMLDocument2;
+  Sel := Doc.selection;
+  if Sel = nil then begin
+    result := true;
+    Exit;
+  end;  
+
+  // Only text selections are safe; Control selections often break pasteHTML
+  // Unneeded?  if not SameText(Sel.type_, 'Text') then Exit;
+
+  Disp := Sel.createRange;
+  if not Supports(Disp, IHTMLTxtRange, Range) then Exit;
+
+  // Get selected HTML to see if it spans multiple cells
+  Html := UpperCase(Range.htmlText);
+
+  // If the selection is empty (caret only), it's safe
+  if Html = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  // If selection includes <TD> or </TD>, it crosses cell boundaries
+  if (Pos('<TD', Html) > 0) or (Pos('</TD>', Html) > 0) then Exit;
+
+  {Unneeded?  // Make sure we're inside a single TD (not outside a table)
+  ParentEl := Range.parentElement;
+  TD := ParentEl;
+  while (TD <> nil) and (CompareText(TD.tagName, 'TD') <> 0) do
+    TD := TD.parentElement;   }
+
+ // if TD = nil then Exit; // not inside a table cell
+
+  Result := True;
+end;
+
+
 procedure THtmlObj.InsertHTMLAtCaret(HTMLText : AnsiString);
 var
-   Range: IHTMLTxtRange;
+  Range: IHTMLTxtRange;
 begin
-   Range:= GetTextRange;
-   Range.pasteHTML(HTMLText);
+  if IsSafeToPasteHTML(self) then begin  
+    Range:= GetTextRange;
+    if not assigned(Range) then exit;
+    SanitizeHTML(HTMLText);  //kt 5/6/25
+    Range.pasteHTML(HTMLText);
+  end else begin
+    ShowMessage('Invalid range detected. Please ensure selection does not include multiple table cells and try again.');
+  end;
 end;
 
 procedure THtmlObj.InsertTextAtCaret(Text : AnsiString);
@@ -1865,6 +2055,7 @@ var AElement : IHTMLElement;
 begin
   AElement := GetElementById(Id);
   if not assigned(AElement) then exit;
+  SanitizeHTML(Content);  //kt 5/6/25
   TempV := Content;
   try
     AElement.innerHTML := TempV;

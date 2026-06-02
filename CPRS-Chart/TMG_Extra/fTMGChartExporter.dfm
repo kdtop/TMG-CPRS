@@ -179,7 +179,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
       Top = 1
       Width = 533
       Height = 544
-      ActivePage = Notes
+      ActivePage = tsCover
       Align = alTop
       Anchors = [akTop, akRight]
       Font.Charset = ANSI_CHARSET
@@ -198,42 +198,49 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
           507)
         object Label3: TLabel
           Left = 46
-          Top = 44
+          Top = 50
           Width = 13
           Height = 13
           Caption = 'To'
         end
         object Label4: TLabel
           Left = 276
-          Top = 40
+          Top = 50
           Width = 17
           Height = 13
           Caption = 'Fax'
         end
         object Label5: TLabel
           Left = 41
-          Top = 74
+          Top = 112
           Width = 18
           Height = 13
           Caption = 'RE:'
         end
         object Label6: TLabel
           Left = 7
-          Top = 104
+          Top = 144
           Width = 52
           Height = 13
           Caption = 'Comments:'
         end
         object Label16: TLabel
           Left = 21
-          Top = 15
+          Top = 19
           Width = 38
           Height = 13
           Caption = 'Recent:'
         end
+        object Label17: TLabel
+          Left = 15
+          Top = 81
+          Width = 45
+          Height = 13
+          Caption = 'Frequent:'
+        end
         object edtTo: TEdit
           Left = 65
-          Top = 40
+          Top = 45
           Width = 192
           Height = 21
           TabOrder = 0
@@ -241,7 +248,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object edtToFax: TEdit
           Left = 305
-          Top = 40
+          Top = 45
           Width = 160
           Height = 21
           TabOrder = 1
@@ -249,7 +256,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object edtRE: TEdit
           Left = 65
-          Top = 70
+          Top = 109
           Width = 400
           Height = 21
           TabOrder = 2
@@ -257,23 +264,22 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object memComments: TMemo
           Left = 65
-          Top = 101
+          Top = 141
           Width = 400
           Height = 51
           TabOrder = 3
         end
         object radCoverGroup: TRadioGroup
           Left = 65
-          Top = 175
+          Top = 216
           Width = 400
-          Height = 121
+          Height = 104
           Caption = 'Cover Sheet'
           Items.Strings = (
             'No cover sheet'
             'Default Cover Sheet'
             'Upload Cover Sheet'
-            'Consultant Cover Sheet'
-            'Template Cover Sheet')
+            'Consultant Cover Sheet')
           TabOrder = 4
           OnClick = radCoverGroupClick
         end
@@ -321,9 +327,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object pnlRefConsultant: TPanel
           Left = 9
-          Top = 303
+          Top = 328
           Width = 519
-          Height = 185
+          Height = 160
           Anchors = [akLeft, akTop, akRight]
           BevelOuter = bvNone
           Color = clSkyBlue
@@ -339,7 +345,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
             Left = 62
             Top = 29
             Width = 400
-            Height = 148
+            Height = 122
             Style = orcsSimple
             AutoSelect = True
             Color = clWindow
@@ -398,7 +404,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkIncludeDemo: TCheckBox
           Left = 65
-          Top = 159
+          Top = 199
           Width = 157
           Height = 16
           Caption = 'Include Demographics Sheet'
@@ -415,8 +421,8 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object cmbRecentFaxNumbers: TORComboBox
           Left = 65
-          Top = 10
-          Width = 400
+          Top = 14
+          Width = 380
           Height = 21
           Style = orcsDropDown
           AutoSelect = True
@@ -444,6 +450,65 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
           TabOrder = 11
           OnClick = chkCopyFaxNumberClick
         end
+        object btnSearch: TBitBtn
+          Left = 445
+          Top = 14
+          Width = 18
+          Height = 18
+          Anchors = [akTop, akRight]
+          TabOrder = 12
+          OnClick = btnSearchClick
+          Glyph.Data = {
+            3E020000424D3E0200000000000036000000280000000D0000000D0000000100
+            1800000000000802000000000000000000000000000000000000FFFFFFFFFFFF
+            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF606060FFFF
+            FF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBF
+            606060A0A0A060606000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFFBFBFBF606060A0A0A0606060BFBFBF00FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFFFFFFFFFFFFBFBFBF606060A0A0A0606060BFBFBFFFFFFF00FFFFFFFFFFFF
+            FFBFBFFF7F7FFF7F7FFFBFBFBFBFBF606060A0A0A0606060BFBFBFFFFFFFFFFF
+            FF00FFFFFFFF3F3FFF0000FF7F7FFF7F7FFF0000DF2020A0A0A0606060BFBFBF
+            FFFFFFFFFFFFFFFFFF00FFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFF3F3F7F
+            4040BFBFBFFFFFFFFFFFFFFFFFFFFFFFFF00FF3F3FFFBFBFFFFFFFFFFFFFFFFF
+            FFFFFFFFFFBFBFFF3F3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FF0000FFFFFF
+            7F7F7FBFBFBFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FF00FF0000BFBFBFBFBFBFBFBFBFBFBFBFFFFFFFFFFFFFFF0000FFFFFFFFFFFF
+            FFFFFFFFFFFFFFFFFF00FF7F7FFF7F7FBFBFBFBFBFBF7F7F7FFFFFFFFF7F7FFF
+            7F7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFF0000FF7F7FBFBFBFFFFF
+            FFFF7F7FFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFBFBF
+            FF3F3FFF0000FF0000FF3F3FFFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FF00}
+        end
+        object cmbFreqReasons: TORComboBox
+          Left = 65
+          Top = 77
+          Width = 398
+          Height = 21
+          Style = orcsDropDown
+          AutoSelect = True
+          Color = clWindow
+          DropDownCount = 8
+          Items.Strings = (
+            'Last office note, per request'
+            'Last office note'
+            'Last lab results, per request'
+            'Last lab results'
+            'Last office note and labs, per request'
+            'Last office note and labs'
+            'Records for referral')
+          ItemHeight = 13
+          ItemTipColor = clWindow
+          ItemTipEnable = True
+          ListItemsOnly = False
+          LongList = False
+          LookupPiece = 1
+          MaxLength = 0
+          Sorted = False
+          SynonymChars = '<>'
+          TabOrder = 13
+          OnChange = cmbFreqReasonsChange
+          CharsNeedMatch = 1
+        end
       end
       object Notes: TTabSheet
         Caption = 'Notes'
@@ -469,7 +534,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object ckbxAll: TCheckBox
           Left = 6
-          Top = 36
+          Top = 29
           Width = 97
           Height = 17
           Anchors = []
@@ -479,7 +544,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkHighlightOnly: TCheckBox
           Left = 131
-          Top = 36
+          Top = 29
           Width = 174
           Height = 17
           Anchors = []
@@ -513,9 +578,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object cklbTitles: TCheckListBox
           Left = 0
-          Top = 69
+          Top = 132
           Width = 525
-          Height = 438
+          Height = 375
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -565,6 +630,10 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
       object tsLabs: TTabSheet
         Caption = 'Labs'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           525
           507)
@@ -586,9 +655,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstLabs: TCheckListBox
           Left = 0
-          Top = 69
+          Top = 132
           Width = 525
-          Height = 438
+          Height = 375
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -656,18 +725,23 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkAllLabs: TCheckBox
           Left = 6
-          Top = 36
+          Top = 29
           Width = 97
           Height = 17
           Anchors = []
           Caption = 'Select All'
           TabOrder = 4
           OnClick = chkAllLabsClick
+          ExplicitTop = 30
         end
       end
       object tsRadiology: TTabSheet
         Caption = 'Radiology'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           525
           507)
@@ -689,9 +763,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstRad: TCheckListBox
           Left = 0
-          Top = 69
+          Top = 132
           Width = 525
-          Height = 438
+          Height = 375
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -761,18 +835,23 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkCheckAllRads: TCheckBox
           Left = 6
-          Top = 36
+          Top = 29
           Width = 97
           Height = 17
           Anchors = []
           Caption = 'Select All'
           TabOrder = 4
           OnClick = chkCheckAllRadsClick
+          ExplicitTop = 30
         end
       end
       object tsOrders: TTabSheet
         Caption = 'Orders'
         ImageIndex = 6
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           525
           507)
@@ -862,9 +941,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstOrders: TCheckListBox
           Left = 0
-          Top = 99
+          Top = 162
           Width = 525
-          Height = 408
+          Height = 345
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -875,6 +954,10 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
       object TabSheet1: TTabSheet
         Caption = 'Scans'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Splitter2: TSplitter
           Left = 250
           Top = 0
@@ -915,6 +998,10 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
       object TabSheet2: TTabSheet
         Caption = 'Extra '
         ImageIndex = 5
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object ExtraSplitter: TSplitter
           Left = 265
           Top = 0
@@ -3332,6 +3419,12 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         'Status = stsDefault')
       (
         'Component = chkCheckAllRads'
+        'Status = stsDefault')
+      (
+        'Component = btnSearch'
+        'Status = stsDefault')
+      (
+        'Component = cmbFreqReasons'
         'Status = stsDefault'))
   end
   object OpenDialog1: TOpenDialog

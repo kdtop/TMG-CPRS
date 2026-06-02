@@ -3,7 +3,7 @@ object frmMemoEdit: TfrmMemoEdit
   Top = 0
   Caption = 'Edit Text'
   ClientHeight = 316
-  ClientWidth = 444
+  ClientWidth = 459
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -24,14 +24,14 @@ object frmMemoEdit: TfrmMemoEdit
   OldCreateOrder = False
   Position = poOwnerFormCenter
   DesignSize = (
-    444
+    459
     316)
   PixelsPerInch = 96
   TextHeight = 13
   object lblMessage: TLabel
     Left = 8
     Top = 8
-    Width = 83
+    Width = 82
     Height = 15
     Caption = 'Edit Text Below'
     Font.Charset = ANSI_CHARSET
@@ -42,21 +42,20 @@ object frmMemoEdit: TfrmMemoEdit
     ParentFont = False
   end
   object memEdit: TMemo
-    Left = 0
+    Left = -6
     Top = 29
-    Width = 444
+    Width = 459
     Height = 248
     Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
       '')
     ReadOnly = True
+    ScrollBars = ssBoth
     TabOrder = 0
     OnKeyPress = memEditKeyPress
-    ExplicitWidth = 529
-    ExplicitHeight = 369
   end
   object btnDone: TBitBtn
-    Left = 344
+    Left = 359
     Top = 284
     Width = 94
     Height = 25
@@ -121,8 +120,7 @@ object frmMemoEdit: TfrmMemoEdit
       0303030303030303030303030303030303030303030303030303030303030303
       0303}
     NumGlyphs = 2
-    ExplicitLeft = 429
-    ExplicitTop = 405
+    ExplicitLeft = 344
   end
   object btnSelectAll: TButton
     Left = 8
@@ -133,7 +131,6 @@ object frmMemoEdit: TfrmMemoEdit
     Caption = 'Select &All'
     TabOrder = 2
     OnClick = btnSelectAllClick
-    ExplicitTop = 404
   end
   object btnSave: TButton
     Left = 96
@@ -144,7 +141,17 @@ object frmMemoEdit: TfrmMemoEdit
     Caption = '&Save'
     TabOrder = 3
     OnClick = btnSaveClick
-    ExplicitTop = 404
+  end
+  object cbWordWrap: TCheckBox
+    Left = 354
+    Top = 6
+    Width = 97
+    Height = 17
+    Anchors = [akTop, akRight]
+    Caption = 'Word Wrap Text'
+    TabOrder = 4
+    OnClick = cbWordWrapClick
+    ExplicitLeft = 339
   end
   object SaveTextFileDialog: TSaveTextFileDialog
     DefaultExt = 'txt'

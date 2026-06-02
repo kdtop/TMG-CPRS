@@ -684,29 +684,29 @@ begin
 
       dftEditBox: begin
         if FTextLen > 0 then MaxLength := FTextLen else MaxLength := FMaxLen;
-        FPseudoHTML := '<EDITBOX id="'+HTMLCtrlID+'" size=' + IntToStr(MaxLength) + '>' + EditDefault + '</EDITBOX>';  //kt was FEditDefault
+        FPseudoHTML := HTML_TAG_EDITBOX_OPEN + ' id="'+HTMLCtrlID+'" size=' + IntToStr(MaxLength) + '>' + EditDefault + HTML_TAG_EDITBOX_CLOSE;  //kt was FEditDefault
       end;
 
       dftComboBox: begin
         TmpSL.Text := Items;
-        FPseudoHTML := '<COMBO id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">^';
+        FPseudoHTML := HTML_TAG_COMBO_OPEN + ' id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">^';
         for j := 0 to TmpSL.Count - 1 do begin
           FPseudoHTML := FPseudoHTML + TmpSL.Strings[j];
           if j <> TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML + '^';
         end;
-        FPseudoHTML := FPseudoHTML + '</COMBO>';
+        FPseudoHTML := FPseudoHTML + HTML_TAG_COMBO_CLOSE;
       end;
 
       dftButton: begin
         //e.g. <CYCBUTTON initial="opt2">opt1|Apples^opt2|Pears^opt3^opt4</CYCBUTTON>
         TmpSL := TStringList.Create;
         TmpSL.Text := Items;
-        FPseudoHTML := '<CYCBUTTON id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">';
+        FPseudoHTML := HTML_TAG_CYCBUTTON_OPEN + ' id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">';
         for j := 0 to TmpSL.Count - 1 do begin
           FPseudoHTML := FPseudoHTML + TmpSL.Strings[j];
           if j <> TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML + '^';
         end;
-        FPseudoHTML := FPseudoHTML + '</CYCBUTTON>';
+        FPseudoHTML := FPseudoHTML + HTML_TAG_CYCBUTTON_CLOSE;
       end;
 
       dftCheckBoxes, dftRadioButtons: begin
@@ -714,9 +714,9 @@ begin
         if FSepLines then FPseudoHTML := FPseudoHTML + '<BR>';
         if FFldType = dftRadioButtons then begin
           //<RADIO inline=false initial="opt2">opt|Apples^opt2|Pears^opt3^opt4</RADIO>
-          FPseudoHTML :=  FPseudoHTML + '<RADIO ';
+          FPseudoHTML :=  FPseudoHTML + HTML_TAG_RADIO_OPEN +' ';
         end else begin  //dftCheckBoxes
-          FPseudoHTML := FPseudoHTML + '<CBGROUP count=' + IntToStr(TmpSL.Count) + ' ';
+          FPseudoHTML := FPseudoHTML + HTML_TAG_CBGROUP_OPEN + ' count=' + IntToStr(TmpSL.Count) + ' ';
         end;
         FPseudoHTML :=  FPseudoHTML + 'id="'+HTMLCtrlID+'" ';
         if ItemDefault <> '' then FPseudoHTML := FPseudoHTML + 'initial="' + DefaultStr + '" ';
@@ -726,7 +726,7 @@ begin
           if FFldType = dftRadioButtons then begin
             FPseudoHTML := FPseudoHTML + TmpSL.Strings[i];
             if i = TmpSL.Count - 1 then begin
-              FPseudoHTML := FPseudoHTML + '</RADIO>';
+              FPseudoHTML := FPseudoHTML + HTML_TAG_RADIO_CLOSE;
               HTMLControls.Add(FPseudoHTML);
               FPseudoHTML := '';
             end else begin
@@ -734,12 +734,12 @@ begin
               HTMLControls.Add('');
             end;
           end else begin //dftCheckBoxes
-            FPseudoHTML := FPseudoHTML + '<CHECKBOX id="'+HTMLCtrlID+'d'+IntToStr(i)+'" ';
+            FPseudoHTML := FPseudoHTML + HTML_TAG_CHECKBOX_OPEN+ ' id="'+HTMLCtrlID+'d'+IntToStr(i)+'" ';
             //kt if TmpSL.Strings[i] = DefaultStr then FPseudoHTML := FPseudoHTML + 'checked ';
             if DefaultStrSL.IndexOf(TmpSL.Strings[i]) > -1 then FPseudoHTML := FPseudoHTML + 'checked ';
-            FPseudoHTML := FPseudoHTML + '>' + TmpSL.Strings[i] + '</CHECKBOX>';
+            FPseudoHTML := FPseudoHTML + '>' + TmpSL.Strings[i] + HTML_TAG_CHECKBOX_CLOSE;
             if FSepLines then FPseudoHTML := FPseudoHTML + '<BR>';
-            if i = TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML +  '</CBGROUP>';
+            if i = TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML +  HTML_TAG_CBGROUP_CLOSE;
             HTMLControls.Add(FPseudoHTML);
             FPseudoHTML := '';
           end;
@@ -752,20 +752,20 @@ begin
         end else begin
           DefDate := 0;
         end;
-        FPseudoHTML := '<DATE id="'+HTMLCtrlID+'" ';
+        FPseudoHTML := HTML_TAG_DATE_OPEN + ' id="'+HTMLCtrlID+'" ';
         FPseudoHTML := FPseudoHTML + 'DTMode=' + IntToStr(Ord(FDateType)-1) + ' ';
         if DefDate<> 0 then begin
           DateTimeToString(InitDT, 'mm/dd/yyyy', FMDateTimeToDateTime(DefDate));
           FPseudoHTML := FPseudoHTML + 'initial="' + InitDT + '"';
         end;
-        FPseudoHTML := FPseudoHTML + '></DATE>';
+        FPseudoHTML := FPseudoHTML + '>' + HTML_TAG_DATE_CLOSE;
         //e.g. '<DATE DTMode=0 initial="7/3/1967"></DATE>'
       end;
 
       dftNumber: begin
         i := Increment;
-        FPseudoHTML := '<NUMBER id="'+HTMLCtrlID+'" ';  //kt
-        FPseudoHTML := FPseudoHTML + 'min='+inttostr(MinVal)+' max='+inttostr(MaxVal)+' step='+inttostr(i)+'>'+EditDefault+'</NUMBER>';
+        FPseudoHTML := HTML_TAG_NUMBER_OPEN + ' id="'+HTMLCtrlID+'" ';  //kt
+        FPseudoHTML := FPseudoHTML + 'min='+inttostr(MinVal)+' max='+inttostr(MaxVal)+' step='+inttostr(i)+'>'+EditDefault + HTML_TAG_NUMBER_CLOSE;
       end;
 
       dftHyperlink, dftText: begin
@@ -789,7 +789,7 @@ begin
         STmp := StripEmbedded(Items);
         if copy(STmp,length(STmp)-1,2) = CRLF then delete(STmp,length(STmp)-1,2);
         STmp := StringReplace(HTMLEscape(STmp), CRLF, '<BR>', [rfReplaceAll]);
-        FPseudoHTML := '<WPBOX id="'+HTMLCtrlID+'">' + sTmp + '</WPBOX>';
+        FPseudoHTML := HTML_TAG_WPBOX_OPEN+' id="'+HTMLCtrlID+'">' + sTmp + HTML_TAG_WPBOX_CLOSE;
       end;
     end;  //case
     TmpSL.Free;
@@ -1271,8 +1271,8 @@ begin
 
   FFirstBuild := TRUE;
   PseudoHTMLSource.Clear;
-  PseudoHTMLSource.Add('<div contentEditable=false>');
-  s := '<DIALOG id="' + FTMGDlgID + '" ' + 'IEN="' + FTemplateIEN + '">';
+  PseudoHTMLSource.Add(HTML_TAG_DIV_OPEN + ' contentEditable=false>');
+  s := HTML_TAG_DIALOG_OPEN + ' id="' + FTMGDlgID + '" ' + 'IEN="' + FTemplateIEN + '">';
   PseudoHTMLSource.Add(s);
   idx := 0;
   while (idx < TempHTMLSL.Count) do begin
@@ -1323,15 +1323,15 @@ begin
   end;
   FDefTextWithHTMLCtrlIDs := DefTextWithHTMLCtrlIDSL.Text;
   FDefTextWithHTMLCtrlIDs := StringReplace(FDefTextWithHTMLCtrlIDs, CRLF, '', [rfReplaceAll]);
-  PseudoHTMLSource.Add('</DIALOG>');
+  PseudoHTMLSource.Add(HTML_TAG_DIALOG_CLOSE);
 
   Attrs := TStringList.Create;
   Attrs.Add('class="' + EMBEDDED_DLG_SOURCE_CLASS + ' ' + HIDDEN_CLASS + '"');
   Attrs.Add('id="'+ FTMGDlgID + EMBEDDED_SOURCE_SUFFIX+'"');  //NOTE: if [ID]_result below is changed, must also change THTMLTemplateDialogEntry.ResolveIntoResultSPAN
   //TempHTMLSL.Text := EncodeTextToSafeHTMLAttribVal(FDefTextWithHTMLCtrlIDs);
   TempHTMLSL.Text := EncodeTextToSafeHTMLAttribVal(DefinitionText); //kt 6/6/16
-  AddElement('SPAN', Attrs, TempHTMLSL, PseudoHTMLSource);
-  PseudoHTMLSource.Add('</div>');  //this is closer for entire embedded dialog
+  AddElement(HTML_TAG_SPAN, Attrs, TempHTMLSL, PseudoHTMLSource);
+  PseudoHTMLSource.Add(HTML_TAG_DIV_CLOSE);  //this is closer for entire embedded dialog
   TempHTMLSL.Free;
   DefTextWithHTMLCtrlIDSL.Free;
 end;

@@ -1672,7 +1672,7 @@ begin
           edt.OnChange := Entry.DoChange;
           UpdateColorsFor508Compliance(edt, TRUE);
           ctrl := edt;
-          FPseudoHTML := '<EDITBOX id="'+HTMLCtrlID+'" size=' + IntToStr(edt.MaxLength) + '>' + edt.Text + '</EDITBOX>'; //kt 1/16
+          FPseudoHTML := HTML_TAG_EDITBOX_OPEN + ' id="'+HTMLCtrlID+'" size=' + IntToStr(edt.MaxLength) + '>' + edt.Text + HTML_TAG_EDITBOX_CLOSE;
         end;
 
       dftComboBox:
@@ -1709,12 +1709,12 @@ begin
           //kt begin mod ----  1/16
           TmpSL := TStringList.Create;
           TmpSL.Text := Items;
-          FPseudoHTML := '<COMBO id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">^';
+          FPseudoHTML := HTML_TAG_COMBO_OPEN + ' id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">^';
           for j := 0 to TmpSL.Count - 1 do begin
             FPseudoHTML := FPseudoHTML + TmpSL.Strings[j];
             if j <> TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML + '^';
           end;
-          FPseudoHTML := FPseudoHTML + '</COMBO>';
+          FPseudoHTML := FPseudoHTML + HTML_TAG_COMBO_CLOSE;
           TmpSL.Free
           //kt end mod ----
         end;
@@ -1738,12 +1738,12 @@ begin
           //e.g. <CYCBUTTON initial="opt2">opt1|Apples^opt2|Pears^opt3^opt4</CYCBUTTON>
           TmpSL := TStringList.Create;
           TmpSL.Text := Items;
-          FPseudoHTML := '<CYCBUTTON id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">';
+          FPseudoHTML := HTML_TAG_CYCBUTTON_OPEN + 'id="'+HTMLCtrlID+'" initial="' + DefaultStr + '">';
           for j := 0 to TmpSL.Count - 1 do begin
             FPseudoHTML := FPseudoHTML + TmpSL.Strings[j];
             if j <> TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML + '^';
           end;
-          FPseudoHTML := FPseudoHTML + '</CYCBUTTON>';
+          FPseudoHTML := FPseudoHTML + HTML_TAG_CYCBUTTON_CLOSE;
           TmpSL.Free
           //kt end mod ----
         end;
@@ -1759,7 +1759,7 @@ begin
             //kt mod 1/16 -------------------
             if FFldType = dftRadioButtons then begin
               //<RADIO inline=false initial="opt2">opt|Apples^opt2|Pears^opt3^opt4</RADIO>
-              FPseudoHTML :=  '<RADIO id="'+HTMLCtrlID+'" ';
+              FPseudoHTML :=  HTML_TAG_RADIO_OPEN + ' id="'+HTMLCtrlID+'" ';
               if FSepLines then begin
                 FPseudoHTML := FPseudoHTML + 'inline=false ';
               end else begin
@@ -1768,7 +1768,7 @@ begin
               if ItemDefault <> '' then FPseudoHTML := FPseudoHTML + 'initial=' + DefaultStr;
               FPseudoHTML := FPseudoHTML + '>';
             end else begin  //dftCheckBoxes
-              FPseudoHTML :=  '<CBGROUP id="'+HTMLCtrlID+'" count=' + IntToStr(TmpSL.Count) + '>';
+              FPseudoHTML :=  HTML_TAG_CBGROUP_OPEN + ' id="'+HTMLCtrlID+'" count=' + IntToStr(TmpSL.Count) + '>';
             end;
             //kt end mod ---------------------
             for i := 0 to TmpSL.Count-1 do begin
@@ -1800,7 +1800,7 @@ begin
               if FFldType = dftRadioButtons then begin
                 FPseudoHTML := FPseudoHTML + TmpSL.Strings[i];
                 if i = TmpSL.Count - 1 then begin
-                  FPseudoHTML := FPseudoHTML + '</RADIO>';
+                  FPseudoHTML := FPseudoHTML + HTML_TAG_RADIO_CLOSE;
                   Entry.FHTMLControls.Insert(Index,FPseudoHTML);
                   FPseudoHTML := '';
                 end else begin
@@ -1808,11 +1808,11 @@ begin
                   Entry.FHTMLControls.Insert(Index,'');
                 end;
               end else begin //dftCheckBoxes
-                FPseudoHTML := FPseudoHTML + '<CHECKBOX id="'+HTMLCtrlID+'d'+IntToStr(i)+'" ';
+                FPseudoHTML := FPseudoHTML + HTML_TAG_CHECKBOX_OPEN + ' id="'+HTMLCtrlID+'d'+IntToStr(i)+'" ';
                 if TmpSL.Strings[i] = DefaultStr then FPseudoHTML := FPseudoHTML + 'checked ';
-                FPseudoHTML := FPseudoHTML + '>' + TmpSL.Strings[i] + '</CHECKBOX>';
+                FPseudoHTML := FPseudoHTML + '>' + TmpSL.Strings[i] + HTML_TAG_CHECKBOX_CLOSE;
                 if FSepLines then FPseudoHTML := FPseudoHTML + '<BR>';
-                if i = TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML +  '</CBGROUP>';
+                if i = TmpSL.Count - 1 then FPseudoHTML := FPseudoHTML +  HTML_TAG_CBGROUP_CLOSE;
                 Entry.FHTMLControls.Insert(Index,FPseudoHTML);
                 FPseudoHTML := '';
               end;
@@ -1863,13 +1863,13 @@ begin
             ctrl := dbox;
           end;
           //kt start mod 1/16 ----
-          FPseudoHTML := '<DATE id="'+HTMLCtrlID+'" ';
+          FPseudoHTML := HTML_TAG_DATE_OPEN + ' id="'+HTMLCtrlID+'" ';
           FPseudoHTML := FPseudoHTML + 'DTMode=' + IntToStr(Ord(FDateType)-1) + ' ';
           if DefDate<> 0 then begin
             DateTimeToString(InitDT, 'mm/dd/yyyy', FMDateTimeToDateTime(DefDate));
             FPseudoHTML := FPseudoHTML + 'initial="' + InitDT + '"';
           end;
-          FPseudoHTML := FPseudoHTML + '></DATE>';
+          FPseudoHTML := FPseudoHTML + '> ' + HTML_TAG_DATE_CLOSE;
           //e.g. '<DATE DTMode=0 initial="7/3/1967"></DATE>'
           //kt end mod
         end;
@@ -1899,8 +1899,8 @@ begin
           pnl.UpDown.Align := alLeft;
           //end 17597
           ctrl := pnl;
-          FPseudoHTML := '<NUMBER id="'+HTMLCtrlID+'" ';  //kt
-          FPseudoHTML := FPseudoHTML + 'min='+inttostr(MinVal)+' max='+inttostr(MaxVal)+' step='+inttostr(i)+'>'+EditDefault+'</NUMBER>';  //kt
+          FPseudoHTML := HTML_TAG_NUMBER_OPEN + ' id="'+HTMLCtrlID+'" ';  //kt
+          FPseudoHTML := FPseudoHTML + 'min='+inttostr(MinVal)+' max='+inttostr(MaxVal)+' step='+inttostr(i)+'>'+EditDefault + HTML_TAG_NUMBER_CLOSE;  //kt
         end;
 
       dftHyperlink, dftText:
@@ -1963,7 +1963,7 @@ begin
           STmp := StripEmbedded(Items);
           if copy(STmp,length(STmp)-1,2) = CRLF then delete(STmp,length(STmp)-1,2);
           STmp := StringReplace(HTMLEscape(STmp), CRLF, '<BR>', [rfReplaceAll]);  
-          FPseudoHTML := '<WPBOX id="'+HTMLCtrlID+'">' + sTmp + '</WPBOX>';
+          FPseudoHTML := HTML_TAG_WPBOX_OPEN + ' id="'+HTMLCtrlID+'">' + sTmp + HTML_TAG_WPBOX_CLOSE;
           //kt end mode 1/16
         end;
     end;

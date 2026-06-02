@@ -40,6 +40,7 @@ interface
        Controls, StdCtrls, StrUtils, MSHTML, ActiveX, Variants,
        ShDocVw, {//kt added ShDocVw 5-2-05 for TWebBrowser access}
        Dialogs,
+       TMGHTML2,  //kt 5/18/25
        Forms,
        Clipbrd, //10/7/22
        Registry, {elh   6/19/09}
@@ -119,6 +120,7 @@ interface
   function  UniqueCacheFName(FName : string) : AnsiString;
   function GetClipboardHTML:string;
   function GetClipHTMLText:string;
+  function PrefixBody(HTMLText: string; Text2Insert : string; var Success:boolean) : string;  //kt 5/1/25
 
   procedure StripTags(var S : string);
   procedure StripQuotes(SL : TStrings; QtChar: char);
@@ -142,14 +144,16 @@ interface
   function GetInsertImgHTMLName(Name: string; PropSL : TStringList = nil): string;
   function SelectExistingImageClick() : string;
   function Make2ColHTMLTable(SourceSL : TStringList; Options : TStringList=nil) : string;
-
+  procedure SetIECompatibility;  //5/2/25
+  procedure ViewHTMLSourceClick(HtmlObj : THtmlObj);  //kt 5/18/25
+  function GetIPAddress():String; //kt 5/22/25 -- moved here from fSingleNote
 
 implementation
 
   uses fNotes,
        fImages,
        Messages,
-       TMGHTML2,  //kt moved from interface 8/16
+       //kt 5/18/25 -- TMGHTML2,  //kt moved from interface 8/16
        Graphics, //For color constants
        fGraphs,  //for RefreshGraph
        fImagePickExisting,
@@ -158,7 +162,9 @@ implementation
        fDrawers,
        uTemplateFields,
        uImages,
-       fTemplateDialog;
+       fTemplateDialog,
+       WinSock,    // kt 5/22/25
+       uTMGOptions;    //5/2/25
 
   type
     TPrinterEvents = class
@@ -1804,11 +1810,13 @@ const
       HtmlEditor : THtmlObj;
       TypedDrawers : TfrmDrawers;
       SavedSelRange : TRangeInfo; //kt 4/8/21
+      SelRangeChanged : boolean;  //kt 5/22/25
   begin
     if not (Drawers is TfrmDrawers) then exit;
     TypedDrawers := TfrmDrawers(Drawers);
     HtmlEditor := TypedDrawers.HTMLEditControl;
     SavedSelRange := HtmlEditor.SelectionInfo; //kt 4/8/21
+    SelRangeChanged := false;
     repeat
       Found := HtmlEditor.FindFirst(EMBEDDED_TEMPLATE_START_TAG);
       if not Found then break;
@@ -1821,8 +1829,10 @@ const
       Temp := piece2(Temp, EMBEDDED_TEMPLATE_END_TAG, 1);
       //Messagedlg('Here I can insert: '+Temp, mtInformation, [mbOK],0);
       TypedDrawers.InsertTemplatebyName(Temp);
+      SelRangeChanged := true;
     until false;
-    HtmlEditor.SetSelectionByRangeInfo(SavedSelRange); //kt 4/8/21
+    If SelRangeChanged then
+      HtmlEditor.SetSelectionByRangeInfo(SavedSelRange); //kt 4/8/21
   end;
 
   procedure StripTags(var S : string);
@@ -2402,7 +2412,10 @@ var  ImageFName : string;
 begin
   if Name = '' then exit;
   //Should I test for file existence?
-  ImageFName := CPRSCacheDir + Name;
+  if pos(CPRSCacheDir,Name)=0 then  //  6/17/25 - Added to ensure CacheDir wasn't already added
+     ImageFName := CPRSCacheDir + Name
+  else
+     ImageFName := Name;
   SizeString := HTMLResize(ImageFName);
   Result := '<img src="'+ ImageFName + '" ' + SizeString + ' '; //kt 8/19/21 //+ ALT_IMG_TAG_CONVERT + ' '
   if assigned(PropSL) then begin
@@ -2502,6 +2515,121 @@ begin
   end;
 end;
 
+
+
+function PrefixBody(HTMLText: string; Text2Insert : string; var Success:boolean) : string;  //kt 5/1/25
+//Purpose: Insert given text directly after <body ...> text
+const
+  NUM_TAGS = 3;
+  BODY_TAGS : array[1..NUM_TAGS] of string[6] = (
+    '<body',
+    '<BODY',
+    '<Body'
+  );
+var BodyTag : string;
+    p1, p2, i : integer;
+    preS, postS : string;
+
+begin
+  Success := false;
+  BodyTag := '';
+  p1 := 0;
+  p2 := 0;
+  Result := HTMLText;  //default to input value
+  for i := 1 to NUM_TAGS do begin
+    p1 := Pos(BODY_TAGS[i],HTMLText);  //p1 is index of BEGINNING of BodyTag
+    if (p1 > 0) then begin
+      BodyTag := BODY_TAGS[i];
+      break;
+    end;
+  end;
+  if (BodyTag<>'') and (p1 > 0) then begin
+    p2 := PosEx('>', HtmlText, p1);  //p2 is index of CLOSING '>' of <body .... > tag
+    if p2>0 then begin
+      preS := LeftStr(HtmlText, p2);
+      postS := MidStr(HtmlText, p2+1, length(HtmlText));
+      Result := preS + CRLF + Text2Insert + CRLF + postS;
+      Success := true;
+    end;
+  end;
+end;
+
+procedure SetIECompatibility;
+//Added 5/2/25
+var
+  Reg: TRegistry;
+  AppName: string;
+  EmulationValue: Integer;
+begin
+  AppName := ExtractFileName(ParamStr(0));
+
+  //NOTE: If we later need to fall back to old behavior, set value to 9000, or perhaps delete key
+  EmulationValue := uTMGOptions.ReadInteger('IE Emulation Version',11000);
+
+  Reg := TRegistry.Create(KEY_WRITE);
+  try
+    Reg.RootKey := HKEY_CURRENT_USER;
+
+    if Reg.OpenKey('Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION',True) then begin
+      Reg.WriteInteger(AppName, EmulationValue);
+      Reg.CloseKey;
+      //No output for success
+    end else begin
+      MessageBox(0, 'Failed to open registry key to set IE Emulation Value.', 'Error',MB_OK);
+    end;
+  finally
+    Reg.Free;
+  end;
+end;
+
+
+procedure ViewHTMLSourceClick(HtmlObj : THtmlObj);
+//kt added 5/18/25
+var OK : boolean;
+    HTMLText : string;
+    frmView : TfrmMemoEdit;
+begin
+  try
+    if not assigned(HtmlObj) then exit;
+    HTMLText := HtmlObj.GetFullHTMLText;
+    frmView := TfrmMemoEdit.Create(application);
+    frmView.memEdit.ReadOnly := false;
+    frmView.memEdit.ScrollBars := ssBoth;
+    frmView.memEdit.Lines.Text := HTMLText;
+    frmView.Caption := 'Note Details';
+    frmView.lblMessage.Caption := 'Source code of note.';
+    frmView.ShowModal;
+  finally
+    frmView.Free;
+  end;
+end;
+
+Function GetIPAddress():String;
+type
+  TaPInAddr = array [0..10] of PInAddr;
+  PaPInAddr = ^TaPInAddr;
+var
+  phe: PHostEnt;
+  pptr: PaPInAddr;
+  Buffer: array [0..63] of Ansichar;
+  i: Integer;
+  GInitData: TWSADATA;
+begin
+  WSAStartup($101, GInitData);
+  Result := '';
+  GetHostName(Buffer, SizeOf(Buffer));
+  phe := GetHostByName(Buffer);
+  if phe = nil then
+    Exit;
+  pptr := PaPInAddr(phe^.h_addr_list);
+  i := 0;
+  while pptr^[i] <> nil do
+  begin
+    Result := StrPas(inet_ntoa(pptr^[i]^));
+    Inc(i);
+  end;
+  WSACleanup;
+end;
 
 
 

@@ -40,7 +40,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   TMGHTML2, uHTMLDlg, uTemplateFields, //kt 1/16
   StdCtrls, ExtCtrls, ORCtrls, ORFn, AppEvnts, uTemplates, fBase508Form, uConst,
-  VA508AccessibilityManager, ComCtrls;
+  VA508AccessibilityManager, ComCtrls, Menus;
 
 type
   TDialogMode = (tHTML, tPlain, tPreview);     //kt 1/16
@@ -59,6 +59,9 @@ type
     tsPlainDlg: TTabSheet;
     tsHTMLDlg: TTabSheet;
     pnlHoldWebBrowser: TPanel;
+    DialogPopupMenu: TPopupMenu;
+    popShowHTMLSourcecode: TMenuItem;
+    procedure popShowHTMLSourcecodeClick(Sender: TObject);
     procedure btnAllClick(Sender: TObject);
     procedure btnNoneClick(Sender: TObject);
     procedure FormPaint(Sender: TObject);
@@ -484,7 +487,7 @@ begin //DoTemplateDialog
       repeat
         if (assigned(frmNotes)) and (HTMLTargetMode) then frmNotes.HTMLEditor.SetMsgActive(False);  //kt 9/11
         pcDlg.ActivePage := tsPlainDlg;  //kt
-        ShowModal;
+        ShowModal;    //<--- this is where control is displayed, and after [OK] etc, returns here.  
         if (assigned(frmNotes)) and (HTMLTargetMode) then frmNotes.HTMLEditor.SetMsgActive(True);   //kt 9/11
         if(ModalResult = mrOK) then begin
           SL.Assign(SLWithTransformedFormulas);  //kt 3/16
@@ -502,7 +505,7 @@ begin //DoTemplateDialog
               Index := Temp;
             end;
           end;
-          GetText(SL, TRUE);     {TRUE = Include embedded fields}
+          GetText(SL, TRUE);     {TRUE = Include embedded fields}   //This gets user answers from dialog. 
         end else begin
           if (not PreviewMode) and (not Silent) and (not uInit.TimedOut) then begin
             CancelMsg := 'If you cancel, your changes will not be saved.  Are you sure you want to cancel?';
@@ -969,8 +972,8 @@ begin
         end;
       end;
       if not (dsp or OneOnly) then begin  //kt added block
-        tmp := HTML_BEGIN_TAG+'<ENABLECB>'+ HTML_ENDING_TAG + tmp +
-               HTML_BEGIN_TAG + '</ENABLECB>' + HTML_ENDING_TAG;
+        tmp := HTML_BEGIN_TAG+HTML_TAG_ENABLECB_OPEN+'>'+ HTML_ENDING_TAG + tmp +
+               HTML_BEGIN_TAG + HTML_TAG_ENABLECB_CLOSE + HTML_ENDING_TAG;
       end;
       Entry := GetDialogEntry(sbMain, EID, tmp, DBcontrolData);  //kt 1/16 -- parses text in tmp into FControl (and FHTMLControls)
       //kt original --> Entry := GetDialogEntry(sbMain, EID, tmp);  //kt 1/16 -- parses text in tmp into FControl (and FHTMLControls)
@@ -1065,6 +1068,13 @@ begin
 
 end;
 
+procedure TfrmTemplateDialog.popShowHTMLSourcecodeClick(Sender: TObject);
+//kt added 5/18/25
+begin
+  inherited;
+  uHTMLTools.ViewHTMLSourceClick(HtmlEditor);
+end;
+
 procedure TfrmTemplateDialog.ItemChecked(Sender: TObject);
 begin
   if(copy(TORCheckBox(Sender).StringData,4,1) = '1') then
@@ -1119,7 +1129,7 @@ begin
   end;
   //kt mod 3/16 ----------
   HtmlEditor.Loaded;
-  HTMLText := HTMLDlg.HTML.Text;
+  HTMLText := HTMLDlg.HTML.Text;  //NOTE: calling HTMLDlg.HTML evokes a final compilation, if not already compiled. 
   HTMLText := FixNoBRs(HTMLText);
   HTMLEditor.HTMLText := HTMLText;
   InitialTab := uTMGOptions.ReadInteger('CPRS Template Inital Tab',0);
@@ -1160,6 +1170,7 @@ begin
   TWinControl(HtmlEditor).Parent := pnlHoldWebBrowser;
   TWinControl(HtmlEditor).Align:=alClient;
   HTMLDlg := THTMLDlg.Create(HtmlEditor);
+  HtmlEditor.PopupMenu := DialogPopupMenu;
 end;
 
 procedure TfrmTemplateDialog.AppShowHint(var HintStr: string;

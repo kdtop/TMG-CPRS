@@ -8,7 +8,7 @@ uses
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
   OleCtrls, SHDocVw, MSHTML, ORFn, fLabs, uImages, uReminders,
   rTIU, uTIU, rCore, fDrawers, ORNet,Trpcb, WinSock, uPCE,
-  ORCtrls, ActnList, Menus, fReminderDialog, ImgList;
+  ORCtrls, ActnList, Menus, fReminderDialog, ImgList, TypInfo;
 
 type
   tSNModes = (snmNone, snmLab, snmReport, snmNurse, snmMessenger, snmRecordsRequest, snmReminder);
@@ -70,6 +70,9 @@ type
     chkCopyToClipboard: TCheckBox;
     chkSaveWOSignature: TCheckBox;
     btnSaveWAddlSigner: TSpeedButton;
+    btnSaveAddlSignLeft: TSpeedButton;
+    btnCarryFwd: TButton;
+    procedure btnCarryFwdClick(Sender: TObject);
     procedure chkSaveWOSignatureClick(Sender: TObject);
     procedure chkCopyToClipboardClick(Sender: TObject);
     procedure btnSaveWSendClick(Sender: TObject);
@@ -163,6 +166,7 @@ type
     procedure SendOneMessage(ToUser,FromUser:string;OneMessage:string;NoteCreated:integer=0);
     procedure LoadUsers;
     function GetMyName:string;
+    procedure InitializeBrowser;
   public
     { Public declarations }
     HTMLEditor : THtmlObj;
@@ -171,7 +175,7 @@ type
     function ActiveEditIEN : Int64;
     procedure HandleInsertDate(Sender: TObject);
     function AllowContextChange(var WhyNot: string): Boolean;
-    procedure Initialize(Mode : tSNModes = snmNone);
+    procedure Initialize(Mode : tSNModes = snmNone; InitRemIEN:string = '');
     procedure UpdateButtons;
     procedure AssignRemForm;
     function CanFinishReminder: boolean;
@@ -191,6 +195,7 @@ implementation
 uses fImages, fSignItem, uConst, rSurgery, uTMGUtil, uCore,
      fNoteProps, uHTMLTools, uTemplates, fFrame, fNoteDR,
      fAddlSigners, Clipbrd,fNotes, uTMGOptions, fEncnt, fLabPicker,
+     fNetworkMessengerClient,
      fReports
      ;
 
@@ -216,21 +221,12 @@ procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; 
 begin
    frmSingleNote := TfrmSingleNote.Create(Application);
    frmSingleNote.NotifyOK := NotifyOK;
-   frmSingleNote.Initialize(Mode);
-   with frmSingleNote do begin
-      RemIEN := 'R'+InitRemIEN;
-      lblPtName.Caption := Patient.Name;
-      lblPtSSN.Caption := Patient.SSN;
-      lblPtAge.Caption := FormatFMDateTime('mmm dd,yyyy', Patient.DOB) + ' (' + IntToStr(Patient.Age) + ')';
-      pnlPatient.Caption := lblPtName.Caption + ' ' + lblPtSSN.Caption + ' ' + lblPtAge.Caption;
-   end;
-   //   1/20/25  if Mode=snmReminder then begin   <- always open as Non-Modal and Stay on Top
-   //   1/20/25    frmSingleNote.ShowModal;
-   //   1/20/25  end else begin
-     frmSingleNote.FormStyle := fsStayOnTop;
-     frmSingleNote.Show;  //<-- NOTE: the OnClose event sets close action to caFree --> all will be freed automatically
-   //   1/20/25  end;
-   //FreeAndNil(frmSingleNote);
+   frmSingleNote.InitializeBrowser;  //kt 5/21/25
+   frmSingleNote.FormStyle := fsStayOnTop;
+   frmSingleNote.Show;  //<-- NOTE: the OnClose event sets close action to caFree --> all will be freed automatically
+   Application.ProcessMessages;
+   frmSingleNote.Initialize(Mode, InitRemIEN);
+   frmSingleNote.HtmlEditor.Editable := true;  //Sets ContentEditable=true to doc.body, so needs to be done AFTER loading document.
 end;
 
 procedure ClearEditRec(EditNoteRec : TEditNoteRec);
@@ -293,11 +289,6 @@ begin
   boolAutosaving := False;
   FEditNote.Lines := TStringList.Create;
   ClearEditRec(FEditNote);
-  HTMLEditor.Navigate('about:blank');
-  HTMLEditor.Editable := True;
-  HTMLEditor.MoveCaretToEnd;
-  HTMLEditor.InsertHTMLAtCaret(' ');
-  HTMLEditor.BringToFront;
   //HtmlEditor.OnPasteEvent := HandleHTMLObjPaste;
   frmDrawers := TfrmDrawers.CreateDrawers(Self, pnlDrawers, [],[]);
   frmDrawers.Align := alBottom;
@@ -383,7 +374,6 @@ begin
 end;
 
 
-
 procedure TfrmSingleNote.FormDestroy(Sender: TObject);
 begin
   FEditNote.Lines.Free;
@@ -391,47 +381,14 @@ begin
   FNotes.Free;
   frmDrawers.DisplayDrawers(FALSE);
   frmDrawers.free;
-  //fSingleNote.frmDrawers.ClearPtData;  //kt added 6/15
-  //fSingleNote.frmDrawers.ResetTemplates;
-  //frmDrawers.FormDestroy(Sender);
-  //freeandnil(fSingleNote.frmDrawers);
   HTMLEditor.Free;
   if (uPCEEdit <> nil) then uPCEEdit.Free; //CQ7012 Added test for nil
   if (uPCEShow <> nil) then uPCEShow.Free; //CQ7012 Added test for nil
 end;
 
 procedure TfrmSingleNote.FormShow(Sender: TObject);
-var
-  EnableList, ShowList: TDrawers;
-
 begin
-  if not FHTMLEditorWarmedUp then begin
-    HtmlEditor.Loaded;
-    HtmlEditor.Editable := true;  //Sets ContentEditable=true to doc.body, so needs to be done AFTER loading document.
-    FHTMLEditorWarmedUp :=true;
-    if (FMode=snmReminder)or(FMode=snmLab) then begin
-      EnableList := [odTemplates, odReminders];
-      ShowList := [odTemplates, odReminders];
-    end else begin
-      EnableList := [odTemplates];
-      ShowList := [odTemplates];
-    end;
-    frmDrawers.DisplayDrawers(TRUE, EnableList, ShowList);
-  end;
-  if FEditIEN = 0 then InsertNewNote;
-  if FEditIEN = 0 then Self.Close;
   HTMLEditor.SetFocus;
-  HTMLEditor.ShowCaret;
-  HTMLEditor.MoveCaretToEnd;
-  if NotifyOK then begin
-    if frmSingleNote.FMode = snmLab then begin
-      HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
-    end else if frmSingleNote.FMode= snmReport then begin
-      HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.');
-    end;
-  end;
-  if FMode=snmLab then UpdateButtons;
-  if FMode=snmReminder then SelectReminder;
 end;
 
 procedure TfrmSingleNote.SelectReminder;
@@ -509,9 +466,11 @@ end;
 function TfrmSingleNote.GetMyName():string;
 //Public function to get the current user's name, based on IP Address
 begin
+  Result := fNetworkMessengerClient.GetMyName;
+  {
   Result := sCallV('TMG MESSENGER GET MY NAME',[MyIPAddress]);
   if piece(Result,'^',1)='1' then
-    Result := piece(Result,'^',2);
+    Result := piece(Result,'^',2);}
 end;
 
 procedure TfrmSingleNote.btnSaveWSendClick(Sender: TObject);
@@ -531,12 +490,6 @@ var Response:integer;
 begin
   result := True;
   if (FSaveAndCloseTriggered) and (not chkSavewosignature.checked) then begin
-    //MOVED BELOW    7/9/24
-    //Signed := SignNote;
-    //if Signed=false then begin
-    //  result := false;
-    //  exit;
-    //end;
     if (chkCopyToClipboard.visible=True)and(chkCopyToClipboard.Checked=True) then    //11/2/23
         CopyHTMLToClipboard('',HtmlEditor.HTMLText);
     if (FAddCosigner = True) or (NotifyOK=True) then begin      //Added NotifyOK  7/9/24
@@ -641,7 +594,7 @@ end;
 
 procedure TfrmSingleNote.UpdateNoteTitleDisplay();
 begin
-  Self.Caption := piece(Self.Caption, ':', 1) + ': ' + GetEditNoteDisplay;
+  Self.Caption := piece(Self.Caption, ':', 1) + ': ' + GetEditNoteDisplay + '(Current Mode: ' + GetEnumName(TypeInfo(tSNModes), Ord(FMode)) + ')';
 end;
 
 procedure TfrmSingleNote.InsertNewNote();
@@ -651,20 +604,15 @@ var
   CreatedNote         : TCreatedDoc; //a record
   TmpBoilerPlate      : TStringList;
   DocInfo             : string;
-  //BoilerplateIsHTML   : boolean;
+  HTML                : string;
   FNewIDChild, IsIDChild: boolean;
   Param, DefValue, NoteTitle : string;
 begin
   if Encounter.NeedVisit then begin
-    //7/9/19 - Autocreate encounter whether NotifyOk or not
-    //if NotifyOK then begin
       Encounter.Location := 6;
       Encounter.DateTime := DateTimeToFMDateTime(Now);
       Encounter.VisitCategory := 'A';
       Encounter.StandAlone := true;
-    //end else begin
-      //UpdateVisit(Font.Size, DfltTIULocation);
-    //end;
     frmFrame.DisplayEncounterText;
   end;
   if Encounter.NeedVisit then begin
@@ -702,8 +650,10 @@ begin
     if LacksRequiredForCreate(FEditNote) then begin
       HaveRequired := ExecuteNoteProperties(FEditNote, CT_NOTES, IsIDChild, FNewIDChild, '', 0);
     end;
+
+    Application.ProcessMessages;
     if HaveRequired then begin
-      uPCEEdit.UseEncounter := True;       //8/13/24
+      uPCEEdit.UseEncounter := True;
       uPCEEdit.NoteDateTime := FEditNote.DateTime;  //8/13/24
       uPCEEdit.PCEForNote(USE_CURRENT_VISITSTR, uPCEShow);   //8/13/24
       // create the note
@@ -714,24 +664,22 @@ begin
       if CreatedNote.ErrorText = '' then begin
         TmpBoilerPlate := TStringList.Create;
         LoadBoilerPlate(TmpBoilerPlate, FEditNote.Title);
-        //HtmlEditor.SetFocus;
         DocInfo := MakeXMLParamTIU(IntToStr(CreatedNote.IEN), FEditNote);
         ExecuteTemplateOrBoilerPlate(TmpBoilerPlate, FEditNote.Title, ltTitle, Self, 'Title: ' + FEditNote.TitleName, DocInfo);
         FEditNote.Lines.Assign(TmpBoilerPlate);
         ResolveEmbeddedTemplates(frmDrawers);
         HtmlEditor.MoveCaretToEnd;
-        if uHTMLTools.TextIsHTML(TmpBoilerPlate.Text) then begin
-          HTMLEditor.InsertHTMLAtCaret(TmpBoilerPlate.Text);
-        end else begin
-          HTMLEditor.InsertHTMLAtCaret(Text2HTML(TmpBoilerPlate));
-        end;
+        Application.ProcessMessages;
+        HTML := TmpBoilerPlate.Text;
+        if not uHTMLTools.TextIsHTML(HTML) then HTML := Text2HTML(HTML);
+        HTML := '<div>'+HTML+'</div>';
+        HTMLEditor.InsertHTMLAtCaret(HTML);
         Application.ProcessMessages;
         UpdateNoteAuthor(DocInfo, FEditNote);
         UpdateNoteTitleDisplay();
         HTMLEditor.MoveCaretToEnd;
       end else begin
         InfoBox(CreatedNote.ErrorText, TX_CREATE_ERR, MB_OK);
-        //HaveRequired := False;
       end; {if CreatedNote.IEN}
     end; {if HaveRequired}
   finally
@@ -770,9 +718,7 @@ procedure TfrmSingleNote.SaveCurrentNote(var Saved: Boolean; Silent : boolean = 
 { validates fields and sends the updated note to the server }
 var
   UpdatedNote: TCreatedDoc;
-  //x: string;
   EmptyNote : boolean; //kt 9/11
-  //EditIsHTML : boolean;  //kt 5/15
   HTMLText : string;
 
 begin
@@ -803,41 +749,16 @@ end;
 
 procedure TfrmSingleNote.DoAutoSave(Suppress: integer = 1);
 var
-//  ErrMsg: string;
-//  HTMLText : string;
-//  Changed : boolean;
   Saved : boolean;
 begin
   if fFrame.frmFrame.DLLActive = true then Exit;
   boolAutosaving := True;
   SaveCurrentNote(Saved, True);
-  {
-  Changed := HTMLEditor.KeyStruck;
-  if Changed then begin
-    StatusText('Autosaving note...');
-    timAutoSave.Enabled := False;
-    try
-      HTMLText := GetEditorHTMLText;
-      SplitHTMLToArray (HTMLText, FEditNote.Lines);
-      SetText(ErrMsg, FEditNote.Lines, lstNotes.GetIEN(EditingIndex),Suppress);
-    finally
-      timAutoSave.Enabled := True;
-    end;
-    FChanged := False;
-    HTMLEditor.KeyStruck := false; //kt 9/11
-    StatusText('');
-  end;
-  }
   boolAutosaving := False;
-  {
-  if ErrMsg <> '' then
-    InfoBox(TX_SAVE_ERROR1 + ErrMsg + TX_SAVE_ERROR2, TC_SAVE_ERROR, MB_OK or MB_ICONWARNING);
-  }
 end;
 
 
 procedure TfrmSingleNote.DoDeleteDocument(NoPrompt : boolean = false);
-//kt added, taking from mnuActDeleteClick
 const
   TX_DEL_OK  = CRLF + CRLF + 'Delete this progress note?';
 var
@@ -985,14 +906,13 @@ begin
            //SaveCurrentNote(Result, Silent);
            if Result then begin
              Result := HandleClosing(Result);
-             if Result then frmSingleNote.close;  
-           end; 
+             if Result then frmSingleNote.close;
+           end;
          end;
   end;
 end;
 
 function TfrmSingleNote.GetClipHTMLText(var szText:string):Boolean;
-//kt added entire function 8/16
 //from: http://www.delphibasics.info/home/delphibasicssnippets/operateclipboardwithoutclipboardunit
 var hData:  DWORD;
     pData:  Pointer;
@@ -1024,7 +944,6 @@ begin
 end;
 
 function TfrmSingleNote.SetClipText(szText:string):Boolean;
-//kt added entire function 8/16
 //from: http://www.delphibasics.info/home/delphibasicssnippets/operateclipboardwithoutclipboardunit
 var pData:  DWORD;
     dwSize: DWORD;
@@ -1122,16 +1041,19 @@ begin inherited; HTMLEditor.InsertHTMLAtCaret(datetostr(date)); end;
 procedure TfrmSingleNote.btnBoldClick(Sender: TObject);
 begin inherited; HTMLEditor.ToggleBold; end;
 
-{
-procedure TfrmSingleNote.HTMLEditorKeyPress(Sender: TObject; var Key: Char);
-begin
-end;
-}
 procedure TfrmSingleNote.btnItalicClick(Sender: TObject);
 begin inherited; HTMLEditor.ToggleItalic; end;
 
 procedure TfrmSingleNote.btnUnderlineClick(Sender: TObject);
 begin inherited; HTMLEditor.ToggleUnderline; end;
+
+procedure TfrmSingleNote.btnCarryFwdClick(Sender: TObject);
+var HTML:string;
+begin
+  HTML := '[CARRY FORWARD TOPICS]<br><br><br><br>[END OF CARRY FORWARD TOPICS]';
+  HTMLEditor.InsertHTMLAtCaret(HTML);
+  HTMLEditor.SetFocus;
+end;
 
 procedure TfrmSingleNote.btnCenterAlignClick(Sender: TObject);
 //kt 9/11 added function
@@ -1181,7 +1103,6 @@ procedure TfrmSingleNote.btnBackColorClick(Sender: TObject);
 begin inherited; HTMLEditor.TextBackColorDialog; end;
 
 procedure TfrmSingleNote.btnFontsClick(Sender: TObject);
-//kt 9/11 added function
 begin
   inherited;
   HTMLEditor.FontDialog;
@@ -1241,7 +1162,7 @@ begin
       result := result+'</tr>';  //end row
     end;
     result := result+'</table>';  //end table
-  end;  
+  end;
   if HasNotes then begin
     result := result+'<table border=1 bgcolor='+BG_COLOR+'><tr><td><pre>';
     result := result + LabInfo.Notes.Text;
@@ -1308,37 +1229,26 @@ begin
 end;
 *)
 
-procedure TfrmSingleNote.Initialize(Mode : tSNModes = snmNone);
-
-    Function GetIPAddress():String;
-    type
-      TaPInAddr = array [0..10] of PInAddr;
-      PaPInAddr = ^TaPInAddr;
-    var
-      phe: PHostEnt;
-      pptr: PaPInAddr;
-      Buffer: array [0..63] of Ansichar;
-      i: Integer;
-      GInitData: TWSADATA;
-    begin
-      WSAStartup($101, GInitData);
-      Result := '';
-      GetHostName(Buffer, SizeOf(Buffer));
-      phe := GetHostByName(Buffer);
-      if phe = nil then
-        Exit;
-      pptr := PaPInAddr(phe^.h_addr_list);
-      i := 0;
-      while pptr^[i] <> nil do
-      begin
-        Result := StrPas(inet_ntoa(pptr^[i]^));
-        Inc(i);
-      end;
-      WSACleanup;
-    end;
-
+procedure TfrmSingleNote.InitializeBrowser;
+  //kt 5/21/25 added to initialize browser
 begin
-  //tSNModes = (snmNone, snmLab, snmReport);
+  if not FHTMLEditorWarmedUp then begin
+    HTMLEditor.Loaded;
+    HTMLEditor.Navigate('about:blank');
+    //HtmlEditor.Editable := true;  //Sets ContentEditable=true to doc.body, so needs to be done AFTER loading document.
+    HTMLEditor.MoveCaretToEnd;
+    HTMLEditor.InsertHTMLAtCaret(' ');
+    HTMLEditor.BringToFront;
+    FHTMLEditorWarmedUp :=true;
+  end;
+end;
+
+procedure TfrmSingleNote.Initialize(Mode : tSNModes = snmNone; InitRemIEN:string = '');
+
+var
+  EnableList, ShowList: TDrawers;
+
+begin  //Initialize()
   FMode := Mode;
   lblMostRecent.Visible := (Mode=snmLab);
   cmdOld.Visible := (Mode=snmLab);
@@ -1362,7 +1272,11 @@ begin
       LoadUsers;
       btnSaveWAddlSigner.Caption := 'Save Note w/'+#13#10+'Addl Signer';
       btnSaveWAddlSigner.Visible := (NotifyOK=false);
-      if NotifyOK then btnSave.Caption := 'Save w/'+#13#10+'Addl Signer';
+      if NotifyOK then begin
+        btnSaveAddlSignLeft.Caption := 'Save w/'+#13#10+'Addl Signer';
+        btnSaveAddlSignLeft.visible := True;
+        btnSave.visible := False;
+      end;
       pnlButton.height := 84;
     end;
     snmReport: begin
@@ -1377,7 +1291,11 @@ begin
       LoadUsers;
       btnSaveWAddlSigner.Caption := 'Save Note w/'+#13#10+'Addl Signer';
       btnSaveWAddlSigner.Visible := (NotifyOK=false);
-      if NotifyOK then btnSave.Caption := 'Save w/'+#13#10+'Addl Signer';
+      if NotifyOK then begin
+        btnSaveAddlSignLeft.Caption := 'Save w/'+#13#10+'Addl Signer';
+        btnSaveAddlSignLeft.visible := True;
+        btnSave.visible := False;
+      end;
       pnlButton.height := 57;
     end;
     snmNurse: begin
@@ -1418,7 +1336,7 @@ begin
       MyIPAddress := GetIPAddress;
       MyName := GetMyName();
       if piece(MyName,'^',1)='-1' then MyName := 'CPRS (Sender Unknown)';
-      frmSingleNote.Caption := 'Single Patient Task Note - '+MyName+' ('+MyIPAddress+')';
+      Caption := 'Single Patient Task Note - '+MyName+' ('+MyIPAddress+')';
     end;
     snmRecordsRequest: begin
       btnFunc1.Caption := 'Records Request Note';
@@ -1442,9 +1360,41 @@ begin
       MyIPAddress := GetIPAddress;
       MyName := GetMyName();
       if piece(MyName,'^',1)='-1' then MyName := 'CPRS (Sender Unknown)';
-      frmSingleNote.Caption := 'Single Records Request Task Note - '+MyName+' ('+MyIPAddress+')';
+      Caption := 'Single Records Request Task Note - '+MyName+' ('+MyIPAddress+')';
+    end;
+  end;  //case mode
+
+  if (FMode=snmReminder)or(FMode=snmLab) then begin
+    EnableList := [odTemplates, odReminders];
+    ShowList := [odTemplates, odReminders];
+  end else begin
+    EnableList := [odTemplates];
+    ShowList := [odTemplates];
+  end;
+  frmDrawers.DisplayDrawers(TRUE, EnableList, ShowList);
+
+  Application.ProcessMessages;
+  if FEditIEN = 0 then InsertNewNote;
+  if FEditIEN = 0 then Self.Close;
+  HTMLEditor.ShowCaret;
+  HTMLEditor.MoveCaretToEnd;
+  if self.NotifyOK then begin
+    if FMode = snmLab then begin
+      HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
+    end else if FMode= snmReport then begin
+      HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.');
     end;
   end;
+  if FMode=snmLab then UpdateButtons;
+  if FMode=snmReminder then SelectReminder;
+
+  RemIEN := 'R'+InitRemIEN;
+  lblPtName.Caption := Patient.Name;
+  lblPtSSN.Caption := Patient.SSN;
+  lblPtAge.Caption := FormatFMDateTime('mmm dd,yyyy', Patient.DOB) + ' (' + IntToStr(Patient.Age) + ')';
+  pnlPatient.Caption := lblPtName.Caption + ' ' + lblPtSSN.Caption + ' ' + lblPtAge.Caption;
+  //kt end move
+
 end;
 
 procedure TfrmSingleNote.LoadUsers;
@@ -1453,7 +1403,7 @@ var Users:TStringList;
     FirstUser:integer;
 begin
   Users := TStringList.Create;
-  //Users.LoadFromFile('\\server1\Public\NetworkMessenger\NetworkMessengerUsers.ini');
+  //Users.LoadFromFile('\\server2\Public\NetworkMessenger\NetworkMessengerUsers.ini');
   cmbUsers.Items.Clear;
   cmbUsers.Text := '';
   tCallV(Users,'TMG MESSENGER GETUSERS',[]);
@@ -1562,12 +1512,10 @@ begin
 end;
 
 procedure TfrmSingleNote.cbFontSizeChange(Sender: TObject);
-//kt 9/11 added function
 const
   FontSizes : array [0..6] of byte = (8,10,12,14,18,24,36);
 begin
   inherited;
-  //HtmlEditor.FontSize := StrToInt(cbFontSize.Text);
   HTMLEditor.FontSize := FontSizes[cbFontSize.ItemIndex];
 end;
 
@@ -1580,12 +1528,22 @@ procedure TfrmSingleNote.chkSaveWOSignatureClick(Sender: TObject);
 begin
    btnSavewsend.Enabled := not chkSaveWOSignature.Checked;
    if ((FMode=snmLab)or(FMode=snmReport)) and (NotifyOK) then begin
-     if chkSaveWOSignature.Checked then
-       btnSave.Caption := 'Save'
-     else
-       btnSave.Caption := 'Save w/'+#13#10+'Addl Signer';
+     if chkSaveWOSignature.Checked then begin
+       btnSave.visible:= True;
+       btnSaveAddlSignLeft.visible := False;
+     end else begin
+       //btnSave.Caption := 'Save w/'+#13#10+'Addl Signer';
+       btnSave.visible:= False;
+       btnSaveAddlSignLeft.visible := True;
+       btnSaveAddlSignLeft.Caption := 'Save w/'+#13#10+'Addl Signer';
+    end;
    end;
-   if FMode=snmLab then begin
+   if NotifyOK then begin
+      label1.visible := not chkSaveWOSignature.Checked;
+      cmbUsers.Visible := not chkSaveWOSignature.Checked;
+      btnSaveNoSend.Visible := false;
+      btnSaveWAddlSigner.Visible := false;
+   end else if (FMode=snmLab)or(FMode=snmReport) then begin
       label1.visible := not chkSaveWOSignature.Checked;
       cmbUsers.Visible := not chkSaveWOSignature.Checked;
       btnSaveNoSend.Visible := not chkSaveWOSignature.Checked;

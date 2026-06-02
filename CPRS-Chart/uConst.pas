@@ -550,6 +550,27 @@ const
 
    //kt end addition
 
+   //kt added
+   HTML_TAG_RADIO     = 'radio';       HTML_TAG_RADIO_OPEN     = '<' + HTML_TAG_RADIO;      HTML_TAG_RADIO_CLOSE     = '</' + HTML_TAG_RADIO + '>';
+   HTML_TAG_CHECKBOX  = 'checkbox';    HTML_TAG_CHECKBOX_OPEN  = '<' + HTML_TAG_CHECKBOX;   HTML_TAG_CHECKBOX_CLOSE  = '</' + HTML_TAG_CHECKBOX + '>';
+   HTML_TAG_EDITBOX   = 'editbox';     HTML_TAG_EDITBOX_OPEN   = '<' + HTML_TAG_EDITBOX;    HTML_TAG_EDITBOX_CLOSE   = '</' + HTML_TAG_EDITBOX + '>';
+   HTML_TAG_WPBOX     = 'wpbox';       HTML_TAG_WPBOX_OPEN     = '<' + HTML_TAG_WPBOX;      HTML_TAG_WPBOX_CLOSE     = '</' + HTML_TAG_WPBOX + '>';
+   HTML_TAG_COMBO     = 'combo';       HTML_TAG_COMBO_OPEN     = '<' + HTML_TAG_COMBO;      HTML_TAG_COMBO_CLOSE     = '</' + HTML_TAG_COMBO + '>';
+   HTML_TAG_CYCBUTTON = 'cycbutton';   HTML_TAG_CYCBUTTON_OPEN = '<' + HTML_TAG_CYCBUTTON;  HTML_TAG_CYCBUTTON_CLOSE = '</' + HTML_TAG_CYCBUTTON + '>';
+   HTML_TAG_NUMBER    = 'number';      HTML_TAG_NUMBER_OPEN    = '<' + HTML_TAG_NUMBER;     HTML_TAG_NUMBER_CLOSE    = '</' + HTML_TAG_NUMBER + '>';
+   HTML_TAG_DATE      = 'date';        HTML_TAG_DATE_OPEN      = '<' + HTML_TAG_DATE;       HTML_TAG_DATE_CLOSE      = '</' + HTML_TAG_DATE + '>';
+   HTML_TAG_ENABLECB  = 'enablecb';    HTML_TAG_ENABLECB_OPEN  = '<' + HTML_TAG_ENABLECB;   HTML_TAG_ENABLECB_CLOSE  = '</' + HTML_TAG_ENABLECB + '>';
+   HTML_TAG_CBGROUP   = 'cbgroup';     HTML_TAG_CBGROUP_OPEN   = '<' + HTML_TAG_CBGROUP;    HTML_TAG_CBGROUP_CLOSE   = '</' + HTML_TAG_CBGROUP + '>';
+   HTML_TAG_DIALOG    = 'dialog';      HTML_TAG_DIALOG_OPEN    = '<' + HTML_TAG_DIALOG;     HTML_TAG_DIALOG_CLOSE    = '</' + HTML_TAG_DIALOG + '>';
+   HTML_TAG_INPUT     = 'input';       HTML_TAG_INPUT_OPEN     = '<' + HTML_TAG_INPUT;      HTML_TAG_INPUT_CLOSE     = '</' + HTML_TAG_INPUT + '>';
+   HTML_TAG_SPAN      = 'span';        HTML_TAG_SPAN_OPEN      = '<' + HTML_TAG_SPAN;       HTML_TAG_SPAN_CLOSE      = '</' + HTML_TAG_SPAN + '>';
+   HTML_TAG_DIV       = 'div';         HTML_TAG_DIV_OPEN       = '<' + HTML_TAG_DIV;        HTML_TAG_DIV_CLOSE       = '</' + HTML_TAG_DIV + '>';
+   HTML_TAG_SELECT    = 'select';      HTML_TAG_SELECT_OPEN    = '<' + HTML_TAG_SELECT;     HTML_TAG_SELECT_CLOSE    = '</' + HTML_TAG_SELECT + '>';
+   HTML_TAG_OPTION    = 'option';      HTML_TAG_OPTION_OPEN    = '<' + HTML_TAG_OPTION;     HTML_TAG_OPTION_CLOSE    = '</' + HTML_TAG_OPTION + '>';
+
+
+   //kt end addition
+
 
 var
   ScrollBarWidth: integer = 0;

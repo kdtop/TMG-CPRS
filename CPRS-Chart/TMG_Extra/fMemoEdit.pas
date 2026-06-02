@@ -48,6 +48,8 @@ type
     btnSelectAll: TButton;
     btnSave: TButton;
     SaveTextFileDialog: TSaveTextFileDialog;
+    cbWordWrap: TCheckBox;
+    procedure cbWordWrapClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
     procedure memEditKeyPress(Sender: TObject; var Key: Char);
     procedure btnSelectAllClick(Sender: TObject);
@@ -74,6 +76,11 @@ end;
 procedure TfrmMemoEdit.btnSelectAllClick(Sender: TObject);
 begin
   memEdit.SelectAll;
+end;
+
+procedure TfrmMemoEdit.cbWordWrapClick(Sender: TObject);
+begin
+  memEdit.WordWrap := cbWordWrap.Checked;
 end;
 
 procedure TfrmMemoEdit.memEditKeyPress(Sender: TObject; var Key: Char);

@@ -234,6 +234,10 @@ begin
     AnElement := AllElements.Item(i, 0) as IHtmlElement;
     NmVal := '';
     State := '';
+    //kt 5/21/25 NOTICE: Below will not work with newer versions of IE, which converts
+    //                   all tags to lower case.  I am not going to fix this right now
+    //                   because we don't use this functionality.  But in the future,
+    //                   would use HTML_TAG_INPUT that we added, defined in uConst.
     if AnElement.tagName = 'INPUT' then
     begin
       AnInput := AnElement as IHtmlInputElement;

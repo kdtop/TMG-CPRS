@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs,uTMGOptions, StdCtrls, ORNet, VAUtils, Trpcb, uCore;
+  Dialogs,uTMGOptions, StdCtrls, ORNet, VAUtils, Trpcb, uCore, uHTMLTools;
 
 type
   TfrmNetworkMessagerClient = class(TForm)
@@ -29,6 +29,7 @@ var
   function LabOrderMsgRecip(UsrType:string):string;
   function FollowUpMsgRecip(UsrType:string):string;
   function GetMyName():string;
+  function GetCurrentUserName:string;
 
 
 implementation
@@ -52,7 +53,7 @@ var Users:TStringList;
     i :integer;
 begin
   Users := TStringList.Create;
-  //Users.LoadFromFile('\\server1\Public\NetworkMessenger\NetworkMessengerUsers.ini');
+  //Users.LoadFromFile('\\server2\Public\NetworkMessenger\NetworkMessengerUsers.ini');
   ComboBox1.Items.Clear;
   tCallV(Users,'TMG MESSENGER GETUSERS',[]);
   for I := 1 to Users.Count - 1 do begin
@@ -65,7 +66,7 @@ end;
 procedure TfrmNetworkMessagerClient.Button1Click(Sender: TObject);
 var FileName:string;
 begin
-  //FileName := '\\server1\Public\NetworkMessenger\'+ComboBox1.Text+'-CPRS.mgr';
+  //FileName := '\\server2\Public\NetworkMessenger\'+ComboBox1.Text+'-CPRS.mgr';
   //Memo1.Lines.SaveToFile(FileName);
   SendOneMessage(ComboBox1.Text,GetMyName,Memo1.Lines);
   Modalresult := mrok;
@@ -113,9 +114,22 @@ end;
 function GetMyName():string;
 //Public function to get the current user's name, based on IP Address
 begin
-  Result := sCallV('TMG MESSENGER GET MY NAME',[DottedIPStr]);
+  //Result := sCallV('TMG MESSENGER GET MY NAME',[DottedIPStr,GetCurrentUserName]);
+  Result := sCallV('TMG MESSENGER GET MY NAME',[GetIPAddress,GetCurrentUserName]);
   if piece(Result,'^',1)='1' then
     Result := piece(Result,'^',2);
+end;
+
+function GetCurrentUserName:string;
+var
+   Buffer: array[0..256] of Char;
+   Size:Dword;
+begin
+   Size := 257;
+   if GetUserName(Buffer, Size)then
+     Result := Buffer
+   else
+     Result := '';
 end;
 
 end.

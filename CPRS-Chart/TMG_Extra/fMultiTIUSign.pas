@@ -8,16 +8,17 @@ uses
   Windows, Messages, SysUtils, DateUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, rCore, fFrame, fAddlSigners, Math,fImagePatientPhotoID, fNotes, uCore,
   TMGHTML2, StdCtrls, Buttons, ORCtrls, ORNet, ExtCtrls, OleCtrls, SHDocVw, rMisc,
-  rReports;
+  rReports, uTMGOptions;
 
 type
+  TMultiSignMode = (tmsmUnassigned, tmsmAlerts, tmsmLooseDocs);
   TItemInfoType = (tiitUnassigned, tiitTIU, tiitLab, tiitRadRpt);
   TItemInfo = class(TObject)
   public
     ItemType : TItemInfoType;
     DFN : string;
     PtName : string;
-    AlertMsg : string;
+    Message : string;
     IEN8925 : string;
     intIEN8925 : int64;
     XQAID : string;
@@ -42,6 +43,7 @@ type
     RptQualifier  : string;
     RptRPC : string;
     RptHSTAg : string;
+    DateStr : string;
     procedure AddErrMsg(msg : string);
     constructor Create();
     destructor Destroy();
@@ -71,7 +73,7 @@ type
     lblPatientInfo: TLabel;
     lbSelected: TListBox;
     pnlLeftTop: TPanel;
-    lblAlerts: TLabel;
+    lblItemsTitle: TLabel;
     WebBrowser: TWebBrowser;
     pnlPatientID: TPanel;
     btnEditZoomOut: TSpeedButton;
@@ -82,6 +84,7 @@ type
     lvUnSelected: TCaptionListView;
     lblNextAppt: TLabel;
     btnDelete: TBitBtn;
+    procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnDeleteClick(Sender: TObject);
     procedure lvUnSelectedChange(Sender: TObject; Item: TListItem; Change: TItemChange);
@@ -121,8 +124,15 @@ type
     FsortCol: integer;
     FsortDirection: string;
     FsortAscending: boolean;
-    Procedure Initialize(Items : TListItems);
-    procedure SetupInfoList(Items : TListItems);
+    FMaximizedOnce:Boolean;
+    FFormMode: TMultiSignMode;
+    FItemsTitleName : string;
+    procedure WndProc(var Msg:TMessage);
+    procedure LoadInfoListIntoLV;
+    Procedure InitializeFromAlerts(Items : TListItems);
+    Procedure InitializeFromLoose();
+    procedure SetupAlertInfoList(Items : TListItems);
+    procedure SetupLooseInfoList(Items : TStringList);
     procedure LoadNoteForView(ItemInfo : TItemInfo);
     function PatientDisplayName(ItemInfo : TItemInfo) : string;
     procedure UpdateButtonEnableStates;
@@ -144,13 +154,16 @@ type
     procedure ZoomOut;
     function ProcessMoveToLoose(ItemInfo : TItemInfo):boolean;
     procedure TransferCurrentFromUnselectedToActionList();
+    procedure UpdateLabels;
+    procedure SetFormMode(Value : TMultiSignMode);
   public
     { Public declarations }
-
+    property  FormMode: TMultiSignMode read FFormMode write SetFormMode;
   end;
 
 
 function ShowMultiAlertsSign(Items : TListItems) : boolean;
+function ShowMultiLooseSign() : boolean;
 
 
 implementation
@@ -162,11 +175,87 @@ uses VAUtils, ORFn, uConst, StrUtils, fSignItem, fImages, uImages,
 
 const
   BlankWebPage = 'about:blank';
+  WM_MYMAXIMIZE = WM_USER + 1;
 
 //===========================================================
 //===========================================================
+function InstantiateForm(Mode: TMultiSignMode): TfrmMultiTIUSign;
+var
+  aMultiTIUSignForm: TfrmMultiTIUSign;
+  InitialBounds:string;
+  InitPnlLeft,InitPnlCenter,InitZoom : string;
+  InitLeftWidth,InitCenterWidth : integer;
+begin
+  InitialBounds := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign']);
+  InitPnlLeft := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.pnlLeft']);
+  InitPnlCenter := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.pnlCenter']);
+  InitZoom := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.ZoomValue']);
+  aMultiTIUSignForm := TfrmMultiTIUSign.Create(Application);
+  aMultiTIUSignForm.SetFormMode(Mode);
+  if InitialBounds<>'' then begin
+    aMultiTIUSignForm.Left := strtoint(piece(InitialBounds,',',1));
+    aMultiTIUSignForm.Top := strtoint(piece(InitialBounds,',',2));
+    aMultiTIUSignForm.Width := strtoint(piece(InitialBounds,',',3));
+    aMultiTIUSignForm.Height := strtoint(piece(InitialBounds,',',4));
+  end;
+  if InitPnlLeft<>'' then begin
+    InitLeftWidth := strtoint(piece(InitPnlLeft,',',1));
+    if InitLeftWidth > 1 then aMultiTIUSignForm.pnlLeft.Width := InitLeftWidth;
+  end;
+  if InitPnlCenter<>'' then begin
+    InitCenterWidth := strtoint(piece(InitPnlCenter,',',1));
+    if (aMultiTIUSignForm.pnlLeft.Width+InitCenterWidth+20)<aMultiTIUSignForm.width then
+      aMultiTIUSignForm.pnlCenter.Width := strtoint(piece(InitPnlCenter,',',1));
+  end;
+  if InitZoom<>'' then begin
+    aMultiTIUSignForm.FInitZoomValue := strtoint(piece(InitZoom,',',1));
+  end else begin
+    aMultiTIUSignForm.FInitZoomValue := -1;
+  end;
+  Result := aMultiTIUSignForm;
+end;
 
 
+function ShowMultiLooseSign() : boolean;
+//Result: True if some documents were signed (i.e. refresh of documents ListView will be needed)
+var
+  frmMultiTIUSign: TfrmMultiTIUSign;
+begin
+  result := false;
+  frmMultiTIUSign := InstantiateForm(tmsmLooseDocs);
+  try
+    frmMultiTIUSign.InitializeFromLoose();
+    if frmMultiTIUSign.ShowModal = mrOK then begin
+      result := true;
+    end;
+  finally
+    frmMultiTIUSign.Free;
+  end;
+
+end;
+
+function ShowMultiAlertsSign(Items : TListItems) : boolean;
+//Result: True if some documents were signed (i.e. refresh of alerts will be needed)
+//NOTE: AllItems contents should NOT BE MODIFIED!  They are owned and managed by sender.
+//Input: Items is really lstvAlerts.Items
+var
+  frmMultiTIUSign: TfrmMultiTIUSign;
+begin
+  result := false;
+  frmMultiTIUSign := InstantiateForm(tmsmAlerts);
+  try
+    frmMultiTIUSign.InitializeFromAlerts(Items);
+    if frmMultiTIUSign.ShowModal = mrOK then begin
+      result := true;
+    end;
+  finally
+    frmMultiTIUSign.Free;
+  end;
+end;
+
+
+
+(*   //original unified function
 function ShowMultiAlertsSign(Items : TListItems) : boolean;
 //Result: True if some documents were signed (i.e. refresh of alerts will be needed)
 //NOTE: AllItems contents should NOT BE MODIFIED!  They are owned and managed by sender.
@@ -178,6 +267,7 @@ var
   InitLeftWidth,InitCenterWidth : integer;
 begin
   result := false;
+
   InitialBounds := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign']);
   InitPnlLeft := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.pnlLeft']);
   InitPnlCenter := sCallV('ORWCH LOADSIZ',['frmMultiTIUSign.pnlCenter']);
@@ -185,6 +275,7 @@ begin
   frmMultiTIUSign := TfrmMultiTIUSign.Create(Application);
   try
     frmMultiTIUSign.Initialize(Items);
+    {MOVED TO FORM SHOW }
     if InitialBounds<>'' then begin
       frmMultiTIUSign.Left := strtoint(piece(InitialBounds,',',1));
       frmMultiTIUSign.Top := strtoint(piece(InitialBounds,',',2));
@@ -214,7 +305,7 @@ begin
     frmMultiTIUSign.Free;
   end;
 end;
-
+*)
 //===========================================================
 //===========================================================
 
@@ -226,7 +317,7 @@ begin
   ItemType := tiitUnassigned;
   DFN := '';
   PtName := '';
-  AlertMsg := '';
+  Message := '';
   IEN8925 := '';
   intIEN8925 := 0;
   XQAID := '';
@@ -251,6 +342,7 @@ begin
   RptQualifier  := '';
   RptRPC := '';
   RptHSTAg := '';
+  DateStr := '';
 end;
 
 destructor TItemInfo.Destroy();
@@ -270,6 +362,32 @@ end;
 
 //===========================================================
 
+procedure TfrmMultiTIUSign.SetFormMode(Value : TMultiSignMode);
+
+begin
+  case Value of
+    tmsmUnassigned,
+    tmsmAlerts: begin
+      btnMoveToLoose.Visible := true;
+      FItemsTitleName := 'Alerted';
+    end;
+    tmsmLooseDocs: begin
+      btnMoveToLoose.Visible := false;
+      FItemsTitleName := 'Loose';
+    end;
+  end;
+  lblItemsTitle.Caption := FItemsTitleName + ' Notes';
+end;
+
+
+procedure TfrmMultiTIUSign.FormActivate(Sender: TObject);
+begin
+  if not FMaximizedOnce then begin
+    if uTMGOptions.ReadInteger('MultiSignWindowState',0) = 2 then WindowState := wsMaximized;
+    FMaximizedOnce := True;
+  end;
+end;
+
 procedure TfrmMultiTIUSign.FormClose(Sender: TObject; var Action: TCloseAction);
 var Bounds,SaveResults:string;
 begin
@@ -282,11 +400,13 @@ begin
    SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign.pnlCenter',Bounds]);
    Bounds := inttostr(FZoomValue)+',0,0,0';
    SaveResults := sCallV('ORWCH SAVESIZ',['frmMultiTIUSign.ZoomValue',Bounds]);
+   uTMGOptions.WriteInteger('MultiSignWindowState',integer(WindowState));
 end;
 
 procedure TfrmMultiTIUSign.FormCreate(Sender: TObject);
 begin
   ItemInfoList := TList.create();
+  FFormMode:= tmsmUnassigned;
   FZoomValue := 100;  //100%
   FZoomStep := 20;  //e.g. 5% change with each zoom in
 end;
@@ -303,6 +423,7 @@ end;
 procedure TfrmMultiTIUSign.FormShow(Sender: TObject);
 begin
   if lvUnSelected.Items.Count > 0 then begin
+    lblItemsTitle.Caption := FItemsTitleName + ' Notes ('+inttostr(lvUnSelected.Items.Count)+' total)';
     lvUnSelected.ItemIndex := 0;
     lvUnSelectedClick(self);
     Application.ProcessMessages;
@@ -312,39 +433,112 @@ begin
   FsortDirection := 'F';
   FsortAscending := true;
   //if FInitZoomValue<>-1 then SetZoom(FInitZoomValue);
-  
+  //if uTMGOptions.ReadInteger('MultiSignWindowState',0) = 2 then PostMessage(Handle, WM_MYMAXIMIZE, 0, 0);
 end;
 
-procedure TfrmMultiTIUSign.Initialize(Items : TListItems);
-//NOTE: Items contents should NOT BE MODIFIED!  They are owned and managed by sender.
-//Input: Items is really lstvAlerts.Items
-var
-  i : integer;
-  ItemInfo : TItemInfo;
-  Date:string;
-  NewItem: TListItem;
+procedure TfrmMultiTIUSign.WndProc(var Msg:TMessage);
 begin
-  SetupInfoList(Items);
-  NewItem := nil;
-  for i := 0 to ItemInfoList.Count - 1 do begin
-    ItemInfo := TItemInfo(ItemInfoList[i]);
-    //lbUnselected.Items.AddObject(ItemInfo.PtName + '  ' + ItemInfo.AlertMsg, Pointer(i));
-    //AddItem(
-    NewItem := lvUnSelected.Items.Add;
-    //NewItem.Caption := ItemInfo.XQAID;
-    //for J := 2 to DelimCount(List[I], U) + 1 do
-    Date := piece(ItemInfo.XQAID,';',3);
-    Date := FormatFMDateTime('mmm dd,yyyy', strtofloat(Date));
-    NewItem.Caption := Date;
+  if Msg.Msg = WM_MYMAXIMIZE then begin
+    WindowState := wsMaximized;
+    exit;
+  end;
+  inherited WndProc(Msg);
+end;
 
-    NewItem.SubItems.Add(ItemInfo.PtName);
-    NewItem.SubItems.Add(ItemInfo.AlertMsg);
-    NewItem.Data := Pointer(i);
 
+Procedure TfrmMultiTIUSign.InitializeFromLoose();
+var
+  Items : TStringList;
+
+begin
+  Items := TStringList.Create;
+  ListNotesForTree(Items, NC_LOOSE_DOCS, 0, 0, 0, 0, false);  //Load items via RPC call.
+  try
+    SetupLooseInfoList(Items);
+    LoadInfoListIntoLV;
+  finally
+    Items.Free;
   end;
 end;
 
-procedure TfrmMultiTIUSign.SetupInfoList(Items : TListItems);
+procedure TfrmMultiTIUSign.InitializeFromAlerts(Items : TListItems);
+//NOTE: Items contents should NOT BE MODIFIED!  They are owned and managed by sender.
+//Input: Items is really lstvAlerts.Items
+begin
+  SetupAlertInfoList(Items);  //fills self.ItemInfoList
+  LoadInfoListIntoLV;
+end;
+
+procedure TfrmMultiTIUSign.LoadInfoListIntoLV;
+//Put elements from local ItemInfoList into form control lvUnSelected
+var
+  i : integer;
+  ItemInfo : TItemInfo;
+  NewItem: TListItem;
+begin
+  for i := 0 to ItemInfoList.Count - 1 do begin
+    ItemInfo := TItemInfo(ItemInfoList[i]);
+    NewItem := lvUnSelected.Items.Add;
+    //Date := piece(ItemInfo.XQAID,';',3);
+    //Date := FormatFMDateTime('mmm dd,yyyy', strtofloat(Date));
+    //NewItem.Caption := Date;
+    NewItem.Caption := ItemInfo.DateStr;
+    NewItem.SubItems.Add(ItemInfo.PtName);
+    NewItem.SubItems.Add(ItemInfo.Message);
+    NewItem.Data := Pointer(i);
+  end;
+
+end;
+
+procedure TfrmMultiTIUSign.SetupLooseInfoList(Items : TStringList);
+//NOTE: Items contents is owned locally.  Could be modified.
+(* Example of Items
+  777968^INSURANCE NOTE;^3240110.01^MILx, GERx^168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S^Laughlin_Office^loose^Visit: 01/10/24;3240110.01^Dis: 01/10/24;3240110.01^^2^^^11^^$F866F7^$F866F7^Created: 01/12/24;3240112.075204
+  793147^INSURANCE NOTE;^3240516.01^MILx, GERx^168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S^Laughlin_Office^loose^Visit: 05/16/24;3240516.01^Dis: 05/16/24;3240516.01^^2^^^11^^$F866F7^$F866F7^Created: 06/03/24;3240603.091135
+  807000^INSURANCE NOTE;^3241008.01^MILx, GERx^168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S^Laughlin_Office^loose^Visit: 10/08/24;3241008.01^Dis: 10/08/24;3241008.01^^2^^^11^^$F866F7^$F866F7^Created: 10/11/24;3241011.08211
+  827171^INSURANCE NOTE;^3250218.01^MILx, GERx^168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S^Laughlin_Office^loose^Visit: 02/18/25;3250218.01^Dis: 02/18/25;3250218.01^^2^^^11^^$F866F7^$F866F7^Created: 02/27/25;3250227.092252
+  844385^INSURANCE NOTE;^3250716.01^MILx, GERx^168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S^Laughlin_Office^loose^Visit: 07/16/25;3250716.01^Dis: 07/16/25;3250716.01^^2^^^11^^$F866F7^$F866F7^Created: 07/17/25;3250717.080722
+
+ piece 1:  TIU_IEN (IEN_8925)
+       2:  DisplayTitle         e.g. Addendum to LAB/XRAYS/STUDIES RESULTS
+       3:  FMReferenceDate(#1301)   e.g. 3150422.174108
+       4:  PatientName   e.g. ZZTEST, BABY  (Z0103)
+       5:  AuthorIEN;AuthorSigName;AuthorName   e.g. 168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S
+       6:  LocationName   e.g. Laughlin_Office
+       7:  Status  e.g. unsigned
+       8:  Adm[or Visit]: DateStr;FMDT   e.g. Visit: 04/21/15;3150421.083119
+       9:  Dis: DateStr;FMDT   e.g. "        ;"
+      10:  REQUESTING PACKAGE REFERENCE IEN(var ptr)  e.g. ""
+      11:  Image Count   e.g. 0
+      12:  Subject(#1701)  e.g. ""
+      13:  Prefix (child indicator)   e.g. "+"
+      14:  ParentIEN (#.06), or IDParentien (#2101), or Context, or 1  e.g. 361381
+      16:  ID Sort indicator  e.g.  ""
+      17:  Highlight Note  ELH   8/4/16
+      18:  Hospital Note   ELH   4/30/19
+      19:  Creation Date   ELH   1/28/25
+*)
+var
+  OneStr : string;
+
+begin
+  ItemInfo := nil;
+  for i := 0 to Items.Count - 1 do begin
+    OneStr := Items.Strings[i];
+    ItemInfo := TItemInfo.Create; //will be owned by ItemInfoList
+    ItemInfo.ItemType := tiitTIU;
+    ItemInfo.IEN8925 := Piece(OneStr, U, 1);
+    ItemInfo.intIEN8925 := StrToIntDef(ItemInfo.IEN8925, 0);
+    ItemInfo.DFN := Patient.DFN;
+    ItemInfo.DateStr := Piece(Piece(OneStr, U, 19),';',2);
+    ItemInfo.PtName := Piece(OneStr, U, 4);
+    ItemInfo.Message := Piece(OneStr, U, 2);
+    ItemInfoList.Add(ItemInfo);
+    ItemInfo := nil;
+  end;
+end;
+
+procedure TfrmMultiTIUSign.SetupAlertInfoList(Items : TListItems);
 //NOTE: Items contents should NOT BE MODIFIED!  They are owned and managed by sender.
 var
   i,j : integer;
@@ -438,8 +632,9 @@ begin
       if assigned(ItemInfo) then begin
         ItemInfo.DFN := ADFN;
         ItemInfo.XQAID := XQAID;
+        ItemInfo.DateStr := FormatFMDateTime('mmm dd,yyyy', strtofloat(piece(XQAID,';',3)));
         ItemInfo.PtName := Items[i].SubItems[0];
-        ItemInfo.AlertMsg := Items[i].SubItems[4];
+        ItemInfo.Message := Items[i].SubItems[4];
         ItemInfoList.Add(ItemInfo);
         ItemInfo := nil;
       end;
@@ -540,6 +735,7 @@ begin
   lvUnSelected.AlphaSort;
   lvUnSelected.ItemIndex := lvUnSelected.Items.Count-1;
   lvUnSelected.SetFocus;
+  UpdateLabels;
 end;
 
 
@@ -627,7 +823,7 @@ begin
   ItemInfo := SelectedItemInfoFromLV(lvUnSelected);
   if not assigned(ItemInfo) then exit;
 
-  //Title := Trim(pieces(ItemInfo.AlertMsg,' ',2,999));
+  //Title := Trim(pieces(ItemInfo.Message,' ',2,999));
   //Title := piece2(Title,'available',1);
   //Answered := InputQuery('Move to Loose Documents','What would you like to call this file?',Title);
   //Title := InputBox('Move to Loose Documents','What would you like to call this file?',Suggestion);
@@ -641,7 +837,7 @@ begin
   ItemInfo := SelectedItemInfoFromLB(lbUnSelected);
   if not assigned(ItemInfo) then exit;
 
-  Suggestion := pieces(ItemInfo.AlertMsg,' ',2,999);
+  Suggestion := pieces(ItemInfo.Message,' ',2,999);
   Suggestion := piece2(Suggestion,'available',1);
   Success := frmNotes.MoveTIUToLoose(ItemInfo.DFN,ItemInfo.IEN8925, Suggestion);
   if Success=False then exit;
@@ -745,10 +941,23 @@ begin
   lvUnSelectedClick(Sender);
 end;
 
+procedure TfrmMultiTIUSign.UpdateLabels;
+begin
+  if lvUnSelected.Items.Count>0 then
+    lblItemsTitle.Caption := FItemsTitleName + ' Notes ('+inttostr(lvUnSelected.Items.Count)+' total)'
+  else
+    lblItemsTitle.Caption := FItemsTitleName + ' Notes';
+  if lbSelected.Items.Count>0 then
+    lblSignList.Caption := 'Action List ('+inttostr(lbSelected.Items.Count)+')'
+  else
+    lblSignList.Caption := 'Action List';
+end;
+
 
 procedure TfrmMultiTIUSign.lbSelectedClick(Sender: TObject);
 begin
   DisplayFromList(lbSelected);
+  UpdateLabels;
   lvUnSelected.ItemIndex := -1;
   UpdateButtonEnableStates;
 end;
@@ -756,6 +965,7 @@ end;
 procedure TfrmMultiTIUSign.lbUnSelectedClick(Sender : TObject);
 begin
   DisplayFromListView(lvUnSelected);
+  UpdateLabels;
   lbSelected.ItemIndex := -1;
   UpdateButtonEnableStates;
 end;
@@ -1253,8 +1463,6 @@ begin
     //
   end;
 end;
-
-
 
 
 

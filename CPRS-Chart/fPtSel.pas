@@ -1337,6 +1337,10 @@ begin
   finally
     List.Free;
   end;
+  if lstvAlerts.Items.Count>0 then
+    lblNotifications.Caption := 'Notifications: ('+inttostr(lstvAlerts.Items.Count)+' alerts)'
+  else
+    lblNotifications.Caption := 'Notifications';
   with lstvAlerts do begin
     Columns[0].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 1), 40);          //Info                 Caption
     Columns[1].Width := StrToIntDef(Piece(frmFrame.EnduringPtSelColumns, ',', 2), 195);         //Patient              SubItems[0]

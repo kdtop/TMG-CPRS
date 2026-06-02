@@ -246,6 +246,8 @@ type
     mnuQuickNotes: TMenuItem;
     mnuReminderNote: TMenuItem;
     mnuChangelog: TMenuItem;
+    mnuConsultants: TMenuItem;
+    procedure mnuConsultantsClick(Sender: TObject);
     procedure mnuChangelogClick(Sender: TObject);
     procedure mnuReminderNoteClick(Sender: TObject);
     procedure menuRecordsTaskClick(Sender: TObject);
@@ -656,6 +658,7 @@ uses
   fChartExportHistory,   //TMG 5/14/24
   fAddSuspectConditions,     //kt 3/19/24
   fChangeLog,         //TMG  10/15/24
+  fConsultants,  //4/3/35
   fODDiet, fODMisc, fODGen, fODMedIn, fODMedOut, fODText, fODConsult, fODProc, fODRad,   //kt added line
   fODLab, fODBBank, fODMeds, fODMedIV, fODVitals, fODAuto, fOMNavA,                      //kt added line
   fOMSet, uODBase, rODMeds, fOMAction, fARTAllgy, fOMHTML, fODChild, fODMedNVA,          //kt added line
@@ -1064,6 +1067,12 @@ begin
   FContextChanging := False;  //5/2/22, ELH added because this got set to TRUE and Consults wouldn't load afterwards
 end;
 
+procedure TfrmFrame.mnuConsultantsClick(Sender: TObject);
+begin
+  inherited;
+  OpenConsultantList;
+end;
+
 procedure TfrmFrame.DigitalSigningSetup1Click(Sender: TObject);
 begin
   inherited;
@@ -1280,6 +1289,8 @@ begin
       Exit;
     end;
   end;
+
+  if uTMGOptions.ReadBool('SetIECompatibility',True) then SetIECompatibility;     //5/2/25
 
   ViewChangeLog(piece(FileVersionValue(Application.ExeName, FILE_VER_FILEDESCRIPTION),' ',1));      //10/15/24
 
@@ -6126,7 +6137,10 @@ var MsgType:string;
 
 begin
   //MsgType := piece(piece(URL,'^',1),':',2);  //trim out the about: and the command
-  if pos('DFN-',URL)>0 then begin
+  if pos('OTHERPAT',URL)>0 then begin
+    frmFrame.mnuFileOpenClick(frmFrame.mnuFileOpen);
+    Cancel := True;
+  end else if pos('DFN-',URL)>0 then begin
     DFN := piece2(URL,'DFN-',2);
     //Patient.DFN := '0';
     pnlNoPatientSelected.Visible := False;

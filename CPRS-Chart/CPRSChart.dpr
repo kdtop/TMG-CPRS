@@ -439,7 +439,9 @@ uses
   fDashboard in 'TMG_Extra\fDashboard.pas' {frmDashboard},
   fChartExportHistory in 'TMG_Extra\fChartExportHistory.pas' {frmChartExportHistory},
   fPopHealth in 'TMG_Extra\fPopHealth.pas' {frmPopHealth},
-  fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog};
+  fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
+  fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
+  fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants};
 
 {$R *.TLB}
 
@@ -474,10 +476,6 @@ begin
   Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
-  Application.CreateForm(TfrmAddSuspectConditions, frmAddSuspectConditions);
-  Application.CreateForm(TfrmDashboard, frmDashboard);
-  Application.CreateForm(TfrmPopHealth, frmPopHealth);
-  Application.CreateForm(TfrmChangeLog, frmChangeLog);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;
   end;

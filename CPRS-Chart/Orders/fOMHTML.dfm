@@ -6,8 +6,8 @@ inherited frmOMHTML: TfrmOMHTML
   ClientWidth = 512
   OnClose = FormClose
   OnCreate = FormCreate
-  ExplicitWidth = 520
-  ExplicitHeight = 320
+  ExplicitWidth = 528
+  ExplicitHeight = 331
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton [0]

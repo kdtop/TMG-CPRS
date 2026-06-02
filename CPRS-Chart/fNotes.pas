@@ -61,6 +61,7 @@ type
   TEditModes = (emNone,emText,emHTML);                //kt 9/11
   TViewModes = (vmEdit,vmView,vmText,vmHTML);         //kt 9/11
   TViewModeSet = Set of TViewModes;                   //kt 9/11
+  TEncViewModes = (emExpand,emShort);                 //5/15/25
   THandleLooseDoc = (hlMoveToScan,hlDelete,hlMoveToTIU);
   TNoteVerbs = (nvNone,nvNoteSelect);
   TTOCLocation = (toclInside,toclOutside);
@@ -307,6 +308,10 @@ type
     btnOpenTOC: TSpeedButton;
     btnOpenTOC2: TSpeedButton;
     timRunMDM: TTimer;
+    btnOpenEnc: TBitBtn;
+    procedure sptVertMoved(Sender: TObject);
+    procedure btnOpenEncClick(Sender: TObject);
+    procedure memPCEShowResizeRequest(Sender: TObject; Rect: TRect);
     procedure timRunMDMTimer(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure btnOpenTOCClick(Sender: TObject);
@@ -514,6 +519,7 @@ type
     boolAutosaving : Boolean;                       //elh 11/18/16
     CallBackProcs : TNotifyPCEEventList;            //kt 5/11/23  This will serve as a callback stack to achieve a pseudo-closure for a non-modal process
     InitialMDM : Boolean;                           //elh 1/23/25
+    EncViewMode : TEncViewModes;                    //elh 5/15/25
     procedure HandleInsertDate(Sender: TObject);    //kt
     procedure HandleHTMLObjPaste(Sender : TObject; var AllowPaste : boolean); //kt 8/16
     function GetClipHTMLText(var szText:string):Boolean;
@@ -595,7 +601,10 @@ type
     procedure UpdateEncounterInfoNonModal(AEditPCEObj, AShowPCEObj : TPCEData;
                                           CallBackProcs : TNotifyPCEEventList);         //kt 5/11/23
     procedure ChangeStatus(Status:string);    //7/18/23
-    
+    procedure AdjustEncButton;  //5/15/25
+    function IsMemoEncTooShort:boolean;  //5/15/25
+    procedure SetEncIcon;  //5/15/25
+
   public
     HtmlEditor : THtmlObj;                                                              //kt 9/11
     HtmlViewer : THtmlObj;                                                              //kt 9/11
@@ -1128,6 +1137,36 @@ begin
   FChanged := False;
 end;
 
+procedure TfrmNotes.AdjustEncButton;
+begin
+    btnOpenEnc.Top := memPCEShow.Top+2;
+end;
+
+function TfrmNotes.IsMemoEncTooShort:boolean;
+var VisibleLines: integer;
+begin
+    VisibleLines := memPCEShow.ClientHeight div Abs(memPCEShow.Font.Height);
+    result := memPCEShow.Lines.Count > VisibleLines;
+    if result then EncViewMode:= emShort
+    else EncViewMode:=emExpand;
+end;
+
+procedure TfrmNotes.SetEncIcon;
+var
+  Bitmap:TBitMap;
+  ImageIndex:integer;
+begin
+  ImageIndex := strtoint(IfThen(IsMemoEncTooShort,'0','1'));
+  Bitmap := TBitmap.create;
+  try
+    TOCImages.GetBitmap(ImageIndex, Bitmap);
+    btnOpenEnc.Glyph.Assign(Bitmap);
+  finally
+    Bitmap.free;
+  end;
+  btnOpenEnc.Repaint;
+end;
+
 procedure TfrmNotes.ShowPCEControls(ShouldShow: Boolean);
 begin
   sptVert.Visible    := ShouldShow;
@@ -1140,6 +1179,11 @@ begin
   memNote.Invalidate;
   end;                                             //kt 9/11
   Application.ProcessMessages;                     //kt 5/15
+  btnOpenEnc.Visible := ShouldShow;
+  if ShouldShow then begin  //5/15/25
+    memPCEShow.height := 45;
+    AdjustEncButton;
+  end;
 end;
 
 procedure TfrmNotes.DisplayPCE;
@@ -2288,7 +2332,7 @@ end;
 
 procedure TfrmNotes.HandleInsertDate(Sender: TObject);  //kt
 begin
-  HTMLEditor.InsertHTMLAtCaret(datetostr(date));
+  HTMLEditor.InsertHTMLAtCaret(datetostr(date)+': ');
 end;
 
 function TfrmNotes.InsertText(TextToInsert:string):string;    //kt
@@ -4290,12 +4334,23 @@ begin
 end;
 
 procedure TfrmNotes.popNoteMemoViewHTMLSourceClick(Sender: TObject);
-//kt added 3/16
-var OK : boolean;
-    HTMLText : string;
-    frmView : TfrmMemoEdit;
+//kt added 3/16.  Modified 5/18/25
+var //ktOK : boolean;
+    //HTMLText : string;
+    //frmView : TfrmMemoEdit;
+    HtmlObj : THtmlObj;
 begin
   inherited;
+
+  //kt modification to use common view code in uHTMLTools
+  HtmlObj := nil;
+  if (vmHTML in FViewMode) then begin
+    if      (vmEdit in FViewMode) then HtmlObj := HtmlEditor
+    else if (vmView in FViewMode) then HtmlObj := HtmlViewer;
+  end;
+  if assigned(HtmlObj) then uHTMLTools.ViewHTMLSourceClick(HtmlObj)
+
+  {  //kt 5/18/25
   try
     OK := false;
     if (vmHTML in FViewMode) then begin
@@ -4321,6 +4376,7 @@ begin
   finally
     frmView.Free;
   end;
+  }
 end;
 
 procedure TfrmNotes.popNotePasteHTMLClick(Sender: TObject);
@@ -4428,16 +4484,19 @@ var position:integer;
     CheckForReplacement : boolean;
 begin
   ScrollPosition := HtmlEditor.GetScrollLocation;
-  CheckForReplacement := not (pos(TagToReplace,ReplacementText)>0);  //if the tag is found in the replacement text, then we know it will be found again after the replacement so don't check for replacement since it will always fail
+  //kt original --> CheckForReplacement := not (pos(TagToReplace,ReplacementText)>0);  //if the tag is found in the replacement text, then we know it will be found again after the replacement so don't check for replacement since it will always fail
+  CheckForReplacement := not (PosInsensitive(TagToReplace,ReplacementText)>0); //kt 5/25  //if the tag is found in the replacement text, then we know it will be found again after the replacement so don't check for replacement since it will always fail
   //messagedlg(inttostr(SCrollPosition),mtinformation,[mbOK],0);
   if not (vmEdit in FViewMode) then begin
     result := '-1^Not in edit mode.';
     exit;  //quit if not in edit mode
   end;
   DIVTagToReplace:='<DIV name="'+piece(piece(TagToReplace,'[',2),']',1)+'"></DIV>';    //Test for DIV first
-  position := Pos(DIVTagToReplace,HtmlEditor.HTMLText);
+  //kt original --> position := Pos(DIVTagToReplace,HtmlEditor.HTMLText);
+  position := PosInsensitive(DIVTagToReplace,HtmlEditor.HTMLText);  //kt 5/25
   if position<1 then begin
-    position := Pos(TagToReplace,HtmlEditor.HTMLText);
+    //kt original --> position := Pos(TagToReplace,HtmlEditor.HTMLText);
+    position := PosInsensitive(TagToReplace,HtmlEditor.HTMLText); //kt 5/25
     if position<1 then begin
       result := '-1^Tag sent "'+TagToReplace+'" could not be found in note.';
       exit;  //quit if tag isn't found
@@ -4449,7 +4508,7 @@ begin
   //position := Pos(TagToReplace,HtmlEditor.HTMLText);
 
   result := '1^success';
-  if ReplaceAll then  //kt 4/28/23  
+  if ReplaceAll then  //kt 4/28/23
      HtmlEditor.HTMLText := StringReplace(HtmlEditor.HTMLText,TagToReplace,ReplacementText,[rfReplaceAll, rfIgnoreCase])
   else
      HtmlEditor.HTMLText := StringReplace(HtmlEditor.HTMLText,TagToReplace,ReplacementText,[rfIgnoreCase]);
@@ -5878,7 +5937,7 @@ begin
   try
     TotalHTML.Assign(SL);
     if pos('DIV name=',TotalHTML.text)<1 then
-      TotalHTML.Add('<p><DIV name="'+TargetName+'"></DIV>');  //5/6/21 - Adding another DIV for multiple items to target
+      TotalHTML.Add('<p><DIV name="'+TargetName+'"></DIV><p>');  //5/6/21 - Adding another DIV for multiple items to target
     Result := WMReplaceHTMLText('['+TargetName+']',TotalHTML.text);
     {    ANY ERRORS dhould be handled by the caller}
     if piece(Result,'^',1)='-1' then begin
@@ -6120,7 +6179,7 @@ begin
           //Move file to the server
           FPath := StringReplace(FilePath, '/', '\',[rfReplaceAll, rfIgnoreCase]);
           //the below line is a temp solution until I find a concrete solution
-          FPath := StringReplace(FPath, '\filesystem\loosedocs\','\\server1\private$\FPG CHARTS\Z-LOOSE-IN-CHART\',[rfReplaceAll, rfIgnoreCase]);
+          FPath := StringReplace(FPath, '\filesystem\loosedocs\','\\server2\private$\FPG CHARTS\Z-LOOSE-IN-CHART\',[rfReplaceAll, rfIgnoreCase]);
           FName := ExtractFileName(FPath);
           CopiedFile := CopyFile(PChar(FPath),PChar(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+FName),true);
           if CopiedFile=False then begin
@@ -6351,6 +6410,13 @@ begin
   if pnlWrite.Visible then
      if NewSize > frmNotes.ClientWidth - memNewNote.Constraints.MinWidth - sptHorz.Width then
         NewSize := frmNotes.ClientWidth - memNewNote.Constraints.MinWidth - sptHorz.Width;
+end;
+
+procedure TfrmNotes.sptVertMoved(Sender: TObject);
+begin
+  inherited;
+  AdjustEncButton;
+  SetEncIcon;
 end;
 
 procedure TfrmNotes.popNoteMemoInsTemplateClick(Sender: TObject);
@@ -7237,6 +7303,33 @@ begin
   end;
 end;
 
+procedure TfrmNotes.btnOpenEncClick(Sender: TObject);
+   procedure AdjustMemoHeight(memo:TRichEdit;Mode:TEncViewModes) ;
+   var
+      LineHeight,DesiredHeight,Padding:integer;
+   begin
+      if Mode = emExpand then begin
+        Memo.height := 45;
+      end else begin
+        LineHeight := Abs(Memo.Font.Height);
+
+        Padding := 60;
+
+        DesiredHeight := (Memo.Lines.Count * LineHeight) + Padding;
+
+        Memo.Height := DesiredHeight;
+      end;
+   end;
+
+var IsTooShort:boolean;
+begin
+  inherited;
+  IsTooShort := IsMemoEncTooShort;
+  AdjustMemoHeight(memPCEShow,EncViewMode);
+  AdjustEncButton;
+  SetEncIcon;
+end;
+
 procedure TfrmNotes.btnOpenTOCClick(Sender: TObject);
 begin
   inherited;
@@ -7524,6 +7617,12 @@ begin
       frmDrawers.pnlTemplatesButton.SetFocus
 end;
 
+procedure TfrmNotes.memPCEShowResizeRequest(Sender: TObject; Rect: TRect);
+begin
+  inherited;
+  AdjustEncButton;
+end;
+
 procedure TfrmNotes.cmdChangeExit(Sender: TObject);
 begin
   inherited;
@@ -7577,6 +7676,8 @@ var TOCNote : TStrings;  //pointer to other objects
     TempFile: string;
     MoveTo:string;
     ControlScreenPos,ControlPanelPos : TPoint;
+    ScreenWidth: Integer;
+    NewLeft: Integer;
 begin
   inherited;
   // EDDIE NOTES: Add a button to top, this opens the TOC box... align to right hand side of CPRS
@@ -7610,8 +7711,23 @@ begin
         frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)-frmNoteTOC.width-20;
         //frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.pnlHtmlViewer.width)-frmNoteTOC.width-20;
       toclOutside:
-        frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)+20;
-        //frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.pnlHtmlViewer.width)+20;
+      begin
+        //Original code  -> frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)+20;
+        ScreenWidth := Screen.Width;  // full screen width
+
+        // your normal placement
+        NewLeft := ControlScreenPos.X + frmNotes.Width + 20;
+
+        // if more than 25% of the control would be off-screen, move it left
+        if NewLeft + frmNoteTOC.Width * 0.25 > ScreenWidth then
+          NewLeft := ScreenWidth - frmNoteTOC.Width;
+
+        // make sure we don’t go negative
+        if NewLeft < 0 then
+          NewLeft := 0;
+
+        frmNoteTOC.Left := NewLeft;
+      end;
   end;
   if Application.MainForm.WindowState = wsMaximized then frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)-frmNoteTOC.width-20;
   //frmNoteTOC.Left := frmNotes.Width-frmNoteTOC.width-5;

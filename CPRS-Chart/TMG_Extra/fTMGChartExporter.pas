@@ -100,6 +100,12 @@ type
     Label16: TLabel;
     chkCopyFaxNumber: TCheckBox;
     chkCheckAllRads: TCheckBox;
+    btnSearch: TBitBtn;
+    cmbFreqReasons: TORComboBox;
+    Label17: TLabel;
+    procedure cmbFreqReasonsChange(Sender: TObject);
+    procedure btnSearchClick(Sender: TObject);
+    procedure cmbCnsltNumbersChange(Sender: TObject);
     procedure chkCheckAllRadsClick(Sender: TObject);
     procedure chkCopyFaxNumberClick(Sender: TObject);
     procedure cklbTitlesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
@@ -159,6 +165,8 @@ type
     DirtyForm:boolean;
     DownloadedFile : string;
     clTMGHighlight : TColor;
+    EditingExport : Boolean;
+    NoteStr,LabStr,RadStr : string;
     //
     procedure LoadPrintLists;
     function AreSomeSelectedInList(ChkLBox:TCheckListBox) : boolean;
@@ -193,6 +201,7 @@ var
 
 
 procedure ExportOneChart(InitialTab:integer);
+procedure EditOneExport(InitialTab:integer;InitNotes,InitLabs,InitRad,InitCover:string);
 
 
 implementation
@@ -200,7 +209,7 @@ implementation
 {$R *.dfm}
 uses
   uTIU, rTIU, uConst, fNotes, fNotePrt, fConsults, fDCSumm, fFrame, fUploadImages, fImages,
-  uImages;
+  uImages, fConsultantOffices;
 
 CONST
   COVER_NO_COVERSHEET = 0;
@@ -232,6 +241,53 @@ procedure ExportOneChart(InitialTab:integer);
     end else begin
       AFrmTMGChartExporter.RadCoverGroup.ItemIndex := 1;
     end;
+    AFrmTMGChartExporter.EditingExport := False;
+    //AFrmTMGChartExporter.ATree := ATree;
+    AFrmTMGChartExporter.PageID := CT_Notes;
+    //AFrmTMGChartExporter.btnApply.Enabled := False;
+    AFrmTMGChartExporter.LoadNoteListbox;
+    AFrmTMGChartExporter.LoadLabsListbox;
+    AFrmTMGChartExporter.LoadRadListbox;
+    // dont autoload orders. this speeds up loading AFrmTMGChartExporter.LoadOrderListbox;
+    AFrmTMGChartExporter.LoadScannedListbox;
+    AFrmTMGChartExporter.ExportPageControl.ActivePageIndex := 0;
+    AFrmTMGChartExporter.RadCoverGroupClick(nil);
+    AFrmTMGChartExporter.ExportPageControlChange(nil);
+    AFrmTMGChartExporter.lstExtraFiles.Drive := 'C';
+    AFrmTMGChartExporter.ExportPageControl.ActivePageIndex := InitialTab;
+    AFrmTMGChartExporter.ShowModal;
+    AFrmTMGChartExporter.Destroy;
+  finally
+    //
+  end;
+end;
+
+procedure EditOneExport(InitialTab:integer;InitNotes,InitLabs,InitRad,InitCover:string);
+  begin
+  AFrmTMGChartExporter := TfrmTMGChartExporter.Create(Application);
+  try
+    if PersistBeginDate<1 then PersistBeginDate := DecFMDTDay(DateTimeToFMDateTime(Now),365);
+    if PersistEndDate<1 then PersistEndDate := DateTimeToFMDateTime(Now);
+    AFrmTMGChartExporter.dtNotesStart.FMDateTime := PersistBeginDate;
+    AFrmTMGChartExporter.dtNotesEnd.FMDateTime := PersistEndDate;
+    AFrmTMGChartExporter.dtLabsStartDt.FMDateTime := PersistBeginDate;
+    AFrmTMGChartExporter.dtLabsEndDt.FMDateTime := PersistEndDate;
+    AFrmTMGChartExporter.dtRadStartDt.FMDateTime := PersistBeginDate;
+    AFrmTMGChartExporter.dtRadEndDt.FMDateTime := PersistEndDate;
+    AFrmTMGChartExporter.dtOrderStartDt.FMDateTime := PersistBeginDate;
+    AFrmTMGChartExporter.dtOrderEndDt.FMDateTime := PersistEndDate;
+
+    AFrmTMGChartExporter.edtTo.Text := piece(InitCover,'^',1);
+    AFrmTMGChartExporter.edtToFax.Text := piece(InitCover,'^',2);
+    AFrmTMGChartExporter.edtRE.Text := piece(InitCover,'^',3);
+    AFrmTMGChartExporter.memComments.lines.text := piece(InitCover,'^',4);
+    AFrmTMGChartExporter.chkStoreData.checked := PersistCoverSheet;
+    AFrmTMGChartExporter.radCoverGroup.ItemIndex := PersistCoverIndex;
+    AFrmTMGChartExporter.EditingExport := True;
+    AFrmTMGChartExporter.NoteStr := InitNotes;
+    AFrmTMGChartExporter.LabStr := InitLabs;
+    AFrmTMGChartExporter.RadStr := InitRad;
+
     //AFrmTMGChartExporter.ATree := ATree;
     AFrmTMGChartExporter.PageID := CT_Notes;
     //AFrmTMGChartExporter.btnApply.Enabled := False;
@@ -305,6 +361,13 @@ begin
   for I := 0 to RPCResults.Count - 1 do begin
     cmbRecentFaxNumbers.Items.Add(RPCResults[i]);
   end;
+  //
+  //RPCResults.Clear;
+  //tCallV(RPCResults,'TMG GET RECENT FAX NUMBERS',['ALL']);
+  //for I := 0 to RPCResults.Count - 1 do begin
+  //  cmbCnsltNumbers.Items.Add(RPCResults[i]);
+  //end;
+  //
   RPCResults.free;
   cmbRecentFaxNumbers.Enabled := cmbRecentFaxNumbers.Items.Count>0  ;
   DirtyForm := False;
@@ -425,6 +488,17 @@ begin
   end;
 end;
 
+procedure TfrmTMGChartExporter.btnSearchClick(Sender: TObject);
+var  SelectedOffice:string;
+begin
+  inherited;
+  SelectedOffice := SearchConsultants;
+  if SelectedOffice<>'' then begin
+    edtTo.Text := piece(SelectedOffice,'^',2);
+    edtToFax.Text := piece(SelectedOffice,'^',4);
+  end;
+end;
+
 procedure TfrmTMGChartExporter.btnSelectCoverClick(Sender: TObject);
 var FileName:string;
 begin
@@ -525,7 +599,7 @@ end;
 procedure TfrmTMGChartExporter.chkHighlightOnlyClick(Sender: TObject);
 
     function IgnoreTitle(Title:string):boolean;
-    //This is a very crud function. It could be fleshed out better, but with the small amount of time it will be used it isn't worth making an RPC
+    //This is a very crudE function. It could be fleshed out better, but with the small amount of time it will be used it isn't worth making an RPC
     begin
         result := False;
         if Title='PHONE NOTE' then result := True;
@@ -546,7 +620,12 @@ procedure TfrmTMGChartExporter.chkHighlightOnlyClick(Sender: TObject);
         if Title='CANCELLED APPOINTMENT' then result := True;
         if Title='CANCELLED APPT' then result := True;
         if Title='NURSE ORDER' then result := True;
-        if Title='OUTSIDE ORDER (IMAGE)' then result := True;                    
+        if Title='OUTSIDE ORDER (IMAGE)' then result := True;
+        if Title='PROCESS REMINDERS' then result := True;
+        if Title='PATIENT TASK' then result := True;
+        if Title='LAB/XRAYS/STUDIES RESULTS' then result := True;
+        if Title='REQUEST RECORDS TASK' then result := True;
+        if Title='REFERRAL NOTE (IMAGE)' then result := True;
     end;
 const
   //HIGHLIGHT_LABEL : array [false .. true] of string = ('Show Highlighted Items Only','Show All Items');
@@ -687,6 +766,21 @@ begin
   end;       }
 end;
 
+procedure TfrmTMGChartExporter.cmbCnsltNumbersChange(Sender: TObject);
+var FaxTo,FaxNumber:string;
+begin
+  inherited;
+  //if cmbRecentFaxNumbers.Text='' then exit;
+  //edtTo.Text := piece2(cmbCnsltNumbers.Text,' = ',1);
+  //edtToFax.Text := piece2(cmbCnsltNumbers.Text,' = ',2);
+end;
+
+procedure TfrmTMGChartExporter.cmbFreqReasonsChange(Sender: TObject);
+begin
+  inherited;
+  edtRE.Text := cmbFreqReasons.Text;
+end;
+
 procedure TfrmTMGChartExporter.cmbRecentFaxNumbersChange(Sender: TObject);
 var FaxTo,FaxNumber:string;
 begin
@@ -745,6 +839,7 @@ var
   HighlightedItem : boolean;
   ThisDate:TFMdatetime;
   tmpList:TStringList;
+
 begin
   HLDPageID := PageID;
   ResizeFormToFont(TForm(self));
@@ -763,10 +858,14 @@ begin
      ThisDate := strtofloat(piece(x,'^',3));
      if (ThisDate>dtNotesStart.FMDateTime) AND (ThisDate<dtNotesEnd.FMDateTime) then begin
        TitleName := MakeNoteDisplayText(x);
-       if pos('Addendum to',TitleName)>0 then continue;  //don't include addendums as they will be in the parent note         
+       if pos('Addendum to',TitleName)>0 then continue;  //don't include addendums as they will be in the parent note
        DataSL.Add(x);
        cklbTitles.Items.Add(TitleName);
-      end;
+       if EditingExport = True then begin
+          if pos(piece(x,'^',1),NoteStr)>0 then
+            cklbTitles.Checked[cklbTitles.Items.Count-1] := True;
+       end;
+     end;
   end;
   tmplist.free;
 
@@ -830,6 +929,10 @@ begin
    TitleName :=FormatFMDateTime('mmm dd, yyyy hh:nn', strtofloat(piece(x,'^',4)));
    if pos('00:00',TitleName)>0 then TitleName:=TitleName+' Outside lab results';
    lstLabs.Items.Add(TitleName);
+   if EditingExport = True then begin
+      if pos(piece(x,'^',3),LabStr)>0 then
+        lstLabs.Checked[lstLabs.Items.Count-1] := True;
+   end;
    //end;
   end;
   RPCResults.free;
@@ -862,6 +965,10 @@ begin
      if (RadDate>BDate)and(RadDate<EDate) then begin
        lstRad.Items.Add(piece(RadList[i],'^',3)+' '+piece(RadList[i],'^',4));
        RadDataSL.Add(piece(piece(RadList[i],'^',2),'i',2)+'#'+piece(RadList[i],'^',7));
+       if EditingExport = True then begin
+         if pos(piece(piece(RadList[i],'^',2),'i',2),RadStr)>0 then
+           lstRad.Checked[lstRad.Items.Count-1] := True;
+       end;
      end;
   end;
   RadList.Free;
@@ -1053,5 +1160,7 @@ begin
 end;
 
 end.
+
+
 
 

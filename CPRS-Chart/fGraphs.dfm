@@ -2,12 +2,12 @@ inherited frmGraphs: TfrmGraphs
   Left = 265
   Top = 279
   BorderIcons = []
-  BorderStyle = bsNone
+  BorderStyle = bsSingle
   Caption = 'CPRS Graphing - CPRSpatient,One'
-  ClientHeight = 596
-  ClientWidth = 700
+  ClientHeight = 564
+  ClientWidth = 694
   PopupMenu = mnuPopGraphStuff
-  Position = poDesigned
+  Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -19,7 +19,7 @@ inherited frmGraphs: TfrmGraphs
   object pnlHeader: TPanel [0]
     Left = 0
     Top = 0
-    Width = 700
+    Width = 694
     Height = 21
     Align = alTop
     BevelOuter = bvNone
@@ -35,7 +35,7 @@ inherited frmGraphs: TfrmGraphs
     object pnlInfo: TORAutoPanel
       Left = 0
       Top = 0
-      Width = 700
+      Width = 694
       Height = 21
       Align = alClient
       BevelOuter = bvNone
@@ -88,8 +88,8 @@ inherited frmGraphs: TfrmGraphs
   end
   object pnlFooter: TPanel [1]
     Left = 0
-    Top = 567
-    Width = 700
+    Top = 535
+    Width = 694
     Height = 29
     Align = alBottom
     BevelOuter = bvNone
@@ -176,15 +176,15 @@ inherited frmGraphs: TfrmGraphs
   object pnlMain: TPanel [2]
     Left = 0
     Top = 21
-    Width = 700
-    Height = 546
+    Width = 694
+    Height = 514
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
     object splGraphs: TSplitter
       Left = 0
-      Top = 445
-      Width = 700
+      Top = 413
+      Width = 694
       Height = 3
       Cursor = crVSplit
       Align = alBottom
@@ -199,8 +199,8 @@ inherited frmGraphs: TfrmGraphs
       Tag = 1
       Left = 0
       Top = 0
-      Width = 700
-      Height = 445
+      Width = 694
+      Height = 413
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
@@ -208,7 +208,7 @@ inherited frmGraphs: TfrmGraphs
         Left = 148
         Top = 0
         Width = 2
-        Height = 445
+        Height = 413
         AutoSnap = False
         Beveled = True
         MinSize = 15
@@ -219,7 +219,7 @@ inherited frmGraphs: TfrmGraphs
         Left = 0
         Top = 0
         Width = 148
-        Height = 445
+        Height = 413
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 0
@@ -280,7 +280,7 @@ inherited frmGraphs: TfrmGraphs
           Left = 0
           Top = 22
           Width = 148
-          Height = 423
+          Height = 391
           ActivePage = tsTopItems
           Align = alClient
           TabOrder = 1
@@ -290,7 +290,7 @@ inherited frmGraphs: TfrmGraphs
               Left = 0
               Top = 0
               Width = 140
-              Height = 395
+              Height = 363
               Align = alClient
               BevelInner = bvNone
               BevelOuter = bvNone
@@ -333,9 +333,13 @@ inherited frmGraphs: TfrmGraphs
           object tsTopViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object splViewsTop: TSplitter
               Left = 0
-              Top = 392
+              Top = 361
               Width = 140
               Height = 2
               Cursor = crVSplit
@@ -347,7 +351,7 @@ inherited frmGraphs: TfrmGraphs
               Left = 0
               Top = 0
               Width = 140
-              Height = 392
+              Height = 360
               Align = alClient
               ItemHeight = 13
               ParentShowHint = False
@@ -362,7 +366,7 @@ inherited frmGraphs: TfrmGraphs
             end
             object memViewsTop: TRichEdit
               Left = 0
-              Top = 394
+              Top = 360
               Width = 140
               Height = 1
               Align = alBottom
@@ -386,15 +390,19 @@ inherited frmGraphs: TfrmGraphs
           object tsTopCustom: TTabSheet
             Caption = 'Custom'
             ImageIndex = 2
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
           end
         end
       end
       object pnlTopRightPad: TPanel
         Tag = 50
-        Left = 685
+        Left = 679
         Top = 0
         Width = 15
-        Height = 445
+        Height = 413
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 1
@@ -402,8 +410,8 @@ inherited frmGraphs: TfrmGraphs
       object pnlScrollTopBase: TPanel
         Left = 150
         Top = 0
-        Width = 534
-        Height = 445
+        Width = 528
+        Height = 413
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 2
@@ -411,8 +419,8 @@ inherited frmGraphs: TfrmGraphs
         object pnlBlankTop: TPanel
           Left = 0
           Top = 0
-          Width = 534
-          Height = 415
+          Width = 528
+          Height = 383
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 2
@@ -422,8 +430,8 @@ inherited frmGraphs: TfrmGraphs
           Tag = 5
           Left = 0
           Top = 0
-          Width = 534
-          Height = 415
+          Width = 528
+          Height = 383
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -434,8 +442,8 @@ inherited frmGraphs: TfrmGraphs
         end
         object pnlDatelineTop: TPanel
           Left = 0
-          Top = 415
-          Width = 534
+          Top = 383
+          Width = 528
           Height = 30
           Align = alBottom
           BevelOuter = bvNone
@@ -443,7 +451,7 @@ inherited frmGraphs: TfrmGraphs
           object chartDatelineTop: TChart
             Left = 20
             Top = 0
-            Width = 514
+            Width = 508
             Height = 30
             AllowPanning = pmNone
             BackWall.Brush.Color = clWhite
@@ -543,10 +551,10 @@ inherited frmGraphs: TfrmGraphs
         end
       end
       object memTop: TMemo
-        Left = 684
+        Left = 678
         Top = 0
         Width = 1
-        Height = 445
+        Height = 413
         Align = alRight
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -569,8 +577,8 @@ inherited frmGraphs: TfrmGraphs
     object pnlBottom: TPanel
       Tag = 1
       Left = 0
-      Top = 448
-      Width = 700
+      Top = 416
+      Width = 694
       Height = 98
       Align = alBottom
       BevelOuter = bvNone
@@ -689,6 +697,10 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object splViewsBottom: TSplitter
               Left = 0
               Top = 45
@@ -741,12 +753,16 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomCustom: TTabSheet
             Caption = 'Custom'
             ImageIndex = 2
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
           end
         end
       end
       object pnlBottomRightPad: TPanel
         Tag = 50
-        Left = 685
+        Left = 679
         Top = 0
         Width = 15
         Height = 98
@@ -757,7 +773,7 @@ inherited frmGraphs: TfrmGraphs
       object pnlScrollBottomBase: TPanel
         Left = 150
         Top = 0
-        Width = 534
+        Width = 528
         Height = 98
         Align = alClient
         BevelOuter = bvNone
@@ -765,7 +781,7 @@ inherited frmGraphs: TfrmGraphs
         object pnlBlankBottom: TPanel
           Left = 0
           Top = 0
-          Width = 534
+          Width = 528
           Height = 68
           Align = alClient
           BevelOuter = bvNone
@@ -775,7 +791,7 @@ inherited frmGraphs: TfrmGraphs
         object pnlDatelineBottom: TPanel
           Left = 0
           Top = 68
-          Width = 534
+          Width = 528
           Height = 30
           Align = alBottom
           BevelOuter = bvNone
@@ -783,7 +799,7 @@ inherited frmGraphs: TfrmGraphs
           object chartDatelineBottom: TChart
             Left = 20
             Top = 0
-            Width = 514
+            Width = 508
             Height = 30
             AllowPanning = pmNone
             BackWall.Brush.Color = clWhite
@@ -883,7 +899,7 @@ inherited frmGraphs: TfrmGraphs
           Tag = 5
           Left = 0
           Top = 0
-          Width = 534
+          Width = 528
           Height = 68
           Align = alClient
           BevelInner = bvNone
@@ -894,7 +910,7 @@ inherited frmGraphs: TfrmGraphs
         end
       end
       object memBottom: TMemo
-        Left = 684
+        Left = 678
         Top = 0
         Width = 1
         Height = 98

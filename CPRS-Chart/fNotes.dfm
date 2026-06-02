@@ -3,8 +3,8 @@ inherited frmNotes: TfrmNotes
   Top = 115
   HelpContext = 5000
   Caption = 'Progress Notes Page'
-  ClientHeight = 754
-  ClientWidth = 1025
+  ClientHeight = 758
+  ClientWidth = 1056
   HelpFile = 'overvw'
   Menu = mnuNotes
   Position = poDesigned
@@ -12,31 +12,31 @@ inherited frmNotes: TfrmNotes
   OnHide = FormHide
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 1033
-  ExplicitHeight = 808
+  ExplicitWidth = 1064
+  ExplicitHeight = 812
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 749
-    Width = 1025
+    Top = 753
+    Width = 1056
     ExplicitTop = 358
     ExplicitWidth = 679
   end
   inherited sptHorz: TSplitter
     Left = 260
-    Height = 749
+    Height = 753
     ParentColor = False
     ExplicitLeft = 261
     ExplicitHeight = 989
   end
   inherited pnlLeft: TPanel
     Width = 260
-    Height = 749
+    Height = 753
     ExplicitWidth = 260
-    ExplicitHeight = 749
+    ExplicitHeight = 753
     object lblSpace1: TLabel
       Left = 0
-      Top = 704
+      Top = 708
       Width = 260
       Height = 3
       Align = alBottom
@@ -47,7 +47,7 @@ inherited frmNotes: TfrmNotes
     end
     object cmdNewNote: TORAlignButton
       Left = 0
-      Top = 707
+      Top = 711
       Width = 260
       Height = 21
       Align = alBottom
@@ -58,7 +58,7 @@ inherited frmNotes: TfrmNotes
     end
     object cmdPCE: TORAlignButton
       Left = 0
-      Top = 728
+      Top = 732
       Width = 260
       Height = 21
       Align = alBottom
@@ -72,13 +72,13 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 33
       Width = 260
-      Height = 671
+      Height = 675
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
       object splDrawers: TSplitter
         Left = 0
-        Top = 668
+        Top = 672
         Width = 260
         Height = 3
         Cursor = crVSplit
@@ -110,7 +110,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 0
         Width = 260
-        Height = 668
+        Height = 672
         Align = alClient
         Constraints.MinWidth = 30
         HideSelection = False
@@ -383,25 +383,26 @@ inherited frmNotes: TfrmNotes
   end
   inherited pnlRight: TPanel
     Left = 264
-    Width = 761
-    Height = 749
+    Width = 792
+    Height = 753
     ExplicitLeft = 264
-    ExplicitWidth = 761
-    ExplicitHeight = 749
+    ExplicitWidth = 792
+    ExplicitHeight = 753
     object sptVert: TSplitter
       Left = 0
-      Top = 700
-      Width = 761
+      Top = 704
+      Width = 792
       Height = 4
       Cursor = crVSplit
       Align = alBottom
+      OnMoved = sptVertMoved
       ExplicitTop = 309
       ExplicitWidth = 611
     end
     object memPCEShow: TRichEdit
       Left = 0
-      Top = 704
-      Width = 761
+      Top = 708
+      Width = 792
       Height = 45
       Align = alBottom
       Color = clCream
@@ -415,23 +416,24 @@ inherited frmNotes: TfrmNotes
       WordWrap = False
       OnDblClick = popEditEncounterElementsClick
       OnExit = memPCEShowExit
+      OnResizeRequest = memPCEShowResizeRequest
     end
     object pnlRead: TPanel
       Left = 0
       Top = 0
-      Width = 761
-      Height = 700
+      Width = 792
+      Height = 704
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
       OnExit = pnlReadExit
       DesignSize = (
-        761
-        700)
+        792
+        704)
       object lblTitle: TOROffsetLabel
         Left = 0
         Top = 0
-        Width = 761
+        Width = 792
         Height = 19
         Align = alTop
         Caption = 'No Progress Notes Found'
@@ -444,14 +446,14 @@ inherited frmNotes: TfrmNotes
       object sptList: TSplitter
         Left = 0
         Top = 113
-        Width = 761
+        Width = 792
         Height = 3
         Cursor = crVSplit
         Align = alTop
         ExplicitWidth = 611
       end
       object btnOpenTOC: TSpeedButton
-        Left = 639
+        Left = 670
         Top = 1
         Width = 120
         Height = 18
@@ -493,12 +495,13 @@ inherited frmNotes: TfrmNotes
           C2FFE3D6C3FFE3D6C3FFE3D6C3FFE3D5C3FFE3D5C1FFE1D3BFFFE0D1BEFFDFCF
           BBFFDDCEBBFFDBCCB7FFDBCAB6FFD8C8B3FFD7C7B1FFD5C4AFFF}
         OnClick = btnOpenTOCClick
+        ExplicitLeft = 639
       end
       object memNote: TRichEdit
         Left = 0
         Top = 116
-        Width = 761
-        Height = 584
+        Width = 792
+        Height = 588
         Align = alClient
         Color = clCream
         Ctl3D = True
@@ -523,7 +526,7 @@ inherited frmNotes: TfrmNotes
       object lvNotes: TCaptionListView
         Left = 0
         Top = 19
-        Width = 761
+        Width = 792
         Height = 94
         Align = alTop
         Columns = <
@@ -573,8 +576,8 @@ inherited frmNotes: TfrmNotes
       object pnlHtmlView: TPanel
         Left = 0
         Top = 116
-        Width = 761
-        Height = 584
+        Width = 792
+        Height = 588
         Align = alClient
         BevelOuter = bvNone
         Color = clBtnShadow
@@ -582,8 +585,8 @@ inherited frmNotes: TfrmNotes
         object pnlHtmlViewer: TPanel
           Left = 0
           Top = 20
-          Width = 761
-          Height = 564
+          Width = 792
+          Height = 568
           Align = alClient
           BevelOuter = bvNone
           Color = clBtnShadow
@@ -592,7 +595,7 @@ inherited frmNotes: TfrmNotes
         object pnlVewToolBar: TPanel
           Left = 0
           Top = 0
-          Width = 761
+          Width = 792
           Height = 20
           Align = alTop
           TabOrder = 1
@@ -865,8 +868,8 @@ inherited frmNotes: TfrmNotes
     object pnlWrite: TPanel
       Left = 0
       Top = 0
-      Width = 761
-      Height = 700
+      Width = 792
+      Height = 704
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
@@ -875,8 +878,8 @@ inherited frmNotes: TfrmNotes
       object pnlTextWrite: TPanel
         Left = 0
         Top = 67
-        Width = 761
-        Height = 633
+        Width = 792
+        Height = 637
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlTextWrite'
@@ -884,8 +887,8 @@ inherited frmNotes: TfrmNotes
         object memNewNote: TRichEdit
           Left = 0
           Top = 0
-          Width = 761
-          Height = 633
+          Width = 792
+          Height = 637
           Align = alClient
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
@@ -907,8 +910,8 @@ inherited frmNotes: TfrmNotes
       object pnlHTMLWrite: TPanel
         Left = 0
         Top = 67
-        Width = 761
-        Height = 633
+        Width = 792
+        Height = 637
         Align = alClient
         BevelOuter = bvNone
         Color = clInactiveBorder
@@ -917,8 +920,8 @@ inherited frmNotes: TfrmNotes
         object pnlHTMLEdit: TPanel
           Left = 0
           Top = 18
-          Width = 761
-          Height = 615
+          Width = 792
+          Height = 619
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -926,7 +929,7 @@ inherited frmNotes: TfrmNotes
         object ToolBar: TToolBar
           Left = 0
           Top = 0
-          Width = 761
+          Width = 792
           Height = 18
           AutoSize = True
           ButtonHeight = 18
@@ -1594,14 +1597,14 @@ inherited frmNotes: TfrmNotes
       object pnlFields: TPanel
         Left = 0
         Top = 0
-        Width = 761
+        Width = 792
         Height = 67
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
         OnResize = pnlFieldsResize
         DesignSize = (
-          761
+          792
           67)
         object bvlNewTitle: TBevel
           Left = 5
@@ -1610,7 +1613,7 @@ inherited frmNotes: TfrmNotes
           Height = 15
         end
         object btnOpenTOC2: TSpeedButton
-          Left = 634
+          Left = 665
           Top = 22
           Width = 120
           Height = 18
@@ -1652,6 +1655,7 @@ inherited frmNotes: TfrmNotes
             C2FFE3D6C3FFE3D6C3FFE3D6C3FFE3D5C3FFE3D5C1FFE1D3BFFFE0D1BEFFDFCF
             BBFFDDCEBBFFDBCCB7FFDBCAB6FFD8C8B3FFD7C7B1FFD5C4AFFF}
           OnClick = btnOpenTOCClick
+          ExplicitLeft = 634
         end
         object lblRefDate: TStaticText
           Left = 237
@@ -1667,7 +1671,7 @@ inherited frmNotes: TfrmNotes
           TabOrder = 2
         end
         object lblAuthor: TStaticText
-          Left = 488
+          Left = 519
           Top = 6
           Width = 152
           Height = 17
@@ -1690,7 +1694,7 @@ inherited frmNotes: TfrmNotes
           TabOrder = 4
         end
         object lblCosigner: TStaticText
-          Left = 396
+          Left = 427
           Top = 21
           Width = 243
           Height = 13
@@ -1733,7 +1737,7 @@ inherited frmNotes: TfrmNotes
           TabOrder = 7
         end
         object cmdChange: TButton
-          Left = 695
+          Left = 726
           Top = 0
           Width = 58
           Height = 21
@@ -1746,7 +1750,7 @@ inherited frmNotes: TfrmNotes
         object txtSubject: TCaptionEdit
           Left = 48
           Top = 40
-          Width = 705
+          Width = 736
           Height = 21
           Hint = 'Subject is limited to a maximum of 80 characters.'
           Anchors = [akLeft, akTop, akRight]
@@ -1758,7 +1762,7 @@ inherited frmNotes: TfrmNotes
           Caption = 'Subject'
         end
         object btnSave: TBitBtn
-          Left = 662
+          Left = 693
           Top = 0
           Width = 31
           Height = 21
@@ -1810,6 +1814,50 @@ inherited frmNotes: TfrmNotes
             0000000000000000000303030303030303030303030303030303}
         end
       end
+    end
+    object btnOpenEnc: TBitBtn
+      Left = 760
+      Top = 710
+      Width = 17
+      Height = 20
+      Anchors = [akRight, akBottom]
+      TabOrder = 3
+      OnClick = btnOpenEncClick
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        20000000000000040000130B0000130B00000000000000000000C8B49CFFC8B4
+        9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B4
+        9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF785524FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF7A5726FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7B5828FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF7A5727FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795524FF7A5727FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF7A5727FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFF8F6F3FFFFFFFFFF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF795625FF7A5727FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFF7A5727FF7B5828FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF7A5626FF7A5727FF795524FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFF7A5727FF7A5727FF7B5827FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF795625FF7B5929FF795625FF7A5727FFFFFFFFFFFFFFFFFF7C59
+        29FF7A5727FF7C5929FF7B5828FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF795525FF795625FF7B5828FF7B5828FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5726FF7B5828FF7B5828FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FF7A57
+        27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFFC8B4
+        9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B4
+        9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFF}
     end
   end
   inherited amgrMain: TVA508AccessibilityManager
@@ -1900,6 +1948,9 @@ inherited frmNotes: TfrmNotes
         'Status = stsDefault')
       (
         'Component = btnSave'
+        'Status = stsDefault')
+      (
+        'Component = btnOpenEnc'
         'Status = stsDefault'))
   end
   object mnuNotes: TMainMenu

@@ -57,7 +57,10 @@ var MsgType:string;
 
 begin
   //MsgType := piece(piece(URL,'^',1),':',2);  //trim out the about: and the command
-  if pos('DFN-',URL)>0 then begin
+  if pos('OTHERPAT',URL)>0 then begin
+    frmFrame.mnuFileOpenClick(frmFrame.mnuFileOpen);
+    Cancel := True;
+  end else if pos('DFN-',URL)>0 then begin
     DFN := piece2(URL,'DFN-',2);
     //Patient.DFN := '0';
     //ShowEverything;

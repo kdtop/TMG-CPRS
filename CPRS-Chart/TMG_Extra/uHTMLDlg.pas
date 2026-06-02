@@ -64,7 +64,7 @@ uses
       FCumulativeBodyHTML : TStringList;    // HTML code so far, ultimately to be passed to some web browser
       FCumulativeScriptCode : TStringList;  //javascript, ultimately to be added to FCumulativeHTML during final compilation.  *Not* wrapped with <script>
       FCumulativeStyleCodes : TStringList;  //style codes, ultimately to be added to FCumulativeHTML during final compilation.  *Not* wrapped with <style>
-      Compiled : boolean;
+      FCompiled : boolean;
       procedure SLAppend(SL, AddOn : TStringList; Tag : string = '');
       procedure AddGlobalStyle(StyleCodes : TStringList);
       procedure GetOneSource(Source : TStringList; EndTag: string; var i : integer; Output : TStringList);
@@ -102,7 +102,10 @@ uses
 
   function THTMLDlg.GetCompletedHTML : TStringList;
   begin
-    if not Compiled then FinalCompile;
+    //kt 5/21/25 if not FCompiled then FinalCompile;
+    //NOTE: I think there is some compiler bug, or other bug, where FCompiled is showing TRUE, when it actually should be FALSE
+    //      The compile process is not much overhead, so I am going to just do full compile each time, to ensure it gets done.  
+    FinalCompile;
     Result := FFinalHTML;
   end;
 
@@ -128,11 +131,11 @@ uses
     *)
     StyleCodes.Add('.selected {');
     StyleCodes.Add('  font-weight : bold;');
-    StyleCodes.Add('  //background-color : yellow;');
+    //kt StyleCodes.Add('  //background-color : yellow;');
     StyleCodes.Add('}');
     StyleCodes.Add('.unselected {');
     StyleCodes.Add('  font-weight : normal;');
-    StyleCodes.Add('  //background-color : white;');
+    //kt StyleCodes.Add('  //background-color : white;');
     StyleCodes.Add('}');
     StyleCodes.Add('');
   end;
@@ -261,7 +264,7 @@ uses
     //has to be appear AFTER FCumulativeBodyHTML in the HTML document.
     SLAppend(FFinalHTML, FCumulativeScriptCode, 'script');
     FFinalHTML.Add('</html>');
-    Compiled := true;
+    FCompiled := true;
   end;
 
   procedure THTMLDlg.AssemblePart(Source, Script, Styles : TStringList);
@@ -377,7 +380,7 @@ uses
     AddGlobalStyle(FCumulativeStyleCodes);
     FFinalHTML.Clear;
     FIntermediateHTML.Clear;
-    Compiled := False;
+    FCompiled := False;
   end;
 
   constructor THTMLDlg.Create(AWebBrowser: THtmlObj);
@@ -395,7 +398,7 @@ uses
     FCumulativeStyleCodes := TStringList.Create;
     AddGlobalStyle(FCumulativeStyleCodes);
     FIntermediateHTML := TStringList.Create;
-    Compiled := False;
+    FCompiled := False;
   end;
 
   destructor THTMLDlg.Destroy;

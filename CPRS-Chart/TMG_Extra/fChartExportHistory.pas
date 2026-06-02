@@ -60,6 +60,8 @@ type
     pnlLowerBottom: TPanel;
     btnExport: TBitBtn;
     btnCancel: TBitBtn;
+    btnEdit: TBitBtn;
+    procedure btnEditClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure btnExportClick(Sender: TObject);
     procedure tvOneExportChange(Sender: TObject; Node: TTreeNode);
@@ -90,7 +92,7 @@ var
 
 implementation
 
-uses uHTMLTools;
+uses uHTMLTools, fTMGChartExporter;
 {$R *.dfm}
 
 procedure ViewChartExportHistory;
@@ -131,6 +133,11 @@ var i,j,k :integer;
 begin
   i := 0;
   while i <= ExportHistory.count-1 do begin
+     if i+3 >= ExportHistory.Count then begin
+        ShowMessage('Error: incomplete data set found at line ' + IntToStr(i+1));
+        Exit;
+     end;
+
      DataStr := ExportHistory[i];
      Inc(i);
      NotesStr := ExportHistory[i];
@@ -143,6 +150,20 @@ begin
      SetLength(TotalExport,Length(TotalExport)+1);
      TotalExport[High(TotalExport)] := ExportItem;
   end; //while 
+end;
+
+procedure TfrmChartExportHistory.btnEditClick(Sender: TObject);
+var
+   NoteStr,LabStr,RadStr:string;
+   ToData:string;
+begin
+   NoteStr := TotalExport[grdExportParents.Row-1].FNoteIENs;
+   LabStr := TotalExport[grdExportParents.Row-1].FLabPDFs;
+   RadStr := TotalExport[grdExportParents.Row-1].FRadReports;
+   ToData := TotalExport[grdExportParents.Row-1].SentTo+'^'+TotalExport[grdExportParents.Row-1].FaxTo+'^'+TotalExport[grdExportParents.Row-1].RE+'^'+TotalExport[grdExportParents.Row-1].Memo;
+   ModalResult := mrOk;
+   Application.ProcessMessages;
+   EditOneExport(0,NoteStr,LabStr,RadStr,ToData);
 end;
 
 procedure TfrmChartExportHistory.btnExportClick(Sender: TObject);
@@ -379,6 +400,7 @@ begin
    end;
    tvOneExport.Items.EndUpdate;
    btnExport.Enabled := True;
+   btnEdit.Enabled := True;
 end;
 
 procedure TfrmChartExportHistory.FreeNodeData;

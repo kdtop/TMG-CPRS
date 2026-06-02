@@ -2022,7 +2022,8 @@ AbortPoint:
 
     //if program name doesn't exist, default to mspaint
     if ProgramName = '' then begin
-       ProgramName := GetWindowsFolder + '\System32\mspaint.exe';
+       //ProgramName := GetWindowsFolder + '\System32\mspaint.exe';
+       ProgramName := 'mspaint.exe';
     end;
 
     //if the file is not being moved, then we want to retain the original

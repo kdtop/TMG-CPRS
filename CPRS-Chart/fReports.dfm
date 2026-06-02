@@ -9,8 +9,8 @@ inherited frmReports: TfrmReports
   Menu = mnuMainMenu
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 725
-  ExplicitHeight = 668
+  ExplicitWidth = 733
+  ExplicitHeight = 672
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape
@@ -32,7 +32,7 @@ inherited frmReports: TfrmReports
     Width = 119
     Height = 604
     ExplicitWidth = 119
-    ExplicitHeight = 584
+    ExplicitHeight = 604
     object Splitter1: TSplitter
       Left = 0
       Top = 126
@@ -65,6 +65,7 @@ inherited frmReports: TfrmReports
         Transparent = True
         VertOffset = 6
         WordWrap = False
+        ExplicitTop = -176
       end
       object tvReports: TORTreeView
         Left = 0
@@ -94,7 +95,6 @@ inherited frmReports: TfrmReports
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
-      ExplicitHeight = 352
       object lblQualifier: TOROffsetLabel
         Left = 0
         Top = 0
@@ -133,7 +133,6 @@ inherited frmReports: TfrmReports
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2'
-        ExplicitHeight = 326
       end
       object lstQualifier: TORListBox
         Left = 0
@@ -152,7 +151,6 @@ inherited frmReports: TfrmReports
         LongList = False
         Pieces = '2,3'
         TabPositions = '10'
-        ExplicitHeight = 326
       end
       object pnlViews: TORAutoPanel
         Left = 0
@@ -163,7 +161,6 @@ inherited frmReports: TfrmReports
         BevelOuter = bvNone
         TabOrder = 3
         Visible = False
-        ExplicitHeight = 326
         object pnlTopViews: TPanel
           Left = 0
           Top = 0
@@ -235,7 +232,6 @@ inherited frmReports: TfrmReports
           LongList = False
           Pieces = '2'
           TabPositions = '10'
-          ExplicitHeight = 246
         end
       end
     end
@@ -288,7 +284,7 @@ inherited frmReports: TfrmReports
     Height = 604
     ExplicitLeft = 123
     ExplicitWidth = 594
-    ExplicitHeight = 584
+    ExplicitHeight = 604
     object sptHorzRight: TSplitter
       Left = 0
       Top = 177
@@ -380,7 +376,6 @@ inherited frmReports: TfrmReports
       Height = 423
       Align = alClient
       TabOrder = 2
-      ExplicitHeight = 403
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 31

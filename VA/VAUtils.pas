@@ -70,6 +70,7 @@ function PieceNCS(const S: string; Delim: string; PieceNum: Integer): string; ov
 function Pieces2(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string; overload; //kt 9/11 added
 function PiecesNCS(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string;         //kt 9/11 added
 function NumPieces(const s : string; ADelim : char) : integer;                                    //kt 9/11 added
+function PosInsensitive(subString, AString : string; Offset : integer=1) : integer;               //kt 5/25 added
 
 // Same as FreeAndNil, but for TString objects only
 // Frees any objects in the TStrings Objects list as well the TStrings object
@@ -403,6 +404,13 @@ begin
 end;
 
 
+function PosInsensitive(subString, AString : string; Offset : integer=1) : integer;
+//kt 5/25 added entire function.  Case-insensitive Pos() call
+begin
+  subString := LowerCase(subString);
+  AString := LowerCase(AString);
+  result := PosEx(subString, AString, Offset);
+end;
 
 //type
 //  TShow508MessageIcon = (smiNone, smiInfo, smiWarning, smiError, smiQuestion);

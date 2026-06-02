@@ -259,6 +259,7 @@ var
   uRemoteCount: Integer;
   uFrozen: Boolean;
   uHTMLDoc: string;
+  uLastHTMLDoc : string; //kt added
   uReportRPC: string;
   uHTMLPatient: ANSIstring;
   uRptID: String;
@@ -275,6 +276,7 @@ begin
   if Assigned(WebBrowser1) then
   begin
     uHTMLDoc := '';
+    uLastHTMLDoc := '';  //kt
     BlankWeb;
   end;
   Timer1.Enabled := False;
@@ -291,6 +293,7 @@ begin
   TabControl1.TabStop := false;
   if Assigned(WebBrowser1) then begin   //kt 9/11 added block
     uHTMLDoc := '';
+    uLastHTMLDoc := '';  //kt
     WebBrowser1.Navigate('about:blank');
   end;
   lstDateRange.Tag := 0; // used to reset date default on graph
@@ -668,6 +671,7 @@ begin
   tvReports.Items.Clear;
   memText.Clear;
   uHTMLDoc := '';
+  uLastHTMLDoc := '';  //kt
   BlankWeb;
   tvProcedures.Items.Clear;
   lblProcTypeMsg.Visible := FALSE;
@@ -958,6 +962,7 @@ var
   MoreID: String;  //Restores MaxOcc value
   aRemote, aHDR, aFHIE, aMax: string;
   i: integer;
+  InsertSuccess : boolean;  //kt added
 begin
   inherited;
   if uFrozen = True then begin
@@ -1157,8 +1162,15 @@ begin
   if WebBrowser1.Visible = true then begin
     if uReportType = 'R' then
       uHTMLDoc := HTML_PRE + uLocalReportData.Text + HTML_POST
-    else
-      uHTMLDoc := uHTMLPatient + uLocalReportData.Text;
+    else begin
+      //kt original --> uHTMLDoc := uHTMLPatient + uLocalReportData.Text;  //kt 5/1/25
+      //kt mod -- 5/1/25
+      uHTMLDoc := PrefixBody(uLocalReportData.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added
+      if not InsertSuccess then begin
+        uHTMLDoc := uHTMLPatient + uLocalReportData.Text;
+      end;
+      //kt end mod -- 5/1/25
+    end;
     BlankWeb;
   end;
 end;
@@ -1652,6 +1664,7 @@ var
   aStatus,aSite: string;
   hook: Boolean;
   i: integer;
+  InsertSuccess : boolean;  //kt added
 begin
   inherited;
   if (uQualifiertype <> 6) or (length(piece(uHState,';',2)) < 1) then
@@ -1720,8 +1733,15 @@ begin
     if WebBrowser1.Visible = true then begin
       if uReportType = 'R' then
         uHTMLDoc := HTML_PRE + memText.Lines.Text + HTML_POST
-      else
-        uHTMLDoc := uHTMLPatient + memText.Lines.Text;
+      else begin
+        //kt original --> uHTMLDoc := uHTMLPatient + memText.Lines.Text;  //kt 5/1/25
+      //kt mod -- 5/1/25
+        uHTMLDoc := PrefixBody(memText.Lines.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added
+        if not InsertSuccess then begin
+          uHTMLDoc := uHTMLPatient + memText.Lines.Text;
+        end;
+      end;
+      //kt end mod -- 5/1/25
       BlankWeb;
     end;
     memText.Lines.EndUpdate;
@@ -1956,6 +1976,7 @@ end;
 
 procedure TfrmReports.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+  //eddie addedd  (//kt)
 var MsgType:string;
   MsgVerb:TNoteVerbs;
   ItemIEN:string;
@@ -1986,6 +2007,7 @@ var
 begin
   inherited;
   if uHTMLDoc = '' then Exit;
+  //kt added, then removed.... if (uHTMLDoc = uLastHTMLDoc) and (uLastHTMLDoc <> '') then exit;  //kt  Don't reload if uHTMLDoc hasn't changed.
   if not(uReportType = 'H') then Exit; //this can be removed if & when browser replaces memtext control
   if not Assigned(WebBrowser1.Document) then Exit;
   WebDoc := WebBrowser1.Document as IHtmlDocument2;
@@ -1994,6 +2016,7 @@ begin
   WebDoc.write(PSafeArray(TVarData(v).VArray));
   WebDoc.close;
   //uHTMLDoc := '';
+  uLastHTMLDoc := uHTMLDoc;  //kt
 end;
 
 procedure TfrmReports.sptHorzRightCanResize(Sender: TObject;
@@ -2083,6 +2106,7 @@ var
   aIFN: integer;
   aID, aHSTag, aRadParam, aColChange, aDirect, aHDR, aFHIE, aFHIEONLY, aQualifierID: string;
   CurrentParentNode, CurrentNode: TTreeNode;
+  InsertSuccess : boolean;  //kt added
 begin
   inherited;
   uTMGOptions.WriteString(TMG_LAST_REPORT_KEY,tvReports.Selected.Text); //kt 4/1/21
@@ -2279,8 +2303,14 @@ begin
               if uReportType = 'R' then begin
                 uHTMLDoc := HTML_PRE + uLocalReportData.Text + HTML_POST
               end else begin
-                uHTMLDoc := uHTMLPatient + uLocalReportData.Text;
+                //kt original --> uHTMLDoc := uHTMLPatient + uLocalReportData.Text;  //kt 5/1/25
+                //kt mod -- 5/1/25
+                uHTMLDoc := PrefixBody(uLocalReportData.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added
+                if not InsertSuccess then begin
+                  uHTMLDoc := uHTMLPatient + uLocalReportData.Text;
+                end;
               end;
+              //kt end mod -- 5/1/25
               BlankWeb;
             end;
           end;

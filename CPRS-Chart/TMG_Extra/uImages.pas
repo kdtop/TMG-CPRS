@@ -903,7 +903,14 @@ begin
     //AProgressCallback := FileTransferProgressCallback;
     Result := rFileTransferU.DownloadFile(FPath,FName,LocalSaveFNamePath, ErrMsg, AProgressCallback);
     StatusText('');
-    If ErrMsg <> '' then MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
+    If ErrMsg <> '' then begin
+      if pos('ABS',FName)<1 then begin  //only show error if it isn't thumbnail
+        MessageDlg('ERROR: '+ErrMsg,mtError,[mbOK],0);
+      end else begin
+        //Result := drSuccess;    //don't worry about failure of thumbnail
+        //ErrMsg := '';
+      end;
+    end;
   end;
   //frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
 end;

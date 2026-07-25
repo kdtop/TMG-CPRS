@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-07-24
+Last updated: 2026-07-25
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -48,13 +48,16 @@ Use the IDE compile log as the source of truth.
 
 This is a copied Delphi 12 porting tree. The real production/source tree exists elsewhere and is safe. Git in this folder is being used for local version control/checkpoints, not necessarily for pushing to GitHub.
 
-Current local baseline:
+Substantive local baseline commits, newest first:
 
+- `f08ed49 Document local git baseline`
 - `497962a Create Delphi 12 working tree baseline`
 - `54f1dc1 Ignore Delphi compiled unit artifacts`
 - `12afbc9 Port CPRS Broker source for Delphi 12`
 
-After commit `497962a`, `git status --short` was clean. Ignored Delphi build artifacts still exist on disk, especially `.dcu`, `__history`, shortcut, and backup files, but they should not dirty normal status.
+These commits are local checkpoints in the copied Delphi 12 working tree. There may also be a later `HANDOFF.md`-only documentation commit at `HEAD`; that does not change source behavior. `origin/master` still points at the older source history (`c58ce2b` at the time this handoff was updated), so this branch is intentionally ahead of `origin/master`. That does not mean the real source tree elsewhere has been changed.
+
+After the latest local handoff update, `git status --short` was clean. "Clean" means there are no uncommitted changes relative to this copied tree's new local baseline. Ignored Delphi build artifacts still exist on disk, especially `.dcu`, `__history`, shortcut, and backup files, but they should not dirty normal status.
 
 `.dcu` files were removed from Git tracking and ignored. `.gitignore` contains `*.dcu` and `*.DCU`.
 
@@ -63,8 +66,9 @@ Important Git workflow:
 1. Before a new work session, run `git status --short`.
 2. If clean, start editing normally.
 3. Commit intentional source/checkpoint changes locally with `git add ...` and `git commit -m "..."`.
-4. Do not use `git reset --hard` or revert broad generated-file changes unless the user explicitly asks.
-5. Do not assume commits have been pushed; local commits remain local until `git push`.
+4. Expect normal future edits to show as `M`/modified until they are committed; after a commit, `git status --short` should return to clean.
+5. Do not use `git reset --hard` or revert broad generated-file changes unless the user explicitly asks.
+6. Do not assume commits have been pushed; local commits remain local until `git push`.
 
 ## Current State
 

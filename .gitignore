@@ -1,5 +1,7 @@
 *.lnk
+# Delphi compiled unit artifacts
 *.dcu
+*.DCU
 *~
 *~dsk
 DCU/*.dcu

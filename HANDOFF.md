@@ -41,8 +41,30 @@ Use the IDE compile log as the source of truth.
 - Windows filesystem/API path fixes may use `string`/`PChar`; byte-oriented RPC/file-transfer payloads should stay `AnsiString`/`AnsiChar` unless deliberately changed.
 - Leave Delphi `__recovery` folders alone and ignore them unless the user explicitly asks to clean them.
 - Many Delphi source files are ANSI encoded. `apply_patch` may fail on them with invalid UTF-8; use encoding-preserving PowerShell edits only when necessary.
-- The git working tree is very dirty and includes generated Delphi artifacts. Use `git status --short` / targeted diffs for orientation, but do not revert unrelated changes.
+- The git tree was intentionally baselined locally on 2026-07-24. Use `git status --short` before edits; it should be clean at session start unless the user has changed files.
 - For future Delphi/Pascal source edits, append `//kt //codex <date>` at the end of every modified source line, e.g. `//kt //codex 7/24/26`.
+
+## Git Baseline
+
+This is a copied Delphi 12 porting tree. The real production/source tree exists elsewhere and is safe. Git in this folder is being used for local version control/checkpoints, not necessarily for pushing to GitHub.
+
+Current local baseline:
+
+- `497962a Create Delphi 12 working tree baseline`
+- `54f1dc1 Ignore Delphi compiled unit artifacts`
+- `12afbc9 Port CPRS Broker source for Delphi 12`
+
+After commit `497962a`, `git status --short` was clean. Ignored Delphi build artifacts still exist on disk, especially `.dcu`, `__history`, shortcut, and backup files, but they should not dirty normal status.
+
+`.dcu` files were removed from Git tracking and ignored. `.gitignore` contains `*.dcu` and `*.DCU`.
+
+Important Git workflow:
+
+1. Before a new work session, run `git status --short`.
+2. If clean, start editing normally.
+3. Commit intentional source/checkpoint changes locally with `git add ...` and `git commit -m "..."`.
+4. Do not use `git reset --hard` or revert broad generated-file changes unless the user explicitly asks.
+5. Do not assume commits have been pushed; local commits remain local until `git push`.
 
 ## Current State
 

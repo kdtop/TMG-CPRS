@@ -1240,7 +1240,7 @@ var
   OldCur: TCursor;
   idx, TmpVar, RangeStart, RangeEnd: oleVariant;
   ddTotal, ffTotal, ffStartCur, ffEndCur, ffEndLast : integer;
-  ffRange, textRange: Range;
+  ffRange, textRange: WordRange;
   tmp, TemplateName, fName: string;
   tmpType, tfIdx: TTemplateFieldType;
   tmpDate: TTmplFldDateType;

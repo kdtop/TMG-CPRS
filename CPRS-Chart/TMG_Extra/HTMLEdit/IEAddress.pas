@@ -388,7 +388,7 @@ type
 implementation
 
 uses
-  ComObj, UrlMon, ImgList, ShellAPI, Forms, SysUtils, Registry, IEConst, EwbCoreTools;
+  ComObj, UrlMon, ImgList, ShellAPI, Forms, SysUtils, Registry, EmbeddedIEConst, EwbCoreTools;
 
 function TEnumString.Clone(out enm: IEnumString): HResult;
 begin

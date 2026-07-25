@@ -33,7 +33,7 @@ uses SysUtils, WinTypes, Dialogs, StdCtrls, Menus,
      ORNet, TRPCB, //ELH 10/6/22
      ActiveX, MSHTMLEvents, SHDocVw, {MSHTML,} MSHTML_EWB,
      AppEvnts, controls, ExtCtrls,
-     IeConst,Messages,Classes,Forms,Graphics;
+     EmbeddedIEConst,Messages,Classes,Forms,Graphics;
 
 type
   TSetFontMode = (sfAll,sfSize,sfColor,sfName,sfStyle,sfCharset);
@@ -1304,7 +1304,7 @@ begin
   end;
 
   // If selection includes <TD> or </TD>, it crosses cell boundaries
-  if (Pos('<TD', Html) > 0) or (Pos('</TD>', Html) > 0) then Exit;
+  if (Pos(WideString('<TD'), Html) > 0) or (Pos(WideString('</TD>'), Html) > 0) then Exit;
 
   {Unneeded?  // Make sure we're inside a single TD (not outside a table)
   ParentEl := Range.parentElement;
@@ -1321,12 +1321,14 @@ end;
 procedure THtmlObj.InsertHTMLAtCaret(HTMLText : AnsiString);
 var
   Range: IHTMLTxtRange;
+  SanitizedHTML: string;
 begin
   if IsSafeToPasteHTML(self) then begin  
     Range:= GetTextRange;
     if not assigned(Range) then exit;
-    SanitizeHTML(HTMLText);  //kt 5/6/25
-    Range.pasteHTML(HTMLText);
+    SanitizedHTML := string(HTMLText);
+    SanitizeHTML(SanitizedHTML);  //kt 5/6/25
+    Range.pasteHTML(SanitizedHTML);
   end else begin
     ShowMessage('Invalid range detected. Please ensure selection does not include multiple table cells and try again.');
   end;

@@ -123,8 +123,8 @@ type
     Data         : TStringList;       //doesn't own object
     MessageStr   : string;            //optional text.
     DataLoadProc : TGridDataLoader;   //doesn't own object
-    ApplyBtn     : TButton;           //doesn't own object
-    RevertBtn    : TButton;           //doesn't own object
+    ApplyBtn     : TControl;           //doesn't own object
+    RevertBtn    : TControl;           //doesn't own object
     OnAfterPost  : TAfterPostHandler;
     RecordSelector : TIENSSelector;    //doesn't own object
     ReadOnly     : boolean;

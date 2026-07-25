@@ -1116,7 +1116,7 @@ begin
    except
       on EListError do
          begin
-         {$ifdef debug}Show508Message('EListError in frmBALocalDiagnoses.ListSelectedOrders()');{$endif}
+         {$ifdef debug}ShowMsg('EListError in frmBALocalDiagnoses.ListSelectedOrders()');{$endif}
          raise;
          end;
     end; //try
@@ -1143,7 +1143,7 @@ begin
    except
       on EListError do
          begin
-         {$ifdef debug}Show508Message('EListError in frmBALocalDiagnoses.AddDiagnosisToPersonalDiagnosesListClick()');{$endif}
+         {$ifdef debug}ShowMsg('EListError in frmBALocalDiagnoses.AddDiagnosisToPersonalDiagnosesListClick()');{$endif}
          raise;
          end;
     end; //try

@@ -32,6 +32,6 @@ requires
   vcl;
 
 contains
-  SortStringGrid in 'SortStringGrid.pas';
+  SortStringGrid in '..\SortStringGrid.pas';
 
 end.

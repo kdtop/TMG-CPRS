@@ -1743,7 +1743,7 @@ begin
         InfoBox('Fractions of tablets other than one half are not reliable.' + CRLF + 'You may wish to reconsider.',
           'Unreliable Partial Tablet', MB_OK or MB_ICONWARNING);
         //kt SelStart := pos(DecimalSeparator, Text);
-        SelStart := pos(DecimalSeparator, Text);
+        SelStart := pos(FormatSettings.DecimalSeparator, Text);
         SelLength := Length(DecPart);
       end else begin
         SelStart := Length(Text);
@@ -1770,11 +1770,11 @@ end;
 
 procedure TfrmAnticoagulate.CheckInputForNumeric(Sender: TObject; var Key: Char);
 begin
-  if not CharInSet(Key, ['0'..'9', #8, DecimalSeparator]) then
+  if not CharInSet(Key, ['0'..'9', #8, FormatSettings.DecimalSeparator]) then
     Key := #0
   else begin
     with Sender as TEdit do begin
-      if (Key = DecimalSeparator) and (pos(DecimalSeparator, Text) >0) then
+      if (Key = FormatSettings.DecimalSeparator) and (pos(FormatSettings.DecimalSeparator, Text) >0) then
         Key := #0;
     end;
   end;

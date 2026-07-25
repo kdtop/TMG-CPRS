@@ -90,6 +90,8 @@ type
     btnRefresh: TButton;
     mnuMultiTIUSign: TMenuItem;
     chkInactivePatients: TCheckBox;
+    mnuHandleLooseDocsAllPatients: TMenuItem;
+    procedure mnuHandleLooseDocsAllPatientsClick(Sender: TObject);
     procedure cboPatientResize(Sender: TObject);
     procedure chkInactivePatientsClick(Sender: TObject);
     procedure mnuMultiTIUSignClick(Sender: TObject);
@@ -1481,6 +1483,13 @@ begin
   end
   else
     ReadyAlert;
+end;
+
+procedure TfrmPtSel.mnuHandleLooseDocsAllPatientsClick(Sender: TObject);
+//kt added 6/8/26
+begin
+  inherited;
+  ShowMultiLooseSignForAllPatients();
 end;
 
 procedure TfrmPtSel.mnuMultiTIUSignClick(Sender: TObject);

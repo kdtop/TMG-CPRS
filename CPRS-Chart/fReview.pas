@@ -2121,7 +2121,7 @@ begin
                       except
                           on EListError do
                              begin
-                             {$ifdef debug}Show508Message('EListError in fReview.lstReviewMouseMove()');{$endif}
+                             {$ifdef debug}ShowMsg('EListError in fReview.lstReviewMouseMove()');{$endif}
                              raise;
                              end;
                       end;
@@ -2211,7 +2211,7 @@ try
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in fReview.buDiagnosisClick()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in fReview.buDiagnosisClick()');{$endif}
         raise;
         end;
   end;
@@ -2333,7 +2333,7 @@ thisOrderList := TStringList.Create;
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in fReview.lstCSReviewClick()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in fReview.lstCSReviewClick()');{$endif}
         raise;
         end;
   end;
@@ -2692,7 +2692,7 @@ begin
                       except
                           on EListError do
                              begin
-                             {$ifdef debug}Show508Message('EListError in fReview.lstCSReviewMouseMove()');{$endif}
+                             {$ifdef debug}ShowMsg('EListError in fReview.lstCSReviewMouseMove()');{$endif}
                              raise;
                              end;
                       end;
@@ -2778,7 +2778,7 @@ thisOrderList := TStringList.Create;
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in fReview.lstReviewClick()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in fReview.lstReviewClick()');{$endif}
         raise;
         end;
   end;
@@ -2911,7 +2911,7 @@ begin
    except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in fReview.Copy1Click()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in fReview.Copy1Click()');{$endif}
         raise
         end;
    end;
@@ -2984,7 +2984,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in fReview.Paste1Click()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in fReview.Paste1Click()');{$endif}
         raise;
         end;
   end;
@@ -3012,7 +3012,7 @@ begin
    except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in fReview.ClearDiagnoses1Click()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in fReview.ClearDiagnoses1Click()');{$endif}
         raise;
         end;
    end;

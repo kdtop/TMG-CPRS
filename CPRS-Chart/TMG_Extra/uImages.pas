@@ -416,9 +416,9 @@ begin
   Rec.DisplayDate := piece(s,'^',9);              //Procedure Date in Display format
   s2 := piece(s,'^',10); if s2='' then s2 := '0'; //PARENT DATA FILE image pointer
   Rec.ParentDataFileIEN := StrToInt(s2);
-  Rec.AbsType := piece(s,'^',11)[1];              //the ABSTYPE :  'M' magnetic 'W' worm  'O' offline
+  Rec.AbsType := Char(piece(s,'^',11)[1]);        //the ABSTYPE :  'M' magnetic 'W' worm  'O' offline
   s2 := piece(s,'^',12); if s2='' then s2 :='O';
-  Rec.Accessibility := s2[1];                     //Image accessibility   'A' accessable  or  'O' offline
+  Rec.Accessibility := Char(s2[1]);               //Image accessibility   'A' accessable  or  'O' offline
   s2 := piece(s,'^',13); if s2='' then s2 := '0'; //Dicom Series number
   Rec.DicomSeriesNum := StrToInt(s2);
   s2 := piece(s,'^',14); if s2='' then s2 := '0'; //Dicom Image Number
@@ -768,7 +768,7 @@ begin
       totalReadCount := totalReadCount + ReadCount;
       if ReadCount > 0 then begin
         SetLength(OneLine,ReadCount);
-        for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
+        for j := 1 to ReadCount do OneLine[j] := AnsiChar(Buffer[j-1]);
         RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
         Inc(ParamIndex);
       end;

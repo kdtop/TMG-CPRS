@@ -52,7 +52,7 @@ type
     procedure btnUpdateClick(Sender: TObject);
     procedure FormHide(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure wbPopHealthBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName,
+    procedure wbPopHealthBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName,
       PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure RadioGroup1Click(Sender: TObject);
   private
@@ -262,7 +262,7 @@ begin
    end;
 end;
 
-procedure TfrmPopHealth.wbPopHealthBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+procedure TfrmPopHealth.wbPopHealthBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
 var MsgType:string;
     DFN:string;

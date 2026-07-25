@@ -754,14 +754,17 @@ var
 begin
   Result := '';
   for i := 1 to Length(x) do
-    case x[i] of
-            #9: for j := 1 to (ATabWidth - (Length(Result) mod ATabWidth)) do
-                  Result := Result + ' ';
-     #32..#127: Result := Result + x[i];
-    #128..#159: Result := Result + '?';
-  #10,#13,#160: Result := Result + ' ';
-    #161..#255: Result := Result + x[i];
-    end;
+    if x[i] = #9 then
+      for j := 1 to (ATabWidth - (Length(Result) mod ATabWidth)) do
+        Result := Result + ' '
+    else if ((Ord(x[i]) >= 32) and (Ord(x[i]) <= 127)) then
+      Result := Result + x[i]
+    else if ((Ord(x[i]) >= 128) and (Ord(x[i]) <= 159)) then
+      Result := Result + '?'
+    else if (x[i] = #10) or (x[i] = #13) or (Ord(x[i]) = 160) then
+      Result := Result + ' '
+    else if ((Ord(x[i]) >= 161) and (Ord(x[i]) <= 255)) then
+      Result := Result + x[i];
   if Copy(Result, Length(Result), 1) = ' ' then Result := TrimRight(Result) + ' ';
 end;
 
@@ -775,13 +778,16 @@ begin
     x := Strings[i];
     y := '';
     for j := 1 to Length(x) do
-      case x[j] of
-                #9: for k := 1 to (ATabWidth - (Length(y) mod ATabWidth)) do y := y + ' ';
-         #32..#127: y := y + x[j];
-        #128..#159: y := y + '?';
-              #160: y := y + ' ';
-        #161..#255: y := y + x[j];
-      end;
+      if x[j] = #9 then
+        for k := 1 to (ATabWidth - (Length(y) mod ATabWidth)) do y := y + ' '
+      else if ((Ord(x[j]) >= 32) and (Ord(x[j]) <= 127)) then
+        y := y + x[j]
+      else if ((Ord(x[j]) >= 128) and (Ord(x[j]) <= 159)) then
+        y := y + '?'
+      else if Ord(x[j]) = 160 then
+        y := y + ' '
+      else if ((Ord(x[j]) >= 161) and (Ord(x[j]) <= 255)) then
+        y := y + x[j];
     if Copy(y, Length(y), 1) = ' ' then y := TrimRight(y) + ' ';
     Strings[i] := y;
     //Strings[i] := TrimRight(y) + ' ';

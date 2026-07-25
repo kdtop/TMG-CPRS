@@ -248,10 +248,10 @@ begin
   if not Result then
   begin
       // Remove thousands seperators
-    S := StringReplace(S, ThousandSeparator, '', [rfReplaceAll]);
+    S := StringReplace(S, FormatSettings.ThousandSeparator, '', [rfReplaceAll]);
       // change DecimalSeperator to '.' because Val only recognizes that, not
       // the locale specific decimal char... then try again.  Stupid Val.
-    S := StringReplace(S, DecimalSeparator, '.', [rfReplaceAll]);
+    S := StringReplace(S, FormatSettings.DecimalSeparator, '.', [rfReplaceAll]);
     Val(S, V, NumCode);
     Result := (NumCode = 0);
   end;

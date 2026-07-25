@@ -163,7 +163,7 @@ begin
           Inc(numSelected);
     except
       on EListError do begin
-        {$ifdef debug}Show508Message('EListError in frmSignOrders.GetNumberOfSelectedOrders()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in frmSignOrders.GetNumberOfSelectedOrders()');{$endif}
         raise;
       end;
     end;
@@ -205,7 +205,7 @@ begin
       end;
     except
       on EListError do begin
-          {$ifdef debug}Show508Message('EListError in frmSignOrders.GetCheckBoxStatus()');{$endif}
+          {$ifdef debug}ShowMsg('EListError in frmSignOrders.GetCheckBoxStatus()');{$endif}
         raise;
       end;
     end;
@@ -1155,7 +1155,7 @@ begin
             end
           except
             on EListError do begin
-              {$ifdef debug}Show508Message('EListError in frmSignOrders.clstOrdersMouseMove()');{$endif}
+              {$ifdef debug}ShowMsg('EListError in frmSignOrders.clstOrdersMouseMove()');{$endif}
               raise;
             end;
           end;
@@ -1789,7 +1789,7 @@ begin
     end;
   except
     on E: Exception do begin
-      {$ifdef debug}Show508Message('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
+      {$ifdef debug}ShowMsg('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
       raise;
     end;
   end;
@@ -1812,7 +1812,7 @@ begin
     FOSTFHintWndActive := True;
   except
     on E: Exception do begin
-      {$ifdef debug}Show508Message('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
+      {$ifdef debug}ShowMsg('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
       raise;
     end;
   end;
@@ -1845,7 +1845,7 @@ begin
     end;
   except
     on E: Exception do begin
-      {$ifdef debug}Show508Message('Unhandled exception in procedure TfrmSignOrders.FormMouseMove()');{$endif}
+      {$ifdef debug}ShowMsg('Unhandled exception in procedure TfrmSignOrders.FormMouseMove()');{$endif}
       raise;
     end;
   end;

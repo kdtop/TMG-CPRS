@@ -3,7 +3,7 @@ unit fChartExportHistory;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, ORFn,
   Dialogs, StdCtrls, OleCtrls, SHDocVw, ComCtrls, ORCtrls, ExtCtrls, ORNet, uCore, VAUtils, Grids, uDocTree, rTIU, rFileTransferU,
   Buttons, uTMGOptions;
 
@@ -72,6 +72,7 @@ type
     { Private declarations }
     ParentExportGridWidths:string;
     TotalExport:TExportArray;
+    OldestDate:TFMDateTime;
     procedure LoadEntireHistory(ExportHistory:TStringList);
     procedure DestroyExportArray;
     procedure LoadParentList;
@@ -157,6 +158,7 @@ var
    NoteStr,LabStr,RadStr:string;
    ToData:string;
 begin
+   if grdExportParents.Row < 1 then exit;
    NoteStr := TotalExport[grdExportParents.Row-1].FNoteIENs;
    LabStr := TotalExport[grdExportParents.Row-1].FLabPDFs;
    RadStr := TotalExport[grdExportParents.Row-1].FRadReports;
@@ -169,6 +171,7 @@ end;
 procedure TfrmChartExportHistory.btnExportClick(Sender: TObject);
 var ExportResult,DownloadedFile,IENToExport:string;
 begin
+  if grdExportParents.Row < 1 then exit;  
   IENToExport := grdExportParents.Cells[7,grdExportParents.Row];
   if IENToExport='' then begin
     ShowMessage('No export is selected to re-export.');
@@ -356,6 +359,7 @@ var RootNote,ChildNode: TTreeNode;
     OneStr:string;
     i : integer;
     NodeData:PNodeData;
+    //OldestDate:FMDateTime;
 begin
    wbOneSentItem.Navigate('about:blank');
    tvOneExport.Items.BeginUpdate;
@@ -364,6 +368,7 @@ begin
    tvOneExport.Items.Clear;
    tvOneExport.Items.EndUpdate;
    //Load Data
+   if grdExportParents.Row < 1 then exit;
    NoteStr := TotalExport[grdExportParents.Row-1].FNoteIENs;
    LabStr := TotalExport[grdExportParents.Row-1].FLabPDFs;
    RadStr := TotalExport[grdExportParents.Row-1].FRadReports;

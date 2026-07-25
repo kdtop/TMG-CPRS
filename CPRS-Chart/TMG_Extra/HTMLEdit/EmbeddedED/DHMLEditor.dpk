@@ -34,7 +34,7 @@ contains
   UEditHost in 'UEditHost.pas',
   EmbeddedED in 'EmbeddedED.pas',
   EmbedEDconst in 'EmbedEDconst.pas',
-  Ieconst in 'Ieconst.pas',
+  EmbeddedIEConst in 'EmbeddedIEConst.pas',
   IEDispConst in 'IEdispConst.pas',
   KS_lib in 'KS_Lib.pas',
   KS_Procs2 in 'KS_procs2.pas',

@@ -189,7 +189,7 @@ type
 implementation
 
 uses
-  EwbFocusControl, EwbAcc, IEConst;
+  EwbFocusControl, EwbAcc, EmbeddedIEConst;
 
 procedure TFocusControl.SetActive(const Value: Boolean);
 begin

@@ -309,6 +309,7 @@ type
     btnOpenTOC2: TSpeedButton;
     timRunMDM: TTimer;
     btnOpenEnc: TBitBtn;
+    MultiLooseDocHandler: TMenuItem;
     procedure sptVertMoved(Sender: TObject);
     procedure btnOpenEncClick(Sender: TObject);
     procedure memPCEShowResizeRequest(Sender: TObject; Rect: TRect);
@@ -591,7 +592,7 @@ type
     function GetEditorHTMLText : string;
     procedure RunMacro(Sender:TObject);                                                 //kt 3/16
     procedure HandleLooseDocument(LooseDocHandler:THandleLooseDoc);                     //kt 1/21
-    procedure WebBrowserBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);  //TMG  4/12/22
+    procedure WebBrowserBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);  //TMG  4/12/22
     procedure HtmlEditorClick(Sender: TObject);                                         //kt 5/22
     procedure HandleMDMClosure(Sender: TObject);                                        //kt 1/21
     procedure DoDeleteDocument(DataString : string; ItemIndex : integer; NoPrompt : boolean = false);  //kt 5/15
@@ -615,6 +616,7 @@ type
     FetchedFileName : string;
     TOCLocation : TTOCLocation;             //TMG 2/19/24
     frmNoteTOC: TfrmNoteTOC;    //1/30/24
+    FLoadingNotes: boolean;   //6/9/26 ELH added to limit user interruptions
     function SetClipText(szText:string):Boolean;
     procedure SaveCurrentNote(var Saved: Boolean; AltMode : boolean = false);           //kt moved from private to public.  //kt added AltMode Param 4/7/23
     function InsertText(TextToInsert:string):string;                                    //kt
@@ -708,7 +710,7 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fTemplateDialog, DateUtils, uInit, uVA508CPRSCompatibility, VA508AccessibilityRouter,
      fNoteSelector,   //tmg  5/22/22
      MDMHelper,       //kt 12/21/20
-     fMultiHandleLoose,  //tmg  12/6/22
+     fMultiTIUSign,    //6/5/26
      VAUtils;
 
 const
@@ -831,7 +833,7 @@ end;
 
 
 { TPage common methods --------------------------------------------------------------------- }
-procedure TfrmNotes.ContextChangeCancelled; 
+procedure TfrmNotes.ContextChangeCancelled;
 //kt added entire function 4/27/15
 begin
   LoadNotes;
@@ -846,6 +848,11 @@ begin
     SetTOCButtonStatus(1);
   end;
   Result := inherited AllowContextChange(WhyNot);  // sets result = true
+  if FLoadingNotes then begin    //ELH  6/9/26
+    Result := False;
+    WhyNot := 'Please wait until note loading is done.';
+  end;
+
   //kt 3/16 original --> if Assigned(frmTemplateDialog) then
   //kt 3/16 original -->   if Screen.ActiveForm = frmTemplateDialog then
   if Screen.ActiveForm is TfrmTemplateDialog then begin
@@ -2267,7 +2274,7 @@ begin
 
 end;
 
-procedure TfrmNotes.WebBrowserBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+procedure TfrmNotes.WebBrowserBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);  //TMG   4/12/22
 var MsgType:string;
     MsgVerb:TNoteVerbs;
@@ -5015,11 +5022,13 @@ begin
        application.processmessages;
   end;  }
   try
+    FLoadingNotes := True;  //ELH  6/9/26
+
     HiddenCount := 0;
     FDocList.Clear;
     uChanging := True;
     RedrawSuspend(memNote.Handle);
-    //kt 4/16  RedrawSuspend(HTMLViewer.Handle); //kt 9/11  <-- removed because IE was not refreshing screen when present. 
+    //kt 4/16  RedrawSuspend(HTMLViewer.Handle); //kt 9/11  <-- removed because IE was not refreshing screen when present.
     RedrawSuspend(lvNotes.Handle);
     tvNotes.Items.BeginUpdate;
     lstNotes.Items.Clear;
@@ -5082,10 +5091,8 @@ begin
       end;
       tmpList.Clear;
       FDocList.Clear;
-
-      //end;
-
       //TMG end addition  4/9/18
+
       //TMG added section 7/17/23
       ListNotesForTree(tmpList, NC_LOOSE_DOCS, 0, 0, 0, 0, TreeAscending);
       if tmpList.Count > 0 then begin
@@ -5218,6 +5225,7 @@ begin
     tmpList.Free;
     frmNotesLoading.free;
     frmNotesLoading := nil;
+    FLoadingNotes := False;  //ELH  6/9/26
   end;
 end;
 
@@ -6072,11 +6080,34 @@ begin
   frmMDMGrid.Show;
 end;
 
-procedure TfrmNotes.mnuLooseDocHandlerClick(Sender: TObject);
+procedure TfrmNotes.mnuLooseDocHandlerClick(Sender: TObject);  //kt //tmg added 6/2026
+var Modified : boolean;
+  tmpList: TStringList;
+  LooseDocsNode: TORtreeNode;
+
 begin
   inherited;
-  //HandleMultipleLooseDocs();
-  ShowMsg('Not finished yet.');
+  Modified := ShowMultiLooseSign;  //Result: True if some documents were changed (i.e. refresh of documents ListView will be needed)
+  if Modified then begin
+    LoadNotes;
+    {tmpList := TStringList.Create;
+    try
+      LooseDocsNode := tvNotes.FindPieceNode(IntToStr(NC_LOOSE_DOCS), U);
+      KillDocTreeChildrenOfNode(LooseDocsNode);
+      //KillDocTreeNodeAndChildren(LooseDocsNode);
+      //Application.ProcessMessages;
+      //NOTE: The following doesn't seem to populate the tree.  I'm not sure why...  it is a copy of other code in LoadNotes that works there. 
+      with FCurrentContext do begin
+        ListNotesForTree(tmpList, NC_LOOSE_DOCS, 0, 0, 0, 0, TreeAscending);
+        if tmpList.Count > 0 then begin
+          CreateListItemsforDocumentTree(FDocList, tmpList, NC_LOOSE_DOCS, GroupBy, TreeAscending, CT_NOTES);
+          UpdateTreeView(FDocList, tvNotes);
+        end;
+      end;
+    finally
+      tmpList.Free;
+    end; }
+  end;
 end;
 
 procedure TfrmNotes.mnuLooseInChartDeleteClick(Sender: TObject);
@@ -6663,6 +6694,7 @@ procedure TfrmNotes.FormShow(Sender: TObject);
 begin
   inherited;
   boolAutosaving := False;    //elh  11/18/16
+  FLoadingNotes := False;
   FOldFramePnlPatientExit := frmFrame.pnlPatient.OnExit;
   frmFrame.pnlPatient.OnExit := frmFramePnlPatientExit;
   FOldDrawerPnlTemplatesButtonExit := frmDrawers.pnlTemplatesButton.OnExit;

@@ -72,7 +72,7 @@ const
 implementation
 
 uses
-  IeConst, EwbAcc;
+  EmbeddedIEConst, EwbAcc;
 
 type
    {VerifyVersion}

@@ -35,7 +35,7 @@ unit SortStringGrid;
 
 interface
 uses
-  Windows, Messages, StrUtils, SysUtils, Classes, Graphics, Controls, Dialogs, Grids;
+  Winapi.Windows, Winapi.Messages, System.StrUtils, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Vcl.Grids;
 
 type
   TSortDirection = (sdNoSort,sdAscending,sdDescending);

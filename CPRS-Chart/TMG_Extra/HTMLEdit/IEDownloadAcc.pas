@@ -40,7 +40,7 @@ interface
 {$I EWB.inc}
 
 uses
-  ActiveX, SysUtils, ShlObj, Windows, UrlMon, IEConst;
+  ActiveX, SysUtils, ShlObj, Windows, UrlMon, EmbeddedIEConst;
 
 {$IFDEF DELPHI6_UP}
 type

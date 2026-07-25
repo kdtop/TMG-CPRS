@@ -7581,7 +7581,9 @@ begin
         if ClickedValue > -1 then break;
         ClickedMark := Marks.Clicked(FX, FY);
         if ClickedMark > -1 then break;
-        ClickedLegend := Legend.Clicked(FX, FY);
+        // Delphi 12 TeeChart no longer exposes Legend.Clicked; OnClickLegend
+        // still handles actual legend clicks, so only legend hover feedback is skipped.
+        ClickedLegend := -1;
         if ClickedLegend > -1 then break;
       end;
     end;

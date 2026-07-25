@@ -72,7 +72,7 @@ var
 implementation
 
 uses fBALocalDiagnoses, fOrdersSign, fReview, rOrders, uCore, rCore, rPCE,uPCE,
-     UBAConst, UBAMessages, USignItems;
+     UBAConst, UBAMessages, USignItems, VAUtils;
 
 
 // -----------------  MAIN CIDC DX HAS BEEN ENTERED LOGIC  ---------------------------
@@ -212,7 +212,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.IsOrderBillable()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.IsOrderBillable()');{$endif}
         raise;
         end;
   end;
@@ -407,7 +407,7 @@ begin
        except
        on EListError do
        begin
-         {$ifdef debug}Show508Message('EListError in UBACore.rpcSaveBillingDxEntered()');{$endif}
+         {$ifdef debug}ShowMsg('EListError in UBACore.rpcSaveBillingDxEntered()');{$endif}
          raise;
      end;
   end;
@@ -557,7 +557,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.OrdersHaveDx()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.OrdersHaveDx()');{$endif}
         raise;
         end;
   end;
@@ -734,7 +734,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.AddProviderPatientDaysDx()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.AddProviderPatientDaysDx()');{$endif}
         raise;
         end;
   end;
@@ -761,7 +761,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.OrderRequiresSCEI()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.OrderRequiresSCEI()');{$endif}
         raise;
         end;
   end;
@@ -885,7 +885,7 @@ begin
      except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.CompleteUnsignedBillingInfo()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.CompleteUnsignedBillingInfo()');{$endif}
         raise;
         end;
   end;
@@ -908,7 +908,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.GetUnsignedOrderFlags()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.GetUnsignedOrderFlags()');{$endif}
         raise;
         end;
   end;
@@ -999,7 +999,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.BuileTFHintRec()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.BuileTFHintRec()');{$endif}
         raise;
         end;
   end;
@@ -1065,7 +1065,7 @@ begin
   except
      on EListError do
         begin
-           {$ifdef debug}Show508Message('EListError in UBACore.ClearSelectedORdersDiagnoses()');{$endif}
+           {$ifdef debug}ShowMsg('EListError in UBACore.ClearSelectedORdersDiagnoses()');{$endif}
            raise;
         end;
   end;
@@ -1151,7 +1151,7 @@ begin
   except
      on EListError do
         begin
-        {$ifdef debug}Show508Message('EListError in UBACore.LoadConsultOrderRec()');{$endif}
+        {$ifdef debug}ShowMsg('EListError in UBACore.LoadConsultOrderRec()');{$endif}
         raise;
         end;
   end;

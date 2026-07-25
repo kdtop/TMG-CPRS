@@ -331,6 +331,8 @@ const
   NC_SCANNED_LOOSE_DOCS = 10;                    // Note Content - items loose in chart, not part of record.  //TMG 9/8/20
   NC_LOOSE_DOCS = 11;                            // Note Content - TIU Documents LOOSE IN CHART  //TMG 7/17/23
   NC_BY_CREATION_DATE = 12;                      // Note Content - signed notes by creation date  //TMG 1/28/25
+  NC_LOOSE_DOCS_ALL_PTS = 13;                    // Note Content - TIU Documents LOOSE IN CHART, but for ALL patients.  //TMG 6/8/26
+  NC_LAST = NC_LOOSE_DOCS_ALL_PTS; //<---- should equal last one in list.
 
   { Surgery View Contexts }
   SR_RECENT     = 0;
@@ -396,10 +398,11 @@ const
 
   { TIU TreeView context strings}
   //Original line -> 3/12/19 NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_OTHER_UNSIGNED] of string =
-  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_BY_CREATION_DATE] of string =
-    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records','Loose documents','Loose notes','Signed notes by creation date'),
-     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '),
-     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' ',' ',' ',' ',' '));
+  NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_LAST] of string =
+    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records','Loose documents','Loose notes','Signed notes by creation date',''),
+     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', ''),
+     ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' ',' ',' ',' ',' ', '')
+    );
 
   CC_ALL        = 1;                             // Consult context - all Consults
   CC_BY_STATUS  = 2;                             // Consult context - Consults by Status

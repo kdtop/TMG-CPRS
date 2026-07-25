@@ -11,7 +11,7 @@ uses
   rReports, uTMGOptions;
 
 type
-  TMultiSignMode = (tmsmUnassigned, tmsmAlerts, tmsmLooseDocs);
+  TMultiSignMode = (tmsmUnassigned, tmsmAlerts, tmsmLooseDocs, tmsmLooseDocsAllPts);
   TItemInfoType = (tiitUnassigned, tiitTIU, tiitLab, tiitRadRpt);
   TItemInfo = class(TObject)
   public
@@ -38,6 +38,7 @@ type
     ProcessDeferredAdditonalSigners : boolean;
     DeferredAdditionalSignersList : TSignerList; //<-- this is a RECORD
     DeferredSigAction : integer;
+    IsLooseDocument : boolean;
     FailMsg : TStringList; //note: default is to be nil.  Only instantiated if problem encountered.
     RptType : string;
     RptQualifier  : string;
@@ -131,8 +132,9 @@ type
     procedure LoadInfoListIntoLV;
     Procedure InitializeFromAlerts(Items : TListItems);
     Procedure InitializeFromLoose();
+    Procedure InitializeFromLooseAllPts();
     procedure SetupAlertInfoList(Items : TListItems);
-    procedure SetupLooseInfoList(Items : TStringList);
+    procedure SetupLooseInfoList(Items : TStringList; MultiplePatients: boolean);
     procedure LoadNoteForView(ItemInfo : TItemInfo);
     function PatientDisplayName(ItemInfo : TItemInfo) : string;
     procedure UpdateButtonEnableStates;
@@ -152,7 +154,7 @@ type
     procedure ZoomReset;
     procedure ZoomIn;
     procedure ZoomOut;
-    function ProcessMoveToLoose(ItemInfo : TItemInfo):boolean;
+    function ProcessDeltaDocumentStatus(ItemInfo : TItemInfo; Status : string):boolean;
     procedure TransferCurrentFromUnselectedToActionList();
     procedure UpdateLabels;
     procedure SetFormMode(Value : TMultiSignMode);
@@ -164,6 +166,7 @@ type
 
 function ShowMultiAlertsSign(Items : TListItems) : boolean;
 function ShowMultiLooseSign() : boolean;
+function ShowMultiLooseSignForAllPatients() : boolean;
 
 
 implementation
@@ -176,6 +179,11 @@ uses VAUtils, ORFn, uConst, StrUtils, fSignItem, fImages, uImages,
 const
   BlankWebPage = 'about:blank';
   WM_MYMAXIMIZE = WM_USER + 1;
+
+  TIU_STATUS_LOOSE = 'LOOSE';
+  TIU_STATUS_UNSIGNED = 'UNSIGNED';
+
+  DATE_FORMAT_STR = 'yyyy-mm-dd';
 
 //===========================================================
 //===========================================================
@@ -217,7 +225,7 @@ end;
 
 
 function ShowMultiLooseSign() : boolean;
-//Result: True if some documents were signed (i.e. refresh of documents ListView will be needed)
+//Result: True if some documents were changed (i.e. refresh of documents ListView will be needed)
 var
   frmMultiTIUSign: TfrmMultiTIUSign;
 begin
@@ -231,7 +239,23 @@ begin
   finally
     frmMultiTIUSign.Free;
   end;
+end;
 
+function ShowMultiLooseSignForAllPatients() : boolean;
+//Result: True if some documents were changed (i.e. refresh of documents ListView will be needed)
+var
+  frmMultiTIUSign: TfrmMultiTIUSign;
+begin
+  result := false;
+  frmMultiTIUSign := InstantiateForm(tmsmLooseDocsAllPts);
+  try
+    frmMultiTIUSign.InitializeFromLooseAllPts();
+    if frmMultiTIUSign.ShowModal = mrOK then begin
+      result := true;
+    end;
+  finally
+    frmMultiTIUSign.Free;
+  end;
 end;
 
 function ShowMultiAlertsSign(Items : TListItems) : boolean;
@@ -323,19 +347,17 @@ begin
   XQAID := '';
   FollowupNum := '';
   PtRecLoaded := false;
-  //PtRec: TPtIDInfo;
   LocalHTMLFile := '';
   Signed := false;
   PromptToLinkToConsult := false;
   DeferredMoveToLoose := false;
-  //DeferredMoveToLooseTitle := '';
   DeferredConsultItemIEN := 0;
   DeferredConsultCompletionDesired := false;
   DeferredToDelete := false;
   ProcessDeferredConsultAfterSignature := false;
   PromptForAdditionalSigners := false;
   ProcessDeferredConsultAfterSignature := false;
-  //DeferredAdditionalSignersList : TSignerList;
+  IsLooseDocument := false;
   DeferredSigAction := 0;
   FailMsg := nil;
   RptType := '';
@@ -371,11 +393,13 @@ begin
       btnMoveToLoose.Visible := true;
       FItemsTitleName := 'Alerted';
     end;
-    tmsmLooseDocs: begin
+    tmsmLooseDocs,
+    tmsmLooseDocsAllPts: begin
       btnMoveToLoose.Visible := false;
       FItemsTitleName := 'Loose';
     end;
   end;
+  FFormMode := Value;
   lblItemsTitle.Caption := FItemsTitleName + ' Notes';
 end;
 
@@ -454,7 +478,23 @@ begin
   Items := TStringList.Create;
   ListNotesForTree(Items, NC_LOOSE_DOCS, 0, 0, 0, 0, false);  //Load items via RPC call.
   try
-    SetupLooseInfoList(Items);
+    SetupLooseInfoList(Items, false);
+    LoadInfoListIntoLV;
+  finally
+    Items.Free;
+  end;
+end;
+
+Procedure TfrmMultiTIUSign.InitializeFromLooseAllPts();
+var
+  Items : TStringList;
+
+begin
+  Items := TStringList.Create;
+  //TO DO .. change NC_LOOSE_DOCS_ALL_PTS definition to value expected by RPC
+  ListNotesForTree(Items, NC_LOOSE_DOCS_ALL_PTS, 0, 0, 0, 0, false);  //Load items via RPC call.
+  try
+    SetupLooseInfoList(Items, true);
     LoadInfoListIntoLV;
   finally
     Items.Free;
@@ -490,7 +530,7 @@ begin
 
 end;
 
-procedure TfrmMultiTIUSign.SetupLooseInfoList(Items : TStringList);
+procedure TfrmMultiTIUSign.SetupLooseInfoList(Items : TStringList; MultiplePatients: boolean);
 //NOTE: Items contents is owned locally.  Could be modified.
 (* Example of Items
   777968^INSURANCE NOTE;^3240110.01^MILx, GERx^168;KEVIN S TOPPENBERG, MD;TOPPENBERG,KEVIN S^Laughlin_Office^loose^Visit: 01/10/24;3240110.01^Dis: 01/10/24;3240110.01^^2^^^11^^$F866F7^$F866F7^Created: 01/12/24;3240112.075204
@@ -513,14 +553,18 @@ procedure TfrmMultiTIUSign.SetupLooseInfoList(Items : TStringList);
       12:  Subject(#1701)  e.g. ""
       13:  Prefix (child indicator)   e.g. "+"
       14:  ParentIEN (#.06), or IDParentien (#2101), or Context, or 1  e.g. 361381
-      16:  ID Sort indicator  e.g.  ""
-      17:  Highlight Note  ELH   8/4/16
-      18:  Hospital Note   ELH   4/30/19
-      19:  Creation Date   ELH   1/28/25
+      15:  ID Sort indicator  e.g.  ""
+      16:  Highlight Note  ELH   8/4/16
+      17:  Hospital Note   ELH   4/30/19
+      18:  Creation Date   ELH   1/28/25
+      19:  PatientDFN  <-- present if context # was NC_LOOSE_DOCS_ALL_PTS.
 *)
 var
   OneStr : string;
-
+  ItemInfo : TItemInfo;
+  ADFN : string;
+  FMDateStr : string;
+  i : integer;
 begin
   ItemInfo := nil;
   for i := 0 to Items.Count - 1 do begin
@@ -529,8 +573,15 @@ begin
     ItemInfo.ItemType := tiitTIU;
     ItemInfo.IEN8925 := Piece(OneStr, U, 1);
     ItemInfo.intIEN8925 := StrToIntDef(ItemInfo.IEN8925, 0);
-    ItemInfo.DFN := Patient.DFN;
-    ItemInfo.DateStr := Piece(Piece(OneStr, U, 19),';',2);
+    ItemInfo.IsLooseDocument:= true;
+    if MultiplePatients then begin
+      ADFN := Piece(OneStr, U, 19);
+    end else begin
+      ADFN := Patient.DFN;
+    end;
+    ItemInfo.DFN := ADFN;
+    FMDateStr := Piece(Piece(OneStr, U, 18),';',2);
+    ItemInfo.DateStr := FormatFMDateTime(DATE_FORMAT_STR, StrToFloat(FMDateStr));
     ItemInfo.PtName := Piece(OneStr, U, 4);
     ItemInfo.Message := Piece(OneStr, U, 2);
     ItemInfoList.Add(ItemInfo);
@@ -632,7 +683,8 @@ begin
       if assigned(ItemInfo) then begin
         ItemInfo.DFN := ADFN;
         ItemInfo.XQAID := XQAID;
-        ItemInfo.DateStr := FormatFMDateTime('mmm dd,yyyy', strtofloat(piece(XQAID,';',3)));
+        //ItemInfo.DateStr := FormatFMDateTime('mmm dd,yyyy', strtofloat(piece(XQAID,';',3)));
+        ItemInfo.DateStr := FormatFMDateTime(DATE_FORMAT_STR, strtofloat(piece(XQAID,';',3)));
         ItemInfo.PtName := Items[i].SubItems[0];
         ItemInfo.Message := Items[i].SubItems[4];
         ItemInfoList.Add(ItemInfo);
@@ -782,7 +834,9 @@ var ItemInfo : TItemInfo;
     Title : string;
     Suggestion : string;
 begin
-  if messagedlg('Are you sure you want to delete this note?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then exit;
+  if not (self.FormMode in [tmsmLooseDocs, tmsmLooseDocsAllPts]) then begin
+    if messagedlg('Are you sure you want to delete this note?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then exit;
+  end;
   ItemInfo := SelectedItemInfoFromLV(lvUnSelected);
   if not assigned(ItemInfo) then exit;
 
@@ -807,74 +861,20 @@ begin
 end;
 
 procedure TfrmMultiTIUSign.btnMoveToLooseClick(Sender: TObject);
-var //j : integer;
-    ItemInfo : TItemInfo;
-    //Success : boolean;
-    //ActionSts,DeleteSts : TActionRec;
-    //ImageList:TList;
-    //i : integer;
-    //RPCResult,Reason : string;
-    //Result : boolean;
-    //ImageInfo : TImageInfo;
-    Answered : boolean;
-    Title : string;
-    Suggestion : string;
+var
+  ItemInfo : TItemInfo;
+  //Answered : boolean;
+  //Title : string;
+  //Suggestion : string;
 begin
   ItemInfo := SelectedItemInfoFromLV(lvUnSelected);
   if not assigned(ItemInfo) then exit;
-
-  //Title := Trim(pieces(ItemInfo.Message,' ',2,999));
-  //Title := piece2(Title,'available',1);
-  //Answered := InputQuery('Move to Loose Documents','What would you like to call this file?',Title);
-  //Title := InputBox('Move to Loose Documents','What would you like to call this file?',Suggestion);
-  //if (Title = '')or(Answered<>True) then exit;
-  //if Title = '' then exit;
   ItemInfo.DeferredMoveToLoose := true;
-  //ItemInfo.DeferredMoveToLooseTitle := Title;
-
   TransferCurrentFromUnselectedToActionList();
-{
-  ItemInfo := SelectedItemInfoFromLB(lbUnSelected);
-  if not assigned(ItemInfo) then exit;
-
-  Suggestion := pieces(ItemInfo.Message,' ',2,999);
-  Suggestion := piece2(Suggestion,'available',1);
-  Success := frmNotes.MoveTIUToLoose(ItemInfo.DFN,ItemInfo.IEN8925, Suggestion);
-  if Success=False then exit;
-
-  ActOnDocument(ActionSts, StrToInt(ItemInfo.IEN8925), 'DELETE RECORD');
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
-    ImageList := TList.Create;
-    FillImageList(ItemInfo.IEN8925, ImageList);
-    Reason := 'DeleteAll';
-    //DeleteAllAttachedImages(ItemInfo., idmDelete, HtmlEditor, false); // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
-    for i := 0 to ImageList.Count - 1 do begin
-       ImageInfo := GetImageInfo(ImageList, i);
-       RPCResult := sCallV('TMG IMAGE DELETE', [inttostr(ImageInfo.IEN),'1',Reason]);
-       Result := Piece(RPCResult,'^',1)= '1';
-       if Result = false then begin
-           MessageDlg(Piece(RPCResult,'^',2),mtError,[mbOK],0);
-       end;
-    end;
-    ImageList.Free;
-  end;
-
-  DeleteDocument(DeleteSts, strtoint(ItemInfo.IEN8925),'');
-  if DeleteSts.Success=False then begin
-    messagedlg(DeleteSts.Reason,mtError,[mbOk],0);
-    exit;
-  end;
-  j := lbUnSelected.ItemIndex;
-  lbUnSelected.Items.Delete(j);
-  while j >= lbUnSelected.Count do dec(j);
-  lbUnSelected.ItemIndex := j;
-  lbUnSelectedClick(Sender);
-  UpdateButtonEnableStates;
-}
 end;
 
 
-function TfrmMultiTIUSign.ProcessMoveToLoose(ItemInfo : TItemInfo):boolean;
+function TfrmMultiTIUSign.ProcessDeltaDocumentStatus(ItemInfo : TItemInfo; Status : string):boolean;
 var Success : boolean;
     ActionSts,DeleteSts : TActionRec;
     ImageList:TList;
@@ -886,11 +886,11 @@ var Success : boolean;
 begin
   //ItemInfo := SelectedItemInfoFromLB(lbUnSelected);
   Result := False;
-  if not assigned(ItemInfo) then exit;
+  if not assigned(ItemInfo) or (Status = '') then exit;
 
   //Title := ItemInfo.DeferredMoveToLooseTitle;
   //Success := frmNotes.MoveTIUToLoose(ItemInfo.DFN,ItemInfo.IEN8925, Title, False);
-  RPCResult := sCallV('TMG TIU CHANGE STATUS',[ItemInfo.IEN8925,'LOOSE']);
+  RPCResult := sCallV('TMG TIU CHANGE STATUS',[ItemInfo.IEN8925,Status]);
   if piece(RPCResult,'^',1)='-1' then begin
     ShowMessage(piece(RPCResult,'^',2));
   end else begin
@@ -1064,28 +1064,60 @@ begin
 end;
 
 procedure TfrmMultiTIUSign.pnlCenterBottomResize(Sender: TObject);
-var btnWidth:integer;
+var
+  btnWidth:integer;
+  numMainBtns : integer;
+  LeftPos : integer;
+  WorkingSpace : integer;
+const
+  SpaceGap = 5;
 begin
-   btnWidth := round((pnlCenterBottom.Width-11-btnPrev.Width-btnNext.Width-24)/3);
-   //btnPrev.width := btnWidth;
-   //btnNext.width := btnWidth;
-   btnPrev.left := 5;
-   btnAddToSign.width := btnWidth;
-   btnMoveToLoose.width := btnWidth;
-   btnDelete.width := btnWidth;
-   btnDelete.Left := 5+6+btnPrev.width;
-   btnAddToSign.Left := btnDelete.Left+btnWidth+6;  //5+12+btnWidth+btnPrev.width;
-   btnMoveToLoose.Left := btnAddToSign.Left+btnWidth+6;//5+18+(btnWidth*2)+btnPrev.width;
-   btnNext.Left := pnlCenterBottom.Width-6-btnNext.Width;
-{   btnWidth := round((pnlCenterBottom.Width-23)/4);
-   btnPrev.width := btnWidth;
-   btnAddToSign.width := btnWidth;
-   btnMoveToLoose.width := btnWidth;
-   btnNext.width := btnWidth;
-   btnPrev.left := 5;
-   btnAddToSign.Left := 5+6+btnWidth;
-   btnMoveToLoose.Left := 5+12+(btnWidth*2);
-   btnNext.Left := 5+18+(btnWidth*3);}
+  numMainBtns := 0;
+  if btnDelete.Visible then inc(numMainBtns);
+  if btnAddToSign.Visible then inc(numMainBtns);
+  if btnMoveToLoose.Visible then inc(numMainBtns);
+  WorkingSpace := pnlCenterBottom.Width - SpaceGap - btnPrev.Width - btnNext.Width - SpaceGap;
+  btnWidth := round((WorkingSpace - SpaceGap*(numMainBtns+1))/numMainBtns);  //remove 1 SpaceGap for a preceeding space before each button, and 1 SpaceGap for a trailing gap
+  {
+          |<--------Working Space-------->|
+   +---------------------------------------------+
+   | +----+ +-------+ +-------+ +-------+ +----+ |
+   | | Pv | | Del   | | Sign  | | Loose | | Nx | |
+   | +----+ +-------+ +-------+ +-------+ +----+ |
+   +---------------------------------------------+
+    ^      ^         ^         ^         ^       ^    <-- each is spacing gap
+  }
+  LeftPos := SpaceGap;   //LeftPos will act like a cursor for where next button gets placed
+  btnPrev.left := LeftPos;
+  inc(LeftPos, btnPrev.Width + SpaceGap);
+  btnDelete.Left := LeftPos;
+  btnDelete.width := btnWidth;
+  inc(LeftPos, btnWidth + SpaceGap);
+  btnAddToSign.Left := LeftPos;
+  btnAddToSign.width := btnWidth;
+  inc(LeftPos, btnWidth + SpaceGap);
+  if (btnMoveToLoose.Visible) then begin
+    btnMoveToLoose.Left := LeftPos;
+    btnMoveToLoose.width := btnWidth;
+    inc(LeftPos, btnWidth + SpaceGap);
+  end;
+  btnNext.Left := LeftPos;
+{
+  numMainBtns := 0;
+  if btnDelete.Visible then inc(numMainBtns);
+  if btnAddToSign.Visible then inc(numMainBtns);
+  if btnMoveToLoose.Visible then inc(numMainBtns);
+  btnWidth := round((pnlCenterBottom.Width-11-btnPrev.Width-btnNext.Width-24)/numMainBtns);
+  LeftPos :=
+  btnPrev.left := 5;
+  btnDelete.Left := 5+6+btnPrev.width;
+  btnDelete.width := btnWidth;
+  btnAddToSign.width := btnWidth;
+  btnAddToSign.Left := btnDelete.Left+btnWidth+6;
+  btnMoveToLoose.width := btnWidth;
+  btnMoveToLoose.Left := btnAddToSign.Left+btnWidth+6;
+  btnNext.Left := pnlCenterBottom.Width-6-btnNext.Width;
+}
 end;
 
 procedure TfrmMultiTIUSign.pnlRightCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
@@ -1252,14 +1284,12 @@ begin
   for i := lbSelected.Items.Count - 1 downto 0 do begin
     Index := Integer(lbSelected.Items.Objects[i]);
     ItemInfo := TItemInfo(ItemInfoList[Index]);
-    if ItemInfo.DeferredToDelete=True then DeleteCount := DeleteCount+1
-    else count:=count+1;
+    if ItemInfo.DeferredToDelete=True then inc(DeleteCount)
+    else inc(count);
   end;
   if DeleteCount>0 then begin
     OkToDelete := (messagedlg('You have '+inttostr(DeleteCount)+' marked to delete.'+#13#10+#13#10+'Are you sure you want to delete these?',mtconfirmation,[mbYes,mbNo],0)=mrYes);
   end;
-  //
-  //Get count above now count := lbSelected.Items.Count;
   if count>0 then MessageStr := 'Sign '+IntToStr(count)+' Notes';
   if DeleteCount>0 then begin
      if MessageStr<>'' then MessageStr := MessageStr+' and'+#13#10;
@@ -1273,16 +1303,24 @@ begin
     Index := Integer(lbSelected.Items.Objects[i]);
     ItemInfo := TItemInfo(ItemInfoList[Index]);
     if (ItemInfo.DeferredToDelete=True)and(OkToDelete=False) then continue;
-    Success := ProcessOne(ItemInfo, ESCode);
+    Success := ProcessOne(ItemInfo, ESCode);  //error, if any, info is stored in ItemInfo.FailMsg
     AllOK := AllOK or Success;
     if Success then begin
       inc(SuccessCt);
       lbSelected.Items.Delete(i);
+    end else begin
+      MessageDlg('ERROR PROCESSING DOCUMENT' + CRLF + CRLF +
+                 'Patient: ' + ItemInfo.PtName + CRLF +
+                 'Title: ' + ItemInfo.Message + CRLF +
+                 'Date: ' + ItemInfo.DateStr + CRLF +
+                 'Message: ' + ItemInfo.FailMsg.Text,
+                 mtError, [mbOK], 0);
     end;
   end;
-  MessageDlg('Successfully signed ' + IntToStr(SuccessCt) + ' items.', mtInformation, [mbOK], 0);
-  //TO DO ... show problems.
-  if SuccessCt = (count+DeleteCount) then self.ModalResult := mrOK;
+  if SuccessCt > 0 then begin
+    MessageDlg('Successfully processed ' + IntToStr(SuccessCt) + ' items.', mtInformation, [mbOK], 0);
+  end;
+  if SuccessCt = (count+DeleteCount) then self.ModalResult := mrOK;  //should effect form closure. 
 end;
 
 
@@ -1293,7 +1331,7 @@ begin
   case ItemInfo.ItemType of
     tiitTIU: begin
       if ItemInfo.DeferredMoveToLoose then begin
-        Result := ProcessMoveToLoose(ItemInfo);
+        Result := ProcessDeltaDocumentStatus(ItemInfo, TIU_STATUS_LOOSE);
       end else if ItemInfo.DeferredToDelete then begin
         Result := DeleteOneTIU(ItemInfo);
       end else begin

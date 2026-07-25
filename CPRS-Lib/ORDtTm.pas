@@ -190,7 +190,7 @@ type
     procedure YearChanged(Sender: TObject);
     procedure BtnClicked(Sender: TObject);
     procedure YearUDChange(Sender: TObject; var AllowChange: Boolean;
-                           NewValue: Smallint; Direction: TUpDownDirection);
+                           NewValue: Integer; Direction: TUpDownDirection);
     procedure YearKeyPress(Sender: TObject; var Key: Char);
     procedure CheckDays;
     procedure Loaded; override;
@@ -916,9 +916,9 @@ begin
     for i := 1 to 12 do
     begin
       if FLongMonths then
-        FMonthCombo.Items.Add(LongMonthNames[i])
+        FMonthCombo.Items.Add(FormatSettings.LongMonthNames[i])
       else
-        FMonthCombo.Items.Add(ShortMonthNames[i]);
+        FMonthCombo.Items.Add(FormatSettings.ShortMonthNames[i]);
       if(GetSize) then
       begin
         Size := TextWidthByFont(Font.Handle, FMonthCombo.Items[i]);
@@ -1305,7 +1305,7 @@ begin
 end;
 
 procedure TORDateCombo.YearUDChange(Sender: TObject; var AllowChange: Boolean;
-                                    NewValue: Smallint; Direction: TUpDownDirection);
+                                    NewValue: Integer; Direction: TUpDownDirection);
 var
   y, m, d: word;
 
@@ -1390,9 +1390,9 @@ begin
     if(FMonth > 0) then
     begin
       if FLongMonths then
-        Result := LongMonthNames[FMonth]
+        Result := FormatSettings.LongMonthNames[FMonth]
       else
-        Result := ShortMonthNames[FMonth];
+        Result := FormatSettings.ShortMonthNames[FMonth];
       if(FDay > 0) then
         Result := Result + ' ' + IntToStr(FDay);
       Result := Result + ', ';

@@ -1007,10 +1007,12 @@ function TfrmPCELex.isNumeric(inStr: String): Boolean;
 var
   dbl: Double;
   error, intDecimal: Integer;
+  decimalSep: Char;
 begin
   Result := False;
-  if (DecimalSeparator <> '.') then
-    intDecimal := Pos(DecimalSeparator, inStr)
+  decimalSep := FormatSettings.DecimalSeparator;
+  if (decimalSep <> '.') then
+    intDecimal := Pos(decimalSep, inStr)
   else
     intDecimal := 0;
   if (intDecimal > 0) then
@@ -1019,7 +1021,7 @@ begin
   if (dbl = 0.0) then
     ; //do nothing
   if (intDecimal > 0) then
-    inStr[intDecimal] := DecimalSeparator;
+    inStr[intDecimal] := decimalSep;
   if (error = 0) then
     Result := True;
 end;

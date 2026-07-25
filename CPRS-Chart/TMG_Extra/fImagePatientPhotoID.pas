@@ -170,8 +170,8 @@ uses
 procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadType);
   var
      Result : TDownloadResult;
-     FName: string;
-     FPath: string;
+     FName: AnsiString;
+     FPath: AnsiString;
   begin
     if DLType in [dlBoth,dlThumb]  then begin
       if not FileExists(InfoRec.LocalThumbPath) then begin
@@ -326,7 +326,7 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
     procedure ParseOneRec(s : string; OneRec : TPatientIDPhotoInfoRec);
     var DT: string;
         FMDT : double;
-        FPath,FName: string;
+        FPath,FName: AnsiString;
     begin
       OneRec.IEN := piece(s,'^',2);
       OneRec.ImageFPath := piece(s,'^',3);

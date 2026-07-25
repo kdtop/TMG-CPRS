@@ -46,7 +46,7 @@ interface
 uses
 {$IFDEF DELPHI6_UP}Variants, {$ENDIF}
   Dialogs, Windows, Messages, Classes, MSHTML_EWB, EWBAcc, Controls, Forms,
-  ExtCtrls, ActiveX, ShlObj, SHDocVw_EWB, UrlMon, IEConst;
+  ExtCtrls, ActiveX, ShlObj, SHDocVw_EWB, UrlMon, EmbeddedIEConst;
 
 type
   TCustomEmbeddedWB = class;

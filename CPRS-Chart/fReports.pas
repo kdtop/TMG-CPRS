@@ -1988,6 +1988,7 @@ begin
   case MsgVerb of
     nvNoteSelect: begin
       ItemIEN := piece(URL,'^',2);
+      if ItemIEN='' then ItemIEN := piece(URL,'@',2);
       Cancel := True;
       //if pos(',',ItemIEN)>0 then begin
         //ItemIEN := SelectNote(ItemIEN);

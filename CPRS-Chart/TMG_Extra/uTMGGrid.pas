@@ -55,7 +55,7 @@ procedure UnRegisterGridInfo(GridInfo : TGridInfo); //overload;
 procedure AddGridInfo(Name : string; Grid: TSortStringGrid;
                       Data : TStringList; BasicTemplate : TStringList;
                       DataLoader : TGridDataLoader; FileNum : string;
-                      ApplyBtn,RevertBtn : TButton; RecSelector : TIENSSelector = nil);
+                      ApplyBtn,RevertBtn : TControl; RecSelector : TIENSSelector = nil);
 procedure ClearGrid(Grid : TSortStringGrid);
 procedure ClearGridList(GridList : TList);
 procedure LoadAnyGrid(Grid : TSortStringGrid; BasicTemplate : TStringList;
@@ -226,7 +226,7 @@ implementation
                         BasicTemplate : TStringList;
                         DataLoader : TGridDataLoader;
                         FileNum : string;
-                        ApplyBtn,RevertBtn : TButton;
+                        ApplyBtn,RevertBtn : TControl;
                         RecSelector : TIENSSelector = nil);
   var GridInfo : TGridInfo;
   begin
@@ -1218,8 +1218,8 @@ implementation
           AGridInfo := GetInfoObjectForGrid(AGrid);
           if AGridInfo = nil then continue;
           LoadAnyGrid(AGrid,AGridInfo);
-          AGridInfo.ApplyBtn.Enabled := false;
-          AGridInfo.RevertBtn.Enabled := false;
+          if Assigned(AGridInfo.ApplyBtn) then AGridInfo.ApplyBtn.Enabled := false;
+          if Assigned(AGridInfo.RevertBtn) then AGridInfo.RevertBtn.Enabled := false;
         end;
       end;
     end;

@@ -513,6 +513,10 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
       object Notes: TTabSheet
         Caption = 'Notes'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           525
           507)
@@ -534,23 +538,25 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object ckbxAll: TCheckBox
           Left = 6
-          Top = 29
+          Top = 28
           Width = 97
           Height = 17
           Anchors = []
           Caption = 'Select All'
           TabOrder = 0
           OnClick = ckbxAllClick
+          ExplicitTop = 29
         end
         object chkHighlightOnly: TCheckBox
           Left = 131
-          Top = 29
+          Top = 28
           Width = 174
           Height = 17
           Anchors = []
           Caption = 'Select All (Ignoring Admin Notes)'
           TabOrder = 1
           OnClick = chkHighlightOnlyClick
+          ExplicitTop = 29
         end
         object dtNotesStart: TORDateBox
           Left = 60
@@ -578,9 +584,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object cklbTitles: TCheckListBox
           Left = 0
-          Top = 132
+          Top = 141
           Width = 525
-          Height = 375
+          Height = 366
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -655,9 +661,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstLabs: TCheckListBox
           Left = 0
-          Top = 132
+          Top = 141
           Width = 525
-          Height = 375
+          Height = 366
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -725,7 +731,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkAllLabs: TCheckBox
           Left = 6
-          Top = 29
+          Top = 28
           Width = 97
           Height = 17
           Anchors = []
@@ -763,9 +769,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstRad: TCheckListBox
           Left = 0
-          Top = 132
+          Top = 141
           Width = 525
-          Height = 375
+          Height = 366
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
@@ -835,7 +841,7 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object chkCheckAllRads: TCheckBox
           Left = 6
-          Top = 29
+          Top = 28
           Width = 97
           Height = 17
           Anchors = []
@@ -941,9 +947,9 @@ inherited frmTMGChartExporter: TfrmTMGChartExporter
         end
         object lstOrders: TCheckListBox
           Left = 0
-          Top = 162
+          Top = 171
           Width = 525
-          Height = 345
+          Height = 336
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13

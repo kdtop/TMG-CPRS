@@ -47,7 +47,7 @@ interface
 {$I EWB.inc}
 
 uses
-  WinInet, Windows, Messages, SysUtils, Classes, IeConst;
+  WinInet, Windows, Messages, SysUtils, Classes, EmbeddedIEConst;
 
 type
   PInternetCacheTimeStamps = ^TInternetCacheTimeStamps;

@@ -1152,7 +1152,7 @@ begin
   except
      on EAccessViolation do
         begin
-        {$ifdef debug}Show508Message('EAccessViolation in uSignItems.GetTempCkBxState()');{$endif}
+        {$ifdef debug}ShowMsg('EAccessViolation in uSignItems.GetTempCkBxState()');{$endif}
         raise;
         end;
   end;

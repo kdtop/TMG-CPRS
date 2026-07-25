@@ -175,7 +175,7 @@ begin
      then begin
         HTMLElement := aElementCollection.item(0, null) as IHTMLElement;
         if (HTMLElement <> Nil) and
-           (pos('<!DOCTYPE', HTMLElement.OuterHTML) = 1)
+           (Pos('<!DOCTYPE', string(HTMLElement.OuterHTML)) = 1)
            then Result := HTMLElement.OuterHTML
            else Result := '';  //no <!DOCTYPE tag in this document
      end

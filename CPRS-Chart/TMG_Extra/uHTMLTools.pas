@@ -1353,7 +1353,7 @@ const
 
     var
       p1,p2 : integer;
-      s1,s2,s3 : AnsiString;
+      s1,s2,s3, ResultPart : AnsiString;
 
     begin
       Result := ''; //default of no result.
@@ -1362,15 +1362,17 @@ const
       if (p1 > 0) then begin
         p2 := Pos(UpperCase(CloseTag),UpperCase(Text)) + Length(CloseTag) -1;
         if ((p2 > 0) and (p2 > p1)) then begin
-          CutInThree (Text, p1,p2, s1,Result,s3);
+          CutInThree (Text, p1,p2, s1,ResultPart,s3);
+          Result := ResultPart;
           Text := s1+s3;
           //Now, remove any CR's or LF's
           repeat
             p1 := Pos (Chr(13),Result);
             if p1= 0 then p1 := Pos (Chr(10),Result);
             if (p1 > 0) then begin
-              CutInThree (Result, p1,p1, s1,s2,s3);
-              Result := s1+s3;
+              ResultPart := AnsiString(Result);
+              CutInThree (ResultPart, p1,p1, s1,s2,s3);
+              Result := string(s1+s3);
   //            Text := MidStr(Text,1,p1-1) + MidStr(Text,p1+1,Length(Text)-p1);
             end;
           until (p1=0);
@@ -1378,7 +1380,8 @@ const
           if not KeepTags then begin
             p1 := Length(OpenTag) + 1;
             p2 := Length (Result) - Length (CloseTag);
-            CutInThree (Result, p1,p2, s1,s2,s3);
+            ResultPart := AnsiString(Result);
+            CutInThree (ResultPart, p1,p2, s1,s2,s3);
             Result := s2;
           end;
         end;
@@ -2649,3 +2652,4 @@ finalization
   SubsFoundList.Free;
 
 end.
+

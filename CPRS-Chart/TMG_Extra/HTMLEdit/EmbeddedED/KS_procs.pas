@@ -344,6 +344,18 @@ implementation
 
 uses RegFuncs;
 
+var
+  ShortDateFormat: string;
+  ShortTimeFormat: string;
+  DateSeparator: Char;
+  TimeSeparator: Char;
+  DecimalSeparator: Char;
+  TimeAMString: string;
+  TimePMString: string;
+  TwoDigitYearCenturyWindow: Word;
+  EraNames: array[1..7] of string;
+  EraYearOffsets: array[1..7] of Integer;
+
 //------------------------------------------------------------------------------
 function CopyCursor(cur: HCURSOR): HCURSOR;
 begin
@@ -1779,7 +1791,7 @@ begin
   for Index := 1 to Length(Search)
     do begin
       if InString or (Search[Index] in BlackSpace)
-        then AppendStr(Result, Search[Index]);
+        then Result := Result + Search[Index];
       InString := ((Search[Index] = '''') and (Search[Index - 1] <> '\')) xor InString;
     end;
 end;
@@ -2484,7 +2496,7 @@ begin
   err:= FindExecutable(@Name[1],@Dir[1],@res);
   if err >= 32
      then begin
-        Exefil := strPas(@res);
+        Exefil := string(PChar(@res[1]));
         result := true;
      end
 	   else begin
@@ -2559,6 +2571,16 @@ begin
     end;
 end;
 //------------------------------------------------------------------------------
+
+initialization
+  ShortDateFormat := FormatSettings.ShortDateFormat;
+  ShortTimeFormat := FormatSettings.ShortTimeFormat;
+  DateSeparator := FormatSettings.DateSeparator;
+  TimeSeparator := FormatSettings.TimeSeparator;
+  DecimalSeparator := FormatSettings.DecimalSeparator;
+  TimeAMString := FormatSettings.TimeAMString;
+  TimePMString := FormatSettings.TimePMString;
+  TwoDigitYearCenturyWindow := 50;
 
 end.
 

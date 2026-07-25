@@ -177,7 +177,7 @@ type
 implementation
 
 uses
-  EwbCoreTools, SysUtils, Forms, IEConst;
+  EwbCoreTools, SysUtils, Forms, EmbeddedIEConst;
 
 constructor TUrl.Create(const Url: string);
 begin

@@ -64,7 +64,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblItemsTitle: TLabel
           Left = 1
           Top = 1
-          Width = 228
+          Width = 89
           Height = 18
           Align = alClient
           Alignment = taCenter
@@ -76,7 +76,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Style = []
           ParentFont = False
           Layout = tlCenter
-          ExplicitWidth = 89
         end
       end
       object lvUnSelected: TCaptionListView
@@ -1924,7 +1923,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             Left = 589
             Top = 0
             Width = 111
-            Height = 25
+            Height = 15
             Align = alRight
             Caption = '[Patient Name Here]'
             Font.Charset = ANSI_CHARSET
@@ -1933,7 +1932,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             Font.Name = 'Microsoft Sans Serif'
             Font.Style = []
             ParentFont = False
-            ExplicitHeight = 15
           end
         end
       end
@@ -2138,7 +2136,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         object lblSignList: TLabel
           Left = 1
           Top = 1
-          Width = 160
+          Width = 68
           Height = 18
           Align = alClient
           Alignment = taCenter
@@ -2150,7 +2148,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Style = []
           ParentFont = False
           Layout = tlCenter
-          ExplicitWidth = 68
         end
       end
     end

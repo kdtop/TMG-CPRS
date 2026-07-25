@@ -11,38 +11,32 @@ unit VERGENCECONTEXTORLib_TLB;
 // manual modifications will be lost.                                         
 // ************************************************************************ //
 
-// PASTLWTR : $Revision:   1.88.1.0.1.0  $
-// File generated on 2/9/2004 9:12:53 AM from Type Library described below.
+// $Rev: 52393 $
+// File generated on 3/13/2017 2:24:31 PM from Type Library described below.
 
-// *************************************************************************//
-// NOTE:                                                                      
-// Items guarded by $IFDEF_LIVE_SERVER_AT_DESIGN_TIME are used by properties  
-// which return objects that may need to be explicitly created via a function 
-// call prior to any access via the property. These items have been disabled  
-// in order to prevent accidental use from within the object inspector. You   
-// may enable them by defining LIVE_SERVER_AT_DESIGN_TIME or by selectively   
-// removing them from the $IFDEF blocks. However, such items must still be    
-// programmatically created via a method of the appropriate CoClass before    
-// they can be used.                                                          
-// ************************************************************************ //
-// Type Lib: D:\Development\BDK32_p40\Source\VergenceContextor.dll (1)
-// IID\LCID: {30AFBABD-5FD3-11D3-8727-0060B0B5E137}\0
+// ************************************************************************  //
+// Type Lib: C:\WINDOWS\SysWOW64\VergenceContextor.dll (1)
+// LIBID: {30AFBABD-5FD3-11D3-8727-0060B0B5E137}
+// LCID: 0
 // Helpfile: 
+// HelpString: Sentillion Vergence Contextor 1.0
 // DepndLst: 
-//   (1) v2.0 stdole, (C:\WINNT\System32\stdole2.tlb)
-//   (2) v4.0 StdVCL, (C:\WINNT\System32\STDVCL40.DLL)
+//   (1) v2.0 stdole, (C:\Windows\SysWOW64\stdole2.tlb)
+// SYS_KIND: SYS_WIN32
 // Errors:
 //   Hint: Member 'Set' of 'IResponseDialogAccessor' changed to 'Set_'
-//   Error creating palette bitmap of (TContextor) : Invalid GUID format
-//   Error creating palette bitmap of (TContextItemCollection) : Invalid GUID format
-//   Error creating palette bitmap of (TContextItem) : Invalid GUID format
-//   Error creating palette bitmap of (TResponseDialog) : Invalid GUID format
-//   Error creating palette bitmap of (TContextorParticipant) : Invalid GUID format
 // ************************************************************************ //
 {$TYPEDADDRESS OFF} // Unit must be compiled without type-checked pointers. 
+{$WARN SYMBOL_PLATFORM OFF}
+{$WRITEABLECONST ON}
+{$VARPROPSETTER ON}
+{$ALIGN 4}
+
 interface
 
-uses Windows, ActiveX, Classes, Graphics, OleServer, OleCtrls, StdVCL;
+uses Winapi.Windows, System.Classes, System.Variants, System.Win.StdVCL, Vcl.Graphics, Vcl.OleCtrls, Vcl.OleServer, Winapi.ActiveX;
+  
+
 
 // *********************************************************************//
 // GUIDS declared in the TypeLibrary. Following prefixes are used:        
@@ -65,15 +59,23 @@ const
   IID_IContextItem: TGUID = '{AC4C0273-615A-11D3-84B5-0000861FDD4F}';
   IID_IResponseContextChange: TGUID = '{CBC6D968-9F6D-416A-8AA7-99172E588DF0}';
   IID_IResponseDialogAccessor: TGUID = '{86592071-F3BA-11D3-8181-005004A0F801}';
-  IID_IContextChangesSink: TGUID = '{0B437E31-620E-11D3-84B6-0000861FDD4F}';
+  IID_IWebSecure: TGUID = '{1A6D9D3D-B36F-42CB-BB0D-1BCB06C6F996}';
   IID_IResponseDialog: TGUID = '{9D33ECF1-8277-11D3-8525-0000861FDD4F}';
+  IID_IContextorDialog: TGUID = '{F4D14825-367F-43DB-BF69-1B4440A043A8}';
+  IID_IBridge: TGUID = '{78280F9B-0AF5-4786-BD2A-78845C9164D7}';
+  IID_IBridge2: TGUID = '{C3BEA4FD-041C-4A08-AC56-0F0129C254A0}';
+  IID_IContextChangesSink: TGUID = '{0B437E31-620E-11D3-84B6-0000861FDD4F}';
   CLASS_Contextor: TGUID = '{D5C9CC98-5FDB-11D3-8727-0060B0B5E137}';
   CLASS_ContextorControl: TGUID = '{8778ACF7-5CA9-11D3-8727-0060B0B5E137}';
   CLASS_ContextItemCollection: TGUID = '{AC4C0272-615A-11D3-84B5-0000861FDD4F}';
   CLASS_ContextItem: TGUID = '{AC4C0274-615A-11D3-84B5-0000861FDD4F}';
   CLASS_ResponseDialog: TGUID = '{9D33ECF2-8277-11D3-8525-0000861FDD4F}';
+  IID_IPasswordDialog: TGUID = '{9D33ECF1-8277-11D3-8525-0000861FDD5E}';
+  CLASS_PasswordDialog: TGUID = '{9D33ECF2-8277-11D3-8525-0000861FDD5E}';
   IID_ISetHook: TGUID = '{8D879FDD-5FE6-11D3-8727-0060B0B5E137}';
   CLASS_ContextorParticipant: TGUID = '{4BA034A2-D0FA-11D3-818B-0050049598B2}';
+  IID_IDispatchAccessor: TGUID = '{C3AC74F6-6C5D-4ED9-8838-2EF5777226E2}';
+  CLASS_DispatchAccessor: TGUID = '{5F9C5135-FA94-4091-B1A9-B55294259118}';
 
 // *********************************************************************//
 // Declaration of Enumerations defined in Type Library                    
@@ -102,6 +104,43 @@ const
   UrCancel = $00000002;
   UrBreak = $00000003;
 
+// Constants for enum __MIDL___MIDL_itf_VergenceContextor_0225_0001
+type
+  __MIDL___MIDL_itf_VergenceContextor_0225_0001 = TOleEnum;
+const
+  BRIDGE_LOG_TYPE_ALL = $00000000;
+  BRIDGE_LOG_TYPE_AUDIT = $00000001;
+  BRIDGE_LOG_TYPE_FINEST = $00000002;
+  BRIDGE_LOG_TYPE_FINER = $00000003;
+  BRIDGE_LOG_TYPE_FINE = $00000004;
+  BRIDGE_LOG_TYPE_CONFIG = $00000005;
+  BRIDGE_LOG_TYPE_INFO = $00000006;
+  BRIDGE_LOG_TYPE_PROTOCOL_ERR = $00000007;
+  BRIDGE_LOG_TYPE_WARNING = $00000008;
+  BRIDGE_LOG_TYPE_SEVERE = $00000009;
+  BRIDGE_LOG_TYPE_OFF = $0000000A;
+
+// Constants for enum __MIDL___MIDL_itf_VergenceContextor_0226_0002
+type
+  __MIDL___MIDL_itf_VergenceContextor_0226_0002 = TOleEnum;
+const
+  VERGENCE_OK_BUTTON = $00000001;
+  VERGENCE_CANCEL_BUTTON = $00000002;
+  VERGENCE_BREAK_LINK_BUTTON = $00000004;
+
+// Constants for enum __MIDL___MIDL_itf_VergenceContextor_0226_0004
+type
+  __MIDL___MIDL_itf_VergenceContextor_0226_0004 = TOleEnum;
+const
+  CUSTOM_TEXT = $00000000;
+  PASSWORD_DOES_NOT_EXIST = $00000001;
+  PASSWORD_INCORRECT = $00000002;
+  PASSWORD_EXPIRED = $00000003;
+  PASSWORD_USER_CHANGE = $00000004;
+  PASSWORD_LEARNING_LOGON_FAILED = $00000005;
+  ACQUIRE_CREDENTIALS = $00000010;
+  ACQUIRE_CREDENTIALS_LOGON_FAILED = $00000020;
+
 type
 
 // *********************************************************************//
@@ -120,12 +159,24 @@ type
   IResponseContextChangeDisp = dispinterface;
   IResponseDialogAccessor = interface;
   IResponseDialogAccessorDisp = dispinterface;
-  IContextChangesSink = interface;
-  IContextChangesSinkDisp = dispinterface;
+  IWebSecure = interface;
+  IWebSecureDisp = dispinterface;
   IResponseDialog = interface;
   IResponseDialogDisp = dispinterface;
+  IContextorDialog = interface;
+  IContextorDialogDisp = dispinterface;
+  IBridge = interface;
+  IBridgeDisp = dispinterface;
+  IBridge2 = interface;
+  IBridge2Disp = dispinterface;
+  IContextChangesSink = interface;
+  IContextChangesSinkDisp = dispinterface;
+  IPasswordDialog = interface;
+  IPasswordDialogDisp = dispinterface;
   ISetHook = interface;
   ISetHookDisp = dispinterface;
+  IDispatchAccessor = interface;
+  IDispatchAccessorDisp = dispinterface;
 
 // *********************************************************************//
 // Declaration of CoClasses defined in Type Library                       
@@ -136,7 +187,9 @@ type
   ContextItemCollection = IContextItemCollection;
   ContextItem = IContextItem;
   ResponseDialog = IResponseDialog;
+  PasswordDialog = IPasswordDialog;
   ContextorParticipant = IContextParticipant;
+  DispatchAccessor = IDispatchAccessor;
 
 
 // *********************************************************************//
@@ -146,6 +199,9 @@ type
   ContextorState = __MIDL___MIDL_itf_VergenceContextor_0000_0002; 
   AccessPrivilege = __MIDL___MIDL_itf_VergenceContextor_0000_0001; 
   UserResponse = __MIDL___MIDL_itf_VergenceContextor_0000_0003; 
+  VaultLogLevel = __MIDL___MIDL_itf_VergenceContextor_0225_0001; 
+  VERGENCE_DIALOG_BUTTON_ID = __MIDL___MIDL_itf_VergenceContextor_0226_0002; 
+  VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE = __MIDL___MIDL_itf_VergenceContextor_0226_0004; 
 
 // *********************************************************************//
 // DispIntf:  _IContextChangesSink
@@ -170,16 +226,17 @@ type
                   const initialNotificationFilter: WideString); safecall;
     procedure Suspend; safecall;
     procedure Resume; safecall;
-    function  Get_State: ContextorState; safecall;
-    function  GetPrivilege(const subj: WideString): AccessPrivilege; safecall;
-    function  Get_CurrentContext: IContextItemCollection; safecall;
+    function Get_State: ContextorState; safecall;
+    function GetPrivilege(const subj: WideString): AccessPrivilege; safecall;
+    function Get_CurrentContext: IContextItemCollection; safecall;
     procedure StartContextChange; safecall;
-    function  EndContextChange(commit: WordBool; 
-                               const aContextItemCollection: IContextItemCollection): UserResponse; safecall;
+    function EndContextChange(commit: WordBool; const aContextItemCollection: IContextItemCollection): UserResponse; safecall;
     procedure SetSurveyResponse(const reason: WideString); safecall;
-    function  Get_NotificationFilter: WideString; safecall;
+    function Get_NotificationFilter: WideString; safecall;
     procedure Set_NotificationFilter(const filter: WideString); safecall;
-    function  Get_Name: WideString; safecall;
+    function Get_Name: WideString; safecall;
+    function Perform(const inputContextItemCollection: IContextItemCollection; 
+                     isSecureAction: WordBool): IContextItemCollection; safecall;
     property State: ContextorState read Get_State;
     property CurrentContext: IContextItemCollection read Get_CurrentContext;
     property NotificationFilter: WideString read Get_NotificationFilter write Set_NotificationFilter;
@@ -198,14 +255,15 @@ type
     procedure Suspend; dispid 2;
     procedure Resume; dispid 3;
     property State: ContextorState readonly dispid 4;
-    function  GetPrivilege(const subj: WideString): AccessPrivilege; dispid 5;
+    function GetPrivilege(const subj: WideString): AccessPrivilege; dispid 5;
     property CurrentContext: IContextItemCollection readonly dispid 6;
     procedure StartContextChange; dispid 7;
-    function  EndContextChange(commit: WordBool; 
-                               const aContextItemCollection: IContextItemCollection): UserResponse; dispid 8;
+    function EndContextChange(commit: WordBool; const aContextItemCollection: IContextItemCollection): UserResponse; dispid 8;
     procedure SetSurveyResponse(const reason: WideString); dispid 9;
     property NotificationFilter: WideString dispid 10;
     property Name: WideString readonly dispid 11;
+    function Perform(const inputContextItemCollection: IContextItemCollection; 
+                     isSecureAction: WordBool): IContextItemCollection; dispid 12;
   end;
 
 // *********************************************************************//
@@ -215,7 +273,7 @@ type
 // *********************************************************************//
   IContextParticipant = interface(IDispatch)
     ['{3E3DD272-998E-11D0-808D-00A0240943E4}']
-    function  ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString; safecall;
+    function ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString; safecall;
     procedure ContextChangesAccepted(contextCoupon: Integer); safecall;
     procedure ContextChangesCanceled(contextCoupon: Integer); safecall;
     procedure CommonContextTerminated; safecall;
@@ -229,7 +287,7 @@ type
 // *********************************************************************//
   IContextParticipantDisp = dispinterface
     ['{3E3DD272-998E-11D0-808D-00A0240943E4}']
-    function  ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString; dispid 1610743808;
+    function ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString; dispid 1610743808;
     procedure ContextChangesAccepted(contextCoupon: Integer); dispid 1610743809;
     procedure ContextChangesCanceled(contextCoupon: Integer); dispid 1610743810;
     procedure CommonContextTerminated; dispid 1610743811;
@@ -243,13 +301,13 @@ type
 // *********************************************************************//
   IContextItemCollection = interface(IDispatch)
     ['{AC4C0271-615A-11D3-84B5-0000861FDD4F}']
-    function  Count: Integer; safecall;
+    function Count: Integer; safecall;
     procedure Add(const aContextItem: IContextItem); safecall;
     procedure Remove(const contextItemName: WideString); safecall;
     procedure RemoveAll; safecall;
-    function  Present(key: OleVariant): IContextItem; safecall;
-    function  Get__NewEnum: IUnknown; safecall;
-    function  Item(key: OleVariant): IContextItem; safecall;
+    function Present(key: OleVariant): IContextItem; safecall;
+    function Get__NewEnum: IUnknown; safecall;
+    function Item(key: OleVariant): IContextItem; safecall;
     property _NewEnum: IUnknown read Get__NewEnum;
   end;
 
@@ -260,13 +318,13 @@ type
 // *********************************************************************//
   IContextItemCollectionDisp = dispinterface
     ['{AC4C0271-615A-11D3-84B5-0000861FDD4F}']
-    function  Count: Integer; dispid 1;
+    function Count: Integer; dispid 1;
     procedure Add(const aContextItem: IContextItem); dispid 2;
     procedure Remove(const contextItemName: WideString); dispid 3;
     procedure RemoveAll; dispid 4;
-    function  Present(key: OleVariant): IContextItem; dispid 5;
+    function Present(key: OleVariant): IContextItem; dispid 5;
     property _NewEnum: IUnknown readonly dispid -4;
-    function  Item(key: OleVariant): IContextItem; dispid 0;
+    function Item(key: OleVariant): IContextItem; dispid 0;
   end;
 
 // *********************************************************************//
@@ -276,19 +334,19 @@ type
 // *********************************************************************//
   IContextItem = interface(IDispatch)
     ['{AC4C0273-615A-11D3-84B5-0000861FDD4F}']
-    function  Get_Subject: WideString; safecall;
+    function Get_Subject: WideString; safecall;
     procedure Set_Subject(const pVal: WideString); safecall;
-    function  Get_Role: WideString; safecall;
+    function Get_Role: WideString; safecall;
     procedure Set_Role(const pVal: WideString); safecall;
-    function  Get_Prefix: WideString; safecall;
+    function Get_Prefix: WideString; safecall;
     procedure Set_Prefix(const pVal: WideString); safecall;
-    function  Get_Suffix: WideString; safecall;
+    function Get_Suffix: WideString; safecall;
     procedure Set_Suffix(const pVal: WideString); safecall;
-    function  Get_Name: WideString; safecall;
+    function Get_Name: WideString; safecall;
     procedure Set_Name(const pVal: WideString); safecall;
-    function  Get_Value: WideString; safecall;
+    function Get_Value: WideString; safecall;
     procedure Set_Value(const pVal: WideString); safecall;
-    function  Clone: IContextItem; safecall;
+    function Clone: IContextItem; safecall;
     property Subject: WideString read Get_Subject write Set_Subject;
     property Role: WideString read Get_Role write Set_Role;
     property Prefix: WideString read Get_Prefix write Set_Prefix;
@@ -310,7 +368,7 @@ type
     property Suffix: WideString dispid 4;
     property Name: WideString dispid 5;
     property Value: WideString dispid 6;
-    function  Clone: IContextItem; dispid 7;
+    function Clone: IContextItem; dispid 7;
   end;
 
 // *********************************************************************//
@@ -321,9 +379,9 @@ type
   IResponseContextChange = interface(IDispatch)
     ['{CBC6D968-9F6D-416A-8AA7-99172E588DF0}']
     procedure StartResponseContextChange; safecall;
-    function  EndResponseContextChange(commit: WordBool; 
-                                       const aContextItemCollection: IContextItemCollection; 
-                                       var noContinue: WordBool): OleVariant; safecall;
+    function EndResponseContextChange(commit: WordBool; 
+                                      const aContextItemCollection: IContextItemCollection; 
+                                      var noContinue: WordBool): OleVariant; safecall;
     procedure CommitContextChange; safecall;
     procedure CancelContextChange; safecall;
   end;
@@ -336,9 +394,9 @@ type
   IResponseContextChangeDisp = dispinterface
     ['{CBC6D968-9F6D-416A-8AA7-99172E588DF0}']
     procedure StartResponseContextChange; dispid 1;
-    function  EndResponseContextChange(commit: WordBool; 
-                                       const aContextItemCollection: IContextItemCollection; 
-                                       var noContinue: WordBool): OleVariant; dispid 2;
+    function EndResponseContextChange(commit: WordBool; 
+                                      const aContextItemCollection: IContextItemCollection; 
+                                      var noContinue: WordBool): OleVariant; dispid 2;
     procedure CommitContextChange; dispid 3;
     procedure CancelContextChange; dispid 4;
   end;
@@ -366,6 +424,249 @@ type
   end;
 
 // *********************************************************************//
+// Interface: IWebSecure
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {1A6D9D3D-B36F-42CB-BB0D-1BCB06C6F996}
+// *********************************************************************//
+  IWebSecure = interface(IDispatch)
+    ['{1A6D9D3D-B36F-42CB-BB0D-1BCB06C6F996}']
+    function GetContextManagerUrl: WideString; safecall;
+    function GetSiteInformation: WideString; safecall;
+    function GetParticipantCoupon: WideString; safecall;
+    function GetCurrentContextCoupon: WideString; safecall;
+    function StartSecureContextChange: WideString; safecall;
+    function EndSecureContextChangeContextorDialog(commit: WordBool; 
+                                                   const aContextItemCollection: IContextItemCollection; 
+                                                   const applicationSignature: WideString): UserResponse; safecall;
+    function EndSecureContextChangeCustomDialog(commit: WordBool; 
+                                                const aContextItemCollection: IContextItemCollection; 
+                                                const applicationSignature: WideString): WordBool; safecall;
+    function GetSurveyResponses: OleVariant; safecall;
+    procedure CommitSecureContextChange; safecall;
+    procedure CancelSecureContextChange; safecall;
+  end;
+
+// *********************************************************************//
+// DispIntf:  IWebSecureDisp
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {1A6D9D3D-B36F-42CB-BB0D-1BCB06C6F996}
+// *********************************************************************//
+  IWebSecureDisp = dispinterface
+    ['{1A6D9D3D-B36F-42CB-BB0D-1BCB06C6F996}']
+    function GetContextManagerUrl: WideString; dispid 1;
+    function GetSiteInformation: WideString; dispid 2;
+    function GetParticipantCoupon: WideString; dispid 3;
+    function GetCurrentContextCoupon: WideString; dispid 4;
+    function StartSecureContextChange: WideString; dispid 5;
+    function EndSecureContextChangeContextorDialog(commit: WordBool; 
+                                                   const aContextItemCollection: IContextItemCollection; 
+                                                   const applicationSignature: WideString): UserResponse; dispid 6;
+    function EndSecureContextChangeCustomDialog(commit: WordBool; 
+                                                const aContextItemCollection: IContextItemCollection; 
+                                                const applicationSignature: WideString): WordBool; dispid 7;
+    function GetSurveyResponses: OleVariant; dispid 8;
+    procedure CommitSecureContextChange; dispid 9;
+    procedure CancelSecureContextChange; dispid 10;
+  end;
+
+// *********************************************************************//
+// Interface: IResponseDialog
+// Flags:     (4432) Hidden Dual OleAutomation Dispatchable
+// GUID:      {9D33ECF1-8277-11D3-8525-0000861FDD4F}
+// *********************************************************************//
+  IResponseDialog = interface(IDispatch)
+    ['{9D33ECF1-8277-11D3-8525-0000861FDD4F}']
+    function ProcessSurveyResults(surveyResponses: OleVariant; noContinue: WordBool): UserResponse; safecall;
+    function ProcessSurveyResults2(surveyResponses: OleVariant; enableOK: WordBool; 
+                                   enableCancel: WordBool; enableBreakLink: WordBool): UserResponse; safecall;
+  end;
+
+// *********************************************************************//
+// DispIntf:  IResponseDialogDisp
+// Flags:     (4432) Hidden Dual OleAutomation Dispatchable
+// GUID:      {9D33ECF1-8277-11D3-8525-0000861FDD4F}
+// *********************************************************************//
+  IResponseDialogDisp = dispinterface
+    ['{9D33ECF1-8277-11D3-8525-0000861FDD4F}']
+    function ProcessSurveyResults(surveyResponses: OleVariant; noContinue: WordBool): UserResponse; dispid 1;
+    function ProcessSurveyResults2(surveyResponses: OleVariant; enableOK: WordBool; 
+                                   enableCancel: WordBool; enableBreakLink: WordBool): UserResponse; dispid 2;
+  end;
+
+// *********************************************************************//
+// Interface: IContextorDialog
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {F4D14825-367F-43DB-BF69-1B4440A043A8}
+// *********************************************************************//
+  IContextorDialog = interface(IDispatch)
+    ['{F4D14825-367F-43DB-BF69-1B4440A043A8}']
+    function DisplayContextorDialog(surveyResponses: OleVariant; enableOK: WordBool; 
+                                    enableCancel: WordBool; enableBreakLink: WordBool): UserResponse; safecall;
+  end;
+
+// *********************************************************************//
+// DispIntf:  IContextorDialogDisp
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {F4D14825-367F-43DB-BF69-1B4440A043A8}
+// *********************************************************************//
+  IContextorDialogDisp = dispinterface
+    ['{F4D14825-367F-43DB-BF69-1B4440A043A8}']
+    function DisplayContextorDialog(surveyResponses: OleVariant; enableOK: WordBool; 
+                                    enableCancel: WordBool; enableBreakLink: WordBool): UserResponse; dispid 1;
+  end;
+
+// *********************************************************************//
+// Interface: IBridge
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {78280F9B-0AF5-4786-BD2A-78845C9164D7}
+// *********************************************************************//
+  IBridge = interface(IDispatch)
+    ['{78280F9B-0AF5-4786-BD2A-78845C9164D7}']
+    function DecryptUserPassword(const encryptedPwd: WideString): WideString; safecall;
+    function SetUserIdAndPassword(const userID: WideString; const plainTextOldPwd: WideString; 
+                                  const plainTextNewPwd: WideString): SYSINT; safecall;
+    procedure SetPasswordUsingDialog(HWNDToOverlay: SYSINT; AllowUserIDChange: SYSINT; 
+                                     const userIDIn: WideString; out userIDOut: WideString; 
+                                     out plainTextOldPwd: WideString; 
+                                     out plainTextNewPwd: WideString; out resultCode: SYSINT); safecall;
+    function GetBridgeConfiguration(const BridgeApplicationConfigurationIdentifier: WideString): IContextItemCollection; safecall;
+    function AddLogEntry(aLogLevel: VaultLogLevel; const LogEntry: WideString): SYSINT; safecall;
+    function GenerateNewPassword: SYSINT; safecall;
+    procedure SetPasswordUsingDialogEx(HWNDToOverlay: SYSINT; updateVault: Integer; 
+                                       oldPassword: Integer; const plainTextBitmapPath: WideString; 
+                                       const userName: WideString; 
+                                       const plainTextTitleName: WideString; 
+                                       const plainTextDescription: WideString; 
+                                       out plainTextNewPwd: WideString; 
+                                       out plainTextOldPwd: WideString; out resultCode: SYSINT); safecall;
+    procedure CloseDialogEx(dialogID: SYSINT); safecall;
+    function GetSecureItemValues(itemNames: OleVariant): IContextItemCollection; safecall;
+    function AddLogEntry2(aLogLevel: VaultLogLevel; const componentName: WideString; 
+                          const LogEntry: WideString): SYSINT; safecall;
+    function SetUserIdAndPasswordEx(const userID: WideString; const plainTextOldPwd: WideString; 
+                                    const plainTextNewPwd: WideString; const appName: WideString): SYSINT; safecall;
+  end;
+
+// *********************************************************************//
+// DispIntf:  IBridgeDisp
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {78280F9B-0AF5-4786-BD2A-78845C9164D7}
+// *********************************************************************//
+  IBridgeDisp = dispinterface
+    ['{78280F9B-0AF5-4786-BD2A-78845C9164D7}']
+    function DecryptUserPassword(const encryptedPwd: WideString): WideString; dispid 1;
+    function SetUserIdAndPassword(const userID: WideString; const plainTextOldPwd: WideString; 
+                                  const plainTextNewPwd: WideString): SYSINT; dispid 2;
+    procedure SetPasswordUsingDialog(HWNDToOverlay: SYSINT; AllowUserIDChange: SYSINT; 
+                                     const userIDIn: WideString; out userIDOut: WideString; 
+                                     out plainTextOldPwd: WideString; 
+                                     out plainTextNewPwd: WideString; out resultCode: SYSINT); dispid 3;
+    function GetBridgeConfiguration(const BridgeApplicationConfigurationIdentifier: WideString): IContextItemCollection; dispid 4;
+    function AddLogEntry(aLogLevel: VaultLogLevel; const LogEntry: WideString): SYSINT; dispid 5;
+    function GenerateNewPassword: SYSINT; dispid 6;
+    procedure SetPasswordUsingDialogEx(HWNDToOverlay: SYSINT; updateVault: Integer; 
+                                       oldPassword: Integer; const plainTextBitmapPath: WideString; 
+                                       const userName: WideString; 
+                                       const plainTextTitleName: WideString; 
+                                       const plainTextDescription: WideString; 
+                                       out plainTextNewPwd: WideString; 
+                                       out plainTextOldPwd: WideString; out resultCode: SYSINT); dispid 7;
+    procedure CloseDialogEx(dialogID: SYSINT); dispid 8;
+    function GetSecureItemValues(itemNames: OleVariant): IContextItemCollection; dispid 9;
+    function AddLogEntry2(aLogLevel: VaultLogLevel; const componentName: WideString; 
+                          const LogEntry: WideString): SYSINT; dispid 10;
+    function SetUserIdAndPasswordEx(const userID: WideString; const plainTextOldPwd: WideString; 
+                                    const plainTextNewPwd: WideString; const appName: WideString): SYSINT; dispid 11;
+  end;
+
+// *********************************************************************//
+// Interface: IBridge2
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {C3BEA4FD-041C-4A08-AC56-0F0129C254A0}
+// *********************************************************************//
+  IBridge2 = interface(IBridge)
+    ['{C3BEA4FD-041C-4A08-AC56-0F0129C254A0}']
+    function GetVersion: WideString; safecall;
+    procedure CloseDialogEx2(DialogTypeIDs: SYSINT; DialogInstanceKey: SYSINT); safecall;
+    function DisplayContextChangeResponseDialog(ParentHWND: SYSINT; 
+                                                ApplicationMessages: OleVariant; 
+                                                DialogFlags: SYSINT; DialogInstanceKey: SYSINT): VERGENCE_DIALOG_BUTTON_ID; safecall;
+    function AcquirePassword(ParentHWND: SYSINT; 
+                             DialogPurpose: VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE; 
+                             const ApplicationNameOrDialogText: WideString; 
+                             const userName: WideString; DialogFlags: SYSINT; 
+                             DialogInstanceKey: SYSINT): WideString; safecall;
+    function AcquirePasswordEx(ParentHWND: SYSINT; 
+                               DialogPurpose: VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE; 
+                               const ApplicationNameOrDialogText: WideString; 
+                               const userName: WideString; const DialogTitle: WideString; 
+                               const Reserved: WideString; DialogFlags: SYSINT; 
+                               DialogInstanceKey: SYSINT): WideString; safecall;
+    procedure AcquireCredentials(ParentHWND: SYSINT; 
+                                 DialogPurpose: VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE; 
+                                 const ApplicationNameOrDialogText: WideString; 
+                                 const userName: WideString; const DialogTitle: WideString; 
+                                 const Reserved: WideString; DialogFlags: SYSINT; 
+                                 DialogInstanceKey: SYSINT; out pNewUsername: WideString; 
+                                 out pNewPassword: WideString); safecall;
+  end;
+
+// *********************************************************************//
+// DispIntf:  IBridge2Disp
+// Flags:     (4416) Dual OleAutomation Dispatchable
+// GUID:      {C3BEA4FD-041C-4A08-AC56-0F0129C254A0}
+// *********************************************************************//
+  IBridge2Disp = dispinterface
+    ['{C3BEA4FD-041C-4A08-AC56-0F0129C254A0}']
+    function GetVersion: WideString; dispid 12;
+    procedure CloseDialogEx2(DialogTypeIDs: SYSINT; DialogInstanceKey: SYSINT); dispid 13;
+    function DisplayContextChangeResponseDialog(ParentHWND: SYSINT; 
+                                                ApplicationMessages: OleVariant; 
+                                                DialogFlags: SYSINT; DialogInstanceKey: SYSINT): VERGENCE_DIALOG_BUTTON_ID; dispid 14;
+    function AcquirePassword(ParentHWND: SYSINT; 
+                             DialogPurpose: VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE; 
+                             const ApplicationNameOrDialogText: WideString; 
+                             const userName: WideString; DialogFlags: SYSINT; 
+                             DialogInstanceKey: SYSINT): WideString; dispid 15;
+    function AcquirePasswordEx(ParentHWND: SYSINT; 
+                               DialogPurpose: VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE; 
+                               const ApplicationNameOrDialogText: WideString; 
+                               const userName: WideString; const DialogTitle: WideString; 
+                               const Reserved: WideString; DialogFlags: SYSINT; 
+                               DialogInstanceKey: SYSINT): WideString; dispid 16;
+    procedure AcquireCredentials(ParentHWND: SYSINT; 
+                                 DialogPurpose: VERGENCE_DIALOG_ACQUIRE_PASSWORD_PURPOSE; 
+                                 const ApplicationNameOrDialogText: WideString; 
+                                 const userName: WideString; const DialogTitle: WideString; 
+                                 const Reserved: WideString; DialogFlags: SYSINT; 
+                                 DialogInstanceKey: SYSINT; out pNewUsername: WideString; 
+                                 out pNewPassword: WideString); dispid 17;
+    function DecryptUserPassword(const encryptedPwd: WideString): WideString; dispid 1;
+    function SetUserIdAndPassword(const userID: WideString; const plainTextOldPwd: WideString; 
+                                  const plainTextNewPwd: WideString): SYSINT; dispid 2;
+    procedure SetPasswordUsingDialog(HWNDToOverlay: SYSINT; AllowUserIDChange: SYSINT; 
+                                     const userIDIn: WideString; out userIDOut: WideString; 
+                                     out plainTextOldPwd: WideString; 
+                                     out plainTextNewPwd: WideString; out resultCode: SYSINT); dispid 3;
+    function GetBridgeConfiguration(const BridgeApplicationConfigurationIdentifier: WideString): IContextItemCollection; dispid 4;
+    function AddLogEntry(aLogLevel: VaultLogLevel; const LogEntry: WideString): SYSINT; dispid 5;
+    function GenerateNewPassword: SYSINT; dispid 6;
+    procedure SetPasswordUsingDialogEx(HWNDToOverlay: SYSINT; updateVault: Integer; 
+                                       oldPassword: Integer; const plainTextBitmapPath: WideString; 
+                                       const userName: WideString; 
+                                       const plainTextTitleName: WideString; 
+                                       const plainTextDescription: WideString; 
+                                       out plainTextNewPwd: WideString; 
+                                       out plainTextOldPwd: WideString; out resultCode: SYSINT); dispid 7;
+    procedure CloseDialogEx(dialogID: SYSINT); dispid 8;
+    function GetSecureItemValues(itemNames: OleVariant): IContextItemCollection; dispid 9;
+    function AddLogEntry2(aLogLevel: VaultLogLevel; const componentName: WideString; 
+                          const LogEntry: WideString): SYSINT; dispid 10;
+    function SetUserIdAndPasswordEx(const userID: WideString; const plainTextOldPwd: WideString; 
+                                    const plainTextNewPwd: WideString; const appName: WideString): SYSINT; dispid 11;
+  end;
+
+// *********************************************************************//
 // Interface: IContextChangesSink
 // Flags:     (4416) Dual OleAutomation Dispatchable
 // GUID:      {0B437E31-620E-11D3-84B6-0000861FDD4F}
@@ -390,23 +691,25 @@ type
   end;
 
 // *********************************************************************//
-// Interface: IResponseDialog
+// Interface: IPasswordDialog
 // Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {9D33ECF1-8277-11D3-8525-0000861FDD4F}
+// GUID:      {9D33ECF1-8277-11D3-8525-0000861FDD5E}
 // *********************************************************************//
-  IResponseDialog = interface(IDispatch)
-    ['{9D33ECF1-8277-11D3-8525-0000861FDD4F}']
-    function  ProcessSurveyResults(responses: OleVariant; noContinue: WordBool): UserResponse; safecall;
+  IPasswordDialog = interface(IDispatch)
+    ['{9D33ECF1-8277-11D3-8525-0000861FDD5E}']
+    function GetPasswordChangeInformation(var userID: WideString; var oldPassword: WideString; 
+                                          var newPassword: WideString): SYSINT; safecall;
   end;
 
 // *********************************************************************//
-// DispIntf:  IResponseDialogDisp
+// DispIntf:  IPasswordDialogDisp
 // Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {9D33ECF1-8277-11D3-8525-0000861FDD4F}
+// GUID:      {9D33ECF1-8277-11D3-8525-0000861FDD5E}
 // *********************************************************************//
-  IResponseDialogDisp = dispinterface
-    ['{9D33ECF1-8277-11D3-8525-0000861FDD4F}']
-    function  ProcessSurveyResults(responses: OleVariant; noContinue: WordBool): UserResponse; dispid 1;
+  IPasswordDialogDisp = dispinterface
+    ['{9D33ECF1-8277-11D3-8525-0000861FDD5E}']
+    function GetPasswordChangeInformation(var userID: WideString; var oldPassword: WideString; 
+                                          var newPassword: WideString): SYSINT; dispid 1;
   end;
 
 // *********************************************************************//
@@ -430,6 +733,26 @@ type
   end;
 
 // *********************************************************************//
+// Interface: IDispatchAccessor
+// Flags:     (4432) Hidden Dual OleAutomation Dispatchable
+// GUID:      {C3AC74F6-6C5D-4ED9-8838-2EF5777226E2}
+// *********************************************************************//
+  IDispatchAccessor = interface(IDispatch)
+    ['{C3AC74F6-6C5D-4ED9-8838-2EF5777226E2}']
+    function GetInterface(const sourceInterface: IDispatch; const interfaceName: WideString): IDispatch; safecall;
+  end;
+
+// *********************************************************************//
+// DispIntf:  IDispatchAccessorDisp
+// Flags:     (4432) Hidden Dual OleAutomation Dispatchable
+// GUID:      {C3AC74F6-6C5D-4ED9-8838-2EF5777226E2}
+// *********************************************************************//
+  IDispatchAccessorDisp = dispinterface
+    ['{C3AC74F6-6C5D-4ED9-8838-2EF5777226E2}']
+    function GetInterface(const sourceInterface: IDispatch; const interfaceName: WideString): IDispatch; dispid 1;
+  end;
+
+// *********************************************************************//
 // The Class CoContextor provides a Create and CreateRemote method to          
 // create instances of the default interface IContextor exposed by              
 // the CoClass Contextor. The functions are intended to be used by             
@@ -441,7 +764,7 @@ type
     class function CreateRemote(const MachineName: string): IContextor;
   end;
 
-  TContextorPending = procedure(Sender: TObject; var aContextItemCollection: OleVariant) of object;
+  TContextorPending = procedure(ASender: TObject; const aContextItemCollection: IDispatch) of object;
 
 
 // *********************************************************************//
@@ -453,28 +776,21 @@ type
 // Event   Interface: _IContextChangesSink
 // TypeFlags        : (2) CanCreate
 // *********************************************************************//
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  TContextorProperties= class;
-{$ENDIF}
   TContextor = class(TOleServer)
   private
     FOnPending: TContextorPending;
     FOnCommitted: TNotifyEvent;
     FOnCanceled: TNotifyEvent;
-    FIntf:        IContextor;
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    FProps:       TContextorProperties;
-    function      GetServerProperties: TContextorProperties;
-{$ENDIF}
-    function      GetDefaultInterface: IContextor;
+    FIntf: IContextor;
+    function GetDefaultInterface: IContextor;
   protected
     procedure InitServerData; override;
     procedure InvokeEvent(DispID: TDispID; var Params: TVariantArray); override;
-    function  Get_State: ContextorState;
-    function  Get_CurrentContext: IContextItemCollection;
-    function  Get_NotificationFilter: WideString;
+    function Get_State: ContextorState;
+    function Get_CurrentContext: IContextItemCollection;
+    function Get_NotificationFilter: WideString;
     procedure Set_NotificationFilter(const filter: WideString);
-    function  Get_Name: WideString;
+    function Get_Name: WideString;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -485,50 +801,22 @@ type
                   const initialNotificationFilter: WideString);
     procedure Suspend;
     procedure Resume;
-    function  GetPrivilege(const subj: WideString): AccessPrivilege;
+    function GetPrivilege(const subj: WideString): AccessPrivilege;
     procedure StartContextChange;
-    function  EndContextChange(commit: WordBool; 
-                               const aContextItemCollection: IContextItemCollection): UserResponse;
+    function EndContextChange(commit: WordBool; const aContextItemCollection: IContextItemCollection): UserResponse;
     procedure SetSurveyResponse(const reason: WideString);
-    property  DefaultInterface: IContextor read GetDefaultInterface;
+    function Perform(const inputContextItemCollection: IContextItemCollection; 
+                     isSecureAction: WordBool): IContextItemCollection;
+    property DefaultInterface: IContextor read GetDefaultInterface;
     property State: ContextorState read Get_State;
     property CurrentContext: IContextItemCollection read Get_CurrentContext;
     property Name: WideString read Get_Name;
     property NotificationFilter: WideString read Get_NotificationFilter write Set_NotificationFilter;
   published
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    property Server: TContextorProperties read GetServerProperties;
-{$ENDIF}
     property OnPending: TContextorPending read FOnPending write FOnPending;
     property OnCommitted: TNotifyEvent read FOnCommitted write FOnCommitted;
     property OnCanceled: TNotifyEvent read FOnCanceled write FOnCanceled;
   end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-// *********************************************************************//
-// OLE Server Properties Proxy Class
-// Server Object    : TContextor
-// (This object is used by the IDE's Property Inspector to allow editing
-//  of the properties of this server)
-// *********************************************************************//
- TContextorProperties = class(TPersistent)
-  private
-    FServer:    TContextor;
-    function    GetDefaultInterface: IContextor;
-    constructor Create(AServer: TContextor);
-  protected
-    function  Get_State: ContextorState;
-    function  Get_CurrentContext: IContextItemCollection;
-    function  Get_NotificationFilter: WideString;
-    procedure Set_NotificationFilter(const filter: WideString);
-    function  Get_Name: WideString;
-  public
-    property DefaultInterface: IContextor read GetDefaultInterface;
-  published
-    property NotificationFilter: WideString read Get_NotificationFilter write Set_NotificationFilter;
-  end;
-{$ENDIF}
-
 
 
 // *********************************************************************//
@@ -540,7 +828,7 @@ type
 // Event   Interface: _IContextChangesSink
 // TypeFlags        : (2) CanCreate
 // *********************************************************************//
-  TContextorControlPending = procedure(Sender: TObject; const aContextItemCollection: IDispatch) of object;
+  TContextorControlPending = procedure(ASender: TObject; const aContextItemCollection: IDispatch) of object;
 
   TContextorControl = class(TOleControl)
   private
@@ -552,23 +840,25 @@ type
   protected
     procedure CreateControl;
     procedure InitControlData; override;
-    function  Get_CurrentContext: IContextItemCollection;
+    function Get_CurrentContext: IContextItemCollection;
   public
     procedure Run(const applicationLabel: WideString; const passcode: WideString; survey: WordBool; 
                   const initialNotificationFilter: WideString);
     procedure Suspend;
     procedure Resume;
-    function  GetPrivilege(const subj: WideString): AccessPrivilege;
+    function GetPrivilege(const subj: WideString): AccessPrivilege;
     procedure StartContextChange;
-    function  EndContextChange(commit: WordBool; 
-                               const aContextItemCollection: IContextItemCollection): UserResponse;
+    function EndContextChange(commit: WordBool; const aContextItemCollection: IContextItemCollection): UserResponse;
     procedure SetSurveyResponse(const reason: WideString);
+    function Perform(const inputContextItemCollection: IContextItemCollection; 
+                     isSecureAction: WordBool): IContextItemCollection;
     property  ControlInterface: IContextor read GetControlInterface;
     property  DefaultInterface: IContextor read GetControlInterface;
     property State: TOleEnum index 4 read GetTOleEnumProp;
     property CurrentContext: IContextItemCollection read Get_CurrentContext;
     property Name: WideString index 11 read GetWideStringProp;
   published
+    property Anchors;
     property NotificationFilter: WideString index 10 read GetWideStringProp write SetWideStringProp stored False;
     property OnPending: TContextorControlPending read FOnPending write FOnPending;
     property OnCommitted: TNotifyEvent read FOnCommitted write FOnCommitted;
@@ -597,60 +887,29 @@ type
 // Event   Interface: 
 // TypeFlags        : (2) CanCreate
 // *********************************************************************//
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  TContextItemCollectionProperties= class;
-{$ENDIF}
   TContextItemCollection = class(TOleServer)
   private
-    FIntf:        IContextItemCollection;
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    FProps:       TContextItemCollectionProperties;
-    function      GetServerProperties: TContextItemCollectionProperties;
-{$ENDIF}
-    function      GetDefaultInterface: IContextItemCollection;
+    FIntf: IContextItemCollection;
+    function GetDefaultInterface: IContextItemCollection;
   protected
     procedure InitServerData; override;
-    function  Get__NewEnum: IUnknown;
+    function Get__NewEnum: IUnknown;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure Connect; override;
     procedure ConnectTo(svrIntf: IContextItemCollection);
     procedure Disconnect; override;
-    function  Count: Integer;
+    function Count: Integer;
     procedure Add(const aContextItem: IContextItem);
     procedure Remove(const contextItemName: WideString);
     procedure RemoveAll;
-    function  Present(key: OleVariant): IContextItem;
-    function  Item(key: OleVariant): IContextItem;
-    property  DefaultInterface: IContextItemCollection read GetDefaultInterface;
+    function Present(key: OleVariant): IContextItem;
+    function Item(key: OleVariant): IContextItem;
+    property DefaultInterface: IContextItemCollection read GetDefaultInterface;
     property _NewEnum: IUnknown read Get__NewEnum;
   published
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    property Server: TContextItemCollectionProperties read GetServerProperties;
-{$ENDIF}
   end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-// *********************************************************************//
-// OLE Server Properties Proxy Class
-// Server Object    : TContextItemCollection
-// (This object is used by the IDE's Property Inspector to allow editing
-//  of the properties of this server)
-// *********************************************************************//
- TContextItemCollectionProperties = class(TPersistent)
-  private
-    FServer:    TContextItemCollection;
-    function    GetDefaultInterface: IContextItemCollection;
-    constructor Create(AServer: TContextItemCollection);
-  protected
-    function  Get__NewEnum: IUnknown;
-  public
-    property DefaultInterface: IContextItemCollection read GetDefaultInterface;
-  published
-  end;
-{$ENDIF}
-
 
 // *********************************************************************//
 // The Class CoContextItem provides a Create and CreateRemote method to          
@@ -674,30 +933,23 @@ type
 // Event   Interface: 
 // TypeFlags        : (2) CanCreate
 // *********************************************************************//
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  TContextItemProperties= class;
-{$ENDIF}
   TContextItem = class(TOleServer)
   private
-    FIntf:        IContextItem;
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    FProps:       TContextItemProperties;
-    function      GetServerProperties: TContextItemProperties;
-{$ENDIF}
-    function      GetDefaultInterface: IContextItem;
+    FIntf: IContextItem;
+    function GetDefaultInterface: IContextItem;
   protected
     procedure InitServerData; override;
-    function  Get_Subject: WideString;
+    function Get_Subject: WideString;
     procedure Set_Subject(const pVal: WideString);
-    function  Get_Role: WideString;
+    function Get_Role: WideString;
     procedure Set_Role(const pVal: WideString);
-    function  Get_Prefix: WideString;
+    function Get_Prefix: WideString;
     procedure Set_Prefix(const pVal: WideString);
-    function  Get_Suffix: WideString;
+    function Get_Suffix: WideString;
     procedure Set_Suffix(const pVal: WideString);
-    function  Get_Name: WideString;
+    function Get_Name: WideString;
     procedure Set_Name(const pVal: WideString);
-    function  Get_Value: WideString;
+    function Get_Value: WideString;
     procedure Set_Value(const pVal: WideString);
   public
     constructor Create(AOwner: TComponent); override;
@@ -705,57 +957,16 @@ type
     procedure Connect; override;
     procedure ConnectTo(svrIntf: IContextItem);
     procedure Disconnect; override;
-    function  Clone: IContextItem;
-    property  DefaultInterface: IContextItem read GetDefaultInterface;
-    property Subject: WideString read Get_Subject write Set_Subject;
-    property Role: WideString read Get_Role write Set_Role;
-    property Prefix: WideString read Get_Prefix write Set_Prefix;
-    property Suffix: WideString read Get_Suffix write Set_Suffix;
-    property Name: WideString read Get_Name write Set_Name;
-    property Value: WideString read Get_Value write Set_Value;
-  published
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    property Server: TContextItemProperties read GetServerProperties;
-{$ENDIF}
-  end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-// *********************************************************************//
-// OLE Server Properties Proxy Class
-// Server Object    : TContextItem
-// (This object is used by the IDE's Property Inspector to allow editing
-//  of the properties of this server)
-// *********************************************************************//
- TContextItemProperties = class(TPersistent)
-  private
-    FServer:    TContextItem;
-    function    GetDefaultInterface: IContextItem;
-    constructor Create(AServer: TContextItem);
-  protected
-    function  Get_Subject: WideString;
-    procedure Set_Subject(const pVal: WideString);
-    function  Get_Role: WideString;
-    procedure Set_Role(const pVal: WideString);
-    function  Get_Prefix: WideString;
-    procedure Set_Prefix(const pVal: WideString);
-    function  Get_Suffix: WideString;
-    procedure Set_Suffix(const pVal: WideString);
-    function  Get_Name: WideString;
-    procedure Set_Name(const pVal: WideString);
-    function  Get_Value: WideString;
-    procedure Set_Value(const pVal: WideString);
-  public
+    function Clone: IContextItem;
     property DefaultInterface: IContextItem read GetDefaultInterface;
-  published
     property Subject: WideString read Get_Subject write Set_Subject;
     property Role: WideString read Get_Role write Set_Role;
     property Prefix: WideString read Get_Prefix write Set_Prefix;
     property Suffix: WideString read Get_Suffix write Set_Suffix;
     property Name: WideString read Get_Name write Set_Name;
     property Value: WideString read Get_Value write Set_Value;
+  published
   end;
-{$ENDIF}
-
 
 // *********************************************************************//
 // The Class CoResponseDialog provides a Create and CreateRemote method to          
@@ -779,17 +990,10 @@ type
 // Event   Interface: 
 // TypeFlags        : (2) CanCreate
 // *********************************************************************//
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  TResponseDialogProperties= class;
-{$ENDIF}
   TResponseDialog = class(TOleServer)
   private
-    FIntf:        IResponseDialog;
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    FProps:       TResponseDialogProperties;
-    function      GetServerProperties: TResponseDialogProperties;
-{$ENDIF}
-    function      GetDefaultInterface: IResponseDialog;
+    FIntf: IResponseDialog;
+    function GetDefaultInterface: IResponseDialog;
   protected
     procedure InitServerData; override;
   public
@@ -798,33 +1002,52 @@ type
     procedure Connect; override;
     procedure ConnectTo(svrIntf: IResponseDialog);
     procedure Disconnect; override;
-    function  ProcessSurveyResults(responses: OleVariant; noContinue: WordBool): UserResponse;
-    property  DefaultInterface: IResponseDialog read GetDefaultInterface;
-  published
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    property Server: TResponseDialogProperties read GetServerProperties;
-{$ENDIF}
-  end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-// *********************************************************************//
-// OLE Server Properties Proxy Class
-// Server Object    : TResponseDialog
-// (This object is used by the IDE's Property Inspector to allow editing
-//  of the properties of this server)
-// *********************************************************************//
- TResponseDialogProperties = class(TPersistent)
-  private
-    FServer:    TResponseDialog;
-    function    GetDefaultInterface: IResponseDialog;
-    constructor Create(AServer: TResponseDialog);
-  protected
-  public
+    function ProcessSurveyResults(surveyResponses: OleVariant; noContinue: WordBool): UserResponse;
+    function ProcessSurveyResults2(surveyResponses: OleVariant; enableOK: WordBool; 
+                                   enableCancel: WordBool; enableBreakLink: WordBool): UserResponse;
     property DefaultInterface: IResponseDialog read GetDefaultInterface;
   published
   end;
-{$ENDIF}
 
+// *********************************************************************//
+// The Class CoPasswordDialog provides a Create and CreateRemote method to          
+// create instances of the default interface IPasswordDialog exposed by              
+// the CoClass PasswordDialog. The functions are intended to be used by             
+// clients wishing to automate the CoClass objects exposed by the         
+// server of this typelibrary.                                            
+// *********************************************************************//
+  CoPasswordDialog = class
+    class function Create: IPasswordDialog;
+    class function CreateRemote(const MachineName: string): IPasswordDialog;
+  end;
+
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPasswordDialog
+// Help String      : Vergence PasswordDialog
+// Default Interface: IPasswordDialog
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPasswordDialog = class(TOleServer)
+  private
+    FIntf: IPasswordDialog;
+    function GetDefaultInterface: IPasswordDialog;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPasswordDialog);
+    procedure Disconnect; override;
+    function GetPasswordChangeInformation(var userID: WideString; var oldPassword: WideString; 
+                                          var newPassword: WideString): SYSINT;
+    property DefaultInterface: IPasswordDialog read GetDefaultInterface;
+  published
+  end;
 
 // *********************************************************************//
 // The Class CoContextorParticipant provides a Create and CreateRemote method to          
@@ -848,17 +1071,10 @@ type
 // Event   Interface: 
 // TypeFlags        : (2) CanCreate
 // *********************************************************************//
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  TContextorParticipantProperties= class;
-{$ENDIF}
   TContextorParticipant = class(TOleServer)
   private
-    FIntf:        IContextParticipant;
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    FProps:       TContextorParticipantProperties;
-    function      GetServerProperties: TContextorParticipantProperties;
-{$ENDIF}
-    function      GetDefaultInterface: IContextParticipant;
+    FIntf: IContextParticipant;
+    function GetDefaultInterface: IContextParticipant;
   protected
     procedure InitServerData; override;
   public
@@ -867,43 +1083,64 @@ type
     procedure Connect; override;
     procedure ConnectTo(svrIntf: IContextParticipant);
     procedure Disconnect; override;
-    function  ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString;
+    function ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString;
     procedure ContextChangesAccepted(contextCoupon: Integer);
     procedure ContextChangesCanceled(contextCoupon: Integer);
     procedure CommonContextTerminated;
     procedure Ping;
-    property  DefaultInterface: IContextParticipant read GetDefaultInterface;
-  published
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-    property Server: TContextorParticipantProperties read GetServerProperties;
-{$ENDIF}
-  end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-// *********************************************************************//
-// OLE Server Properties Proxy Class
-// Server Object    : TContextorParticipant
-// (This object is used by the IDE's Property Inspector to allow editing
-//  of the properties of this server)
-// *********************************************************************//
- TContextorParticipantProperties = class(TPersistent)
-  private
-    FServer:    TContextorParticipant;
-    function    GetDefaultInterface: IContextParticipant;
-    constructor Create(AServer: TContextorParticipant);
-  protected
-  public
     property DefaultInterface: IContextParticipant read GetDefaultInterface;
   published
   end;
-{$ENDIF}
 
-{
+// *********************************************************************//
+// The Class CoDispatchAccessor provides a Create and CreateRemote method to          
+// create instances of the default interface IDispatchAccessor exposed by              
+// the CoClass DispatchAccessor. The functions are intended to be used by             
+// clients wishing to automate the CoClass objects exposed by the         
+// server of this typelibrary.                                            
+// *********************************************************************//
+  CoDispatchAccessor = class
+    class function Create: IDispatchAccessor;
+    class function CreateRemote(const MachineName: string): IDispatchAccessor;
+  end;
+
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TDispatchAccessor
+// Help String      : DispatchAccessor Class
+// Default Interface: IDispatchAccessor
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TDispatchAccessor = class(TOleServer)
+  private
+    FIntf: IDispatchAccessor;
+    function GetDefaultInterface: IDispatchAccessor;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IDispatchAccessor);
+    procedure Disconnect; override;
+    function GetInterface(const sourceInterface: IDispatch; const interfaceName: WideString): IDispatch;
+    property DefaultInterface: IDispatchAccessor read GetDefaultInterface;
+  published
+  end;
+
 procedure Register;
-}
+
+resourcestring
+  dtlServerPage = 'ActiveX';
+
+  dtlOcxPage = 'ActiveX';
+
 implementation
 
-uses ComObj;
+uses System.Win.ComObj;
 
 class function CoContextor.Create: IContextor;
 begin
@@ -959,69 +1196,56 @@ function TContextor.GetDefaultInterface: IContextor;
 begin
   if FIntf = nil then
     Connect;
-  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call ''Connect'' or ''ConnectTo'' before this operation');
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
   Result := FIntf;
 end;
 
 constructor TContextor.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps := TContextorProperties.Create(Self);
-{$ENDIF}
 end;
 
 destructor TContextor.Destroy;
 begin
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps.Free;
-{$ENDIF}
   inherited Destroy;
 end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-function TContextor.GetServerProperties: TContextorProperties;
-begin
-  Result := FProps;
-end;
-{$ENDIF}
 
 procedure TContextor.InvokeEvent(DispID: TDispID; var Params: TVariantArray);
 begin
   case DispID of
     -1: Exit;  // DISPID_UNKNOWN
-   1: if Assigned(FOnPending) then
-            FOnPending(Self, Params[0] {const IDispatch});
-   2: if Assigned(FOnCommitted) then
-            FOnCommitted(Self);
-   3: if Assigned(FOnCanceled) then
-            FOnCanceled(Self);
+    1: if Assigned(FOnPending) then
+         FOnPending(Self, Params[0] {const IDispatch});
+    2: if Assigned(FOnCommitted) then
+         FOnCommitted(Self);
+    3: if Assigned(FOnCanceled) then
+         FOnCanceled(Self);
   end; {case DispID}
 end;
 
-function  TContextor.Get_State: ContextorState;
+function TContextor.Get_State: ContextorState;
 begin
-  Result := DefaultInterface.Get_State;
+  Result := DefaultInterface.State;
 end;
 
-function  TContextor.Get_CurrentContext: IContextItemCollection;
+function TContextor.Get_CurrentContext: IContextItemCollection;
 begin
-  Result := DefaultInterface.Get_CurrentContext;
+  Result := DefaultInterface.CurrentContext;
 end;
 
-function  TContextor.Get_NotificationFilter: WideString;
+function TContextor.Get_NotificationFilter: WideString;
 begin
-  Result := DefaultInterface.Get_NotificationFilter;
+  Result := DefaultInterface.NotificationFilter;
 end;
 
 procedure TContextor.Set_NotificationFilter(const filter: WideString);
 begin
-  DefaultInterface.Set_NotificationFilter(filter);
+  DefaultInterface.NotificationFilter := filter;
 end;
 
-function  TContextor.Get_Name: WideString;
+function TContextor.Get_Name: WideString;
 begin
-  Result := DefaultInterface.Get_Name;
+  Result := DefaultInterface.Name;
 end;
 
 procedure TContextor.Run(const applicationLabel: WideString; const passcode: WideString; 
@@ -1040,7 +1264,7 @@ begin
   DefaultInterface.Resume;
 end;
 
-function  TContextor.GetPrivilege(const subj: WideString): AccessPrivilege;
+function TContextor.GetPrivilege(const subj: WideString): AccessPrivilege;
 begin
   Result := DefaultInterface.GetPrivilege(subj);
 end;
@@ -1050,8 +1274,8 @@ begin
   DefaultInterface.StartContextChange;
 end;
 
-function  TContextor.EndContextChange(commit: WordBool; 
-                                      const aContextItemCollection: IContextItemCollection): UserResponse;
+function TContextor.EndContextChange(commit: WordBool; 
+                                     const aContextItemCollection: IContextItemCollection): UserResponse;
 begin
   Result := DefaultInterface.EndContextChange(commit, aContextItemCollection);
 end;
@@ -1061,60 +1285,27 @@ begin
   DefaultInterface.SetSurveyResponse(reason);
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-constructor TContextorProperties.Create(AServer: TContextor);
+function TContextor.Perform(const inputContextItemCollection: IContextItemCollection; 
+                            isSecureAction: WordBool): IContextItemCollection;
 begin
-  inherited Create;
-  FServer := AServer;
+  Result := DefaultInterface.Perform(inputContextItemCollection, isSecureAction);
 end;
-
-function TContextorProperties.GetDefaultInterface: IContextor;
-begin
-  Result := FServer.DefaultInterface;
-end;
-
-function  TContextorProperties.Get_State: ContextorState;
-begin
-  Result := DefaultInterface.Get_State;
-end;
-
-function  TContextorProperties.Get_CurrentContext: IContextItemCollection;
-begin
-  Result := DefaultInterface.Get_CurrentContext;
-end;
-
-function  TContextorProperties.Get_NotificationFilter: WideString;
-begin
-  Result := DefaultInterface.Get_NotificationFilter;
-end;
-
-procedure TContextorProperties.Set_NotificationFilter(const filter: WideString);
-begin
-  DefaultInterface.Set_NotificationFilter(filter);
-end;
-
-function  TContextorProperties.Get_Name: WideString;
-begin
-  Result := DefaultInterface.Get_Name;
-end;
-
-{$ENDIF}
 
 procedure TContextorControl.InitControlData;
 const
   CEventDispIDs: array [0..2] of DWORD = (
     $00000001, $00000002, $00000003);
   CControlData: TControlData2 = (
-    ClassID: '{8778ACF7-5CA9-11D3-8727-0060B0B5E137}';
-    EventIID: '{6BED8971-B3DD-11D3-8736-0060B0B5E137}';
-    EventCount: 3;
+    ClassID:      '{8778ACF7-5CA9-11D3-8727-0060B0B5E137}';
+    EventIID:     '{6BED8971-B3DD-11D3-8736-0060B0B5E137}';
+    EventCount:   3;
     EventDispIDs: @CEventDispIDs;
-    LicenseKey: nil (*HR:$80004002*);
-    Flags: $00000000;
-    Version: 401);
+    LicenseKey:   nil (*HR:$80004002*);
+    Flags:        $00000000;
+    Version:      500);
 begin
   ControlData := @CControlData;
-  TControlData2(CControlData).FirstEventOfs := Cardinal(@@FOnPending) - Cardinal(Self);
+  TControlData2(CControlData).FirstEventOfs := UIntPtr(@@FOnPending) - UIntPtr(Self);
 end;
 
 procedure TContextorControl.CreateControl;
@@ -1134,9 +1325,9 @@ begin
   Result := FIntf;
 end;
 
-function  TContextorControl.Get_CurrentContext: IContextItemCollection;
+function TContextorControl.Get_CurrentContext: IContextItemCollection;
 begin
-  Result := DefaultInterface.Get_CurrentContext;
+  Result := DefaultInterface.CurrentContext;
 end;
 
 procedure TContextorControl.Run(const applicationLabel: WideString; const passcode: WideString; 
@@ -1155,7 +1346,7 @@ begin
   DefaultInterface.Resume;
 end;
 
-function  TContextorControl.GetPrivilege(const subj: WideString): AccessPrivilege;
+function TContextorControl.GetPrivilege(const subj: WideString): AccessPrivilege;
 begin
   Result := DefaultInterface.GetPrivilege(subj);
 end;
@@ -1165,8 +1356,8 @@ begin
   DefaultInterface.StartContextChange;
 end;
 
-function  TContextorControl.EndContextChange(commit: WordBool; 
-                                             const aContextItemCollection: IContextItemCollection): UserResponse;
+function TContextorControl.EndContextChange(commit: WordBool; 
+                                            const aContextItemCollection: IContextItemCollection): UserResponse;
 begin
   Result := DefaultInterface.EndContextChange(commit, aContextItemCollection);
 end;
@@ -1174,6 +1365,12 @@ end;
 procedure TContextorControl.SetSurveyResponse(const reason: WideString);
 begin
   DefaultInterface.SetSurveyResponse(reason);
+end;
+
+function TContextorControl.Perform(const inputContextItemCollection: IContextItemCollection; 
+                                   isSecureAction: WordBool): IContextItemCollection;
+begin
+  Result := DefaultInterface.Perform(inputContextItemCollection, isSecureAction);
 end;
 
 class function CoContextItemCollection.Create: IContextItemCollection;
@@ -1227,39 +1424,26 @@ function TContextItemCollection.GetDefaultInterface: IContextItemCollection;
 begin
   if FIntf = nil then
     Connect;
-  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call ''Connect'' or ''ConnectTo'' before this operation');
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
   Result := FIntf;
 end;
 
 constructor TContextItemCollection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps := TContextItemCollectionProperties.Create(Self);
-{$ENDIF}
 end;
 
 destructor TContextItemCollection.Destroy;
 begin
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps.Free;
-{$ENDIF}
   inherited Destroy;
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-function TContextItemCollection.GetServerProperties: TContextItemCollectionProperties;
+function TContextItemCollection.Get__NewEnum: IUnknown;
 begin
-  Result := FProps;
-end;
-{$ENDIF}
-
-function  TContextItemCollection.Get__NewEnum: IUnknown;
-begin
-  Result := DefaultInterface.Get__NewEnum;
+  Result := DefaultInterface._NewEnum;
 end;
 
-function  TContextItemCollection.Count: Integer;
+function TContextItemCollection.Count: Integer;
 begin
   Result := DefaultInterface.Count;
 end;
@@ -1279,34 +1463,15 @@ begin
   DefaultInterface.RemoveAll;
 end;
 
-function  TContextItemCollection.Present(key: OleVariant): IContextItem;
+function TContextItemCollection.Present(key: OleVariant): IContextItem;
 begin
   Result := DefaultInterface.Present(key);
 end;
 
-function  TContextItemCollection.Item(key: OleVariant): IContextItem;
+function TContextItemCollection.Item(key: OleVariant): IContextItem;
 begin
   Result := DefaultInterface.Item(key);
 end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-constructor TContextItemCollectionProperties.Create(AServer: TContextItemCollection);
-begin
-  inherited Create;
-  FServer := AServer;
-end;
-
-function TContextItemCollectionProperties.GetDefaultInterface: IContextItemCollection;
-begin
-  Result := FServer.DefaultInterface;
-end;
-
-function  TContextItemCollectionProperties.Get__NewEnum: IUnknown;
-begin
-  Result := DefaultInterface.Get__NewEnum;
-end;
-
-{$ENDIF}
 
 class function CoContextItem.Create: IContextItem;
 begin
@@ -1359,171 +1524,84 @@ function TContextItem.GetDefaultInterface: IContextItem;
 begin
   if FIntf = nil then
     Connect;
-  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call ''Connect'' or ''ConnectTo'' before this operation');
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
   Result := FIntf;
 end;
 
 constructor TContextItem.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps := TContextItemProperties.Create(Self);
-{$ENDIF}
 end;
 
 destructor TContextItem.Destroy;
 begin
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps.Free;
-{$ENDIF}
   inherited Destroy;
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-function TContextItem.GetServerProperties: TContextItemProperties;
+function TContextItem.Get_Subject: WideString;
 begin
-  Result := FProps;
-end;
-{$ENDIF}
-
-function  TContextItem.Get_Subject: WideString;
-begin
-  Result := DefaultInterface.Get_Subject;
+  Result := DefaultInterface.Subject;
 end;
 
 procedure TContextItem.Set_Subject(const pVal: WideString);
 begin
-  DefaultInterface.Set_Subject(pVal);
+  DefaultInterface.Subject := pVal;
 end;
 
-function  TContextItem.Get_Role: WideString;
+function TContextItem.Get_Role: WideString;
 begin
-  Result := DefaultInterface.Get_Role;
+  Result := DefaultInterface.Role;
 end;
 
 procedure TContextItem.Set_Role(const pVal: WideString);
 begin
-  DefaultInterface.Set_Role(pVal);
+  DefaultInterface.Role := pVal;
 end;
 
-function  TContextItem.Get_Prefix: WideString;
+function TContextItem.Get_Prefix: WideString;
 begin
-  Result := DefaultInterface.Get_Prefix;
+  Result := DefaultInterface.Prefix;
 end;
 
 procedure TContextItem.Set_Prefix(const pVal: WideString);
 begin
-  DefaultInterface.Set_Prefix(pVal);
+  DefaultInterface.Prefix := pVal;
 end;
 
-function  TContextItem.Get_Suffix: WideString;
+function TContextItem.Get_Suffix: WideString;
 begin
-  Result := DefaultInterface.Get_Suffix;
+  Result := DefaultInterface.Suffix;
 end;
 
 procedure TContextItem.Set_Suffix(const pVal: WideString);
 begin
-  DefaultInterface.Set_Suffix(pVal);
+  DefaultInterface.Suffix := pVal;
 end;
 
-function  TContextItem.Get_Name: WideString;
+function TContextItem.Get_Name: WideString;
 begin
-  Result := DefaultInterface.Get_Name;
+  Result := DefaultInterface.Name;
 end;
 
 procedure TContextItem.Set_Name(const pVal: WideString);
 begin
-  DefaultInterface.Set_Name(pVal);
+  DefaultInterface.Name := pVal;
 end;
 
-function  TContextItem.Get_Value: WideString;
+function TContextItem.Get_Value: WideString;
 begin
-  Result := DefaultInterface.Get_Value;
+  Result := DefaultInterface.Value;
 end;
 
 procedure TContextItem.Set_Value(const pVal: WideString);
 begin
-  DefaultInterface.Set_Value(pVal);
+  DefaultInterface.Value := pVal;
 end;
 
-function  TContextItem.Clone: IContextItem;
+function TContextItem.Clone: IContextItem;
 begin
   Result := DefaultInterface.Clone;
 end;
-
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-constructor TContextItemProperties.Create(AServer: TContextItem);
-begin
-  inherited Create;
-  FServer := AServer;
-end;
-
-function TContextItemProperties.GetDefaultInterface: IContextItem;
-begin
-  Result := FServer.DefaultInterface;
-end;
-
-function  TContextItemProperties.Get_Subject: WideString;
-begin
-  Result := DefaultInterface.Get_Subject;
-end;
-
-procedure TContextItemProperties.Set_Subject(const pVal: WideString);
-begin
-  DefaultInterface.Set_Subject(pVal);
-end;
-
-function  TContextItemProperties.Get_Role: WideString;
-begin
-  Result := DefaultInterface.Get_Role;
-end;
-
-procedure TContextItemProperties.Set_Role(const pVal: WideString);
-begin
-  DefaultInterface.Set_Role(pVal);
-end;
-
-function  TContextItemProperties.Get_Prefix: WideString;
-begin
-  Result := DefaultInterface.Get_Prefix;
-end;
-
-procedure TContextItemProperties.Set_Prefix(const pVal: WideString);
-begin
-  DefaultInterface.Set_Prefix(pVal);
-end;
-
-function  TContextItemProperties.Get_Suffix: WideString;
-begin
-  Result := DefaultInterface.Get_Suffix;
-end;
-
-procedure TContextItemProperties.Set_Suffix(const pVal: WideString);
-begin
-  DefaultInterface.Set_Suffix(pVal);
-end;
-
-function  TContextItemProperties.Get_Name: WideString;
-begin
-  Result := DefaultInterface.Get_Name;
-end;
-
-procedure TContextItemProperties.Set_Name(const pVal: WideString);
-begin
-  DefaultInterface.Set_Name(pVal);
-end;
-
-function  TContextItemProperties.Get_Value: WideString;
-begin
-  Result := DefaultInterface.Get_Value;
-end;
-
-procedure TContextItemProperties.Set_Value(const pVal: WideString);
-begin
-  DefaultInterface.Set_Value(pVal);
-end;
-
-{$ENDIF}
 
 class function CoResponseDialog.Create: IResponseDialog;
 begin
@@ -1576,51 +1654,103 @@ function TResponseDialog.GetDefaultInterface: IResponseDialog;
 begin
   if FIntf = nil then
     Connect;
-  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call ''Connect'' or ''ConnectTo'' before this operation');
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
   Result := FIntf;
 end;
 
 constructor TResponseDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps := TResponseDialogProperties.Create(Self);
-{$ENDIF}
 end;
 
 destructor TResponseDialog.Destroy;
 begin
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps.Free;
-{$ENDIF}
   inherited Destroy;
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-function TResponseDialog.GetServerProperties: TResponseDialogProperties;
+function TResponseDialog.ProcessSurveyResults(surveyResponses: OleVariant; noContinue: WordBool): UserResponse;
 begin
-  Result := FProps;
-end;
-{$ENDIF}
-
-function  TResponseDialog.ProcessSurveyResults(responses: OleVariant; noContinue: WordBool): UserResponse;
-begin
-  Result := DefaultInterface.ProcessSurveyResults(responses, noContinue);
+  Result := DefaultInterface.ProcessSurveyResults(surveyResponses, noContinue);
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-constructor TResponseDialogProperties.Create(AServer: TResponseDialog);
+function TResponseDialog.ProcessSurveyResults2(surveyResponses: OleVariant; enableOK: WordBool; 
+                                               enableCancel: WordBool; enableBreakLink: WordBool): UserResponse;
 begin
-  inherited Create;
-  FServer := AServer;
+  Result := DefaultInterface.ProcessSurveyResults2(surveyResponses, enableOK, enableCancel, 
+                                                   enableBreakLink);
 end;
 
-function TResponseDialogProperties.GetDefaultInterface: IResponseDialog;
+class function CoPasswordDialog.Create: IPasswordDialog;
 begin
-  Result := FServer.DefaultInterface;
+  Result := CreateComObject(CLASS_PasswordDialog) as IPasswordDialog;
 end;
 
-{$ENDIF}
+class function CoPasswordDialog.CreateRemote(const MachineName: string): IPasswordDialog;
+begin
+  Result := CreateRemoteComObject(MachineName, CLASS_PasswordDialog) as IPasswordDialog;
+end;
+
+procedure TPasswordDialog.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{9D33ECF2-8277-11D3-8525-0000861FDD5E}';
+    IntfIID:   '{9D33ECF1-8277-11D3-8525-0000861FDD5E}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPasswordDialog.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPasswordDialog;
+  end;
+end;
+
+procedure TPasswordDialog.ConnectTo(svrIntf: IPasswordDialog);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPasswordDialog.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPasswordDialog.GetDefaultInterface: IPasswordDialog;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPasswordDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPasswordDialog.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPasswordDialog.GetPasswordChangeInformation(var userID: WideString; 
+                                                      var oldPassword: WideString; 
+                                                      var newPassword: WideString): SYSINT;
+begin
+  Result := DefaultInterface.GetPasswordChangeInformation(userID, oldPassword, newPassword);
+end;
 
 class function CoContextorParticipant.Create: IContextParticipant;
 begin
@@ -1673,34 +1803,21 @@ function TContextorParticipant.GetDefaultInterface: IContextParticipant;
 begin
   if FIntf = nil then
     Connect;
-  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call ''Connect'' or ''ConnectTo'' before this operation');
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
   Result := FIntf;
 end;
 
 constructor TContextorParticipant.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps := TContextorParticipantProperties.Create(Self);
-{$ENDIF}
 end;
 
 destructor TContextorParticipant.Destroy;
 begin
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-  FProps.Free;
-{$ENDIF}
   inherited Destroy;
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-function TContextorParticipant.GetServerProperties: TContextorParticipantProperties;
-begin
-  Result := FProps;
-end;
-{$ENDIF}
-
-function  TContextorParticipant.ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString;
+function TContextorParticipant.ContextChangesPending(contextCoupon: Integer; var reason: WideString): WideString;
 begin
   Result := DefaultInterface.ContextChangesPending(contextCoupon, reason);
 end;
@@ -1725,25 +1842,82 @@ begin
   DefaultInterface.Ping;
 end;
 
-{$IFDEF LIVE_SERVER_AT_DESIGN_TIME}
-constructor TContextorParticipantProperties.Create(AServer: TContextorParticipant);
+class function CoDispatchAccessor.Create: IDispatchAccessor;
 begin
-  inherited Create;
-  FServer := AServer;
+  Result := CreateComObject(CLASS_DispatchAccessor) as IDispatchAccessor;
 end;
 
-function TContextorParticipantProperties.GetDefaultInterface: IContextParticipant;
+class function CoDispatchAccessor.CreateRemote(const MachineName: string): IDispatchAccessor;
 begin
-  Result := FServer.DefaultInterface;
+  Result := CreateRemoteComObject(MachineName, CLASS_DispatchAccessor) as IDispatchAccessor;
 end;
 
-{$ENDIF}
-{
+procedure TDispatchAccessor.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{5F9C5135-FA94-4091-B1A9-B55294259118}';
+    IntfIID:   '{C3AC74F6-6C5D-4ED9-8838-2EF5777226E2}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TDispatchAccessor.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IDispatchAccessor;
+  end;
+end;
+
+procedure TDispatchAccessor.ConnectTo(svrIntf: IDispatchAccessor);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TDispatchAccessor.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TDispatchAccessor.GetDefaultInterface: IDispatchAccessor;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TDispatchAccessor.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TDispatchAccessor.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TDispatchAccessor.GetInterface(const sourceInterface: IDispatch; 
+                                        const interfaceName: WideString): IDispatch;
+begin
+  Result := DefaultInterface.GetInterface(sourceInterface, interfaceName);
+end;
+
 procedure Register;
 begin
-  RegisterComponents('Kernel',[TContextorControl]);
-  RegisterComponents('Kernel',[TContextor, TContextItemCollection, TContextItem, TResponseDialog,
-    TContextorParticipant]);
+  RegisterComponents(dtlOcxPage, [TContextorControl]);
+  RegisterComponents(dtlServerPage, [TContextor, TContextItemCollection, TContextItem, TResponseDialog, 
+    TPasswordDialog, TContextorParticipant, TDispatchAccessor]);
 end;
-}
+
 end.

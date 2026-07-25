@@ -213,7 +213,7 @@ begin
   hHash := 0;
   hPassKey := 0;
   hUserKey := 0;
-  hCertStore := 0;
+  hCertStore := nil;
   CSProviderName := c_SignPROV_NAME; //The Signing Provider  // 120206
   ContainerName := '';         //Will use the default        // 120206
   Reason := '';
@@ -349,7 +349,7 @@ begin
     if pCertContext <> nil then
         CertFreeCertificateContext(pCertContext);
     //Release the Cert Store.
-    if hCertStore <> 0 then
+    if hCertStore <> nil then
         CertCloseStore(hCertStore, CERT_CLOSE_STORE_FORCE_FLAG);
     // Clean up.
     // Release the CSP handle
@@ -531,7 +531,7 @@ begin
   Result := False;
   //The system maps the current users Cert's to the MY store.
   //So, Open the MY Store
-  if hCertStore = 0 then
+  if hCertStore = nil then
   begin
     hCertStore := CertOpenSystemStore(0, PChar('MY'));
   end;
@@ -542,7 +542,7 @@ begin
   pCertContext := nil;
   Reason := 'Could not open the Cert Store';
   //if hCertStore is 0 the open didn't work
-  if hCertStore = 0 then
+  if hCertStore = nil then
   begin
     TrackingMsg.Add('Unable to open a Certificate Store.');
 //  SaveLog(); // 121214 remove saving of log to PKISignError
@@ -576,7 +576,7 @@ begin
         0,
         0,
         PChar(NameString),  //SetLength done at start
-        128)) then
+        128) <> 0) then
              CertDisplayName := StrPas(PChar(NameString));
 
     // expected CertDisplayName is ALPHA NUMERIC
@@ -620,7 +620,7 @@ begin
     isAltNameMatched := false;
     if (CertGetNameString(pCertContext,8,0,0,
         PChar(NameString),   //SetLength done at start
-        128)) then
+        128) <> 0) then
     begin
       CertName := StrPas(PChar(NameString));  // 120507 JLI Make change in regular
     end;
@@ -628,7 +628,7 @@ begin
     begin
       if CertGetNameString(pCertContext,1,0,0,
          PChar(NameString),   //SetLength done at start
-         128) then
+         128) <> 0 then
       begin
         CertName := StrPas(PChar(NameString));
       end;
@@ -644,7 +644,7 @@ begin
         CertName := '';
         if CertGetNameString(pCertContext,1,0,0,
            PChar(NameString),   //SetLength done at start
-           128) then
+           128) <> 0 then
         begin
           CertName := StrPas(PChar(NameString));
         end;
@@ -718,7 +718,7 @@ begin
               rgExtension := pCertContext.pCertInfo.rgExtension;
               cExtension := pCertContext.pCertInfo.cExtension;
               // see if we get the CRL dist point
-              pce := CertFindExtension(PChar('2.5.29.31'), cExtension, rgExtension);
+              pce := CertFindExtension(PAnsiChar(AnsiString('2.5.29.31')), cExtension, rgExtension);
               if pce <> nil then
                 CRLURL := CRLDistPoint(pce.Value.pbData, pce.Value.cbData);
               RevocationStatusOK := true;
@@ -854,9 +854,9 @@ begin
           CertFreeCertificateContext(pCertContext);
   pCertContext := nil;
   //Release the Cert Store.
-  if hCertStore <> 0 then
+  if hCertStore <> nil then
           CertCloseStore(hCertStore, CERT_CLOSE_STORE_FORCE_FLAG);
-  hCertStore := 0;
+  hCertStore := nil;
   // the following close the card on completion
   if not (fhCard = 0) then
   begin
@@ -1081,7 +1081,7 @@ begin
                                                          // use nil for default
                                 0,                       //Flags
                                 hMsg);
-   if hCertStore = 0 then
+   if hCertStore = nil then
    begin
      lastErr := GetLastError;
      Str := IntToStr(lastErr)+' - '+SysErrorMessage(lastErr);
@@ -1373,16 +1373,16 @@ function sCardReady: boolean;
 const
     MAX_SCARD_READERS = 10;
 var
-    szReaders: string;
+    szReaders: AnsiString;
     dwI: DWORD;
     cch: integer;
-    Str: String;
+    Str: AnsiString;
     ActiveProtocol: DWORD;
     fhSC: sCardContext;
     fhCard: longint;
     offset, index: Integer;
     done: Boolean;
-    charval: Char;
+    charval: AnsiChar;
 begin
     Result := False;
     dwi := SCardEstablishContext(SCARD_SCOPE_USER,
@@ -1401,17 +1401,17 @@ begin
     setlength(szReaders, cch);
     dwi := SCardListReadersA(fhSC,
         nil,
-        PChar(szReaders),
+        PAnsiChar(szReaders),
         cch);
     if dwi = SCARD_S_SUCCESS then
       Result := True;
     // check for card in reader
     offset := 1;
     done := false;
-    Str := StrPas(PChar(szReaders));
+    Str := StrPas(PAnsiChar(szReaders));
     while not done do
     begin
-      dwi := SCardConnectA(fhSC, PChar(Str), SCARD_SHARE_SHARED, 3, fhCard, @ActiveProtocol);
+      dwi := SCardConnectA(fhSC, PAnsiChar(Str), SCARD_SHARE_SHARED, 3, fhCard, @ActiveProtocol);
       if dwi = SCARD_S_SUCCESS then
         done := true
       else
@@ -1432,7 +1432,7 @@ begin
           begin
             szReaders[index] := szReaders[index+offset-1];
           end;
-          Str := StrPas(PChar(szReaders));
+          Str := StrPas(PAnsiChar(szReaders));
           offset := 1;
         end;
       end;

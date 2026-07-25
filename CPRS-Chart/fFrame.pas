@@ -54,7 +54,8 @@ uses
   rTIU, math,                  //TMG
   uTMGEvent,                   //TMG  10/29/20
   fImagePatientPhotoID, fTMGChartExporter, //kt
-  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw, ImgList;
+  VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw, ImgList,
+  System.ImageList;
 
 type
   TControlCracker = class(TControl);                  //kt-tabs 11/26/22
@@ -247,13 +248,14 @@ type
     mnuReminderNote: TMenuItem;
     mnuChangelog: TMenuItem;
     mnuConsultants: TMenuItem;
+    procedure tabPageLChanging(Sender: TObject; var AllowChange: Boolean);
     procedure mnuConsultantsClick(Sender: TObject);
     procedure mnuChangelogClick(Sender: TObject);
     procedure mnuReminderNoteClick(Sender: TObject);
     procedure menuRecordsTaskClick(Sender: TObject);
     procedure mnuExportHistoryClick(Sender: TObject);
     procedure timUpdateNoPatTimer(Sender: TObject);
-    procedure wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+    procedure wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
       TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure mnuAddSuspectCondClick(Sender: TObject);
     procedure menuPatientTaskClick(Sender: TObject);
@@ -1061,7 +1063,7 @@ begin
     HideEverything();
     Patient.DFN := '';   //4/19/24
   if assigned(frmPatientPhotoID) then begin
-    frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
+    frmPatientPhotoID.WebBrowser.Navigate(string(frmImages.NullImageName));  //Make sure previous image isn't shown  6/7/22
     Application.Processmessages;
   end;
   FContextChanging := False;  //5/2/22, ELH added because this got set to TRUE and Consults wouldn't load afterwards
@@ -2285,6 +2287,14 @@ begin
   OtherSide := OtherPageSide(ASide);
   OtherTabPage := TabPage(OtherSide);
   PageID := TabIndexToPageID(ASide, ATabPage.TabIndex);
+  {    6/9/26
+  if PageID = CT_Notes then begin  //6/9/26 ELH added
+    if frmNotes.FLoadingNotes then begin
+      ShowMessage('Please allow notes to load before changing tabs.');
+      exit;
+    end;
+  end;
+  }
   if PageID = CT_PROBLEMS then ProbTabClicked := true; //needed in fProbs
   if User.IsReportsOnly then PageID := CT_REPORTS;  // Reports Only tab.
   OtherPageID := TabIndexToPageID(Otherside, OtherTabPage.TabIndex);
@@ -2929,7 +2939,7 @@ begin
  //kt  BEGIN MOD 11/1/13 ---------------------------------------------------------
  if assigned(frmPatientPhotoID) then begin    //TMG added 6/7/22
     frmPatientPhotoID.hide;
-    frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22
+    frmPatientPhotoID.WebBrowser.Navigate(string(frmImages.NullImageName));  //Make sure previous image isn't shown  6/7/22
     Application.Processmessages;
   end;
  frmOrders.TMGLoadColors;   //12/14/17
@@ -3053,11 +3063,11 @@ begin
     end; //end IsBillingAware
   except
     on EAccessViolation do begin
-      {$ifdef debug}Show508Message('Access Violation in procedure TfrmFrame.mnuFileExitClick()');{$endif}
+      {$ifdef debug}ShowMsg('Access Violation in procedure TfrmFrame.mnuFileExitClick()');{$endif}
       raise;
     end;
     on E: Exception do begin
-      {$ifdef debug}Show508Message('Unhandled exception in procedure TfrmFrame.mnuFileExitClick()');{$endif}
+      {$ifdef debug}ShowMsg('Unhandled exception in procedure TfrmFrame.mnuFileExitClick()');{$endif}
       raise;
     end;
   end;
@@ -5142,7 +5152,7 @@ end;
 procedure TfrmFrame.HandleCCOWError(AMessage: string);
 begin
   {$ifdef DEBUG}
-    Show508Message(AMessage);
+    ShowMsg(AMessage);
   {$endif}
   InfoBox(TX_CCOW_ERROR, TC_CCOW_ERROR, MB_ICONERROR or MB_OK);
   FCCOWInstalled := False;
@@ -5850,6 +5860,15 @@ begin
   TabCtrlClickedSide := ASide; //used in fProbs.
 end;
 
+procedure TfrmFrame.tabPageLChanging(Sender: TObject; var AllowChange: Boolean);  //ELH added 6/9/26
+begin
+  inherited;
+  if frmNotes.FLoadingNotes then begin
+      AllowChange := False;
+      exit;
+  end;
+end;
+
 procedure TfrmFrame.tabPageMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 //kt note: I don't think this event is used
@@ -6130,7 +6149,7 @@ begin
   end;
 end;
 
-procedure TfrmFrame.wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+procedure TfrmFrame.wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
 var MsgType:string;
     DFN:string;
@@ -6299,8 +6318,8 @@ end;
 
 function TfrmFrame.CheckForRPC(RPCName: string): boolean;
 //kt 9/11 added
-var                                                   
-    RPCResult              : AnsiString;
+var
+    RPCResult              : string;
 
 begin
   RPCBrokerV.remoteprocedure := 'XWB IS RPC AVAILABLE';

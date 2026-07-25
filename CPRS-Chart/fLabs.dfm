@@ -3,24 +3,24 @@ inherited frmLabs: TfrmLabs
   Top = 237
   HelpContext = 8000
   Caption = 'Laboratory Results Page'
-  ClientHeight = 674
+  ClientHeight = 620
   ClientWidth = 1042
   HelpFile = 'qnoback'
   Menu = mnuLabs
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 1050
-  ExplicitHeight = 728
-  PixelsPerInch = 96
+  ExplicitWidth = 1058
+  ExplicitHeight = 679
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 669
+    Top = 615
     Width = 1042
     ExplicitTop = 748
     ExplicitWidth = 714
   end
   inherited sptHorz: TSplitter
-    Height = 669
+    Height = 615
     ExplicitHeight = 748
   end
   object Label1: TLabel [2]
@@ -38,12 +38,13 @@ inherited frmLabs: TfrmLabs
     Visible = False
   end
   inherited pnlLeft: TPanel
-    Height = 669
+    Height = 615
     Constraints.MinWidth = 37
-    ExplicitHeight = 649
+    StyleElements = [seFont, seClient, seBorder]
+    ExplicitHeight = 669
     object Splitter1: TSplitter
       Left = 0
-      Top = 409
+      Top = 355
       Width = 97
       Height = 10
       Cursor = crVSplit
@@ -58,12 +59,12 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 0
       Width = 97
-      Height = 409
+      Height = 355
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
-      ExplicitHeight = 389
+      ExplicitHeight = 409
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -81,7 +82,7 @@ inherited frmLabs: TfrmLabs
         Left = 0
         Top = 19
         Width = 97
-        Height = 390
+        Height = 336
         Align = alClient
         HideSelection = False
         Indent = 18
@@ -93,17 +94,16 @@ inherited frmLabs: TfrmLabs
         OnKeyDown = tvReportsKeyDown
         Caption = 'Available Reports'
         NodePiece = 0
-        ExplicitHeight = 370
       end
     end
     object pnlLeftBottom: TPanel
       Left = 0
-      Top = 419
+      Top = 365
       Width = 97
       Height = 250
       Align = alBottom
       TabOrder = 1
-      ExplicitTop = 399
+      ExplicitTop = 419
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -154,6 +154,7 @@ inherited frmLabs: TfrmLabs
         TabOrder = 0
         Visible = False
         OnClick = lstQualifierClick
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2,3'
@@ -231,11 +232,12 @@ inherited frmLabs: TfrmLabs
   end
   inherited pnlRight: TPanel
     Width = 941
-    Height = 669
+    Height = 615
     Constraints.MinWidth = 30
+    StyleElements = [seFont, seClient, seBorder]
     OnResize = pnlRightResize
     ExplicitWidth = 941
-    ExplicitHeight = 649
+    ExplicitHeight = 669
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -252,10 +254,10 @@ inherited frmLabs: TfrmLabs
       Left = 0
       Top = 300
       Width = 941
-      Height = 349
+      Height = 295
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 329
+      ExplicitHeight = 349
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -281,7 +283,7 @@ inherited frmLabs: TfrmLabs
         Left = 1
         Top = 20
         Width = 939
-        Height = 328
+        Height = 274
         Align = alClient
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -297,13 +299,12 @@ inherited frmLabs: TfrmLabs
         Visible = False
         WantReturns = False
         WordWrap = False
-        ExplicitHeight = 308
       end
       object WebBrowser1: TWebBrowser
         Left = 1
         Top = 20
         Width = 939
-        Height = 328
+        Height = 274
         TabStop = False
         Align = alClient
         TabOrder = 2
@@ -436,13 +437,12 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 939
+            Width = 367
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
-            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162
@@ -573,6 +573,7 @@ inherited frmLabs: TfrmLabs
             Height = 15
             Alignment = taCenter
             AutoSize = True
+            Caption = ''
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -12
@@ -583,6 +584,9 @@ inherited frmLabs: TfrmLabs
             Visible = False
             OnEnter = lblDateEnter
             ShowAccelChar = True
+            WordWrap = False
+            LabelAlignment = taCenter
+            LabelLayout = tlTop
           end
           object cmdNext: TButton
             Left = 191
@@ -655,9 +659,6 @@ inherited frmLabs: TfrmLabs
             Font.Height = -11
             Font.Name = 'MS Sans Serif'
             Font.Style = [fsBold]
-            ParentFont = False
-            TabOrder = 5
-            OnClick = btnViewReportClick
             Glyph.Data = {
               E6050000424DE605000000000000A60300002800000018000000180000000100
               08000000000040020000130B0000130B0000DC000000DC00000000000000FFFF
@@ -707,6 +708,9 @@ inherited frmLabs: TfrmLabs
               0101010101D4A173ABD1D5D5D5D5D501CFA08C7389B20101010101010101A472
               7B8C8D8D8D8D8D8C887F78BBDB01010101010101010101A38F7A7C7C7C7C7C7C
               7D7EBAC9010101010101}
+            ParentFont = False
+            TabOrder = 5
+            OnClick = btnViewReportClick
           end
           object btnViewHL7: TBitBtn
             Left = 816
@@ -720,9 +724,6 @@ inherited frmLabs: TfrmLabs
             Font.Height = -11
             Font.Name = 'MS Sans Serif'
             Font.Style = [fsBold]
-            ParentFont = False
-            TabOrder = 6
-            OnClick = btnViewHL7Click
             Glyph.Data = {
               76060000424D7606000000000000360400002800000018000000180000000100
               0800000000004002000000000000000000000001000000000000FFFFFF00552F
@@ -776,6 +777,9 @@ inherited frmLabs: TfrmLabs
               1F011A0909091E1B1B1B10020202020235000059595959595959595959594D2A
               2A2A2A2A2A2A2A2A2A0000000000000000000000000000000000000000000000
               0000000000000000000000000000000000000000000000000000}
+            ParentFont = False
+            TabOrder = 6
+            OnClick = btnViewHL7Click
           end
           object btnViewLinkedNote: TBitBtn
             Left = 570
@@ -788,9 +792,6 @@ inherited frmLabs: TfrmLabs
             Font.Height = -11
             Font.Name = 'MS Sans Serif'
             Font.Style = [fsBold]
-            ParentFont = False
-            TabOrder = 7
-            OnClick = btnViewLinkedNoteClick
             Glyph.Data = {
               36050000424D3605000000000000360400002800000010000000100000000100
               0800000000000001000000000000000000000001000000010000000000009C8B
@@ -834,6 +835,9 @@ inherited frmLabs: TfrmLabs
               0E1010060504040302020202030E0E0E0E0E0E010101010302020202030E0C0E
               0C0E0614140A030202020202030C0C0C0C0C07170803020202020202030B0B0B
               0B0B060803020202020202020303030303030303020202020202}
+            ParentFont = False
+            TabOrder = 7
+            OnClick = btnViewLinkedNoteClick
           end
           object btnViewLinkedOrder: TBitBtn
             Left = 447
@@ -846,9 +850,6 @@ inherited frmLabs: TfrmLabs
             Font.Height = -11
             Font.Name = 'MS Sans Serif'
             Font.Style = [fsBold]
-            ParentFont = False
-            TabOrder = 8
-            OnClick = btnViewLinkedOrderClick
             Glyph.Data = {
               F6060000424DF606000000000000360000002800000018000000180000000100
               180000000000C0060000130B0000130B00000000000000000000FF00FFFF00FF
@@ -906,6 +907,9 @@ inherited frmLabs: TfrmLabs
               FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
               FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
               00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+            ParentFont = False
+            TabOrder = 8
+            OnClick = btnViewLinkedOrderClick
           end
         end
       end
@@ -987,9 +991,11 @@ inherited frmLabs: TfrmLabs
           Width = 842
           Height = 85
           AllowPanning = pmNone
-          AllowZoom = False
-          BackWall.Brush.Color = clWhite
           BackWall.Brush.Style = bsClear
+          Legend.Alignment = laTop
+          Legend.Inverted = True
+          Legend.Shadow.HorizSize = 2
+          Legend.Shadow.VertSize = 2
           Title.Text.Strings = (
             'test name')
           Title.Visible = False
@@ -997,67 +1003,55 @@ inherited frmLabs: TfrmLabs
           OnClickSeries = chtChartClickSeries
           OnUndoZoom = chtChartUndoZoom
           LeftAxis.Title.Caption = 'units'
-          Legend.Alignment = laTop
-          Legend.Inverted = True
-          Legend.ShadowSize = 2
           View3D = False
+          Zoom.Allow = False
           Align = alClient
           BevelOuter = bvNone
           Color = clSilver
           PopupMenu = popChart
           TabOrder = 1
           OnMouseDown = chtChartMouseDown
+          DefaultCanvas = 'TGDIPlusCanvas'
+          ColorPaletteIndex = 13
           object serHigh: TLineSeries
-            Marks.ArrowLength = 8
-            Marks.Visible = False
+            HoverElement = [heCurrent]
             SeriesColor = clRed
             Title = 'Ref High'
+            Brush.BackColor = clDefault
             LinePen.Style = psDash
             Pointer.InflateMargins = True
             Pointer.Style = psRectangle
-            Pointer.Visible = False
             XValues.DateTime = True
             XValues.Name = 'X'
-            XValues.Multiplier = 1.000000000000000000
             XValues.Order = loAscending
-            YValues.DateTime = False
             YValues.Name = 'Y'
-            YValues.Multiplier = 1.000000000000000000
             YValues.Order = loNone
           end
           object serLow: TLineSeries
-            Marks.ArrowLength = 8
-            Marks.Visible = False
+            HoverElement = [heCurrent]
             SeriesColor = clRed
             Title = 'Ref Low'
+            Brush.BackColor = clDefault
             LinePen.Style = psDash
             Pointer.InflateMargins = True
             Pointer.Style = psRectangle
-            Pointer.Visible = False
-            XValues.DateTime = False
             XValues.Name = 'X'
-            XValues.Multiplier = 1.000000000000000000
             XValues.Order = loAscending
-            YValues.DateTime = False
             YValues.Name = 'Y'
-            YValues.Multiplier = 1.000000000000000000
             YValues.Order = loNone
           end
           object serTest: TLineSeries
-            Marks.ArrowLength = 8
-            Marks.Visible = False
+            HoverElement = [heCurrent]
             SeriesColor = clBlue
             Title = 'Lab Test'
+            Brush.BackColor = clDefault
             Pointer.InflateMargins = True
             Pointer.Style = psCircle
             Pointer.Visible = True
             XValues.DateTime = True
             XValues.Name = 'X'
-            XValues.Multiplier = 1.000000000000000000
             XValues.Order = loAscending
-            YValues.DateTime = False
             YValues.Name = 'Y'
-            YValues.Multiplier = 1.000000000000000000
             YValues.Order = loNone
           end
         end
@@ -1084,6 +1078,7 @@ inherited frmLabs: TfrmLabs
         OnCompare = lvReportsCompare
         OnKeyUp = lvReportsKeyUp
         OnSelectItem = lvReportsSelectItem
+        AutoSize = False
       end
     end
     object pnlRightTopHeader: TPanel
@@ -1152,12 +1147,12 @@ inherited frmLabs: TfrmLabs
     end
     object pnlFooter: TORAutoPanel
       Left = 0
-      Top = 649
+      Top = 595
       Width = 941
       Height = 20
       Align = alBottom
       TabOrder = 3
-      ExplicitTop = 629
+      ExplicitTop = 649
       DesignSize = (
         941
         20)
@@ -1203,6 +1198,7 @@ inherited frmLabs: TfrmLabs
         ShowHint = True
         TabOrder = 0
         Visible = False
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
       end
@@ -1214,10 +1210,6 @@ inherited frmLabs: TfrmLabs
         Hint = 'Click to view '
         Anchors = [akTop, akRight]
         Caption = 'Shared Results'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 1
-        OnClick = btnSharedResultsClick
         Glyph.Data = {
           F6000000424DF600000000000000760000002800000010000000100000000100
           04000000000080000000130B0000130B00001000000010000000000000000000
@@ -1227,6 +1219,10 @@ inherited frmLabs: TfrmLabs
           CC0000CCCCFF00CCCC000CCCCC7FF0CCCCC00CCCCC0FF7CCCCC00CCCC070FFCC
           CCC00CCCCCFFFFCCCCC000CCCCC00CCCCC0000CCCCCC00CCCC00D0CCCCC0FFCC
           CC0DD0CCCCC0FFCCCC0DDD0000CCCC0000DDDDDD00000000DDDD}
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+        OnClick = btnSharedResultsClick
       end
     end
   end

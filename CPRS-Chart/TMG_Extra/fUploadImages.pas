@@ -1278,16 +1278,16 @@ implementation
 
   function TfrmImageUpload.CopyFileToTemp(FNamePath : string;TempBrowseable : boolean) : string;
   var DestFile : string;
-      lpDestFile : PAnsiChar;
-      lpSourceFile : PAnsiChar;
+      lpDestFile : PChar;
+      lpSourceFile : PChar;
   begin
     if TempBrowseable then begin
       DestFile := CacheDir + '\tempbrowseable' + ExtractFileExt(FNamePath);
     end else begin
       DestFile := CacheDir + '\' + ExtractFileName(FNamePath);
     end;
-    lpDestFile := PAnsiChar(DestFile);
-    lpSourceFile := PAnsiChar(FNamePath);
+    lpDestFile := PChar(DestFile);
+    lpSourceFile := PChar(FNamePath);
     if CopyFile(lpSourcefile,lpDestFile,LongBool(FALSE)) = TRUE then begin  //0=success
       Result := DestFile;
     end else begin

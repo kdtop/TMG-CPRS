@@ -74,6 +74,8 @@ procedure SetTreeNodeImagesAndFormatting(Node: TORTreeNode; CurrentContext: TTIU
 procedure ResetDocTreeObjectStrings(AnObject: PDocTreeObject);
 procedure KillDocTreeObjects(TreeView: TORTreeView);
 procedure KillDocTreeNode(ANode: TTreeNode);
+procedure KillDocTreeChildrenOfNode(ANode: TORTreeNode);  //kt //tmg added 6/7/26
+procedure KillDocTreeNodeAndChildren(ANode: TORTreeNode); //kt //tmg added 6/7/26
 function  ContextMatch(ANode: TORTreeNode; AParentID: string; AContext: TTIUContext): Boolean;
 function  TextFound(ANode: TORTreeNode; CurrentContext: TTIUContext): Boolean;
 procedure RemoveParentsWithNoChildren(Tree: TTreeView; Context: TTIUContext);
@@ -317,9 +319,11 @@ var
   ChildNode, tmpNode: TORTreeNode;
   DocHasChildren: Boolean;
   AnObject: PDocTreeObject;
+  tmpStr : string;  //to make debugging easier.
 begin
   with DocList do for i := 0 to Count - 1 do begin
     tmpNode := nil;
+    tmpStr := Strings[i]; //kt, for easier debuggin.  
     MyParent := Piece(Strings[i], U, 14);
     if (MyParent = Parent) then begin
        if frmNotes.frmNotesLoading<>nil then begin
@@ -327,7 +331,7 @@ begin
         //frmNotes.frmNotesLoading.ProgressBar1.Max := count;
         frmNotes.frmNotesLoading.ProgressBar1.Position := frmNotes.frmNotesLoading.ProgressBar1.Position+1; 
         //frmNotes.frmNotesLoading.label2.caption := Piece(Strings[i], U, 2); //Piece(Strings[i], U, 14);
-        application.processmessages;
+        {TESTING    application.processmessages;}
       end;
       MyID := Piece(Strings[i], U, 1);
       if Piece(Strings[i], U, 13) <> '%' then
@@ -626,6 +630,34 @@ begin
     ANode.Data := nil;
   end;
   ANode.Owner.Delete(ANode);
+end;
+
+procedure KillDocTreeChildrenOfNode(ANode: TORTreeNode);
+//kt //tmg added 6/7/26
+var i : integer;
+    ChildNode : TORTreeNode;
+    MaxIdx : integer;
+begin
+  if not Assigned(ANode) then exit;
+  if not ANode.HasChildren then exit;
+  MaxIdx := ANode.Count-1;
+  for i := MaxIdx downto 0 do begin
+    ChildNode := TORTreeNode(ANode.Item[i]);
+    KillDocTreeNodeAndChildren(ChildNode);
+  end;
+end;
+
+
+procedure KillDocTreeNodeAndChildren(ANode: TORTreeNode);
+//kt //tmg added 6/7/26
+var i : integer;
+    ChildNode : TORTreeNode;
+begin
+  if not Assigned(ANode) then exit;
+  if ANode.HasChildren then begin
+    KillDocTreeChildrenOfNode(ANode);
+  end;
+  KillDocTreeNode(ANode);
 end;
 
 procedure RemoveParentsWithNoChildren(Tree: TTreeView; Context: TTIUContext);

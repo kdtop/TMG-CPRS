@@ -48,7 +48,7 @@ interface
 
 
 uses
-  Dialogs, IEDownloadAcc, Controls, Shellapi, IEConst, ActiveX,
+  Dialogs, IEDownloadAcc, Controls, Shellapi, EmbeddedIEConst, ActiveX,
   Contnrs, ExtCtrls, Windows, WinInet, UrlMon, Classes, SysUtils
 {$IFDEF DELPHI5}, FileCtrl{$ENDIF}{$IFDEF USE_MSHTML}, MSHTML_EWB{$ENDIF};
 

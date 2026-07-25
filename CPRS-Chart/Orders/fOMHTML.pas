@@ -21,9 +21,9 @@ type
     procedure btnCancelClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure webViewDocumentComplete(Sender: TObject;
-      const pDisp: IDispatch; var URL: OleVariant);
+      const pDisp: IDispatch; const URL: OleVariant);
     procedure webViewBeforeNavigate2(Sender: TObject;
-      const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
+      const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
       Headers: OleVariant; var Cancel: WordBool);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -401,7 +401,7 @@ end;
 { webBrowser events }
 
 procedure TfrmOMHTML.webViewDocumentComplete(Sender: TObject; const pDisp: IDispatch;
-  var URL: OleVariant);
+  const URL: OleVariant);
 { This event happens after a navigation.  It is at this point that there is an instantiated
   instance of IHtmlDocument available. }
 begin
@@ -426,7 +426,7 @@ begin
 end;
 
 procedure TfrmOMHTML.webViewBeforeNavigate2(Sender: TObject;  const pDisp: IDispatch;
-  var URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+  const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
 begin
   inherited;
   SaveState;

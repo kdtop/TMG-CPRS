@@ -5,7 +5,7 @@ unit ORSystem;
 
 interface
 
-uses SysUtils, Windows, Classes, Forms, Registry, ORFn;
+uses System.SysUtils, Winapi.Windows, System.Classes, Vcl.Forms, System.Win.Registry, ORFn;
 
 const
   CPRS_ROOT_KEY =  HKEY_LOCAL_MACHINE;
@@ -63,7 +63,7 @@ begin
   AHandle := FindFirstFile(PChar(FileName), FindData);
   if AHandle <> INVALID_HANDLE_VALUE then
   begin
-    Windows.FindClose(AHandle);
+    Winapi.Windows.FindClose(AHandle);
     Result.LowPart  := FindData.ftLastWriteTime.dwLowDateTime;
     Result.HighPart := FindData.ftLastWriteTime.dwHighDateTime;
   end;
@@ -548,7 +548,7 @@ begin
     Result := FALSE;
     Exit;
   end;
-  Windows.GetModuleFileName(DLLHandle, DLLNamePath, 261);
+  Winapi.Windows.GetModuleFileName(DLLHandle, DLLNamePath, 261);
   DLLVersion := ClientVersion(DLLNamePath);
   if StrToIntDef(Piece(DLLVersion, '.', 1), 0) < DLL_CURRENT_VERSION then
   begin

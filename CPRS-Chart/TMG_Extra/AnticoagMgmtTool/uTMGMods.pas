@@ -108,7 +108,7 @@ begin
     else if Field = '%NEXTAPPT%'                then Result := IfThen(Patient.NextScheduledINRCheckDate<>0, DateToStr(Patient.NextScheduledINRCheckDate), '(none)')
     else if Field = '%NEXTAPPTTIME%'            then Result := IfThen(Patient.NextScheduledINRCheckTime<>0, TMGTimeToStr(Patient.NextScheduledINRCheckTime), '')
     else if Field = '%TIMENARRTOAPPT%'          then Result := LengthOfTimeNarrToDate(Patient.NextScheduledINRCheckDate)
-    else if Field = '%DAYOFWEEKOFAPPT%'         then Result := LongDayNames[DayOfWeek(Patient.NextScheduledINRCheckDate)]
+    else if Field = '%DAYOFWEEKOFAPPT%'         then Result := FormatSettings.LongDayNames[DayOfWeek(Patient.NextScheduledINRCheckDate)]
 
     else if Field = '%HELP%'                    then Result := GetHelpText(AppState,AFlowsheet);
   end;

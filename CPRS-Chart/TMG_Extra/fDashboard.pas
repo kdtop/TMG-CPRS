@@ -10,7 +10,7 @@ type
   TfrmDashboard = class(TfrmPage)
     wbDashboard: TWebBrowser;
     timUpdateDashboard: TTimer;
-    procedure wbDashboardBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName,
+    procedure wbDashboardBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName,
       PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure FormHide(Sender: TObject);
     procedure timUpdateDashboardTimer(Sender: TObject);
@@ -50,7 +50,7 @@ begin
   LoadDashboard();
 end;
 
-procedure TfrmDashboard.wbDashboardBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+procedure TfrmDashboard.wbDashboardBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
 var MsgType:string;
     DFN:string;

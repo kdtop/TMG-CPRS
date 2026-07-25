@@ -524,7 +524,7 @@ begin
   case FState of
     tsNormal:               if FIsSymbol and (FTokenName = FClassName) then
                               FState := tsPendingEqualChar;
-    tsPendingEqualChar:     if FIsChar and (FTokenName = EQUALS) then
+    tsPendingEqualChar:     if FIsChar and (FTokenName = '=') then
                               FState := tsPendingClassSymbol
                             else
                               FState := tsNormal;

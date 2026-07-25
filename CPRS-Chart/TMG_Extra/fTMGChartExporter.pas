@@ -266,7 +266,8 @@ procedure EditOneExport(InitialTab:integer;InitNotes,InitLabs,InitRad,InitCover:
   begin
   AFrmTMGChartExporter := TfrmTMGChartExporter.Create(Application);
   try
-    if PersistBeginDate<1 then PersistBeginDate := DecFMDTDay(DateTimeToFMDateTime(Now),365);
+    //if PersistBeginDate<1 then PersistBeginDate := DecFMDTDay(DateTimeToFMDateTime(Now),365);
+    PersistBeginDate := DateTimeToFMDateTime(StrToDateTime('01/01/2005'));
     if PersistEndDate<1 then PersistEndDate := DateTimeToFMDateTime(Now);
     AFrmTMGChartExporter.dtNotesStart.FMDateTime := PersistBeginDate;
     AFrmTMGChartExporter.dtNotesEnd.FMDateTime := PersistEndDate;

@@ -9,8 +9,8 @@ inherited frmReports: TfrmReports
   Menu = mnuMainMenu
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 733
-  ExplicitHeight = 672
+  ExplicitWidth = 725
+  ExplicitHeight = 668
   PixelsPerInch = 96
   TextHeight = 13
   inherited shpPageBottom: TShape

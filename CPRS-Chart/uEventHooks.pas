@@ -104,14 +104,27 @@ type
     procedure LeaveCriticalSection;
   end;
 
-  
-var
-  uCPRSEventHookManager: TCPRSEventHookManager = nil;
-  uCOMObjectActive: boolean = False;
 
-procedure EnsureEventHookObjects;
-begin
-  if not assigned(uCPRSEventHookManager) then
+var //kt //codex 7/24/26
+  uCPRSEventHookManager: TCPRSEventHookManager = nil; //kt //codex 7/24/26
+  uCOMObjectActive: boolean = False; //kt //codex 7/24/26
+
+function LoadCPRSModuleTypeLib(out CPRSLib: ITypeLib): HResult; //kt //codex 7/24/26
+var //kt //codex 7/24/26
+  ModuleName: string; //kt //codex 7/24/26
+  Buffer: array[0..261] of Char; //kt //codex 7/24/26
+begin //kt //codex 7/24/26
+  CPRSLib := nil; //kt //codex 7/24/26
+  SetString(ModuleName, Buffer, Windows.GetModuleFileName(HInstance, Buffer, Length(Buffer))); //kt //codex 7/24/26
+  if ModuleName = '' then //kt //codex 7/24/26
+    Result := HResult($80004005) //kt //codex 7/24/26
+  else //kt //codex 7/24/26
+    Result := LoadTypeLib(PWideChar(WideString(ModuleName)), CPRSLib); //kt //codex 7/24/26
+end; //kt //codex 7/24/26
+
+procedure EnsureEventHookObjects; //kt //codex 7/24/26
+begin //kt //codex 7/24/26
+  if not assigned(uCPRSEventHookManager) then //kt //codex 7/24/26
     uCPRSEventHookManager := TCPRSEventHookManager.Create;
 end;
 
@@ -121,13 +134,13 @@ constructor TCPRSBroker.Create;
 var
   CPRSLib: ITypeLib;
 
-begin
-  FParam := TParams.Create(nil);
-  FEmptyParams := TParams.Create(nil);
-  OleCheck(LoadRegTypeLib(LIBID_CPRSChart, 1, 0, 0, CPRSLib));
-  inherited Create(CPRSLib, ICPRSBroker);
-  EnsureBroker;
-end;
+begin //kt //codex 7/24/26
+  FParam := TParams.Create(nil); //kt //codex 7/24/26
+  FEmptyParams := TParams.Create(nil); //kt //codex 7/24/26
+  OleCheck(LoadCPRSModuleTypeLib(CPRSLib)); //kt //codex 7/24/26
+  inherited Create(CPRSLib, ICPRSBroker); //kt //codex 7/24/26
+  EnsureBroker; //kt //codex 7/24/26
+end; //kt //codex 7/24/26
 
 procedure TCPRSBroker.CallRPC(const RPCName: WideString);
 var
@@ -324,11 +337,11 @@ constructor TCPRSState.Create;
 var
   CPRSLib: ITypeLib;
 
-begin
-  OleCheck(LoadRegTypeLib(LIBID_CPRSChart, 1, 0, 0, CPRSLib));
-  inherited Create(CPRSLib, ICPRSState);
-  FHandle := DottedIPStr + 'x' + IntToHex(Application.Handle,8);
-end;
+begin //kt //codex 7/24/26
+  OleCheck(LoadCPRSModuleTypeLib(CPRSLib)); //kt //codex 7/24/26
+  inherited Create(CPRSLib, ICPRSState); //kt //codex 7/24/26
+  FHandle := DottedIPStr + 'x' + IntToHex(Application.Handle,8); //kt //codex 7/24/26
+end; //kt //codex 7/24/26
 
 function TCPRSState.Handle: WideString;
 begin
@@ -493,14 +506,16 @@ begin
   if FindCmdLineSwitch('UNREGSERVER', ['-', '/'], True) then
     Unregister := TRUE
   else
-  begin
-    Unregister := FALSE;
-    if not FindCmdLineSwitch('REGSERVER', ['-', '/'], True) then
-      DoHalt := FALSE;
-  end;
+  begin //kt //codex 7/24/26
+    Unregister := FALSE; //kt //codex 7/24/26
+    if not FindCmdLineSwitch('REGSERVER', ['-', '/'], True) then //kt //codex 7/24/26
+      DoHalt := FALSE; //kt //codex 7/24/26
+  end; //kt //codex 7/24/26
+  if not DoHalt then //kt //codex 7/24/26
+    Exit; //kt //codex 7/24/26
 
-  try
-    SetString(ModuleName, Buffer, Windows.GetModuleFileName(HInstance, Buffer, SizeOf(Buffer)));
+  try //kt //codex 7/24/26
+    SetString(ModuleName, Buffer, Windows.GetModuleFileName(HInstance, Buffer, Length(Buffer))); //kt //codex 7/24/26
     if ModuleName <> '' then
     begin
       OleCheck(LoadTypeLib(PWideChar(WideString(ModuleName)), CPRSLib)); // will register if needed

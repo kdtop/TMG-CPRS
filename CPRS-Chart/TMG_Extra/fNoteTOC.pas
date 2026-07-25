@@ -26,7 +26,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure chkKeepOpenClick(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
-    procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName,
+    procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName,
       PostData, Headers: OleVariant; var Cancel: WordBool);
   private
     { Private declarations }
@@ -139,7 +139,7 @@ begin
   end;
 end;
 
-procedure TfrmNoteTOC.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+procedure TfrmNoteTOC.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
 
   function PosEx(const SubStr, S: string; Offset: Cardinal = 1): Integer;

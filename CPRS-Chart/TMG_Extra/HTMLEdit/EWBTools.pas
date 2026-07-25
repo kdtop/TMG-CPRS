@@ -323,7 +323,7 @@ implementation
 
 uses
   Registry, ShellAPI, Controls, Messages, Forms, SysUtils,
-  OleCtrls, WinInet, SendMail_For_EWB, ComObj, IEConst, IniFiles, JPEG, WinSock,
+  OleCtrls, WinInet, SendMail_For_EWB, ComObj, EmbeddedIEConst, IniFiles, JPEG, WinSock,
   Wcrypt2, Browse4Folder, EWBCoreTools;
 
 type
@@ -1368,8 +1368,8 @@ var
     if S = '' then
       S := '0.750000'; // <-- default margin value  by takeru_tk_81
     S := StringReplace(S, ' ', '', [rfReplaceAll]);
-    if DecimalSeparator <> '.' then
-      S := StringReplace(S, '.', DecimalSeparator, []);
+    if FormatSettings.DecimalSeparator <> '.' then
+      S := StringReplace(S, '.', FormatSettings.DecimalSeparator, []);
     if Measure = mMetric then
       Result := StrToFloat(S) * InchToMetric
     else

@@ -15,7 +15,7 @@ type
   TfrmBase508Form = class(TForm)
     amgrMain: TVA508AccessibilityManager;
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    function FormHelp(Command: Word; Data: Integer; var CallHelp: Boolean): Boolean;
+    function FormHelp(Command: Word; Data: THelpEventData; var CallHelp: Boolean): Boolean;
   private
     HelpClicked: boolean;
     OldCursor: TCursor;
@@ -31,7 +31,7 @@ type
     procedure UM508(var Message: TMessage); message UM_508;
     procedure WMNCLBUTTONDOWN(var Msg: TWMNCLButtonDown) ; message WM_NCLBUTTONDOWN;
     procedure WMNCLBUTTONUP(var Msg: TWMNCLButtonUp) ; message WM_NCLBUTTONUP;
-    function DoOnHelp(Command: Word; Data: Integer; var CallHelp: Boolean): Boolean;
+    function DoOnHelp(Command: Word; Data: THelpEventData; var CallHelp: Boolean): Boolean;
   protected
     procedure Activate; override;
     procedure Loaded; override;
@@ -270,7 +270,7 @@ begin
   Result := CallNextHookEx(MouseMonitorHook, Code, wParam, lParam);
 end;
 
-function TfrmBase508Form.DoOnHelp(Command: Word; Data: Integer; var CallHelp: Boolean): Boolean;
+function TfrmBase508Form.DoOnHelp(Command: Word; Data: THelpEventData; var CallHelp: Boolean): Boolean;
 var
   context: THelpContext;
   current: TControl;
@@ -283,7 +283,7 @@ begin
       while (current.HelpContext = 0) and (assigned(current.Parent)) do current := current.Parent;
       context := current.HelpContext;
     end else begin
-      context := Data;
+      context := THelpContext(Data);
     end;
     Result := FormHelp(Command, context, CallHelp);
   end else begin
@@ -291,9 +291,9 @@ begin
   end;
 end;
 
-function TfrmBase508Form.FormHelp(Command: Word; Data: Integer; var CallHelp: Boolean): Boolean;
+function TfrmBase508Form.FormHelp(Command: Word; Data: THelpEventData; var CallHelp: Boolean): Boolean;
 begin
-  Result := THelpManager.GetInstance.ExecHelp(Command, Data, CallHelp);
+  Result := THelpManager.GetInstance.ExecHelp(Command, Integer(Data), CallHelp);
 end;
 
 procedure TfrmBase508Form.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

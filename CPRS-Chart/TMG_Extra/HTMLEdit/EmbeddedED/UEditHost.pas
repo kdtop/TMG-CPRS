@@ -68,7 +68,7 @@ type
   end;
 
 implementation
-  uses ActiveX, ComObj, IeConst;
+  uses ActiveX, ComObj, EmbeddedIEConst;
 
 const
   SID_SHTMLEditHost: TGUID = '{3050F6A0-98B5-11CF-BB82-00AA00BDCE0B}';

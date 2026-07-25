@@ -308,7 +308,7 @@ object frmChartExportHistory: TfrmChartExportHistory
           FFFFFFFFFFFFFFFFFFFF}
       end
       object btnEdit: TBitBtn
-        Left = 215
+        Left = 232
         Top = 8
         Width = 155
         Height = 32

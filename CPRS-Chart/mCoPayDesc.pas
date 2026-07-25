@@ -53,7 +53,7 @@ type
 
 implementation
 
-uses rPCE, UBAGlobals, VAUtils, VA508AccessibilityRouter;
+uses rPCE, UBAGlobals, VAUtils, VA508AccessibilityRouter, fFrame;
 
 {$R *.DFM}
 var
@@ -149,7 +149,7 @@ begin
   except
      on E: Exception do
         begin
-        {$ifdef debug}Show508Message('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
+        {$ifdef debug}ShowMsg('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
         raise;
         end;
   end;
@@ -173,7 +173,7 @@ begin
   except
      on E: Exception do
         begin
-        {$ifdef debug}Show508Message('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
+        {$ifdef debug}ShowMsg('Unhandled exception in procedure TfrmSignOrders.ShowTreatmentFactorHints()');{$endif}
         raise;
         end;
   end;

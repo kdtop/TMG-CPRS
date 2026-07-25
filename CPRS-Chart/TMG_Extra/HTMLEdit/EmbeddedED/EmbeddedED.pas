@@ -93,7 +93,7 @@ uses
   AXCtrls, menus, Controls, messages, URLMon,
   {$IFDEF D6D7} Variants, {$ENDIF}
   {$IFDEF EDPRINT} EDPrint, {$ENDIF}
-  IEConst, EmbedEDconst, KS_Lib, SHDocVw;
+  EmbeddedIEConst, EmbedEDconst, KS_Lib, SHDocVw;
 
 type
   TDHTMLEDITAPPEARANCE = (DEAPPEARANCE_FLAT, DEAPPEARANCE_3D);
@@ -949,6 +949,10 @@ procedure TEmbeddedED.EDMessageHandler(var Message: TMessage);
 var
   WinMsg: TMsg;
   handled: boolean;
+  Msg: LongWord;
+  WParam: SYSINT;
+  LParam: SYSINT;
+  MsgResult: SYSINT;
   //kt 8/16 Transformed: boolean;
 
   //----------------------------------------------------------
@@ -996,7 +1000,15 @@ begin
   Handled := false;
 
   if assigned(FMessageHandler) then begin  //external assigned message handler
-    FMessageHandler(Self, Message.Msg, Message.WParam, Message.LParam, Message.Result);
+    Msg := Message.Msg;
+    WParam := Message.WParam;
+    LParam := Message.LParam;
+    MsgResult := Message.Result;
+    FMessageHandler(Self, Msg, WParam, LParam, MsgResult);
+    Message.Msg := Msg;
+    Message.WParam := WParam;
+    Message.LParam := LParam;
+    Message.Result := MsgResult;
     if Message.Result = 1 then begin
       exit;
     end;

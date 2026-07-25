@@ -302,7 +302,7 @@ begin
     OneLine := '';
     if ReadCount > 0 then begin
       SetLength(OneLine,ReadCount);
-      for j := 1 to ReadCount do OneLine[j] := char(Buffer[j-1]);
+      for j := 1 to ReadCount do OneLine[j] := AnsiChar(Buffer[j-1]);
       RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
       Inc(ParamIndex);
 
@@ -450,7 +450,7 @@ var
   i : integer;            //RGZ2
   PlainTrio : longword;   //RGZ3  //unsigned 32-bit
   j : integer;            //RGZ4
-  EncodedChar : char;
+  EncodedChar : AnsiChar;
   PlainInt : integer;
   PlainByte : byte;       //RGZ5
   DecodedTrio : string[3];//RGZ6

@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fPCEBase, ORCtrls, StdCtrls, ComCtrls, CheckLst, ExtCtrls, Buttons, uPCE, rPCE, ORFn,
-  fPCELex, fPCEOther, rCore, fPCEBaseMain, VA508AccessibilityManager;
+  fPCELex, fPCEOther, rCore, fPCEBaseMain, VA508AccessibilityManager, VAUtils;
 
 type
   TfrmSkinTests = class(TfrmPCEBaseMain)
@@ -136,7 +136,7 @@ begin
       end
       else
       begin
-        Show508Message('If the reading is over 9, the results are required to be positive.');
+        ShowMsg('If the reading is over 9, the results are required to be positive.');
         cboSkinResults.SelectById('P');
        end;
     end;

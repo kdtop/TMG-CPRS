@@ -7,11 +7,11 @@ inherited frmReports: TfrmReports
   ClientWidth = 717
   HelpFile = 'qnoback'
   Menu = mnuMainMenu
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 725
-  ExplicitHeight = 668
-  PixelsPerInch = 96
+  ExplicitWidth = 733
+  ExplicitHeight = 673
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 604
@@ -31,6 +31,7 @@ inherited frmReports: TfrmReports
   inherited pnlLeft: TPanel
     Width = 119
     Height = 604
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 119
     ExplicitHeight = 604
     object Splitter1: TSplitter
@@ -147,6 +148,7 @@ inherited frmReports: TfrmReports
         TabOrder = 1
         OnClick = lstQualifierClick
         OnDrawItem = lstQualifierDrawItem
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2,3'
@@ -228,6 +230,7 @@ inherited frmReports: TfrmReports
           ShowHint = True
           TabOrder = 1
           OnClick = lstDateRangeClick
+          Caption = ''
           ItemTipColor = clWindow
           LongList = False
           Pieces = '2'
@@ -282,6 +285,7 @@ inherited frmReports: TfrmReports
     Left = 123
     Width = 594
     Height = 604
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 123
     ExplicitWidth = 594
     ExplicitHeight = 604
@@ -470,6 +474,7 @@ inherited frmReports: TfrmReports
         OnDrawItem = lvReportsDrawItem
         OnKeyUp = lvReportsKeyUp
         OnSelectItem = lvReportsSelectItem
+        AutoSize = False
       end
     end
   end

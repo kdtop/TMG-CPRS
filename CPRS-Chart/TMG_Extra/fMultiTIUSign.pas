@@ -1134,6 +1134,7 @@ procedure TfrmMultiTIUSign.LoadNoteForView(ItemInfo : TItemInfo);
 var
   Lines : TStringList;
   Temp : string;
+  IsHTML : boolean;
 begin
   Lines := TStringList.Create;
   try
@@ -1142,7 +1143,7 @@ begin
         if ItemInfo.LocalHTMLFile = '' then begin
           StatusText('Retrieving selected progress note...');
           Screen.Cursor := crAppStart;
-          LoadDocumentText(Lines, ItemInfo.intIEN8925);
+          LoadDocumentText(Lines, ItemInfo.intIEN8925, IsHTML);
           Screen.Cursor := crDefault;
           StatusText('');
           //kt 8/19/21 -- line below not needed, as is called at time of loading document.

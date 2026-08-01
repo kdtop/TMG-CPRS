@@ -127,20 +127,22 @@ var
    hFn: integer;
    finfo: TOFSTRUCT;
    bytesRead, status: longint;
-   tBuf: PChar;
+   tBuf: PAnsiChar; //kt //codex 7/29/26
+   ansiFn: AnsiString; //kt //codex 7/29/26
 
 begin
-     tBuf := StrAlloc(160);
-     hFn := OpenFile(fn, finfo, OF_READ);
+     tBuf := AllocMem(160); //kt //codex 7/29/26
+     ansiFn := AnsiString(string(fn)); //kt //codex 7/29/26
+     hFn := OpenFile(PAnsiChar(ansiFn), finfo, OF_READ); //kt //codex 7/29/26
      bytesRead := 0;
-     status := _lread(hFn, tBuf, sizeof(tBuf));
+     status := _lread(hFn, tBuf, 160); //kt //codex 7/29/26
      while status <> 0 do
      begin
-          status := _lread(hFn, tBuf, sizeof(tBuf));
+          status := _lread(hFn, tBuf, 160); //kt //codex 7/29/26
           inc(bytesRead,status);
      end;
      _lclose(hFn);
-     StrDispose(tBuf);
+     FreeMem(tBuf); //kt //codex 7/29/26
      Result := bytesRead;
 end;
 

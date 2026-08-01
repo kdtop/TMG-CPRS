@@ -1,4 +1,4 @@
-unit fNotes;
+﻿unit fNotes;
 
  (*
  NOTE: The original version of this file may be obtained freely from the VA.
@@ -51,11 +51,13 @@ uses
   uNoteComponents,                                    //kt 4/15
   pngimage,                                           //kt 12/28/21
   rFileTransferU, uImages,ShellApi,                   //kt 10/27/20
+  System.UITypes,                                     //kt 7/30/26
+  System.Types,                                       //kt 7/30/26
   TMG_WIA_TLB,
   fNotesLoading, //tmg   5/6/22
   MSHTML_EWB, //TMG 5/20/22
   fNoteTOC, //tmg 1/23/24
-  OleCtrls, ToolWin, VA508ImageListLabeler;
+  OleCtrls, ToolWin, VA508ImageListLabeler, System.ImageList;
 
 type
   TEditModes = (emNone,emText,emHTML);                //kt 9/11
@@ -2159,7 +2161,7 @@ end;
 
 procedure TfrmNotes.FormCreate(Sender: TObject);
 var
-  CacheDir : AnsiString;  //kt 9/11
+  CacheDir : string;  //kt 9/11 //codex 7/29/26
   NewItem:tMenuItem;
   arrMacros : TStringList;
   i : integer;
@@ -2440,9 +2442,9 @@ procedure TfrmNotes.HandleHTMLObjPaste(Sender : TObject; var AllowPaste : boolea
     HTMLText := HTMLText + 'StartHTML:-1' + CRLF;
     HTMLText := HTMLText + 'EndHTML:-1' + CRLF;
     HTMLText := HTMLText + 'StartFragment:000081' + CRLF;
-    HTMLText := HTMLText + 'EndFragment:Â°Â°Â°Â°Â°Â°' + CRLF;
+    HTMLText := HTMLText + 'EndFragment:Ã‚Â°Ã‚Â°Ã‚Â°Ã‚Â°Ã‚Â°Ã‚Â°' + CRLF;
     HTMLText := HTMLText + SL.Text + CRLF;
-    HTMLText := StringReplace(HTMLText, 'Â°Â°Â°Â°Â°Â°', Format('%.6d', [Length(HTMLText)]), []);
+    HTMLText := StringReplace(HTMLText, 'Ã‚Â°Ã‚Â°Ã‚Â°Ã‚Â°Ã‚Â°Ã‚Â°', Format('%.6d', [Length(HTMLText)]), []);
     SL.Clear;
     SL.Text := HTMLText;
   end;
@@ -2554,8 +2556,7 @@ begin
                           '  (' + FormatFMDateTime('mmm dd,yy@hh:nn', MakeFMDateTime(Piece(Items[ItemIndex], U, 3)))
                           + ')';
       lvNotes.Caption := lblTitle.Caption;
-      //kt 8/09 LoadDocumentText(memNote.Lines, ItemIEN);
-      LoadDocumentText(FViewNote, ItemIEN);  //kt 9/11
+      LoadDocumentText(FViewNote, ItemIEN, IsHTML);  //kt 9/11
       TMGDebugEditLines := false;                           //kt 4/16  -- can change while walking through to edit StringList;
       if TMGDebugEditLines = true then EditSL(FViewNote);   //kt 4/16
       Note := FViewNote;                     //kt 9/11
@@ -2566,8 +2567,6 @@ begin
       mnuActLoadBoiler.Enabled := False;
       Screen.Cursor := crDefault;
       StatusText('');
-      //frmImages.NewNoteSelected(Editing); //kt 9/05
-      IsHTML := uHTMLTools.IsHTML(FViewNote);            //kt 9/11
       Mode := [vmView] + [vmHTML_MODE[IsHTML]];          //kt 9/11
       SetDisplayToHTMLvsText(Mode,FViewNote);            //kt 9/11
       if not FWarmedUp and IsHTML then begin             //kt 9/11
@@ -7754,7 +7753,7 @@ begin
         if NewLeft + frmNoteTOC.Width * 0.25 > ScreenWidth then
           NewLeft := ScreenWidth - frmNoteTOC.Width;
 
-        // make sure we don�t go negative
+        // make sure we don’t go negative
         if NewLeft < 0 then
           NewLeft := 0;
 

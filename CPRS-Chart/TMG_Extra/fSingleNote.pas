@@ -998,9 +998,9 @@ procedure TfrmSingleNote.HandleHTMLObjPaste(Sender : TObject; var AllowPaste : b
     HTMLText := HTMLText + 'StartHTML:-1' + CRLF;
     HTMLText := HTMLText + 'EndHTML:-1' + CRLF;
     HTMLText := HTMLText + 'StartFragment:000081' + CRLF;
-    HTMLText := HTMLText + 'EndFragment:같같같' + CRLF;
+    HTMLText := HTMLText + 'EndFragment:째째째째째째' + CRLF;
     HTMLText := HTMLText + SL.Text + CRLF;
-    HTMLText := StringReplace(HTMLText, '같같같', Format('%.6d', [Length(HTMLText)]), []);
+    HTMLText := StringReplace(HTMLText, '째째째째째째', Format('%.6d', [Length(HTMLText)]), []);
     SL.Clear;
     SL.Text := HTMLText;
   end;

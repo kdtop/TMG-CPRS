@@ -55,6 +55,8 @@ uses
   uTMGEvent,                   //TMG  10/29/20
   fImagePatientPhotoID, fTMGChartExporter, //kt
   VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw, ImgList,
+  System.UITypes,
+  System.Contnrs,  //kt 7/30/26
   System.ImageList;
 
 type
@@ -1249,6 +1251,7 @@ begin
     Exit;
   end;
   ServerReq := Piece(FileVersionValue(Application.ExeName, FILE_VER_INTERNALNAME), ' ', 1);
+  if ServerReq = '' then ServerReq := Piece(FileVersionValue(Application.ExeName, FILE_VER_FILEVERSION), ' ', 1); //kt //codex 7/30/26
   //kt Allow 'SPOOF-VER=x.x.x.x' command-line parameter
   tempS := Trim(ParamSearch('SPOOF-VER')); //kt 9/11 added
   if tempS <>'' then begin
@@ -2109,7 +2112,7 @@ begin
 end;
 
 procedure TfrmFrame.mnuChangelogClick(Sender: TObject);
-var ChangeLog:TStringList;
+//var ChangeLog:TStringList;
 begin
   inherited;
   ViewChangeLog('ALL');
@@ -6151,7 +6154,7 @@ end;
 
 procedure TfrmFrame.wbNoPatientSelectedBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
-var MsgType:string;
+var //MsgType:string;
     DFN:string;
 
 begin

@@ -1228,6 +1228,7 @@ procedure TfrmCarePlan.sgCarePlanProgressDrawCell(Sender: TObject; ACol, ARow: I
       BegPos,EndPos : integer;
       Pos: TPoint;
       LineNo : integer;
+      IsHTML : boolean;
   begin
     CPHeader := CP_TEMPLATE_TAG+CarePlanName;
     CPFooter := ENDOF_TAG+CP_TEMPLATE_TAG+CarePlanName+CP_BRACKET_CLOSE;
@@ -1239,7 +1240,7 @@ procedure TfrmCarePlan.sgCarePlanProgressDrawCell(Sender: TObject; ACol, ARow: I
     NoteText := TStringList.Create;
 
     try
-      LoadDocumentText(NoteText,StrToIntDef(IEN8925,-1));
+      LoadDocumentText(NoteText,StrToIntDef(IEN8925,-1), IsHTML);
       DetailsRE.Lines.Assign(NoteText);
       BegPos := DetailsRE.FindText(CPHeader,0,strlen(PChar(DetailsRE.Text)),[]);
       EndPos := DetailsRE.FindText(CPFooter,0,strlen(PChar(DetailsRE.Text)),[]);

@@ -1,5 +1,5 @@
 {GENERAL METHODS USED BY TWAIN DELPHI}
-{december 2001®, made by Gustavo Daud}
+{december 2001Â®, made by Gustavo Daud}
 
 {This unit contains general methods used by Delphi}
 {Twain component. Some of the methods bellow aren't}
@@ -70,9 +70,9 @@ type
       SetAdditionalBlock;
   end;
 
-{Returns custom Microsoft Windows® directories}
+{Returns custom Microsoft WindowsÂ® directories}
 function GetCustomDirectory(const DirectoryKind: TDirectoryKind): String;
-{Returns the last error string from Microsoft Windows®}
+{Returns the last error string from Microsoft WindowsÂ®}
 function GetLastErrorText(): String;
 {Returns if the directory exists}
 function DirectoryExists(const Directory: String): Boolean;
@@ -180,7 +180,7 @@ begin
   Result := (s shl 10) or p;
 end;
 
-{Returns the last error string from Microsoft Windows®}
+{Returns the last error string from Microsoft WindowsÂ®}
 function GetLastErrorText(): String;
 var
   Buffer: Array[Byte] of WideChar;
@@ -207,7 +207,7 @@ begin
     Directory := Directory + '\'
 end;
 
-{Returns custom Microsoft Windows® directories}
+{Returns custom Microsoft WindowsÂ® directories}
 function GetCustomDirectory(const DirectoryKind: TDirectoryKind): String;
 const
   {Default maximum size for directories}

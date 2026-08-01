@@ -49,18 +49,18 @@ type
     private
     public
       TIUIEN :             int64;      //IEN in file# 8925
-      DFN :                AnsiString; //IEN in Patient File (#2)
+      DFN :                string; //IEN in Patient File (#2)
       IMAGEIEN :           int64;      //IEN in file# 2005 (IMAGE)
       UploadDUZ :          int64;      //IEN in NEW PERSON file
-      ThumbFPathName :     AnsiString; // local file path name
-      ImageFPathName :     AnsiString; // local file path name
-      ServerPath :         AnsiString;
-      ServerFName :        AnsiString;
-      ServerThumbFName:    AnsiString;
+      ThumbFPathName :     string; // local file path name
+      ImageFPathName :     string; // local file path name
+      ServerPath :         string;
+      ServerFName :        string;
+      ServerThumbFName:    string;
       ShortDesc :          String[60];
       Extension :          String[16];
-      ImageDateTime :      AnsiString;
-      UploadDateTime:      AnsiString;
+      ImageDateTime :      string;
+      UploadDateTime:      string;
       ObjectType :         int64;      //pointer to file 2005.02
       ProcName :           String[10]; //server limit is 10 chars.
       pLongDesc :          TStrings;  //Won't be owned by this list
@@ -72,13 +72,13 @@ type
     private
     public
       TIUIEN :       int64;      //IEN in file# 8925
-      ErrMsg :       AnsiString;
-      NoteTitle :    AnsiString; //Title of note to be associated with image
+      ErrMsg :       string;
+      NoteTitle :    string; //Title of note to be associated with image
       Patient :      TPatient;
       ImageInfo :    TUploadImageInfo;
-      Location :     AnsiString; //Location that image if from
-      DOS :          AnsiString; //Date of service
-      Provider :     AnsiString;
+      Location :     string; //Location that image if from
+      DOS :          string; //Date of service
+      Provider :     string;
       CurNoteImages: TStringList;
       UploadError :  Boolean;
       procedure SetDFN(var ChartNum,Location,FName,LName,MName,DOB,Sex : string);
@@ -171,7 +171,7 @@ type
                            FName, LName, MName, Sex, DOB, DOS, Provider,
                            Title : string; FilePaths : TStrings);
     function EncodeImgTxt(ChartNum, Location, FName, LName, MName, Sex, DOB,
-                           DOS, Provider, Title : string; FilePaths : TStrings) : AnsiString;
+                           DOS, Provider, Title : string; FilePaths : TStrings) : string;
     procedure FinishDocument(UploadNote : TAutoUploadNote; ErrLog : TStringList = nil);
     procedure SetPatientPhotoID(Value : boolean);
     procedure SetAllowNonImages(Value : boolean);
@@ -288,7 +288,7 @@ implementation
   end;
 
   function UniqueTempSaveFilePath (RootName : string = 'temp_file'; FileType : string = 'jpg') : string;
-  var  CacheDir : AnsiString;  //kt 9/11
+  var  CacheDir : string;  //kt 9/11 //codex 7/29/26
        i : integer;
   begin
     CacheDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
@@ -421,8 +421,8 @@ implementation
   //-------------------------------------------------------------------------
   //-------------------------------------------------------------------------
   procedure TAutoUploadNote.SetDFN(var ChartNum,Location,FName,LName,MName,DOB,Sex : string);
-  var RPCResult : AnsiString;
-      PMS : AnsiString;
+  var RPCResult : string;
+      PMS : string;
   begin
     //Notice: ChartNum, and PMS are optional.  If PMS is 1,2,or 3, then ChartNum
     //        is used to look up patient.  Otherwise a lookup is based on just
@@ -590,7 +590,7 @@ implementation
 
   var
     FullRect, Rect : TRect;
-    ThumbFName : AnsiString;
+    ThumbFName : string;
     //IconNumber : integer;
     //SmallIcon, LargeIcon: HIcon;
     PicH, PicW : integer;
@@ -777,10 +777,10 @@ implementation
   //result: true if success, false if failure
   //kt 8/10/20 Added ErrLog.  Optional.  If provided, then errors will be added to this, and MessageDlg will not be shown.
   var
-    RPCResult,index              : AnsiString;
-    ImageIEN                     : AnsiString;
-    MsgNum                       : AnsiString;
-    ErrorMsg                     : AnsiString;
+    RPCResult,index              : string;
+    ImageIEN                     : string;
+    MsgNum                       : string;
+    ErrorMsg                     : string;
     i                            : integer;
     CacheFPathName, tempFName    : string;
 
@@ -1027,7 +1027,7 @@ implementation
   {
   procedure TImageUploadForm.LoadNotesList();
   var
-    NoteInfo,s,dateS : AnsiString;
+    NoteInfo,s,dateS : string;
     i : integer;
   const
     U='^';
@@ -1250,7 +1250,7 @@ implementation
 
   procedure TfrmImageUpload.FilesToUploadListClick(Sender: TObject);
   var
-    FileName:  AnsiString;
+    FileName:  string;
     SelectedItem: integer;
   begin
     SelectedItem := FilesToUploadList.ItemIndex;
@@ -1355,7 +1355,7 @@ implementation
   end;  
 
   function TfrmImageUpload.EncodeImgTxt(ChartNum, Location, FName, LName, MName, Sex, DOB,
-                           DOS, Provider, Title : string; FilePaths : TStrings) : AnsiString;
+                           DOS, Provider, Title : string; FilePaths : TStrings) : string;
   //format of line is as follows:
   //ChartNum^Location^FName^LName^MName^Sex^DOB^DOS^Provider^Title^FilePath(s)
   //NOTE: To provide patient IEN instead of FName etc, use this format:
@@ -1681,7 +1681,7 @@ implementation
       FoundFile : string;
       MetaFilename : string;
       Found : TSearchRec;
-      //BarCodeData : AnsiString;
+      //BarCodeData : string;
       DFN,DOS,AuthIEN,LocIEN,NoteTypeIEN : string;
       OneLine : string;
       FilePaths : TStringList;

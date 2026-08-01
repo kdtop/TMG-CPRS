@@ -4,10 +4,9 @@ inherited frmNotePrint: TfrmNotePrint
   Caption = 'frmNotePrint'
   ClientHeight = 306
   Position = poScreenCenter
+  StyleElements = [seFont, seClient, seBorder]
   OnCreate = FormCreate
-  ExplicitWidth = 443
-  ExplicitHeight = 344
-  PixelsPerInch = 96
+  ExplicitHeight = 345
   TextHeight = 13
   object lblPrintTo: TLabel [0]
     Left = 8
@@ -87,6 +86,7 @@ inherited frmNotePrint: TfrmNotePrint
       EditMask = '99999;0; '
       MaxLength = 5
       TabOrder = 1
+      Text = ''
     end
     object txtPageLength: TMaskEdit
       Left = 184
@@ -97,6 +97,7 @@ inherited frmNotePrint: TfrmNotePrint
       EditMask = '99999;0; '
       MaxLength = 5
       TabOrder = 2
+      Text = ''
     end
     object cboDevice: TORComboBox
       Left = 8
@@ -122,6 +123,7 @@ inherited frmNotePrint: TfrmNotePrint
       SynonymChars = '<>'
       TabPositions = '30'
       TabOrder = 0
+      Text = ''
       OnChange = cboDeviceChange
       OnNeedData = cboDeviceNeedData
       CharsNeedMatch = 1

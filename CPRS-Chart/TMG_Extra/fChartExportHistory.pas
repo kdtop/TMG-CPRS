@@ -108,7 +108,7 @@ end;
 //======================EXPORT RECORD ROUTINES==================================
 
 constructor TExportRecord.Create(const Data,ANotes,ALabs,ARadReports:string);  //Constructor
-var i:integer;
+//var i:integer;
 begin
   inherited Create;
   FDate := piece(Data,'^',1);
@@ -128,7 +128,7 @@ end;
 //======================END EXPORT RECORD ROUTINES==================================
 
 procedure TfrmChartExportHistory.LoadEntireHistory(ExportHistory:TStringList);
-var i,j,k :integer;
+var i,j :integer;
     DataStr,NotesStr,LabStr,RadStr:string;
     ExportItem:TExportRecord;
 begin
@@ -216,7 +216,7 @@ procedure TfrmChartExportHistory.LoadParentList();
     end;
 
 var i:integer;
-    ListItem:TListItem;
+    //ListItem:TListItem;
 begin
   grdExportParents.Cells[0,0] := 'Date';
   grdExportParents.Cells[1,0] := 'Sent To';
@@ -244,13 +244,14 @@ var
     Lines:TStringList;
     HTMLFile:string;
     NodeData:PNodeData;
+    IsHTML : boolean;
 begin
    if Assigned(Node) and Assigned(Node.Data) then begin
       NodeData := PNodeData(Node.Data);
       if Node.Parent.Text='Office Notes' then begin
         Lines := TStringList.Create();
-        LoadDocumentText(Lines,strtoint(piece(NodeData^.FullText,'?',1)));
-        uHTMLTools.FixHTML(Lines);
+        LoadDocumentText(Lines,strtoint(piece(NodeData^.FullText,'?',1)), IsHTML);
+        If IsHTML then uHTMLTools.FixHTML(Lines);
         HTMLFile := CPRSCacheDir+piece(NodeData^.FullText,'?',1)+'.html';
         Lines.SaveToFile(HTMLFile);
         wbOneSentItem.Navigate(HTMLFile);

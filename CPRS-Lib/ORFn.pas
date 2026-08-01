@@ -58,7 +58,7 @@ var
   ScrollBarHeight: integer = 0;
 
 type
-  TCharacterSet = Set of Char;
+  TCharacterSet = TSysCharSet; //kt //codex 7/30/26
   TFMDateTime = Double;
   TORIdleCallProc = procedure(Msg: string);
 
@@ -699,9 +699,10 @@ end;
 function ConvertSpecialStrings(const x: string): string;
 var i : Integer;
 begin
+   Result := x; //kt //codex 7/30/26
    for i := 0 to Length(SearchChars)-1 do
     begin
-       Result := StringReplace(Result,SearchChars[i], ReplaceChars[i],[rfReplaceAll]);
+       Result := StringReplace(Result,SearchChars[i], ReplaceChars[i],[rfReplaceAll]); //kt //codex 7/30/26
     end;
 end;
 
@@ -873,7 +874,7 @@ begin
      else if ((x[i-1] in [' ',',','-','.','/','^'])) and (x[i] in ['a'..'z'])
       then Result[i] := Chr(Ord(x[i]) - 32);
   //Call added to satisfy the need for special string handling(Roman Numerals II-XI) GRE-06/02
-  Result := ConvertSpecialStrings(x);
+  Result := ConvertSpecialStrings(Result); //kt //codex 7/30/26
 end;
 
 procedure MixedCaseList(AList: TStrings);
@@ -1419,18 +1420,26 @@ begin
 end;
 
 procedure FastAssign(source, destination: TStrings);
-// do not use this with RichEdit Lines unless source is RichEdit with PlainText
 var
   ms: TMemoryStream;
 begin
+  if not Assigned(source) then
+    raise Exception.Create('FastAssign source is nil'); //kt //codex 7/30/26
+  if not Assigned(destination) then
+    raise Exception.Create('FastAssign destination is nil'); //kt //codex 7/30/26
+  if source = destination then
+    Exit; //kt //codex 7/30/26
+
   destination.Clear;
   if (source is TStringList) and (destination is TStringList) then
-    destination.Assign(source)
-  else
-  if (CompareText(source.ClassName, 'TRichEditStrings') = 0) then
-    destination.Assign(source)
-  else
-  begin
+    destination.Assign(source) //kt //codex 7/30/26
+  else if (CompareText(source.ClassName, 'TRichEditStrings') <> 0) and
+          (CompareText(destination.ClassName, 'TRichEditStrings') <> 0) then
+    destination.Assign(source) //kt //codex 7/30/26
+  else if (CompareText(source.ClassName, 'TORStrings') = 0) or
+          (CompareText(destination.ClassName, 'TORStrings') = 0) then
+    destination.Assign(source) //kt //codex 7/30/26
+  else begin
     ms := TMemoryStream.Create;
     try
       source.SaveToStream(ms);
@@ -1440,15 +1449,51 @@ begin
       ms.Free;
     end;
   end;
+
+  { original method  //kt
+  var
+    ms: TMemoryStream;
+  begin
+    destination.Clear;
+    if (source is TStringList) and (destination is TStringList) then
+      destination.Assign(source)
+    else
+    if (CompareText(source.ClassName, 'TRichEditStrings') = 0) then
+      destination.Assign(source)
+    else
+    begin
+      ms := TMemoryStream.Create;
+      try
+        source.SaveToStream(ms);
+        ms.Seek(0, soFromBeginning);
+        destination.LoadFromStream(ms);
+      finally
+        ms.Free;
+      end;
+    end;
+  end;
+  }
 end;
 
 procedure FastAddStrings(source, destination: TStrings);
-// do not use this with RichEdit Lines unless source and destination are RichEdit with PlainText
 var
   ms: TMemoryStream;
 begin
+  if not Assigned(source) then
+    raise Exception.Create('FastAddStrings source is nil'); //kt //codex 7/30/26
+  if not Assigned(destination) then
+    raise Exception.Create('FastAddStrings destination is nil'); //kt //codex 7/30/26
+  if source = destination then
+    raise Exception.Create('FastAddStrings does not support source=destination'); //kt //codex 7/30/26
+
   if (source is TStringList) and (destination is TStringList) then
-    destination.AddStrings(source)
+    destination.AddStrings(source) //kt //codex 7/30/26
+  else if (CompareText(source.ClassName, 'TRichEditStrings') <> 0) and
+          (CompareText(destination.ClassName, 'TRichEditStrings') <> 0) then
+    destination.AddStrings(source) //kt //codex 7/30/26
+  else if (CompareText(source.ClassName, 'TORStrings') = 0) or
+          (CompareText(destination.ClassName, 'TORStrings') = 0) then
+    destination.AddStrings(source) //kt //codex 7/30/26
   else
   begin
     ms := TMemoryStream.Create;
@@ -1462,7 +1507,30 @@ begin
     finally
       ms.Free;
     end;
+
   end;
+  { original method   //kt
+  var
+    ms: TMemoryStream;
+  begin
+    if (source is TStringList) and (destination is TStringList) then
+      destination.AddStrings(source)
+    else
+    begin
+      ms := TMemoryStream.Create;
+      try
+        destination.SaveToStream(ms);
+        ms.Seek(0, soFromEnd);
+        source.SaveToStream(ms);
+        ms.Seek(0, soFromBeginning);
+        destination.Clear;
+        destination.LoadFromStream(ms);
+      finally
+        ms.Free;
+      end;
+    end;
+  end;
+  }
 end;
 
 function ValidFileName(const InitialFileName: string): string;
@@ -2862,7 +2930,7 @@ end;
 
 function CharInSet(AChar: Char; ASetOfChar: TCharacterSet) : Boolean;
 begin
-  result := (AChar in ASetOfChar);
+  result := SysUtils.CharInSet(AChar, ASetOfChar); //kt //codex 7/30/26
 end;
 
 function SplitUsingSeparators(const Value: string; PreSeparators, PostSeparators: TSysCharSet): TStringList;

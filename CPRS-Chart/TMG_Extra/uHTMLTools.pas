@@ -1,6 +1,6 @@
-unit uHTMLTools;
+ï»¿unit uHTMLTools;
 //kt 9/11 Added entire unit.
-//kt 9/11 NAME CHANGED rHTMLTools --> uHTMLTools
+//kt 9/11 NAME CHANGED rHTMLTools --> uHTMLTools 
 
  (*
  Copyright 6/23/2015 Kevin S. Toppenberg, MD
@@ -2234,9 +2234,9 @@ begin
   Result := Result + 'StartHTML:-1' + CrLf;
   Result := Result + 'EndHTML:-1' + CrLf;
   Result := Result + 'StartFragment:000081' + CrLf;
-  Result := Result + 'EndFragment:°°°°°°' + CrLf;
+  Result := Result + 'EndFragment:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½' + CrLf;
   Result := Result + HTMLText + CrLf;
-  Result := StringReplace(Result, '°°°°°°', Format('%.6d', [Length(Result)]), []);
+  Result := StringReplace(Result, 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', Format('%.6d', [Length(Result)]), []);
 end;
 
 //The second parameter is optional and is put into the clipboard as CF_HTML.
@@ -2608,30 +2608,51 @@ begin
 end;
 
 Function GetIPAddress():String;
-type
-  TaPInAddr = array [0..10] of PInAddr;
-  PaPInAddr = ^TaPInAddr;
 var
-  phe: PHostEnt;
-  pptr: PaPInAddr;
-  Buffer: array [0..63] of Ansichar;
-  i: Integer;
-  GInitData: TWSADATA;
+  HostName: array [0..63] of AnsiChar;
+  HostEntry: PHostEnt;
+  Address: PInAddr;
+  WSAData: TWSADATA;
 begin
-  WSAStartup($101, GInitData);
   Result := '';
-  GetHostName(Buffer, SizeOf(Buffer));
-  phe := GetHostByName(Buffer);
-  if phe = nil then
-    Exit;
-  pptr := PaPInAddr(phe^.h_addr_list);
-  i := 0;
-  while pptr^[i] <> nil do
-  begin
-    Result := StrPas(inet_ntoa(pptr^[i]^));
-    Inc(i);
+  //kt //codex 7/30/26 rewrite of code below
+  if WSAStartup($0101, WSAData) <> 0 then Exit;
+  try
+    if GetHostName(HostName, SizeOf(HostName)) <> 0 then Exit;
+    HostEntry := GetHostByName(HostName);
+    if HostEntry = nil then Exit;
+    if HostEntry^.h_addr_list = nil then Exit;
+    Address := PInAddr(HostEntry^.h_addr_list^);
+    if Address = nil then Exit;
+    Result := string(AnsiString(inet_ntoa(Address^)));
+  finally
+    WSACleanup;
   end;
-  WSACleanup;
+  //kt //codex original --> type
+  //kt //codex original -->   TaPInAddr = array [0..10] of PInAddr;
+  //kt //codex original -->   PaPInAddr = ^TaPInAddr;
+  //kt //codex original --> var
+  //kt //codex original -->   phe: PHostEnt;
+  //kt //codex original -->   pptr: PaPInAddr;
+  //kt //codex original -->   Buffer: array [0..63] of Ansichar;
+  //kt //codex original -->   i: Integer;
+  //kt //codex original -->   GInitData: TWSADATA;
+  //kt //codex original --> begin
+  //kt //codex original -->   WSAStartup($101, GInitData);
+  //kt //codex original -->   Result := '';
+  //kt //codex original -->   GetHostName(Buffer, SizeOf(Buffer));
+  //kt //codex original -->   phe := GetHostByName(Buffer);
+  //kt //codex original -->   if phe = nil then
+  //kt //codex original -->     Exit;
+  //kt //codex original -->   pptr := PaPInAddr(phe^.h_addr_list);
+  //kt //codex original -->   i := 0;
+  //kt //codex original -->   while pptr^[i] <> nil do
+  //kt //codex original -->   begin
+  //kt //codex original -->     Result := StrPas(inet_ntoa(pptr^[i]^));
+  //kt //codex original -->     Inc(i);
+  //kt //codex original -->   end;
+  //kt //codex original -->   WSACleanup;
+  //kt //codex original --> end;
 end;
 
 

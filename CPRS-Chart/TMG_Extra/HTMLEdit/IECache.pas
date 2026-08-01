@@ -4,7 +4,7 @@
 //                 For Delphi 5, 6, 7, 2005, 2006              *
 //                     Freeware Component                      *
 //                            by                               *
-//                     Per Lindsø Larsen                       *
+//                     Per LindsÃ¸ Larsen                       *
 //                   per.lindsoe@larsen.dk                     *
 //                                                             *
 //  Contributions:                                             *

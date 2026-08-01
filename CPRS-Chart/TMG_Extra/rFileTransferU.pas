@@ -54,31 +54,31 @@ type
 procedure GetAvailLabPDFs(OutList : TStringList; DFN : string; StartDate: TFMDateTime = 0; EndDate : TFMDateTime = 9999999);
 procedure GetAvailLabHL7s(OutList : TStringList; DFN : string; StartDate: TFMDateTime = 0; EndDate : TFMDateTime = 9999999; OptionStr:string='0^0^0');
 
-function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: string;
                             RPCName : string;
                             var ErrMsg : string;
                             ProgressCallback :   TProgressCallback = nil): TDownloadResult;
-function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: string;
                         CurrentFileNum, TotalFileNum: Integer;
                         var ErrMsg : string;
                         ProgressCallback : TProgressCallback = nil) : TDownloadResult;
-function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadFile(FPath,FName,LocalSaveFNamePath: string;
                       var ErrMsg : string;
                       ProgressCallback : TProgressCallback = nil): TDownloadResult;
-function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath, DropboxDir: AnsiString;
+function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath, DropboxDir: string;
                                 var ErrMsg : string;
                                 ProgressCallback : TProgressCallback = nil): TDownloadResult;
-function UploadFile(LocalFNamePath,FPath,FName: AnsiString;
+function UploadFile(LocalFNamePath,FPath,FName: string;
                     var ErrMsg : string;
                     ProgressCallback : TProgressCallback = nil): boolean;
-function UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir: AnsiString; var ErrMsg : string): boolean;
+function UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir: string; var ErrMsg : string): boolean;
 
-function Encode64(Input: AnsiString) : AnsiString;
-function Decode64(Input: AnsiString) : AnsiString;
+function Encode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
+function Decode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
 function FileSize(fileName : wideString) : Int64;
 
 var
-  CacheDir : AnsiString;
+  CacheDir : string;
 
 
 implementation
@@ -99,7 +99,7 @@ begin
 end;
 
 
-function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadFileCommon(FPath,FName,LocalSaveFNamePath: string;
                             RPCName : string;
                             var ErrMsg : string;
                             ProgressCallback :   TProgressCallback = nil): TDownloadResult;
@@ -107,7 +107,7 @@ var
   i,count                       : integer;
   j                             : word;
   OutFile                       : TFileStream;
-  s                             : AnsiString;
+  s                             : AnsiString; //kt //codex 7/30/26
   Buffer                        : array[0..1024] of byte;
   RefreshCountdown              : integer;
   BrokerResult                  : string;
@@ -163,7 +163,7 @@ begin
 end;
 
 
-function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadLabPDF(FPath,FName,LocalSaveFNamePath: string;
                         CurrentFileNum, TotalFileNum: Integer;
                         var ErrMsg : string;
                         ProgressCallback : TProgressCallback = nil) : TDownloadResult;
@@ -174,7 +174,7 @@ begin
 end;
 
 
-function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadFile(FPath,FName,LocalSaveFNamePath: string;
                       var ErrMsg : string;
                       ProgressCallback :   TProgressCallback = nil): TDownloadResult;
 begin
@@ -182,11 +182,11 @@ begin
                                'TMG DOWNLOAD FILE', ErrMsg, ProgressCallback);
 end;
 
-function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath, DropboxDir: AnsiString;
+function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath, DropboxDir: string;
                                 var ErrMsg : string;
                                 ProgressCallback :   TProgressCallback = nil): TDownloadResult;
 var
-  DropboxFile : AnsiString;
+  DropboxFile : string;
   DownloadFileSize : Integer;
   LastLocalFileSize, LocalFileSize    : integer;
   bResult          : boolean;
@@ -247,7 +247,7 @@ begin
 end;
 
 
-function UploadFile(LocalFNamePath,FPath,FName: AnsiString;
+function UploadFile(LocalFNamePath,FPath,FName: string;
                     var ErrMsg : string;
                     ProgressCallback : TProgressCallback = nil): boolean;
 const
@@ -264,14 +264,16 @@ var
   LocalOutFile                  : TFileStream;
   Buffer                        : array[0..1024] of byte;
   RefreshCountdown              : integer;
-  OneLine                       : AnsiString;
-  RPCResult                     : AnsiString;
+  OneLine                       : AnsiString; //kt //codex 7/30/26
+  RPCResult                     : string;
   Abort                         : boolean;
 
 begin
   result := false;  //default of failure
   if not FileExists(LocalFNamePath) then exit;
   LocalFileSize := FileSize(LocalFNamePath);
+  LocalOutFile := nil;
+  infile := nil;
   try
     InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
     LocalOutFile := TFileStream.Create(CacheDir+'\'+FName,fmCreate or fmOpenWrite); //for local copy
@@ -294,6 +296,7 @@ begin
 
   RPCBrokerV.Param[3].PType := list;
   ParamIndex := 0;
+  totalReadCount := 0;
   RefreshCountdown := RefreshInterval;
   repeat
     ReadCount := InFile.Read(Buffer,BlockSize);
@@ -302,7 +305,7 @@ begin
     OneLine := '';
     if ReadCount > 0 then begin
       SetLength(OneLine,ReadCount);
-      for j := 1 to ReadCount do OneLine[j] := AnsiChar(Buffer[j-1]);
+      for j := 1 to ReadCount do OneLine[j] := AnsiChar(Buffer[j-1]); //kt //codex 7/30/26
       RPCBrokerV.Param[3].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
       Inc(ParamIndex);
 
@@ -343,10 +346,10 @@ begin
 end;
 
 
-function UploadFileViaDropBox(LocalFNamePath,FPath,FName, DropboxDir: AnsiString; var ErrMsg : string): boolean;
+function UploadFileViaDropBox(LocalFNamePath,FPath,FName, DropboxDir: string; var ErrMsg : string): boolean;
 //NOTE: Callback progress function not used because I can't give it a meaningful result.
 var
-  DropboxFile : AnsiString;
+  DropboxFile : string;
 begin
   Result := false; //default to failure
   //First copy LocalFileNamePath --> DropBox\FileName
@@ -362,7 +365,7 @@ begin
 end;
 
 
-function Encode64(Input: AnsiString) : AnsiString;
+function Encode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
 //This function is based on ENCODE^RGUTUU, which is match for
 //DECODE^RGUTUU that is used to decode (ascii armouring) on the
 //server side.  This is a base64 encoder.
@@ -371,7 +374,7 @@ const
   //  (65 characters if intro '=' is counted)
   CharSet  = '=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 var
-  //Result : AnsiString;  // RGZ1  //'Result' is implicitly declared by Pascal
+  //Result : string;  // RGZ1  //'Result' is implicitly declared by Pascal
 
   i : integer;            //RGZ2
   j : integer;            //RGZ4
@@ -436,7 +439,7 @@ begin
 end;
 
 
-function Decode64(Input: AnsiString) : AnsiString;
+function Decode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
 //This function is based on DECODE^RGUTUU, which is match for
 //ENCODE^RGUTUU that is used to encode (ascii armouring) on the
 //server side.  This is a Base64 decoder
@@ -446,11 +449,11 @@ const
   CharSet  = '=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 var
-  //Result : AnsiString;  //RGZ1  //'Result' is implicitly declared by Pascal
+  //Result : string;  //RGZ1  //'Result' is implicitly declared by Pascal
   i : integer;            //RGZ2
   PlainTrio : longword;   //RGZ3  //unsigned 32-bit
   j : integer;            //RGZ4
-  EncodedChar : AnsiChar;
+  EncodedChar : AnsiChar; //kt //codex 7/30/26
   PlainInt : integer;
   PlainByte : byte;       //RGZ5
   DecodedTrio : string[3];//RGZ6
@@ -492,7 +495,7 @@ begin
   //(each '=' represents 1 padded 0 added to allow for even groups of 3)
   for j :=0 to 1 do begin
     if (Input[Length(Input)-j] = '=') then begin
-      Result := MidStr(Result,1,Length(Result)-1);
+      Delete(Result, Length(Result), 1); //kt //codex 7/30/26
     end;
   end;
 end;

@@ -5,12 +5,12 @@ inherited frmCarePlan: TfrmCarePlan
   ClientHeight = 421
   ClientWidth = 1090
   Position = poMainFormCenter
+  StyleElements = [seFont, seClient, seBorder]
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 1098
-  ExplicitHeight = 455
-  PixelsPerInch = 96
+  ExplicitWidth = 1106
+  ExplicitHeight = 460
   TextHeight = 13
   object Splitter1: TSplitter [0]
     Left = 137
@@ -41,16 +41,18 @@ inherited frmCarePlan: TfrmCarePlan
     OnEnter = tvPatientCarePlansEnter
     OnExit = tvPatientCarePlansExit
     Items.NodeData = {
-      01050000003B0000000000000000000000FFFFFFFFFFFFFFFF00000000000000
-      00114400690065007400200043006F006E00740072006F006C00200050006C00
-      61006E00330000000000000000000000FFFFFFFFFFFFFFFF0000000000000000
-      0D45007800650072006300690073006500200050006C0061006E003900000000
-      00000000000000FFFFFFFFFFFFFFFF00000000000000001043006F0075006E00
-      730065006C006C0069006E006700200050006C0061006E003700000000000000
-      00000000FFFFFFFFFFFFFFFF00000000000000000F4D00650064006900630061
-      00740069006F006E00200050006C0061006E00330000000000000000000000FF
-      FFFFFFFFFFFFFF00000000000000000D53007500720067006900630061006C00
-      200050006C0061006E00}
+      070500000009540054007200650065004E006F00640065004100000000000000
+      00000000FFFFFFFFFFFFFFFFFFFFFFFF00000000000000000001114400690065
+      007400200043006F006E00740072006F006C00200050006C0061006E00000039
+      0000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF000000000000000000
+      010D45007800650072006300690073006500200050006C0061006E0000003F00
+      00000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF00000000000000000001
+      1043006F0075006E00730065006C006C0069006E006700200050006C0061006E
+      0000003D0000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF0000000000
+      00000000010F4D0065006400690063006100740069006F006E00200050006C00
+      61006E000000390000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF0000
+      00000000000000010D53007500720067006900630061006C00200050006C0061
+      006E00}
   end
   object pnlTop: TPanel [2]
     Left = 0
@@ -91,8 +93,6 @@ inherited frmCarePlan: TfrmCarePlan
       Top = 37
       Width = 28
       Height = 28
-      TabOrder = 0
-      OnClick = btnNavProbClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFED7E8
@@ -168,14 +168,14 @@ inherited frmCarePlan: TfrmCarePlan
         EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
         54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
         ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
+      TabOrder = 0
+      OnClick = btnNavProbClick
     end
     object btnNextProb: TBitBtn
       Left = 39
       Top = 37
       Width = 28
       Height = 28
-      TabOrder = 1
-      OnClick = btnNavProbClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFED7E8
@@ -251,6 +251,8 @@ inherited frmCarePlan: TfrmCarePlan
         EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
         54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
         ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
+      TabOrder = 1
+      OnClick = btnNavProbClick
     end
     object cboActiveProb: TComboBox
       Left = 193
@@ -263,7 +265,6 @@ inherited frmCarePlan: TfrmCarePlan
       Font.Height = -16
       Font.Name = 'Times New Roman'
       Font.Style = [fsBold]
-      ItemHeight = 0
       ParentFont = False
       TabOrder = 2
       OnChange = cboActiveProbChange
@@ -294,8 +295,6 @@ inherited frmCarePlan: TfrmCarePlan
       Width = 130
       Height = 26
       Caption = '&New/Edit Care Plan'
-      TabOrder = 1
-      OnClick = btnNewCPClick
       Glyph.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
         20000000000000040000120B0000120B00000000000000000000FFFFFFFFFFFF
@@ -331,6 +330,8 @@ inherited frmCarePlan: TfrmCarePlan
         FFFFFBFFFFFFFEFFFFFFFFFFFFFFFFFFFFFF3830EFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD7D6FCFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      TabOrder = 1
+      OnClick = btnNewCPClick
     end
     object btnDone: TBitBtn
       Left = 866
@@ -344,9 +345,6 @@ inherited frmCarePlan: TfrmCarePlan
       Font.Height = -16
       Font.Name = 'Times New Roman'
       Font.Style = []
-      ModalResult = 1
-      ParentFont = False
-      TabOrder = 4
       Glyph.Data = {
         76060000424D7606000000000000360000002800000014000000140000000100
         20000000000040060000130B0000130B00000000000000000000000000000000
@@ -400,6 +398,9 @@ inherited frmCarePlan: TfrmCarePlan
         000000000000000000000000000000000000000000000000000000000000FFFF
         FF10B3CEB344A8C8A99E3787417439894398489353F93F8F4CDA87B68B9EB9D1
         B844FFFFFF100000000000000000000000000000000000000000}
+      ModalResult = 1
+      ParentFont = False
+      TabOrder = 4
     end
     object btnLaunch: TBitBtn
       Left = 640
@@ -414,9 +415,6 @@ inherited frmCarePlan: TfrmCarePlan
       Font.Height = -16
       Font.Name = 'Times New Roman'
       Font.Style = []
-      ParentFont = False
-      TabOrder = 3
-      OnClick = btnLaunchClick
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
         20000000000000100000130B0000130B00000000000000000000D8E9EDFFD8E9
@@ -548,6 +546,9 @@ inherited frmCarePlan: TfrmCarePlan
         EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD7E8EDFFCDDDEAFFD8E9
         EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9
         EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFFD8E9EDFF}
+      ParentFont = False
+      TabOrder = 3
+      OnClick = btnLaunchClick
     end
     object cbHideInactive: TCheckBox
       Left = 5
@@ -612,7 +613,6 @@ inherited frmCarePlan: TfrmCarePlan
         Top = 6
         Width = 145
         Height = 21
-        ItemHeight = 13
         TabOrder = 0
         Text = 'All Results'
         OnChange = cboDateRangeChange
@@ -654,8 +654,8 @@ inherited frmCarePlan: TfrmCarePlan
         Top = 4
         Width = 89
         Height = 21
-        Date = 40678.623003101850000000
-        Time = 40678.623003101850000000
+        Date = 40678.000000000000000000
+        Time = 0.623003101849462800
         TabOrder = 1
         OnChange = dtStartDateChange
       end
@@ -664,8 +664,8 @@ inherited frmCarePlan: TfrmCarePlan
         Top = 6
         Width = 89
         Height = 21
-        Date = 40678.623003101850000000
-        Time = 40678.623003101850000000
+        Date = 40678.000000000000000000
+        Time = 0.623003101849462800
         TabOrder = 2
         OnChange = dtEndDateChange
       end
@@ -674,8 +674,6 @@ inherited frmCarePlan: TfrmCarePlan
         Top = 5
         Width = 25
         Height = 19
-        TabOrder = 3
-        OnClick = btnFontClick
         Glyph.Data = {
           82020000424D8202000000000000420000002800000012000000100000000100
           10000300000040020000130B0000130B0000000000000000000000F80000E007
@@ -698,6 +696,8 @@ inherited frmCarePlan: TfrmCarePlan
           5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF108010805AEF5AEF5AEF5AEF5AEF
           5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF5AEF
           5AEF5AEF5AEF}
+        TabOrder = 3
+        OnClick = btnFontClick
       end
     end
     object pnlRightMain: TPanel
@@ -748,6 +748,7 @@ inherited frmCarePlan: TfrmCarePlan
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
+        ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
         WordWrap = False

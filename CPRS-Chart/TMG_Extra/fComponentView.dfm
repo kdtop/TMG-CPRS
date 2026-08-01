@@ -13,13 +13,11 @@ object frmComponentView: TfrmComponentView
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0
@@ -110,9 +108,6 @@ object frmComponentView: TfrmComponentView
       Height = 35
       Anchors = [akTop, akRight]
       Caption = '&Done'
-      ModalResult = 1
-      TabOrder = 0
-      OnClick = btnDoneClick
       Glyph.Data = {
         BE060000424DBE06000000000000360400002800000024000000120000000100
         0800000000008802000000000000000000000001000000000000000000000000
@@ -169,7 +164,10 @@ object frmComponentView: TfrmComponentView
         030303030303030303FA0303030303030303030303030303030303F803030303
         0303030303030303030303030303030303030303030303030303030303030303
         0303}
+      ModalResult = 1
       NumGlyphs = 2
+      TabOrder = 0
+      OnClick = btnDoneClick
     end
     object btnPrev: TBitBtn
       Left = 5
@@ -177,9 +175,6 @@ object frmComponentView: TfrmComponentView
       Width = 90
       Height = 37
       Caption = '   &Previous'
-      ModalResult = 1
-      TabOrder = 1
-      OnClick = btnPrevClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFED7E8
@@ -255,6 +250,9 @@ object frmComponentView: TfrmComponentView
         EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
         54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
         ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
+      ModalResult = 1
+      TabOrder = 1
+      OnClick = btnPrevClick
     end
     object btnNext: TBitBtn
       Left = 101
@@ -262,9 +260,6 @@ object frmComponentView: TfrmComponentView
       Width = 90
       Height = 37
       Caption = '&Next   '
-      ModalResult = 1
-      TabOrder = 2
-      OnClick = btnNextClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFED7E8
@@ -341,6 +336,9 @@ object frmComponentView: TfrmComponentView
         54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
         ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
       Layout = blGlyphRight
+      ModalResult = 1
+      TabOrder = 2
+      OnClick = btnNextClick
     end
     object btnCombinedView: TBitBtn
       Left = 197
@@ -348,9 +346,6 @@ object frmComponentView: TfrmComponentView
       Width = 124
       Height = 37
       Caption = '&Combined View'
-      ModalResult = 1
-      TabOrder = 3
-      OnClick = btnCombinedViewClick
       Glyph.Data = {
         42090000424D4209000000000000420000002800000018000000180000000100
         20000300000000090000130B0000130B00000000000000000000000000FF0000
@@ -427,6 +422,9 @@ object frmComponentView: TfrmComponentView
         1616FFE51616FFE51616FFE51616FFE72C2CFFE72C2CFFE72C2CFFE72C2CFFE7
         2C2CFFE72C2CFFE72C2CFFE72C2CFFE72C2CFFE61F1FFFE51A1AFFE51616FFE5
         1616FFFF00FF}
+      ModalResult = 1
+      TabOrder = 3
+      OnClick = btnCombinedViewClick
     end
   end
   object pnlMain: TPanel

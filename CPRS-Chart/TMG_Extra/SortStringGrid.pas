@@ -144,7 +144,7 @@ implementation
   //Sort routine heavily modified from code found here
   //http://www.delphitricks.com/source-code/components/sort_a_stringgrid.html
   const
-    DivS = '{°v°}'; //some arbitrary but unique character sequence
+    DivS = '{Â°vÂ°}'; //some arbitrary but unique character sequence
 
   var
     RowNum,ColNum         : integer;

@@ -102,6 +102,7 @@ var DataStr : string;
     IEN     : Int64;
     SL      : TStringList;
     HTMLText : String;
+    IsHTML   : boolean;
 begin
   if (Index < 0) or (Index >= ListComps.Count) then exit;
   DataStr := ListComps.Strings[Index];
@@ -112,8 +113,8 @@ begin
   strIEN := Piece(DataStr, '^', 2);
   IEN := StrToInt64Def(strIEN, 0);
   if IEN <= 0 then exit;
-  LoadDocumentText(SL, IEN);
-  if not IsHTML(SL) Then Begin
+  LoadDocumentText(SL, IEN, IsHTML);
+  if not IsHTML Then Begin
     SL.Text := Text2HTML(SL);
   end else begin
     FixHTML(SL);

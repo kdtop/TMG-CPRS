@@ -3,7 +3,7 @@
 //                                                          *
 //                     Freeware Component                   *
 //                            by                            *
-//                     Per Lindsø Larsen                    *
+//                     Per LindsÃ¸ Larsen                    *
 //                Updated by Eran Bodankin - bsalsa         *
 //                     bsalsa@gmail.com                    *
 //                                                          *

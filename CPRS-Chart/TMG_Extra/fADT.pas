@@ -125,9 +125,9 @@ begin
     Param[0].Mult['"DATE"'] := '3130505.1122';
     Param[0].Mult['"TYPE"'] := '0';
   end;
-//PARAM(ìDATEî) [Required, DateTime] Discharge date
-//PARAM(ìTYPEî) [Required,Numeric] Discharge type (one of the codes returned by LSTDTYP^DGPMAPI7)
-//PARAM(ìADMIFNî) [Required,Numeric] Admission IEN
+//PARAM(‚ÄúDATE‚Äù) [Required, DateTime] Discharge date
+//PARAM(‚ÄúTYPE‚Äù) [Required,Numeric] Discharge type (one of the codes returned by LSTDTYP^DGPMAPI7)
+//PARAM(‚ÄúADMIFN‚Äù) [Required,Numeric] Admission IEN
 end;
 
 procedure TfrmADT.btnExportClick(Sender: TObject);
@@ -441,7 +441,7 @@ begin
       //[Optional,Boolean] Set to 1 if this admission is a result of a previously scheduled appt
       //Param[0].Mult['"SCADM"'] := ToDo;
       //[Optional,String] Array of diagnoses
-      //Param[0].Mult['"DIAG"'] := ToDo;   //;î,#) [Optional,String] Array of diagnoses
+      //Param[0].Mult['"DIAG"'] := ToDo;   //;‚Äù,#) [Optional,String] Array of diagnoses
       Param[0].Mult['"REFER"'] := edtReferral.text;
       CallBroker;
     end;

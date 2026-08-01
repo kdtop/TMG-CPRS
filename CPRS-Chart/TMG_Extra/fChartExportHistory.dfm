@@ -10,13 +10,11 @@ object frmChartExportHistory: TfrmChartExportHistory
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   WindowState = wsMaximized
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 0
@@ -60,6 +58,7 @@ object frmChartExportHistory: TfrmChartExportHistory
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect]
       TabOrder = 1
       OnClick = grdExportParentsClick
+      Caption = ''
       ColWidths = (
         94
         92
@@ -109,6 +108,7 @@ object frmChartExportHistory: TfrmChartExportHistory
           Indent = 19
           TabOrder = 0
           OnChange = tvOneExportChange
+          Caption = ''
           NodeDelim = '-'
           NodePiece = 1
           ShortNodeCaptions = True
@@ -161,9 +161,6 @@ object frmChartExportHistory: TfrmChartExportHistory
         Font.Height = -11
         Font.Name = 'Microsoft Sans Serif'
         Font.Style = []
-        ParentFont = False
-        TabOrder = 0
-        OnClick = btnExportClick
         Glyph.Data = {
           E6050000424DE605000000000000A60300002800000018000000180000000100
           08000000000040020000130B0000130B0000DC000000DC00000000000000FFFF
@@ -213,6 +210,9 @@ object frmChartExportHistory: TfrmChartExportHistory
           0101010101D4A173ABD1D5D5D5D5D501CFA08C7389B20101010101010101A472
           7B8C8D8D8D8D8D8C887F78BBDB01010101010101010101A38F7A7C7C7C7C7C7C
           7D7EBAC9010101010101}
+        ParentFont = False
+        TabOrder = 0
+        OnClick = btnExportClick
       end
       object btnCancel: TBitBtn
         Left = 684
@@ -226,9 +226,6 @@ object frmChartExportHistory: TfrmChartExportHistory
         Font.Height = -11
         Font.Name = 'Microsoft Sans Serif'
         Font.Style = []
-        ModalResult = 1
-        ParentFont = False
-        TabOrder = 1
         Glyph.Data = {
           66090000424D660900000000000036000000280000001C0000001C0000000100
           18000000000030090000130B0000130B00000000000000000000FFFFFFFFFFFF
@@ -306,6 +303,9 @@ object frmChartExportHistory: TfrmChartExportHistory
           FFFFFFFFFFFFFFFFFFFFFFFFFFFF565A9C3337872B30844448965256A05C60A5
           5C60A55256A04448962B3084333787565A9CFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFF}
+        ModalResult = 1
+        ParentFont = False
+        TabOrder = 1
       end
       object btnEdit: TBitBtn
         Left = 232
@@ -319,9 +319,6 @@ object frmChartExportHistory: TfrmChartExportHistory
         Font.Height = -11
         Font.Name = 'Microsoft Sans Serif'
         Font.Style = []
-        ParentFont = False
-        TabOrder = 2
-        OnClick = btnEditClick
         Glyph.Data = {
           66010000424D6601000000000000760000002800000014000000140000000100
           040000000000F000000000000000000000001000000010000000000000000000
@@ -335,6 +332,9 @@ object frmChartExportHistory: TfrmChartExportHistory
           0000500000000008FF803007000050EEEEEEEE70880B43000000500000000000
           00FBB43000005555555555550BFFBB43000055555555555550BFFBB400005555
           55555555550BFFBB0000}
+        ParentFont = False
+        TabOrder = 2
+        OnClick = btnEditClick
       end
     end
   end

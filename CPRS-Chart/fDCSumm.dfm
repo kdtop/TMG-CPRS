@@ -7,10 +7,10 @@ inherited frmDCSumm: TfrmDCSumm
   ClientWidth = 679
   HelpFile = 'overvw'
   Menu = mnuSumms
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
-  ExplicitWidth = 687
-  ExplicitHeight = 436
-  PixelsPerInch = 96
+  ExplicitWidth = 695
+  ExplicitHeight = 441
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 377
@@ -30,6 +30,7 @@ inherited frmDCSumm: TfrmDCSumm
   inherited pnlLeft: TPanel
     Width = 64
     Height = 377
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 64
     ExplicitHeight = 377
     object lblSumms: TOROffsetLabel
@@ -109,6 +110,7 @@ inherited frmDCSumm: TfrmDCSumm
         TabOrder = 0
         Visible = False
         OnClick = lstSummsClick
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2,3'
@@ -145,6 +147,7 @@ inherited frmDCSumm: TfrmDCSumm
     Left = 67
     Width = 612
     Height = 377
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 67
     ExplicitWidth = 612
     ExplicitHeight = 377
@@ -164,8 +167,14 @@ inherited frmDCSumm: TfrmDCSumm
       Height = 45
       Align = alBottom
       Color = clCream
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
       Lines.Strings = (
         '<No encounter information entered>')
+      ParentFont = False
       PlainText = True
       ReadOnly = True
       ScrollBars = ssVertical
@@ -349,7 +358,6 @@ inherited frmDCSumm: TfrmDCSumm
           Top = 0
           Width = 145
           Height = 21
-          ItemHeight = 0
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -361,7 +369,6 @@ inherited frmDCSumm: TfrmDCSumm
           Width = 75
           Height = 21
           Hint = 'Font Size (Ctrl+(1-6))'
-          ItemHeight = 13
           ItemIndex = 2
           TabOrder = 1
           Text = '3 (12 pt)'
@@ -906,6 +913,7 @@ inherited frmDCSumm: TfrmDCSumm
         OnCompare = lvSummsCompare
         OnResize = lvSummsResize
         OnSelectItem = lvSummsSelectItem
+        AutoSize = False
         Caption = 'No Discharge Summaries Found'
       end
       object pnlHtmlViewer: TPanel

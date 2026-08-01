@@ -102,8 +102,8 @@ TYPE
 // c.f. Delphi Help text "Delegating to a class-type property"
 //
 // ISampleGrabber.SetCallback verlangt als ersten Parameter ein "ISampleGrabberCB"
-// Um für ein solches Interface Routinen zu deklarieren ist scheinbar das
-// folgende, sonderbare Konstrukt nötig.
+// Um fÃ¼r ein solches Interface Routinen zu deklarieren ist scheinbar das
+// folgende, sonderbare Konstrukt nÃ¶tig.
 //
 // ISampleGrabber.SetCallback needs an "ISampleGrabberCB" as first parameter.
 // This is my attempt to build such a thing with Delphi.
@@ -356,11 +356,11 @@ begin
 end;
 
 {*}
-// Nebenbei bemerkt: Beim Debuggen fiel mir auf, daß die von mir verwendete
-// WebCam scheinbar einen Triple-Buffer für die Bilddaten verwendet. Die oben
-// von pSample.GetPointer(ppBuffer) zurückgelieferte Adresse wiederholt sich
+// Nebenbei bemerkt: Beim Debuggen fiel mir auf, daÃŸ die von mir verwendete
+// WebCam scheinbar einen Triple-Buffer fÃ¼r die Bilddaten verwendet. Die oben
+// von pSample.GetPointer(ppBuffer) zurÃ¼ckgelieferte Adresse wiederholt sich
 // in einem 3-er Zyklus. Wenn das ein Feature von DirectShow ist und nicht
-// von der Kamera-Steuersoftware, dann könnte man selbst auf Double- oder
+// von der Kamera-Steuersoftware, dann kÃ¶nnte man selbst auf Double- oder
 // Triplebuffering verzichten. 
 
 
@@ -578,7 +578,7 @@ BEGIN
   Index := 0;
   DeviceName := Trim(DeviceName);
   IF DeviceName = '' then
-    DeviceName := '#1'; // Default: First device (Erstes Gerät)
+    DeviceName := '#1'; // Default: First device (Erstes GerÃ¤t)
 
   if @ppIBFVideoSource = nil then
     begin
@@ -1194,7 +1194,7 @@ BEGIN
   Width := 0;
   Height := 0;
   pIMediaControl.Stop;
-  pIBFVideoSource.Stop;  // nicht zwingend nötig
+  pIBFVideoSource.Stop;  // nicht zwingend nÃ¶tig
 
   Result := GetCaptureIAMStreamConfig(pSC);
   {$ifdef DXErr} DXErrString := DXGetErrorDescription9A(Result); {$endif}
@@ -1212,7 +1212,7 @@ BEGIN
           FourCC := VI.bmiHeader.biCompression;
         end;
     end;
-  pIBFVideoSource.Run(0);// nicht zwingend nötig
+  pIBFVideoSource.Run(0);// nicht zwingend nÃ¶tig
   pIMediaControl.Run;
 END;
 
@@ -1479,7 +1479,7 @@ BEGIN
   Width := 0;
   Height := 0;
   pIMediaControl.Stop;
-  pIBFVideoSource.Stop;  // nicht zwingend nötig
+  pIBFVideoSource.Stop;  // nicht zwingend nÃ¶tig
 
   pSC := nil;
   Result := pICapGraphBuild2.FindInterface(@PIN_CATEGORY_capture,
@@ -1502,7 +1502,7 @@ BEGIN
           FourCC := VI.bmiHeader.biCompression;
         end;
     end;
-  pIBFVideoSource.Run(0);// nicht zwingend nötig
+  pIBFVideoSource.Run(0);// nicht zwingend nÃ¶tig
   pIMediaControl.Run;
 END;
 *)

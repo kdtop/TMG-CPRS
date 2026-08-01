@@ -9,7 +9,7 @@ unit Diff_NP;
 * Date:             7 November 2009                                            *
 * Compilers:        Delphi 7 - Delphi 2009                                     *
 * Author:           Angus Johnson - angusj-AT-myrealbox-DOT-com                *
-* Copyright:        © 2001-2009 Angus Johnson                                  *
+* Copyright:        Â© 2001-2009 Angus Johnson                                  *
 *                                                                              *
 * Licence to use, terms and conditions:                                        *
 *                   The code in the TDiff component is released as freeware    *

@@ -405,10 +405,10 @@ end;
 
 function TfrmODMedIV.IVTypeHelpText: string;
 begin
-   result := 'Continuous Type:' + CRLF + '     IV’s that run at a specified “Rate” ( __ml/hr, __mcg/kg/min, etc)' +
+   result := 'Continuous Type:' + CRLF + '     IVâ€™s that run at a specified â€œRateâ€ ( __ml/hr, __mcg/kg/min, etc)' +
              CRLF + CRLF + 'Intermittent Type:' + CRLF +
-             '     IV’s administered at scheduled intervals (Q4H, QDay) or One-Time only, ' +
-             CRLF + '     “over a specified time period” (e.g. “Infuse over 30 min.”).' + CRLF + CRLF +
+             '     IVâ€™s administered at scheduled intervals (Q4H, QDay) or One-Time only, ' +
+             CRLF + '     â€œover a specified time periodâ€ (e.g. â€œInfuse over 30 min.â€).' + CRLF + CRLF +
              'Examples:' + CRLF + 'Continuous = Infusion/drip' + CRLF + 'Intermittent = IVP/IVPB';
 end;
 

@@ -380,9 +380,10 @@ procedure SrchToList(CONST SearchStr : String; Lines : TStringList);
   end;
 
   procedure ShowDocument(noteIEN : Integer; HtmlViewer: THTMLObj; NoteText:TStringList; SearchStr:string);
+  var IsHTML : boolean;
   begin
-    LoadDocumentText(NoteText,noteIEN);
-    if not IsHTML(NoteText) Then Begin
+    LoadDocumentText(NoteText,noteIEN, IsHTML);
+    if not IsHTML Then Begin
       NoteText.Text := Text2HTML(NoteText);
     end else begin
       FixHTML(NoteText);

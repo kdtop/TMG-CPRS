@@ -16,7 +16,7 @@ unit Rpcconf1;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, AnsiStrings, WinTypes, WinProcs, Messages, Classes, Graphics, Controls, //kt //codex 7/29/26
   Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, Xwbut1,
   WinSock, rpcnet, MFunStr;
 
@@ -87,18 +87,18 @@ end;
 {: Library function to obtain an IP address, given a server name }
 function GetServerIP(ServerName: String): String;
 var
-   host,outcome: PChar;
+   host, outcome: PAnsiChar; //kt //codex 7/29/26
 begin
   TaskInstance := LibOpen;
   if not IsIPAddress(ServerName) then
   begin
-    outcome := StrAlloc(256);
-    host := StrAlloc(length(ServerName) + 1);
-    StrPCopy(host, ServerName);
-    LibGetHostIP1(TaskInstance, host, outcome);
-    Result := StrPas(outcome);
-    StrDispose(outcome);
-    StrDispose(host);
+    outcome := AllocMem(256); //kt //codex 7/29/26
+    host := AllocMem(Length(ServerName) + 1); //kt //codex 7/29/26
+    AnsiStrings.StrPCopy(host, AnsiString(ServerName)); //kt //codex 7/29/26
+    LibGetHostIP1(TaskInstance, host, outcome); //kt //codex 7/29/26
+    Result := string(AnsiStrings.StrPas(outcome)); //kt //codex 7/29/26
+    FreeMem(outcome); //kt //codex 7/29/26
+    FreeMem(host); //kt //codex 7/29/26
   end
   else
     Result := ServerName;

@@ -47,20 +47,20 @@ type
     private
     public
       IEN :                int64;    //IEN in file# 2005
-      ServerPathName :     AnsiString;
-      ServerFName :        AnsiString;
-      ServerThumbPathName: AnsiString;
-      ServerThumbFName :   AnsiString;
+      ServerPathName :     string;
+      ServerFName :        string;
+      ServerThumbPathName: string;
+      ServerThumbFName :   string;
       //Note: if there is no thumbnail to download, CacheThumbFName will still
       //      contain a file name and path, but a test for FileExists() will fail.
-      CacheThumbFName :    AnsiString; // local cache path and File name of thumbnail image
-      CacheFName :         AnsiString; // local cache path and File name of image
-      ShortDesc :          AnsiString;
+      CacheThumbFName :    string; // local cache path and File name of thumbnail image
+      CacheFName :         string; // local cache path and File name of image
+      ShortDesc :          string;
       LongDesc :           TStringList; //will be nil unless holds data.
-      DateTime :           AnsiString;  //fileman format
+      DateTime :           string;  //fileman format
       ImageType :          Integer;
-      ProcName :           AnsiString;
-      DisplayDate :        AnsiString;
+      ProcName :           string;
+      DisplayDate :        string;
       ParentDataFileIEN:   int64;
       AbsType :            char;      //'M' magnetic 'W' worm  'O' offline
       Accessibility :      char;      //'A' accessable  or  'O' offline
@@ -97,10 +97,10 @@ type
   TBoolUnknown = (tbuUnknown, tbuFalse, tbuTrue);
 
 procedure ImageDownloadInitialize();
-function  GetImagesForIEN(IEN: AnsiString; AImageInfoList : TList): integer;
+function  GetImagesForIEN(IEN: string; AImageInfoList : TList): integer;
 function  GetAllImages(AImageInfoList : TList; SDT : TFMDateTime = 0; EDT : TFMDateTime= 9999999.999999; ExcludeSL : TStringList=nil;Reverse:boolean=False): integer;
 function  ParseOneImageListLine(s : string) : TImageInfo;
-procedure SplitLinuxFilePath(FullPathName : AnsiString; var Path : AnsiString; var FName : AnsiString);
+procedure SplitLinuxFilePath(FullPathName : string; var Path : string; var FName : string);
 procedure AddNoteImagesToList(ImagesInHTMLNote: TStringList; AImageInfoList: TList);
 function  FillImageList(TIUIEN : string; AImageInfoList : TList) : integer;
 procedure EmptyCache();
@@ -113,15 +113,15 @@ procedure DeleteImage(var DeleteSts: TActionRec; ImageFileName: String;
                       HtmlEditor : THtmlObj; EditActive: Boolean; var RefreshNeeded : boolean;
                       DelUser : TUser; const Reason: string);  //Reason should be 10-60 chars;
 procedure DeleteImageIndex(ImageIndex : integer; DeleteMode : TImgDelMode; boolPromptUser: boolean; HtmlEditor : THtmlObj; EditIsActive : boolean);
-function  DoDecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
-function  DoCreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
+function  DoDecodeBarcode(LocalFNamePath,ImageType: string): string;
+function  DoCreateBarcode(MsgStr: string; ImageType: string): string;
 function  IndexOfIEN(AImageInfoList : TList; IEN : Int64) : integer;
 function  IndexOfServerFName(Name : string; AImageInfoList: TList): integer;
-function  DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
+function  DownloadFile(FPath,FName,LocalSaveFNamePath: string;
                       CurrentImage,TotalImages: Integer; HideProgress : boolean = false): TDownloadResult;
-function  DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;CurrentImage,TotalImages: Integer): TDownloadResult;
-function  UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
-function  UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+function  DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: string;CurrentImage,TotalImages: Integer): TDownloadResult;
+function  UploadFileViaDropBox(LocalFNamePath,FPath,FName: string;CurrentImage,TotalImages: Integer): boolean;
+function  UploadFile(LocalFNamePath,FPath,FName: string;CurrentImage,TotalImages: Integer): boolean;
 procedure ClearImageList(AImageInfoList : TList);
 procedure RemoveSuccessfullyDownloadedRecs(AImageInfoList: TList);
 function  ProcessDownloadCue(HideProgress : boolean = false) : TDownloadResult;
@@ -296,7 +296,7 @@ begin
   end;
 end;
 
-function GetImagesForIEN(IEN: AnsiString; AImageInfoList : TList): integer;
+function GetImagesForIEN(IEN: string; AImageInfoList : TList): integer;
 //NOTE: This will ignore records found matching those already in AImageInfoList.
 var
   i  : integer;
@@ -387,14 +387,14 @@ function ParseOneImageListLine(s : string) : TImageInfo;
 //      So caller must be responsible for them.
 var
   j : integer;
-  s2 : AnsiString;
+  s2 : string;
   Rec  : TImageInfo;
   ImageIEN : integer;
-  //TIUIEN : AnsiString;
-  ServerFName : AnsiString;
-  ServerPathName : AnsiString;
-  ImageFPathName :     AnsiString;  //path on server of image  -- original data provided by server
-  ThumbnailFPathName : AnsiString;  //path on server of thumbnail -- original data provided by server
+  //TIUIEN : string;
+  ServerFName : string;
+  ServerPathName : string;
+  ImageFPathName :     string;  //path on server of image  -- original data provided by server
+  ThumbnailFPathName : string;  //path on server of thumbnail -- original data provided by server
 
 begin
   Result := nil;
@@ -455,9 +455,9 @@ begin
 end;
 
 
-procedure SplitLinuxFilePath(FullPathName : AnsiString;
-                             var Path     : AnsiString;
-                             var FName    : AnsiString);
+procedure SplitLinuxFilePath(FullPathName : string;
+                             var Path     : string;
+                             var FName    : string);
 var  p : integer;
      n : integer;
 begin
@@ -544,12 +544,12 @@ procedure EmptyCache();
 //Note: This will include the html_note file created by
 // the notes tab.
 var
-  //CacheDir : AnsiString;
+  //CacheDir : string;
   FoundFile : boolean;
   FSearch : TSearchRec;
   Files : TStringList;
   i : integer;
-  FName : AnsiString;
+  FName : string;
   FExt : string;
   SkipFile, Crashing, IsNoteBackup : boolean;
 
@@ -729,7 +729,7 @@ begin
 end;
 
 
-function DoDecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
+function DoDecodeBarcode(LocalFNamePath,ImageType: string): string;
 //Decode data from barcode on image, or return '' if none
 //Note: if I could find a cost-effective way of decoding this on client side,
 //      then that code be done here in the function, instead of uploading image
@@ -745,8 +745,8 @@ var
   InFile                        : TFileStream;
   Buffer                        : array[0..1024] of byte;
   RefreshCountdown              : integer;
-  OneLine                       : AnsiString;
-  RPCResult                     : AnsiString;
+  OneLine                       : AnsiString; //kt //codex 7/30/26
+  RPCResult                     : string;
   //SavedCursor                   : TCursor;
   totalReadCount                : integer;
   //Abort                         : Boolean;
@@ -768,7 +768,7 @@ begin
       totalReadCount := totalReadCount + ReadCount;
       if ReadCount > 0 then begin
         SetLength(OneLine,ReadCount);
-        for j := 1 to ReadCount do OneLine[j] := AnsiChar(Buffer[j-1]);
+        for j := 1 to ReadCount do OneLine[j] := AnsiChar(Buffer[j-1]); //kt //codex 7/30/26
         RPCBrokerV.Param[0].Mult[IntToStr(ParamIndex)] := Encode64(OneLine);
         Inc(ParamIndex);
       end;
@@ -790,7 +790,7 @@ begin
 end;
 
 
-function DoCreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
+function DoCreateBarcode(MsgStr: string; ImageType: string): string;
 //Create a local barcode file, in .png format, from MsgStr
 //ImageType is optional, default ='png'.  It should NOT contain '.'
 //Returns file path on local client of new barcode image.
@@ -798,8 +798,8 @@ function DoCreateBarcode(MsgStr: AnsiString; ImageType: AnsiString): AnsiString;
 //      to the server for attaching to progress notes.  It is included
 //      in this unit because the functionality used is nearly identical to
 //      the other code.
-  function UniqueFName : AnsiString;
-    var  FName,tempFName : AnsiString;
+  function UniqueFName : string;
+    var  FName,tempFName : string;
          count : integer;
   begin
     FName := 'Barcode-Image';
@@ -816,9 +816,9 @@ var
   i,count                       : integer;
   j                             : word;
   OutFile                       : TFileStream;
-  s                             : AnsiString;
+  s                             : AnsiString; //kt //codex 7/30/26
   Buffer                        : array[0..1024] of byte;
-  LocalSaveFNamePath            : AnsiString;
+  LocalSaveFNamePath            : string;
   SavedResult                   : TStringList;
 
 begin
@@ -882,7 +882,7 @@ begin
   end;
 end;
 
-function DownloadFile(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadFile(FPath,FName,LocalSaveFNamePath: string;
                       CurrentImage,TotalImages: Integer; HideProgress : boolean = false): TDownloadResult;
 var
   ErrMsg            : string;
@@ -915,7 +915,7 @@ begin
   //frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
 end;
 
-function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: AnsiString;
+function DownloadFileViaDropbox(FPath,FName,LocalSaveFNamePath: string;
                                 CurrentImage,TotalImages: Integer): TDownloadResult;
 var
   ErrMsg          : string;
@@ -929,7 +929,7 @@ begin
   StatusText('');
 end;
 
-function UploadFileViaDropBox(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+function UploadFileViaDropBox(LocalFNamePath,FPath,FName: string;CurrentImage,TotalImages: Integer): boolean;
 var
   ErrMsg : string;
 begin
@@ -943,7 +943,7 @@ begin
   StatusText('');
 end;
 
-function UploadFile(LocalFNamePath,FPath,FName: AnsiString;CurrentImage,TotalImages: Integer): boolean;
+function UploadFile(LocalFNamePath,FPath,FName: string;CurrentImage,TotalImages: Integer): boolean;
 var
   ErrMsg : string;
 begin
@@ -1061,8 +1061,8 @@ function ProcessDownloadCue(HideProgress : boolean = false) : TDownloadResult;
   //Loads image specified in Rec to Cache (unless already present)
   //NOTE: I am making this a sub-function so it won't get called directly.
   var
-    ServerFName : AnsiString;
-    ServerPathName : AnsiString;
+    ServerFName : string;
+    ServerPathName : string;
     R1,R2 : TDownloadResult;
 
   begin

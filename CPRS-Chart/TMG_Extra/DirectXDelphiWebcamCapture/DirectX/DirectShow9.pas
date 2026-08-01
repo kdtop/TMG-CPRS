@@ -8941,7 +8941,7 @@ const
   ED_DEVCAP_POSTROLL                     = ED_BASE+30;
   {$EXTERNALSYM ED_DEVCAP_POSTROLL}
 
-// returns indication of device’s synchronization accuracy.
+// returns indication of deviceâ€™s synchronization accuracy.
   ED_DEVCAP_SYNC_ACCURACY                = ED_BASE+31;
   {$EXTERNALSYM ED_DEVCAP_SYNC_ACCURACY}
   ED_SYNCACC_PRECISE                     = ED_BASE+32;
@@ -8951,7 +8951,7 @@ const
   ED_SYNCACC_ROUGH                       = ED_BASE+34;
   {$EXTERNALSYM ED_SYNCACC_ROUGH}
 
-// returns device’s normal framerate.
+// returns deviceâ€™s normal framerate.
   ED_DEVCAP_NORMAL_RATE                  = ED_BASE+35;
   {$EXTERNALSYM ED_DEVCAP_NORMAL_RATE}
   ED_RATE_24                             = ED_BASE+36;

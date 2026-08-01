@@ -10,14 +10,12 @@ object frmMultiTIUSign: TfrmMultiTIUSign
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0
@@ -109,6 +107,7 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         OnColumnClick = lvUnSelectedColumnClick
         OnCompare = lvUnSelectedCompare
         OnResize = lvUnSelectedResize
+        AutoSize = False
         Caption = 'lvUnSelected'
       end
     end
@@ -175,9 +174,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Height = -15
           Font.Name = 'Microsoft Sans Serif'
           Font.Style = []
-          ParentFont = False
-          TabOrder = 0
-          OnClick = btnPrevClick
           Glyph.Data = {
             42240000424D4224000000000000420000002800000030000000300000000100
             20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -470,6 +466,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             DBFFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
             F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
             F0FFF0F0F0FF}
+          ParentFont = False
+          TabOrder = 0
+          OnClick = btnPrevClick
         end
         object btnAddToSign: TBitBtn
           Left = 274
@@ -483,9 +482,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Height = -15
           Font.Name = 'Microsoft Sans Serif'
           Font.Style = []
-          ParentFont = False
-          TabOrder = 1
-          OnClick = btnAddToSignClick
           Glyph.Data = {
             42240000424D4224000000000000420000002800000030000000300000000100
             20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -778,6 +774,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
             F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
             F0FFF0F0F0FF}
+          ParentFont = False
+          TabOrder = 1
+          OnClick = btnAddToSignClick
         end
         object btnNext: TBitBtn
           Left = 673
@@ -790,9 +789,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Height = -15
           Font.Name = 'Microsoft Sans Serif'
           Font.Style = []
-          ParentFont = False
-          TabOrder = 2
-          OnClick = btnNextClick
           Glyph.Data = {
             42240000424D4224000000000000420000002800000030000000300000000100
             20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -1086,6 +1082,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
             F0FFF0F0F0FF}
           Layout = blGlyphRight
+          ParentFont = False
+          TabOrder = 2
+          OnClick = btnNextClick
         end
         object btnMoveToLoose: TBitBtn
           Left = 473
@@ -1099,9 +1098,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Height = -15
           Font.Name = 'Microsoft Sans Serif'
           Font.Style = []
-          ParentFont = False
-          TabOrder = 3
-          OnClick = btnMoveToLooseClick
           Glyph.Data = {
             36270000424D3627000000000000360000002800000040000000340000000100
             18000000000000270000130B0000130B00000000000000000000FB07EBFB07EB
@@ -1417,6 +1413,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             FB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07
             EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB
             07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EBFB07EB}
+          ParentFont = False
+          TabOrder = 3
+          OnClick = btnMoveToLooseClick
         end
         object btnDelete: TBitBtn
           Left = 78
@@ -1430,9 +1429,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Font.Height = -15
           Font.Name = 'Microsoft Sans Serif'
           Font.Style = []
-          ParentFont = False
-          TabOrder = 4
-          OnClick = btnDeleteClick
           Glyph.Data = {
             361B0000424D361B000000000000360000002800000030000000300000000100
             180000000000001B0000130B0000130B00000000000000000000F9F9FEF9F9FE
@@ -1652,6 +1648,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             F9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9
             FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9
             F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FEF9F9FE}
+          ParentFont = False
+          TabOrder = 4
+          OnClick = btnDeleteClick
         end
       end
       object pnlCenterTop: TPanel
@@ -1989,8 +1988,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Anchors = [akLeft, akTop, akRight]
           Caption = '&Remove Doc'
           Constraints.MinWidth = 115
-          TabOrder = 0
-          OnClick = btnRemoveClick
           Glyph.Data = {
             42100000424D4210000000000000420000002800000020000000200000000100
             20000300000000100000130B0000130B000000000000000000000000FF0000FF
@@ -2123,6 +2120,8 @@ object frmMultiTIUSign: TfrmMultiTIUSign
             D8FFD8D8D8FFD8D8D8FFD8D8D8FFD8D8D8FFD8D8D8FFE9E9E9FFF0F0F0FFF0F0
             F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
             F0FFF0F0F0FF}
+          TabOrder = 0
+          OnClick = btnRemoveClick
         end
       end
       object pnlRightTop: TPanel
@@ -2175,9 +2174,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       Font.Height = -16
       Font.Name = 'Microsoft Sans Serif'
       Font.Style = []
-      ParentFont = False
-      TabOrder = 0
-      OnClick = btnSignAllClick
       Glyph.Data = {
         42400000424D4240000000000000420000002800000040000000400000000100
         20000300000000400000130B0000130B000000000000000000000000FF0000FF
@@ -2694,6 +2690,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
         F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
         F0FFF0F0F0FF}
+      ParentFont = False
+      TabOrder = 0
+      OnClick = btnSignAllClick
     end
     object btnCancel: TBitBtn
       Left = 5
@@ -2706,9 +2705,6 @@ object frmMultiTIUSign: TfrmMultiTIUSign
       Font.Height = -15
       Font.Name = 'Microsoft Sans Serif'
       Font.Style = []
-      ParentFont = False
-      TabOrder = 1
-      OnClick = btnCancelClick
       Glyph.Data = {
         42240000424D4224000000000000420000002800000030000000300000000100
         20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -3001,6 +2997,9 @@ object frmMultiTIUSign: TfrmMultiTIUSign
         F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
         F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
         F0FFF0F0F0FF}
+      ParentFont = False
+      TabOrder = 1
+      OnClick = btnCancelClick
     end
   end
 end

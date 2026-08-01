@@ -14,7 +14,7 @@
   place to add conditional defines and compiler directives to be used by all
   component units.
 
-  Copyright © 1995-2001 by Ray Konopka
+  Copyright Â© 1995-2001 by Ray Konopka
 ===============================================================================}
 
 {$IFDEF WIN32}

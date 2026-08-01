@@ -3,40 +3,41 @@ inherited frmNotes: TfrmNotes
   Top = 115
   HelpContext = 5000
   Caption = 'Progress Notes Page'
-  ClientHeight = 818
+  ClientHeight = 684
   ClientWidth = 1056
   HelpFile = 'overvw'
   Menu = mnuNotes
   Position = poDesigned
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 1064
-  ExplicitHeight = 872
-  PixelsPerInch = 96
+  ExplicitWidth = 1072
+  ExplicitHeight = 743
   TextHeight = 13
   inherited shpPageBottom: TShape
-    Top = 813
+    Top = 679
     Width = 1056
     ExplicitTop = 358
     ExplicitWidth = 679
   end
   inherited sptHorz: TSplitter
     Left = 260
-    Height = 813
+    Height = 679
     ParentColor = False
     ExplicitLeft = 261
     ExplicitHeight = 989
   end
   inherited pnlLeft: TPanel
     Width = 260
-    Height = 813
+    Height = 679
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 260
-    ExplicitHeight = 813
+    ExplicitHeight = 679
     object lblSpace1: TLabel
       Left = 0
-      Top = 768
+      Top = 634
       Width = 260
       Height = 3
       Align = alBottom
@@ -47,7 +48,7 @@ inherited frmNotes: TfrmNotes
     end
     object cmdNewNote: TORAlignButton
       Left = 0
-      Top = 771
+      Top = 637
       Width = 260
       Height = 21
       Align = alBottom
@@ -58,7 +59,7 @@ inherited frmNotes: TfrmNotes
     end
     object cmdPCE: TORAlignButton
       Left = 0
-      Top = 792
+      Top = 658
       Width = 260
       Height = 21
       Align = alBottom
@@ -72,13 +73,13 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 33
       Width = 260
-      Height = 735
+      Height = 601
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
       object splDrawers: TSplitter
         Left = 0
-        Top = 732
+        Top = 598
         Width = 260
         Height = 3
         Cursor = crVSplit
@@ -101,6 +102,7 @@ inherited frmNotes: TfrmNotes
         TabOrder = 0
         Visible = False
         OnClick = lstNotesClick
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2,3'
@@ -110,7 +112,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 0
         Width = 260
-        Height = 732
+        Height = 598
         Align = alClient
         Constraints.MinWidth = 30
         HideSelection = False
@@ -384,13 +386,14 @@ inherited frmNotes: TfrmNotes
   inherited pnlRight: TPanel
     Left = 264
     Width = 792
-    Height = 813
+    Height = 679
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 264
     ExplicitWidth = 792
-    ExplicitHeight = 813
+    ExplicitHeight = 679
     object sptVert: TSplitter
       Left = 0
-      Top = 764
+      Top = 630
       Width = 792
       Height = 4
       Cursor = crVSplit
@@ -401,13 +404,19 @@ inherited frmNotes: TfrmNotes
     end
     object memPCEShow: TRichEdit
       Left = 0
-      Top = 768
+      Top = 634
       Width = 792
       Height = 45
       Align = alBottom
       Color = clCream
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
       Lines.Strings = (
         '<No encounter information entered>')
+      ParentFont = False
       PlainText = True
       PopupMenu = popEditEncounterElementsMenu
       ReadOnly = True
@@ -422,14 +431,14 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 0
       Width = 792
-      Height = 764
+      Height = 630
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
       OnExit = pnlReadExit
       DesignSize = (
         792
-        764)
+        630)
       object lblTitle: TOROffsetLabel
         Left = 0
         Top = 0
@@ -501,11 +510,11 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 116
         Width = 792
-        Height = 648
+        Height = 514
         Align = alClient
         Color = clCream
         Ctl3D = True
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Courier New'
@@ -571,13 +580,14 @@ inherited frmNotes: TfrmNotes
         OnCompare = lvNotesCompare
         OnResize = lvNotesResize
         OnSelectItem = lvNotesSelectItem
+        AutoSize = False
         Caption = 'No Progress Notes Found'
       end
       object pnlHtmlView: TPanel
         Left = 0
         Top = 116
         Width = 792
-        Height = 648
+        Height = 514
         Align = alClient
         BevelOuter = bvNone
         Color = clBtnShadow
@@ -586,7 +596,7 @@ inherited frmNotes: TfrmNotes
           Left = 0
           Top = 20
           Width = 792
-          Height = 628
+          Height = 494
           Align = alClient
           BevelOuter = bvNone
           Color = clBtnShadow
@@ -869,7 +879,7 @@ inherited frmNotes: TfrmNotes
       Left = 0
       Top = 0
       Width = 792
-      Height = 764
+      Height = 630
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
@@ -879,7 +889,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 67
         Width = 792
-        Height = 697
+        Height = 563
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlTextWrite'
@@ -888,9 +898,9 @@ inherited frmNotes: TfrmNotes
           Left = 0
           Top = 0
           Width = 792
-          Height = 697
+          Height = 563
           Align = alClient
-          Font.Charset = DEFAULT_CHARSET
+          Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
           Font.Name = 'Courier New'
@@ -911,7 +921,7 @@ inherited frmNotes: TfrmNotes
         Left = 0
         Top = 67
         Width = 792
-        Height = 697
+        Height = 563
         Align = alClient
         BevelOuter = bvNone
         Color = clInactiveBorder
@@ -921,7 +931,7 @@ inherited frmNotes: TfrmNotes
           Left = 0
           Top = 18
           Width = 792
-          Height = 679
+          Height = 545
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -971,7 +981,6 @@ inherited frmNotes: TfrmNotes
             Top = 0
             Width = 145
             Height = 21
-            ItemHeight = 13
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0
@@ -983,7 +992,6 @@ inherited frmNotes: TfrmNotes
             Width = 75
             Height = 21
             Hint = 'Font Size (Ctrl+(1-6))'
-            ItemHeight = 13
             ItemIndex = 2
             TabOrder = 1
             Text = '3 (12 pt)'
@@ -1767,8 +1775,6 @@ inherited frmNotes: TfrmNotes
           Width = 31
           Height = 21
           Anchors = [akTop, akRight]
-          TabOrder = 9
-          OnClick = btnSaveClick
           Glyph.Data = {
             36050000424D3605000000000000360400002800000010000000100000000100
             08000000000000010000D30E0000D30E0000000100000001000000000000E577
@@ -1812,6 +1818,8 @@ inherited frmNotes: TfrmNotes
             0505050505050201000303000102050505050505050502010003030001020505
             0505050505050202000303000102050505050505050502040003030000000000
             0000000000000000000303030303030303030303030303030303}
+          TabOrder = 9
+          OnClick = btnSaveClick
         end
       end
     end
@@ -1821,8 +1829,6 @@ inherited frmNotes: TfrmNotes
       Width = 17
       Height = 20
       Anchors = [akRight, akBottom]
-      TabOrder = 3
-      OnClick = btnOpenEncClick
       Glyph.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
         20000000000000040000130B0000130B00000000000000000000C8B49CFFC8B4
@@ -1858,6 +1864,8 @@ inherited frmNotes: TfrmNotes
         27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFFC8B4
         9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B4
         9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFF}
+      TabOrder = 3
+      OnClick = btnOpenEncClick
     end
   end
   inherited amgrMain: TVA508AccessibilityManager

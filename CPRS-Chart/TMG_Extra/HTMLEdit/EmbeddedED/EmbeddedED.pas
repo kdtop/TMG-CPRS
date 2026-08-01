@@ -1962,11 +1962,14 @@ begin
      result := LoadFromStringMoniker(Self, aString);
   {$ELSE}
      FCurrentDocumentPath := '';
-     aHandle := GlobalAlloc(GPTR, Length(aString) + 1);
+	     //kt //codex original --> aHandle := GlobalAlloc(GPTR, Length(aString) + 1);
+	     aHandle := GlobalAlloc(GPTR, (Length(aString) + 1) * SizeOf(Char));  //kt //codex 7/31/26
      try
         if aHandle <> 0
            then begin
-              Move(aString[1], PChar(aHandle)^, Length(aString) + 1);
+	              //kt //codex original --> Move(aString[1], PChar(aHandle)^, Length(aString) + 1);
+	              if Length(aString) > 0 then Move(PChar(aString)^, PChar(aHandle)^, Length(aString) * SizeOf(Char));  //kt //codex 7/31/26
+	              PChar(aHandle)[Length(aString)] := #0;  //kt //codex 7/31/26
               CreateStreamOnHGlobal(aHandle, FALSE, aStream);
               result := LoadFromIStream(aStream);
            end

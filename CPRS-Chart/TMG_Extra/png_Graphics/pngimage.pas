@@ -10,7 +10,7 @@
 
 {
   Version 1.5
-  2005-29-06 - Fixed a lot of bugs using tips from mails that I´ve
+  2005-29-06 - Fixed a lot of bugs using tips from mails that IÂ´ve
 	       being receiving for some time
                  BUG 1 - Loosing palette when assigning to TBitmap. fixed
                  BUG 2 - SetPixels and GetPixels worked only with
@@ -2565,7 +2565,7 @@ begin
   until Col >= ImageWidth;
 end;
 
-{Copy ímages with palette using bit depths 1, 4 or 8}
+{Copy Ã­mages with palette using bit depths 1, 4 or 8}
 procedure TChunkIDAT.CopyInterlacedPalette148(const Pass: Byte;
   Src, Dest, Trans{$IFDEF Store16bits}, Extra{$ENDIF}: pChar);
 const
@@ -2599,7 +2599,7 @@ begin
   until Col >= ImageWidth;
 end;
 
-{Copy ímages with palette using bit depth 2}
+{Copy Ã­mages with palette using bit depth 2}
 procedure TChunkIDAT.CopyInterlacedPalette2(const Pass: Byte; Src, Dest,
   Trans{$IFDEF Store16bits}, Extra{$ENDIF}: pChar);
 var
@@ -2628,7 +2628,7 @@ begin
   until Col >= ImageWidth;
 end;
 
-{Copy ímages with grayscale using bit depth 2}
+{Copy Ã­mages with grayscale using bit depth 2}
 procedure TChunkIDAT.CopyInterlacedGray2(const Pass: Byte;
   Src, Dest, Trans{$IFDEF Store16bits}, Extra{$ENDIF}: pChar);
 var
@@ -2657,7 +2657,7 @@ begin
   until Col >= ImageWidth;
 end;
 
-{Copy ímages with palette using 2 bytes for each pixel}
+{Copy Ã­mages with palette using 2 bytes for each pixel}
 procedure TChunkIDAT.CopyInterlacedGrayscale16(const Pass: Byte;
   Src, Dest, Trans{$IFDEF Store16bits}, Extra{$ENDIF}: pChar);
 var
@@ -4463,7 +4463,7 @@ begin
         FOR i := 0 TO W - 1 DO
         begin
           if Stretch then i2 := trunc(i / FactorX) else i2 := i;
-          {Optmize when we don´t have transparency}
+          {Optmize when we donÂ´t have transparency}
           if (AlphaSource[i2] <> 0) then
             if (AlphaSource[i2] = 255) then
               ImageData[i] := pRGBQuad(@ImageSource[i2 * 3])^

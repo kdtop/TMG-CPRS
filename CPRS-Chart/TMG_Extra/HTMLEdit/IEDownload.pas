@@ -6,7 +6,7 @@
 //                     Freeware Component                                 *
 //                       for Delphi by                                    *
 //                      Eran Bodankin                                     *
-//                   and Per Lindsø Larsen                                *
+//                   and Per LindsÃ¸ Larsen                                *
 //                                                                        *
 //                                                                        *
 //  Updated versions:                                                     *

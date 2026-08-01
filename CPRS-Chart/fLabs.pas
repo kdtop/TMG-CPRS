@@ -43,7 +43,7 @@ uses
   uConst, ORDtTmRng, OleCtrls, SHDocVw, Variants, StrUtils, fBase508Form,
   ORNet,ShellAPI,    //tmg
   fImagePickPDF,rFileTransferU,Trpcb,       //tmg
-  VA508AccessibilityManager, rWVEHR;
+  VA508AccessibilityManager, rWVEHR, VclTee.TeeGDIPlus;
 
 type
   TGrdLab508Manager = class(TVA508ComponentManager)
@@ -534,8 +534,9 @@ begin
   uLabRemoteReportData := TStringList.Create;
   uColumns := TStringList.Create;
   uTreeStrings := TStringList.Create;
-  uEmptyImageList := TImageList.Create(Self);
-  uEmptyImageList.Width := 0;
+  uEmptyImageList := nil; //kt //codex 7/30/26
+  //kt //codex original --> uEmptyImageList := TImageList.Create(Self);
+  //kt //codex original --> uEmptyImageList.Width := 0;
   uLocalReportData := TStringList.Create;
   uRemoteReportData := TStringList.Create;
   //uPrevReportNode := tvReports.Items.GetFirstNode;  //TMG, handled in Display Page
@@ -638,7 +639,7 @@ begin
   TabControl1.Tabs.Clear;
   HideTabControl;
   tmpGrid.Clear;
-  lvReports.SmallImages := uEmptyImageList;
+  lvReports.SmallImages := uEmptyImageList; //kt //codex 7/30/26
   uLocalReportData.Clear;
   uRemoteReportData.Clear;
   with grdLab do
@@ -699,7 +700,7 @@ begin
     begin
       uColChange := '';
       lstQualifier.Clear;
-      lvReports.SmallImages := uEmptyImageList;
+      lvReports.SmallImages := nil; //kt //codex 7/30/26
       lvReports.Items.Clear;
       lvReports.Columns.Clear;
       lblTitle.Caption := '';
@@ -735,11 +736,11 @@ begin
         if Patient.Inpatient then lstDates.ItemIndex := 2 else lstDates.ItemIndex := 4;
         tvReports.Selected := tvReports.Items.GetFirstNode;
         tvReportsClick(self);
-        lvReports.SmallImages := uEmptyImageList;
+        lvReports.SmallImages := nil; //kt //codex 7/30/26
         lstQualifier.Clear;
         //tvProcedures.Items.Clear;
         //lblProcTypeMsg.Visible := FALSE;
-        lvReports.SmallImages := uEmptyImageList;
+        lvReports.SmallImages := nil; //kt //codex 7/30/26
         lvReports.Items.Clear;
         Splitter1.Visible := false;
         pnlLeftBottom.Visible := false;
@@ -1148,7 +1149,7 @@ begin
   memLab.Clear;
   uHTMLDoc := '';
   BlankWeb;
-  lvReports.SmallImages := uEmptyImageList;
+  lvReports.SmallImages := nil; //kt //codex 7/30/26
   lvReports.Items.Clear;
   uTreeStrings.Clear;
   lvReports.Caption := '';
@@ -1404,7 +1405,7 @@ begin
   case uQualifierType of
       QT_HSCOMPONENT:
         begin     //      = 5
-          lvReports.SmallImages := uEmptyImageList;
+          lvReports.SmallImages := nil; //kt //codex 7/30/26
           lvReports.Items.Clear;
           memLab.Lines.Clear;
           LabRowObjects.Clear;
@@ -1436,7 +1437,7 @@ begin
         end;
       QT_HSWPCOMPONENT:
         begin      //      = 6
-          lvReports.SmallImages := uEmptyImageList;
+          lvReports.SmallImages := nil; //kt //codex 7/30/26
           lvReports.Items.Clear;
           LabRowObjects.Clear;
           memLab.Lines.Clear;
@@ -2238,7 +2239,6 @@ begin
   uLabLocalReportData.Free;
   uLabRemoteReportData.Free;
   uTreeStrings.Free;
-  uEmptyImageList.Free;
   uColumns.Free;
   uLocalReportData.Free;
   uRemoteReportData.Free;
@@ -3895,7 +3895,7 @@ begin
   memLab.Lines.Clear;
   memLab.Parent := pnlRightBottom;
   memLab.Align := alClient;
-  lvReports.SmallImages := uEmptyImageList;
+  lvReports.SmallImages := nil; //kt //codex 7/30/26
   lvReports.Items.Clear;
   lvReports.Columns.Clear;
   DisplayHeading('');
@@ -4364,7 +4364,7 @@ begin
               if lstQualifier.ItemID = '' then
                 begin
                   lstQualifier.ItemIndex := lstQualifier.Items.Add(aStartTime + ';' + aStopTime + '^' + aStartTime + ' to ' + aStopTime);
-                  lvReports.SmallImages := uEmptyImageList;
+                  lvReports.SmallImages := nil; //kt //codex 7/30/26
                   lvReports.Items.Clear;
                   lstQualifierClick(self);
                 end
@@ -4386,7 +4386,7 @@ begin
             CommonComponentVisible(false,false,false,false,false,false,false,false,false,false,true,true);
             pnlRightTop.Visible := true;
             lvReports.Visible := true;
-            lvReports.SmallImages := uEmptyImageList;
+            lvReports.SmallImages := nil; //kt //codex 7/30/26
             lvReports.Items.Clear;
             LabRowObjects.Clear;
             memLab.Lines.Clear;
@@ -4493,7 +4493,7 @@ begin
             TabControl1.OnChange(nil);
             LabRowObjects.Clear;
             memLab.Lines.Clear;
-            lvReports.SmallImages := uEmptyImageList;
+            lvReports.SmallImages := nil; //kt //codex 7/30/26
             lvReports.Items.Clear;
             memLab.Repaint;
             if (length(piece(aHSTag,';',2)) > 0) then

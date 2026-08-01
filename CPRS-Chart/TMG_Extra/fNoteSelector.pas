@@ -97,14 +97,15 @@ end;
 
 procedure TfrmNoteSelector.FormShow(Sender: TObject);
 var
-  i, AnImg: integer;
+  i : integer;
+  //AnImg: integer;
   x, TitleName: string;
-  HighlightedItem : boolean;
+  //HighlightedItem : boolean;
   //ThisDate:TFMdatetime;
   tmpList:TStringList;
-  OneIEN: string;
-  NumOfNotes : integer;
-  Node: TORTreeNode;
+  //OneIEN: string;
+  //NumOfNotes : integer;
+  //Node: TORTreeNode;
 begin
   //if IENList='ALL' then begin
   if Mode=nsSelect then begin
@@ -205,8 +206,8 @@ begin
 end;
 
 procedure TfrmNoteSelector.btnOKClick(Sender: TObject);
-var
-  SelNode: TORTreeNode;
+//var
+//  SelNode: TORTreeNode;
 begin
   //SelectedNote := lstNoteTitles.Items[lstNoteTitles.ItemIndex];
   //SelNode := TORTreeNode(tvNotes.Selected);
@@ -216,8 +217,8 @@ end;
 
 
 procedure TfrmNoteSelector.tvnotesClick(Sender: TObject);
-var Lines:TStringList;
-    HTMLFile:string;
+//var  Lines:TStringList;
+//    HTMLFile:string;
 begin
   {Lines := TStringList.Create();
   LoadDocumentText(Lines,strtoint(piece(tvNotes.Items[tvNotes.ItemIndex],'^',1)));
@@ -232,10 +233,11 @@ end;
 procedure TfrmNoteSelector.DisplayOneNote(NoteIEN:string);
 var Lines:TStringList;
     HTMLFile:string;
+    IsHTML : boolean;
 begin
   Lines := TStringList.Create();
-  LoadDocumentText(Lines,strtoint(NoteIEN));
-  uHTMLTools.FixHTML(Lines);
+  LoadDocumentText(Lines,strtoint(NoteIEN), IsHTML);
+  If IsHTML then uHTMLTools.FixHTML(Lines);
   HTMLFile := CPRSCacheDir+NoteIEN+'.html';
   Lines.SaveToFile(HTMLFile);
   WebBrowser1.Navigate(HTMLFile);
@@ -245,10 +247,11 @@ end;
 procedure TfrmNoteSelector.DisplayMultiNote(NoteIEN:string);
 var Lines:TStringList;
     HTMLFile:string;
+    IsHTML : boolean;
 begin
   Lines := TStringList.Create();
-  LoadDocumentText(Lines,strtoint(NoteIEN));
-  uHTMLTools.FixHTML(Lines);
+  LoadDocumentText(Lines,strtoint(NoteIEN), IsHTML);
+  If IsHTML then uHTMLTools.FixHTML(Lines);
   HTMLFile := CPRSCacheDir+NoteIEN+'.html';
   Lines.SaveToFile(HTMLFile);
   WebBrowser1.Navigate(HTMLFile);

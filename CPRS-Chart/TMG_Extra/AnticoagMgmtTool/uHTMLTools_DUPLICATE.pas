@@ -2111,9 +2111,9 @@ begin
   Result := Result + 'StartHTML:-1' + CrLf;
   Result := Result + 'EndHTML:-1' + CrLf;
   Result := Result + 'StartFragment:000081' + CrLf;
-  Result := Result + 'EndFragment:같같같' + CrLf;
+  Result := Result + 'EndFragment:째째째째째째' + CrLf;
   Result := Result + HTMLText + CrLf;
-  Result := StringReplace(Result, '같같같', Format('%.6d', [Length(Result)]), []);
+  Result := StringReplace(Result, '째째째째째째', Format('%.6d', [Length(Result)]), []);
 end;
 
 //The second parameter is optional and is put into the clipboard as CF_HTML.

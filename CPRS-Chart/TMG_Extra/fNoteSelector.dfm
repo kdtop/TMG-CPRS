@@ -10,10 +10,8 @@ object frmNoteSelector: TfrmNoteSelector
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 0
@@ -53,6 +51,7 @@ object frmNoteSelector: TfrmNoteSelector
       TabOrder = 0
       OnClick = tvnotesClick
       OnDblClick = tvnotesDblClick
+      Caption = ''
       ItemTipColor = clWindow
       LongList = False
       LookupPiece = 1
@@ -124,8 +123,6 @@ object frmNoteSelector: TfrmNoteSelector
       Height = 25
       Anchors = [akLeft, akBottom]
       Caption = 'zoom OUT'
-      TabOrder = 0
-      OnClick = btnMailZoomOutClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000110B0000110B00000000000000000000FF00FFFF00FF
@@ -183,6 +180,8 @@ object frmNoteSelector: TfrmNoteSelector
         E9CCA4996964996964FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF99696499
         6964996964996964996964FF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 0
+      OnClick = btnMailZoomOutClick
     end
     object btnMailZoomIn: TBitBtn
       Left = 946
@@ -191,8 +190,6 @@ object frmNoteSelector: TfrmNoteSelector
       Height = 25
       Anchors = [akLeft, akBottom]
       Caption = 'zoom IN'
-      TabOrder = 1
-      OnClick = btnMailZoomInClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000110B0000110B00000000000000000000FF00FFFF00FF
@@ -250,6 +247,8 @@ object frmNoteSelector: TfrmNoteSelector
         E9CCA4996964996964FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF99696499
         6964996964996964996964FF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 1
+      OnClick = btnMailZoomInClick
     end
   end
 end

@@ -321,6 +321,7 @@ var
   RemoteSiteID: string;    //for Remote site printing
   RemoteQuery: string;    //for Remote site printing
   TempLines : TStringList; //kt 9/11
+  IsHTML : boolean;  //kt
 
 begin
   inherited;
@@ -369,7 +370,7 @@ begin
           PrintWindowsReport(FReportText, PAGE_BREAK, Self.Caption, ErrMsg);
         end;
       end else begin
-        LoadDocumentText(TempLines, FNote);  //Get document without headers/footers
+        LoadDocumentText(TempLines, FNote, IsHTML);  //Get document without headers/footers
         PrintHTMLReport(TempLines, ErrMsg, Patient.Name,
                         FormatFMDateTime('mm/dd/yyyy', Patient.DOB),
                         uHTMLtools.ExtractDateOfNote(TempLines), // date for report.

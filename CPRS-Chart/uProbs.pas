@@ -760,7 +760,7 @@ begin
       if first then {the first line is just a counter}
       begin
         first := false;
-        // 'NEWþ10,0þ-1^These notes are now in XHTML format and must be modified via CPRS-R.'
+        // 'NEWÃ¾10,0Ã¾-1^These notes are now in XHTML format and must be modified via CPRS-R.'
         noedit := Piece(fNewRec[i], v, 3);
         if Piece(noedit, U, 1) = '-1' then
         begin

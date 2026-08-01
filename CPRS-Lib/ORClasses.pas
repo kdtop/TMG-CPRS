@@ -656,8 +656,8 @@ procedure TORStringList.SortByPieces(Pieces: array of integer;
       J := R;
       P := Strings[(L + R) shr 1];
       repeat
-        while ComparePieces(Strings[I], P, Pieces, Delim, TRUE) < 0 do Inc(I);
-        while ComparePieces(Strings[J], P, Pieces, Delim, TRUE) > 0 do Dec(J);
+        while (I <= R) and (ComparePieces(Strings[I], P, Pieces, Delim, TRUE) < 0) do Inc(I); //kt //codex 7/30/26
+        while (J >= L) and (ComparePieces(Strings[J], P, Pieces, Delim, TRUE) > 0) do Dec(J); //kt //codex 7/30/26
         if I <= J then
         begin
           Exchange(I, J);

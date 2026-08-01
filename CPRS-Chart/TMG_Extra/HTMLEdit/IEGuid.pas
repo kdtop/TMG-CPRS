@@ -4,7 +4,7 @@
 //                Freeware Component                 *
 //                   by                              *
 //                                                   *
-//        Per Lindsø Larsen                          *
+//        Per LindsÃ¸ Larsen                          *
 //   http://www.euromind.com/iedelphi                *
 //                                                   *
 // Contributor:                                      *

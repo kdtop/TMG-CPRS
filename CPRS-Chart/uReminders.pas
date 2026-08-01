@@ -5830,10 +5830,10 @@ begin
             else begin
               if(copy(tmp,4,4) = '0000') then begin
                 fmt := 'YYYY';
-                dateStr := ' – Exact date is unknown';
+                dateStr := ' â€“ Exact date is unknown';
               end else if(copy(tmp,6,2) = '00') then begin
                 fmt := 'MMMM, YYYY';
-                dateStr := ' – Exact date is unknown';
+                dateStr := ' â€“ Exact date is unknown';
               end else begin
                  fmt := 'MMMM D, YYYY';
               end;

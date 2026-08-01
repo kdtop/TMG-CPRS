@@ -1004,6 +1004,7 @@ type
     function SupportsDynamicProperty(PropertyID: integer): boolean;
     function GetDynamicProperty(PropertyID: integer): string;
   published
+    property AutoSize; //kt //codex 7/30/26
     property Caption;
   end;
 

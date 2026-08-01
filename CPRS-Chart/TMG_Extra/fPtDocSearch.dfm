@@ -10,14 +10,12 @@ object frmPtDocSearch: TfrmPtDocSearch
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnResize = FormResize
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object LRSplitter: TSplitter
     Left = 185
@@ -40,7 +38,7 @@ object frmPtDocSearch: TfrmPtDocSearch
     object lblSearchTerms: TLabel
       Left = 8
       Top = 6
-      Width = 157
+      Width = 156
       Height = 19
       Caption = 'Enter Search Terms:'
       Font.Charset = ANSI_CHARSET
@@ -77,6 +75,7 @@ object frmPtDocSearch: TfrmPtDocSearch
       Style = orcsSimple
       Align = alBottom
       AutoSelect = True
+      Caption = ''
       Color = clWindow
       DropDownCount = 8
       Enabled = False
@@ -91,6 +90,7 @@ object frmPtDocSearch: TfrmPtDocSearch
       Sorted = False
       SynonymChars = '<>'
       TabOrder = 1
+      Text = ''
       OnClick = cboFoundNotesClick
       OnDblClick = cboFoundNotesDblClick
       OnNeedData = cboFoundNotesNeedData
@@ -136,9 +136,6 @@ object frmPtDocSearch: TfrmPtDocSearch
       Height = 33
       Caption = '&Open Document'
       Enabled = False
-      ModalResult = 1
-      TabOrder = 0
-      OnClick = btnOKClick
       Glyph.Data = {
         76060000424D7606000000000000360000002800000014000000140000000100
         20000000000040060000130B0000130B00000000000000000000000000000000
@@ -192,6 +189,9 @@ object frmPtDocSearch: TfrmPtDocSearch
         000000000000000000000000000000000000000000000000000000000000FFFF
         FF10B3CEB344A8C8A99E3787417439894398489353F93F8F4CDA87B68B9EB9D1
         B844FFFFFF100000000000000000000000000000000000000000}
+      ModalResult = 1
+      TabOrder = 0
+      OnClick = btnOKClick
     end
     object btnCancel: TBitBtn
       Left = 145
@@ -200,9 +200,6 @@ object frmPtDocSearch: TfrmPtDocSearch
       Height = 33
       Caption = '&Cancel'
       Default = True
-      ModalResult = 2
-      TabOrder = 1
-      Visible = False
       Glyph.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
         18000000000000030000120B0000120B00000000000000000000FFFFFFFFFFFF
@@ -230,6 +227,9 @@ object frmPtDocSearch: TfrmPtDocSearch
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      ModalResult = 2
+      TabOrder = 1
+      Visible = False
     end
     object btnDone: TBitBtn
       Left = 643
@@ -239,8 +239,6 @@ object frmPtDocSearch: TfrmPtDocSearch
       Anchors = [akTop, akRight]
       Caption = '&Done'
       Default = True
-      TabOrder = 2
-      OnClick = btnDoneClick
       Glyph.Data = {
         BE060000424DBE06000000000000360400002800000024000000120000000100
         0800000000008802000000000000000000000001000000000000000000000000
@@ -298,6 +296,8 @@ object frmPtDocSearch: TfrmPtDocSearch
         0303030303030303030303030303030303030303030303030303030303030303
         0303}
       NumGlyphs = 2
+      TabOrder = 2
+      OnClick = btnDoneClick
     end
   end
   object Timer: TTimer

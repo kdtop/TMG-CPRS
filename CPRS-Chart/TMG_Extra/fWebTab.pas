@@ -187,7 +187,7 @@ function AskServerForURLs(URLList : TStringList) : string;
 //  Note: if URL='<!HIDE!>' then server is requesting tab to be hidden
 //Results of Fn: Returns '1^Success' if success, or '0^ErrorMessage'
 var
-    RPCResult              : AnsiString;
+    RPCResult              : string; //codex 7/29/26
     i                      : integer;
 begin
   if TMG_URL_RPC_Checked = false then begin

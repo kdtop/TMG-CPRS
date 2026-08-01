@@ -11,10 +11,8 @@ object frmBase508Form: TfrmBase508Form
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   KeyPreview = True
-  OldCreateOrder = False
   OnHelp = FormHelp
   OnKeyDown = FormKeyDown
-  PixelsPerInch = 96
   TextHeight = 13
   object amgrMain: TVA508AccessibilityManager
     Data = (

@@ -1138,6 +1138,8 @@ begin
     Exit;
   end;
   ServerReq := Piece(FileVersionValue(Application.ExeName, FILE_VER_INTERNALNAME), ' ', 1);
+  if ServerReq = '' then ServerReq := Piece(FileVersionValue(Application.ExeName, FILE_VER_FILEVERSION), ' ', 1); //kt //codex 7/30/26
+  if ServerReq = '' then ServerReq := ClientVer; //kt //codex 7/30/26
   //kt Allow 'SPOOF-VER=x.x.x.x' command-line parameter
   tempS := Trim(ParamSearch('SPOOF-VER')); //kt 9/11 added
   if tempS <>'' then begin
@@ -5785,7 +5787,7 @@ end;
 function TfrmFrame.CheckForRPC(RPCName: string): boolean;
 //kt 9/11 added
 var                                                   
-    RPCResult              : AnsiString;
+    RPCResult              : string; //kt //codex 7/29/26
 
 begin
   RPCBrokerV.remoteprocedure := 'XWB IS RPC AVAILABLE';

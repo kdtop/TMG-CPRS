@@ -2797,15 +2797,13 @@ begin
         SetPiece(x, U, 10, Piece(lstNotes.Items[lstNotes.ItemIndex], U, 11));
         NotifyOtherApps(NAE_REPORT, x);
       end else begin
-        //LoadDocumentText(memConsult.Lines,ItemIEN) ;
-        LoadDocumentText(FViewNote,ItemIEN);   //kt
+        LoadDocumentText(FViewNote,ItemIEN, IsHTML);   //kt
         Note := FViewNote;
         mnuActChange.Enabled     := False;
         mnuActLoadBoiler.Enabled := False;
         x := 'TIU^' + lstNotes.ItemID;
         SetPiece(x, U, 10, Piece(lstNotes.Items[lstNotes.ItemIndex], U, 11));
         NotifyOtherApps(NAE_REPORT, x);
-        IsHTML := uHTMLTools.IsHTML(FViewNote);        //kt
         Mode := [vmView] + [vmHTML_MODE[IsHTML]];      //kt
         SetDisplayToHTMLvsText(Mode,FViewNote);        //kt
         if not FWarmedUp and IsHTML then begin
@@ -3153,7 +3151,7 @@ end;
 
 procedure TfrmConsults.FormCreate(Sender: TObject);
 var
-  CacheDir : AnsiString;  //kt 9/11
+  CacheDir : string;  //kt 9/11 //codex 7/29/26
 begin
   inherited;
   FocusToRightPanel := False;

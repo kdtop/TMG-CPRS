@@ -86,7 +86,7 @@ procedure GetNoteInfo(Dest : TStrings; IEN : string);   //kt added 12/9/2020
 procedure ListConsultRequests(Dest: TStrings);
 procedure ListDCSumm(Dest: TStrings);
 procedure LoadDetailText(Dest: TStrings; IEN: Integer);    //**KCM**
-procedure LoadDocumentText(Dest: TStrings; IEN: Integer);
+procedure LoadDocumentText(Dest: TStrings; IEN: Integer; var VIsHTML : boolean);
 procedure GetNoteForEdit(var EditRec: TEditNoteRec; IEN: Integer);
 function VisitStrForNote(IEN: Integer): string;
 function GetCurrentSigners(IEN: integer): TStrings;
@@ -529,7 +529,7 @@ begin
   end; {with}
 end;
 
-procedure LoadDocumentText(Dest: TStrings; IEN: Integer);
+procedure LoadDocumentText(Dest: TStrings; IEN: Integer; var VIsHTML : boolean);
 { returns the text of a document (progress note, discharge summary, etc.) }
 begin
   //kt original --> CallV('TIU GET RECORD TEXT', [IEN]);  //kt <-- 2nd parameter defaults to 'VIEW' on server
@@ -537,9 +537,8 @@ begin
   //kt 'A' means get note and child components and grandchild etc components. Without 'A', granchild components are ignored.
   CallV('TIU GET RECORD TEXT', [IEN, 'VIEW;A']);
   FastAssign(RPCBrokerV.Results, Dest);
-  if IsHTML(Dest) then begin   //kt 8/19/21
-    ScanForSubs(Dest);
-  end;
+  VIsHTML := IsHTML(Dest);
+  if VIsHTML then ScanForSubs(Dest);
 end;
 
 procedure LoadDetailText(Dest: TStrings; IEN: Integer);    //**KCM**
@@ -780,8 +779,8 @@ end;
 function GetTMGPSCode(IEN: Int64): string;
 //kt
 { determine if cosigner dialog should be displayed for TIU Document Type }
-var
-  x: string;
+//var
+//  x: string;
 begin
   result := '';
   if sCallV('XWB IS RPC AVAILABLE',['TMG CPRS GET CUSTOM PS CODE'])='1' then
@@ -1022,8 +1021,8 @@ procedure PutAddendum(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; Adde
   load broker directly since there isn't a good way to set up mutilple subscript arrays }
 (*var
   i: Integer;*)
-var
-  ErrMsg: string;
+//var
+//  ErrMsg: string;
 begin
   PutChildDoc('TIU CREATE ADDENDUM RECORD', CreatedDoc, NoteRec, AddendumTo, true);
   { //kt moved below to PutChildDoc
@@ -1264,7 +1263,7 @@ var
   line, s, RPCResult : string;
   i, TxtIdx : integer;
   p1, p2 : integer;
-  Response: integer;
+  //Response: integer;
 begin
   ErrStr := '';
   Result := Lines;  //Default is to return pointer to original Lines
@@ -1322,7 +1321,7 @@ var
   line, s, RPCResult : string;
   i, TxtIdx : integer;
   p1, p2 : integer;
-  Response: integer;
+  //Response: integer;
 begin
   ErrStr := '';
   Result := Lines;  //Default is to return pointer to original Lines
@@ -1489,7 +1488,7 @@ function ExportChart(NotesList,LabList,RadList,OrdersList,ScansList,OtherDocList
   end;
 
 var
-  RPCResult : string;
+  //RPCResult : string;
   i : integer;
   FileName                      : string;
   count                         : integer;
@@ -1497,7 +1496,7 @@ var
   OutFile                       : TFileStream;
   s                             : AnsiString;
   Buffer                        : array[0..1024] of byte;
-  RefreshCountdown              : integer;
+  //RefreshCountdown              : integer;
   bResult                       : boolean;
   BrokerResult                  : string;
   ErrMsg                        : string;
@@ -1606,7 +1605,7 @@ function ReExportChart(ExportIEN:String): String;
   end;
 
 var
-  RPCResult : string;
+  //RPCResult : string;
   i : integer;
   FileName                      : string;
   count                         : integer;
@@ -1614,7 +1613,7 @@ var
   OutFile                       : TFileStream;
   s                             : AnsiString;
   Buffer                        : array[0..1024] of byte;
-  RefreshCountdown              : integer;
+  //RefreshCountdown              : integer;
   bResult                       : boolean;
   BrokerResult                  : string;
   ErrMsg                        : string;

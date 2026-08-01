@@ -137,7 +137,7 @@ type
     procedure mnuPopDeleteImageClick(Sender: TObject);
     procedure mnuAddUniversalImageClick(Sender: TObject);
   private
-    LastDisplayedTIUIEN : AnsiString;
+    LastDisplayedTIUIEN : string;
     FDeleteImageIndex : integer;
     FEditIsActive : boolean;  //note: I suspect this is not kept in sync with actual editing in the various other forms.
     FImageDeleteMode : TImgDelMode;
@@ -166,9 +166,9 @@ type
     //procedure ZoomIn;
     //procedure ZoomOut;
   public
-    NullImageName : AnsiString;
+    NullImageName : string;
     procedure NewNoteSelected(EditIsActive : boolean);
-    function DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
+    function DecodeBarcode(LocalFNamePath,ImageType: string): string;
     procedure GetThumbnailBitmapForFName (FName : string; Bitmap : TBitmap);
     function ThumbnailIndexForFName (FName : string) : integer;
     function AllowContextChange(var WhyNot: string): Boolean;
@@ -275,7 +275,7 @@ begin
 end;
 
 procedure TfrmImages.FormShow(Sender: TObject);
-var  TIUIEN : AnsiString;
+var  TIUIEN : string;
 begin
   inherited;
   Descending := True;
@@ -305,7 +305,7 @@ begin
 end;
 
 procedure TfrmImages.UpdateImageInfoMemo(Rec : TImageInfo);
-var s : AnsiString;
+var s : string;
     i : integer;
 begin
   CurrentImageMemo.Lines.Clear;
@@ -330,8 +330,8 @@ end;
 {
 procedure TfrmImages.UpdateNoteInfoMemo();
 var
-  NoteInfo,s : AnsiString;
-  //dateS      : AnsiString;
+  NoteInfo,s : string;
+  //dateS      : string;
 const
   U='^';
 begin
@@ -871,7 +871,7 @@ begin
 end;
 
 
-function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: AnsiString): AnsiString;
+function TfrmImages.DecodeBarcode(LocalFNamePath,ImageType: string): string;
 //Decode data from barcode on image, or return '' if none
 //Note: if I could find a cost-effective way of decoding this on client side,
 //      then that code be done here in the function, instead of uploading image
@@ -910,7 +910,7 @@ end;
 
 procedure TfrmImages.ExecuteFileIfNeeded(Selected: integer);
 var
-  FileName : AnsiString;
+  FileName : string;
   Rec  : TImageInfo;
 begin
   inherited;
@@ -938,7 +938,7 @@ end;
 function TfrmImages.ThumbnailIndexForFName (FName : string) : integer;
 var
   //index : integer;
-  Ext : AnsiString;
+  Ext : string;
 begin
   Result := 4; //default
   Ext := LowerCase(ExtractFileExt(FName));

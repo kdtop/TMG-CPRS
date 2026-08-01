@@ -863,6 +863,7 @@ inherited frmFrame: TfrmFrame
             Font.Name = 'MS Sans Serif'
             Font.Style = []
             ParentFont = False
+            Transparent = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
             ExplicitWidth = 46
@@ -907,6 +908,7 @@ inherited frmFrame: TfrmFrame
             Font.Name = 'MS Sans Serif'
             Font.Style = []
             ParentFont = False
+            Transparent = False
             Layout = tlCenter
             OnClick = pnlCIRNClick
             ExplicitWidth = 63
@@ -926,6 +928,7 @@ inherited frmFrame: TfrmFrame
             Font.Name = 'MS Sans Serif'
             Font.Style = []
             ParentFont = False
+            Transparent = False
             Layout = tlCenter
             OnClick = lblLoadSequelPatClick
             ExplicitWidth = 52

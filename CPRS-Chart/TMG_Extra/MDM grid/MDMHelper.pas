@@ -327,13 +327,13 @@ end;
 
 procedure TfrmMDMGrid.btnReviewDocsHelpClick(Sender: TObject);
 begin
-  MessageDlg('An ìexternalî note includes records, notes, ' + CRLF +
+  MessageDlg('An ‚Äúexternal‚Äù note includes records, notes, ' + CRLF +
              'and tests from external providers', mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmMDMGrid.btnTestsHelpClick(Sender: TObject);
 begin
-  MessageDlg('A single ìunique testî for coding purposes includes panels.' + CRLF +
+  MessageDlg('A single ‚Äúunique test‚Äù for coding purposes includes panels.' + CRLF +
              'E.g., a basic metabolic panel is considered a single unique test.',
              mtInformation, [mbOK], 0);
 end;
@@ -364,7 +364,7 @@ end;
 
 procedure TfrmMDMGrid.btnDiscussExternalDocHelpClick(Sender: TObject);
 begin
-  MessageDlg('An ìexternalî physician or qualified health professional is'+CRLF+
+  MessageDlg('An ‚Äúexternal‚Äù physician or qualified health professional is'+CRLF+
              'a provider from a different specialty or a totally different'+CRLF+
              'group practice.', mtInformation, [mbOK], 0);
 end;
@@ -383,10 +383,10 @@ end;
 
 procedure TfrmMDMGrid.btnInterpretTestHelpClick(Sender: TObject);
 begin
-  MessageDlg('An ìIndependent interpretation of testsî includes looking at'+CRLF+
+  MessageDlg('An ‚ÄúIndependent interpretation of tests‚Äù includes looking at'+CRLF+
              'or interpreting a chest X-ray (CXR) or electrocardiogram (ECG) '+CRLF+
-             'tracing (i.e., ìI ordered and personally reviewed the CXR and '+CRLF+
-             'it shows Öî). You are not credited with interpretation in this '+CRLF+
+             'tracing (i.e., ‚ÄúI ordered and personally reviewed the CXR and '+CRLF+
+             'it shows ‚Ä¶‚Äù). You are not credited with interpretation in this '+CRLF+
              'category if you are also billing for your interpretation separately.', mtInformation, [mbOK], 0);
 end;
 

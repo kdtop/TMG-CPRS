@@ -6,7 +6,7 @@
 {                                                       }
 {     CONTRIBUTORS:                                     }
 {      Eran Bodankin (bsalsa) bsalsa@gmail.com         }
-{      Per Lindsø Larsen                                }
+{      Per LindsÃ¸ Larsen                                }
 {      Peter Morris (Pete@StuckIndoors.com)             }
 {      Thomas Stutz (aka smot)                          }
 {                                                       }

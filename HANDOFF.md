@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-07-25
+Last updated: 2026-07-31
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -41,8 +41,9 @@ Use the IDE compile log as the source of truth.
 - Windows filesystem/API path fixes may use `string`/`PChar`; byte-oriented RPC/file-transfer payloads should stay `AnsiString`/`AnsiChar` unless deliberately changed.
 - Leave Delphi `__recovery` folders alone and ignore them unless the user explicitly asks to clean them.
 - Many Delphi source files are ANSI encoded. `apply_patch` may fail on them with invalid UTF-8; use encoding-preserving PowerShell edits only when necessary.
-- The git tree was intentionally baselined locally on 2026-07-24. Use `git status --short` before edits; it should be clean at session start unless the user has changed files.
-- For future Delphi/Pascal source edits, append `//kt //codex <date>` at the end of every modified source line, e.g. `//kt //codex 7/24/26`.
+- The git tree was intentionally baselined locally on 2026-07-24. Use `git status --short` before edits, but do not assume the tree is clean; the user may have several days of local changes that are not yet committed.
+- For future Delphi/Pascal source edits, append `//kt //codex <date>` at the end of every modified source line, e.g. `//kt //codex 7/30/26`.
+- For future Delphi/Pascal source edits, when removing a line, leave the old line in place as a comment using this pattern: `//kt //codex original --> <old code>`.
 
 ## Git Baseline
 
@@ -57,29 +58,84 @@ Substantive local baseline commits, newest first:
 
 These commits are local checkpoints in the copied Delphi 12 working tree. There may also be a later `HANDOFF.md`-only documentation commit at `HEAD`; that does not change source behavior. `origin/master` still points at the older source history (`c58ce2b` at the time this handoff was updated), so this branch is intentionally ahead of `origin/master`. That does not mean the real source tree elsewhere has been changed.
 
-After the latest local handoff update, `git status --short` was clean. "Clean" means there are no uncommitted changes relative to this copied tree's new local baseline. Ignored Delphi build artifacts still exist on disk, especially `.dcu`, `__history`, shortcut, and backup files, but they should not dirty normal status.
+`git status --short` was clean immediately after the 2026-07-30 handoff-only update. That is no longer a safe assumption for later sessions. As of 2026-07-31, the user reports the local git view has not been updated in a few days and the working tree may contain intentional uncommitted edits plus generated artifacts and backup files.
 
 `.dcu` files were removed from Git tracking and ignored. `.gitignore` contains `*.dcu` and `*.DCU`.
 
 Important Git workflow:
 
 1. Before a new work session, run `git status --short`.
-2. If clean, start editing normally.
-3. Commit intentional source/checkpoint changes locally with `git add ...` and `git commit -m "..."`.
-4. Expect normal future edits to show as `M`/modified until they are committed; after a commit, `git status --short` should return to clean.
+2. Review the current modified/untracked files before assuming anything is accidental.
+3. Commit intentional source/checkpoint changes locally with `git add ...` and `git commit -m "..."` when the user wants a new checkpoint.
+4. Expect normal future edits to show as `M`/modified until they are committed; do not assume a dirty tree means a bad state.
 5. Do not use `git reset --hard` or revert broad generated-file changes unless the user explicitly asks.
 6. Do not assume commits have been pushed; local commits remain local until `git push`.
 
 ## Current State
 
-`CPRS-Chart\build_errors.txt` currently reflects the last IDE compile before the latest `BDK50\Rpcnet.pas` patch. It is not a fresh compile after that patch.
+As of 2026-07-31, the user has confirmed a successful Delphi IDE compile. Active work is runtime/debugging cleanup rather than basic compile blocking.
 
-Latest saved compile state:
+Important:
 
-- `BDK50\wsockc.pas` no longer has fatal/errors; it still has many string-cast warnings.
-- Compile then failed in `BDK50\Rpcnet.pas` with `PAnsiChar` / `PWideChar` mismatches at old host/IP lookup calls.
-- `BDK50\Rpcnet.pas` has now been patched for that failing compile wave.
-- The next required action is another IDE compile from the Windows Server Delphi session, then save the refreshed output to `CPRS-Chart\build_errors.txt`.
+- Do not assume older `CPRS-Chart\build_errors.txt` notes below are current.
+- If the user reports a new compile problem, ask for a fresh IDE compile log.
+- Otherwise, assume the main active work is runtime behavior under Delphi 12.
+
+### Runtime / Debugging Status As Of 2026-07-31
+
+- The application compiles and can start, log in, and communicate with the RPC Broker.
+- Several Delphi 12 runtime/designer compatibility issues have been found and fixed incrementally.
+- Current work has shifted to runtime AV/debugger cleanup in chart tabs and older helper units.
+
+Recent confirmed fixes from this session:
+
+- `CPRS-Lib\ORClasses.pas`
+  - `TORStringList.SortByPieces` quicksort loop now bounds-checks `I` and `J` before indexing, preventing out-of-range access during sort.
+- `CPRS-Lib\ORFn.pas`
+  - `MixedCase` now passes its transformed `Result` into `ConvertSpecialStrings` instead of the original input.
+  - `ConvertSpecialStrings` was fixed to initialize `Result := x`; previously it could return `''` for non-empty input.
+  - `CharInSet` helper now uses `TSysCharSet` / `SysUtils.CharInSet`.
+  - `FastAssign` / `FastAddStrings` were under active investigation because of a runtime AV in `System.Classes.LoadFromStream`; the user subsequently rewrote these functions manually to the desired logic. Do not overwrite those user edits casually.
+- `CPRS-Lib\ORCtrls.pas`
+  - `TCaptionListView` republishes `AutoSize` so older DFM state can load.
+- `VA\VA508Accessibility\VA508AccessibilityManager.pas`
+  - `TVA508StaticText` now republishes/implements properties needed by older DFM state: `AutoSize`, `WordWrap`, `LabelAlignment`, `LabelLayout`.
+- `CPRS-Chart\fFrame.pas` and `CPRS-Chart\fFrame_SidexSide.pas`
+  - Added fallback for empty `FILE_VER_INTERNALNAME` by trying `FILE_VER_FILEVERSION`.
+- `CPRS-Chart\TMG_Extra\rFileTransferU.pas` and `CPRS-Chart\TMG_Extra\uImages.pas`
+  - Byte-oriented upload/base64 helper locals were moved back to `AnsiString`/`AnsiChar` where needed.
+  - Deprecated `MidStr` trimming was replaced with `Delete(...)`.
+- `CPRS-Chart\fLabs.pas`
+  - The “empty image list” pattern was corrected: `uEmptyImageList` now remains `nil`, and list views use `SmallImages := uEmptyImageList` / `nil` rather than a zero-width `TImageList`.
+- `CPRS-Chart\fReports.pas`
+  - The old `OnBeforeNavigate2` signature mismatch was investigated. The user used the Delphi designer to regenerate the handler signature and manually repaired the event hookup. Do not revert that blindly.
+- `CPRS-Chart\TMG_Extra\uHTMLTools.pas`
+  - `GetIPAddress` was rewritten into a cleaner Delphi-style Winsock helper and the old code was preserved as `//kt //codex original --> ...` comments.
+- `CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED\KS_procs.pas`
+  - `IsAlNum()` was fixed after UTF-8 conversion by replacing the old `'À'..'ÿ'` set range with an `Ord(C)` range test.
+
+### Encoding / Editing Notes
+
+- The user converted `CPRS-Chart\TMG_Extra\uHTMLTools.pas` to UTF-8 using Windows Notepad so it is easier to edit safely.
+- A root script now exists: `convert_ansi_to_utf8.sh`
+  - Recurses through the tree
+  - Detects non-UTF-8 Delphi source files
+  - Converts them from Windows-1252 to UTF-8
+  - Creates `.bak` backups
+- The script can introduce follow-up compile fixes in old third-party units; use it cautiously and expect Unicode/set-expression cleanup afterward.
+
+### User Editing Conventions
+
+- Add `//kt //codex <date>` to modified Delphi/Pascal source lines.
+- If removing Delphi/Pascal code, leave the old line behind as:
+  - `//kt //codex original --> <old code>`
+- The user may manually revise Codex patches after review. Read the current file contents before making follow-up edits.
+
+Current compile state:
+
+- CPRS currently compiles in the Delphi 12 IDE.
+- Active work is now runtime/debugging cleanup after compile success.
+- Do not treat the older `BDK50\Rpcnet.pas` compile-failure notes below as the current blocker; they are historical context for how the tree reached the present compileable state.
 
 Older milestone:
 
@@ -118,7 +174,13 @@ Patched `CPRS-Lib\ORNet.pas` so `SetParams` handles Delphi 12 text `TVarRec` cas
 
 Important: this does not mean RPC payloads should become Unicode. All `SetParams` scalar cases now pass through a local `AnsiString` helper before assigning `RPCBrokerV.Param[i].Value`. The helper preserves the existing leading `#1` convention that converts a literal into a Broker `reference` parameter. `SetList` also assigns `AnsiString(Strings[i])` into `Mult[...]`.
 
-If the next IDE compile errors inside `BDK50` units, prefer patching the local extracted source rather than installed Delphi/package files. Continue tagging every modified Pascal source line with `//kt //codex 7/24/26`.
+If the next IDE compile errors inside `BDK50` units, prefer patching the local extracted source rather than installed Delphi/package files. Continue tagging every modified Pascal source line with `//kt //codex 7/30/26`.
+
+Additional standing instruction from the user as of 2026-07-30:
+
+- Codex should mark Delphi/Pascal code changes inline with `//kt //codex <date>`.
+- If a prior Codex patch omitted that marker, add it when revisiting the line.
+- When removing Delphi/Pascal code, preserve the old line as a commented reference using `//kt //codex original --> <old code>`.
 
 After the first compile with local Broker source, `CPRS-Chart\build_errors.txt` showed many `BDK50\wsockc.pas` errors where old Winsock code used `PChar`/`Char` assuming ANSI but Delphi 12 treats `PChar` as UTF-16. Patched `BDK50\wsockc.pas` and `BDK50\Trpcb.pas` so the Broker's raw socket buffers and low-level `NetCall`/`tCall`/`pchCall` pointer path use `PAnsiChar`, `AnsiChar`, and `AnsiString` at the Winsock/RPC wire boundary.
 
@@ -126,16 +188,17 @@ The next compile reached the edited `NetCall` code and showed that unqualified `
 
 Follow-up compile showed Delphi's `AnsiStrings` unit does not expose `StrAlloc`, and unqualified `StrLen` became ambiguous after adding `AnsiStrings`. Patched `BDK50\wsockc.pas` so temporary receive/server-packet buffers use `AllocMem` / `FreeMem`, returned RPC strings use `AnsiStrings.StrNew`, and old `cLeft`/`cRight` helpers call `AnsiStrings.StrLen`. Patched `BDK50\Trpcb.pas` so `Sec` / `App` scratch buffers use `AllocMem` / `FreeMem`.
 
-Next compile cleared `wsockc.pas` errors and moved to `BDK50\Rpcnet.pas`. Patched `Rpcnet.pas` host/IP lookup buffers so `libGetHostIP1`, `libGetLocalIP`, and the async result record use `PAnsiChar`, with `AllocMem` / `FreeMem` for scratch buffers and `AnsiStrings.StrCopy` / `StrCat` / `StrPCopy` / `StrPas` for ANSI text. `inet_ntoa` results are copied into the existing ANSI buffer instead of assigning the static Winsock pointer. The user has not yet recompiled after this `Rpcnet.pas` pass.
+Next compile cleared `wsockc.pas` errors and moved to `BDK50\Rpcnet.pas`. Patched `Rpcnet.pas` host/IP lookup buffers so `libGetHostIP1`, `libGetLocalIP`, and the async result record use `PAnsiChar`, with `AllocMem` / `FreeMem` for scratch buffers and `AnsiStrings.StrCopy` / `StrCat` / `StrPCopy` / `StrPas` for ANSI text. `inet_ntoa` results are copied into the existing ANSI buffer instead of assigning the static Winsock pointer. This was the last compile-blocking wave in the saved notes; the user has since reported that CPRS compiles successfully as of 2026-07-31.
 
 ## Next Session Start
 
 Recommended first step:
 
-1. Have the user compile once in the Delphi 12 IDE inside the Windows Server session.
-2. Read the refreshed `CPRS-Chart\build_errors.txt`.
-3. If errors remain, expect the next blocker after the latest `BDK50\Rpcnet.pas` patch; patch only the next concrete blocker and preserve byte-oriented RPC behavior.
-4. If there are no errors/fatal errors, ask the user to run CPRSChart again and verify startup no longer breaks on `Error accessing the OLE registry` or `Unable to pass parameter type to Broker`.
+1. Read the current source before editing; the user manually adjusted some recent patches, especially `CPRS-Lib\ORFn.pas` and event-handler fixes.
+2. Run `git status --short`, but treat the result as informational only unless the user asks to clean or checkpoint it.
+3. If the user reports a compile issue, ask for a fresh Delphi IDE compile log and ignore stale compile guidance.
+4. If the user reports a runtime/designer issue, inspect the active unit/DFM pair first; many current failures are old-component/Delphi-12 compatibility problems rather than broker/compile failures.
+5. Be careful with files converted from ANSI to UTF-8; conversion can surface warnings/errors in old character-set code.
 
 Useful error filter:
 
@@ -143,7 +206,7 @@ Useful error filter:
 Select-String -Path .\CPRS-Chart\build_errors.txt -Pattern '\[dcc32 (Error|Fatal Error)\]| error [A-Z][0-9]+|Fatal Error'
 ```
 
-Do not assume the saved compile log is fresh. At session start, compare `CPRS-Chart\build_errors.txt` against the latest handoff state and ask the user for a new IDE compile if it still shows the pre-`Rpcnet.pas` patch errors.
+Do not assume the saved compile log is fresh. If `CPRS-Chart\build_errors.txt` is empty, stale, or inconsistent with the current runtime/debugging work, ask the user for a fresh IDE compile log before treating it as an active blocker.
 
 ## Resolved Conflict Notes
 

@@ -1415,7 +1415,7 @@ begin
       else str := str + CRLF + 'Order Dialog ' + Piece(Alist.Strings[i],U,3);
     end;
     if infoBox('This order set contains the following items:'+ CRLF + str + CRLF+ CRLF + 'Select the OK button to start this order set.' +
-               'To stop the order set while it is in process, press ìAlt +F6î to navigate to the order set dialog, and select the Stop Order Set Button.', 'Starting Order Set'  ,MB_OKCANCEL) = IDCANCEL then
+               'To stop the order set while it is in process, press ‚ÄúAlt +F6‚Äù to navigate to the order set dialog, and select the Stop Order Set Button.', 'Starting Order Set'  ,MB_OKCANCEL) = IDCANCEL then
     begin
       Result := False;
       exit;

@@ -6,12 +6,12 @@ inherited frmConsults: TfrmConsults
   ClientHeight = 461
   ClientWidth = 715
   Menu = mnuConsults
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnShow = FormShow
-  ExplicitWidth = 723
-  ExplicitHeight = 515
-  PixelsPerInch = 96
+  ExplicitWidth = 731
+  ExplicitHeight = 520
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 456
@@ -32,6 +32,7 @@ inherited frmConsults: TfrmConsults
     Left = 162
     Width = 553
     Height = 456
+    StyleElements = [seFont, seClient, seBorder]
     OnExit = pnlRightExit
     OnResize = pnlRightResize
     ExplicitLeft = 162
@@ -121,6 +122,12 @@ inherited frmConsults: TfrmConsults
       Height = 62
       Align = alBottom
       Color = clCream
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
       TabOrder = 2
       WantReturns = False
     end
@@ -279,6 +286,7 @@ inherited frmConsults: TfrmConsults
   inherited pnlLeft: TPanel [3]
     Width = 160
     Height = 456
+    StyleElements = [seFont, seClient, seBorder]
     OnExit = pnlLeftExit
     OnResize = pnlLeftResize
     ExplicitWidth = 160
@@ -366,6 +374,7 @@ inherited frmConsults: TfrmConsults
         TabOrder = 4
         Visible = False
         OnClick = lstNotesClick
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2,3'
@@ -486,6 +495,7 @@ inherited frmConsults: TfrmConsults
         TabOrder = 1
         Visible = False
         OnClick = lstConsultsClick
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2,3,4,5'

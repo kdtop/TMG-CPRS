@@ -2320,7 +2320,7 @@ begin
       (ValFor(COL_SEQUENCE, 1)<>''))  then
       begin
         text := 'By switching to the Dosage Tab, ' ;
-         if (InfoBox(text +'you will lose all data on this screen. Click ìOKî to continue or ìCancelî','Warning',MB_OKCANCEL)=IDCANCEL) then
+         if (InfoBox(text +'you will lose all data on this screen. Click ‚ÄúOK‚Äù to continue or ‚ÄúCancel‚Äù','Warning',MB_OKCANCEL)=IDCANCEL) then
             begin
              if tabDose.TabIndex = 1 then tabDose.TabIndex := 0
              else tabDose.TabIndex := 1;

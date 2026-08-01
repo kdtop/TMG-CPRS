@@ -41,7 +41,7 @@ inherited frmLabs: TfrmLabs
     Height = 615
     Constraints.MinWidth = 37
     StyleElements = [seFont, seClient, seBorder]
-    ExplicitHeight = 669
+    ExplicitHeight = 615
     object Splitter1: TSplitter
       Left = 0
       Top = 355
@@ -64,7 +64,6 @@ inherited frmLabs: TfrmLabs
       BevelOuter = bvNone
       Constraints.MinWidth = 30
       TabOrder = 0
-      ExplicitHeight = 409
       object lblReports: TOROffsetLabel
         Left = 0
         Top = 0
@@ -103,7 +102,6 @@ inherited frmLabs: TfrmLabs
       Height = 250
       Align = alBottom
       TabOrder = 1
-      ExplicitTop = 419
       object lblQualifier: TOROffsetLabel
         Left = 1
         Top = 1
@@ -237,7 +235,7 @@ inherited frmLabs: TfrmLabs
     StyleElements = [seFont, seClient, seBorder]
     OnResize = pnlRightResize
     ExplicitWidth = 941
-    ExplicitHeight = 669
+    ExplicitHeight = 615
     object sptHorzRight: TSplitter
       Left = 0
       Top = 296
@@ -257,7 +255,6 @@ inherited frmLabs: TfrmLabs
       Height = 295
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 349
       object Memo1: TMemo
         Left = 1
         Top = 1
@@ -286,7 +283,7 @@ inherited frmLabs: TfrmLabs
         Height = 274
         Align = alClient
         Color = clCream
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -12
         Font.Name = 'Courier New'
@@ -572,7 +569,6 @@ inherited frmLabs: TfrmLabs
             Width = 7
             Height = 15
             Alignment = taCenter
-            AutoSize = True
             Caption = ''
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
@@ -1152,7 +1148,6 @@ inherited frmLabs: TfrmLabs
       Height = 20
       Align = alBottom
       TabOrder = 3
-      ExplicitTop = 649
       DesignSize = (
         941
         20)

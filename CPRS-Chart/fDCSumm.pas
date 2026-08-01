@@ -1408,8 +1408,7 @@ begin
       lvSumms.Caption := lblTitle.Caption;
       lblTitle.Hint := lblTitle.Caption;
       //lblTitle.Caption := Piece(DisplayText[ItemIndex], #9, 1) + '  ' + Piece(DisplayText[ItemIndex], #9, 2);
-      //kt LoadDocumentText(memSumm.Lines, ItemIEN);
-      LoadDocumentText(FViewSumm, ItemIEN);  //kt
+      LoadDocumentText(FViewSumm, ItemIEN, IsHTML);  //kt
       Note := FViewSumm;   //kt
       memSumm.SelStart := 0;
       mnuViewDetail.Enabled := True;
@@ -1418,7 +1417,6 @@ begin
       mnuActLoadBoiler.Enabled := False;
       Screen.Cursor := crDefault;
       StatusText('');
-      IsHTML := uHTMLTools.IsHTML(FViewSumm);            //kt 9/11
       Mode := [vmView] + [vmHTML_MODE[IsHTML]];          //kt 9/11
       SetDisplayToHTMLvsText(Mode,FViewSumm);            //kt 9/11
       if not FWarmedUp and IsHTML then begin             //kt 9/11
@@ -2285,7 +2283,7 @@ end;
 
 procedure TfrmDCSumm.FormCreate(Sender: TObject);
   var
-  CacheDir : AnsiString;  //kt 9/11
+  CacheDir : string;  //kt 9/11 //codex 7/29/26
 begin
   inherited;
   PageID := CT_DCSUMM;

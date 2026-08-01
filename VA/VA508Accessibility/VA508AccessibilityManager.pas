@@ -236,6 +236,8 @@ type
     FNextLabel: TVA508ChainedLabel;
     FDeletingChain: boolean;
     FInitTabStop: boolean;
+    FLabelAlignment: TAlignment; //kt //codex 7/30/26
+    FLabelLayout: TTextLayout; //kt //codex 7/30/26
     procedure DeleteChain(FromLabel, ToLabel: TVA508ChainedLabel);
     procedure SetNextLabel(const Value: TVA508ChainedLabel);
     function GetLabelCaption: string;
@@ -249,6 +251,8 @@ type
     procedure CMFontChanged(var Message: TMessage); message CM_FONTCHANGED;
     function GetAlignment: TAlignment;
     procedure SetAlignment(const Value: TAlignment);
+    function GetWordWrap: boolean; //kt //codex 7/30/26
+    procedure SetWordWrap(const Value: boolean); //kt //codex 7/30/26
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure DoEnter; override;
@@ -262,6 +266,7 @@ type
     procedure InvalidateAll;
     property NextLabel: TVA508ChainedLabel read FNextLabel write SetNextLabel;
   published
+    property AutoSize; //kt //codex 7/30/26
     property TabStop default false;
     property OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
     property OnExit: TNotifyEvent read FOnExit write FOnExit;
@@ -269,6 +274,9 @@ type
     property Name: string read GetRootName write SetRootName;
     property ShowAccelChar: boolean read GetShowAccelChar write SetShowAccelChar;
     property Alignment: TAlignment read GetAlignment write SetAlignment;
+    property WordWrap: boolean read GetWordWrap write SetWordWrap; //kt //codex 7/30/26
+    property LabelAlignment: TAlignment read FLabelAlignment write FLabelAlignment; //kt //codex 7/30/26
+    property LabelLayout: TTextLayout read FLabelLayout write FLabelLayout; //kt //codex 7/30/26
   end;
 
   TVA508SilentComponent = class(TVA508ComponentManager)
@@ -3126,6 +3134,8 @@ begin
   FLabel := TLabel.Create(Self);
   FLabel.Parent := Self;
   FLabel.Align := alClient;
+  FLabelAlignment := taLeftJustify; //kt //codex 7/30/26
+  FLabelLayout := tlTop; //kt //codex 7/30/26
   ControlStyle := ControlStyle - [csAcceptsControls];
   FInitTabStop := (not TabStop);
 end;
@@ -3199,6 +3209,11 @@ end;
 function TVA508StaticText.GetShowAccelChar: boolean;
 begin
   Result := FLabel.ShowAccelChar;
+end;
+
+function TVA508StaticText.GetWordWrap: boolean; //kt //codex 7/30/26
+begin
+  Result := FLabel.WordWrap;
 end;
 
 procedure TVA508StaticText.InvalidateAll;
@@ -3397,6 +3412,15 @@ end;
 procedure TVA508StaticText.SetShowAccelChar(const Value: boolean);
 begin
   FLabel.ShowAccelChar := Value;
+end;
+
+procedure TVA508StaticText.SetWordWrap(const Value: boolean); //kt //codex 7/30/26
+begin
+  if FLabel.WordWrap <> Value then
+  begin
+    FLabel.WordWrap := Value; //kt //codex 7/30/26
+    UpdateSize; //kt //codex 7/30/26
+  end;
 end;
 
 procedure TVA508StaticText.UpdateSize;

@@ -1,4 +1,4 @@
-{ ******************************************** }
+ï»¿{ ******************************************** }
 {       KS_Procs ver 1.2 (Jan. 16, 2004)       }
 {                                              }
 {       For Delphi 4, 5 and 6                  }
@@ -193,7 +193,7 @@ function KsSameText(S1, S2: string; MaxLen: Cardinal): boolean;
 
 function BeforLastToken(const StrIn, Token: string): string;
 function BeforeFirstToken(const S: string; Token: Char): string;
-//Returnerer alt før Token som Result
+//Returnerer alt fÃ¸r Token som Result
 
 function strMake(C: Char; Len: Integer): string;
 //Returns a string with a specified number of a specified Char
@@ -217,7 +217,7 @@ function NoStartSlash(const S: string): string;
 
 function SplitAtToken(var S: string; Token: Char): string;
 function SplitAtTokenStr(var S: string; Token: string): string;
-//returnerer alt før Token som Result, og alt efter Token i S
+//returnerer alt fÃ¸r Token som Result, og alt efter Token i S
 function strTokenCount(S: string; Token: Char): Integer;
 //Returnerer antal token i S
 function AfterTokenNr(const S: string; Token: Char; Nr: Integer): string;
@@ -288,7 +288,7 @@ function KSGetFileTime(const FileName: string; ComparisonType: TTimeOfWhat): TFi
 function KSCompareFileTime(const FileNameOne, FileNameTwo: string; ComparisonType: TTimeOfWhat): TFileTimeComparision;
 //Compares two files timestamps
 function FileDifferent(const Sourcefile: string; TargetPath: string): Boolean;
-//Returnere true hvis de to filer har forskellig dato eller størrelse
+//Returnere true hvis de to filer har forskellig dato eller stÃ¸rrelse
 function KSFileGetDateTime(const aFile: string): TDateTime;
 //Returnere TdateTime for en fils dato
 function GetFileTimeEx(const FileName: string; ComparisonType: TTimeOfWhat): TDateTime;
@@ -461,7 +461,7 @@ end;
 //------------------------------------------------------------------------------
 function SplitAtToken(var S: string; Token: Char): string;
 //Splits up a string at a specified substring
-//Returnerer alt før Token som Result, og alt efter Token i S
+//Returnerer alt fÃ¸r Token som Result, og alt efter Token i S
 var
   I: Word;
 begin
@@ -479,7 +479,7 @@ begin
 end;
 //------------------------------------------------------------------------------
 function BeforeFirstToken(const S: string; Token: Char): string;
-//Returnerer alt før Token som Result
+//Returnerer alt fÃ¸r Token som Result
 var
   I: Word;
 begin
@@ -492,7 +492,7 @@ end;
 //------------------------------------------------------------------------------
 function SplitAtTokenStr(var S: string; Token: string): string;
 //Splits up a string at a specified substring
-//Returnerer alt før Token som Result, og alt efter Token i S
+//Returnerer alt fÃ¸r Token som Result, og alt efter Token i S
 var
   I: Word;
 begin
@@ -709,7 +709,7 @@ end;
 function fileExec(const aCmdLine: string; const aAppName: string = ''; aHide: Boolean = True;
            aWait: Boolean = False; bWait: Boolean = False): Boolean;
 //Executes a file and wait as specified
-//aWait = vent på inputidle, bWait = vent på at programmet stopper igen
+//aWait = vent pÃ¥ inputidle, bWait = vent pÃ¥ at programmet stopper igen
 var
   StartupInfo: TStartupInfo;
   ProcessInfo: TProcessInformation;
@@ -1245,9 +1245,9 @@ var
 begin
   //asm int 3 end; //KS trap
   Hwnd := GetWindowFromText('Microsoft Word');
-  // Hvis word er aktiv så minimer > så kan der printes i baggrunden
+  // Hvis word er aktiv sÃ¥ minimer > sÃ¥ kan der printes i baggrunden
   if hwnd > 0
-    then ShowWindow(hwnd, SW_HIDE); //hvis word ikke er aktiv må vi finde os i forgrunds-print
+    then ShowWindow(hwnd, SW_HIDE); //hvis word ikke er aktiv mÃ¥ vi finde os i forgrunds-print
 
   Hwnd := ShellExecute(handle, 'Print', Pchar(Fil), nil, nil, SW_HIDE);
   if Hwnd < 32
@@ -1523,7 +1523,7 @@ end;
 function KSCompareFileTime(const FileNameOne, FileNameTwo: string; ComparisonType:
   TTimeOfWhat): TFileTimeComparision;
 //Compares two files timestamps
-// NB der er vistnok vrøvl med alt andet end ftLastWriteTime
+// NB der er vistnok vrÃ¸vl med alt andet end ftLastWriteTime
 var
   FileOneFileTime: TFileTime;
   FileTwoFileTime: TFileTime;
@@ -1547,7 +1547,7 @@ end;
 //------------------------------------------------------------------------------
 function GetFileTimeEx(const FileName: string; ComparisonType: TTimeOfWhat): TDateTime;
 // Returns the date and time that a file was created, last accessed, or last modified as TDateTime
-// NB der er vistnok vrøvl med alt andet end ftLastWriteTime
+// NB der er vistnok vrÃ¸vl med alt andet end ftLastWriteTime
 var
   SystemTime: TSystemTime;
   FileTime: TFileTime;
@@ -1589,7 +1589,7 @@ end;
 //------------------------------------------------------------------------------
 function KSGetFileTime(const FileName: string; ComparisonType: TTimeOfWhat): TFileTime;
 // Returns the date and time that a file was created, last accessed, or last modified
-// NB der er vistnok vrøvl med alt andet end ftLastWriteTime
+// NB der er vistnok vrÃ¸vl med alt andet end ftLastWriteTime
 var
   FileTime, LocalFileTime: TFileTime;
   hFile: THandle;
@@ -1936,12 +1936,12 @@ var
   rec: TFindHwndRec;
 begin
   //asm int 3 end; //KS trap
-  {gem søgestrengen så callback-funktionen kan læse den}
+  {gem sÃ¸gestrengen sÃ¥ callback-funktionen kan lÃ¦se den}
   StrPcopy(rec.WindowTekst, WindowText);
   rec.LenWindowTekst := word(Length(WindowText));
   if rec.LenWindowTekst > 48
     then KSMessageE('It is maximum posible to search for 49 characters [function GetWindowFromText])');
-  rec.FoundWnd := 0;          {rturværdi hvis window ikke findes}
+  rec.FoundWnd := 0;          {rturvÃ¦rdi hvis window ikke findes}
 
   EnumWindows(@EnumWindowsProc, Longint(@rec));
 
@@ -2354,13 +2354,14 @@ end;
 function IsAlNum(C: char): bool;
 begin
   //asm int 3 end; //trap
-  result := C in ['0'..'9', 'A'..'Z', 'a'..'z', 'À'..'ÿ'];
+  result := (C in ['0'..'9', 'A'..'Z', 'a'..'z']) or ((Ord(C) >= $00C0) and (Ord(C) <= $00FF)); //kt //codex 7/30/26
+  //kt //codex original --> result := C in ['0'..'9', 'A'..'Z', 'a'..'z', 'Ã€'..'Ã¿'];
 end;
 //------------------------------------------------------------------------------
 procedure SearchForFiles(path, mask: AnsiString; var Value: TStringList; Recurse: Boolean = False);
 //path = rootdir
 //fileMask = *.db, *.*, ....osv
-//value = stringlist til at modtage resultate af søgningen
+//value = stringlist til at modtage resultate af sÃ¸gningen
 //Recurse = True -> recursering af foldere under path
 var
 srRes : TSearchRec;

@@ -110,8 +110,6 @@ type
     mnuViewHL7: TMenuItem;
     mnuDeleteOneStudy: TMenuItem;
     procedure mnuDeleteOneStudyClick(Sender: TObject);
-    procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags, TargetFrameName,
-      PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure mnuViewHL7Click(Sender: TObject);
     procedure mnuViewInBrowserClick(Sender: TObject);
     procedure sptHorzRightMoved(Sender: TObject);
@@ -136,7 +134,7 @@ type
     procedure GoRemote(Dest: TStringList; AItem: string; AQualifier, ARpc: string; AHSTag: string; AHDR: string; aFHIE: string);
     procedure lstHeadersClick(Sender: TObject);
     procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
-    procedure WebBrowser1DocumentComplete(Sender: TObject; const pDisp: IDispatch; var URL: OleVariant);
+    procedure WebBrowser1DocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
     procedure sptHorzRightCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure lstQualifierDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure tvReportsClick(Sender: TObject);
@@ -170,6 +168,8 @@ type
     procedure lstDateRangeClick(Sender: TObject);
     procedure sptHorzMoved(Sender: TObject);
     procedure chkMaxFreqClick(Sender: TObject);
+    procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
+      Headers: OleVariant; var Cancel: WordBool);
 
   private
     SortIdx1, SortIdx2, SortIdx3: Integer;
@@ -1294,8 +1294,9 @@ begin
   uRemoteReportData := TStringList.Create;
   uColumns := TStringList.Create;
   uTreeStrings := TStringList.Create;
-  uEmptyImageList := TImageList.Create(Self);
-  uEmptyImageList.Width := 0;
+  uEmptyImageList := nil; //kt //codex 7/30/26
+  //kt //codex original --> uEmptyImageList := TImageList.Create(Self);
+  //kt //codex original --> uEmptyImageList.Width := 0;
   RowObjects := TRowObject.Create;
   uRemoteCount := 0;
   GraphFormActive := false;
@@ -1974,7 +1975,7 @@ begin
     Newsize := 50;
 end;
 
-procedure TfrmReports.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; var URL, Flags,
+procedure TfrmReports.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
   //eddie addedd  (//kt)
 var MsgType:string;
@@ -1998,10 +1999,11 @@ begin
     end;
   end;
   //if MsgType<>'TIUIEN' then exit;
+
 end;
 
 procedure TfrmReports.WebBrowser1DocumentComplete(Sender: TObject;
-  const pDisp: IDispatch; var URL: OleVariant);
+  const pDisp: IDispatch; const URL: OleVariant);
 var
   WebDoc: IHtmlDocument2;
   v: variant;

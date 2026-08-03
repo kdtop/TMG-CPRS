@@ -101,7 +101,8 @@ var DataStr : string;
     strIEN  : string;
     IEN     : Int64;
     SL      : TStringList;
-    HTMLText : String;
+    var
+    (* HTMLText : String; *)
     IsHTML   : boolean;
 begin
   if (Index < 0) or (Index >= ListComps.Count) then exit;
@@ -124,10 +125,11 @@ end;
 
 procedure TfrmComponentView.ShowDocumentIndex(Index : integer);
 var DataStr : string;
-    strIEN  : string;
-    IEN     : Int64;
+    (* strIEN  : string; *)
+    var
+    (* IEN     : Int64; *)
     SL      : TStringList;
-    HTMLText : String;
+    (* HTMLText : String; *)
 begin
   if (Index >= 0) and (Index < ListComps.Count) then begin
     DataStr := ListComps.Strings[Index];

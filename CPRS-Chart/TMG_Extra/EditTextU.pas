@@ -110,9 +110,9 @@ uses FMErrorU, ORNet, ORFn,
 
 
   function TEditTextForm.GetWPField(FileNum,FieldNum,IENS : string) : TStringList;
-  var   RPCResult: string;
-        cmd : string;
-        lastLine : string;
+  (* RPCResult: string; *)
+        (* cmd : string; *)
+        (* lastLine : string; *)
   begin
     FCachedText.clear;
     rTMGRPCs.GetWPField(FileNum, FieldNum, IENS, FCachedText);
@@ -137,10 +137,10 @@ uses FMErrorU, ORNet, ORFn,
 
 
   procedure TEditTextForm.PostWPField(Lines: TStrings; FileNum,FieldNum,IENS : string);
-  var   RPCResult: string;
-        cmd : string;
-        lastLine : string;
-        i : integer;
+  (* RPCResult: string; *)
+        (* cmd : string; *)
+        (* lastLine : string; *)
+        (* i : integer; *)
   begin
     if rTMGRPCs.PostWPField(Lines, FileNum,FieldNum,IENS) then begin
       FCachedText.Assign(Lines);

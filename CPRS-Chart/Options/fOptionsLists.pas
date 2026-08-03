@@ -400,8 +400,8 @@ end;
 
 procedure TfrmOptionsLists.btnAddCurPtClick(Sender: TObject);
 //kt added
-var
-  i: integer;
+//var
+  (* i: integer; *)
 begin
   //if not btnListAdd.Enabled then exit;
   with lstPersonalPatients do
@@ -481,7 +481,8 @@ procedure TfrmOptionsLists.ExportList(List: string);
     end;
 var
     tslist :tstringlist;
-    i : integer;
+    var
+    (* i : integer; *)
     chosenDirectory,saveFile,filename : string;
 begin
   inherited;

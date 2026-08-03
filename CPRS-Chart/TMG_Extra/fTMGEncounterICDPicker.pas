@@ -789,7 +789,7 @@ var SL, tempSL: TStringList;
     j : tDxNodeType;
     IsHeader : boolean;
     LastHeaderIdx : integer;
-    Saved : boolean;
+    (* Saved : boolean; *)
 
 CONST
   tNODE_FIRST = ord(TopicsDiscussed);

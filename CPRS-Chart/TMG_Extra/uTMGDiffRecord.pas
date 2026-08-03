@@ -117,7 +117,7 @@ implementation
   var SavedIdx : integer; //From this index to end of SL should not be deleted.
       i, j : integer;
       Mode : TSearchMode;
-      OpenTag : string;
+      (* OpenTag : string; *)
   const
       NUM_CONTEXT_LINES = 1;
   begin
@@ -149,7 +149,8 @@ implementation
 
   procedure TDiffRecorder.ProcessSnapshot(InputSL : TStringList; SaveToFile : boolean = false);
   //NOTE: It is expected that InputSL will be be raw HTML (not encoded / protected)
-  var TimeStr, FName : string;
+  var TimeStr: string;
+  (* FName: string; *)
 
     procedure FixAndWrapWithHTML(SL : TStringList);
     begin
@@ -191,7 +192,9 @@ implementation
   procedure TDiffRecorder.GetDiffHTML(LastHTMLSL, SL2,
                                       HTMLChangesSL, ModOldSL, ModNewSL,
                                       TagDeltaSL : TStringList);
-   var i, j, k : integer;
+   var i, j: integer;
+   var
+   (* k: integer; *)
       lastKind : TChangeKind;
       Char1, Char2 : string;
       S1, S2 : string;

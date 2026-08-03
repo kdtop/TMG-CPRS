@@ -11,9 +11,8 @@ inherited frmOptionsLists: TfrmOptionsLists
   Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  ExplicitWidth = 413
-  ExplicitHeight = 474
-  PixelsPerInch = 96
+  ExplicitWidth = 423
+  ExplicitHeight = 481
   TextHeight = 13
   object lblAddby: TLabel [0]
     Left = 7
@@ -120,6 +119,7 @@ inherited frmOptionsLists: TfrmOptionsLists
     Sorted = False
     SynonymChars = '<>'
     TabOrder = 1
+    Text = ''
     OnChange = lstAddByChange
     OnClick = lstAddByClick
     OnKeyPress = lstAddByKeyPress

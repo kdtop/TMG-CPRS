@@ -1309,7 +1309,7 @@ var
   ListItem: TListItem;
   tmpRptID: string;
   ModalResult : integer; //kt
-  temp : string; //kt
+  (* temp : string; //kt *)
 
   function FindReport(QualType: integer; var AnIndex: integer): boolean; overload;
   var
@@ -3287,8 +3287,10 @@ procedure TfrmReports.mnuDeleteOneStudyClick(Sender: TObject);
         Result := sCallV('TMG DELETE ONE RAD STUDY',[IENS]);
     end;
 var
-  i,j: integer;
-  line: string;
+  i: integer;
+  (* j: integer; *)
+  var
+  (* line: string; *)
   ListItem: TListItem;
   DelResult: String;
   IEN:string;
@@ -3321,7 +3323,9 @@ end;
 
 function TfrmReports.GetCurrentReportString : string;
 var
-  i,j: integer;
+  i: integer;
+  var
+  (* j: integer; *)
   line: string;
   ListItem: TListItem;
   aText: String;
@@ -3412,10 +3416,12 @@ end;
 procedure TfrmReports.mnuViewHL7Click(Sender: TObject);
 var
   InitFMDateTime : TFMDateTime;
-    i,j: integer;
+    i: integer;
+    var
+    (* j: integer; *)
   Date : TDateTime;
   ListItem: TListItem;
-  aText: String;
+  (* aText: String; *)
 begin
   inherited;
   InitFMDateTime:=FMDTNow;

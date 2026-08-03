@@ -160,8 +160,8 @@ end;
 
 procedure TfrmCompletedVisitNote.BitBtn1Click(Sender: TObject);
 var UseUI:OleVariant;
-    TempLines : TStringList;
-    ErrMsg: string;
+    (* TempLines : TStringList; *)
+    (* ErrMsg: string; *)
 begin
   //to do!!!  Replace with CPRS functionality --> HTMLEditor.Print(True);
   UseUI := true;
@@ -223,7 +223,8 @@ var EncSig :string;
     frmSignItemACM: TfrmSignItemACM;
     CosignWanted : boolean;
     frmCosign: TfrmCosign;
-    temp : boolean;
+    var
+    (* temp : boolean; *)
     UseUI:OleVariant;
 begin
 

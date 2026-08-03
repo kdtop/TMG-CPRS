@@ -49,7 +49,7 @@ unit uHTMLDlgObjs;
 interface
 
 uses
-  SysUtils, StrUtils, Classes, Controls, TMGHTML2, uHTMLTools, MSHTML_EWB,
+  SysUtils, StrUtils, Classes, Controls, TMGHTML2, uHTMLTools, MSHTML,
   DateUtils, ORFn ;
 
 
@@ -1209,7 +1209,7 @@ implementation
   //kt 5/21/25 -- update to more robust method
   function GetRadioGroupVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var
-    InputElem: IHTMLInputElement;
+    (* InputElem: IHTMLInputElement; *)
     ValueVar: OleVariant;
   begin
     Result := '';
@@ -1524,7 +1524,7 @@ implementation
   //kt 5/21/25 -- update to more robust method
   function GetNumberVal(HtmlDlg : TObject; Elem: IHTMLElement; NoCommas : boolean = false) : string;
   var
-    InputElem: IHTMLInputElement;
+    (* InputElem: IHTMLInputElement; *)
     ValueVar: OleVariant;
   begin
     Result := '';
@@ -2127,7 +2127,7 @@ implementation
   begin
     Result := False;
     if not Assigned(Elem) then Exit;
-    ClassStr := Elem.className;  //className property returns space delim list of classnames
+    ClassStr := HTMLElement_GetClassName(Elem); // className property returns space delim list of classnames
     if Pos('TMGDisabledControl', ClassStr) > 0 then begin
       Result := True;
     end else begin

@@ -151,7 +151,8 @@ const
   function InsertTemplateByName(Drawers : TfrmDrawers; AName : String) : boolean;
   //not interactive
   //finds the **first** exact match (case sensitive) to AName
-  var cmd  : string;
+  var
+  (* cmd  : string; *)
       RPCSuccess : string;
       i,j : integer;
       OneName, OneLine, Part : string;
@@ -268,8 +269,8 @@ const
   procedure TfrmTemplateSearch.edtTemSearchTermsChange(Sender: TObject);
   var LastChar : Char;
       Len : integer;
-      i : integer;
-      OneLine:string;
+      (* i : integer; *)
+      (* OneLine:string; *)
   begin
     StatusBar.Panels[0].Text := '';
     Len := Length(edtTemSearchTerms.Text);
@@ -378,7 +379,9 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
   procedure TfrmTemplateSearch.GetSearchResults();
   //This will run the appropriate searchs and load results
       procedure GetTemplateResults(SearchString:string;User:Int64;var SavedResults:TStringList);
-      var cmd,OneLine  : string;
+      var OneLine: string;
+      var
+      (* cmd: string; *)
         RPCSuccess : string;
         i : integer;
         TempResults:TStringList;
@@ -471,8 +474,8 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
   end;
 
   procedure TfrmTemplateSearch.DoDialogSearch(AllSearch:Boolean = False);
-  var OneLine:string;
-      i : integer;
+  (* OneLine:string; *)
+      (* i : integer; *)
   begin
     GetSearchResults;
     {
@@ -489,10 +492,10 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
   end;
 
   procedure TfrmTemplateSearch.DoTemplateSearch(AllSearch:Boolean = False);
-  var cmd  : string;
-      RPCSuccess : string;
-      i : integer;
-      OneLine : string;
+  (* cmd  : string; *)
+      (* RPCSuccess : string; *)
+      (* i : integer; *)
+      (* OneLine : string; *)
   begin
     GetSearchResults;
     {
@@ -523,8 +526,8 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
   end;
 
   procedure TfrmTemplateSearch.DoAllSearch;
-  var OneLine:string;
-      i : integer;
+  (* OneLine:string; *)
+      (* i : integer; *)
   begin
     GetSearchResults;
   {
@@ -535,8 +538,8 @@ procedure TfrmTemplateSearch.btnTemAcceptClick(Sender: TObject);
   end;
 
   procedure TfrmTemplateSearch.DoTopicSearch;
-  var OneLine:string;
-      i : integer;
+  (* OneLine:string; *)
+      (* i : integer; *)
   begin
     GetSearchResults;
   end;

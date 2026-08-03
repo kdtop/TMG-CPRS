@@ -248,7 +248,7 @@ var
   i: integer;
   thisOrderID: string;
   tempDxRec: TBADxRecord;
-  {$ifdef debug}thismsg: string;{$endif}
+  {$ifdef debug}(* thismsg: string; *){$endif}
 begin
    //** Initialize
   if Assigned(UBAGlobals.OrderIDList) then
@@ -1559,4 +1559,3 @@ Initialization
   lexIENHoldList.Clear;
 
 end.
-

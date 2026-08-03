@@ -1,4 +1,4 @@
-﻿unit fNotes;
+unit fNotes;
 
  (*
  NOTE: The original version of this file may be obtained freely from the VA.
@@ -55,7 +55,7 @@ uses
   System.Types,                                       //kt 7/30/26
   TMG_WIA_TLB,
   fNotesLoading, //tmg   5/6/22
-  MSHTML_EWB, //TMG 5/20/22
+  MSHTML,  //tmg
   fNoteTOC, //tmg 1/23/24
   OleCtrls, ToolWin, VA508ImageListLabeler, System.ImageList;
 
@@ -1414,8 +1414,7 @@ begin
 end;
 
 procedure TfrmNotes.UnlockConsultRequest(ANote: Int64; AConsult: Integer = 0);
-(*var
-  x: string;*)
+(* x: string;*)
 begin
 (*  if (AConsult = 0) and IsConsultTitle(TitleForNote(ANote)) then
     begin
@@ -6081,8 +6080,8 @@ end;
 
 procedure TfrmNotes.mnuLooseDocHandlerClick(Sender: TObject);  //kt //tmg added 6/2026
 var Modified : boolean;
-  tmpList: TStringList;
-  LooseDocsNode: TORtreeNode;
+  (* tmpList: TStringList; *)
+  (* LooseDocsNode: TORtreeNode; *)
 
 begin
   inherited;
@@ -6455,9 +6454,7 @@ begin
 end;
 
 procedure TfrmNotes.popNoteMemoLinkToConsultClick(Sender: TObject);
-(*
-var
-   PendingConsultList : TStringList;
+(* PendingConsultList : TStringList;
    RPCResult : string;
    Response : integer;
    Messagetext: string;
@@ -7705,7 +7702,8 @@ procedure TfrmNotes.ViewThisTocClick(Sender: TObject);
 var TOCNote : TStrings;  //pointer to other objects
     OriginalNote : TStringList;
     TempFile: string;
-    MoveTo:string;
+    var
+    (* MoveTo:string; *)
     ControlScreenPos,ControlPanelPos : TPoint;
     ScreenWidth: Integer;
     NewLeft: Integer;
@@ -7780,8 +7778,8 @@ function TfrmNotes.RefreshTOC():string;
 var TOCNote : TStrings;  //pointer to other objects
     OriginalNote : TStringList;
     TempFile: string;
-    MoveTo:string;
-    ControlScreenPos : TPoint;
+    (* MoveTo:string; *)
+    (* ControlScreenPos : TPoint; *)
 begin
   inherited;
   TempFile := UniqueCacheFName(GetCurrentNoteIEN+'.html');
@@ -7802,8 +7800,9 @@ procedure TfrmNotes.JumpToText(TextToFind:string);
     var
       Document: IHTMLDocument2; // Document object
       Body: IHTMLBodyElement; // Body element
-      Selection: IHTMLSelectionObject; //Current selection
-      Range,NewRange: IHTMLTxtRange; // Text range for search
+      (* Selection: IHTMLSelectionObject; //Current selection *)
+      Range: IHTMLTxtRange; // Text range for search
+      (* NewRange: IHTMLTxtRange; // Text range for search *)
       Flags: Integer; // Flags for findText
     begin
       result := false;
@@ -8080,7 +8079,7 @@ begin
 end;
 
 procedure TfrmNotes.CheckForLock();    //kt
-var NoteUnlocked:boolean;
+(* NoteUnlocked:boolean; *)
 begin
   //NoteUnlocked := Changes.Exist(CH_DOC, lstNotes.ItemID);
   //if not NoteUnlocked then

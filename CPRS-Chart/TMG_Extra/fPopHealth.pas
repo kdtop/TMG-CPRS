@@ -264,7 +264,8 @@ end;
 
 procedure TfrmPopHealth.wbPopHealthBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags,
   TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
-var MsgType:string;
+var
+(* MsgType:string; *)
     DFN:string;
     RemIEN:string;
 begin

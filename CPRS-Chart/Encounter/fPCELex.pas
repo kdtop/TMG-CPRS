@@ -278,7 +278,7 @@ begin
 end;
 
 procedure TfrmPCELex.SetApp(LexApp: Integer);
-var w : integer;
+(* w : integer; *)
 begin
   FLexApp := LexApp;
   case LexApp of

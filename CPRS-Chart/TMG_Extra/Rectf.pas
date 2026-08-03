@@ -476,7 +476,7 @@ implementation
 
 
   function TRectf.Overlaps(OtherRect : TRectf) : boolean;
-  var Corner : tCorner;
+  (* Corner : tCorner; *)
   begin
     Result := (
       Self.ContainsPoint(OtherRect.TopLeft) or

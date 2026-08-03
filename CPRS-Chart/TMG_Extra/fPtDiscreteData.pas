@@ -141,7 +141,7 @@ end;
 
 procedure TfrmPtDiscreteData.FormDestroy(Sender: TObject);
 var i : integer;
-    DataRec : TDBDataRec;
+    (* DataRec : TDBDataRec; *)
 begin
   SaveEdits(FDataRecBeingEdited);
   FDBControlData.Free;

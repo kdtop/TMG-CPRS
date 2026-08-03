@@ -277,7 +277,7 @@ end;
 
 function TMGHasLabReport(DFN,DisplayDate:string):boolean;  //kt 10/23/20
 var Results:TStringList;
-    SDT:integer;
+    (* SDT:integer; *)
 begin
   Results := TStringList.create();
   //SDT := strtoint(piece(DisplayDate,'.',1))-1;  //Back up a day
@@ -288,7 +288,7 @@ end;
 
 function TMGHasHL7Report(DFN,DisplayDate:string):boolean;  //kt 3/28/22
 var Results:TStringList;
-    SDT:integer;
+    (* SDT:integer; *)
 begin
   Results := TStringList.create();
   //SDT := strtoint(piece(DisplayDate,'.',1))-1;  //Back up a day
@@ -298,7 +298,7 @@ begin
 end;
 
 function TMGHasLinkedOrder(DFN,DisplayDate:string):string;  //kt 3/28/22
-var SDT:integer;
+(* SDT:integer; *)
 begin
   //SDT := strtoint(piece(DisplayDate,'.',1))-1;  //Back up a day
   result := sCallV('TMG CPRS LAB ORDER LINK',[DFN,piece(DisplayDate,'.',1)+'.0001',piece(DisplayDate,'.',1)+'.9999']);

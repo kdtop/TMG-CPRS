@@ -397,7 +397,7 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.btnListAddClick(Sender: TObject);
-var FileName:string;
+(* FileName:string; *)
 begin
   inherited;
   if lstExtraFiles.FileName = '' then exit; //shouldn't be needed
@@ -474,7 +474,8 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.btnSaveClick(Sender: TObject);
-var SaveDialog : TSaveDialog;
+var
+(* SaveDialog : TSaveDialog; *)
     FDir : string;
     CopyResult : boolean;
 begin
@@ -501,7 +502,7 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.btnSelectCoverClick(Sender: TObject);
-var FileName:string;
+(* FileName:string; *)
 begin
   inherited;
   OpenDialog1.InitialDir := 'C:\';
@@ -727,7 +728,9 @@ procedure TfrmTMGChartExporter.cklbTitlesDrawItem(Control: TWinControl; Index: I
     Result := (Pos(SubStr, Str) = 1) and (Length (SubStr) <= Length(Str));
   end;
 
-var s, ThisIEN, SelectedIEN, ParentTitle,ItemText : string;
+var s, ItemText: string;
+var
+(* ThisIEN, SelectedIEN, ParentTitle: string; *)
     ThisColor:TColor;
 begin
   inherited;
@@ -768,7 +771,7 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.cmbCnsltNumbersChange(Sender: TObject);
-var FaxTo,FaxNumber:string;
+(* FaxTo,FaxNumber:string; *)
 begin
   inherited;
   //if cmbRecentFaxNumbers.Text='' then exit;
@@ -783,7 +786,7 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.cmbRecentFaxNumbersChange(Sender: TObject);
-var FaxTo,FaxNumber:string;
+(* FaxTo,FaxNumber:string; *)
 begin
   inherited;
   if cmbRecentFaxNumbers.Text='' then exit;
@@ -835,9 +838,12 @@ end;
 
 procedure TfrmTMGChartExporter.LoadNoteListbox;
 var
-  i, AnImg: integer;
+  i: integer;
+  var
+  (* AnImg: integer; *)
   x, TitleName: string;
-  HighlightedItem : boolean;
+  var
+  (* HighlightedItem : boolean; *)
   ThisDate:TFMdatetime;
   tmpList:TStringList;
 
@@ -874,9 +880,12 @@ end;
 
 procedure TfrmTMGChartExporter.LoadScannedListbox;
 var
-  i, AnImg: integer;
+  i: integer;
+  var
+  (* AnImg: integer; *)
   x, TitleName: string;
-  HighlightedItem : boolean;
+  var
+  (* HighlightedItem : boolean; *)
   ThisDate:TFMdatetime;
   tmpList:TStringList;
 begin
@@ -911,7 +920,7 @@ procedure TfrmTMGChartExporter.LoadLabsListbox;
 var RPCResults:TStringList;
     i : integer;
     x,TitleName : string;
-    ThisDate:TFMdatetime;
+    (* ThisDate:TFMdatetime; *)
 begin
   inherited;
   LabDataSL.Clear;
@@ -940,10 +949,10 @@ begin
 end;
 
 procedure TfrmTMGChartExporter.LoadOtherLabsListbox;
-var RPCResults:TStringList;
-    i : integer;
-    x,TitleName : string;
-    ThisDate:TFMdatetime;
+(* RPCResults:TStringList; *)
+    (* i : integer; *)
+    (* x,TitleName : string; *)
+    (* ThisDate:TFMdatetime; *)
 begin
   inherited;
   LoadLabsListbox;

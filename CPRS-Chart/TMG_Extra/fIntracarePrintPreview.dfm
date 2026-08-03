@@ -10,9 +10,7 @@ object frmIntracarePrintPreview: TfrmIntracarePrintPreview
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object PaintBox1: TPaintBox
     Left = 8

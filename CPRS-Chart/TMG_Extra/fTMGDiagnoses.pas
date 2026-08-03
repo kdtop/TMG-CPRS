@@ -1852,7 +1852,9 @@ end;
 procedure TfrmTMGDiagnoses.btnOtherClick(Sender: TObject);
 var
   x, Code: string;
-  ICD, Narrative, Status, ProbIEN, CodeSys : string;
+  ICD: string;
+  var
+  (* Narrative, Status, ProbIEN, CodeSys: string; *)
   DxEntry : TDataStr;
   APCEItem: TPCEItem;
   //SrchCode: integer;
@@ -1967,9 +1969,10 @@ begin
 end;
 
 procedure TfrmTMGDiagnoses.lbSectionClick(Sender: TObject);
-var SrchEnable : boolean;
+var
+(* SrchEnable : boolean; *)
     IntEntryType : integer;
-    SectionDataStr : TDataStr;
+    (* SectionDataStr : TDataStr; *)
 begin
   if not FProgSectionClick then SetSearchMode(false);
 

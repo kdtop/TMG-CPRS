@@ -1,4 +1,4 @@
-﻿unit uHTMLTools;
+unit uHTMLTools;
 //kt 9/11 Added entire unit.
 //kt 9/11 NAME CHANGED rHTMLTools --> uHTMLTools 
 
@@ -939,7 +939,8 @@ implementation
 
   procedure EditSL(Lines : TStrings);
   //kt added block 4/16
-  var HTMLText : string;
+  var
+  (* HTMLText : string; *)
       frmView : TfrmMemoEdit;
   begin
     try
@@ -2012,7 +2013,9 @@ const
   procedure SummarizeScript(InSL, OutSL : TStrings);
   //Return in OutSL a list of names of all defined function.
   var s : string;
-      p, p2, i : integer;
+      p, p2: integer;
+      var
+      (* i: integer; *)
       TempSL : TStringList;
       lcText, Text : string;
   const FN = 'function';
@@ -2128,12 +2131,14 @@ const
   //http://stackoverflow.com/questions/11915903
   var
     ADoc:      IHTMLDocument2; //OleVariant;
-    V,el:      OleVariant;
-    i:         Integer;
-    Temp :     HRESULT;
+    V:      OleVariant;
+    (* el:      OleVariant; *)
+    (* i:         Integer; *)
+    (* Temp :     HRESULT; *)
     Body:      IHTMLElement;          // document body element
-    Elements:  IHTMLElementCollection; // all tags in document body
-    AElement:  IHTMLElement;          // a tag in document body
+    (* Elements:  IHTMLElementCollection; // all tags in document body *)
+    var
+    (* AElement:  IHTMLElement;          // a tag in document body *)
     HTML:      String;
     Abort:     boolean;
 
@@ -2297,7 +2302,7 @@ procedure MakeWrapperHTMLFile(FullFilePathName, TargetSaveFilePathName : string;
 var
    MyHTML: TStringList;
    HTML : string;
-   TempFile: string;
+   (* TempFile: string; *)
 begin
   //HTML := '<embed src="file://'+PDFFullFilePathName+'" width="800px" height="1200px" />';
   case FileType of
@@ -2320,7 +2325,8 @@ function UniqueCacheFName(FName : string) : AnsiString;
 //NOTE: FName should not include path.
 
 var  Ext, PartA, TempFName : AnsiString;
-     Num, count : integer;
+     count: integer;
+     (* Num: integer; *)
 begin
   //Num := NumPieces(CPRSCacheDir + FName, '.');
   //if Num < 2 then Num := 2;
@@ -2339,7 +2345,7 @@ function StripHTMLTags(strHTML: string): string;
 var
   P: PChar;
   InTag: Boolean;
-  i, intResultLength: Integer;
+  (* i, intResultLength: Integer; *)
 begin
   strHTML := StringReplace(strHTML, '<BR>', '@@BR@@',  [rfReplaceAll]);
   P := PChar(strHTML);
@@ -2588,7 +2594,8 @@ end;
 
 procedure ViewHTMLSourceClick(HtmlObj : THtmlObj);
 //kt added 5/18/25
-var OK : boolean;
+var
+(* OK : boolean; *)
     HTMLText : string;
     frmView : TfrmMemoEdit;
 begin

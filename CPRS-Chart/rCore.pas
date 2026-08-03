@@ -1474,9 +1474,9 @@ end;
 procedure ListVisitsAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
                                                          Thru: TFMDateTime = 0);  //*DFN*
 { lists all admissions for a patient: MovementTime^LocIEN^LocName^Type }
-var
-  i: Integer;
-  ATime, x: string;
+//var
+  (* i: Integer; *)
+  (* ATime, x: string; *)
 begin
   CallV('TMG ORWCV VISITS', [DFN, From, Thru]);
   with RPCBrokerV do
@@ -1491,9 +1491,9 @@ end;
 procedure ListSequelApptsAll(Dest: TStrings; const DFN: string; From: TFMDateTime = 0;
                                                          Thru: TFMDateTime = 0);  //*DFN*
 { lists all admissions for a patient: MovementTime^LocIEN^LocName^Type }
-var
-  i: Integer;
-  ATime, x: string;
+//var
+  (* i: Integer; *)
+  (* ATime, x: string; *)
 begin
   CallV('TMG ORWCV APPTS', [DFN, From, Thru]);
   with RPCBrokerV do

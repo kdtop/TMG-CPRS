@@ -650,8 +650,8 @@ end;
 
 procedure KillDocTreeNodeAndChildren(ANode: TORTreeNode);
 //kt //tmg added 6/7/26
-var i : integer;
-    ChildNode : TORTreeNode;
+(* i : integer; *)
+    (* ChildNode : TORTreeNode; *)
 begin
   if not Assigned(ANode) then exit;
   if ANode.HasChildren then begin

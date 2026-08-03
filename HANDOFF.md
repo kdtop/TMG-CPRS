@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-07-31
+Last updated: 2026-08-03
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -14,24 +14,28 @@ Project: `CPRS-Chart\CPRSChart.dproj`
 
 ## Goal
 
-Keep CPRSChart compiling with the installed Delphi 12 IDE/compiler.
+Primary current goal as of 2026-08-03:
 
-The user compiles from the Delphi IDE and saves compiler output to:
+- Keep CPRSChart working under Delphi 12 at runtime/debug time now that the project compiles successfully again in the Delphi IDE.
+- Continue cautiously simplifying the old HTML editor/browser wrapper area without breaking the current successful Delphi IDE build.
 
-`CPRS-Chart\build_errors.txt`
+Secondary goal when needed:
 
-The working loop is:
+- If the user reports a new compile regression, return temporarily to compile-blocker triage using a fresh Delphi IDE compile log.
 
-1. User compiles in Delphi IDE.
-2. Agent reads `CPRS-Chart\build_errors.txt`.
-3. Agent patches the next compile blocker, if any.
-4. Repeat.
+Compile-log workflow, only when the user reports a new compile failure:
+
+1. User compiles in the Delphi IDE.
+2. User saves compiler output to `CPRS-Chart\build_errors.txt`.
+3. Agent reads `CPRS-Chart\build_errors.txt`.
+4. Agent patches the next compile blocker, if any.
+5. Repeat.
 
 Command-line build is not currently useful because the installed Delphi edition reports:
 
 `This version of the product does not support command line compiling.`
 
-Use the IDE compile log as the source of truth.
+When there is an active compile problem, use the fresh IDE compile log as the source of truth. Otherwise, assume runtime/debugging cleanup is the active work.
 
 ## Important Constraints
 
@@ -41,7 +45,7 @@ Use the IDE compile log as the source of truth.
 - Windows filesystem/API path fixes may use `string`/`PChar`; byte-oriented RPC/file-transfer payloads should stay `AnsiString`/`AnsiChar` unless deliberately changed.
 - Leave Delphi `__recovery` folders alone and ignore them unless the user explicitly asks to clean them.
 - Many Delphi source files are ANSI encoded. `apply_patch` may fail on them with invalid UTF-8; use encoding-preserving PowerShell edits only when necessary.
-- The git tree was intentionally baselined locally on 2026-07-24. Use `git status --short` before edits, but do not assume the tree is clean; the user may have several days of local changes that are not yet committed.
+- The git tree was intentionally baselined locally on 2026-07-24. In this Linux-mounted workspace, plain `git ...` may fail with a dubious ownership error. Prefer `git -c safe.directory=/mnt/WinPublic/vista/TMGCPRS_v30A_Delphi12 ...` for status/log commands. Do not assume the tree is clean; the user may have several days of local changes that are not yet committed.
 - For future Delphi/Pascal source edits, append `//kt //codex <date>` at the end of every modified source line, e.g. `//kt //codex 7/30/26`.
 - For future Delphi/Pascal source edits, when removing a line, leave the old line in place as a comment using this pattern: `//kt //codex original --> <old code>`.
 
@@ -51,6 +55,7 @@ This is a copied Delphi 12 porting tree. The real production/source tree exists 
 
 Substantive local baseline commits, newest first:
 
+- `2d6ed84 Checkpoint current Delphi 12 HTML editor/debugging state`
 - `f08ed49 Document local git baseline`
 - `497962a Create Delphi 12 working tree baseline`
 - `54f1dc1 Ignore Delphi compiled unit artifacts`
@@ -64,7 +69,7 @@ These commits are local checkpoints in the copied Delphi 12 working tree. There 
 
 Important Git workflow:
 
-1. Before a new work session, run `git status --short`.
+1. Before a new work session, run `git -c safe.directory=/mnt/WinPublic/vista/TMGCPRS_v30A_Delphi12 status --short`.
 2. Review the current modified/untracked files before assuming anything is accidental.
 3. Commit intentional source/checkpoint changes locally with `git add ...` and `git commit -m "..."` when the user wants a new checkpoint.
 4. Expect normal future edits to show as `M`/modified until they are committed; do not assume a dirty tree means a bad state.
@@ -73,7 +78,7 @@ Important Git workflow:
 
 ## Current State
 
-As of 2026-07-31, the user has confirmed a successful Delphi IDE compile. Active work is runtime/debugging cleanup rather than basic compile blocking.
+As of 2026-08-03, the user has confirmed a successful Delphi IDE compile. Active work is runtime/debugging cleanup and cautious HTML-stack simplification rather than basic compile blocking.
 
 Important:
 
@@ -81,14 +86,61 @@ Important:
 - If the user reports a new compile problem, ask for a fresh IDE compile log.
 - Otherwise, assume the main active work is runtime behavior under Delphi 12.
 
-### Runtime / Debugging Status As Of 2026-07-31
+Recommended working assumption for the next session:
+
+- Start from runtime/designer/debugging investigation unless the user explicitly says the build is failing again.
+- Treat `CPRS-Chart\build_errors.txt` as historical context unless the user has just saved a fresh compile log from the Delphi IDE.
+
+### Runtime / Debugging Status As Of 2026-08-01
 
 - The application compiles and can start, log in, and communicate with the RPC Broker.
 - Several Delphi 12 runtime/designer compatibility issues have been found and fixed incrementally.
 - Current work has shifted to runtime AV/debugger cleanup in chart tabs and older helper units.
+- The user is reviewing the `HTMLEdit` / `EmbeddedED` area cautiously. Do not assume broad code-pruning work is already complete or safe to resume without re-checking actual call sites.
+
+### HTML / HTMLEdit Status As Of 2026-08-03
+
+- The user reports that CPRS currently compiles after substantial HTMLEdit streamlining work.
+- `EmbeddedED` has effectively been cut out of the active CPRS build path:
+  - `THtmlObj` in `TMGHTML2.pas` was changed to descend from `TWebBrowser`.
+  - Code previously relied on from `EmbeddedED` was copied into `TMGHTML2.pas` inside the user-created `//kt //codex From EmbeddedED` section as needed during compile-fix passes.
+  - The user then removed the `EmbeddedED` folder from the tree and reported a full build still succeeded.
+- The user also removed old `IE*.pas` files and old `Ewb*/EWB*` helper files after compile testing, and reported builds still succeeded.
+- `MSHTML_EWB.pas` is a local modified type-library import, not a stock Delphi unit. The user has been gradually moving usages from `MSHTML_EWB` to plain `MSHTML`.
+- During that migration, plain `MSHTML` often does not expose `Elem.className` the same way the old local import did. Current practical compatibility workaround:
+  - use `VarToStr(Elem.getAttribute('className', 0))`
+  - use `Elem.setAttribute('className', ..., 0)` for writes
+- Do not assume every remaining `MSHTML_EWB` reference is gone. Re-check actual current source before making more replacements.
+
+### Important 2026-08-03 Cleanup Warning
+
+- A broad automated pass that commented out all `H2164 Variable ... declared but never used` locals caused widespread Delphi declaration-block damage.
+- Failure modes included:
+  - commenting out the first declaration line in a local `var` block and accidentally removing the only live `var` keyword
+  - leaving stray `var` lines with no following live declarations
+  - breaking mixed declaration/type lines
+- The user manually repaired this and reports the project compiles again.
+- Do not repeat a broad mechanical unused-local cleanup pass across the tree.
+- If this cleanup is revisited later, do it only in tiny, hand-reviewed scopes.
+
+### RPC Broker String Concern For Future Work
+
+- This is not today's task, but it should be considered in a future session.
+- The local Delphi 12 port still produces many warnings about possible data loss when assigning Delphi `string` values into Broker parameter storage.
+- This is expected because `RPCBroker.Params` / related Broker payload paths still fundamentally use single-byte storage at the wire boundary.
+- The user does not want a broad encoding rewrite attempted casually.
+- Future work item:
+  - review Broker call sites and decide whether warning reduction is worth a larger deliberate pass
+  - if touched, preserve Broker wire semantics as single-byte/ANSI unless there is a deliberate protocol change
+  - prefer targeted marshaling at the Broker boundary over changing broad application text handling
 
 Recent confirmed fixes from this session:
 
+- `CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED\EmbeddedED.pas`
+  - `LoadFromString` was fixed for Delphi 12 Unicode `Char` sizing when copying HTML into global memory before handing it to the embedded browser.
+  - The prior code allocated and copied as if `Char` were single-byte; that truncated HTML and caused the browser "View Source" output to stop around `&nbsp;&amp;n`.
+  - The fix now allocates `(Length(aString)+1) * SizeOf(Char)`, copies with `Move(PChar(aString)^, ...)` using `Length(aString) * SizeOf(Char)`, and writes an explicit null terminator.
+  - The user confirmed on 2026-07-31 that this resolved the missing/truncated HTML display issue.
 - `CPRS-Lib\ORClasses.pas`
   - `TORStringList.SortByPieces` quicksort loop now bounds-checks `I` and `J` before indexing, preventing out-of-range access during sort.
 - `CPRS-Lib\ORFn.pas`
@@ -123,6 +175,7 @@ Recent confirmed fixes from this session:
   - Converts them from Windows-1252 to UTF-8
   - Creates `.bak` backups
 - The script can introduce follow-up compile fixes in old third-party units; use it cautiously and expect Unicode/set-expression cleanup afterward.
+- Delphi IDE state matters: on 2026-07-31, compile errors persisted until the user closed and reopened Delphi so the IDE reloaded `EmbeddedED.pas` from disk. If compile output does not match the current file contents, suspect a stale in-memory editor buffer before assuming the source is still broken.
 
 ### User Editing Conventions
 
@@ -135,6 +188,7 @@ Current compile state:
 
 - CPRS currently compiles in the Delphi 12 IDE.
 - Active work is now runtime/debugging cleanup after compile success.
+- `CPRS-Chart\build_errors.txt` may currently contain stale `EmbeddedED.pas` forward-declaration failures from before the Delphi IDE reload on 2026-07-31. Do not treat that file as current unless the user saves a fresh compile log after reopening Delphi.
 - Do not treat the older `BDK50\Rpcnet.pas` compile-failure notes below as the current blocker; they are historical context for how the tree reached the present compileable state.
 
 Older milestone:
@@ -195,10 +249,14 @@ Next compile cleared `wsockc.pas` errors and moved to `BDK50\Rpcnet.pas`. Patche
 Recommended first step:
 
 1. Read the current source before editing; the user manually adjusted some recent patches, especially `CPRS-Lib\ORFn.pas` and event-handler fixes.
-2. Run `git status --short`, but treat the result as informational only unless the user asks to clean or checkpoint it.
-3. If the user reports a compile issue, ask for a fresh Delphi IDE compile log and ignore stale compile guidance.
+2. Run `git -c safe.directory=/mnt/WinPublic/vista/TMGCPRS_v30A_Delphi12 status --short`, but treat the result as informational only unless the user asks to clean or checkpoint it.
+3. If the user reports a compile issue, ask for a fresh Delphi IDE compile log and ignore stale compile guidance, especially if Delphi may still have an old in-memory copy of `EmbeddedED.pas`.
 4. If the user reports a runtime/designer issue, inspect the active unit/DFM pair first; many current failures are old-component/Delphi-12 compatibility problems rather than broker/compile failures.
-5. Be careful with files converted from ANSI to UTF-8; conversion can surface warnings/errors in old character-set code.
+5. If returning to `HTMLEdit` / browser-stack cleanup, start by reading the current `TMGHTML2.pas`, `uHTMLDlgObjs.pas`, `uHTMLTemplateFields.pas`, and current `uses` lists before assuming older `EmbeddedED` assumptions still apply.
+6. Do not run another broad automated unused-variable cleanup pass. If removing unused locals, do it manually and in very small scopes.
+7. Be careful with files converted from ANSI to UTF-8; conversion can surface warnings/errors in old character-set code.
+
+Historical compile-porting notes follow below. They are preserved for context, not as the default current task. Do not resume that older Broker/compile sequence unless the user reports a new compile regression that points back into the same area.
 
 Useful error filter:
 

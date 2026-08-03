@@ -8,7 +8,6 @@ inherited frmNotes: TfrmNotes
   HelpFile = 'overvw'
   Menu = mnuNotes
   Position = poDesigned
-  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnResize = FormResize
@@ -32,7 +31,6 @@ inherited frmNotes: TfrmNotes
   inherited pnlLeft: TPanel
     Width = 260
     Height = 679
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 260
     ExplicitHeight = 679
     object lblSpace1: TLabel
@@ -387,7 +385,6 @@ inherited frmNotes: TfrmNotes
     Left = 264
     Width = 792
     Height = 679
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 264
     ExplicitWidth = 792
     ExplicitHeight = 679

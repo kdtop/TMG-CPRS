@@ -153,7 +153,9 @@ end;
 
 procedure TfrmEncounterMDM.HandleMDMOK(Sender: TObject);
 var
-  i, np, idx : integer;
+  np, idx: integer;
+  var
+  (* i: integer; *)
   CPTs, oneCPT : string;
 
   procedure Append(Source, Dest : TStrings);

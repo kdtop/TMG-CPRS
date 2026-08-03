@@ -1778,9 +1778,9 @@ end;
 //====================================================================
 
 procedure TfrmPtDemoEdit.tsKeeneShow(Sender: TObject);
-var
-   RPCResult: string;
-   strDate: string;
+//var
+   (* RPCResult: string; *)
+   (* strDate: string; *)
 begin
   //kt if uTMGOptions.ReadString('SpecialLocation','')<>'INTRACARE' then exit;
   {
@@ -1839,8 +1839,8 @@ begin
 end;
 
 procedure TfrmPtDemoEdit.ApplyKeene;
-var
-   RPCResult : string;
+//var
+   (* RPCResult : string; *)
 begin
 {
   //kt if uTMGOptions.ReadString('SpecialLocation','')<>'INTRACARE' then exit;

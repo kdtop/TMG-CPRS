@@ -531,8 +531,12 @@ end;
 
 function WM_PutNewOrder(OrderText: string; AutoSign:boolean; PromptForPrint:boolean):string;        //TMG 5/20/19
 var
-  i, inc, len, numLoop, remain, IndexOfOrder: Integer;
-  ocStr, tmpStr, x, y, z: string;
+  i, IndexOfOrder: Integer;
+  var
+  (* inc, len, numLoop, remain: Integer; *)
+  x: string;
+  var
+  (* ocStr, tmpStr, y, z: string; *)
   AList : Tlist;
   j : integer;
   OrderArray : TStringList;

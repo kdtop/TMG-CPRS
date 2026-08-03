@@ -72,8 +72,8 @@ end;
 procedure TfrmConsultants.btnDoctorAddClick(Sender: TObject);
 //Ask user for name to add one physician
 var PhysicianName:string;
-    OneOffice:TStringList;
-    OfficeData:string;
+    (* OneOffice:TStringList; *)
+    (* OfficeData:string; *)
 begin
   PhysicianName := inputbox('Add doctor to '+piece(lstOffices.Items[lstOffices.ItemIndex],'^',2),'Please enter the name of the doctor you would like to add.','');
   if PhysicianName='' then exit;
@@ -84,8 +84,8 @@ end;
 
 procedure TfrmConsultants.btnDoctorDeleteClick(Sender: TObject);
 //Delete one physician
-var
-    OfficeData:string;
+//var
+    (* OfficeData:string; *)
 begin
   if CallConsultChannel('DELDOC'+'^'+piece(lstSpecialties.Items[lstSpecialties.ItemIndex],'^',1)+'^'+piece(lstOffices.Items[lstOffices.ItemIndex],'^',1)+'^'+piece(lstDoctors.Items[lstDoctors.ItemIndex],'^',1))=True then
     lstOfficesClick(Sender);

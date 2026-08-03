@@ -20,15 +20,15 @@ object frameGetDXImage: TframeGetDXImage
     object Label_Cameras: TLabel
       Left = 8
       Top = 2
-      Width = 37
-      Height = 13
+      Width = 41
+      Height = 15
       Caption = 'Camera'
     end
     object Label1: TLabel
       Left = 368
       Top = 6
-      Width = 63
-      Height = 13
+      Width = 72
+      Height = 15
       Caption = 'Display mode'
       Visible = False
     end
@@ -43,8 +43,8 @@ object frameGetDXImage: TframeGetDXImage
     object Label5: TLabel
       Left = 272
       Top = 6
-      Width = 74
-      Height = 13
+      Width = 80
+      Height = 15
       Caption = 'Device Settings'
       Visible = False
     end
@@ -53,7 +53,6 @@ object frameGetDXImage: TframeGetDXImage
       Top = 16
       Width = 193
       Height = 21
-      ItemHeight = 0
       PopupMenu = PopupMenu1
       TabOrder = 0
       Text = 'No cameras found'
@@ -62,9 +61,8 @@ object frameGetDXImage: TframeGetDXImage
       Left = 376
       Top = 15
       Width = 193
-      Height = 21
+      Height = 23
       Style = csDropDownList
-      ItemHeight = 13
       TabOrder = 1
       Visible = False
       Items.Strings = (
@@ -81,7 +79,6 @@ object frameGetDXImage: TframeGetDXImage
       Width = 121
       Height = 21
       Style = csDropDownList
-      ItemHeight = 0
       TabOrder = 2
       Visible = False
       OnChange = ComboBox1Change
@@ -92,8 +89,6 @@ object frameGetDXImage: TframeGetDXImage
       Width = 99
       Height = 22
       Caption = 'Open &Settings'
-      TabOrder = 3
-      OnClick = SpeedButton1Click
       Glyph.Data = {
         36090000424D3609000000000000360000002800000030000000100000000100
         1800000000000009000000000000000000000000000000000000FE00FEFE00FE
@@ -170,6 +165,8 @@ object frameGetDXImage: TframeGetDXImage
         FEFE00FEFE00FEFE00FEFE00FEFE00FEFE00FEFE00FEFE00FEFE00FE807F7F80
         7F7F807F7F807F7FFE00FEFE00FEFE00FEFE00FEFE00FEFE00FE}
       NumGlyphs = 3
+      TabOrder = 3
+      OnClick = SpeedButton1Click
     end
   end
   object Panel_Main: TPanel
@@ -183,8 +180,8 @@ object frameGetDXImage: TframeGetDXImage
     object Label2: TLabel
       Left = 296
       Top = 12
-      Width = 50
-      Height = 13
+      Width = 54
+      Height = 15
       Caption = 'Difference'
       Visible = False
     end
@@ -202,16 +199,16 @@ object frameGetDXImage: TframeGetDXImage
     object Label_fps: TLabel
       Left = 144
       Top = 12
-      Width = 91
-      Height = 13
+      Width = 99
+      Height = 15
       Caption = 'Frames per second'
       Visible = False
     end
     object Label_VideoSize: TLabel
       Left = 9
       Top = 12
-      Width = 76
-      Height = 13
+      Width = 83
+      Height = 15
       Caption = 'Label_VideoSize'
       Visible = False
     end

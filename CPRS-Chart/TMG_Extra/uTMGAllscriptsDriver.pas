@@ -5,7 +5,7 @@ interface
   uses
     Forms, SysUtils,Variants, ExtCtrls, Classes, StrUtils,
     uTMGWebDriver, uCore, ORFn,
-    TMGHTML2, dialogs, SHDocVw, MSHTMLEvents,MSHTML_EWB,MSHTML;
+    TMGHTML2, dialogs, SHDocVw, MSHTMLEvents, MSHTML;
 
 
 Procedure AllScriptsSyncToPatient(WB: THtmlObj; URL: WideString; Patient: TPatient);
@@ -98,7 +98,7 @@ type
     function GetNextAction(DesiredWebState : wpStates; var ErrMsg : string) : wpActions;
     function DriveNextAction(Action : wpActions; var ErrMsg : string) : boolean; //Result is if timer should be re-enabled
     function GetCredentials : TCredentials;
-    procedure HandlePtSrchGetElementCallback (Elem : MSHTML_EWB.IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
+    procedure HandlePtSrchGetElementCallback (Elem : MSHTML.IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
     procedure GetSearchPatientsResultsList (AList : TInterfaceList);
     function GetSearchPatientsResultsCount : integer;
   public
@@ -231,7 +231,7 @@ begin
 end;
 
 
-procedure TTMGAllscriptsDriver.HandlePtSrchGetElementCallback (Elem : MSHTML_EWB.IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
+procedure TTMGAllscriptsDriver.HandlePtSrchGetElementCallback (Elem : MSHTML.IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
 var Id : string;
 begin
   if not assigned(Elem) then exit;

@@ -961,7 +961,8 @@ implementation
   end;
 
   function SingleFile(FilePathName:string): string;  //2/2/21
-  var i : integer;
+  var
+  (* i : integer; *)
       Info: TUploadImageInfo;
 
   begin

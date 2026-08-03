@@ -380,7 +380,6 @@ uses
   fTest_RW_HTML in 'TMG_Extra\fTest_RW_HTML.pas' {frmTMGTestHTML},
   uHTMLDlg in 'TMG_Extra\uHTMLDlg.pas',
   uHTMLDlgObjs in 'TMG_Extra\uHTMLDlgObjs.pas',
-  TMGDataHTML in 'TMG_Extra\HTMLEdit\TMGDataHTML.pas',
   Monkey_Bundle_a_JS_U in 'TMG_Extra\Monkey_Bundle_a_JS_U.pas',
   Monkey_Bundle_b_JS_U in 'TMG_Extra\Monkey_Bundle_b_JS_U.pas',
   Monkey_Bundle_c_JS_U in 'TMG_Extra\Monkey_Bundle_c_JS_U.pas',

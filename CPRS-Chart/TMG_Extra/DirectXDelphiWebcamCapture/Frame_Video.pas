@@ -219,10 +219,10 @@ end;
 
 procedure TframeGetDXImage.Button1Click(Sender: TObject);
 var
-  i, x, y, j,
-  T1 : integer;
+  i, x, y, j: integer;
   d  : double;
-  s  : string;
+  var
+  (* s  : string; *)
   hour, min, sec, msec: word;
 begin
   CopyBMP.Width := VideoBMP[VideoBMPIndex].Width;
@@ -291,10 +291,12 @@ end;
 
 procedure TframeGetDXImage.btnTakePictureClick(Sender: TObject);
 var
-  i, x, y, j,
-  T1 : integer;
+  i, x, y, j: integer;
+  var
+  (* T1 : integer; *)
   d  : double;
-  s  : string;
+  var
+  (* s  : string; *)
   hour, min, sec, msec: word;
 begin
   CopyBMP.Width := VideoBMP[VideoBMPIndex].Width;

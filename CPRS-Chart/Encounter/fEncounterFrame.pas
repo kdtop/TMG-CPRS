@@ -342,8 +342,8 @@ end;
 
 
 procedure TfrmEncounterFrame.SetCurrentTabAsDirty(DirtyStatus:boolean);  //11/14/23
-var
-  ClickedForm : TForm;
+//var
+  (* ClickedForm : TForm; *)
 begin
   inherited;
   //ClickedForm := TForm(FormName);
@@ -751,7 +751,7 @@ var
   GAFStaff: Int64;
 }
 var SendErrors,UnpastedHTML : string;
-    Response:integer;
+    (* Response:integer; *)
 begin
   inherited;
   SendErrors := '';
@@ -981,8 +981,10 @@ end;
 
 function TfrmEncounterFrame.TestData(HTML:string='0'):string;         //TMG ELH added entire 10/17/23
 var
-  ProcList,DiagList:TStringList;
-  ProcStr,DiagStr,VstTypesStr:string;
+  (* ProcList,DiagList:TStringList; *)
+  ProcStr, DiagStr:string;
+  var
+  (* VstTypesStr:string; *)
   TmpPCEData: TPCEData;
 begin
   TmpPCEData := TPCEData.Create;

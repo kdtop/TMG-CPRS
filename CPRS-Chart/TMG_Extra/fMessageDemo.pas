@@ -59,7 +59,7 @@ begin
 end;
 
 procedure TfrmMessageDemo.Button1Click(Sender: TObject);
-var FileName:string;
+(* FileName:string; *)
 begin
   //FileName := '\\server1\Public\NetworkMessenger\'+ComboBox1.Text+'-CPRS.mgr';
   //Memo1.Lines.SaveToFile(FileName);

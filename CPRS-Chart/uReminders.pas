@@ -4578,7 +4578,8 @@ var
   i, ilvl: integer;
   Prompt: TRemPrompt;
   txt: string;
-  HTMLTxt : string; //kt 1/16
+  var
+  (* HTMLTxt : string; //kt 1/16 *)
   FldData: TORStringList;
 
 begin

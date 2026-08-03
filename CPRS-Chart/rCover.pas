@@ -429,7 +429,7 @@ begin
 end;
 
 procedure LoadDemographics(Dest: TStrings);
-var i :integer;
+(* i :integer; *)
 begin
   CallV('ORWPT PTINQ', [Patient.DFN]);
   FastAssign(RPCBrokerV.Results, Dest);
@@ -437,7 +437,7 @@ begin
 end;
 
 procedure LoadHTMLDemographics(Dest: TStrings);  //TMG added entire function
-var i :integer;
+(* i :integer; *)
 begin
   CallV('TMG GET HTML DEMOGRAPHICS', [Patient.DFN]);
   FastAssign(RPCBrokerV.Results, Dest);

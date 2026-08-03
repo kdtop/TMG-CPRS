@@ -54,7 +54,7 @@ implementation
 uses
   FMErrorU,
   fNotes,
-  MSHTML_EWB, Monkey_Datepicker;
+  MSHTML, Monkey_Datepicker;
 
 
 procedure TfrmTMGTestHTML.SLAppend(SL, AddOnSL : TStrings);

@@ -307,7 +307,8 @@ implementation
 
   procedure TfrmOneRecEdit.PrepForm(FileNum : string; IENS : string; FilterTemplate : TStringList = nil);
   //Format is: FileNum^IENS^FieldNum^ExternalValue^DDInfo...
-  var DispIENS, ExpandedFileName : string;
+  var
+  (* DispIENS, ExpandedFileName : string; *)
       TempGridInfo : TGridInfo;
   begin
     TempGridInfo := TGridInfo.Create;
@@ -326,8 +327,8 @@ implementation
   end;
 
   procedure TfrmOneRecEdit.RecEditPageControlChange(Sender: TObject);
-  var Modified : boolean;
-      Response : integer;
+  (* Modified : boolean; *)
+      (* Response : integer; *)
   begin
     if TTabControl(Sender).TabIndex = 0 then begin
       FGridInfo.BasicTemplate := SavedBasicTemplate;

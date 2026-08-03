@@ -6,7 +6,6 @@ inherited frmConsults: TfrmConsults
   ClientHeight = 461
   ClientWidth = 715
   Menu = mnuConsults
-  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnShow = FormShow
@@ -32,7 +31,6 @@ inherited frmConsults: TfrmConsults
     Left = 162
     Width = 553
     Height = 456
-    StyleElements = [seFont, seClient, seBorder]
     OnExit = pnlRightExit
     OnResize = pnlRightResize
     ExplicitLeft = 162
@@ -286,7 +284,6 @@ inherited frmConsults: TfrmConsults
   inherited pnlLeft: TPanel [3]
     Width = 160
     Height = 456
-    StyleElements = [seFont, seClient, seBorder]
     OnExit = pnlLeftExit
     OnResize = pnlLeftResize
     ExplicitWidth = 160

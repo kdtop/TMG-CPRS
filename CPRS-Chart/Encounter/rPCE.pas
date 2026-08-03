@@ -1634,7 +1634,7 @@ procedure EditTMGCommon(Data, Result : TStringList); //kt added
 //               Data[#]="DEL^ENTRY^.01=Misc-Stuff^.01=`572555"                 ; <-- delete entry for ICD (IEN80) 667788, in section `4567
 //               Data[#]="DEL^SECTION^.01=Misc-Stuff"                           ; <-- DELETE entry NOTE: this will kill all contained child entries!
 
-var i : integer;
+(* i : integer; *)
 begin
   {
   RPCBrokerV.ClearParameters := True;

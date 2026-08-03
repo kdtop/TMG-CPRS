@@ -445,7 +445,8 @@ end;
 
 procedure TfrmOptionsOther.pnlShowColorClick(Sender: TObject);
 //kt 9/11 added
-var s : string;
+var
+(* s : string; *)
     selIndex : integer;
 begin
   if ColorDialog.Execute then begin

@@ -382,7 +382,8 @@ end;
 
 procedure TfrmEnounterLabs.DiscontinueLabsOrdered;
 var i : integer;
-    s : string;
+    var
+    (* s : string; *)
     AnOrder : TOrder;
     AnID : string;
     OrderSelected : boolean;
@@ -482,10 +483,12 @@ end;
 
 procedure TfrmEnounterLabs.SendData(var SendErrors,UnpastedHTML:string);  //kt
 var i,j : integer;
-    OrderSelected : boolean;
+    var
+    (* OrderSelected : boolean; *)
     MessageArray : TStringList;
     AnOrderTextSL : TStringList;
-    Result, ErrMsg : string;
+    var
+    (* Result, ErrMsg : string; *)
     HTMLTable : TStringList;
     line : string;
 

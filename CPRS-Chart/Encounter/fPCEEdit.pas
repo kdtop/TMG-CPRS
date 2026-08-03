@@ -239,7 +239,7 @@ end;
 procedure HandleUpdatePCEDone(PCEData: TPCEData; CallBackProcs : TNotifyPCEEventList);  //kt added
 //callback handler for EditPCEDataNonModal() which calls UpdatePCENonModal()
 var
-  i : integer;
+  (* i : integer; *)
   TempPCEObj: TPCEData;
 begin
   //i := CallBackProcs.Count - 1;  if i<0 then exit;

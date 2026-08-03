@@ -116,7 +116,8 @@ procedure SendFollowUpMsg(MessageArr : TStringList);
 //         SL[2...] = the usual content of the message.
 //
 var MyName : string;
-    PromptToPrint                     : boolean;
+    var
+    (* PromptToPrint                     : boolean; *)
     Recipients : string;
     AUser : string;
     i : integer;
@@ -530,7 +531,9 @@ procedure TfrmFollowUp.SetupFollowUpMsg(SL : TStringList);
 //         SL[1] = MyName
 //         SL[3...] = the usual content of the message.
 //
-var s, MyName, User, FastingMsg : string;
+var s, MyName, User: string;
+var
+(* FastingMsg: string; *)
     i : integer;
 begin
   if not assigned(SL) then exit;

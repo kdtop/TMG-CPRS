@@ -763,7 +763,9 @@ var
 
   function WrappedText(const Str: string; HTMLTargetMode : boolean): string;
   var
-    i, i2, j, k, m: integer;
+    i, i2, j, k: integer;
+    var
+    (* m: integer; *)
     HTMLStrLen : integer;
     Temp, Temp1, Temp2: string;
 
@@ -867,12 +869,14 @@ function ResolveTemplateFields(Text: string;
   //uses uEntries in global scope
   //indirectly uses uTmplFlds in global scope.
 var
-  flen, CtrlID, i, j: integer;
+  CtrlID, i, j: integer;
+  var
+  (* flen: integer; *)
   Entry: TTemplateDialogEntry;
   iField, Temp, NewTxt, Fld: string;
   FoundEntry: boolean;
   TmplFld: TTemplateField;
-  tempSL : TStringList;
+  (* tempSL : TStringList; *)
 
   procedure AddNewTxt(var Result, Temp, NewTxt : string; var i : integer);
   begin
@@ -1035,7 +1039,8 @@ var
   FoundEntry: boolean;
   FoundHTMLEntry: boolean;
   TmplFld: TTemplateField;
-  tempSL : TStringList;
+  var
+  (* tempSL : TStringList; *)
   ControlBlockDisabled : boolean;
 
 begin
@@ -2083,7 +2088,7 @@ begin
 end;
 
 procedure TTemplateField.SetItemDefault(const Value: string);
-var temp : string;
+(* temp : string; *)
 begin
   if(FItemDefault <> Value) and CanModify then begin
     //kt NOTE: Remember, FItemDefault doesn't store TAG, it is FEditDefault that does that.
@@ -2093,7 +2098,8 @@ end;
 
 function TTemplateField.GetItemDefault: string;
 //kt added 5/16
-var UseLocalValue : boolean;
+var
+(* UseLocalValue : boolean; *)
     DFN : string;
     ErrStr : string;
 const
@@ -3352,7 +3358,8 @@ function TDBControlData.SaveToServer(IEN8925 : int64; var ErrStr : string) : boo
 var
   SL : TStringList;
   i : integer;
-  IEN, s, AVisitStr, Value : string;
+  AVisitStr, Value: string;
+  (* IEN, s: string; *)
 begin
   ErrStr := '';  Result := true;  //default to success (no problems)
   if Self.Count = 0 then exit;

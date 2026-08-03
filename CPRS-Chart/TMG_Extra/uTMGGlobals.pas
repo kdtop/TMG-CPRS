@@ -79,7 +79,8 @@ var
 implementation
 
   procedure FreeAndDeleteDataForGridListItem(i : integer);
-  var s : string;
+  var
+      //s : string;
       AGridInfo : TGridInfo;
       ACompleteGridInfo : TCompleteGridInfo; //kt 5/15/13
   begin

@@ -883,7 +883,8 @@ end;
 function EnumWindowsProc(hwnd: HWND; lParam: LPARAM): BOOL; stdcall;
 var
   s: string;
-  IsVisible, IsOwned, IsAppWindow: Boolean;
+  IsVisible, IsOwned: Boolean;
+  (* IsAppWindow: Boolean; *)
 begin
   Result := True;//carry on enumerating
 
@@ -1236,8 +1237,9 @@ function TEncounter.NeedVisitWVerification: Boolean;   //TMG added function  8/2
       end;
     end;
 var
-  msg: string;
-  ADate, AMaxDate: TDateTime;
+  (* msg: string; *)
+  ADate: TDateTime;
+  (* AMaxDate: TDateTime; *)
   datemsg : string;  //TMG 6/6/22
   response : integer;  //TMG 6/6/22
 begin

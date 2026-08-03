@@ -63,17 +63,17 @@ uses rCore,rTIU,uConst,
 {$R *.dfm}
 
 procedure TfrmIntracarePrintPreview.FormShow(Sender: TObject);
-var
-  YPos,XPos,tempXPos : integer;
-  i,j,k,p : integer;
-  Line1,Line2,Line3,Line4 : string;
+//var
+  (* YPos,XPos,tempXPos : integer; *)
+  (* i,j,k,p : integer; *)
+  (* Line1,Line2,Line3,Line4 : string; *)
   //barcodeWidth,barcodeHeight : integer;
-  KeeneRPCResult: string;
-  VitalRPCResult : TStringList;
-  l : integer;
-  Height,Weight,HeightTag,WeightTag: string;
-  AdmDate: string;
-  tempWidth: integer;
+  (* KeeneRPCResult: string; *)
+  (* VitalRPCResult : TStringList; *)
+  (* l : integer; *)
+  (* Height,Weight,HeightTag,WeightTag: string; *)
+  (* AdmDate: string; *)
+  (* tempWidth: integer; *)
 
 begin
   with PaintBox1 do begin

@@ -3,7 +3,7 @@ unit uTMGWebDriver;
 interface
 
 uses Forms, Windows, dialogs, SysUtils, Variants,
-    TMGHTML2, EmbeddedED, MSHTML_EWB
+    TMGHTML2, {EmbeddedED,} MSHTML
     ;
 
   function FillInputValueById(WB: THtmlObj; const Id : string; value : string; var ErrMsg : string) : boolean;  //result is true for success.

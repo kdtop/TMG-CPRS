@@ -55,8 +55,9 @@ unit uHTMLTemplateFields;
 interface
 
 uses
-  Forms, SysUtils, Classes, Dialogs, StdCtrls, ExtCtrls, Controls, Contnrs,
-  {uHTMLDlg, } TMGHTML2, uHTMLTools, MSHTML_EWB,
+  Forms, SysUtils, Classes, Dialogs, StdCtrls, ExtCtrls, Controls, Contnrs, Variants,
+  {uHTMLDlg, } TMGHTML2, uHTMLTools,
+  MSHTML,
   uTemplateFields, uHTMLDlgObjs, DateUtils,
   Graphics, ORClasses, ComCtrls, ORDtTm, uDlgComponents, TypInfo, ORFn, StrUtils;
 
@@ -588,7 +589,8 @@ end;
 
 function THTMLTemplateFieldType.GetItemDefault: string;
 //kt added 5/16
-var UseLocalValue : boolean;
+var
+(* UseLocalValue : boolean; *)
     DFN : string;
     ErrStr : string;
 const
@@ -2227,11 +2229,14 @@ end;
 procedure THTMLTemplateDocument.SyncFromHTMLDocument;
 //Scan actual HTML document and modify self if parts have been modified.
 var InstanceID, InstanceID2, TemplateIEN, s : string;
-    DefText, DefTextWithCtrlID : string;
+    DefText: string;
+    var
+    (* DefTextWithCtrlID: string; *)
     Elem : IHTMLElement;
     AHTMLTemplateDialogEntry, SourceDlg : THTMLTemplateDialogEntry;
     i, j, k  : integer;
-    IDNum : integer;
+    var
+    (* IDNum : integer; *)
     DiscardSL1, DiscardSL2 : TStringList;
     FoundDlgsInDOM : TInterfaceListAndTStrings;
 begin
@@ -2332,7 +2337,7 @@ procedure THTMLTemplateDocument.IterateCallBackForDocSync(Elem : IHTMLElement; M
 var ElemID, ClassName : string;
     List : TInterfaceListAndTStrings;
 begin
-  ClassName := Elem.ClassName;
+  ClassName := HTMLElement_GetClassName(Elem);
   if Pos(EMBEDDED_DLG_CLASS, ClassName) = 0 then exit;
   ElemID := Elem.ID;
   List := TInterfaceListAndTStrings(Obj);

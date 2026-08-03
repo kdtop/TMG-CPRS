@@ -2272,7 +2272,9 @@ procedure TPCEData.PCEForNote(NoteIEN: Integer; PotentialSrcObj: TPCEData);
 //                      Was renamed from EditObj -> PotentialSrcObj:
 
 var
-  i, j: Integer;
+  i: Integer;
+  var
+  (* j: Integer; *)
   TmpCat, TmpVStr: string;
   x: string;
   DoCopy, IsVisit: Boolean;
@@ -3902,7 +3904,7 @@ procedure TPCEData.AddStrData(List: TStrings);
     if(length(Txt) > 0) then List.Add(Txt);
   end;
 
-var i : integer;
+(* i : integer; *)
 begin
   //kt for i := 0 to FVisitTypesList.Count - 1 do Add(StrVisitType(FVisitTypesList.Proc[i])); //kt
   //kt Add(StrVisitType);
@@ -4033,7 +4035,7 @@ var
   AItem: TPCEItem;
   i: Integer;
   IsStrings: boolean;
-  Obj : TObject;
+  (* Obj : TObject; *)
   SrcPCEItem : TPCEItem; //kt added, replacing TPCEItem(Src[i]) -> SrcPCEItem
 
 begin

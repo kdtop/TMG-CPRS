@@ -1606,7 +1606,7 @@ procedure TfrmdlgProb.bbChangeProbClick(Sender: TObject);
 var
    newprob: string ;
    frmPLLex: TfrmPLLex;
-   ICDStr : string;  //kt added 10/15
+   (* ICDStr : string;  //kt added 10/15 *)
 begin
   //kt 11/22/15 begin mod -------
   if LinkedComponentsData.Count > 0 then begin
@@ -1704,7 +1704,7 @@ procedure TfrmdlgProb.SetProbCodeText(Value : string);
   end;
 
 var CodeType,Code : string;
-    Right : integer;
+    (* Right : integer; *)
 begin
   CodeType := Piece(Value,'^',1);
   Code := Piece(Value,'^',2);

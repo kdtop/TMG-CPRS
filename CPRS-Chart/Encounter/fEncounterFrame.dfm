@@ -5,7 +5,6 @@ inherited frmEncounterFrame: TfrmEncounterFrame
   ClientHeight = 424
   ClientWidth = 632
   FormStyle = fsMDIForm
-  OldCreateOrder = True
   Position = poMainFormCenter
   OnCanResize = FormCanResize
   OnClose = FormClose
@@ -14,9 +13,8 @@ inherited frmEncounterFrame: TfrmEncounterFrame
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 640
-  ExplicitHeight = 458
-  PixelsPerInch = 96
+  ExplicitWidth = 648
+  ExplicitHeight = 463
   TextHeight = 13
   object Bevel1: TBevel [0]
     Left = 0

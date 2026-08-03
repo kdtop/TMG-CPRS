@@ -167,17 +167,17 @@ procedure TfrmNoteTOC.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: 
 end;
 
 var
-  s: String;
-  iValue, iCode: Integer;
+  (* s: String; *)
+  (* iValue, iCode: Integer; *)
   NumOfPieces:integer;
   Document: IHTMLDocument2;
   Links: IHTMLElementCollection;
-  Link: IHTMLAnchorElement;
+  (* Link: IHTMLAnchorElement; *)
   Element: IHTMLElement;
   I: Integer;
   OuterHTML, HrefValue, LowerHref :WideString;
   HrefPos, StartPos,EndPos : Integer;
-  OriginalHref: WideString;
+  (* OriginalHref: WideString; *)
 begin
   //Messagedlg(url,mtinformation,[mbOk],0);
   //Cancel := True;

@@ -309,8 +309,9 @@ begin
 end;
 
 procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
-  var  Device : IDevice;
-       Item : IItem;
+  (* Device : IDevice; *)
+       var
+       (* Item : IItem; *)
        CommonDialog : TWIACommonDialog;
        Image : IImageFile;
        DeviceMan: TWIADeviceManager;
@@ -356,11 +357,12 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
   end;
 
   procedure TfrmGetImage.btnTakePictureClick(Sender: TObject);
-  var  Device : IDevice;
-       Item : IItem;
-       CommonDialog : TWIACommonDialog;
+  (* Device : IDevice; *)
+       (* Item : IItem; *)
+       (* CommonDialog : TWIACommonDialog; *)
        //Image : IImageFile;
-       DeviceMan: TWIADeviceManager;
+       var
+       (* DeviceMan: TWIADeviceManager; *)
        frmGetDXImage : TfrmGetDXImage;
   begin
     frmGetDXImage := TfrmGetDXImage.create(self);
@@ -580,9 +582,9 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
   var
     Image : IImageFile;
     ImageProcess : IImageProcess;
-    AProperty : IProperty;
-    FilterID : WideString;
-    v : OleVariant;
+    (* AProperty : IProperty; *)
+    (* FilterID : WideString; *)
+    (* v : OleVariant; *)
 
   begin
     While Degrees < 0 do Degrees := Degrees + 360;
@@ -611,9 +613,9 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
   var
     Image : IImageFile;
     ImageProcess : IImageProcess;
-    AProperty : IProperty;
-    FilterID : WideString;
-    v : OleVariant;
+    (* AProperty : IProperty; *)
+    (* FilterID : WideString; *)
+    (* v : OleVariant; *)
 
   begin
     Image := CoImageFile.Create;
@@ -640,9 +642,9 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
   var
     Image : IImageFile;
     ImageProcess : IImageProcess;
-    AProperty : IProperty;
-    FilterID : WideString;
-    v : OleVariant;
+    (* AProperty : IProperty; *)
+    (* FilterID : WideString; *)
+    (* v : OleVariant; *)
 
   begin
     Image := CoImageFile.Create;
@@ -766,7 +768,9 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
 
   procedure TfrmGetImage.ImageContainerMouseMove(Sender: TObject; Shift: TShiftState;
                                                  X, Y: Integer);
-  var MousePt, Pt2 : TPoint;
+  var MousePt: TPoint;
+  var
+  (* Pt2: TPoint; *)
       RectSize : integer;
   begin
     if not DraggingSizeBox then exit;
@@ -788,7 +792,8 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
   end;
 
   procedure TfrmGetImage.btnCropClick(Sender: TObject);
-  var LMargin,RMargin,TMargin,BMargin,temp : integer;
+  var LMargin, RMargin, TMargin, BMargin: integer;
+  (* temp: integer; *)
   begin
     if EqualRects(SelectRect,NullRect) then begin
       MessageDlg('Please click and drag on image first to ' + #13#10 +

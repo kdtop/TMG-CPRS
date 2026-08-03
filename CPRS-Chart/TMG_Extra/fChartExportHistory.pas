@@ -128,7 +128,9 @@ end;
 //======================END EXPORT RECORD ROUTINES==================================
 
 procedure TfrmChartExportHistory.LoadEntireHistory(ExportHistory:TStringList);
-var i,j :integer;
+var i:integer;
+var
+(* j:integer; *)
     DataStr,NotesStr,LabStr,RadStr:string;
     ExportItem:TExportRecord;
 begin
@@ -357,7 +359,8 @@ end;
 procedure TfrmChartExportHistory.LoadOneExport();
 var RootNote,ChildNode: TTreeNode;
     NoteStr,LabStr,RadStr:string;
-    OneStr:string;
+    var
+    (* OneStr:string; *)
     i : integer;
     NodeData:PNodeData;
     //OldestDate:FMDateTime;

@@ -171,7 +171,8 @@ var i,j : integer;
     countStr : string;
     count : integer;
     //data : string;
-    x : string;
+    var
+    (* x : string; *)
     Data,AddData : TDataStr;
     SomethingChecked : boolean;
     DoneIndex : integer;
@@ -323,7 +324,7 @@ procedure TfrmTMGVisitTypes.Data2Grid;  //kt added
 var i : integer;
     AProc, ACopiedProc : TPCEProc;
     APCEItem : TPCEItem;
-    ItemStr : string;
+    (* ItemStr : string; *)
 begin
   for i := lbGrid.Items.Count - 1 downto 0 do begin
     APCEItem := TPCEItem(lbGrid.Items.Objects[i]);
@@ -390,7 +391,9 @@ procedure TfrmTMGVisitTypes.LoadTMGVisitInfo(TitlesToAdd : TStringList);
 //This is called when form first instantiated.  It gets server information and stores locally.
 //  called from InitTMGTab()
 var SL, tempSL: TStringList;
-    TempStr,s2 : string;
+    s2: string;
+    var
+    (* TempStr: string; *)
     CMD, Entry : string;
     SDT : TFMDateTime;
     IntEntryType : integer;
@@ -772,7 +775,9 @@ end;
 
 procedure TfrmTMGVisitTypes.lbModsClickCheck(Sender: TObject; Index: Integer);
 var
-  i, idx: integer;
+  i: integer;
+  var
+  (* idx: integer; *)
   PCEObj: TPCEProc;
   ModIEN: string;
   DoChk, Add: boolean;

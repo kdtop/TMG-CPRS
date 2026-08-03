@@ -12,7 +12,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -20,7 +19,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
   DesignSize = (
     634
     467)
-  PixelsPerInch = 96
   TextHeight = 13
   object OKBtn: TButton
     Left = 344
@@ -261,7 +259,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
           Width = 161
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
           TabOrder = 0
           OnChange = AliasComboBoxChange
           Items.Strings = (
@@ -400,7 +397,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
           Top = 96
           Width = 73
           Height = 21
-          ItemHeight = 13
           TabOrder = 5
           Text = '<State>'
           OnChange = StateComboBoxChange
@@ -519,7 +515,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
         Width = 206
         Height = 21
         Anchors = [akLeft, akTop, akRight]
-        ItemHeight = 13
         TabOrder = 7
         Text = '<Sex>'
         OnChange = SexComboBoxChange
@@ -591,8 +586,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
         Top = 185
         Width = 27
         Height = 21
-        TabOrder = 15
-        OnClick = btnSkypeCopyClick
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           18000000000000030000120B0000120B00000000000000000000FF00FFFF00FF
@@ -620,6 +613,8 @@ object frmPtDemoEdit: TfrmPtDemoEdit
           FFDEC1FFDEC1FFDEC1E2C1ADC5A7A0BF8181FF00FFFF00FFFF00FFFF00FFFF00
           FFFF00FFFF00FFFF00FFA56F6FA56F6FA56F6FA56F6FA56F6FA56F6FBF8181FF
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+        TabOrder = 15
+        OnClick = btnSkypeCopyClick
       end
     end
     object tsNotes: TTabSheet
@@ -649,8 +644,7 @@ object frmPtDemoEdit: TfrmPtDemoEdit
           Left = 0
           Top = 0
           Width = 145
-          Height = 21
-          ItemHeight = 13
+          Height = 18
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -662,7 +656,6 @@ object frmPtDemoEdit: TfrmPtDemoEdit
           Width = 75
           Height = 21
           Hint = 'Font Size (Ctrl+(1-6))'
-          ItemHeight = 13
           ItemIndex = 2
           TabOrder = 1
           Text = '3 (12 pt)'

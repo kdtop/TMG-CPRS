@@ -225,7 +225,7 @@ procedure TfrmPtDocSearch.edtSearchTermsChange(Sender: TObject);
 
   procedure TfrmPtDocSearch.ShowResults;
       var cmd  : string;
-     RPCResult : String;
+     (* RPCResult : String; *)
   begin
     //Result := ''; //default
     RPCBrokerV.remoteprocedure := 'TMG SEARCH CHANNEL';

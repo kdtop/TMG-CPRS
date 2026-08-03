@@ -13,9 +13,7 @@ object frmNoteTOC: TfrmNoteTOC
   Font.Name = 'Tahoma'
   Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0
@@ -94,7 +92,6 @@ object frmNoteTOC: TfrmNoteTOC
       Top = 25
       Width = 170
       Height = 21
-      ItemHeight = 13
       TabOrder = 4
       OnChange = cmbLocationChange
       Items.Strings = (

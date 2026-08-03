@@ -22,7 +22,7 @@ uses
   Monkey_Bundle_a_JS_U, Monkey_Bundle_b_JS_U, Monkey_Bundle_c_JS_U;
 
   procedure AddMonkeyBundleScript(SL : TStringList);
-  var i : integer;
+  (* i : integer; *)
   CONST TITLE_COMMENT = '//Javascript Bundle for MonkeyPhysics';
   begin
     if SL.IndexOf(TITLE_COMMENT) <> -1 then exit;  //don't add duplicate

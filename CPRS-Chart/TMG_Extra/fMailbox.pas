@@ -305,10 +305,10 @@ end;
 
 procedure TfrmMailbox.PrintDocument(const Path,DocToPrint : string) ;
 var
-  printCommand : string;
-  printerInfo : string;
-  Device, Driver, Port: array[0..255] of Char;
-  hDeviceMode: THandle;
+  (* printCommand : string; *)
+  (* printerInfo : string; *)
+  (* Device, Driver, Port: array[0..255] of Char; *)
+  (* hDeviceMode: THandle; *)
   ScaleX, ScaleY: Integer;
   RR: TRect;
 begin

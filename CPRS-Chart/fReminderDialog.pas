@@ -440,7 +440,8 @@ begin
 end;
 
 procedure TfrmRemDlg.FormDestroy(Sender: TObject);
-var AVisitStr, ErrStr : string;  //kt added 5/16
+var ErrStr: string;  //kt added 5/16
+(* AVisitStr: string;  //kt added 5/16 *)
     IEN8925 : integer;  //kt added 5/16
 begin
   if FProcessingTemplate then begin
@@ -488,7 +489,7 @@ procedure TfrmRemDlg.ClearControls(All: boolean = FALSE);
 
   procedure WipeOutControls(const Ctrl: TWinControl);
   var i: integer;
-      ChildCtrl : TControl; //kt 7/16
+      (* ChildCtrl : TControl; //kt 7/16 *)
   begin
     for i := Ctrl.ControlCount-1 downto 0 do begin
       if (Ctrl.Controls[i].Owner = Self) then begin

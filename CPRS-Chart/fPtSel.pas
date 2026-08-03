@@ -1513,7 +1513,7 @@ begin
 end;
 
 procedure TfrmPtSel.PatientImageMouseEnter(Sender: TObject);
-var refresh : boolean;
+(* refresh : boolean; *)
 begin
   inherited;
   try

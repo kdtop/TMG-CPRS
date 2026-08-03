@@ -300,7 +300,8 @@ implementation
   procedure TfrmIntracarePtAdmLbl.SetupPreview(ACanvas : TCanvas);
   var
     YPos,XPos,tempXPos : integer;
-    i,j,k,p : integer;
+    var
+    (* i,j,k,p : integer; *)
     Line1,Line2,Line3,Line4 : string;
     //barcodeWidth,barcodeHeight : integer;
     KeeneRPCResult: string;
@@ -308,7 +309,7 @@ implementation
     l : integer;
     Height,Weight,HeightTag,WeightTag: string;
     AdmDate: string;
-    tempWidth: integer;
+    (* tempWidth: integer; *)
 
   begin
     HeightTag := ' HT ';

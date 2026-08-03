@@ -161,7 +161,7 @@ const
 var
   uTIULocation: integer;
   uTIULocationName: string;
-  EncounterLastVisitDateTime : String;   //kt 9/11
+  (* EncounterLastVisitDateTime : String;   //kt 9/11 *)
   EncounterLastLocation : Integer;       //kt 9/11
   EncounterLastLocationValid : String;   //kt 9/11
 

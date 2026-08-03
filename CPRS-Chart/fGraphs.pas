@@ -531,7 +531,7 @@ function CreateGraph(Cmd: string;
 var FName : String;
     BitMap: TBitMap;
     Rect : TRect;
-    ImageFName : string;
+    (* ImageFName : string; *)
 begin
   Result := '-1'; //default to failure
   try
@@ -591,7 +591,8 @@ var  S, PreStr, PostStr, TagStr, AttrStr : string;
      Err : string;
      Attrs : TStringList;
      AttrName, AttrValue : string;
-     Cmd, DateStr, Width, Height : string;
+     var
+     (* Cmd, DateStr, Width, Height : string; *)
      AttrData : Array[1..GRAPH_ATTR_CT] of string;
      NowStr : string;
      FName, VistAFName : string;
@@ -675,7 +676,9 @@ procedure TfrmGraphs.mnuToUpdatableImageClick(Sender: TObject);
 //kt added entire function 8/9/21
 var Rect : TRect;
     Canvas : TCanvas;
-    FName, ImageFName : string;
+    FName: string;
+    var
+    (* ImageFName: string; *)
     Width,Height : integer;
     aGraphItem: TGraphItem;
     aListItem: TListItem;

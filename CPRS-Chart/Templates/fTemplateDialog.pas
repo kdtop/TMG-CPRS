@@ -239,7 +239,9 @@ procedure TfrmTemplateDialog.GetHTMLText(HTMLSL: TStrings; IncludeEmbeddedFields
 //Copied and heavily modified from .GetText() above
 var
   i                        : integer;
-  Save, Hidden,HTMLMode    : boolean;
+  Hidden, HTMLMode: boolean;
+  var
+  (* Save: boolean; *)
   tmp, TemplateHTMLText    : string;
   HTMLOpenTag,HTMLCloseTag : string;
   OneBlock                 : string;
@@ -307,7 +309,7 @@ var
   PreviewMode : boolean;                       //kt 1/16
   SLWithTransformedFormulas : TStringList;     //kt 3/16
   SLWithFormulasAndObjsRemoved : TStringList;  //kt 3/16
-  DummyInt : integer;                          //kt
+  (* DummyInt : integer;                          //kt *)
   RPCErrStr : string;                          //kt 5/16
 
   procedure LoadValuesForDBControls;
@@ -324,7 +326,8 @@ var
   var i, j : integer;
       ATmplFld: TTemplateField;  //kt 5/16
       SL, LineArr : TStringList;
-      s, AVisitStr : string;
+      AVisitStr: string;
+      (* s: string; *)
       Arr : TDBControlInfoArray;    //kt 5/16
       //uses in global scope: VEFANameToObjID -- format: SL.String[i] = Field Name,  Integer(SL.Object[i]) = fieldID
   begin

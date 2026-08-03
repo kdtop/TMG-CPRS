@@ -78,7 +78,7 @@ uses
   Windows, ActiveX, Classes, ComObj, OleCtrls
   //SinkUses//
   , StdVCL
-  , MSHTML_EWB
+  , MSHTML
   ;
 
 type

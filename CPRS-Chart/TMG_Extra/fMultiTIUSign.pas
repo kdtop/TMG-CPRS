@@ -601,7 +601,8 @@ var
   AFollowUp : integer;
   OneStudy, CaseNum : string;
   SelectID : string;
-  RecordID : string;
+  var
+  (* RecordID : string; *)
   Data  : TStringList;
   OrderIFN : string;
   DT,SDT,EDT : string;
@@ -792,7 +793,9 @@ end;
 
 
 procedure TfrmMultiTIUSign.MoveItemBetweenLists(j : integer; CurLB:TListBox; TargetLB : TListView);
-var s,Date : string;
+var s: string;
+var
+(* Date: string; *)
     i : integer;
     NewItem : TListItem;
 begin
@@ -831,8 +834,8 @@ end;
 
 procedure TfrmMultiTIUSign.btnDeleteClick(Sender: TObject);
 var ItemInfo : TItemInfo;
-    Title : string;
-    Suggestion : string;
+    (* Title : string; *)
+    (* Suggestion : string; *)
 begin
   if not (self.FormMode in [tmsmLooseDocs, tmsmLooseDocsAllPts]) then begin
     if messagedlg('Are you sure you want to delete this note?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then exit;
@@ -875,14 +878,16 @@ end;
 
 
 function TfrmMultiTIUSign.ProcessDeltaDocumentStatus(ItemInfo : TItemInfo; Status : string):boolean;
-var Success : boolean;
-    ActionSts,DeleteSts : TActionRec;
-    ImageList:TList;
-    i : integer;
-    RPCResult,Reason : string;
-    Results : boolean;
-    ImageInfo : TImageInfo;
-    Title : string;
+(* Success : boolean; *)
+    (* ActionSts,DeleteSts : TActionRec; *)
+    (* ImageList:TList; *)
+    var
+    (* i : integer; *)
+    RPCResult: string;
+    (* Reason: string; *)
+    (* Results : boolean; *)
+    (* ImageInfo : TImageInfo; *)
+    (* Title : string; *)
 begin
   //ItemInfo := SelectedItemInfoFromLB(lbUnSelected);
   Result := False;

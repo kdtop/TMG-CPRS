@@ -468,7 +468,8 @@ procedure TfrmImages.DisplayMediaInBrowser(MediaName : string);
     procedure LoadMedia(MediaName:string);
       var   HTMLFile: textfile;
         HTMLText: string;
-        SR: TSearchRec;
+        var
+        (* SR: TSearchRec; *)
         FileList:TStringList;
         i : integer;
       begin

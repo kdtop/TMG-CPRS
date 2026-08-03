@@ -193,7 +193,9 @@ uses
     OneSource,Content, Attrs : TStringList;
     s, s1, s2, Id            : string;
     StartTag, EndTag         : string;
-    i,TagNum, PosNum         : integer;
+    i, PosNum: integer;
+    var
+    (* TagNum: integer; *)
     TagFound                 : boolean;
     HTMLObjFactory           : THTMLObjHandler;
   begin
@@ -246,7 +248,7 @@ uses
   end;
 
   procedure THTMLDlg.FinalCompile;
-  var i : integer;
+  (* i : integer; *)
   begin
     FFinalHTML.Clear;
     FFinalHTML.Add('<!DOCTYPE html>');
@@ -333,7 +335,8 @@ uses
   function THTMLDlg.GetValueByID(ID : string; var Disabled : boolean; NoCommas : boolean = false) : string;
   //RefreshResults/LoadResults does NOT need to be called first.
   var i : integer;
-      AnID, StartTag, value : string;
+      AnID, StartTag: string;
+      (* value: string; *)
   begin
     Result := '';
     FResultValues.Clear;

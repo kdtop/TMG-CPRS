@@ -445,7 +445,7 @@ end;
 procedure TfrmSingleNote.SendOneMessage(ToUser,FromUser:string;OneMessage:string;NoteCreated:integer=0);
 //Public function to send a NetworkMessenger message
 var
-  i : integer;
+  (* i : integer; *)
   Result : string;
 begin
   RPCBrokerV.remoteprocedure := 'TMG MESSENGER SEND MESSAGE';
@@ -1061,9 +1061,12 @@ begin inherited; HTMLEditor.AlignCenter; end;
 
 procedure TfrmSingleNote.btnChangeTitleClick(Sender: TObject);
 var
-  LastTitle, LastConsult: Integer;
-  OKPressed, IsIDChild: Boolean;
-  x: string;
+  LastTitle: Integer;
+  var
+  (* LastConsult: Integer; *)
+  OKPressed: Boolean;
+  (* IsIDChild: Boolean; *)
+  (* x: string; *)
 
 begin
   inherited;

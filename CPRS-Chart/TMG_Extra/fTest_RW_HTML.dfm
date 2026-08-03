@@ -10,11 +10,9 @@ object frmTMGTestHTML: TfrmTMGTestHTML
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 361
@@ -37,8 +35,6 @@ object frmTMGTestHTML: TfrmTMGTestHTML
       Width = 73
       Height = 25
       Caption = 'Clear'
-      TabOrder = 0
-      OnClick = btnClearClick
       Glyph.Data = {
         42040000424D4204000000000000420000002800000010000000100000000100
         20000300000000040000130B0000130B00000000000000000000000000FF0000
@@ -75,6 +71,8 @@ object frmTMGTestHTML: TfrmTMGTestHTML
         5EA1FF9BB6D0FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8
         E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8
         E9ECFFD8E9EC}
+      TabOrder = 0
+      OnClick = btnClearClick
     end
     object Button1: TButton
       Left = 183
@@ -150,8 +148,6 @@ object frmTMGTestHTML: TfrmTMGTestHTML
       Top = 152
       Width = 35
       Height = 33
-      TabOrder = 0
-      OnClick = btnFromSourceClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFED7E8
@@ -227,14 +223,14 @@ object frmTMGTestHTML: TfrmTMGTestHTML
         EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
         54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
         ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
+      TabOrder = 0
+      OnClick = btnFromSourceClick
     end
     object btnToSource: TBitBtn
       Left = 6
       Top = 191
       Width = 35
       Height = 33
-      TabOrder = 1
-      OnClick = btnToSourceClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFED7E8
@@ -310,6 +306,8 @@ object frmTMGTestHTML: TfrmTMGTestHTML
         EBFFD8E9ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED9C7C9FFD98D8FFEDB53
         54FFDF3B3BFFDF2728FFDF2728FFDE3C3CFFDB5354FFDA9091FED9C6C9FFD8E9
         ECFED8E9ECFED6E5E8FFD8E9ECFED8E9ECFED7E8EBFFD8E9ECFE}
+      TabOrder = 1
+      OnClick = btnToSourceClick
     end
   end
   object pnlHoldWebBrowser: TPanel

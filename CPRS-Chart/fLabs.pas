@@ -2251,7 +2251,7 @@ procedure TfrmLabs.FillGrid(agrid: TStringGrid; aitems: TStrings);
 var
   testcnt, x, y, i: integer;
   FirstSeen: string;
-  LabsSent:string;
+  (* LabsSent:string; *)
 begin
   testcnt := strtoint(Piece(aitems[0], '^', 1));
   if LastCheckedLabs<>Patient.DFN+'^'+Piece(aitems[0], '^', 3) then begin
@@ -2330,7 +2330,8 @@ var
   i,ix: integer;
   TMGHeight : integer;
   TMGMinHeight:integer;
-  pnlRightTopPct : Real;
+  var
+  (* pnlRightTopPct : Real; *)
   LabsSent : string;
 begin
   tmpList := TStringList.Create;
@@ -5327,7 +5328,9 @@ const
   RetryDelay = 500; //milliseconds
 
 var
-  LocalFNamePath,FPath,FName    : AnsiString;
+  LocalFNamePath, FName: AnsiString;
+  var
+  (* FPath: AnsiString; *)
   ReadCount                     : Word;
   totalReadCount                : Integer;
   LocalFileSize                 : integer;
@@ -5337,7 +5340,8 @@ var
   Buffer                        : array[0..1024] of byte;
   OneLine                       : AnsiString;
   RPCResult                     : AnsiString;
-  Abort                         : boolean;
+  var
+  (* Abort                         : boolean; *)
   frmImagePickPDF               : TfrmImagePickPDF;
   Retries                       : integer;
   FileOpened                    : boolean;

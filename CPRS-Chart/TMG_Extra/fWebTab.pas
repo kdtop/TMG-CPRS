@@ -111,7 +111,7 @@ begin
 end;
 
 procedure TfrmWebTab.TimerRecordDOMTimer(Sender: TObject);
-var SL : TStringList;
+(* SL : TStringList; *)
 const SAVE_TO_DISK = true;
 begin
   inherited;
@@ -121,8 +121,8 @@ begin
 end;
 
 procedure TfrmWebTab.mnuViewHTMLSourceClick(Sender: TObject);
-var HTMLText : string;
-    frmView : TfrmMemoEdit;
+(* HTMLText : string; *)
+    (* frmView : TfrmMemoEdit; *)
 begin
   inherited;
   {    REMOVED FOR NOW
@@ -188,7 +188,7 @@ function AskServerForURLs(URLList : TStringList) : string;
 //Results of Fn: Returns '1^Success' if success, or '0^ErrorMessage'
 var
     RPCResult              : string; //codex 7/29/26
-    i                      : integer;
+    (* i                      : integer; *)
 begin
   if TMG_URL_RPC_Checked = false then begin
     RPCBrokerV.remoteprocedure := 'XWB IS RPC AVAILABLE';

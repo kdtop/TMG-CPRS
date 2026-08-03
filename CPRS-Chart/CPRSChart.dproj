@@ -1039,7 +1039,6 @@
         </DCCReference>
         <DCCReference Include="TMG_Extra\uHTMLDlg.pas"/>
         <DCCReference Include="TMG_Extra\uHTMLDlgObjs.pas"/>
-        <DCCReference Include="TMG_Extra\HTMLEdit\TMGDataHTML.pas"/>
         <DCCReference Include="TMG_Extra\Monkey_Bundle_a_JS_U.pas"/>
         <DCCReference Include="TMG_Extra\Monkey_Bundle_b_JS_U.pas"/>
         <DCCReference Include="TMG_Extra\Monkey_Bundle_c_JS_U.pas"/>

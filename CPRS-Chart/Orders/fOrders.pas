@@ -3216,8 +3216,8 @@ procedure TfrmOrders.popCopyOrderTextClick(Sender: TObject);
 //TMG added entire procedure. It takes the current order text, puts inside an HTML table, then copies to Clipboard 5/19/22
 var OrderText:string;
     i : integer;
-    pData:  DWORD;
-    dwSize: DWORD;
+    (* pData:  DWORD; *)
+    (* dwSize: DWORD; *)
 begin
   inherited;
   with lstOrders do for i := 0 to Items.Count - 1 do if Selected[i] then begin

@@ -337,7 +337,7 @@ end;
 
 function FieldHelp(FileNum, IENS, FieldNum, HelpStyle : string) : string;
 var
-   RPCResult: string;
+   (* RPCResult: string; *)
    ParamStr : string;
 begin
   Result := '';
@@ -455,7 +455,7 @@ end;
 procedure TfrmLabEntry.LoadOneTest(DataInfo:string);
 var Name, Store: string;
     SelIEN60: Int64;
-    ItemIdx : integer;
+    (* ItemIdx : integer; *)
 begin
   //ItemIdx := LabsORComboBox.ItemIndex;
   //If ItemIdx < 0 then exit;

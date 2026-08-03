@@ -174,10 +174,10 @@ end;
 
 procedure TfrmPtHTMLDemo.cmdPrintClick(Sender: TObject);
 var
-  AHeader: TStringList;
-  memPrintReport: TRichEdit;
-  StartLine, MaxLines, LastLine, ThisPage, i: integer;
-  ErrMsg: string;
+  (* AHeader: TStringList; *)
+  (* memPrintReport: TRichEdit; *)
+  (* StartLine, MaxLines, LastLine, ThisPage, i: integer; *)
+  (* ErrMsg: string; *)
   RemoteSiteID: string;    //for Remote site printing
   RemoteQuery: string;    //for Remote site printing
 const

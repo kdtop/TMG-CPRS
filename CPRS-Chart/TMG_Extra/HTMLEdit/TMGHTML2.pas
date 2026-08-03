@@ -22,22 +22,87 @@ use of HTML WYSIWYG interfaces made open by Microsoft.
 *)
 
 (*
-NOTICE: Also Derived from EmbeddedED.  See notes in that code block.
+NOTICE: Also Derived from EmbeddedED project.  The parts used were merged
+        into this file in a block starting with marking:
+        '//------- //kt //codex From EmbeddedED'
+
+        The license info from the EmbeddedED project is included below:
+
+        {       EmbeddedED ver 1.21 (Jan. 19, 2004)     }
+        {                                               }
+        {       For Delphi 4, 5, 6 and 7                }
+        {                                               }
+        {       Copyright (C) 1999-2004, Kurt Senfer.   }
+        {       All Rights Reserved.                    }
+        {                                               }
+        {       Support@ks.helpware.net                 }
+        {                                               }
+        {       Documentation and updated versions:     }
+        {                                               }
+        {       http://KS.helpware.net                  }
+        {                                               }
+        { ********************************************* }
+
+        {
+            This library is free software; you can redistribute it and/or
+            modify it under the terms of the GNU Lesser General Public
+            License as published by the Free Software Foundation; either
+            version 2.1 of the License, or (at your option) any later version.
+
+            This library is distributed in the hope that it will be useful,
+            but WITHOUT ANY WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+            Lesser General Public License for more details.
+
+            You should have received a copy of the GNU Lesser General Public
+            License along with this library; if not, write to the Free Software
+            Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+        This unit forms the basic core of a MSHTML Edit component witch can be used
+        as the starting point for a full blown WYSIWYG HTML Editor.
+
+        Don't change this unit, but subclass it in order to build your own advanced
+        HTML Editor on top of it. If you change the unit you'll run into unnecessary
+        troubles when official updates of this unit is released. If you build a
+        subclassed editor you can benefit from new versions of the EmbeddedED unit
+        without the need of changing your own code.
+
+        If you find bugs or have ideas / wishes for new features that either should be
+        incorporated into the EmbeddedED unit or cant be placed in a subclassed unit,
+        then please let me know and I'll try to keep EmbeddedED updated at any time.
+
+        ----------------------------------------------------------------------
+
+        Once I tried to get an HTML editor written as OSP. When it didn't succeeded
+        I tried to get different groups of people to share the workload of
+        writing a good HTML editor around the MSHTML engine - no succeed either.
+
+        Then I finally had to do everything myself and finally I decided only to make
+        parts of my source public.
+
+        If you ever need to do more than the basic editing that the EmbeddedED unit
+        will give you, you need to write some code yourself, or you might chose to acquire
+        some of the code I wrote - check out my site at http://KS.helpware.net.
+
+        The power of all units are compiled into the KsDHTMLEDLib.ocx witch you can use
+        free of charge.  }
+
 *)
 
 interface
 
 uses SysUtils, WinTypes, Dialogs, StdCtrls, Menus,
-     EmbeddedED,
      WinMsgLog,  //kt 8/16
      ORNet, TRPCB, //ELH 10/6/22
-     ActiveX, MSHTMLEvents, SHDocVw, {MSHTML,} MSHTML_EWB,
+     ActiveX, MSHTMLEvents, SHDocVw, MSHTML, {MSHTML_EWB,}
      AppEvnts, controls, ExtCtrls,
-     EmbeddedIEConst,Messages,Classes,Forms,Graphics;
+     EmbeddedIEConst,
+     Messages,Classes,Forms,Graphics;
 
 type
   TSetFontMode = (sfAll,sfSize,sfColor,sfName,sfStyle,sfCharset);
   TLocalTimerAction = (ltFreeCtrl, ltSetFocus);  //kt 10/2014
+  CmdID = TOleEnum;
 
   THTMLSearchFlags = set of (    //from IHTMLTxtRange.findText flags, not all included here.
     hsPartial,              //Match partial words
@@ -69,7 +134,7 @@ type
   TPasteEventProc = procedure (Sender : TObject; var AllowPaste : boolean) of object; //kt 8/16
 
   // THtmlObj=class(TWebBrowser)
-  THtmlObj=class(TEmbeddedED)
+  THtmlObj=class(TWebBrowser)
   private
     FZoomStep :              integer; //kt 9/4/15
     FZoomValue :             integer; //kt 9/4/15
@@ -78,15 +143,46 @@ type
     CtrlToBeProcessed  :     boolean;
     ShiftToBeProcessed :     boolean;
     CtrlReturnToBeProcessed: boolean;
+    KeyPressTime :           FILETIME;
     Modified:                boolean;
     FOrigAppOnMessage :      TMessageEvent;
     FApplication :           TApplication;
     FActive :                boolean;
     FEditable:               boolean;
+    FEmbeddedOnBlur :        TNotifyEvent;
+    FEmbeddedOnClick :       TNotifyEvent;
+    FPrintFinished :         Boolean;
+    FReadyState :            Integer;
+    FMainWinHandle :         HWND;
+    FmsHTMLwinHandle :       HWND;
+    FmsHTMLwinPtr :          Pointer;
+    FOleInPlaceActiveObject: IOleInPlaceActiveObject;
+    EDMessageHandlerPtr :    Pointer;
+    FCaret :                 IHTMLCaret;
+    FTMGDisplayPointer :     IDisplayPointer;
     ColorDialog:             TColorDialog;
     AllowNextBlur :          boolean;
     LocalTimer :             TTimer;
     LocalTimerAction:        set of TLocalTimerAction;
+    function  GetDOC: IHTMLDocument2;
+    function  GetDocumentHTML: string;
+    procedure SetDocumentHTML(NewHTML: String);
+    function  GetPersistStream: IPersistStreamInit;
+    function  LoadFromIStream(aIStream: IStream): HResult;
+    function  LoadFromString(aString: String): HResult;
+    procedure AssignDocument;
+    procedure EmbeddedDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
+    procedure EmbeddedOnDownloadComplete(Sender: TObject);
+    procedure SubClassMsHTML;
+    procedure UnSubClassMsHTML;
+    procedure EDMessageHandler(var Message: TMessage);
+    function  GetInPlaceActiveObject: IOleInPlaceActiveObject;
+    function  GetMSHTMLwinHandle: Hwnd;
+    function  DoCommand(cmdID: CMDID): HResult; overload;
+    function  DoCommand(cmdID: CMDID; cmdexecopt: OLECMDEXECOPT): HResult; overload;
+    function  DoCommand(cmdID: CMDID; cmdexecopt: OLECMDEXECOPT; var pInVar: OleVariant): HResult; overload;
+    function  DoCommand(cmdID: CMDID; cmdexecopt: OLECMDEXECOPT; var pInVar, pOutVar: OleVariant): HResult; overload;
+    function  NewDocument: HResult;
     function  GetHTMLText:string;
     procedure SetHTMLText(HTML:String);
     function  GetText:string;
@@ -110,8 +206,8 @@ type
     //procedure ReassignKeyboardHandler(TurnOn : boolean);
     procedure GlobalMsgHandler(var Msg: TMsg; var Handled: Boolean);
     procedure HandleBlur(Sender: TObject);
-    procedure SubMessageHandler(var Msg: TMessage); override;
-    function SubFocusHandler(fGotFocus: BOOL): HResult; override;
+    procedure SubMessageHandler(var Msg: TMessage);
+    function SubFocusHandler(fGotFocus: BOOL): HResult;
     function GetActive : boolean;
     procedure SetZoom(Pct : integer);  //kt added 9/4/15
     procedure SetZoomStep(Value : integer);  //kt added 9/4/15
@@ -119,13 +215,6 @@ type
     procedure LaunchDateInsert;
     function RuleStyleToCSSText(Style: IHTMLRuleStyle) : string;
     procedure CSSTextToHumanReadable(SelectorText, CSSText : string; OutSL : TStrings);
-    //procedure StripQuotes(SL : TStrings; QtChar: char);
-    //procedure StripBetweenChars(SL : TStrings; OpenChar, CloseChar : char; StartPos: integer = 1; NumToDel : integer = MaxInt); overload;
-    //procedure StripBetweenChars(var s : string; OpenChar, CloseChar : char; StartPos: integer = 1; NumToDel : integer = MaxInt); overload;
-    //procedure StripBraces(SL : TStrings; StartPos: integer = 1; NumToDel : integer = MaxInt); overload;
-    //procedure StripBraces(var s : string; StartPos: integer = 1; NumToDel : integer = MaxInt); overload;
-    //procedure StripBetweenTags(SL : TStrings; OpenTag, CloseTag : string; StartLineIdx : Word = 0; Count : Word = 9999);
-    //procedure TrimFunction(SL : TStrings; FnStr : string);
     function FlagsToWord(Flags : THTMLSearchFlags = [hsPartial]) : word;  //kt 6/16
     procedure HandleGetByClassCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
     procedure HandleGetOneByClassCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
@@ -140,18 +229,23 @@ type
     KeyStruck : boolean; // A VERY crude determiner as to if Modified.
     NextControl : TWinControl;
     PrevControl : TWinControl;
-    OnLaunchTemplateSearch : TNotifyEvent;                          //kt 10/2014
-    OnLaunchDialogSearch : TNotifyEvent;                          //kt 10/2014
-    OnLaunchConsole : TNotifyEvent;                                 //kt 6/2015
-    OnModified : TNotifyEvent;                                      //kt 9/4/15
-    OnInsertDate : TNotifyEvent;                                    //kt 12/29/15
-    TMGHandle : THandle;                                            //kt 8/16
-    WinMessageLog: TfrmWinMessageLog;                               //kt 8/16 -- debug tool
+    OnLaunchTemplateSearch : TNotifyEvent;
+    OnLaunchDialogSearch : TNotifyEvent;
+    OnLaunchConsole : TNotifyEvent;
+    OnModified : TNotifyEvent;
+    OnInsertDate : TNotifyEvent;
+    TMGHandle : THandle;
+    WinMessageLog: TfrmWinMessageLog;
     function  GetFullHTMLText:string; //html text including from <head> </head>
     procedure HandleLocalTimerAction(Sender : TObject);
     procedure SetMsgActive (Active : boolean);
     constructor Create(Owner: TControl; Application : TApplication);
     destructor Destroy; override;
+    function  WaitForDocComplete: Boolean;
+    procedure ShowCaret;
+    procedure SetFocusToDoc;
+    procedure ScrollDoc(Pos: Integer);
+    procedure PrintDocument(var withUI: OleVariant);
     procedure Clear;
     procedure ToggleBullet;
     procedure ToggleItalic;
@@ -202,6 +296,8 @@ type
     function GetScrollLocation: integer;
     property  HTMLText:string read GetHTMLText write SetHTMLText;
     property  Text:string read GetText write SetText;
+    property  DOC: IHTMLDocument2 read GetDOC;
+    property  DocumentHTML: String read GetDocumentHTML write SetDocumentHTML;
     //property Active : boolean read FActive write SetMsgActive;
     property  Active : boolean read GetActive;
     property  Editable : boolean read GetEditableState write SetEditableState;
@@ -212,6 +308,8 @@ type
     property  Zoom : integer read FZoomValue write SetZoom;
     property  ZoomStep : integer read FZoomStep write SetZoomStep;
     property  OnPasteEvent : TPasteEventProc read FOnPasteEvent write FOnPasteEvent;  //kt 8/16
+    property  OnClick : TNotifyEvent read FEmbeddedOnClick write FEmbeddedOnClick;
+    property  PrintFinished: Boolean read FPrintFinished write FPrintFinished;
     function GetDocHead: IHTMLElement;
     function GetDocBody: IHTMLElement;
     function GetDocStyleElement: IHTMLElement;
@@ -242,6 +340,7 @@ type
 
 function HTMLElement_PropertyValue(Elem : IHTMLElement; PropertyName : string) : string;
 function HTMLElement_HasClassName(Elem : IHTMLElement; AClassName : string) : boolean;
+function HTMLElement_GetClassName(Elem : IHTMLElement) : string;
 procedure HTMLElement_EnsureHasClassName(Elem : IHTMLElement; AClassName : string);
 procedure HTMLElement_RemoveClassName(Elem : IHTMLElement; AClassName : string);
 
@@ -253,7 +352,7 @@ implementation
 
 
 uses
-  WinProcs,Variants,Clipbrd, StrUtils, Math, ORFn, VAUtils,
+  WinProcs,Variants,Clipbrd, StrUtils, Math, ORFn, VAUtils, ComObj,
   uHTMLTools, uTMGOptions,
   Windows;
 
@@ -278,7 +377,9 @@ begin
   inherited Create(Owner);  //Note: Owner should be a descendant of TControl;
   FApplication := Application;
   FOrigAppOnMessage := Application.OnMessage;
-  OnBlur := HandleBlur;
+  FEmbeddedOnBlur := HandleBlur;
+  OnDocumentComplete := EmbeddedDocumentComplete;
+  OnDownloadComplete := EmbeddedOnDownloadComplete;
   AllowNextBlur := false;
   KeyStruck := false;
   Modified := false;
@@ -296,7 +397,6 @@ begin
   LocalTimerAction := [];
   FZoomValue := 100;  //100%
   FZoomStep := 20;  //e.g. 5% change with each zoom in
-  //kt mod 7/31/16 ----------
   Self.TMGHandle := 0;
   if Self.ControlInterface.QueryInterface(IOleWindow, TempWin) = 0 then begin
     if TempWin.GetWindow(TempHandle) = 0 then begin
@@ -304,20 +404,267 @@ begin
     end;
   end;
   WinMessageLog := nil;
-  //FOnPasteEvent := nil; //kt 8/16
   FOnPasteEvent := PasteEvent;  //<-- This one works, just need to figure out how to properly use it when the user needs it    9/15/22
   if (CF_HTML = -1) then begin
     CF_HTML  := RegisterClipboardFormat('HTML Format');
   end;
-  //kt --- end mod 7/31/16 ----------
 end;
 
 destructor THtmlObj.Destroy;
 begin
   SetMsgActive(false); //Turns off local OnMessage handling
+  UnSubClassMsHTML;
+  FOleInPlaceActiveObject := nil;
   LocalTimer.Free;
   inherited Destroy;
 end;
+
+//------- //kt //codex From EmbeddedED
+
+function THtmlObj.GetPersistStream: IPersistStreamInit;
+begin
+  if Self.Document = nil
+    then Result := nil
+    else Result := Self.Document as IPersistStreamInit;
+end;
+
+function THtmlObj.GetDOC: IHTMLDocument2;
+begin
+  if Self.Document = nil
+    then Result := nil
+    else Result := Self.Document as IHTMLDocument2;
+end;
+
+function THtmlObj.GetDocumentHTML: string;
+begin
+  Result := GetFullHTMLText;
+end;
+
+function THtmlObj.LoadFromIStream(aIStream: IStream): HResult;
+begin
+  if Self.Document = nil then begin
+    AssignDocument;
+  end;
+  if GetPersistStream = nil then begin
+    Result := E_FAIL;
+    Exit;
+  end;
+  FReadyState := 0;
+  Result := GetPersistStream.Load(aIStream);
+  WaitForDocComplete;
+end;
+
+function THtmlObj.LoadFromString(aString: String): HResult;
+var
+  aHandle: THandle;
+  aStream: IStream;
+begin
+  aHandle := GlobalAlloc(GPTR, (Length(aString) + 1) * SizeOf(Char));
+  try
+    if aHandle <> 0 then begin
+      if Length(aString) > 0 then begin
+        Move(PChar(aString)^, PChar(aHandle)^, Length(aString) * SizeOf(Char));
+      end;
+      PChar(aHandle)[Length(aString)] := #0;
+      CreateStreamOnHGlobal(aHandle, FALSE, aStream);
+      Result := LoadFromIStream(aStream);
+    end else begin
+      Result := S_FALSE;
+    end;
+  finally
+    GlobalFree(aHandle);
+  end;
+end;
+
+procedure THtmlObj.SetDocumentHTML(NewHTML: String);
+begin
+  if DOC = nil then begin
+    AssignDocument;
+  end;
+  if DOC = nil then Exit;
+  LoadFromString(NewHTML);
+end;
+
+procedure THtmlObj.AssignDocument;
+var
+  Ov: OleVariant;
+begin
+  if Self.Document = nil then begin
+    HandleNeeded;
+    Ov := 'about:blank';
+    FReadyState := 0;
+    Navigate2(Ov);
+    WaitForDocComplete;
+  end;
+end;
+
+function THtmlObj.WaitForDocComplete: Boolean;
+var
+  I: Cardinal;
+begin
+  I := GetTickCount + 20000;
+  Result := True;
+  if Self.Document = nil then Exit;
+  while FReadyState <> READYSTATE_COMPLETE do begin
+    if GetTickCount > I then begin
+      Result := False;
+      Break;
+    end;
+    FApplication.ProcessMessages;
+    Sleep(10);
+  end;
+end;
+
+function THtmlObj.DoCommand(cmdID: CMDID): HResult;
+begin
+  Result := DoCommand(cmdID, OLECMDEXECOPT_DODEFAULT);
+end;
+
+function THtmlObj.DoCommand(cmdID: CMDID; cmdexecopt: OLECMDEXECOPT): HResult;
+begin
+  Result := DoCommand(cmdID, cmdexecopt, POlevariant(Nil)^);
+end;
+
+function THtmlObj.DoCommand(cmdID: CMDID; cmdexecopt: OLECMDEXECOPT; var pInVar: OleVariant): HResult;
+begin
+  Result := DoCommand(cmdID, cmdexecopt, pInVar, POlevariant(Nil)^);
+end;
+
+function THtmlObj.DoCommand(cmdID: CMDID; cmdexecopt: OLECMDEXECOPT; var pInVar, pOutVar: OleVariant): HResult;
+var
+  CmdTarget: IOleCommandTarget;
+begin
+  Result := E_FAIL;
+  if DOC = nil then Exit;
+  CmdTarget := DOC as IOleCommandTarget;
+  if CmdTarget = nil then Exit;
+  Result := CmdTarget.Exec(@CGID_MSHTML, cmdID, cmdexecopt, pInVar, pOutVar);
+end;
+
+function THtmlObj.NewDocument: HResult;
+const
+  EMPTY_DOC =
+    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">' + #13#10 +
+    '<HTML><HEAD><TITLE>No Title</TITLE>' +
+    '<META http-equiv=Content-Type content="text/html; charset=windows-1252">' +
+    '</HEAD><BODY><P>&nbsp;</P></BODY></HTML>';
+begin
+  if Self.Document = nil then begin
+    AssignDocument;
+  end;
+  Result := LoadFromString(EMPTY_DOC);
+end;
+
+function THtmlObj.GetInPlaceActiveObject: IOleInPlaceActiveObject;
+var
+  aHandle: Windows.Hwnd;
+begin
+  if FOleInPlaceActiveObject <> nil then begin
+    Result := FOleInPlaceActiveObject;
+    Exit;
+  end;
+  if ControlInterface <> nil
+    then OleCheck(ControlInterface.QueryInterface(IOleInPlaceActiveObject, FOleInPlaceActiveObject))
+    else begin
+      Result := nil;
+      Exit;
+    end;
+  OleCheck(FOleInPlaceActiveObject.GetWindow(FMainWinHandle));
+  aHandle := FindWindowEx(FMainWinHandle, 0, 'Shell DocObject View', nil);
+  FmsHTMLwinHandle := FindWindowEx(aHandle, 0, 'Internet Explorer_Server', nil);
+  Result := FOleInPlaceActiveObject;
+end;
+
+function THtmlObj.GetMSHTMLwinHandle: Hwnd;
+begin
+  if FOleInPlaceActiveObject = nil then begin
+    GetInPlaceActiveObject;
+  end;
+  Result := FmsHTMLwinHandle;
+end;
+
+procedure THtmlObj.SubClassMsHTML;
+begin
+  if (GetInPlaceActiveObject <> nil) and (FmsHTMLwinHandle <> 0) then begin
+    if EDMessageHandlerPtr <> nil then begin
+      UnSubClassMsHTML;
+    end;
+    EDMessageHandlerPtr := MakeObjectInstance(EDMessageHandler);
+    FmsHTMLwinPtr := Pointer(SetWindowLong(FmsHTMLwinHandle, GWL_WNDPROC, LongInt(EDMessageHandlerPtr)));
+  end;
+end;
+
+procedure THtmlObj.UnSubClassMsHTML;
+begin
+  if (GetInPlaceActiveObject <> nil) and (FmsHTMLwinHandle <> 0) and (EDMessageHandlerPtr <> nil) then begin
+    SetWindowLong(FmsHTMLwinHandle, GWL_WNDPROC, LongInt(FmsHTMLwinPtr));
+    FreeObjectInstance(EDMessageHandlerPtr);
+    EDMessageHandlerPtr := nil;
+  end;
+end;
+
+procedure THtmlObj.EDMessageHandler(var Message: TMessage);
+begin
+  SubMessageHandler(Message);
+  if Message.Result = 1 then Exit;
+  Message.Result := CallWindowProc(FmsHTMLwinPtr, FmsHTMLwinHandle, Message.Msg, Message.WParam, Message.LParam);
+end;
+
+procedure THtmlObj.EmbeddedDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
+begin
+  FReadyState := READYSTATE_COMPLETE;
+  GetInPlaceActiveObject;
+  if FmsHTMLwinHandle = 0 then begin
+    GetMSHTMLwinHandle;
+  end;
+  SubClassMsHTML;
+end;
+
+procedure THtmlObj.EmbeddedOnDownloadComplete(Sender: TObject);
+begin
+  if (FReadyState <> READYSTATE_COMPLETE) and (Self.Document <> nil) then begin
+    FReadyState := READYSTATE_COMPLETE;
+  end;
+end;
+
+procedure THtmlObj.SetFocusToDoc;
+var
+  OleObj: IOleObject;
+begin
+  if Self.Document = nil then Exit;
+  {$IFDEF VER120}
+  OleObj := Self.Application_ as IOleObject;
+  {$ELSE}
+  OleObj := Self.Application as IOleObject;
+  {$ENDIF}
+  if OleObj <> nil then begin
+    OleObj.DoVerb(OLEIVERB_UIACTIVATE, nil, Self as IOleClientSite, 0, Handle, GetClientRect);
+  end;
+end;
+
+procedure THtmlObj.ShowCaret;
+begin
+  if FCaret <> nil then begin
+    FCaret.Show(0);
+  end;
+end;
+
+procedure THtmlObj.ScrollDoc(Pos: Integer);
+begin
+  if (Self.Document <> nil) and (Pos > 0) then begin
+    (DOC.Body as IHTMLElement2).ScrollTop := Pos;
+  end;
+end;
+
+procedure THtmlObj.PrintDocument(var withUI: OleVariant);
+begin
+  FPrintFinished := False;
+  if withUI
+    then DoCommand(IDM_PRINT, OLECMDEXECOPT_PROMPTUSER)
+    else DoCommand(IDM_PRINT, OLECMDEXECOPT_DONTPROMPTUSER);
+end;
+
+//-------- End From EmbeddedED.
 
 procedure THtmlObj.HandleLocalTimerAction(Sender : TObject);
 begin
@@ -507,7 +854,7 @@ begin
 end;
 
 function THtmlObj.GetEditableState : boolean;
-var mode : string;
+(* mode : string; *)
 begin
   {
   mode := Doc.designMode;
@@ -1028,7 +1375,7 @@ end;
 
 procedure THtmlObj.SetSelectionByRange(ARange : IHtmlTxtRange);
 //kt added 4/8/21
-var SelRange : IHtmlTxtRange;
+(* SelRange : IHtmlTxtRange; *)
 begin
   //SelRange := GetTextRange;
   //SelRange.setEndPoint('StartToStart',ARange);
@@ -1273,7 +1620,8 @@ var
   Sel: IHTMLSelectionObject;
   Disp: IDispatch;
   Range: IHTMLTxtRange;
-  ParentEl, TD: IHTMLElement;
+  var
+  (* ParentEl, TD: IHTMLElement; *)
   Html: WideString;
 begin
   Result := False;
@@ -1336,10 +1684,13 @@ end;
 
 procedure THtmlObj.InsertTextAtCaret(Text : AnsiString);
 //kt added.  Note: inserts external format (not HTML markup)
-var P : PWideChar;
+var WText : WideString;
+    P : PWord;
 begin
-  P := StringToOleStr(Text);
-  FCaret.InsertText(P,Length(Text))
+  WText := WideString(Text);
+  if WText = '' then exit;
+  P := @WText[1];
+  FCaret.InsertText(P^, Length(WText))
 end;
 
 function THtmlObj.GetCaretLocation() : TPoint;
@@ -1371,7 +1722,9 @@ function THtmlObj.Find(Text : string; Flags : THTMLSearchFlags = [hsPartial]; Mo
 //kt added 6/16
 //From here: https://social.msdn.microsoft.com/Forums/vstudio/en-US/308fa3dc-3bbe-4ff0-9d5d-51cd28e5868d/webbrowser-2005-documentselection?forum=csharpgeneral
 var  Sel : IHTMLSelectionObject;
-     SelP1, SelP2, SelP3 : integer;
+     SelP1, SelP3: integer;
+     var
+     (* SelP2: integer; *)
      TextRange : IHTMLTxtRange;
      AFlag : word;
 begin
@@ -1399,9 +1752,9 @@ end;
 
 function THtmlObj.FindFirst(Text : string; Flags : THTMLSearchFlags = [hsPartial]) : boolean;
 //kt added 6/16
-var  Sel : IHTMLSelectionObject;
-     TextRange : IHTMLTxtRange;
-     AFlag : word;
+(* Sel : IHTMLSelectionObject; *)
+     (* TextRange : IHTMLTxtRange; *)
+     (* AFlag : word; *)
 begin
   Result := Find(Text, Flags, fmFirst);
 end;
@@ -1906,7 +2259,7 @@ end;
 procedure THtmlObj.HandleGetByClassCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
 begin
   //see if element has class matching MSG, if so, add to OutList.
-  if ClassesNameContainsClass(Elem.className, Msg) then begin
+  if ClassesNameContainsClass(HTMLElement_GetClassName(Elem), Msg) then begin
     TInterfaceList(Obj).Add(Elem);
   end;
 end;
@@ -1914,7 +2267,7 @@ end;
 procedure THtmlObj.HandleGetOneByClassCallback (Elem : IHTMLElement; Msg : string; Obj :TObject; var Stop : boolean);
 begin
   //see if element has class matching MSG, if so, add to OutList.
-  if ClassesNameContainsClass(Elem.className, Msg) then begin
+  if ClassesNameContainsClass(HTMLElement_GetClassName(Elem), Msg) then begin
     TInterfaceList(Obj).Add(Elem);
     Stop := true; //this will cause search to stop after first match found.
   end;
@@ -2400,8 +2753,11 @@ procedure THtmlObj.AddStylesToExistingStyleSheet(StyleSheet: IHTMLStyleSheet; Se
 //  The first SL will contain the selector text
 //  the second SL will contain all the CSS in one line (divided by ";"'s)
 var
-  SLIdx, RuleIdx, p: integer;
-  SelectorText, CSSText, OneCSSEntry : string;
+  SLIdx, RuleIdx: integer;
+  var
+  (* p: integer; *)
+  SelectorText, CSSText: string;
+  (* OneCSSEntry: string; *)
 begin
   if not assigned(StyleSheet) then begin
     raise Exception.Create('Invalid StyleSheet');
@@ -2673,8 +3029,8 @@ end;
 
 procedure THtmlObj.GetDocScriptSummary(OutSL : TStrings);
 var SL : TStringList;
-    s : string;
-    i : integer;
+    (* s : string; *)
+    (* i : integer; *)
 begin
   SL := TStringList.Create;
   try
@@ -2790,13 +3146,13 @@ begin
 end;
 
 function HTMLElement_HasClassName(Elem : IHTMLElement; AClassName : string) : boolean;
-// use Elem.className
+// use className attribute
 var Str : string;
     p : integer;
     SL : TStringList;
 begin
   Result := false;
-  Str := Elem.className;
+  Str := HTMLElement_GetClassName(Elem);
   p := Pos(AClassName, Str);
   if p = 0 then exit;
   Result := true;
@@ -2812,12 +3168,18 @@ begin
   end;
 end;
 
+function HTMLElement_GetClassName(Elem : IHTMLElement) : string;
+begin
+  Result := VarToStr(Elem.getAttribute('className', 0));
+end;
+
+
 procedure HTMLElement_EnsureHasClassName(Elem : IHTMLElement; AClassName : string);
 var Str : string;
-    i, p : integer;
+    i : integer;
     SL : TStringList;
 begin
-  Str := Elem.className;
+  Str := HTMLElement_GetClassName(Elem);
   SL := TStringList.Create;
   try
     if Pos(' ', Str) > 0 then begin
@@ -2833,19 +3195,19 @@ begin
       if Str <> '' then Str := Str + ' ';
       Str := Str + SL[i];
     end;
-    Elem.className := Str;
+    Elem.setAttribute('className', Str, 0);
   finally
     SL.Free;
   end;
 end;
 
 procedure HTMLElement_RemoveClassName(Elem : IHTMLElement; AClassName : string);
-// use Elem.className
+// use className attribute
 var Str : string;
     i, p : integer;
     SL : TStringList;
 begin
-  Str := Elem.className;
+  Str := HTMLElement_GetClassName(Elem);
   p := Pos(AClassName, Str);
   if p = 0 then exit;
   SL := TStringList.Create;
@@ -2859,7 +3221,7 @@ begin
       if Str <> '' then Str := Str + ' ';
       Str := Str + SL[i];
     end;
-    Elem.className := Str;
+    Elem.setAttribute('className', Str, 0);
   finally
     SL.Free;
   end;

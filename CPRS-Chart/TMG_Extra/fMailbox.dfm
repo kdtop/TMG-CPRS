@@ -5,11 +5,9 @@ inherited frmMailbox: TfrmMailbox
   ClientHeight = 360
   ClientWidth = 743
   Font.Name = 'Tahoma'
-  OldCreateOrder = False
   OnShow = FormShow
-  ExplicitWidth = 751
-  ExplicitHeight = 394
-  PixelsPerInch = 96
+  ExplicitWidth = 759
+  ExplicitHeight = 399
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 265
@@ -57,8 +55,6 @@ inherited frmMailbox: TfrmMailbox
       Height = 33
       Anchors = [akLeft, akBottom]
       Caption = 'zoom IN'
-      TabOrder = 0
-      OnClick = btnMailZoomInClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000110B0000110B00000000000000000000FF00FFFF00FF
@@ -116,6 +112,8 @@ inherited frmMailbox: TfrmMailbox
         E9CCA4996964996964FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF99696499
         6964996964996964996964FF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 0
+      OnClick = btnMailZoomInClick
     end
     object btnMailZoomOut: TBitBtn
       Left = 89
@@ -124,8 +122,6 @@ inherited frmMailbox: TfrmMailbox
       Height = 33
       Anchors = [akLeft, akBottom]
       Caption = 'zoom OUT'
-      TabOrder = 1
-      OnClick = btnMailZoomOutClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000110B0000110B00000000000000000000FF00FFFF00FF
@@ -183,6 +179,8 @@ inherited frmMailbox: TfrmMailbox
         E9CCA4996964996964FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF99696499
         6964996964996964996964FF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 1
+      OnClick = btnMailZoomOutClick
     end
     object btnMailImport: TBitBtn
       Left = 314
@@ -191,8 +189,6 @@ inherited frmMailbox: TfrmMailbox
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = '&To Import'
-      TabOrder = 2
-      OnClick = btnMailImportClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000130B0000130B00000000000000000000FF00FFFF00FF
@@ -250,6 +246,8 @@ inherited frmMailbox: TfrmMailbox
         8686863E38386E6C6C8787874844446E6C6CFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FF7B7B7BAAAAAAFF00FF9C9C9CADADADFF00FF7E7E7EA7A7A7FF00FF7B
         7B7BA4A4A4FF00FF7A7A7AA5A5A5FF00FF7B7B7BAAAAAAFF00FF}
+      TabOrder = 2
+      OnClick = btnMailImportClick
     end
     object btnMailPrint: TBitBtn
       Left = 409
@@ -258,8 +256,6 @@ inherited frmMailbox: TfrmMailbox
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = '&Print'
-      TabOrder = 3
-      OnClick = btnMailPrintClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000120B0000120B00000000000000000000FF00FFFF00FF
@@ -317,6 +313,8 @@ inherited frmMailbox: TfrmMailbox
         FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFCC9A99CC9A99CC9A99CC9A99CC9A99FF00FFFF00FFFF00FFFF
         00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 3
+      OnClick = btnMailPrintClick
     end
     object btnMailDelete: TBitBtn
       Left = 504
@@ -325,8 +323,6 @@ inherited frmMailbox: TfrmMailbox
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = '&Delete'
-      TabOrder = 4
-      OnClick = btnMailDeleteClick
       Glyph.Data = {
         DE020000424DDE020000000000009E0000002800000018000000180000000100
         08000000000040020000120B0000120B00001A00000000000000021DD400021D
@@ -352,6 +348,8 @@ inherited frmMailbox: TfrmMailbox
         1818181818181818181818181818181818181818181818181818181818181818
         1818181818181818181818181818181818181818181818181818181818181818
         1818}
+      TabOrder = 4
+      OnClick = btnMailDeleteClick
     end
     object btnToMailbox: TBitBtn
       Left = 219
@@ -361,8 +359,6 @@ inherited frmMailbox: TfrmMailbox
       Anchors = [akRight, akBottom]
       Caption = 'To &Mailbox'
       Enabled = False
-      TabOrder = 5
-      Visible = False
       Glyph.Data = {
         F6000000424DF600000000000000760000002800000010000000100000000100
         0400000000008000000000000000000000001000000000000000000000000000
@@ -372,6 +368,8 @@ inherited frmMailbox: TfrmMailbox
         00F00BFBFBFBFB0FFFF00FBFBFBFBF0000F00000000000FFFFF050F0F0F0F000
         00F05700F0F0FFFFFFF05550F0F0F00F00F05550F0F0FFFFFFF05550F0F0FFFF
         FFF05550F0F0000000005550F000000000555550000000005555}
+      TabOrder = 5
+      Visible = False
     end
     object btnMailRotate: TBitBtn
       Left = 599
@@ -380,8 +378,6 @@ inherited frmMailbox: TfrmMailbox
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = 'Rotate'
-      TabOrder = 6
-      OnClick = btnMailRotateClick
       Glyph.Data = {
         36050000424D3605000000000000360400002800000010000000100000000100
         08000000000000010000C30E0000C30E00000001000000010000000000000000
@@ -425,6 +421,8 @@ inherited frmMailbox: TfrmMailbox
         0500000003030005050505050505050505050505000005050505050505050505
         0505050500050505050505050505050505050505050505050505050505050505
         0505050505050505050505050505050505050505050505050505}
+      TabOrder = 6
+      OnClick = btnMailRotateClick
     end
   end
   object pnlMailLeft: TPanel [3]

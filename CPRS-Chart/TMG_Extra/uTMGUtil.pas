@@ -335,8 +335,9 @@ implementation
 
   procedure FillPGBars(pnl:TPanel;PtArray:TStringList);
   var int:integer;
-      component : TComponent;
-      acct:string;
+      (* component : TComponent; *)
+      var
+      (* acct:string; *)
       value:integer;
       bgColor:TColor;
   begin

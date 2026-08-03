@@ -127,8 +127,8 @@ uses
   end;  
 
   procedure TPostForm.PostBtnClick(Sender: TObject);
-  var  RPCResult : string;
-       i : integer;
+  (* RPCResult : string; *)
+       (* i : integer; *)
   begin
     if rTMGRPCs.PostChanges(FChanges) = true then begin
       PostResults.Assign(RPCBrokerV.Results);

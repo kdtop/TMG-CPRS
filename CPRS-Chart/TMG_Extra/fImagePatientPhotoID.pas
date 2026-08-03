@@ -188,7 +188,7 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
   end;
 
   procedure TfrmPatientPhotoID.ShowPhotoSet(InfoRec : TPatientIDPhotoInfoRec);
-  var HTMLText : string;
+  (* HTMLText : string; *)
   begin
     EnsureDownloaded(InfoRec,dlBoth);
     if FileExists(InfoRec.LocalFPath) then begin
@@ -256,7 +256,8 @@ procedure EnsureDownloaded(InfoRec : TPatientIDPhotoInfoRec; DLType : TDownloadT
   end;
 
   procedure TfrmPatientPhotoID.SetPreviewDisplay(RelativeTo:TControl;Location:TLocationType);
-  var SetTop,SetLeft:integer;
+  var
+  (* SetTop,SetLeft:integer; *)
       lPoint:TPoint;
   begin
     {WebBrowser.Navigate(frmImages.NullImageName);  //Make sure previous image isn't shown  6/7/22

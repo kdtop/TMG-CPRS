@@ -211,7 +211,7 @@ procedure TfrmPtDemo.Initialize();
 //kt added 9/4/15 to separate the creating of the form from the loading of text.
 //  Moved code original found in the OnCreate function here...
 var
-  i, MaxWidth, AWidth, AHeight: Integer;
+  (* i, MaxWidth, AWidth, AHeight: Integer; *)
   Rect: TRect;
   DemographicsSL: TStringList;  //added to assign richtext  elh 4/23/14
 begin
@@ -232,7 +232,7 @@ procedure TfrmPtDemo.SetViewModeAndLines(Mode : TDGViewModes; Lines : TStringLis
 //kt addded function 9/4/15, moving prior code here and modifying.
 var
   i, MaxWidth, AWidth, AHeight: Integer;
-  Rect: TRect;
+  (* Rect: TRect; *)
 begin
   FViewMode := Mode;
   if Mode = vmHTML then begin

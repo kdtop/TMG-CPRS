@@ -629,7 +629,7 @@ end;
 function TfrmAnticoagulate.Initialize(ADFN : string = '') : boolean;
 //Results: TRUE if OK, or FALSE if problem with connection.
 var
-  i : integer;
+  (* i : integer; *)
   DFN :  string;
 
 begin

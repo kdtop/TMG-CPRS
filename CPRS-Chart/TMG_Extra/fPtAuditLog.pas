@@ -146,7 +146,9 @@ end;
 
 procedure TfrmPtAuditLog.btnPrintClick(Sender: TObject);
 var  printDialog: TPrintDialog;
-     i,page,startPage,endPage : integer;
+     i, page: integer;
+     var
+     (* startPage, endPage: integer; *)
      xpos,ypos: integer;
 begin
      printDialog := TPrintDialog.Create(self);

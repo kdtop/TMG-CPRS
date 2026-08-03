@@ -700,7 +700,9 @@ const
   var
     i, Added : integer;
     slTags, TagsShown : TStringList;
-    ATag, s, ProbName, ICD, temp: string;
+    ATag, ProbName, ICD, temp: string;
+    var
+    (* s: string; *)
     ADD_COMPONENT_TAG : string;
 
   begin

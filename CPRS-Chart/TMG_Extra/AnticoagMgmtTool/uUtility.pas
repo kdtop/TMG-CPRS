@@ -73,8 +73,8 @@ end;
 
 
 function TMGTimeToStr(ATime : TTime) : string;
-var
-  FormattedTime : string;
+//var
+  (* FormattedTime : string; *)
 begin
  //LongTimeFormat := 'h:n';
  //DateTimeToString(formattedDate, 'tt', ATime);

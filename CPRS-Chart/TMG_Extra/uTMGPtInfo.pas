@@ -325,7 +325,9 @@ procedure TPatientInfo.RemoveUnchanged(OldInfo : TPatientInfo);
     end;
   end;
 
-  var i,j,AddCt : integer;  
+  var i, AddCt: integer;  
+  var
+  (* j: integer; *)
       pAlias, tempPAlias : tAlias;
  
 begin

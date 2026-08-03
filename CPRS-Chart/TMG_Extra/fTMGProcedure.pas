@@ -756,7 +756,9 @@ end;
 
 procedure TfrmTMGProcedures.lbModsClickCheck(Sender: TObject; Index: Integer);
 var
-  i, idx: integer;
+  i: integer;
+  var
+  (* idx: integer; *)
   PCEObj: TPCEProc;
   ModIEN: string;
   DoChk, Add: boolean;

@@ -905,7 +905,7 @@ var
   IEN, DataStr, ItemsStr, DxLstStr  : string;
   DialogItem                        : TDialogItem;
   AllProcsDataObj, DataObj, TempObj : TTMGData;
-  TempSL                            : TStringList;
+  (* TempSL                            : TStringList; *)
 
 begin //TfrmODTMG1.InitData
   FObjToStoreDxLinks := nil;
@@ -1053,7 +1053,9 @@ end;
 procedure TfrmODTMG1.LoadUserDxList(DxInfoList : TStringList);
 //DxInfoList.Strings[x] should hold 1 selected Dx, in format: STD_ICD_DATA_FORMAT = 'ICDCode^ProblemText^ICDCode2^CodeStatus^ProblemIEN^ICDCodeSys';
 var i : integer;
-    S,Name,ICD : string;
+    Name, ICD: string;
+    var
+    (* S: string; *)
     SortSL : TStringList;
     DataStr : TDataStr;
     DataObj : TTMGData;
@@ -1189,7 +1191,8 @@ procedure TfrmODTMG1.Responses2Data();
 var i : integer;
     IValue : string;
     DataObj : TTMGData;
-    rg      : TRadioGroup;
+    var
+    (* rg      : TRadioGroup; *)
     AResponse: TResponse;
 
 begin
@@ -1484,7 +1487,9 @@ procedure TfrmODTMG1.HandleCheckListBoxChange(Sender : TObject);  //Called by a 
 //GUI2Data
 var ChangedDataObjs : TTMGDataList;
     CkLb            : TCheckListBox;
-    i, num          : integer;
+    i: integer;
+    var
+    (* num: integer; *)
     DataObj         : TTMGData;
     ShowSpecificDx  : Boolean;
 begin
@@ -2480,7 +2485,7 @@ end;
 
 procedure TfrmODTMG1.btnSrchICDClick(Sender: TObject);
 var
-  EntryType : tDxNodeType;
+  (* EntryType : tDxNodeType; *)
   ItemDataStr : TDataStr;
   frmICDPicker : TfrmEncounterICDPicker;
   ModalResult : integer;

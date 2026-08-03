@@ -10,10 +10,8 @@ object frmConsultants: TfrmConsultants
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 0
@@ -51,6 +49,7 @@ object frmConsultants: TfrmConsultants
       ShowHint = True
       TabOrder = 0
       OnClick = lstSpecialtiesClick
+      Caption = ''
       ItemTipColor = clWindow
       LongList = False
       LookupPiece = 1
@@ -67,6 +66,7 @@ object frmConsultants: TfrmConsultants
       ShowHint = True
       TabOrder = 1
       OnClick = lstOfficesClick
+      Caption = ''
       ItemTipColor = clWindow
       LongList = False
       Pieces = '2'
@@ -109,6 +109,7 @@ object frmConsultants: TfrmConsultants
         ShowHint = True
         TabOrder = 0
         OnClick = lstDoctorsClick
+        Caption = ''
         ItemTipColor = clWindow
         LongList = False
         Pieces = '2'

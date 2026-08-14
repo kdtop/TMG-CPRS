@@ -3,6 +3,7 @@ unit fODChild;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, fAutoSZ, ORFn, VA508AccessibilityManager;
 

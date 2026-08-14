@@ -36,6 +36,8 @@ unit uTMGGrid;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, StrUtils,
   ORNet, ORFn, ComCtrls, Grids, ORCtrls, ExtCtrls, Buttons,

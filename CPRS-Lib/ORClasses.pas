@@ -3,6 +3,7 @@ unit ORClasses;
 interface
 
 uses
+  System.Types,
   SysUtils, Classes, Controls, ComCtrls, ExtCtrls, StdCtrls, Forms, ORFn;
 
 type

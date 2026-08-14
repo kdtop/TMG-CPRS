@@ -3,6 +3,8 @@ unit fGraphProfiles;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, StdCtrls, ExtCtrls, CheckLst, ORCtrls, ORFn, uGraphs, rCore, uCore,
   fBase508Form, VA508AccessibilityManager;

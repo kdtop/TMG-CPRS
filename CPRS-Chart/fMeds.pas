@@ -5,6 +5,8 @@
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fPage, StdCtrls, Menus, ORCtrls, ORFn, ExtCtrls, ComCtrls, rOrders, uConst,
   rMeds, ORNet, fBase508Form, VA508AccessibilityManager;

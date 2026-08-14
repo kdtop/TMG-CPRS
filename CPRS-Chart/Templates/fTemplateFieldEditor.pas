@@ -3,6 +3,8 @@ unit fTemplateFieldEditor;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ORCtrls, StdCtrls, ExtCtrls, Menus, ComCtrls, uTemplateFields, ORFn,
   ToolWin, MenuBar, ORClasses, ORDtTm, fBase508Form, VA508AccessibilityManager;

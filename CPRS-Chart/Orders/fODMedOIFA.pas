@@ -3,6 +3,8 @@ unit fODMedOIFA;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ExtCtrls, fAutoSz, fBase508Form, VA508AccessibilityManager;
 

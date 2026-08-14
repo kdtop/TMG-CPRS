@@ -3,6 +3,8 @@ unit fCosign;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ORCtrls, ExtCtrls, ORNet, ORFn, Trpcb,
   uTypesACM, StrUtils,

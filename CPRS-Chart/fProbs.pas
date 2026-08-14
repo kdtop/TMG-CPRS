@@ -41,6 +41,8 @@ interface
 {$DEFINE VEVA_USE_CP}
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fHSplit, StdCtrls, ExtCtrls, Menus, ORCtrls, Buttons, uProbs,
   Grids, Vawrgrid, ORfn, uCore, fProbEdt, uConst, ComCtrls,
@@ -1486,7 +1488,8 @@ begin
   if ActionAfterEditClose = '' then exit;
   repeat
     ComboStr := Piece(ActionAfterEditClose,';',1);
-    ActionAfterEditClose := MidStr(ActionAfterEditClose,Length(ComboStr)+2,Length(ActionAfterEditClose));
+    //kt //codex original --> ActionAfterEditClose := MidStr(ActionAfterEditClose,Length(ComboStr)+2,Length(ActionAfterEditClose));
+    ActionAfterEditClose := Copy(ActionAfterEditClose,Length(ComboStr)+2,Length(ActionAfterEditClose)); //kt //codex 8/3/26
     cmd := piece(ComboStr,'^',1);
     Val := piece(ComboStr,'^',2);
     if cmd = 'CLICK' then begin

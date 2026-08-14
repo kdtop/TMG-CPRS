@@ -4,6 +4,8 @@ unit fFnWizard;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons, StrUtils,
   fTemplateEditor, dShared, fInsertFldEtc,
@@ -403,7 +405,8 @@ begin
   ClearEditsRec(ARec);
 
   AName := OneTabSheet.Caption;
-  AName := MidStr(AName, 1, Length(AName)-2);
+  //kt //codex original --> AName := MidStr(AName, 1, Length(AName)-2);
+  AName := Copy(AName, 1, Length(AName)-2); //kt //codex 8/3/26
   ARec.Prefix := AName;
   for j := 0 to OneTabSheet.ControlCount - 1 do begin
     OneControl := OneTabSheet.Controls[j];
@@ -471,7 +474,8 @@ begin
   OneTabSheet := GetPageHoldingControl(AButton);
   if assigned(OneTabSheet) then begin
     Prefix := OneTabSheet.Caption;
-    Prefix := MidStr(Prefix, 1, Length(Prefix)-2);
+    //kt //codex original --> Prefix := MidStr(Prefix, 1, Length(Prefix)-2);
+    Prefix := Copy(Prefix, 1, Length(Prefix)-2); //kt //codex 8/3/26
     for j := 0 to OneTabSheet.ControlCount - 1 do begin
       OneControl := OneTabSheet.Controls[j];
       if not (OneControl is TStringGrid) then continue;
@@ -930,7 +934,8 @@ var Prefix : string;
 begin
   Prefix := TStringGrid(Sender).Parent.Name;
   //Prefix := MidStr(Prefix, 1, Length(Prefix)-2);  //'Name()' --> 'Name'
-  Prefix := MidStr(Prefix, 3, Length(Prefix));  //'Name()' --> 'Name'
+  //kt //codex original --> Prefix := MidStr(Prefix, 3, Length(Prefix));  //'Name()' --> 'Name'
+  Prefix := Copy(Prefix, 3, Length(Prefix));  //'Name()' --> 'Name' //kt //codex 8/3/26
   HandleAGridChange(Prefix, TStringGrid(Sender));
 end;
 

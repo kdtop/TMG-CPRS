@@ -36,6 +36,8 @@ unit fTemplateSearch;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   fDrawers,fNotes,fReminderDialog,uReminders,uTMGOptions,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons, TMGHTML2;

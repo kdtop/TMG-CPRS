@@ -39,6 +39,7 @@ unit fODBase;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, fAutoSz, StdCtrls,
   ORCtrls, ORFn, uConst, rOrders, rODBase, uCore, ComCtrls, ExtCtrls, Menus, Mask,
   uHTMLTools,Clipbrd,  //elh 2/12/18

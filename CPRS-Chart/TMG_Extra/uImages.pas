@@ -36,6 +36,8 @@ unit uImages;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, StdCtrls, ExtCtrls, ComCtrls, Dialogs,
   Forms, AxCtrls, Graphics, Controls, StrUtils,
   TMGHTML2, rFileTransferU, fImageTransferProgress,
@@ -348,7 +350,8 @@ begin
         else continue;   //ignore rest of header (record #0)
       end;
       TIUIEN := piece(s, '^', 1);
-      s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
+      //kt //codex original --> s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
+      s := Copy(s, length(TIUIEN)+2, length(s));  //trim off first piece. //kt //codex 8/3/26
       Rec := ParseOneImageListLine(s);
       if Rec = nil then continue;
       if IndexOfIEN(AImageInfoList, Rec.IEN) > -1 then begin
@@ -366,7 +369,8 @@ begin
         else continue;   //ignore rest of header (record #0)
       end;
       TIUIEN := piece(s, '^', 1);
-      s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
+      //kt //codex original --> s := MidStr(s, length(TIUIEN)+2, length(s));  //trim off first piece.
+      s := Copy(s, length(TIUIEN)+2, length(s));  //trim off first piece. //kt //codex 8/3/26
       Rec := ParseOneImageListLine(s);
       if Rec = nil then continue;
       if IndexOfIEN(AImageInfoList, Rec.IEN) > -1 then begin
@@ -493,7 +497,8 @@ procedure AddNoteImagesToList(ImagesInHTMLNote: TStringList; AImageInfoList: TLi
     result :='/'+Midstr(FileName,1,4);
     i := 5;
     repeat
-      frag := MidStr(FileName,i,2);
+      //kt //codex original --> frag := MidStr(FileName,i,2);
+      frag := Copy(FileName,i,2); //kt //codex 8/3/26
       result := result + '\' + frag;
       inc(i,2);
     until (i >= HashLen);
@@ -618,7 +623,8 @@ procedure DeleteImage(var DeleteSts: TActionRec;
        NoteText := HtmlEditor.HTMLText;
        Beginning := PosEx('<IMG',NoteText, Ending);
        Ending :=  PosEx('>', NoteText, Beginning) + 1;
-       tempString := MidStr(NoteText, Beginning, Ending-Beginning);
+       //kt //codex original --> tempString := MidStr(NoteText, Beginning, Ending-Beginning);
+       tempString := Copy(NoteText, Beginning, Ending-Beginning); //kt //codex 8/3/26
        if pos(FileName,tempString) > 0 then boolFound := True;
      end;
      if boolFound = false then  begin
@@ -629,7 +635,8 @@ procedure DeleteImage(var DeleteSts: TActionRec;
          NoteText := HtmlEditor.HTMLText;
          Beginning := PosEx('<embed',NoteText, Ending);
          Ending :=  PosEx('>', NoteText, Beginning) + 1;
-         tempString := MidStr(NoteText, Beginning, Ending-Beginning);
+         //kt //codex original --> tempString := MidStr(NoteText, Beginning, Ending-Beginning);
+         tempString := Copy(NoteText, Beginning, Ending-Beginning); //kt //codex 8/3/26
          if pos(FileName,tempString) > 0 then boolFound := True;
        end;
      end;

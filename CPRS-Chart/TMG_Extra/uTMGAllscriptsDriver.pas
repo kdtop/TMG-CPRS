@@ -3,6 +3,8 @@ unit uTMGAllscriptsDriver;
 interface
 
   uses
+  System.UITypes,
+
     Forms, SysUtils,Variants, ExtCtrls, Classes, StrUtils,
     uTMGWebDriver, uCore, ORFn,
     TMGHTML2, dialogs, SHDocVw, MSHTMLEvents, MSHTML;

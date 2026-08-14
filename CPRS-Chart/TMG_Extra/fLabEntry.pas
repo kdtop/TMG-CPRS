@@ -36,6 +36,8 @@ unit fLabEntry;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ORCtrls, ExtCtrls, StdCtrls, Buttons, Grids, rCore, ORNet, ORFn,
   StrUtils, ComCtrls;

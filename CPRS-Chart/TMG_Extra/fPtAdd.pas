@@ -37,6 +37,8 @@ unit fPtAdd;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Trpcb, mfunstr, ORNet, uCore, ExtCtrls, StrUtils,
   Buttons, ComCtrls;
@@ -583,9 +585,12 @@ end;
 function TfrmPtAdd.FrmtSSNum(SSNumStr : string) : string;
 var partA,partB,partC : string;
 begin
-  partA := MidStr(SSNumStr,1,3);
-  partB := MidStr(SSNumStr,4,2);
-  partC := MidStr(SSNumStr,6,5);
+  //kt //codex original --> partA := MidStr(SSNumStr,1,3);
+  partA := Copy(SSNumStr,1,3); //kt //codex 8/3/26
+  //kt //codex original --> partB := MidStr(SSNumStr,4,2);
+  partB := Copy(SSNumStr,4,2); //kt //codex 8/3/26
+  //kt //codex original --> partC := MidStr(SSNumStr,6,5);
+  partC := Copy(SSNumStr,6,5); //kt //codex 8/3/26
   Result := partA;
   if length(partA)=3 then begin
     Result := Result + '-' + partB;  

@@ -23,6 +23,8 @@ unit Loginfrm;
 interface          
 
 uses
+  System.UITypes,
+
   SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, StdCtrls, XWBut1, ExtCtrls, Buttons,
   Hash, MFunStr, Trpcb, SgnonCnf, frmSignonMessage, ShellApi,

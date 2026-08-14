@@ -37,6 +37,8 @@ unit fTemplateDialog;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   TMGHTML2, uHTMLDlg, uTemplateFields, //kt 1/16
   StdCtrls, ExtCtrls, ORCtrls, ORFn, AppEvnts, uTemplates, fBase508Form, uConst,

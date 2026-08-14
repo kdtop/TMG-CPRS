@@ -54,7 +54,8 @@ function TMGReplaceText(const Str : string; StartP, EndP : integer; NewFrag : st
 var StrA, StrB : string;
 begin
   StrA := LeftStr(Str, StartP-1);
-  StrB := MidStr(Str, EndP + 1, Length(Str));
+  //kt //codex original --> StrB := MidStr(Str, EndP + 1, Length(Str));
+  StrB := Copy(Str, EndP + 1, Length(Str)); //kt //codex 8/3/26
   Result := StrA + NewFrag + StrB;
 end;
 
@@ -84,7 +85,8 @@ begin
     Result := BOOL_TAGS[i];
   end;
   if FoundStartPos <> MAX then begin
-    InterimStr := MidStr(Str, StartPos, FoundStartPos - StartPos);
+    //kt //codex original --> InterimStr := MidStr(Str, StartPos, FoundStartPos - StartPos);
+    InterimStr := Copy(Str, StartPos, FoundStartPos - StartPos); //kt //codex 8/3/26
     AfterTokenStart := FoundStartPos + Length(Result);
   end else begin
     FoundStartPos := 0;
@@ -119,7 +121,8 @@ begin
   if P1 > 0 then begin
     Result := P1;
     AfterTokenStart := P1 + Length(NextToken);
-    InterimStr := MidStr(Str, StartPos, P1-StartPos);
+    //kt //codex original --> InterimStr := MidStr(Str, StartPos, P1-StartPos);
+    InterimStr := Copy(Str, StartPos, P1-StartPos); //kt //codex 8/3/26
   end;
 end;
 
@@ -170,9 +173,12 @@ begin
     if P1 = 0 then break;
     P2 := PosEx('%', Str, P1+1); //look for closing %
     if P2 = 0 then break;
-    StrA := MidStr(Str, 1, P1-1);
-    StrB := MidStr(Str, P1, P2-P1+1);
-    StrC := MidStr(Str, P2+1, Length(Str));
+    //kt //codex original --> StrA := MidStr(Str, 1, P1-1);
+    StrA := Copy(Str, 1, P1-1); //kt //codex 8/3/26
+    //kt //codex original --> StrB := MidStr(Str, P1, P2-P1+1);
+    StrB := Copy(Str, P1, P2-P1+1); //kt //codex 8/3/26
+    //kt //codex original --> StrC := MidStr(Str, P2+1, Length(Str));
+    StrC := Copy(Str, P2+1, Length(Str)); //kt //codex 8/3/26
     if (Pos(' ', StrB) = 0) then begin  //Screen out widely spaced %'s by checking for spaces in 'field name'
       Result := Strb;
       break;
@@ -206,7 +212,8 @@ begin
     exit;
   end;
   PreString := InterimStr;
-  Str := MidStr(Str, P1, Length(Str));  //string should now start with IF_TAG
+  //kt //codex original --> Str := MidStr(Str, P1, Length(Str));  //string should now start with IF_TAG
+  Str := Copy(Str, P1, Length(Str));  //string should now start with IF_TAG //kt //codex 8/3/26
 
   NextToken := NextBlockOrBoolTag(Str, Length(NextToken)+1, P1, P2, InterimStr);
   if NextToken <> BEGIN_TAG then begin
@@ -237,7 +244,8 @@ begin
   TrueText := InterimStr;
   if not TestResult then TrueText := '';  //just remove truth text, if logic test was false.
   Result := TrueText;
-  PostString := MidStr(Str, ExciseEndP, Length(Str));
+  //kt //codex original --> PostString := MidStr(Str, ExciseEndP, Length(Str));
+  PostString := Copy(Str, ExciseEndP, Length(Str)); //kt //codex 8/3/26
 
   //At this point, in Result, the IF <test> BEGIN <truth_text> END block should be replaced
   //  with either '', or the truth_text
@@ -253,7 +261,8 @@ begin
     exit;
   end;
 
-  Str := MidStr(Str, P2, Length(Str)); //Trim off ELSE_TAG
+  //kt //codex original --> Str := MidStr(Str, P2, Length(Str)); //Trim off ELSE_TAG
+  Str := Copy(Str, P2, Length(Str)); //Trim off ELSE_TAG //kt //codex 8/3/26
   NextToken := NextBlockOrBoolTag(Str, 1, P1, P2, InterimStr);
   InterimStr := TMGTrim(InterimStr);
   if (NextToken <> IF_TAG) and (NextToken <> BEGIN_TAG) then begin

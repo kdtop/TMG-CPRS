@@ -4,6 +4,8 @@ unit fSingleNote;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
   OleCtrls, SHDocVw, MSHTML, ORFn, fLabs, uImages, uReminders,

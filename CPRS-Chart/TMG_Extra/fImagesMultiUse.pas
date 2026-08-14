@@ -36,6 +36,8 @@ unit fImagesMultiUse;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, SHDocVw, ExtCtrls, StdCtrls, Buttons, ImgList,
   fImages, ORNet, uImages,

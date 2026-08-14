@@ -5,6 +5,8 @@ unit fOMNavA;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Buttons, Grids, StdCtrls, ORCtrls, ExtCtrls, uConst, rOrders, uOrders, fFrame, fBase508Form,
   VA508AccessibilityManager;

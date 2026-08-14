@@ -133,7 +133,8 @@ begin
   end;
   PrepRPC('GET SUB RECS LIST', [SubFileNum, ParentIENS, Fields, Identifier]);
   if CallBrokerAndErrorCheck(RPCResult) then begin
-    Map := MidStr(RPCResult, Length('1^Success^')+1, Length(RPCResult));
+    //kt //codex original --> Map := MidStr(RPCResult, Length('1^Success^')+1, Length(RPCResult));
+    Map := Copy(RPCResult, Length('1^Success^')+1, Length(RPCResult)); //kt //codex 8/3/26
     SubRecsList.Assign(RPCBrokerV.Results);
   end;
 end;

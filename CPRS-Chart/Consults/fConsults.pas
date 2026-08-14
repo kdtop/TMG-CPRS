@@ -44,6 +44,9 @@ unit fConsults;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ORDtTm,
   fHSplit, stdCtrls, ExtCtrls, Menus, ComCtrls, ORCtrls, ORFn, uConsults, rOrders, uPCE,
   ORClasses, uConst, fDrawers, rTIU, uTIU, uDocTree, RichEdit, fPrintList,

@@ -35,6 +35,7 @@ unit fBillableItems;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ORNet, Printers, Math, ExtCtrls;
 

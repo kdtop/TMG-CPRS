@@ -3,6 +3,8 @@ unit uDlgComponents;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
   SysUtils, Windows, Messages, Classes, Controls, StdCtrls, ComCtrls, ExtCtrls, uReminders,
   TypInfo, StrUtils, ORCtrls, ORDtTm, Forms, Graphics, Dialogs, RTLConsts, Buttons,
   VA508AccessibilityManager;

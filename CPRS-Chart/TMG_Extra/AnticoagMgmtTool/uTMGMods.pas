@@ -128,9 +128,12 @@ begin
     if P1 = 0 then break;
     P2 := PosEx('%', Str, P1+1); //look for closing %
     if P2 = 0 then break;
-    StrA := MidStr(Str, 1, P1-1);
-    StrB := MidStr(Str, P1, P2-P1+1);
-    StrC := MidStr(Str, P2+1, Length(Str));
+    //kt //codex original --> StrA := MidStr(Str, 1, P1-1);
+    StrA := Copy(Str, 1, P1-1); //kt //codex 8/3/26
+    //kt //codex original --> StrB := MidStr(Str, P1, P2-P1+1);
+    StrB := Copy(Str, P1, P2-P1+1); //kt //codex 8/3/26
+    //kt //codex original --> StrC := MidStr(Str, P2+1, Length(Str));
+    StrC := Copy(Str, P2+1, Length(Str)); //kt //codex 8/3/26
     if (Pos(' ', StrB) = 0) then begin  //Screen out widely spaced %'s by checking for spaces in 'field name'
       FldValue := DataValue(AppState, AFlowsheet, StrB); //Try to convert into data value
       if FldValue <> StrB then begin

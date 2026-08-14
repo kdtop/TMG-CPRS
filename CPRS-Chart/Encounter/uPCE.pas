@@ -37,7 +37,9 @@ unit uPCE;
 
 interface
 
-uses Windows, SysUtils, Classes, ORFn, uConst, ORCtrls, ORClasses,UBAGlobals
+uses
+  System.UITypes,
+ Windows, SysUtils, Classes, ORFn, uConst, ORCtrls, ORClasses,UBAGlobals
      ,Dialogs, StrUtils  //kt;
      ;
 

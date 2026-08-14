@@ -66,6 +66,8 @@ interface
 
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ORCtrls, ORFn, ComCtrls, fBase508Form,
   TMGHTML2, Buttons,    //tmg

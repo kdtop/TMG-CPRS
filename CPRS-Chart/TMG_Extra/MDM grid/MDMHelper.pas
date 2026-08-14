@@ -4,6 +4,8 @@ unit MDMHelper;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   {$IFNDEF STAND_ALONE_APP}
   VAUtils,  ORNet, uCore,  rTemplates,

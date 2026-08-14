@@ -4,6 +4,8 @@ unit fODTMG1;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, fODGen, VA508AccessibilityManager, StdCtrls, ComCtrls, ExtCtrls,
   ORCtrls, CheckLst, Buttons, uCore, ORNet, VAUtils;
@@ -716,7 +718,8 @@ procedure TfrmODTMG1.InitData();
     if DataStr[1] <> '~' then exit;
     SL := TStringList.Create;
     try
-      DataStr := MidStr(DataStr, 2, Length(DataStr));
+      //kt //codex original --> DataStr := MidStr(DataStr, 2, Length(DataStr));
+      DataStr := Copy(DataStr, 2, Length(DataStr)); //kt //codex 8/3/26
       PiecesToList(DataStr,';', SL);
       index := FindPiece(SL , '=', 1, KeyName); //find element containing KeyName
       if index > -1 then begin
@@ -1453,7 +1456,8 @@ begin
   end else begin
     if StartPos > 0 then begin
       PartA := LeftStr(EditCtrl.Text, StartPos-1);
-      PartB := MidStr(EditCtrl.Text, StartPos + Length(Str) + 1, 9999999);
+      //kt //codex original --> PartB := MidStr(EditCtrl.Text, StartPos + Length(Str) + 1, 9999999);
+      PartB := Copy(EditCtrl.Text, StartPos + Length(Str) + 1, 9999999); //kt //codex 8/3/26
       EditCtrl.Text := PartA + PartB;
       Result := true;
     end;

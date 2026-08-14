@@ -3,6 +3,8 @@ unit fTest_RW_HTML;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, uHTMLDlg, ORFn,
   TMGHTML2, StdCtrls, Buttons, ExtCtrls, uHTMLTools

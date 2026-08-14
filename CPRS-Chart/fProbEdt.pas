@@ -37,6 +37,8 @@ unit fProbEdt;
 interface
 
 uses
+  System.UITypes,
+
   SysUtils, windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, Grids,
   ORCtrls, Vawrgrid, uCore, Menus, uConst, fBase508Form,
@@ -1519,7 +1521,8 @@ begin
   s := edTMGFollowup.Text;
   if Trim(s) <> '' then begin
     Num := Piece(s, ' ', 1);
-    UnitName := Uppercase(MidStr(s, Length(Num)+1, Length(s)));
+    //kt //codex original --> UnitName := Uppercase(MidStr(s, Length(Num)+1, Length(s)));
+    UnitName := Uppercase(Copy(s, Length(Num)+1, Length(s))); //kt //codex 8/3/26
     SpaceEntered := (Length(UnitName)>0) and (UnitName[1] = ' ');
     UnitName := Trim(UnitName);
     if (Length(UnitName) > 0) then UnitName := UnitName[1];

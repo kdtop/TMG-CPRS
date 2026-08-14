@@ -3,6 +3,8 @@ unit fLetterWriter;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, fDrawers,
   Dialogs, ExtCtrls, StdCtrls, ORCtrls, Buttons, ORNet, ORFn, StrUtils, uCore, TRPCB, uConst, rTIU, uTIU, ComCtrls,
   fBase508Form, VA508AccessibilityManager;

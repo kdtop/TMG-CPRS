@@ -128,11 +128,14 @@ begin
   Result := false;
   p1 := Pos(OBJ_SHOW_TEXT,Txt);
   while (p1>0) do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + OBJ_SHOW_TEXT_LEN;
     p2 := PosEx(OBJ_SHOW_TEXT_END,Txt,p1);
-    SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
-    ObjStr := MidStr(Txt,p1, (p2-p1));
+    //kt //codex original --> SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
+    SubStrB := Copy(Txt,p2+1,length(Txt)+1); //kt //codex 8/3/26
+    //kt //codex original --> ObjStr := MidStr(Txt,p1, (p2-p1));
+    ObjStr := Copy(Txt,p1, (p2-p1)); //kt //codex 8/3/26
     ObjStr := GetTxtObjects(ObjStr);
     ObjStr := SubstuteIDs(ObjStr,VEFANameToObjID);
     Txt := SubStrA + FLD_OBJ_SIGNATURE + ObjStr + FLD_OBJ_END_TAG + SubStrB;
@@ -158,10 +161,13 @@ begin
       Formula := 'ERROR.  Matching "]" not found after ' + FN_OBJ_TAG + '.';
       Exit;
     end;
-    SubStrA := MidStr(Formula,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Formula,1,p1-1);
+    SubStrA := Copy(Formula,1,p1-1); //kt //codex 8/3/26
     p1 := p1+FN_OBJ_TAG_LEN;
-    TIUObj := Trim(MidStr(Formula, p1, (p2-p1)));
-    SubStrB := MidStr(Formula,p2+1,999);
+    //kt //codex original --> TIUObj := Trim(MidStr(Formula, p1, (p2-p1)));
+    TIUObj := Trim(Copy(Formula, p1, (p2-p1))); //kt //codex 8/3/26
+    //kt //codex original --> SubStrB := MidStr(Formula,p2+1,999);
+    SubStrB := Copy(Formula,p2+1,999); //kt //codex 8/3/26
     OP1 := Pos('{',TIUObj);
     if (OP1 > 0) then begin
       OP2 := CloseCharPos('{','}', TIUObj, OP1+1);
@@ -169,7 +175,8 @@ begin
         Formula := 'ERROR.  Matching ")" not found after "(".';
         Exit;
       end;
-      Argument := MidStr(TIUObj,OP1+1,(OP2-(OP1+1)));
+      //kt //codex original --> Argument := MidStr(TIUObj,OP1+1,(OP2-(OP1+1)));
+      Argument := Copy(TIUObj,OP1+1,(OP2-(OP1+1))); //kt //codex 8/3/26
       if Pos(FN_OBJ_TAG,Argument)>0 then begin
         EvalTIUObjects(Argument)
       end;
@@ -181,7 +188,8 @@ begin
       end else begin
         Argument := s;
       end;
-      TIUObj := MidStr(TIUObj,1,OP1-1) + '{' + Argument + '}';
+      //kt //codex original --> TIUObj := MidStr(TIUObj,1,OP1-1) + '{' + Argument + '}';
+      TIUObj := Copy(TIUObj,1,OP1-1) + '{' + Argument + '}'; //kt //codex 8/3/26
     end;
     TIUObj := GetRPCTIUObj(TIUObj);
     Formula := SubStrA + TIUObj + SubStrB;
@@ -238,11 +246,14 @@ var p1,p2 : integer;
 begin
   p1 := PosEx(FN_FIELD_TAG,Txt,1);
   while p1 > 0 do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + Length(FN_FIELD_TAG);
     p2 := PosEx(']',Txt,p1);   //NOTE: This assumes no '[' in field name.
-    FldInfo := MidStr(Txt,p1,(p2-p1));
-    SubStrB := MidStr(Txt, p2+1, 999);
+    //kt //codex original --> FldInfo := MidStr(Txt,p1,(p2-p1));
+    FldInfo := Copy(Txt,p1,(p2-p1)); //kt //codex 8/3/26
+    //kt //codex original --> SubStrB := MidStr(Txt, p2+1, 999);
+    SubStrB := Copy(Txt, p2+1, 999); //kt //codex 8/3/26
 
     NumStr := piece(FldInfo,':',1);
     FldName := Trim(piece(FldInfo,':',2));  //VEFA-261 11/15/11
@@ -298,11 +309,14 @@ begin
   Result := false;
   p1 := Pos(FN_SHOW_TEXT,Txt);
   while (p1>0) do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + FN_SHOW_TEXT_LEN;
     p2 := PosEx(FN_SHOW_TEXT_END,Txt,p1);
-    SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
-    FnStr := MidStr(Txt,p1, (p2-p1));
+    //kt //codex original --> SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
+    SubStrB := Copy(Txt,p2+1,length(Txt)+1); //kt //codex 8/3/26
+    //kt //codex original --> FnStr := MidStr(Txt,p1, (p2-p1));
+    FnStr := Copy(Txt,p1, (p2-p1)); //kt //codex 8/3/26
     FnStr := GetStoredInfo(VEFAFormulas, FnStr);
     FnStr := SubstuteIDs(FnStr,VEFANameToObjID);
     Txt := SubStrA + FN_BEGIN_SIGNATURE + FnStr + FN_END_TAG + SubStrB;
@@ -346,12 +360,15 @@ begin
   FormulaCount := 0;  //VEFA-261 changed
   p1 := Pos(FN_BEGIN_SIGNATURE,Txt);
   while (p1>0) do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + FN_BEGIN_SIGNATURE_LEN;
     //p2 := PosEx(FN_END_TAG,Txt,p1);
     p2 := CloseCharPos(FN_BEGIN_TAG, FN_END_TAG, Txt, p1);
-    SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
-    FnStr := MidStr(Txt,p1, (p2-p1));
+    //kt //codex original --> SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
+    SubStrB := Copy(Txt,p2+1,length(Txt)+1); //kt //codex 8/3/26
+    //kt //codex original --> FnStr := MidStr(Txt,p1, (p2-p1));
+    FnStr := Copy(Txt,p1, (p2-p1)); //kt //codex 8/3/26
     FnStr := AnsiReplaceText(FnStr,#9,'');
     FnStr := AnsiReplaceText(FnStr,#10,'');
     FnStr := AnsiReplaceText(FnStr,#13,'');
@@ -372,10 +389,12 @@ begin
   Txt := SL.Text;
   p1 := Pos(FN_SHOW_TEXT,Txt);
   while (p1>0) do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + length(FN_SHOW_TEXT);
     p2 := CloseCharPos(FN_BEGIN_TAG, FN_END_TAG, Txt, p1);
-    SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
+    //kt //codex original --> SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
+    SubStrB := Copy(Txt,p2+1,length(Txt)+1); //kt //codex 8/3/26
     Txt := SubStrA + SubStrB;
     p1 := Pos(FN_SHOW_TEXT, Txt);
   end;
@@ -395,11 +414,14 @@ begin
   TxtObjCount := 0;  //VEFA-261 changed.
   p1 := Pos(FLD_OBJ_SIGNATURE,Txt);
   while (p1>0) do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + FN_OBJ_TAG_LEN;
     p2 := CloseCharPos(FN_BEGIN_TAG, FN_END_TAG, Txt, p1);
-    SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
-    FnStr := MidStr(Txt,p1, (p2-p1));
+    //kt //codex original --> SubStrB := MidStr(Txt,p2+1,length(Txt)+1);
+    SubStrB := Copy(Txt,p2+1,length(Txt)+1); //kt //codex 8/3/26
+    //kt //codex original --> FnStr := MidStr(Txt,p1, (p2-p1));
+    FnStr := Copy(Txt,p1, (p2-p1)); //kt //codex 8/3/26
     FnStr := AnsiReplaceText(FnStr,#9,'');
     FnStr := AnsiReplaceText(FnStr,#10,'');
     FnStr := AnsiReplaceText(FnStr,#13,'');
@@ -418,10 +440,12 @@ begin
   Txt := SL.Text;
   p1 := Pos(OBJ_SHOW_TEXT, Txt);
   while (p1>0) do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + length(OBJ_SHOW_TEXT);
     p2 := CloseCharPos(FN_BEGIN_TAG, FN_END_TAG, Txt, p1);
-    SubStrB := MidStr(Txt, p2+1, length(Txt)+1);
+    //kt //codex original --> SubStrB := MidStr(Txt, p2+1, length(Txt)+1);
+    SubStrB := Copy(Txt, p2+1, length(Txt)+1); //kt //codex 8/3/26
     Txt := SubStrA + SubStrB;
     p1 := PosEx(OBJ_SHOW_TEXT,Txt,p1);
   end;
@@ -506,7 +530,8 @@ begin
         FnP1 := i;
         FnP2 := CloseCharPos('{', VEFA_MATCH[ExtMode].EndTag, Temp, i);
         p1 := FnP1 + VEFA_MATCH[ExtMode].SigLen;
-        FnObjStr := MidStr(Temp, p1, FnP2-p1);
+        //kt //codex original --> FnObjStr := MidStr(Temp, p1, FnP2-p1);
+        FnObjStr := Copy(Temp, p1, FnP2-p1); //kt //codex 8/3/26
         FNFlags := '';
         if Pos(':',FnObjStr)>0 then begin
           VarName := Trim(piece(FnObjStr,':',1));  //Var names may not contain '[' or '{'
@@ -519,23 +544,31 @@ begin
         end else VarName := '';
         p1 := Pos(FN_VAR_SIGNATURE,FnObjStr);
         while (p1 > 0) do begin
-          SubStrA := MidStr(FnObjStr,1,p1-1);
+          //kt //codex original --> SubStrA := MidStr(FnObjStr,1,p1-1);
+          SubStrA := Copy(FnObjStr,1,p1-1); //kt //codex 8/3/26
           p1 := p1 + FN_VAR_SIG_LEN;
           p2 := PosEx(FN_VAR_END_TAG,FnObjStr,p1);
-          LookupVarName := Trim(MidStr(FnObjStr,p1,(p2-p1)));
-          SubStrB := MidStr(FnObjStr,p2+1,length(FnObjStr)+1);
+          //kt //codex original --> LookupVarName := Trim(MidStr(FnObjStr,p1,(p2-p1)));
+          LookupVarName := Trim(Copy(FnObjStr,p1,(p2-p1))); //kt //codex 8/3/26
+          //kt //codex original --> SubStrB := MidStr(FnObjStr,p2+1,length(FnObjStr)+1);
+          SubStrB := Copy(FnObjStr,p2+1,length(FnObjStr)+1); //kt //codex 8/3/26
           FnObjStr := SubStrA + VEFAVars.Values[LookupVarName] + SubStrB;
           p1 := Pos(FN_VAR_SIGNATURE,FnObjStr);
         end;
         p1 := Pos(FieldIDDelim,FnObjStr);
         while (p1 > 0) do begin
-          SubStrA := MidStr(FnObjStr,1,p1-1);
+          //kt //codex original --> SubStrA := MidStr(FnObjStr,1,p1-1);
+          SubStrA := Copy(FnObjStr,1,p1-1); //kt //codex 8/3/26
           p2 := PosEx(FieldIDDelim,FnObjStr,p1+1);
-          Argument := MidStr(FnObjStr,p1+1,(p2-p1)-1);
-          SubStrB := MidStr(FnObjStr,p2+1,length(FnObjStr)+1);
-          CtrlID := StrToIntDef(MidStr(Argument,1,FieldIDLen), 0);
+          //kt //codex original --> Argument := MidStr(FnObjStr,p1+1,(p2-p1)-1);
+          Argument := Copy(FnObjStr,p1+1,(p2-p1)-1); //kt //codex 8/3/26
+          //kt //codex original --> SubStrB := MidStr(FnObjStr,p2+1,length(FnObjStr)+1);
+          SubStrB := Copy(FnObjStr,p2+1,length(FnObjStr)+1); //kt //codex 8/3/26
+          //kt //codex original --> CtrlID := StrToIntDef(MidStr(Argument,1,FieldIDLen), 0);
+          CtrlID := StrToIntDef(Copy(Argument,1,FieldIDLen), 0); //kt //codex 8/3/26
           //Fld := MidStr(Argument,FieldIDLen,StrLen(PChar(Argument))+1);
-          Fld := MidStr(Argument,FieldIDLen+1,Length(Argument)+1);  //VEFA-261 11/9/11
+          //kt //codex original --> Fld := MidStr(Argument,FieldIDLen+1,Length(Argument)+1);  //VEFA-261 11/9/11
+          Fld := Copy(Argument,FieldIDLen+1,Length(Argument)+1);  //VEFA-261 11/9/11 //kt //codex 8/3/26
           if(CtrlID > 0) then begin
             FoundEntry := FALSE;
             for j := 0 to Entries.Count-1 do begin
@@ -589,8 +622,10 @@ begin
           if VarName <> '' then VEFAVars.Values[VarName] := FnObjStr;
           if (Pos('H',FNFlags)>0) and (Problem='') then FnObjStr := '';  //hide output
         end;
-        SubStrA := MidStr(Temp,1,FnP1-1);
-        SubStrB := MidStr(Temp,FnP2+1,StrLen(PChar(Temp))+1);
+        //kt //codex original --> SubStrA := MidStr(Temp,1,FnP1-1);
+        SubStrA := Copy(Temp,1,FnP1-1); //kt //codex 8/3/26
+        //kt //codex original --> SubStrB := MidStr(Temp,FnP2+1,StrLen(PChar(Temp))+1);
+        SubStrB := Copy(Temp,FnP2+1,StrLen(PChar(Temp))+1); //kt //codex 8/3/26
         Temp := SubStrA + FnObjStr + SubStrB;
       end;
     until(i = 0);

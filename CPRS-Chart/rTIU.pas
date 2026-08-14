@@ -1283,10 +1283,12 @@ begin
         s := '';
         if (p1 > 0) and ((p1 < p2) or (p2 = 0)) then begin
           s := Piece2(line, CRLF, 1);
-          line := MidStr(line, length(s)+ length(CRLF) + 1, MaxInt);
+          //kt //codex original --> line := MidStr(line, length(s)+ length(CRLF) + 1, MaxInt);
+          line := Copy(line, length(s)+ length(CRLF) + 1, MaxInt); //kt //codex 8/3/26
         end else if (p2 > 0) and ((p2 < p1) or (p1 = 0)) then begin
           s := Piece2(line, LFCR, 1);
-          line := MidStr(line, length(s)+ length(LFCR)+1, MaxInt);
+          //kt //codex original --> line := MidStr(line, length(s)+ length(LFCR)+1, MaxInt);
+          line := Copy(line, length(s)+ length(LFCR)+1, MaxInt); //kt //codex 8/3/26
         end;
         RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(TxtIdx+1)] := s; inc(TxtIdx);
         p1 := Pos(CRLF, line);
@@ -1344,10 +1346,12 @@ begin
         s := '';
         if (p1 > 0) and ((p1 < p2) or (p2 = 0)) then begin
           s := Piece2(line, CRLF, 1);
-          line := MidStr(line, length(s)+ length(CRLF) + 1, MaxInt);
+          //kt //codex original --> line := MidStr(line, length(s)+ length(CRLF) + 1, MaxInt);
+          line := Copy(line, length(s)+ length(CRLF) + 1, MaxInt); //kt //codex 8/3/26
         end else if (p2 > 0) and ((p2 < p1) or (p1 = 0)) then begin
           s := Piece2(line, LFCR, 1);
-          line := MidStr(line, length(s)+ length(LFCR)+1, MaxInt);
+          //kt //codex original --> line := MidStr(line, length(s)+ length(LFCR)+1, MaxInt);
+          line := Copy(line, length(s)+ length(LFCR)+1, MaxInt); //kt //codex 8/3/26
         end;
         RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(TxtIdx+1)] := s; inc(TxtIdx);
         p1 := Pos(CRLF, line);

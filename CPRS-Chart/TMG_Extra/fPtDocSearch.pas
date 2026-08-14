@@ -36,6 +36,8 @@ unit fPtDocSearch;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, SHDocVw, ExtCtrls, ORCtrls, StdCtrls, Buttons,
   StrUtils, ORNet, ORFn, Trpcb, uCore, rTIU, TMGHTML2, uHTMLTools;
@@ -326,11 +328,14 @@ procedure SrchToList(CONST SearchStr : String; Lines : TStringList);
         p2 := Pos(' ',WorkingS);
       end;
       if p2>0 then begin
-        subStr := MidStr(WorkingS,p1,(p2-1));
+        //kt //codex original --> subStr := MidStr(WorkingS,p1,(p2-1));
+        subStr := Copy(WorkingS,p1,(p2-1)); //kt //codex 8/3/26
         if subStr[Length(subStr)]='"' then begin
-          subStr := MidStr(subStr,1,Length(subStr)-1);
+          //kt //codex original --> subStr := MidStr(subStr,1,Length(subStr)-1);
+          subStr := Copy(subStr,1,Length(subStr)-1); //kt //codex 8/3/26
         end;
-        WorkingS := MidStr(WorkingS,p2+1,Length(WorkingS));
+        //kt //codex original --> WorkingS := MidStr(WorkingS,p2+1,Length(WorkingS));
+        WorkingS := Copy(WorkingS,p2+1,Length(WorkingS)); //kt //codex 8/3/26
       end else begin
         subStr := WorkingS;
         WorkingS := '';
@@ -354,9 +359,12 @@ procedure SrchToList(CONST SearchStr : String; Lines : TStringList);
     //will advance p past colorized term.
     var subA,subB,subC : string;
     begin
-      subA := MidStr(Str,1,p1-1);
-      subB := MidStr(Str,p1,Length(UpperTerm));
-      subC := MidStr(Str,p1+Length(UpperTerm),Length(Str));
+      //kt //codex original --> subA := MidStr(Str,1,p1-1);
+      subA := Copy(Str,1,p1-1); //kt //codex 8/3/26
+      //kt //codex original --> subB := MidStr(Str,p1,Length(UpperTerm));
+      subB := Copy(Str,p1,Length(UpperTerm)); //kt //codex 8/3/26
+      //kt //codex original --> subC := MidStr(Str,p1+Length(UpperTerm),Length(Str));
+      subC := Copy(Str,p1+Length(UpperTerm),Length(Str)); //kt //codex 8/3/26
       Result := subA + COLOR_START + subB + COLOR_END + subC;
       p := p + LEN_START + LEN_END;
     end;

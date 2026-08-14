@@ -3,6 +3,8 @@ unit fEncounterFrame;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Tabs, ComCtrls, ExtCtrls, Menus, StdCtrls, Buttons, fPCEBase,
   {fVisitType,} fDiagnoses, {fProcedure,} fImmunization, fSkinTest, fPatientEd,

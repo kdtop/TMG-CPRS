@@ -5,6 +5,8 @@ unit fTaskEvents;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, Buttons, ComCtrls, StrUtils, Math,
   rCore, uCore, ORFn, ORNet, ORDtTm, ORCtrls;

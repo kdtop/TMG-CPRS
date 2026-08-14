@@ -36,6 +36,8 @@ unit fTMGQuickConsole;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   //fDrawers,
   StrUtils, Math, uTIU, fDrawers,
@@ -277,7 +279,8 @@ const
     Sel1 := edtAction.SelStart;
     Sel2 := edtAction.SelStart + edtAction.SelLength;
     if Sel2 > Sel1 then begin
-      UserInput := MidStr(edtAction.Text, 1, Sel1);
+      //kt //codex original --> UserInput := MidStr(edtAction.Text, 1, Sel1);
+      UserInput := Copy(edtAction.Text, 1, Sel1); //kt //codex 8/3/26
     end else begin
       UserInput := edtAction.Text;
     end;
@@ -335,7 +338,8 @@ const
                   if length(UserInput) > length(InputSuggestion) then InputSuggestion := '';
                   if InputSuggestion <> '' then begin
                     InputSuggestion := '';
-                    UserInput := MidStr(UserInput, 1, Length(UserInput)-1);
+                    //kt //codex original --> UserInput := MidStr(UserInput, 1, Length(UserInput)-1);
+                    UserInput := Copy(UserInput, 1, Length(UserInput)-1); //kt //codex 8/3/26
                     Key := 0; //handled
                     UpdateEditBox;
                   end;
@@ -376,7 +380,8 @@ const
   begin
     IgnoreEditInputChanges := true;
     if LeftMatch(UpperCase(UserInput), UpperCase(InputSuggestion)) then begin
-      HiText := MidStr(InputSuggestion, Length(UserInput)+1, 999);
+      //kt //codex original --> HiText := MidStr(InputSuggestion, Length(UserInput)+1, 999);
+      HiText := Copy(InputSuggestion, Length(UserInput)+1, 999); //kt //codex 8/3/26
     end else HiText := '';
     edtAction.Text := UserInput + HiText;
     Application.ProcessMessages;  //Process first change event for edtAction
@@ -430,8 +435,10 @@ const
         repeat
           if Pos(',', Tags )> 0 then begin
             tempTag := piece(Tags, ',', 1);
-            Tags := MidStr(Tags, Length(tempTag)+1,999);
-            while (Length(Tags)>0) and (Tags[1] in [' ', ',']) do Tags := MidStr(Tags,2, 999);
+            //kt //codex original --> Tags := MidStr(Tags, Length(tempTag)+1,999);
+            Tags := Copy(Tags, Length(tempTag)+1,999); //kt //codex 8/3/26
+            //kt //codex original --> while (Length(Tags)>0) and (Tags[1] in [' ', ',']) do Tags := MidStr(Tags,2, 999);
+            while (Length(Tags)>0) and (Tags[1] in [' ', ',']) do Tags := Copy(Tags,2, 999); //kt //codex 8/3/26
           end else begin
             tempTag := Tags;
             Tags := '';

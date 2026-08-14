@@ -34,6 +34,8 @@ unit uTMGPtInfo;
 
 interface
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, StdCtrls, ExtCtrls;
 

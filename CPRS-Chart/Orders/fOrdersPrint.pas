@@ -3,6 +3,7 @@ unit fOrdersPrint;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ORfn, ExtCtrls, rOrders, fFrame, fBase508Form,
   VA508AccessibilityManager, Buttons, ComCtrls, uTMGOptions;

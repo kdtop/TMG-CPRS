@@ -3,6 +3,7 @@ unit fOrdersOnChart;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fAutoSz, StdCtrls, ORFn, ORCtrls, ExtCtrls, VA508AccessibilityManager;
 

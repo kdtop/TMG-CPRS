@@ -3,6 +3,8 @@ unit fTopicICDLinkerU;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   uTMGTypes, fPCELex,
   fTMGEncounterICDPicker,

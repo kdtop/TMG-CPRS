@@ -261,8 +261,10 @@ implementation
     while (PieceNum > 0) and (Length(Remainder) > 0) do begin
       p := Pos(Delim,Remainder);
       if p=0 then p := length(Remainder)+1;
-      Result := MidStr(Remainder,1,p-1);
-      Remainder := MidStr(Remainder,p+PieceLen,Length(Remainder));
+      //kt //codex original --> Result := MidStr(Remainder,1,p-1);
+      Result := Copy(Remainder,1,p-1); //kt //codex 8/3/26
+      //kt //codex original --> Remainder := MidStr(Remainder,p+PieceLen,Length(Remainder));
+      Remainder := Copy(Remainder,p+PieceLen,Length(Remainder)); //kt //codex 8/3/26
       Dec(PieceNum);
     end;
   end;

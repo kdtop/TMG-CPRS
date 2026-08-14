@@ -199,7 +199,8 @@ implementation
     Command := UpperCase(piece(s, '^',1));
     //NOTE: To add new messages, follow pattern for ENQ handler function below.
     //      ALL command handlers must follow format of TWMAPIHandler
-    DataStr := MidStr(s, Length(Command)+2, Length(s));
+    //kt //codex original --> DataStr := MidStr(s, Length(Command)+2, Length(s));
+    DataStr := Copy(s, Length(Command)+2, Length(s)); //kt //codex 8/3/26
     HandleCommand(Command, DataStr, SendToHandle);
     msg.Result := 2006; //Found on web.  ?? meaning ??
   end;

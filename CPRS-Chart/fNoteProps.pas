@@ -36,6 +36,8 @@ unit fNoteProps;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORDtTm, ORCtrls, ExtCtrls, rTIU, uConst, uTIU, ORFn, ORNet,
   ComCtrls, Buttons, fBase508Form, VA508AccessibilityManager;

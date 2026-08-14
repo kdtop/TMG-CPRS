@@ -36,6 +36,8 @@ unit fPtLabelPrint;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Spin, StdCtrls, Buttons, jpeg, ExtCtrls, ORCtrls, ORDtTm,
   Printers, uCore,ORFn;

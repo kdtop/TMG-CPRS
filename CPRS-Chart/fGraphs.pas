@@ -38,6 +38,9 @@ unit fGraphs;
 interface
 
 uses
+  VCLTee.TeCanvas,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, ORCtrls, Menus, TeeProcs, TeEngine, Series, Chart, Math,
   ComCtrls, GanttCh, ClipBrd, StrUtils, ORFn, ORDtTmRng, DateUtils, Printers,
@@ -612,15 +615,18 @@ begin
       exit; //to finally part
     end;
     PreStr := LeftStr(S, p-1);
-    S := MidStr(S, p, Length(S));
+    //kt //codex original --> S := MidStr(S, p, Length(S));
+    S := Copy(S, p, Length(S)); //kt //codex 8/3/26
     p := PosNonQT('>', S);
     if p = 0 then begin
       Err := 'Unable to find closing ">" in HTML line';
       exit; //to finally part.
     end;
     TagStr := LeftStr(S, p);
-    PostStr := MidStr(S, p+1, Length(S));
-    AttrStr := Trim(MidStr(TagStr, IMG_LEN+1, Length(TagStr)-IMG_LEN-1));  //remove '<IMG'  and '>' to get just attributes
+    //kt //codex original --> PostStr := MidStr(S, p+1, Length(S));
+    PostStr := Copy(S, p+1, Length(S)); //kt //codex 8/3/26
+    //kt //codex original --> AttrStr := Trim(MidStr(TagStr, IMG_LEN+1, Length(TagStr)-IMG_LEN-1));  //remove '<IMG'  and '>' to get just attributes
+    AttrStr := Trim(Copy(TagStr, IMG_LEN+1, Length(TagStr)-IMG_LEN-1));  //remove '<IMG'  and '>' to get just attributes //kt //codex 8/3/26
     PiecesToListNonQT(AttrStr, ' ', Attrs);  //Parse to string list.
     for i := 1 to GRAPH_ATTR_CT do begin
       AttrData[i] := AnsiReplaceStr(Attrs.Values[GRAPH_ATTRS[i]],'"','');;

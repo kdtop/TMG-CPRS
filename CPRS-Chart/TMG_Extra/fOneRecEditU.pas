@@ -36,6 +36,8 @@ unit fOneRecEditU;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   StrUtils, {MainU,} rTMGRPCs, uTMGGrid, uTMGGlobals,
   Dialogs, StdCtrls, ExtCtrls, Grids, ComCtrls, Buttons, uTMGTypes,

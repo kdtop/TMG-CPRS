@@ -37,6 +37,8 @@ unit fWebTab;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, SHDocVw, StdCtrls,fPage, VA508AccessibilityManager, ExtCtrls, uCore,
   uTMGAllscriptsDriver, TMGHtml2, Menus, uTMGDiffRecord, uHTMLTools;

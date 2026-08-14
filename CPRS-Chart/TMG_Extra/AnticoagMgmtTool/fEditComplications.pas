@@ -95,13 +95,16 @@ begin
       Cmd := Trim(UpperCase(piece(line, ':', 1)));
     end;
     if Cmd = 'C' then begin
-      Line := MidStr(Line, 2, Length(Line));
+      //kt //codex original --> Line := MidStr(Line, 2, Length(Line));
+      Line := Copy(Line, 2, Length(Line)); //kt //codex 8/3/26
       memComments.Lines.Add(Line);
       continue;
     end else if Cmd = 'MB' then begin
-      Line := MidStr(Line, 4, Length(Line));
+      //kt //codex original --> Line := MidStr(Line, 4, Length(Line));
+      Line := Copy(Line, 4, Length(Line)); //kt //codex 8/3/26
     end else if Cmd = 'DATE' then begin
-      DateStr := MidStr(Line, 6, Length(Line));
+      //kt //codex original --> DateStr := MidStr(Line, 6, Length(Line));
+      DateStr := Copy(Line, 6, Length(Line)); //kt //codex 8/3/26
       continue; //will use after loop done;
     end;
     index := FComplicationsCkbList.IndexOf(Line);

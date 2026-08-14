@@ -35,6 +35,8 @@ unit LookupU;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   rTMGRPCs,
   Dialogs, StdCtrls, ORCtrls, Buttons;

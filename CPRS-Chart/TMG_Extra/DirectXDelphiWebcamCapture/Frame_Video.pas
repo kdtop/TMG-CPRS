@@ -38,6 +38,8 @@ Please note:
 interface
 
 uses
+  System.UITypes,
+
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls,
   Buttons, MMSystem, Menus, ComCtrls, JPEG,
   VFrames;

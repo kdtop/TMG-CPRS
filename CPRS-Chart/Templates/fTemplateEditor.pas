@@ -51,6 +51,8 @@ JFKQRUVZ
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, ComCtrls, ORCtrls, Buttons, Mask, ORFn, ORNet,
   uTemplateFields, uCarePlan, //kt

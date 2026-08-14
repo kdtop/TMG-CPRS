@@ -38,6 +38,9 @@ unit uTemplateFields;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Forms, SysUtils, Classes, Dialogs, StdCtrls, ExtCtrls, Controls, Contnrs,
   uHTMLDlg, //kt added 1/16
   Graphics, ORClasses, ComCtrls, ORDtTm, uDlgComponents, TypInfo, ORFn, StrUtils;
@@ -671,11 +674,14 @@ var p1,p2 : integer;
 begin
   p1 := PosEx(FN_FIELD_TAG,Txt,1);
   while p1 > 0 do begin
-    SubStrA := MidStr(Txt,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Txt,1,p1-1);
+    SubStrA := Copy(Txt,1,p1-1); //kt //codex 8/3/26
     p1 := p1 + Length(FN_FIELD_TAG);
     p2 := PosEx(']',Txt,p1);   //NOTE: This assumes no '[' in field name.
-    FldInfo := MidStr(Txt,p1,(p2-p1));
-    SubStrB := MidStr(Txt, p2+1, 999);
+    //kt //codex original --> FldInfo := MidStr(Txt,p1,(p2-p1));
+    FldInfo := Copy(Txt,p1,(p2-p1)); //kt //codex 8/3/26
+    //kt //codex original --> SubStrB := MidStr(Txt, p2+1, 999);
+    SubStrB := Copy(Txt, p2+1, 999); //kt //codex 8/3/26
 
     NumStr := piece(FldInfo,':',1);
     FldName := piece(FldInfo,':',2);
@@ -723,10 +729,13 @@ begin
       Formula := 'ERROR.  Matching "]" not found after ' + FN_OBJ_TAG + '.';
       Exit;
     end;
-    SubStrA := MidStr(Formula,1,p1-1);
+    //kt //codex original --> SubStrA := MidStr(Formula,1,p1-1);
+    SubStrA := Copy(Formula,1,p1-1); //kt //codex 8/3/26
     p1 := p1+FN_OBJ_TAG_LEN;
-    TIUObj := Trim(MidStr(Formula, p1, (p2-p1)));
-    SubStrB := MidStr(Formula,p2+1,999);
+    //kt //codex original --> TIUObj := Trim(MidStr(Formula, p1, (p2-p1)));
+    TIUObj := Trim(Copy(Formula, p1, (p2-p1))); //kt //codex 8/3/26
+    //kt //codex original --> SubStrB := MidStr(Formula,p2+1,999);
+    SubStrB := Copy(Formula,p2+1,999); //kt //codex 8/3/26
     OP1 := Pos('{',TIUObj);
     if (OP1 > 0) then begin
       OP2 := CloseCharPos('{','}', TIUObj, OP1+1);
@@ -734,7 +743,8 @@ begin
         Formula := 'ERROR.  Matching ")" not found after "(".';
         Exit;
       end;
-      Argument := MidStr(TIUObj,OP1+1,(OP2-(OP1+1)));
+      //kt //codex original --> Argument := MidStr(TIUObj,OP1+1,(OP2-(OP1+1)));
+      Argument := Copy(TIUObj,OP1+1,(OP2-(OP1+1))); //kt //codex 8/3/26
       if Pos(FN_OBJ_TAG,Argument)>0 then begin
         EvalTIUObjects(Argument)
       end;
@@ -747,7 +757,8 @@ begin
       end else begin
         Argument := s;
       end;
-      TIUObj := MidStr(TIUObj,1,OP1-1) + '{' + Argument + '}';
+      //kt //codex original --> TIUObj := MidStr(TIUObj,1,OP1-1) + '{' + Argument + '}';
+      TIUObj := Copy(TIUObj,1,OP1-1) + '{' + Argument + '}'; //kt //codex 8/3/26
     end;
     TIUObj := GetRPCTIUObj(TIUObj);
     Formula := SubStrA + TIUObj + SubStrB;
@@ -820,7 +831,8 @@ var
     if HTMLTargetMode = True then begin
       temp1 := Result;
       while (pos('<',temp1)>0) and (pos('>',temp1)>0) do begin
-        temp2 := MidStr(temp1,pos('<',temp1),pos('>',temp1)-pos('<',temp1)+1);
+        //kt //codex original --> temp2 := MidStr(temp1,pos('<',temp1),pos('>',temp1)-pos('<',temp1)+1);
+        temp2 := Copy(temp1,pos('<',temp1),pos('>',temp1)-pos('<',temp1)+1); //kt //codex 8/3/26
         HTMLStrLen := HTMLStrLen + strlen(PChar(temp2));
         temp1 := Rightstr(temp1,strlen(PChar(temp1))-pos('>',temp1));
       end;
@@ -1056,17 +1068,23 @@ begin
       Result := Result + text;
       break;
     end;
-    Result := Result + MidStr(Text, 1, p1-1);
-    Fld := MidStr(Text, p1, (p2 - p1));
-    Text := MidStr(Text, p2 + length(TemplateFieldEndSignature), length(Text));  //up to, but excluding closing part.
-    Fld := MidStr(Fld, Length(TemplateFieldBeginSignature) + 1, length(Fld));  //trim opening part
+    //kt //codex original --> Result := Result + MidStr(Text, 1, p1-1);
+    Result := Result + Copy(Text, 1, p1-1); //kt //codex 8/3/26
+    //kt //codex original --> Fld := MidStr(Text, p1, (p2 - p1));
+    Fld := Copy(Text, p1, (p2 - p1)); //kt //codex 8/3/26
+    //kt //codex original --> Text := MidStr(Text, p2 + length(TemplateFieldEndSignature), length(Text));  //up to, but excluding closing part.
+    Text := Copy(Text, p2 + length(TemplateFieldEndSignature), length(Text));  //up to, but excluding closing part. //kt //codex 8/3/26
+    //kt //codex original --> Fld := MidStr(Fld, Length(TemplateFieldBeginSignature) + 1, length(Fld));  //trim opening part
+    Fld := Copy(Fld, Length(TemplateFieldBeginSignature) + 1, length(Fld));  //trim opening part //kt //codex 8/3/26
     CtrlID := 0;
     if (length(Fld) > 0) and (LeftStr(Fld, Length(FieldIDDelim)) = FieldIDDelim) then begin
-      CtrlIDStr := MidStr(Fld, length(FieldIDDelim)+1, FieldIDLen - length(FieldIDDelim));
+      //kt //codex original --> CtrlIDStr := MidStr(Fld, length(FieldIDDelim)+1, FieldIDLen - length(FieldIDDelim));
+      CtrlIDStr := Copy(Fld, length(FieldIDDelim)+1, FieldIDLen - length(FieldIDDelim)); //kt //codex 8/3/26
       CtrlID := StrToIntDef(CtrlIDStr, 0);
     end;
     if CtrlID = 0 then continue;
-    Fld := MidStr(Fld, FieldIDLen + 1, length(Fld));
+    //kt //codex original --> Fld := MidStr(Fld, FieldIDLen + 1, length(Fld));
+    Fld := Copy(Fld, FieldIDLen + 1, length(Fld)); //kt //codex 8/3/26
     FoundEntry := FALSE;
     for i := 0 to uEntries.Count-1 do begin
       Entry := TTemplateDialogEntry(uEntries.Objects[i]);
@@ -2423,8 +2441,10 @@ function TTemplateField.GetInnerEditDefaultValue : string;
 //Strip off tag and return just default value
 begin
   Case(GetDataBinding) of
-    dbcbReadWrite  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_RW_TAG)+1, MaxInt);
-    dbcbWriteOnly  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_W_TAG)+1, MaxInt);
+    //kt //codex original --> dbcbReadWrite  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_RW_TAG)+1, MaxInt);
+    dbcbReadWrite  : Result := Copy(FEditDefault, length(DATABASE_CONTROL_RW_TAG)+1, MaxInt); //kt //codex 8/3/26
+    //kt //codex original --> dbcbWriteOnly  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_W_TAG)+1, MaxInt);
+    dbcbWriteOnly  : Result := Copy(FEditDefault, length(DATABASE_CONTROL_W_TAG)+1, MaxInt); //kt //codex 8/3/26
     dbcbNone       : Result := FEditDefault;
   end;
 end;
@@ -3386,4 +3406,3 @@ finalization
   KillObj(@uEntries, TRUE);
 
 end.
-

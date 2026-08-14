@@ -38,6 +38,8 @@ unit uTemplates;
 
 interface
 uses
+  System.UITypes,
+
   Classes, Controls, SysUtils, Forms, ORFn, ORNet, Dialogs, MSXML_TLB, uTIU, uDCSumm, Variants,
   ComCtrls, ORCtrls, StrUtils  //kt added
   ;
@@ -2002,7 +2004,8 @@ begin
       p1 := p1+L;
       p2 := PosEx(TemplateFieldEndSignature, FBoilerplate, p1);
       if p2 > 0 then begin
-        FldName := MidStr(FBoilerplate, p1, p2-p1);
+        //kt //codex original --> FldName := MidStr(FBoilerplate, p1, p2-p1);
+        FldName := Copy(FBoilerplate, p1, p2-p1); //kt //codex 8/3/26
         FFieldsUsed.Add(FldName);
       end else begin
         p2 := p1;

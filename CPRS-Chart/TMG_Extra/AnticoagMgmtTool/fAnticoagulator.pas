@@ -19,6 +19,8 @@ support 508 stuff right now, outside the VA.
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, {RpRender, RpRenderCanvas,RPCConf1, RpRenderPrinter, RpDefine, RpCon,
   RpRave, RpBase, RpSystem,} Trpcb, ORNet,ORFn, {ORDtTm,} TeEngine,

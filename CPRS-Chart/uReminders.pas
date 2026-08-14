@@ -37,6 +37,8 @@ unit uReminders;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
   Windows, Messages, Classes, Controls, StdCtrls, SysUtils, ComCtrls, Menus,
   Graphics, Forms, ORClasses, ORCtrls, ORDtTm, ORFn, ORNet, Dialogs, uPCE, uVitals,
   TMGHTML2,  //kt 9/11

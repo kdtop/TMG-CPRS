@@ -34,7 +34,9 @@ unit Sgnoncnf;
 
 interface
 
-uses WinTypes, WinProcs, Classes, Graphics, Forms, Controls, Buttons,
+uses
+  System.UITypes,
+ WinTypes, WinProcs, Classes, Graphics, Forms, Controls, Buttons,
   StdCtrls, ExtCtrls, Dialogs, SysUtils, MFunStr, XWBut1;
 
 type

@@ -46,6 +46,9 @@ unit fPtSel;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, ExtCtrls, ORFn, ORNet, ORDtTmRng, Gauges, Menus, ComCtrls,
   fImagePatientPhotoID,strUtils,  //kt

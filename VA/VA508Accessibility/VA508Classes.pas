@@ -1,7 +1,9 @@
 unit VA508Classes;
 
 interface
-  uses SysUtils, Classes, Contnrs, StrUtils, Windows, HRParser, HRParserPas, Forms, Dialogs;
+  uses
+  System.UITypes,
+ SysUtils, Classes, Contnrs, StrUtils, Windows, HRParser, HRParserPas, Forms, Dialogs;
 
 type
   TFormData = class

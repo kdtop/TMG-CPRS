@@ -117,7 +117,8 @@ the following string '^' pieces:
 function IsComponent(Title, Subject : string) : boolean;
 //kt 5/15
 begin
-  Result := (MidStr(Trim(Title),1,length(Subject)+2) = '['+Subject+']');
+  //kt //codex original --> Result := (MidStr(Trim(Title),1,length(Subject)+2) = '['+Subject+']');
+  Result := (Copy(Trim(Title),1,length(Subject)+2) = '['+Subject+']'); //kt //codex 8/3/26
 end;
 
 function IsComponent(Node : TORTreeNode) : boolean;

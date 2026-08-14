@@ -36,6 +36,8 @@ unit fUploadImages;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, pngimage, ExtDlgs, OleCtrls,
   uCore, iniFiles, ShellAPI, fTMG_WIA_GetImage, registry, jpeg, uImages,
@@ -433,8 +435,10 @@ implementation
     //      to server for lookup is bypassed, and the values for FName,DOB etc
     //      are ignored
 
-    if MidStr(LName,1,1)='`' then begin
-      Self.Patient.DFN := MidStr(LName,2,999);
+    //kt //codex original --> if MidStr(LName,1,1)='`' then begin
+    if Copy(LName,1,1)='`' then begin //kt //codex 8/3/26
+      //kt //codex original --> Self.Patient.DFN := MidStr(LName,2,999);
+      Self.Patient.DFN := Copy(LName,2,999); //kt //codex 8/3/26
     end else begin
       //**NOTE**: site-specific code
       if Location ='Laughlin_Office' then PMS :='2'
@@ -917,7 +921,8 @@ implementation
     Info.pLongDesc := nil;
 
     //Load up info class/record
-    Info.ShortDesc := MidStr(ShortDescEdit.Text,1,60);
+    //kt //codex original --> Info.ShortDesc := MidStr(ShortDescEdit.Text,1,60);
+    Info.ShortDesc := Copy(ShortDescEdit.Text,1,60); //kt //codex 8/3/26
     if Info.ShortDesc = DefShortDesc then Info.ShortDesc := ' ';
     Info.UploadDUZ := User.DUZ;
     if LongDescMemo.Lines.Count>0 then begin
@@ -946,7 +951,8 @@ implementation
     for i:= 0 to FilesToUploadList.Items.Count-1 do begin
       Info.ImageFPathName := FilesToUploadList.Items.Strings[i];
       Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
-      Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
+      //kt //codex original --> Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
+      Info.Extension := Copy(Info.Extension,2,99); //remove '.'  //changed 17 --> 99 //kt //codex 8/3/26
       if UploadFile(Info,MoveCheckBox.Checked) then begin   //Upload function passes back filename info in Info class
         FUploadedImagesList.Add(Info.ServerFName);
         FUploadedImagesIENList.Add(IntToStr(Info.IMAGEIEN)); //1:1 relief between two lists
@@ -999,7 +1005,8 @@ implementation
     //for i:= 0 to FilesToUploadList.Items.Count-1 do begin
     Info.ImageFPathName := FilePathName;
     Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
-    Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
+    //kt //codex original --> Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
+    Info.Extension := Copy(Info.Extension,2,99); //remove '.'  //changed 17 --> 99 //kt //codex 8/3/26
     if frmImageUpload.UploadFile(Info,False) then begin   //Upload function passes back filename info in Info class
        result := Info.ServerFName;
     end;
@@ -1176,7 +1183,8 @@ implementation
   procedure TfrmImageUpload.ShortDescEditChange(Sender: TObject);
   begin
     if Length(ShortDescEdit.Text)> 60 then begin
-      ShortDescEdit.Text := MidStr(ShortDescEdit.Text,1,60);
+      //kt //codex original --> ShortDescEdit.Text := MidStr(ShortDescEdit.Text,1,60);
+      ShortDescEdit.Text := Copy(ShortDescEdit.Text,1,60); //kt //codex 8/3/26
     end;
   end;
 
@@ -1488,7 +1496,8 @@ implementation
         AutoUploadNote.ImageInfo.DFN := AutoUploadNote.Patient.DFN;
         AutoUploadNote.ImageInfo.ImageFPathName := FilePaths.Strings[i];
         AutoUploadNote.ImageInfo.Extension := ExtractFileExt(AutoUploadNote.ImageInfo.ImageFPathName); //includes '.'
-        AutoUploadNote.ImageInfo.Extension := MidStr(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.'
+        //kt //codex original --> AutoUploadNote.ImageInfo.Extension := MidStr(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.'
+        AutoUploadNote.ImageInfo.Extension := Copy(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.' //kt //codex 8/3/26
         if not UploadFile(AutoUploadNote.ImageInfo, true, ErrLog) then begin   //Upload function passes back filename info in Info class
           Result := 'ERROR UPLOADING IMAGE FILE';
         end;    

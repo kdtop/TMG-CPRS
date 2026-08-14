@@ -4,6 +4,7 @@ unit fFollowUp;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   VAUtils,  Math, StrUtils, ORNet,
   Dialogs, fPCEBase, VA508AccessibilityManager, StdCtrls, Buttons, ExtCtrls,

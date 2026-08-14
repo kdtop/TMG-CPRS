@@ -3,6 +3,7 @@ unit fReportsAdhocComponent1;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, Grids, ORCtrls, ORfn, Buttons, fAutoSz,
   VA508AccessibilityManager;

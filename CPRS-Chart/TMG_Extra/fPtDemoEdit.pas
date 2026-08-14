@@ -39,6 +39,8 @@ unit fPtDemoEdit;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, ORFn,
   rTMGRPCs, uTMGPtInfo,  TMGHTML2,
   ClipBrd,

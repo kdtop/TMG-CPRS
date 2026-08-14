@@ -1340,7 +1340,8 @@ procedure TPatientFlowsheetData.ParsePatientData(DFN : string; RPCResults : TStr
     if OneBlock.Count = 0 then exit;
     line := OneBlock[0]; OneBlock.Delete(0);
     Start := piece(line, '|', 1);
-    ZeroNode := MidStr(line, length(Start)+2, Length(Line)); //piece(line, '|', 2);
+    //kt //codex original --> ZeroNode := MidStr(line, length(Start)+2, Length(Line)); //piece(line, '|', 2);
+    ZeroNode := Copy(line, length(Start)+2, Length(Line)); //piece(line, '|', 2); //kt //codex 8/3/26
     TMGNode := Piece2(ZeroNode,'^@^',2);
     ZeroNode := Piece2(ZeroNode,'^@^',1);
     OneFlowsheet.RawData := ZeroNode; //was line

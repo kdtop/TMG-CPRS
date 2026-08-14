@@ -91,7 +91,9 @@ NOTICE: Also Derived from EmbeddedED project.  The parts used were merged
 
 interface
 
-uses SysUtils, WinTypes, Dialogs, StdCtrls, Menus,
+uses
+  System.UITypes,
+ SysUtils, WinTypes, Dialogs, StdCtrls, Menus,
      WinMsgLog,  //kt 8/16
      ORNet, TRPCB, //ELH 10/6/22
      ActiveX, MSHTMLEvents, SHDocVw, MSHTML, {MSHTML_EWB,}
@@ -725,13 +727,16 @@ begin
           SanitizeHTML(partA); //recursive call
           p2 := PosEx(CloseTag, lowerHTML, p1+length(OpenTag));
           if p2>0 then begin
-            partB := MidStr(HTML, p1, p2-p1 + length(CloseTag));  //this should be block to NOT sanitize
-            partC := MidStr(HTML, p2 + length(CloseTag), len);
+            //kt //codex original --> partB := MidStr(HTML, p1, p2-p1 + length(CloseTag));  //this should be block to NOT sanitize
+            partB := Copy(HTML, p1, p2-p1 + length(CloseTag));  //this should be block to NOT sanitize //kt //codex 8/3/26
+            //kt //codex original --> partC := MidStr(HTML, p2 + length(CloseTag), len);
+            partC := Copy(HTML, p2 + length(CloseTag), len); //kt //codex 8/3/26
             SanitizeHTML(partC);  //recursive call
           end else begin
             //In this case, we have an open tag, but no matching close tag, so don't sanitize anything in remaining string.
             PartB := '';
-            PartC := MidStr(HTML, p1, len)
+            //kt //codex original --> PartC := MidStr(HTML, p1, len)
+            PartC := Copy(HTML, p1, len) //kt //codex 8/3/26
           end;
           HTML := partA + partB + partC;
           p1 := 0;
@@ -942,9 +947,12 @@ begin
   Result := clBlack;  //FIX!!!! IMPLEMENT LATER...
   if Pos('#',MSHTMLColor)=1 then begin
    // MSHTMLColor := MidStr(MSHTMLColor,2,99);
-   strHexRed := MidStr(MSHTMLColor,2,2);
-   strHexGreen := MidStr(MSHTMLColor,4,2);
-   strHexBlue := MidStr(MSHTMLColor,6,2);
+   //kt //codex original --> strHexRed := MidStr(MSHTMLColor,2,2);
+   strHexRed := Copy(MSHTMLColor,2,2); //kt //codex 8/3/26
+   //kt //codex original --> strHexGreen := MidStr(MSHTMLColor,4,2);
+   strHexGreen := Copy(MSHTMLColor,4,2); //kt //codex 8/3/26
+   //kt //codex original --> strHexBlue := MidStr(MSHTMLColor,6,2);
+   strHexBlue := Copy(MSHTMLColor,6,2); //kt //codex 8/3/26
    tempColor.RGBColor.R := StrToIntDef('$'+StrHexRed,0);
    tempColor.RGBColor.G := StrToIntDef('$'+StrHexGreen,0);
    tempColor.RGBColor.B := StrToIntDef('$'+StrHexBlue,0);
@@ -2770,8 +2778,10 @@ begin
     while CSSText <> '' do begin
       p := Pos(';', CSSText);
       if p > 0 then begin
-        OneCSSEntry := MidStr(CSSText, 1, p);
-        CSSText := Trim(MidStr(CSSText, p+1, Length(CSSText)));
+        //kt //codex original --> OneCSSEntry := MidStr(CSSText, 1, p);
+        OneCSSEntry := Copy(CSSText, 1, p); //kt //codex 8/3/26
+        //kt //codex original --> CSSText := Trim(MidStr(CSSText, p+1, Length(CSSText)));
+        CSSText := Trim(Copy(CSSText, p+1, Length(CSSText))); //kt //codex 8/3/26
       end else begin
         OneCSSEntry := CSSText;
         CSSText := '';
@@ -2979,8 +2989,10 @@ begin
     while s <> '' do begin
       p := Pos(CRLF, s);
       if p > 0 then begin
-        PartA := MidStr(s, 1, p-1);
-        s := MidStr(s, p+2, Length(s));
+        //kt //codex original --> PartA := MidStr(s, 1, p-1);
+        PartA := Copy(s, 1, p-1); //kt //codex 8/3/26
+        //kt //codex original --> s := MidStr(s, p+2, Length(s));
+        s := Copy(s, p+2, Length(s)); //kt //codex 8/3/26
         JavaScriptSL.Add(PartA);
       end else begin
         JavaScriptSL.Add(s);
@@ -3054,7 +3066,8 @@ var JSSummary, CurrentJSSummary, JSToAdd : TStringList;
       s := SL.Strings[i];
       p := Pos('//', s);  //NOTICE!!  This doesn't check if the "comment" is actually inside a string...
       if p = 0 then continue;
-      SL.Strings[i] := Trim(MidStr(s, 1, p-1));
+      //kt //codex original --> SL.Strings[i] := Trim(MidStr(s, 1, p-1));
+      SL.Strings[i] := Trim(Copy(s, 1, p-1)); //kt //codex 8/3/26
     end;
   end;
 

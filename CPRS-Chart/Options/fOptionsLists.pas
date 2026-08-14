@@ -38,6 +38,8 @@ unit fOptionsLists;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ORCtrls, OrFn, Menus, fBase508Form,
   VA508AccessibilityManager

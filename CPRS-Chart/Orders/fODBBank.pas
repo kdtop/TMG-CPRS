@@ -2,6 +2,8 @@ unit fODBBank;
 interface
 
 uses
+  System.UITypes,
+
   SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, StdCtrls, ORCtrls, ORfn, fODBase, ExtCtrls, ComCtrls, uConst,
   ORDtTm, Buttons, Menus, ImgList, VA508AccessibilityManager, VAUtils;

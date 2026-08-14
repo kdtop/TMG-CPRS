@@ -4,6 +4,8 @@ unit fFormulaHelper;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, ComCtrls, Grids, Buttons, Menus,
   fPickTemplateField, fPickTemplateVar, uTemplates, OrFn,
@@ -357,7 +359,8 @@ begin
   //----------
   TagStart := FN_CLOSE_TAG;  //should always be last character in the string;
   TagEnd := '';
-  while (Ord(Text[Length(Text)]) < 33) do Text := MidStr(Text, 1, Length(Text)-1);  //trim off control characters and spaces
+  //kt //codex original --> while (Ord(Text[Length(Text)]) < 33) do Text := MidStr(Text, 1, Length(Text)-1);  //trim off control characters and spaces
+  while (Ord(Text[Length(Text)]) < 33) do Text := Copy(Text, 1, Length(Text)-1);  //trim off control characters and spaces //kt //codex 8/3/26
   //TagEnd := Text[Pos];
   if Text[Length(Text)] <> FN_CLOSE_TAG then TagEnd := NEEDS_TRIM;
   if Pos >= Length(Text) then begin
@@ -523,7 +526,8 @@ begin
   //Text := reUserInput.Lines.Text;
   Text := Midstr(Text,Length(FN_OPEN_TAG)+1, Length(TEXT));
   if Pos(':',Text)=0 then exit;
-  Text := MidStr(Text,1, Pos(':',Text)-1);
+  //kt //codex original --> Text := MidStr(Text,1, Pos(':',Text)-1);
+  Text := Copy(Text,1, Pos(':',Text)-1); //kt //codex 8/3/26
   if Pos('[',Text)>0 then exit;  //Ignore [FLD:SomeName]
   AnsiReplaceStr(Text,#13,'');
   AnsiReplaceStr(Text,#10,'');
@@ -536,11 +540,13 @@ var p : integer;
 begin
   Result := Text;
   if GetOutputStoreVarName(Text)='' then begin
-    StrB := MidStr(Text,Length(FN_OPEN_TAG)+1, Length(Text));
+    //kt //codex original --> StrB := MidStr(Text,Length(FN_OPEN_TAG)+1, Length(Text));
+    StrB := Copy(Text,Length(FN_OPEN_TAG)+1, Length(Text)); //kt //codex 8/3/26
   end else begin
     p := PosEx(':',Text,length(FN_OPEN_TAG)+1);
     if p=0 then exit;  //shouldn't happen
-    StrB := MidStr(Text,p+1,Length(Text));
+    //kt //codex original --> StrB := MidStr(Text,p+1,Length(Text));
+    StrB := Copy(Text,p+1,Length(Text)); //kt //codex 8/3/26
   end;
   if VarName <> '' then VarName := VarName + ':';
   Result := FN_OPEN_TAG + VarName + StrB;
@@ -1074,8 +1080,10 @@ end;
   begin
     P1 := 1;
     FindPairedChars(Expr, ErrStr, P1,P2, OpenChar);
-    Result := MidStr(Expr,P1, P2);
-    Expr := Trim(MidStr(Expr, P2+1,length(Expr)));
+    //kt //codex original --> Result := MidStr(Expr,P1, P2);
+    Result := Copy(Expr,P1, P2); //kt //codex 8/3/26
+    //kt //codex original --> Expr := Trim(MidStr(Expr, P2+1,length(Expr)));
+    Expr := Trim(Copy(Expr, P2+1,length(Expr))); //kt //codex 8/3/26
   end;
 
 
@@ -1108,7 +1116,8 @@ end;
     OperIdx := 0;
     i := 1;
     while i <= length(Expr) do begin
-      if MidStr(Expr,i,5) =FLD_OPEN_TAG then begin
+      //kt //codex original --> if MidStr(Expr,i,5) =FLD_OPEN_TAG then begin
+      if Copy(Expr,i,5) =FLD_OPEN_TAG then begin //kt //codex 8/3/26
         FindPairedChars(Expr, ErrStr, i, P2,'[');
         if P2<= i then begin
           ErrStr := 'Unmatched brackets';
@@ -1138,8 +1147,10 @@ end;
       inc (i);
     end;
     if OperIdx > 0 then begin
-      Term := Trim(MidStr(Expr,1,OperIdx-1));
-      Expr := MidStr(Expr,OperIdx,length(Expr));
+      //kt //codex original --> Term := Trim(MidStr(Expr,1,OperIdx-1));
+      Term := Trim(Copy(Expr,1,OperIdx-1)); //kt //codex 8/3/26
+      //kt //codex original --> Expr := MidStr(Expr,OperIdx,length(Expr));
+      Expr := Copy(Expr,OperIdx,length(Expr)); //kt //codex 8/3/26
     end else begin
       Term := Expr;
       Expr := '';
@@ -1156,7 +1167,8 @@ end;
         exit;
       end;
       Operator := Expr[1];
-      Expr := Trim(MidStr(Expr,2,Length(Expr)));
+      //kt //codex original --> Expr := Trim(MidStr(Expr,2,Length(Expr)));
+      Expr := Trim(Copy(Expr,2,Length(Expr))); //kt //codex 8/3/26
     end else begin
       Operator := '';
     end;
@@ -1179,12 +1191,16 @@ end;
       CommaPos := Pos(',', Expr);
       ParenPos := Pos('(', Expr);
       if (CommaPos>0) and (CommaPos<ParenPos) then begin  //Both ','  and '(' present  and Comma FIRST
-        StrA := MidStr(Expr, 1, CommaPos-1);
+        //kt //codex original --> StrA := MidStr(Expr, 1, CommaPos-1);
+        StrA := Copy(Expr, 1, CommaPos-1); //kt //codex 8/3/26
         ParamSL.Add(StrA);
-        Expr := MidStr(Expr, CommaPos+1, Length(Expr));
+        //kt //codex original --> Expr := MidStr(Expr, CommaPos+1, Length(Expr));
+        Expr := Copy(Expr, CommaPos+1, Length(Expr)); //kt //codex 8/3/26
       end else if (ParenPos > 0) and (ParenPos < CommaPos) then begin   //'(' present  +/- ',', but PARENTHESIS FIRST
-        StrA := MidStr(Expr, 1, ParenPos-1);
-        Expr := MidStr(Expr, ParenPos, Length(Expr));
+        //kt //codex original --> StrA := MidStr(Expr, 1, ParenPos-1);
+        StrA := Copy(Expr, 1, ParenPos-1); //kt //codex 8/3/26
+        //kt //codex original --> Expr := MidStr(Expr, ParenPos, Length(Expr));
+        Expr := Copy(Expr, ParenPos, Length(Expr)); //kt //codex 8/3/26
         StrB := GetPairedParentheses(Expr, ErrStr);
         ParamSL.Add(StrA+StrB);
       end else begin
@@ -1193,14 +1209,17 @@ end;
           ParamSL.Add(Expr);
           Expr := '';
         end else begin
-          StrA := MidStr(Expr,1, CommaPos-1);
-          Expr := MidStr(Expr, CommaPos+1, Length(Expr));
+          //kt //codex original --> StrA := MidStr(Expr,1, CommaPos-1);
+          StrA := Copy(Expr,1, CommaPos-1); //kt //codex 8/3/26
+          //kt //codex original --> Expr := MidStr(Expr, CommaPos+1, Length(Expr));
+          Expr := Copy(Expr, CommaPos+1, Length(Expr)); //kt //codex 8/3/26
           ParamSL.Add(StrA);
         end;
       end;
       Expr := Trim(Expr);
       if (Length(Expr)> 1) and (Expr[1] = ',') then begin
-        Expr := Trim(MidStr(Expr, 2, Length(Expr)))
+        //kt //codex original --> Expr := Trim(MidStr(Expr, 2, Length(Expr)))
+        Expr := Trim(Copy(Expr, 2, Length(Expr))) //kt //codex 8/3/26
       end;
     until Expr = '';
   end;
@@ -1237,7 +1256,8 @@ end;
     Result := '';
     p := Pos('(', Expr);
     if p = 0 then exit;
-    Result := MidStr(Expr,1,p-1);
+    //kt //codex original --> Result := MidStr(Expr,1,p-1);
+    Result := Copy(Expr,1,p-1); //kt //codex 8/3/26
   end;
 
   function HasNestedFunction(Expr : string) : boolean;
@@ -1307,19 +1327,23 @@ end;
             exit;
           end;
           if SubExpr[1] = '(' then begin
-            SubExpr := MidStr(SubExpr,2,Length(SubExpr)-2); //trim leading and trailing parentheses -- syntax already inforced.
+            //kt //codex original --> SubExpr := MidStr(SubExpr,2,Length(SubExpr)-2); //trim leading and trailing parentheses -- syntax already inforced.
+            SubExpr := Copy(SubExpr,2,Length(SubExpr)-2); //trim leading and trailing parentheses -- syntax already inforced. //kt //codex 8/3/26
             OutSL.Add(IndentS +'(');
             Val := EvalExpression(SubExpr, ErrStr, OutSL, IndentAmount+2);  //Val not used here
             OutSL.Add(IndentS +')');
           end else if IsFn(SubExpr) then begin
             p := Pos('(',SubExpr);
-            FNName := UpperCase(MidStr(SubExpr,1,p-1));
+            //kt //codex original --> FNName := UpperCase(MidStr(SubExpr,1,p-1));
+            FNName := UpperCase(Copy(SubExpr,1,p-1)); //kt //codex 8/3/26
             if IsValidFn(FNName) then begin
-              SubExpr := MidStr(SubExpr,p,Length(SubExpr));
+              //kt //codex original --> SubExpr := MidStr(SubExpr,p,Length(SubExpr));
+              SubExpr := Copy(SubExpr,p,Length(SubExpr)); //kt //codex 8/3/26
               //SubExprSaved := SubExpr;
               SubSubExpr := GetPairedParentheses(SubExpr, ErrStr);
               SubExpr := Trim(SubExpr);
-              SubSubExpr := MidStr(SubSubExpr,2, Length(SubSubExpr)-2);
+              //kt //codex original --> SubSubExpr := MidStr(SubSubExpr,2, Length(SubSubExpr)-2);
+              SubSubExpr := Copy(SubSubExpr,2, Length(SubSubExpr)-2); //kt //codex 8/3/26
               if FNNAME <> 'TEXT' then begin
 
                 tempS := SubSubExpr;
@@ -1408,9 +1432,11 @@ end;
     if ErrStr <> '' then exit;
     Expr := GetPairedParentheses(Expr, ErrStr, '{');
     OutVarName := GetOutputStoreVarName(Expr);
-    Expr := Trim(MidStr(Expr, Length(FN_OPEN_TAG) + 1, Length(Expr) - Length(FN_OPEN_TAG) - 1));
+    //kt //codex original --> Expr := Trim(MidStr(Expr, Length(FN_OPEN_TAG) + 1, Length(Expr) - Length(FN_OPEN_TAG) - 1));
+    Expr := Trim(Copy(Expr, Length(FN_OPEN_TAG) + 1, Length(Expr) - Length(FN_OPEN_TAG) - 1)); //kt //codex 8/3/26
     if OutVarName <> '' then begin
-      Expr := MidStr(Expr, Length(OutVarName)+2, Length(Expr));
+      //kt //codex original --> Expr := MidStr(Expr, Length(OutVarName)+2, Length(Expr));
+      Expr := Copy(Expr, Length(OutVarName)+2, Length(Expr)); //kt //codex 8/3/26
       OutVarName := OutVarName + ':'
     end;
     //VEFA-261  OutSL.Add(FN_OPEN_TAG + OutVarName);
@@ -1451,7 +1477,8 @@ begin
   Result := '';
   p := Pos(FN_OPEN_TAG, Formula);
   if p = 0 then exit;
-  Text := MidStr(Formula, p, Length(Formula));
+  //kt //codex original --> Text := MidStr(Formula, p, Length(Formula));
+  Text := Copy(Formula, p, Length(Formula)); //kt //codex 8/3/26
   Result := GetPairedParentheses(Text, ErrStr, '{');
   if ErrStr <> '' then begin
     Result := '';
@@ -1502,7 +1529,8 @@ end;
 function TfrmFormulaHelper.HandleTags(OrigFormula : string; RemoveTag: boolean): string;
 begin
   if RemoveTag then begin
-    Result := MidStr(Trim(OrigFormula),Length(FN_OPEN_TAG)+1,Length(OrigFormula));
+    //kt //codex original --> Result := MidStr(Trim(OrigFormula),Length(FN_OPEN_TAG)+1,Length(OrigFormula));
+    Result := Copy(Trim(OrigFormula),Length(FN_OPEN_TAG)+1,Length(OrigFormula)); //kt //codex 8/3/26
     Result := LeftStr(Result,Length(Result)-1);
   end else begin
     Result := FN_OPEN_TAG + OrigFormula + FN_CLOSE_TAG;

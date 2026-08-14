@@ -43,6 +43,9 @@ bugs noticed:
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, Buttons, ORCtrls, ComCtrls, ImgList, uTemplates,
   TMGHTML2, uHTMLTools, StrUtils, uTIU, uNoteComponents, //kt added uses on this line. 9/11

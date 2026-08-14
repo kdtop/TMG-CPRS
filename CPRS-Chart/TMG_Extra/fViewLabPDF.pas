@@ -36,6 +36,8 @@ unit fViewLabPDF;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, OleCtrls, SHDocVw, ExtCtrls, ComCtrls, ORCtrls,
   ORFn, uCore, DateUtils, ORNet, uTMGOptions,

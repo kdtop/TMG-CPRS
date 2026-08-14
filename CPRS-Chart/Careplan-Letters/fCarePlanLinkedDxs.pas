@@ -3,6 +3,8 @@ unit fCarePlanLinkedDxs;
 interface             
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Grids, StdCtrls, Buttons,fBase508Form, VA508AccessibilityManager;
 

@@ -44,7 +44,8 @@ begin
     if not lbxProbList.Selected[i] then continue;
     ICDCode := piece(lbxProbList.Items.Strings[i],' ',1);
     Name := Trim(pieces(lbxProbList.Items.Strings[i],' ',2,64));
-    while (Name[1] in [' ','-']) and (length(Name)>1) do Name := MidStr(Name,2,999);
+    //kt //codex original --> while (Name[1] in [' ','-']) and (length(Name)>1) do Name := MidStr(Name,2,999);
+    while (Name[1] in [' ','-']) and (length(Name)>1) do Name := Copy(Name,2,999); //kt //codex 8/3/26
     SelectionResult.Add(ICDCode+'^'+Name);
   end;
   btnOK.Enabled := SelectionResult.Count > 0;

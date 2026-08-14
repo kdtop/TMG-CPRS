@@ -3,6 +3,7 @@ unit fOrdersRelease;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fAutoSz, StdCtrls, ORFn, ORCtrls, ExtCtrls, UBACore, UBAGlobals,
   VA508AccessibilityManager;

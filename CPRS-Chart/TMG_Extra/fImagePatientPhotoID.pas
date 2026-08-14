@@ -36,6 +36,7 @@ unit fImagePatientPhotoID;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   ORNet, ORFn,
   rFileTransferU, uImages,uHTMLTools,
@@ -528,4 +529,3 @@ procedure TfrmPatientPhotoID.FormShow(Sender: TObject);
   end;
 
 end.
-

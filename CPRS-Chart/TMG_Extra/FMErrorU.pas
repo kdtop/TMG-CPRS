@@ -67,7 +67,8 @@ uses
     if Memo.Lines.Count=1 then begin
       s := Memo.Lines.Strings[0];
       if piece(s,'^',1)='-1' then begin
-        Memo.Lines.Strings[0] := MidStr(s, 3,length(s));
+        //kt //codex original --> Memo.Lines.Strings[0] := MidStr(s, 3,length(s));
+        Memo.Lines.Strings[0] := Copy(s, 3,length(s)); //kt //codex 8/3/26
       end;
     end else if Memo.Lines.Count>1 then begin
       if piece(Memo.Lines.Strings[0],'^',1)='-1' then begin

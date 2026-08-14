@@ -5,6 +5,9 @@ unit fOrdersSign;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fAutoSz, StdCtrls, StrUtils, ORFn, ORNet, ORCtrls, AppEvnts, mCoPayDesc, XUDsigS,
   ComCtrls, CheckLst, ExtCtrls, uConsults, UBAGlobals,UBACore, UBAMessages, UBAConst,

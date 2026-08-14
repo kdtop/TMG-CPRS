@@ -7,6 +7,8 @@ unit fTMGEncounterICDPicker;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   uTMGTypes, fPCELex, ORNet,
   Dialogs, StdCtrls, Buttons, ExtCtrls, ORCtrls, ORFn, StrUtils;

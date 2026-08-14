@@ -36,6 +36,8 @@ unit fReminderDialog;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, ORFn, StdCtrls, ComCtrls, Buttons, ORCtrls, uReminders, uConst,
   ORClasses, fRptBox, Menus, rPCE, uTemplates,fBase508Form,

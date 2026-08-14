@@ -3,6 +3,7 @@ unit fReportsAdhocSubItem1;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ORCtrls, Buttons, ORfn, fAutoSz, VA508AccessibilityManager;
 

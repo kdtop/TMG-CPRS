@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-08-03
+Last updated: 2026-08-14
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -14,7 +14,7 @@ Project: `CPRS-Chart\CPRSChart.dproj`
 
 ## Goal
 
-Primary current goal as of 2026-08-03:
+Primary current goal as of 2026-08-14:
 
 - Keep CPRSChart working under Delphi 12 at runtime/debug time now that the project compiles successfully again in the Delphi IDE.
 - Continue cautiously simplifying the old HTML editor/browser wrapper area without breaking the current successful Delphi IDE build.
@@ -55,13 +55,14 @@ This is a copied Delphi 12 porting tree. The real production/source tree exists 
 
 Substantive local baseline commits, newest first:
 
+- `e564182 Checkpoint HTML editor streamlining milestone`
 - `2d6ed84 Checkpoint current Delphi 12 HTML editor/debugging state`
 - `f08ed49 Document local git baseline`
 - `497962a Create Delphi 12 working tree baseline`
 - `54f1dc1 Ignore Delphi compiled unit artifacts`
 - `12afbc9 Port CPRS Broker source for Delphi 12`
 
-These commits are local checkpoints in the copied Delphi 12 working tree. There may also be a later `HANDOFF.md`-only documentation commit at `HEAD`; that does not change source behavior. `origin/master` still points at the older source history (`c58ce2b` at the time this handoff was updated), so this branch is intentionally ahead of `origin/master`. That does not mean the real source tree elsewhere has been changed.
+These commits are local checkpoints in the copied Delphi 12 working tree. As of 2026-08-14, `HEAD` is `e564182` on `master`, and it is a real source checkpoint, not just a `HANDOFF.md`-only documentation commit. `origin/master` still points at the older source history (`c58ce2b` at the time this handoff was updated), so this branch is intentionally ahead of `origin/master`. That does not mean the real source tree elsewhere has been changed.
 
 `git status --short` was clean immediately after the 2026-07-30 handoff-only update. That is no longer a safe assumption for later sessions. As of 2026-07-31, the user reports the local git view has not been updated in a few days and the working tree may contain intentional uncommitted edits plus generated artifacts and backup files.
 
@@ -78,7 +79,7 @@ Important Git workflow:
 
 ## Current State
 
-As of 2026-08-03, the user has confirmed a successful Delphi IDE compile. Active work is runtime/debugging cleanup and cautious HTML-stack simplification rather than basic compile blocking.
+As of 2026-08-14, the current local baseline includes the `e564182` HTML streamlining checkpoint. The user had previously confirmed a successful Delphi IDE compile, and active work remains runtime/debugging cleanup plus cautious HTML-stack simplification rather than basic compile blocking.
 
 Important:
 
@@ -91,26 +92,48 @@ Recommended working assumption for the next session:
 - Start from runtime/designer/debugging investigation unless the user explicitly says the build is failing again.
 - Treat `CPRS-Chart\build_errors.txt` as historical context unless the user has just saved a fresh compile log from the Delphi IDE.
 
-### Runtime / Debugging Status As Of 2026-08-01
+### Runtime / Debugging Status As Of 2026-08-14
 
 - The application compiles and can start, log in, and communicate with the RPC Broker.
 - Several Delphi 12 runtime/designer compatibility issues have been found and fixed incrementally.
 - Current work has shifted to runtime AV/debugger cleanup in chart tabs and older helper units.
-- The user is reviewing the `HTMLEdit` / `EmbeddedED` area cautiously. Do not assume broad code-pruning work is already complete or safe to resume without re-checking actual call sites.
+- The user is reviewing the `HTMLEdit` area cautiously. The `EmbeddedED` implementation has already been cut out of the active source tree; do not assume older `EmbeddedED`-specific cleanup notes still apply without re-checking the current files.
+- New active planning topic as of 2026-08-14: refactoring `CPRS-Chart\fNotes.pas` to replace the hidden `lstNotes: TORListBox` data-store role with a non-visual record-string model in `CPRS-Chart\TMG_Extra\uTRecStrList.pas`, while reducing tree/list duplication and event cascades.
 
-### HTML / HTMLEdit Status As Of 2026-08-03
+### HTML / HTMLEdit Status As Of 2026-08-13
 
-- The user reports that CPRS currently compiles after substantial HTMLEdit streamlining work.
-- `EmbeddedED` has effectively been cut out of the active CPRS build path:
-  - `THtmlObj` in `TMGHTML2.pas` was changed to descend from `TWebBrowser`.
-  - Code previously relied on from `EmbeddedED` was copied into `TMGHTML2.pas` inside the user-created `//kt //codex From EmbeddedED` section as needed during compile-fix passes.
-  - The user then removed the `EmbeddedED` folder from the tree and reported a full build still succeeded.
-- The user also removed old `IE*.pas` files and old `Ewb*/EWB*` helper files after compile testing, and reported builds still succeeded.
-- `MSHTML_EWB.pas` is a local modified type-library import, not a stock Delphi unit. The user has been gradually moving usages from `MSHTML_EWB` to plain `MSHTML`.
-- During that migration, plain `MSHTML` often does not expose `Elem.className` the same way the old local import did. Current practical compatibility workaround:
-  - use `VarToStr(Elem.getAttribute('className', 0))`
-  - use `Elem.setAttribute('className', ..., 0)` for writes
-- Do not assume every remaining `MSHTML_EWB` reference is gone. Re-check actual current source before making more replacements.
+- The current `HEAD` checkpoint is `e564182 Checkpoint HTML editor streamlining milestone`.
+- `THtmlObj` in `TMGHTML2.pas` now descends from `TWebBrowser`, not `TEmbeddedED`.
+- The active HTMLEdit implementation is now centered in `CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas`, including the merged `//kt //codex From EmbeddedED` block.
+- The old `EmbeddedED` source folder was removed from the tracked source tree in this checkpoint, along with old `IE*.pas`, `Ewb*.pas`, `EWB*.pas`, `IEdispConst.pas`, and `MSHTML_EWB.pas`.
+- `MSHTMLEvents.pas` is still present in the tree and remains part of the current HTML stack.
+- Some Delphi IDE/session artifacts may still mention deleted `EmbeddedED` paths. Treat those as historical/editor state unless a fresh compile proves they are still relevant.
+- For the next HTML cleanup pass, start with:
+  - `CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas`
+  - `CPRS-Chart\TMG_Extra\uHTMLDlgObjs.pas`
+  - `CPRS-Chart\TMG_Extra\uHTMLTemplateFields.pas`
+  - `docs\EMBEDDEDED_CUT_PLAN.md`
+  - `docs\EMBEDDEDED_DEPENDENCY_MAP.md`
+
+### Notes / `uTRecStrList` Status As Of 2026-08-14
+
+- A new non-visual record-string helper unit now exists:
+  - `CPRS-Chart\TMG_Extra\uTRecStrList.pas`
+- This unit is intended to become the replacement backing store for the hidden `lstNotes` role in `fNotes`.
+- Current `TRecStrList` capabilities include:
+  - `Add`, `Insert`, `Delete`, `Exchange`, `Clear`
+  - `GetID`, `GetIEN`, `IndexOfID`, `IndexOfIEN`, `SelectByID`, `SelectByIEN`
+  - `SelectedIndex`, `SelectedID`, `SelectedRecord`, `DeleteSelected`
+  - indexed record access via `Items[Index]`
+  - piece access via `ItemPiece[Index, PieceNum]`
+  - optional field-name schema lookup via `SelectedData['fieldname']` after `SetSchema(...)`
+- The numeric identifier from piece 1 is cached in `TStringList.Objects[]`; non-numeric piece-1 values are stored as `-1`.
+- `uTRecStrList` is not yet wired into `fNotes`; it is preparatory infrastructure for the next refactor session.
+- For the next `fNotes` refactor session, read:
+  - `FNOTES_REVIEW.md`
+  - `CPRS-Chart\TMG_Extra\uTRecStrList.pas`
+  - `CPRS-Chart\fNotes.pas`
+  - `CPRS-Chart\uDocTree.pas`
 
 ### Important 2026-08-03 Cleanup Warning
 
@@ -134,13 +157,10 @@ Recommended working assumption for the next session:
   - if touched, preserve Broker wire semantics as single-byte/ANSI unless there is a deliberate protocol change
   - prefer targeted marshaling at the Broker boundary over changing broad application text handling
 
-Recent confirmed fixes from this session:
+Recent confirmed fixes from earlier sessions that still matter conceptually:
 
-- `CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED\EmbeddedED.pas`
-  - `LoadFromString` was fixed for Delphi 12 Unicode `Char` sizing when copying HTML into global memory before handing it to the embedded browser.
-  - The prior code allocated and copied as if `Char` were single-byte; that truncated HTML and caused the browser "View Source" output to stop around `&nbsp;&amp;n`.
-  - The fix now allocates `(Length(aString)+1) * SizeOf(Char)`, copies with `Move(PChar(aString)^, ...)` using `Length(aString) * SizeOf(Char)`, and writes an explicit null terminator.
-  - The user confirmed on 2026-07-31 that this resolved the missing/truncated HTML display issue.
+- The old `EmbeddedED.pas` `LoadFromString` Unicode `Char` sizing bug was fixed before the later HTML streamlining work removed that file from the tracked source tree.
+- That older fix matters as history because it explains why HTML/document byte-vs-character sizing had to be handled carefully during the later merge into `TMGHTML2.pas`.
 - `CPRS-Lib\ORClasses.pas`
   - `TORStringList.SortByPieces` quicksort loop now bounds-checks `I` and `J` before indexing, preventing out-of-range access during sort.
 - `CPRS-Lib\ORFn.pas`
@@ -163,9 +183,6 @@ Recent confirmed fixes from this session:
   - The old `OnBeforeNavigate2` signature mismatch was investigated. The user used the Delphi designer to regenerate the handler signature and manually repaired the event hookup. Do not revert that blindly.
 - `CPRS-Chart\TMG_Extra\uHTMLTools.pas`
   - `GetIPAddress` was rewritten into a cleaner Delphi-style Winsock helper and the old code was preserved as `//kt //codex original --> ...` comments.
-- `CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED\KS_procs.pas`
-  - `IsAlNum()` was fixed after UTF-8 conversion by replacing the old `'À'..'ÿ'` set range with an `Ord(C)` range test.
-
 ### Encoding / Editing Notes
 
 - The user converted `CPRS-Chart\TMG_Extra\uHTMLTools.pas` to UTF-8 using Windows Notepad so it is easier to edit safely.
@@ -175,7 +192,7 @@ Recent confirmed fixes from this session:
   - Converts them from Windows-1252 to UTF-8
   - Creates `.bak` backups
 - The script can introduce follow-up compile fixes in old third-party units; use it cautiously and expect Unicode/set-expression cleanup afterward.
-- Delphi IDE state matters: on 2026-07-31, compile errors persisted until the user closed and reopened Delphi so the IDE reloaded `EmbeddedED.pas` from disk. If compile output does not match the current file contents, suspect a stale in-memory editor buffer before assuming the source is still broken.
+- Delphi IDE state matters: on 2026-07-31, compile errors persisted until the user closed and reopened Delphi so the IDE reloaded the current source from disk. If compile output does not match the current file contents, suspect a stale in-memory editor buffer before assuming the source is still broken.
 
 ### User Editing Conventions
 
@@ -188,7 +205,7 @@ Current compile state:
 
 - CPRS currently compiles in the Delphi 12 IDE.
 - Active work is now runtime/debugging cleanup after compile success.
-- `CPRS-Chart\build_errors.txt` may currently contain stale `EmbeddedED.pas` forward-declaration failures from before the Delphi IDE reload on 2026-07-31. Do not treat that file as current unless the user saves a fresh compile log after reopening Delphi.
+- `CPRS-Chart\build_errors.txt` may currently contain stale historical failures from before the later HTML streamlining checkpoint. Do not treat that file as current unless the user saves a fresh compile log after reopening Delphi.
 - Do not treat the older `BDK50\Rpcnet.pas` compile-failure notes below as the current blocker; they are historical context for how the tree reached the present compileable state.
 
 Older milestone:
@@ -250,11 +267,12 @@ Recommended first step:
 
 1. Read the current source before editing; the user manually adjusted some recent patches, especially `CPRS-Lib\ORFn.pas` and event-handler fixes.
 2. Run `git -c safe.directory=/mnt/WinPublic/vista/TMGCPRS_v30A_Delphi12 status --short`, but treat the result as informational only unless the user asks to clean or checkpoint it.
-3. If the user reports a compile issue, ask for a fresh Delphi IDE compile log and ignore stale compile guidance, especially if Delphi may still have an old in-memory copy of `EmbeddedED.pas`.
+3. If the user reports a compile issue, ask for a fresh Delphi IDE compile log and ignore stale compile guidance, especially if Delphi may still have an old in-memory view of files that were later removed or rewritten.
 4. If the user reports a runtime/designer issue, inspect the active unit/DFM pair first; many current failures are old-component/Delphi-12 compatibility problems rather than broker/compile failures.
-5. If returning to `HTMLEdit` / browser-stack cleanup, start by reading the current `TMGHTML2.pas`, `uHTMLDlgObjs.pas`, `uHTMLTemplateFields.pas`, and current `uses` lists before assuming older `EmbeddedED` assumptions still apply.
+5. If returning to `HTMLEdit` / browser-stack cleanup, start by reading the current `TMGHTML2.pas`, `uHTMLDlgObjs.pas`, `uHTMLTemplateFields.pas`, `docs\EMBEDDEDED_CUT_PLAN.md`, and `docs\EMBEDDEDED_DEPENDENCY_MAP.md` before assuming older `EmbeddedED` assumptions still apply.
 6. Do not run another broad automated unused-variable cleanup pass. If removing unused locals, do it manually and in very small scopes.
 7. Be careful with files converted from ANSI to UTF-8; conversion can surface warnings/errors in old character-set code.
+8. If returning to the `fNotes` cleanup, use `uTRecStrList` as the intended backing-store replacement for hidden `lstNotes`, and follow `FNOTES_REVIEW.md` rather than re-deriving the architecture from scratch.
 
 Historical compile-porting notes follow below. They are preserved for context, not as the default current task. Do not resume that older Broker/compile sequence unless the user reports a new compile regression that points back into the same area.
 
@@ -489,14 +507,15 @@ Updated local copies from installed package sources:
 
 ## HTMLEdit Streamlining Idea
 
-The HTMLEdit area appears to be a large imported third-party stack plus a local wrapper:
+The HTMLEdit area is now a smaller post-cut stack centered on a local wrapper plus a few supporting units:
 
 - Main local wrapper: `CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas`
-- `THtmlObj` is currently declared as `class(TEmbeddedED)`.
-- Imported embedded editor package files live under `CPRS-Chart\TMG_Extra\HTMLEdit\EmbeddedED`.
-- Very large generated/browser support units include `MSHTML_EWB.pas`, `MSHTMLEvents.pas`, `EmbeddedED.pas`, `IEdispConst.pas`, and numerous `Ewb*/IE*` helper units.
+- `THtmlObj` is currently declared as `class(TWebBrowser)`.
+- The merged `//kt //codex From EmbeddedED` section inside `TMGHTML2.pas` is the main place where inherited `EmbeddedED` behavior was inlined.
+- Supporting current units include `MSHTMLEvents.pas`, `uHTMLDlgObjs.pas`, and `uHTMLTemplateFields.pas`.
+- The best orientation docs for this area are `docs\EMBEDDEDED_CUT_PLAN.md` and `docs\EMBEDDEDED_DEPENDENCY_MAP.md`.
 
-Initial scan suggests CPRS mostly depends on `THtmlObj` as an abstraction, not directly on most of the imported package. Common call sites use:
+CPRS still mostly depends on `THtmlObj` as an abstraction. Common call sites use:
 
 - creation: `THtmlObj.Create(...)`
 - text/html load/save: `Text`, `Clear`
@@ -505,9 +524,9 @@ Initial scan suggests CPRS mostly depends on `THtmlObj` as an abstraction, not d
 - simple formatting/edit commands: `ToggleBold`, `ToggleItalic`, colors, paste, send keys
 - DOM helpers: `GetElementById`, class/tag searches, style/script helpers
 
-Possible second-phase strategy after the Delphi 12 compile pass is stable:
+Possible next-phase strategy after the current `e564182` cut:
 
 1. Keep the public `THtmlObj` API stable.
-2. Introduce a smaller implementation behind that API, probably based directly on `TWebBrowser`/IE COM (`IHTMLDocument2`, `IHTMLTxtRange`, `execCommand`, `designMode`/`contentEditable`).
-3. Migrate call sites gradually by preserving `THtmlObj` method names.
-4. Remove unused imported units only after compile references prove they are no longer needed.
+2. Treat `TMGHTML2.pas` as the primary implementation surface and avoid resurrecting deleted `EmbeddedED` units unless a fresh compile/runtime failure proves something was cut incorrectly.
+3. Use `docs\EMBEDDEDED_CUT_PLAN.md` and `docs\EMBEDDEDED_DEPENDENCY_MAP.md` before making further large removals.
+4. Migrate or simplify remaining helpers gradually while preserving `THtmlObj` method names.

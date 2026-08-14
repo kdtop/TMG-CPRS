@@ -18,6 +18,8 @@
 unit XWBRich20;
 interface
 uses Messages, Windows, SysUtils, Classes, Controls, Forms,
+  System.Types,
+  System.UITypes,
   Menus, Graphics, StdCtrls, RichEdit, ToolWin, ImgList, ExtCtrls, ComCtrls;
 
 type

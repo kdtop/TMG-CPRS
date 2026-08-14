@@ -5,6 +5,8 @@ unit fTMGDiagnoses;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fPCEBase, StdCtrls, CheckLst, ORNet, ExtCtrls, Buttons, uPCE, ORFn,
   ComCtrls, fPCEBaseMain, UBAGlobals, UBAConst, UCore, VA508AccessibilityManager,

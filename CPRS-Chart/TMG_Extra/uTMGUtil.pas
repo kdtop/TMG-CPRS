@@ -215,7 +215,8 @@ implementation
       if piece(oneEntry,'^',3) <> FileNum then continue;
       if piece(oneEntry,'^',4) <> FieldNum then continue;
       temp := pieces(oneEntry,'^',1,4)+'^';
-      oneEntry := MidStr(oneEntry,length(temp)+1,length(oneEntry));
+      //kt //codex original --> oneEntry := MidStr(oneEntry,length(temp)+1,length(oneEntry));
+      oneEntry := Copy(oneEntry,length(temp)+1,length(oneEntry)); //kt //codex 8/3/26
       Nodes := piece2(oneEntry,'&=&',1);
       Nodes := piece(Nodes,')',1);
       DDVal := piece2(oneEntry,'&=&',2);

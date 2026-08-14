@@ -43,6 +43,9 @@ unit fReview;
 interface                                                                                                                                
 
 uses
+  System.Types,
+  System.UITypes,
+
   UBAGlobals,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, checklst, uConst, ExtCtrls, uCore, mCoPayDesc, XUDsigS,

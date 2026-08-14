@@ -40,6 +40,7 @@ unit ORFn;
 interface  // --------------------------------------------------------------------------------
 
 uses SysUtils, Windows, Messages, Classes, Controls, StdCtrls, ExtCtrls, ComCtrls, Forms,
+  VCLTee.TeEngine,
      DateUtils, //kt added 11/20
      Graphics, Menus, RichEdit, Buttons;
 

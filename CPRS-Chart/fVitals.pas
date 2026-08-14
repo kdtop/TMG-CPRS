@@ -34,6 +34,8 @@ unit fVitals;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, TeEngine, Series, TeeProcs, Chart, ExtCtrls, Grids,Buttons,
   ORNet, ORFn, uConst, Menus, ORDtTmRng, fBase508Form, ComCtrls, uVitals, VAUtils,

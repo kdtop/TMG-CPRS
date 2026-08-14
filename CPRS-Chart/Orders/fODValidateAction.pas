@@ -3,6 +3,7 @@ unit fODValidateAction;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ORFn, uCore, StdCtrls, CheckLst, ComCtrls,ExtCtrls,uConst, ORCtrls, fBase508Form,
   VA508AccessibilityManager;

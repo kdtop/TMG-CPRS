@@ -36,6 +36,8 @@ unit fConsultLink;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ORCtrls, Buttons, VAUtils, ORNet;
 

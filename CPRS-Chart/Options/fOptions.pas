@@ -37,7 +37,9 @@ unit fOptions;
 
 interface
 
-uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
+uses
+  System.UITypes,
+ Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ComCtrls, ExtCtrls, ORCtrls, OrFn, Dialogs, ORDtTmRng, fBAOptionsDiagnoses,
   inifiles, uConst, strUtils, uImages, //kt 9/11 added line
   uBAGlobals, fBase508Form, VA508AccessibilityManager, fAutoSz;

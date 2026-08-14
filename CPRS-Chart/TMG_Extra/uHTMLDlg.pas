@@ -158,7 +158,8 @@ uses
       s := Source.Strings[i];
       if Pos(EndTag, s) > 0 then begin
         s := ORFn.piece2(s, EndTag, 1) + EndTag;  //If s has code after EndTag, s will have that cut off
-        s2 := MidStr(Source.Strings[i], Length(s)+1, Length(Source.Strings[i]));
+        //kt //codex original --> s2 := MidStr(Source.Strings[i], Length(s)+1, Length(Source.Strings[i]));
+        s2 := Copy(Source.Strings[i], Length(s)+1, Length(Source.Strings[i])); //kt //codex 8/3/26
         if s2 <> '' then begin
           Source.Strings[i] := s2;
           dec(i); //counteract later inc
@@ -178,7 +179,8 @@ uses
     strContent := ORFn.piece2(Source.text, EndTag,1);
     //strContent := ORFn.piece2(strContent,StartTag,2);
     p := Pos('>', strContent);
-    strContent := MidStr(strContent, p+1, length(strContent));
+    //kt //codex original --> strContent := MidStr(strContent, p+1, length(strContent));
+    strContent := Copy(strContent, p+1, length(strContent)); //kt //codex 8/3/26
     Content.add(strContent);
   end;
 
@@ -213,7 +215,8 @@ uses
         PosNum := Pos(StartTag, s);
         if (PosNum > 1) then begin
           s1 := ORFn.piece2(s, StartTag, 1);
-          s2 := MidStr(s, Length(s1)+1, Length(s));
+          //kt //codex original --> s2 := MidStr(s, Length(s1)+1, Length(s));
+          s2 := Copy(s, Length(s1)+1, Length(s)); //kt //codex 8/3/26
           s1 := StringReplace(s1, CRLF, '',  [rfReplaceAll]);
           FCumulativeBodyHTML.Add(s1);
           ParsedSource.Add(s1);

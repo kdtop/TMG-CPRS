@@ -36,6 +36,8 @@ unit fProbAutoAdd;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls, ORCtrls, ORFn, ORDtTm, Math, Menus;
 

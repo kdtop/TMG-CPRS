@@ -35,6 +35,8 @@ unit fADT;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Registry, FileCtrl,
   Dialogs, StdCtrls, ExtCtrls, ComCtrls, ORFn, ORNet, TRPCB, uCore, ORCtrls, ORDtTm, fFrame, rCore, OleCtrls, SHDocVw;
 

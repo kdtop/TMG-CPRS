@@ -5,6 +5,8 @@ unit fTMGChartExporter;
 interface
 
 uses
+  System.UITypes,
+
  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, ORNet, uCore,rConsults,
   Dialogs, fAutoSz, StdCtrls, ORCtrls, fConsult513Prt, VA508AccessibilityManager, rReports, ShellAPI,
   CheckLst, ComCtrls, ORDtTm, ORFn, OleCtrls, SHDocVw, ExtCtrls, Buttons, FileCtrl, Math,

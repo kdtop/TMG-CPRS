@@ -4,6 +4,8 @@ unit fPtDiscreteData;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   uTemplateFields, ORFn, StrUtils, TMGHTML2,
   Dialogs, ExtCtrls, StdCtrls, ORCtrls, ComCtrls,

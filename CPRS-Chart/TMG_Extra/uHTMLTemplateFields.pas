@@ -55,6 +55,9 @@ unit uHTMLTemplateFields;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Forms, SysUtils, Classes, Dialogs, StdCtrls, ExtCtrls, Controls, Contnrs, Variants,
   {uHTMLDlg, } TMGHTML2, uHTMLTools,
   MSHTML,
@@ -522,8 +525,10 @@ function THTMLTemplateFieldType.GetInnerEditDefaultValue : string;
 //Strip off tag and return just default value
 begin
   Case(GetDataBinding) of
-    dbcbReadWrite  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_RW_TAG)+1, MaxInt);
-    dbcbWriteOnly  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_W_TAG)+1, MaxInt);
+    //kt //codex original --> dbcbReadWrite  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_RW_TAG)+1, MaxInt);
+    dbcbReadWrite  : Result := Copy(FEditDefault, length(DATABASE_CONTROL_RW_TAG)+1, MaxInt); //kt //codex 8/3/26
+    //kt //codex original --> dbcbWriteOnly  : Result := MidStr(FEditDefault, length(DATABASE_CONTROL_W_TAG)+1, MaxInt);
+    dbcbWriteOnly  : Result := Copy(FEditDefault, length(DATABASE_CONTROL_W_TAG)+1, MaxInt); //kt //codex 8/3/26
     dbcbNone       : Result := FEditDefault;
   end;
 end;
@@ -1245,8 +1250,10 @@ begin
         ScriptSL := TStringList.Create;
         FnNames := TStringList.Create;
         PosPastEndTag := PosEndTag + length(SCRIPT_CLOSE_TAG);
-        Script := MidStr(FDefinitionText, PosPastStartTag, PosEndTag - PosPastStartTag);
-        TempHTMLSL.Text := MidStr(s, 1, PosStartTag-1) + MidStr(s, PosPastEndTag, length(s));
+        //kt //codex original --> Script := MidStr(FDefinitionText, PosPastStartTag, PosEndTag - PosPastStartTag);
+        Script := Copy(FDefinitionText, PosPastStartTag, PosEndTag - PosPastStartTag); //kt //codex 8/3/26
+        //kt //codex original --> TempHTMLSL.Text := MidStr(s, 1, PosStartTag-1) + MidStr(s, PosPastEndTag, length(s));
+        TempHTMLSL.Text := Copy(s, 1, PosStartTag-1) + Copy(s, PosPastEndTag, length(s)); //kt //codex 8/3/26
         ScriptSL.Text := Script;
         //FHTMLTemplateDocument.FWebBrowser.SummarizeScript(ScriptSL, FnNames);
         SummarizeScript(ScriptSL, FnNames);
@@ -1285,22 +1292,26 @@ begin
     while PosStartTag > 0 do begin
       PosPastStartTag := PosStartTag + TemplateFieldSignatureLen;  //move i to right after field start sig
       if WorkingLine[PosPastStartTag] = FieldIDDelim then begin
-        CtrlID := StrToIntDef( MidStr(WorkingLine, PosPastStartTag+1, FieldIDLen-1), 0);
+        //kt //codex original --> CtrlID := StrToIntDef( MidStr(WorkingLine, PosPastStartTag+1, FieldIDLen-1), 0);
+        CtrlID := StrToIntDef( Copy(WorkingLine, PosPastStartTag+1, FieldIDLen-1), 0); //kt //codex 8/3/26
         delete(WorkingLine, PosPastStartTag, FieldIDLen);
       end else begin
         CtrlID := GetNewTemplateFieldID;
       end;
       HTMLCtrlID := 'ctrl' + IntToStr(CtrlID) + '_' + FTMGDlgID;
-      StrA := MidStr(WorkingLine, 1, PosStartTag-1);
+      //kt //codex original --> StrA := MidStr(WorkingLine, 1, PosStartTag-1);
+      StrA := Copy(WorkingLine, 1, PosStartTag-1); //kt //codex 8/3/26
       PosEndTag := PosEx(TemplateFieldEndSignature, WorkingLine, PosPastStartTag);
       if(PosEndTag > 0) then begin
         PosPastEndTag := PosEndTag + length(TemplateFieldEndSignature);
         PosStartTag := PosPastEndTag; //needed for next search cycle
         flen := PosEndTag - PosPastStartTag;
-        FldName := MidStr(WorkingLine, PosPastStartTag, flen);
+        //kt //codex original --> FldName := MidStr(WorkingLine, PosPastStartTag, flen);
+        FldName := Copy(WorkingLine, PosPastStartTag, flen); //kt //codex 8/3/26
         //1 Fld represents 1 type (e.g. edit box)
         //  E.g. Add edit boxes by using same AHTMLTemplateFieldType object to generate actual instances
-        StrB := MidStr(WorkingLine, PosPastEndTag, length(WorkingLine));
+        //kt //codex original --> StrB := MidStr(WorkingLine, PosPastEndTag, length(WorkingLine));
+        StrB := Copy(WorkingLine, PosPastEndTag, length(WorkingLine)); //kt //codex 8/3/26
         AHTMLTemplateFieldType := GetHTMLTemplateFieldType(FldName, FALSE);
         if assigned(AHTMLTemplateFieldType) then begin
           if(AHTMLTemplateFieldType.Required) then StrB := '* ' + StrB;
@@ -1313,7 +1324,8 @@ begin
           WorkingLine := StrA + '[Unknown field: "' + FldName + '"]' + StrB;
         end
       end else begin
-        StrB := MidStr(WorkingLine, PosPastStartTag, length(WorkingLine));
+        //kt //codex original --> StrB := MidStr(WorkingLine, PosPastStartTag, length(WorkingLine));
+        StrB := Copy(WorkingLine, PosPastStartTag, length(WorkingLine)); //kt //codex 8/3/26
         PosStartTag := 1;
         WorkingLine := StrB;
       end;
@@ -1421,7 +1433,8 @@ begin
       PosNum := Pos(StartTag, s);
       if (PosNum > 1) then begin
         s1 := ORFn.piece2(s, StartTag, 1);
-        s2 := MidStr(s, Length(s1)+1, Length(s));
+        //kt //codex original --> s2 := MidStr(s, Length(s1)+1, Length(s));
+        s2 := Copy(s, Length(s1)+1, Length(s)); //kt //codex 8/3/26
         s1 := StringReplace(s1, CRLF, '',  [rfReplaceAll]);
         FHTML.Add(s1);
         ParsedSource.Add(s1);
@@ -1465,7 +1478,8 @@ begin
     s := Source.Strings[i];
     if Pos(EndTag, s) > 0 then begin
       s := ORFn.piece2(s, EndTag, 1) + EndTag;  //If s has code after EndTag, s will have that cut off
-      s2 := MidStr(Source.Strings[i], Length(s)+1, Length(Source.Strings[i]));
+      //kt //codex original --> s2 := MidStr(Source.Strings[i], Length(s)+1, Length(Source.Strings[i]));
+      s2 := Copy(Source.Strings[i], Length(s)+1, Length(Source.Strings[i])); //kt //codex 8/3/26
       if s2 <> '' then begin
         Source.Strings[i] := s2;
         dec(i); //counteract later inc
@@ -1485,7 +1499,8 @@ begin
   strContent := ORFn.piece2(Source.text, EndTag,1);
   //strContent := ORFn.piece2(strContent,StartTag,2);
   p := Pos('>', strContent);
-  strContent := MidStr(strContent, p+1, length(strContent));
+  //kt //codex original --> strContent := MidStr(strContent, p+1, length(strContent));
+  strContent := Copy(strContent, p+1, length(strContent)); //kt //codex 8/3/26
   Content.add(strContent);
 end;
 
@@ -1730,17 +1745,23 @@ begin
       Result := Result + text;
       break;
     end;
-    Result := Result + MidStr(Text, 1, p1-1);
-    Fld := MidStr(Text, p1, (p2 - p1));
-    Text := MidStr(Text, p2 + length(TemplateFieldEndSignature), length(Text));  //up to, but excluding closing part.
-    Fld := MidStr(Fld, Length(TemplateFieldBeginSignature) + 1, length(Fld));  //trim opening part
+    //kt //codex original --> Result := Result + MidStr(Text, 1, p1-1);
+    Result := Result + Copy(Text, 1, p1-1); //kt //codex 8/3/26
+    //kt //codex original --> Fld := MidStr(Text, p1, (p2 - p1));
+    Fld := Copy(Text, p1, (p2 - p1)); //kt //codex 8/3/26
+    //kt //codex original --> Text := MidStr(Text, p2 + length(TemplateFieldEndSignature), length(Text));  //up to, but excluding closing part.
+    Text := Copy(Text, p2 + length(TemplateFieldEndSignature), length(Text));  //up to, but excluding closing part. //kt //codex 8/3/26
+    //kt //codex original --> Fld := MidStr(Fld, Length(TemplateFieldBeginSignature) + 1, length(Fld));  //trim opening part
+    Fld := Copy(Fld, Length(TemplateFieldBeginSignature) + 1, length(Fld));  //trim opening part //kt //codex 8/3/26
     CtrlID := 0;
     if (length(Fld) > 0) and (LeftStr(Fld, Length(FieldIDDelim)) = FieldIDDelim) then begin
-      CtrlIDStr := MidStr(Fld, length(FieldIDDelim)+1, FieldIDLen - length(FieldIDDelim));
+      //kt //codex original --> CtrlIDStr := MidStr(Fld, length(FieldIDDelim)+1, FieldIDLen - length(FieldIDDelim));
+      CtrlIDStr := Copy(Fld, length(FieldIDDelim)+1, FieldIDLen - length(FieldIDDelim)); //kt //codex 8/3/26
       CtrlID := StrToIntDef(CtrlIDStr, 0);
     end;
     if CtrlID = 0 then continue;
-    Fld := MidStr(Fld, FieldIDLen + 1, length(Fld));
+    //kt //codex original --> Fld := MidStr(Fld, FieldIDLen + 1, length(Fld));
+    Fld := Copy(Fld, FieldIDLen + 1, length(Fld)); //kt //codex 8/3/26
     FoundEntry := FALSE;
     if IncludeEmbedded then iField := Fld else iField := '';
     NewHTMLTxt := GetHTMLControlText(CtrlID, FALSE, FoundHTMLEntry, ControlBlockDisabled, iField);  //kt added 1/16
@@ -1790,13 +1811,16 @@ begin
       PosStartTag := PosEx(HTML_CTRL_TAG, Str, PosStartTag);
       if PosStartTag = 0 then break;
       PosPastStartTag := PosStartTag + length(HTML_CTRL_TAG);  //move i to right after field start sig
-      StrA := MidStr(Str, 1, PosStartTag-1);
+      //kt //codex original --> StrA := MidStr(Str, 1, PosStartTag-1);
+      StrA := Copy(Str, 1, PosStartTag-1); //kt //codex 8/3/26
       PosEndTag := PosEx(HTML_CTRL_END_TAG, Str, PosPastStartTag);
       if(PosEndTag > 0) then begin
         PosPastEndTag := PosEndTag + length(HTML_CTRL_END_TAG);
-        StrB := MidStr(Str, PosPastEndTag, length(Str));
+        //kt //codex original --> StrB := MidStr(Str, PosPastEndTag, length(Str));
+        StrB := Copy(Str, PosPastEndTag, length(Str)); //kt //codex 8/3/26
         flen := PosEndTag - PosPastStartTag;
-        Info := MidStr(Str, PosPastStartTag, flen);
+        //kt //codex original --> Info := MidStr(Str, PosPastStartTag, flen);
+        Info := Copy(Str, PosPastStartTag, flen); //kt //codex 8/3/26
         HTMLCtrlID := piece(Info, '^', 1);
         FldName := piece(Info, '^', 2);
         CtrlValue := GetHTMLControlText(HTMLCtrlID, NoCommas, FoundEntry, ControlBlockDisabled);
@@ -1814,7 +1838,8 @@ begin
         end;
         Str := StrA + CtrlValue + StrB;
       end else begin
-        StrB := MidStr(Str, PosPastStartTag, length(Str));
+        //kt //codex original --> StrB := MidStr(Str, PosPastStartTag, length(Str));
+        StrB := Copy(Str, PosPastStartTag, length(Str)); //kt //codex 8/3/26
         PosStartTag := 1;
         Str := StrA + StrB;
       end;
@@ -2811,4 +2836,3 @@ initialization
 finalization
   GLOBAL_HTMLTemplateDialogsMgr.Free;
 end.
-

@@ -3,6 +3,8 @@ unit fGraphSettings;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, StdCtrls, ExtCtrls, CheckLst, Math, ORCtrls, ORFn, uCore, uGraphs, fBase508Form,
   VA508AccessibilityManager;

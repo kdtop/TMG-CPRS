@@ -33,6 +33,8 @@ unit uTMGEvent;
 
 interface
 uses
+  System.UITypes,
+
   ORNet, rCore, Classes,uCore,sysutils,ORFn,Dialogs,Controls,
   uTMGOptions;
 

@@ -37,6 +37,8 @@ unit uLogic;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, ORNet, ORFn,ComCtrls,Trpcb, ORCtrls;
 

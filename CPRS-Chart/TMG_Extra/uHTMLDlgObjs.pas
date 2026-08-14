@@ -162,7 +162,8 @@ implementation
         OneAttrib := OneAttrib + ch;
         if Done then begin
           //pull off OneAttrib out of strAtribs, shortening latter....
-          strAttribs := MidStr(strAttribs, length(OneAttrib)+1, length(strAttribs));
+          //kt //codex original --> strAttribs := MidStr(strAttribs, length(OneAttrib)+1, length(strAttribs));
+          strAttribs := Copy(strAttribs, length(OneAttrib)+1, length(strAttribs)); //kt //codex 8/3/26
           Attrs.Add(OneAttrib);
           OneAttrib := '';
           break;
@@ -198,7 +199,8 @@ implementation
     Result := SL.Text;
     Len := Length(Result); PosNum := Len;
     while (PosNum > 0) and (Result[PosNum] in [#10, #13]) do dec(PosNum);
-    if PosNum <> Len then Result := MidStr(Result, 1, PosNum);
+    //kt //codex original --> if PosNum <> Len then Result := MidStr(Result, 1, PosNum);
+    if PosNum <> Len then Result := Copy(Result, 1, PosNum); //kt //codex 8/3/26
   end;
 
   function AddElement(ElementName : string; Attrs, Content, Output : TStringList; NoCloser : boolean = false) : string;
@@ -232,7 +234,8 @@ implementation
     if (Str <> '') and (Str[1] in ['"','''']) then begin
       Len := Length(Str);
       if Str[Len] = Str[1] then X := 1 else X := 0;
-      Str := MidStr(Str, 2, Len-1-X);
+      //kt //codex original --> Str := MidStr(Str, 2, Len-1-X);
+      Str := Copy(Str, 2, Len-1-X); //kt //codex 8/3/26
     end;
     Result := Str;
   end;
@@ -247,7 +250,8 @@ implementation
       s := Attrs.Strings[i];
       p := Pos('=', s);
       if p > 0  then begin
-        AKey := UpperCase(MidStr(s, 1, p-1));
+        //kt //codex original --> AKey := UpperCase(MidStr(s, 1, p-1));
+        AKey := UpperCase(Copy(s, 1, p-1)); //kt //codex 8/3/26
       end else begin
         AKey := Trim(s);
       end;
@@ -281,7 +285,8 @@ implementation
       if (Result <> '') then begin
         if ((Result[1] = '"')  and (Result[Length(Result)] = '"')) or
            ((Result[1] = '''') and (Result[Length(Result)] = '''')) then begin
-          Result := MidStr(Result, 2, Length(Result)-2);
+          //kt //codex original --> Result := MidStr(Result, 2, Length(Result)-2);
+          Result := Copy(Result, 2, Length(Result)-2); //kt //codex 8/3/26
         end;
       end;
     end else Result := '';
@@ -1683,16 +1688,23 @@ implementation
   begin
     Date    := RPad(Piece(FMDTVal,'.',1),7,'0');
     Time    := RPad(Piece(FMDTVal,'.',2),6,'0');
-    Yr      := StrToIntDef(MidStr(Date,1,3),0)+1700;
-    YrStr   := IntToStr(Yr); ShortYrStr := MidStr(YrStr, 3, 2);
-    Mo      := StrToIntDef(MidStr(Date,4,2),0);
-    Day     := StrToIntDef(MidStr(Date,6,2),0);
-    Hr24Str := MidStr(Time,1,2);
+    //kt //codex original --> Yr      := StrToIntDef(MidStr(Date,1,3),0)+1700;
+    Yr      := StrToIntDef(Copy(Date,1,3),0)+1700; //kt //codex 8/3/26
+    //kt //codex original --> YrStr   := IntToStr(Yr); ShortYrStr := MidStr(YrStr, 3, 2);
+    YrStr   := IntToStr(Yr); ShortYrStr := Copy(YrStr, 3, 2); //kt //codex 8/3/26
+    //kt //codex original --> Mo      := StrToIntDef(MidStr(Date,4,2),0);
+    Mo      := StrToIntDef(Copy(Date,4,2),0); //kt //codex 8/3/26
+    //kt //codex original --> Day     := StrToIntDef(MidStr(Date,6,2),0);
+    Day     := StrToIntDef(Copy(Date,6,2),0); //kt //codex 8/3/26
+    //kt //codex original --> Hr24Str := MidStr(Time,1,2);
+    Hr24Str := Copy(Time,1,2); //kt //codex 8/3/26
     Hr24    := StrToIntDef(Hr24Str,0);
     Hr12Str := Hr24Str; if Hr24>12 then Hr12Str := IntToStr(Hr24-12);
     if Hr24>12 then AMPM := 'pm' else AMPM := 'am';
-    Min     := StrToIntDef(MidStr(Time,3,2),0);
-    Sec     := StrToIntDef(MidStr(Time,5,2),0);
+    //kt //codex original --> Min     := StrToIntDef(MidStr(Time,3,2),0);
+    Min     := StrToIntDef(Copy(Time,3,2),0); //kt //codex 8/3/26
+    //kt //codex original --> Sec     := StrToIntDef(MidStr(Time,5,2),0);
+    Sec     := StrToIntDef(Copy(Time,5,2),0); //kt //codex 8/3/26
 
     FormatArr := TStringList.Create;
     PiecesToList(Format,'^', FormatArr);

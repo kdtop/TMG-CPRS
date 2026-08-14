@@ -35,6 +35,8 @@ unit fTMG_WIA_GetImage;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, TMG_WIA_TLB, OleCtrls, Grids, ExtDlgs, ComObj, StrUtils,
   ExtCtrls, jpeg, Buttons, Menus

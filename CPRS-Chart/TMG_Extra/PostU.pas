@@ -169,10 +169,12 @@ uses
   begin
     result := '';
     if Pos('+',oldIENS)=1 then begin
-      oldIENS := MidStr(oldIENS,2,999);
+      //kt //codex original --> oldIENS := MidStr(oldIENS,2,999);
+      oldIENS := Copy(oldIENS,2,999); //kt //codex 8/3/26
     end;
     if Pos(',',oldIENS)=length(oldIENS) then begin
-      oldIENS := MidStr(oldIENS,1,length(oldIENS)-1);
+      //kt //codex original --> oldIENS := MidStr(oldIENS,1,length(oldIENS)-1);
+      oldIENS := Copy(oldIENS,1,length(oldIENS)-1); //kt //codex 8/3/26
     end;
     for i := 0 to PostResults.Count-1 do begin
       if piece(PostResults.Strings[i],'^',1)=oldIENS then begin

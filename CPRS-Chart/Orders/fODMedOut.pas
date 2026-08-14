@@ -3,6 +3,7 @@ unit fODMedOut;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fODBase, ORCtrls, StdCtrls, ORFn, ExtCtrls, uConst, ComCtrls, uCore, Mask,
   Menus, Buttons, VA508AccessibilityManager;

@@ -37,6 +37,9 @@ unit fSurgery;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fHSplit, StdCtrls, ExtCtrls, Menus, ComCtrls, ORCtrls, ORFn, uConst, ORDtTm,
   uPCE, ORClasses, fDrawers, ImgList, fSurgeryView, rSurgery, uSurgery,

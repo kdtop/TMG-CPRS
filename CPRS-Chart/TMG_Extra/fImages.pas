@@ -37,6 +37,8 @@ unit fImages;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fPage, StdCtrls, ExtCtrls, Menus, ComCtrls, ORCtrls, ORFn, uConst, ORDtTm,
   uPCE, ORClasses, fDrawers, ImgList, rTIU, uTIU, uDocTree, fRptBox, fPrintList,
@@ -943,7 +945,8 @@ var
 begin
   Result := 4; //default
   Ext := LowerCase(ExtractFileExt(FName));
-  Ext := MidStr(Ext,2,99);
+  //kt //codex original --> Ext := MidStr(Ext,2,99);
+  Ext := Copy(Ext,2,99); //kt //codex 8/3/26
   if   (Ext='jpg')
     or (Ext='jpeg')
     or (Ext='png')

@@ -37,6 +37,8 @@ unit fReports;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Menus, uConst, ORDtTmRng,
   OleCtrls, SHDocVw, Buttons, ClipBrd, rECS, Variants, StrUtils, fBase508Form,

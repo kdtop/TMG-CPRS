@@ -5,6 +5,7 @@ unit fCarePlanPicker;
 interface
 
 uses
+  System.UITypes,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   dShared, uTemplates, ORFn, uCore, Clipbrd, rMisc, VAUtils, uConst, rTemplates, ORNet,
   fFindingTemplates, uTemplateFields,

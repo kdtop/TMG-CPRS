@@ -3,6 +3,8 @@ unit fMailbox;
 interface
 
 uses
+  System.UITypes,
+
   Windows, fPage, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,ORFn,OrNet,uCore,pngimage,
   Dialogs, StdCtrls, Printers, VA508AccessibilityManager, ExtCtrls, Buttons, OleCtrls, SHDocVw;
 

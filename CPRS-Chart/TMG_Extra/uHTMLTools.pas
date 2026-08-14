@@ -36,7 +36,9 @@ unit uHTMLTools;
 
 interface
 
-  uses Windows, SysUtils, Classes, Printers, ComCtrls, ExtCtrls,
+  uses
+  System.UITypes,
+ Windows, SysUtils, Classes, Printers, ComCtrls, ExtCtrls,
        Controls, StdCtrls, StrUtils, MSHTML, ActiveX, Variants,
        ShDocVw, {//kt added ShDocVw 5-2-05 for TWebBrowser access}
        Dialogs,
@@ -433,14 +435,17 @@ implementation
       if p>0 then begin
         p := p + Length(CPRS_DIR_SIGNAL);  //kt 8/19/21
         p2 := PosEx('"',Lines[i],p);
-        tempS := MidStr(Lines[i],p,(p2-p));
+        //kt //codex original --> tempS := MidStr(Lines[i],p,(p2-p));
+        tempS := Copy(Lines[i],p,(p2-p)); //kt //codex 8/3/26
         p := Pos(CACHE_DIR, tempS);
         if p>0 then begin
-          tempS := MidStr(tempS, Length(CACHE_DIR)+1, Length(tempS));
+          //kt //codex original --> tempS := MidStr(tempS, Length(CACHE_DIR)+1, Length(tempS));
+          tempS := Copy(tempS, Length(CACHE_DIR)+1, Length(tempS)); //kt //codex 8/3/26
         end else begin
           p := Pos(CACHE_DIR_ALT, tempS);
           if p>0 then begin
-            tempS := MidStr(tempS, Length(CACHE_DIR_ALT)+1, Length(tempS));
+            //kt //codex original --> tempS := MidStr(tempS, Length(CACHE_DIR_ALT)+1, Length(tempS));
+            tempS := Copy(tempS, Length(CACHE_DIR_ALT)+1, Length(tempS)); //kt //codex 8/3/26
           end;
         end;
         SubsFoundList.Add(tempS);
@@ -481,7 +486,8 @@ implementation
          endPos := pos('Cache/',Lines.Strings[i]);
          //MidStr := AnsiMidStr(Lines.Strings[i],p+13,Length(Lines.Strings[i])-endPos);
          p := p + Length(FILEPREFIX);
-         MidStr := AnsiMidStr(Lines.Strings[i],p,endPos-p-1);
+         //kt //codex original --> MidStr := AnsiMidStr(Lines.Strings[i],p,endPos-p-1);
+         MidStr := Copy(Lines.Strings[i],p,endPos-p-1); //kt //codex 8/3/26
          Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],MidStr,CPRS_DIR_SIGNAL);
       end;
       //kt 8/19/21 Lines.Strings[i] := AnsiReplaceStr(Lines.Strings[i],ALT_IMG_TAG_CONVERT,'IMAGE'); //Remove signal
@@ -534,10 +540,13 @@ implementation
     function GetTag(p1,p2 : integer; var Text : string) : string;
     var i : integer;
     begin
-      Result := MidStr(Text,p1, p2-p1);
-      if Result[1] = '/' then Result := MidStr(Result,2,999);
+      //kt //codex original --> Result := MidStr(Text,p1, p2-p1);
+      Result := Copy(Text,p1, p2-p1); //kt //codex 8/3/26
+      //kt //codex original --> if Result[1] = '/' then Result := MidStr(Result,2,999);
+      if Result[1] = '/' then Result := Copy(Result,2,999); //kt //codex 8/3/26
       i := Pos(' ',Result);
-      if i >0 then Result := MidStr(Result,1,i-1);
+      //kt //codex original --> if i >0 then Result := MidStr(Result,1,i-1);
+      if i >0 then Result := Copy(Result,1,i-1); //kt //codex 8/3/26
     end;
     
   var p1,p2: integer;
@@ -586,8 +595,10 @@ implementation
       p := Pos(Tag,s);
       if p=0 then continue;
       if (p+length(Tag)-1) < length(s) then begin  //extra stuff after tag on line --> split line
-        s1 := MidStr(Lines.Strings[i],1,p+length(Tag)-1);
-        s2 := MidStr(Lines.Strings[i],p+length(Tag),Length(Lines.Strings[i]));
+        //kt //codex original --> s1 := MidStr(Lines.Strings[i],1,p+length(Tag)-1);
+        s1 := Copy(Lines.Strings[i],1,p+length(Tag)-1); //kt //codex 8/3/26
+        //kt //codex original --> s2 := MidStr(Lines.Strings[i],p+length(Tag),Length(Lines.Strings[i]));
+        s2 := Copy(Lines.Strings[i],p+length(Tag),Length(Lines.Strings[i])); //kt //codex 8/3/26
         Lines.Strings[i] := s1;
         Lines.Insert(i+1,s2);            
       end;
@@ -617,8 +628,10 @@ implementation
     if idx <> -1 then begin
       p := Pos(Tag,UpperCase(Lines.Strings[idx]));
       if p>1 then begin  //extra stuff after tag on line --> split line
-        s1 := MidStr(Lines.Strings[idx],1,p-1);
-        s2 := MidStr(Lines.Strings[idx],p,Length(Lines.Strings[idx]));
+        //kt //codex original --> s1 := MidStr(Lines.Strings[idx],1,p-1);
+        s1 := Copy(Lines.Strings[idx],1,p-1); //kt //codex 8/3/26
+        //kt //codex original --> s2 := MidStr(Lines.Strings[idx],p,Length(Lines.Strings[idx]));
+        s2 := Copy(Lines.Strings[idx],p,Length(Lines.Strings[idx])); //kt //codex 8/3/26
         Lines.Strings[idx] := s1;
         Lines.Insert(idx+1,s2);
         inc(idx);
@@ -650,8 +663,10 @@ implementation
       p2 := PosEx('>',s,p1);
       if p2=0 then continue;  //this is a problem, no closing '>' found... ignore for now.
       if p2 = length(s) then break;
-      s1 := MidStr(Lines.Strings[i],1,p2);
-      S2 := MidStr(Lines.Strings[i],p2+1,999);
+      //kt //codex original --> s1 := MidStr(Lines.Strings[i],1,p2);
+      s1 := Copy(Lines.Strings[i],1,p2); //kt //codex 8/3/26
+      //kt //codex original --> S2 := MidStr(Lines.Strings[i],p2+1,999);
+      S2 := Copy(Lines.Strings[i],p2+1,999); //kt //codex 8/3/26
       Lines.Strings[i] := s1;
       Lines.Insert(i+1,s2);
       Result := i;
@@ -671,8 +686,10 @@ implementation
     for i := 0 to Lines.Count-1 do begin
       p1 := Pos(Tag,UpperCase(Lines.Strings[i]));
       if p1=0 then continue;
-      s1 := MidStr(Lines.Strings[i],1,p1-1);
-      S2 := MidStr(Lines.Strings[i],p1,999);
+      //kt //codex original --> s1 := MidStr(Lines.Strings[i],1,p1-1);
+      s1 := Copy(Lines.Strings[i],1,p1-1); //kt //codex 8/3/26
+      //kt //codex original --> S2 := MidStr(Lines.Strings[i],p1,999);
+      S2 := Copy(Lines.Strings[i],p1,999); //kt //codex 8/3/26
       Lines.Strings[i] := s1;
       Lines.Insert(i+1,s2);
       break;
@@ -824,11 +841,14 @@ implementation
     s := Lines.Strings[i];
     p1 := Pos(Tag,UpperCase(s));
     if p1=0 then exit;
-    s1 := MidStr(s, 1, p1-1);
-    s2 := MidStr(s, p1, length(s));
+    //kt //codex original --> s1 := MidStr(s, 1, p1-1);
+    s1 := Copy(s, 1, p1-1); //kt //codex 8/3/26
+    //kt //codex original --> s2 := MidStr(s, p1, length(s));
+    s2 := Copy(s, p1, length(s)); //kt //codex 8/3/26
     p1 := Pos('>', s2);
     if p1 > 0 then begin
-      s2 := MidStr(s2, p1+1, length(s2));
+      //kt //codex original --> s2 := MidStr(s2, p1+1, length(s2));
+      s2 := Copy(s2, p1+1, length(s2)); //kt //codex 8/3/26
     end else begin
       s2 := '';
     end;
@@ -1019,9 +1039,11 @@ implementation
     //For any lines that end in <BR>, remove it to prevent *double* <BR>'s from be added
     for i := 0 to SL.Count - 1 do begin
       s := TrimRight(SL.Strings[i]);
-      tag := MidStr(s, Length(s)-3, Length(s));
+      //kt //codex original --> tag := MidStr(s, Length(s)-3, Length(s));
+      tag := Copy(s, Length(s)-3, Length(s)); //kt //codex 8/3/26
       if UpperCase(tag) = '<BR>' then begin
-        s := MidStr(s, 1, Length(s)-4);
+        //kt //codex original --> s := MidStr(s, 1, Length(s)-4);
+        s := Copy(s, 1, Length(s)-4); //kt //codex 8/3/26
         SL.Strings[i] := s;
       end;
     end;
@@ -1095,7 +1117,8 @@ implementation
             if (ch = '<') then begin
               k := PosEx('>', HTMLText, i);
               if k > 0 then begin
-                TestTag := MidStr(HTMLText, i+1, k-i-1);
+                //kt //codex original --> TestTag := MidStr(HTMLText, i+1, k-i-1);
+                TestTag := Copy(HTMLText, i+1, k-i-1); //kt //codex 8/3/26
                 //When in javascript, the only HTML tag that should be recognized is '</script>'
                 if UpperCase(Trim(Piece(TestTag,' ',1))) = '/SCRIPT' then begin
                   InTagCode := True;
@@ -1124,7 +1147,8 @@ implementation
           if InTagCode and (ch = '>') then begin
             InTagCode := False;
             TagEnd := i;
-            TagText := UpperCase(MidStr(HTMLText,TagStart+1,(TagEnd-TagStart-1)));
+            //kt //codex original --> TagText := UpperCase(MidStr(HTMLText,TagStart+1,(TagEnd-TagStart-1)));
+            TagText := UpperCase(Copy(HTMLText,TagStart+1,(TagEnd-TagStart-1))); //kt //codex 8/3/26
             LastGoodBreakI := i;
             if Pos('SCRIPT', TagText) > 0 then begin
               InScript := (Trim(TagText[1]) <> '/');
@@ -1157,7 +1181,8 @@ implementation
         TagText := '';
       end;
       if LastGoodBreakI > 0 then begin
-        tempS := MidStr(HTMLText,1,LastGoodBreakI);
+        //kt //codex original --> tempS := MidStr(HTMLText,1,LastGoodBreakI);
+        tempS := Copy(HTMLText,1,LastGoodBreakI); //kt //codex 8/3/26
         if InScript then tempS := StringReplace(tempS, #$D#$A, '', [rfReplaceAll]);
         HTMLText := Rightstr(HTMLText, length(HTMLText)- LastGoodBreakI);
         if pos('function ', tempS) > 0 then begin
@@ -1165,7 +1190,8 @@ implementation
         end;
         if (InScript = false) or (tempS <> '') then Lines.Add(tempS);
       end else begin  //couldn't find good break, so cut off arbitrarily ... may introduce HTML errors
-        tempS := MidStr(HTMLText,1,80);
+        //kt //codex original --> tempS := MidStr(HTMLText,1,80);
+        tempS := Copy(HTMLText,1,80); //kt //codex 8/3/26
         HTMLText := Rightstr(HTMLText, length(HTMLText)- 80);    //characters 81 ... the end
         if (InScript = false) or (tempS <> '') then Lines.Add(tempS);
       end;
@@ -1347,9 +1373,12 @@ const
                 p2 points to last character to be in s2        }
       begin
         s1 := ''; s2 := '';  s3 := '';
-        if p1 > 1 then s1 := MidStr(Text, 1, p1-1);
-        s2 := MidStr(Text, p1, p2-p1+1);
-        s3 := MidStr(Text, p2+1, Length(Text)-p2);
+        //kt //codex original --> if p1 > 1 then s1 := MidStr(Text, 1, p1-1);
+        if p1 > 1 then s1 := Copy(Text, 1, p1-1);
+        //kt //codex original --> s2 := MidStr(Text, p1, p2-p1+1);
+        s2 := Copy(Text, p1, p2-p1+1);
+        //kt //codex original --> s3 := MidStr(Text, p2+1, Length(Text)-p2);
+        s3 := Copy(Text, p2+1, Length(Text)-p2);
       end;
 
     var
@@ -1534,9 +1563,12 @@ const
           p := Length(Text) + 1;
           break;
         end;
-        strA := MidStr(Text, 1, p-1);
-        numStr := MidStr(Text, p + ENCODE_CHART_OPEN_TAG_LEN, (p2-p-ENCODE_CHART_OPEN_TAG_LEN));
-        strB := MidStr(Text, p2+1, length(Text));
+        //kt //codex original --> strA := MidStr(Text, 1, p-1);
+        strA := Copy(Text, 1, p-1); //kt //codex 8/3/26
+        //kt //codex original --> numStr := MidStr(Text, p + ENCODE_CHART_OPEN_TAG_LEN, (p2-p-ENCODE_CHART_OPEN_TAG_LEN));
+        numStr := Copy(Text, p + ENCODE_CHART_OPEN_TAG_LEN, (p2-p-ENCODE_CHART_OPEN_TAG_LEN)); //kt //codex 8/3/26
+        //kt //codex original --> strB := MidStr(Text, p2+1, length(Text));
+        strB := Copy(Text, p2+1, length(Text)); //kt //codex 8/3/26
         Num := StrToIntDef(numStr, 63); //63 = "?"
         Text := strA + char(Num) + strB;
       end;
@@ -1849,7 +1881,8 @@ const
       if p1 > 0 then begin
         p2 := PosEx('>', S, p1);
         if p2 > 0 then begin
-          S := LeftStr(S, p1-1) + MidStr(S, p2+1, length(S));
+          //kt //codex original --> S := LeftStr(S, p1-1) + MidStr(S, p2+1, length(S));
+          S := LeftStr(S, p1-1) + Copy(S, p2+1, length(S)); //kt //codex 8/3/26
         end;
       end;
     until (p1 = 0);
@@ -1868,7 +1901,8 @@ const
         p2 := PosEx(QtChar, S, p2+2);
         if p2 = 0 then begin p1 := 0; break; end;
       end;
-      s := LeftStr(S, p1-1) + MidStr(S,P2+1, MaxInt);
+      //kt //codex original --> s := LeftStr(S, p1-1) + MidStr(S,P2+1, MaxInt);
+      s := LeftStr(S, p1-1) + Copy(S,P2+1, MaxInt); //kt //codex 8/3/26
       p1 := Pos(QtChar, S);
     end;
   end;
@@ -1896,7 +1930,8 @@ const
             dec(depth);
             if depth<1 then begin
               p2 := i;
-              S := LeftStr(S, p1-1) + MidStr(S, p2+1, MaxInt);
+              //kt //codex original --> S := LeftStr(S, p1-1) + MidStr(S, p2+1, MaxInt);
+              S := LeftStr(S, p1-1) + Copy(S, p2+1, MaxInt); //kt //codex 8/3/26
               Dec(NumToDel);
               break;
             end;
@@ -1944,10 +1979,12 @@ const
         i : integer;
     begin
       s := SL.Strings[StartPos.LineIdx];
-      s := MidStr(s, 1, StartPos.LinePos - 1);
+      //kt //codex original --> s := MidStr(s, 1, StartPos.LinePos - 1);
+      s := Copy(s, 1, StartPos.LinePos - 1); //kt //codex 8/3/26
       SL.Strings[StartPos.LineIdx] := s;   //trim the first line of range
       s := SL.Strings[EndPos.LineIdx];
-      PartB := MidStr(s, EndPos.LinePos + 1, Length(s));
+      //kt //codex original --> PartB := MidStr(s, EndPos.LinePos + 1, Length(s));
+      PartB := Copy(s, EndPos.LinePos + 1, Length(s)); //kt //codex 8/3/26
       SL.Strings[EndPos.LineIdx] := PartB;  // trim the last list of range
       for i := EndPos.LineIdx - 1 downto StartPos.LineIdx + 1 do begin
         SL.Delete(i);  //trim all intervening lines
@@ -2004,7 +2041,8 @@ const
     if p = 0 then exit;
     p2 := PosEx('(', s, p);
     if p2=0 then exit;
-    s := LeftStr(s, p-1) + MidStr(s, p2, MaxInt);
+    //kt //codex original --> s := LeftStr(s, p-1) + MidStr(s, p2, MaxInt);
+    s := LeftStr(s, p-1) + Copy(s, p2, MaxInt); //kt //codex 8/3/26
     StripBetweenChars(s, '(', ')', p, 1);
     StripBraces(s, p, 1);
     SL.Text := s;
@@ -2035,7 +2073,8 @@ const
         p := p + length(FN);
         p2 := PosEx('(', lcText, p);  //Get
         if p2 > 0 then begin
-          s := Trim(MidStr(Text, p, p2-p));
+          //kt //codex original --> s := Trim(MidStr(Text, p, p2-p));
+          s := Trim(Copy(Text, p, p2-p)); //kt //codex 8/3/26
           s := StringReplace(s, #$0D, '', [rfReplaceAll]); s := StringReplace(s, #$0A, '', [rfReplaceAll]);
           if s <> '' then OutSL.Add(s);
         end;
@@ -2556,7 +2595,8 @@ begin
     p2 := PosEx('>', HtmlText, p1);  //p2 is index of CLOSING '>' of <body .... > tag
     if p2>0 then begin
       preS := LeftStr(HtmlText, p2);
-      postS := MidStr(HtmlText, p2+1, length(HtmlText));
+      //kt //codex original --> postS := MidStr(HtmlText, p2+1, length(HtmlText));
+      postS := Copy(HtmlText, p2+1, length(HtmlText)); //kt //codex 8/3/26
       Result := preS + CRLF + Text2Insert + CRLF + postS;
       Success := true;
     end;
@@ -2680,4 +2720,3 @@ finalization
   SubsFoundList.Free;
 
 end.
-

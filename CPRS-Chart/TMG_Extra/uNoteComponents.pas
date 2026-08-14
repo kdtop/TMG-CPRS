@@ -36,6 +36,8 @@ unit uNoteComponents;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Controls, ComCtrls, Dialogs,
   uTIU,
   ORCtrls, StrUtils, ORFn, ORNet, rTemplates;
@@ -199,13 +201,17 @@ begin
   Mode := ctNone;
   p := PosNCS(TMG_COMPONENT_TAG, S);
   if p = 0 then exit;  //return false
-  PreStr := MidStr(S, 1, p-1);
-  sB := MidStr(S, p, length(S));
+  //kt //codex original --> PreStr := MidStr(S, 1, p-1);
+  PreStr := Copy(S, 1, p-1); //kt //codex 8/3/26
+  //kt //codex original --> sB := MidStr(S, p, length(S));
+  sB := Copy(S, p, length(S)); //kt //codex 8/3/26
   p := Pos('}', sB);
   if (p = 0) then exit; //Return false.  Here we have an ERROR STATE, no closing '}' found.
   Result := true;
-  temp := MidStr(sB, 1, p-1);  //e.g. '{Component Start: HPI' or '{Component End: HPI'
-  PostStr := MidStr(sB, p+1, length(sB));
+  //kt //codex original --> temp := MidStr(sB, 1, p-1);  //e.g. '{Component Start: HPI' or '{Component End: HPI'
+  temp := Copy(sB, 1, p-1);  //e.g. '{Component Start: HPI' or '{Component End: HPI' //kt //codex 8/3/26
+  //kt //codex original --> PostStr := MidStr(sB, p+1, length(sB));
+  PostStr := Copy(sB, p+1, length(sB)); //kt //codex 8/3/26
   BlockName := Trim(piece(temp,':',2));  //e.g. 'HPI'
   if PosNCS(TMG_COMPONENT_START_TAG, temp)>0 then Mode := ctStart
   else if PosNCS(TMG_COMPONENT_END_TAG, temp)>0 then Mode := ctEnd;

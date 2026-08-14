@@ -37,6 +37,8 @@ unit fLabs;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fHSplit, StdCtrls, ExtCtrls, ORCtrls, ComCtrls, Grids, Buttons, fLabTest,
   fLabTests, fLabTestGroups, ORFn, TeeProcs, TeEngine, Chart, Series, Menus,

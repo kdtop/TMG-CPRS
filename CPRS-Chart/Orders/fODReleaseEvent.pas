@@ -3,6 +3,7 @@ unit fODReleaseEvent;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ORFn, CheckLst, ORCtrls, fAutoSz, fBase508Form,
   VA508AccessibilityManager;

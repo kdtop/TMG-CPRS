@@ -5,6 +5,9 @@ unit fODMeds;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fODBase, StdCtrls, ComCtrls, ExtCtrls, ORCtrls, Grids, Buttons, uConst, ORDtTm,
   Menus, XUDIGSIGSC_TLB, VA508AccessibilityManager, VAUtils, Contnrs;

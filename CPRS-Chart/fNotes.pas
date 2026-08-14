@@ -1549,7 +1549,8 @@ begin
     LastAuthorName := FEditNote.AuthorName;
     tempPos := Pos(' - ',LastAuthorName);
     if tempPos>0 then begin  //trim off title, e.g. "Jones,John - Physician
-      LastAuthorName:=UpperCase(Trim(MidStr(LastAuthorName,1,tempPos)));
+      //kt //codex original --> LastAuthorName:=UpperCase(Trim(MidStr(LastAuthorName,1,tempPos)));
+      LastAuthorName:=UpperCase(Trim(Copy(LastAuthorName,1,tempPos))); //kt //codex 8/3/26
     end;
     //kt end addition 9/11 -----------------
     // lock the consult request if there is a consult

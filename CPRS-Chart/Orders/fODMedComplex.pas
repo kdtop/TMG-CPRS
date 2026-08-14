@@ -3,6 +3,7 @@ unit fODMedComplex;
 interface
 
 uses
+  System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fAutoSz, StdCtrls, Grids, Buttons, ExtCtrls, ORCtrls, Menus, ORFn, fODBase, uConst,
   ComCtrls, VA508AccessibilityManager;

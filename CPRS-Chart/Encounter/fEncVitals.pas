@@ -3,6 +3,8 @@ unit fEncVitals;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   fPCEBase, ORDtTm, StdCtrls, ORCtrls, ExtCtrls, Buttons, fAutoSz, ORFn,
   rvitals, ComCtrls, ORNet, uVitals, VAUtils, TRPCB, VA508AccessibilityManager;

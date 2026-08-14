@@ -37,6 +37,8 @@ unit SubfilesU;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   StrUtils, fPtDemoEdit,
   Dialogs, StdCtrls, ExtCtrls, Grids, ComCtrls, Buttons, SortStringGrid, uTMGTypes;
@@ -337,7 +339,8 @@ uses
     begin
       result := '';
       newIENS := piece(oldIENS,',',1);   // +1,123, --> +1
-      parentIENS := MidStr(oldIENS,length(newIENS)+1,99);
+      //kt //codex original --> parentIENS := MidStr(oldIENS,length(newIENS)+1,99);
+      parentIENS := Copy(oldIENS,length(newIENS)+1,99); //kt //codex 8/3/26
       newIENS := piece(newIENS,'+',2);   // +1 --> 1
       for i := 1 to PostResults.Count-1 do begin  //0 is 1^Success
         oneEntry := PostResults.Strings[i];

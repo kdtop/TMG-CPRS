@@ -397,7 +397,8 @@ begin
           ItemInfo := TItemInfo.Create; //owned by ItemInfoList
           ItemInfo.ItemType := tiitTIU;
           tempS := piece(XQAID,';',1);
-          ItemInfo.IEN8925 := MidStr(tempS, 4, length(tempS));
+          //kt //codex original --> ItemInfo.IEN8925 := MidStr(tempS, 4, length(tempS));
+          ItemInfo.IEN8925 := Copy(tempS, 4, length(tempS)); //kt //codex 8/3/26
           ItemInfo.intIEN8925 := StrToIntDef(ItemInfo.IEN8925, 0);
           ADFN := Piece(x, U, 2);  //*DFN*
           ItemInfo.FollowupNum := Piece(Piece(x, U, 3), ';', 1);  //Matches Notification types in uConst, e.g. NF_NOTES_UNSIGNED_NOTE

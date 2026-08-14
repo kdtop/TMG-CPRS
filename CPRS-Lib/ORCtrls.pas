@@ -5,6 +5,7 @@ unit ORCtrls; // Oct 26, 1997 @ 10:00am
 interface // --------------------------------------------------------------------------------
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, StdCtrls, Forms,
+  System.Types,
   ComCtrls, Commctrl, Buttons, ExtCtrls, Grids, ImgList, Menus, CheckLst,
   Variants, VAClasses, typinfo;
 

@@ -5,6 +5,9 @@ unit fOrders;
 interface
 
 uses
+  System.Types,
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, fHSplit, StdCtrls,
   ExtCtrls, Menus, ORCtrls, ComCtrls, ORFn, rOrders, fODBase, uConst, uCore, uOrders,UBACore,
   UBAGlobals, VA508AccessibilityManager, fBase508Form, Buttons,
@@ -3569,4 +3572,3 @@ initialization
   SpecifyFormIsNotADialog(TfrmOrders);
 
 end.
-

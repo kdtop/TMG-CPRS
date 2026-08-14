@@ -105,6 +105,7 @@
         <VerInfo_Keys>CompanyName=Family Physicians of Greeneville (TMG) modification of code from Veterans Administration (VA);FileVersion=1.0.30.16;InternalName=1.0.30.16 server required;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.30.16;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <Debugger_RunParams>s=192.168.3.99 p=9260</Debugger_RunParams>
+        <DCC_IMPLICIT_STRING_CAST>false</DCC_IMPLICIT_STRING_CAST>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

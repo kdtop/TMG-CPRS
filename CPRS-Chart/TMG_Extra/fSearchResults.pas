@@ -35,6 +35,8 @@ unit fSearchResults;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ORCtrls, StdCtrls, ORNet, ORFn, ComCtrls, Trpcb, Buttons,
   ExtCtrls, OleCtrls, SHDocVw, TMGHTML2, SortStringGrid, Grids;

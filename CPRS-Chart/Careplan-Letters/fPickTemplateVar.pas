@@ -4,6 +4,8 @@ unit fPickTemplateVar;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, RichEdit, ComCtrls, StrUtils,
   fBase508Form, VA508AccessibilityManager;
@@ -54,7 +56,8 @@ begin
   P2 := Pos('^H:',s);
   if P2=0 then P2 := Pos(':',s);
   if P2=0 then exit;
-  s := MidStr(s, 1, P2-1);
+  //kt //codex original --> s := MidStr(s, 1, P2-1);
+  s := Copy(s, 1, P2-1); //kt //codex 8/3/26
   if (Pos('[',s)>0) or (Pos(#13,s)>0) or (Pos(#10,s)>0) then exit;  //Ignore [FLD:SomeName]
   Result := s;
 end;

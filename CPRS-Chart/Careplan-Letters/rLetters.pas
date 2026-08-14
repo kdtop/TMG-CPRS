@@ -3,7 +3,9 @@ unit rLetters;
 
 interface
 
-  uses SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, TRPCB, uTIU;
+  uses
+  System.UITypes,
+ SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, TRPCB, uTIU;
 
   procedure GetLetterList(LetterList : TStringList);
   procedure GetLetterText(BoilerPlate, OutputLines: TStrings; DFN : string);

@@ -37,6 +37,8 @@ unit dShared;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, ImgList, uTemplates, ORFn, ORNet, ExtCtrls, ORCtrls, Richedit,
   VA508ImageListLabeler;

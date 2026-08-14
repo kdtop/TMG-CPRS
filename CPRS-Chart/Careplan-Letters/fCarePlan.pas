@@ -38,6 +38,8 @@ unit fCarePlan;
 interface
 
 uses
+  System.UITypes,
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   fDrawers,fFrame, uTemplates, uConst,
   Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls, Grids, ORNet, uCarePlan, Menus, OleCtrls, SHDocVw,

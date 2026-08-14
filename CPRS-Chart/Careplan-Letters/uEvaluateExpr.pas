@@ -432,8 +432,10 @@ implementation
     while (PieceNum > 0) and (Length(Remainder) > 0) do begin
       p := Pos(Delim,Remainder);
       if p=0 then p := length(Remainder)+1;
-      Result := MidStr(Remainder,1,p-1);
-      Remainder := MidStr(Remainder,p+PieceLen,9999);
+      //kt //codex original --> Result := MidStr(Remainder,1,p-1);
+      Result := Copy(Remainder,1,p-1); //kt //codex 8/3/26
+      //kt //codex original --> Remainder := MidStr(Remainder,p+PieceLen,9999);
+      Remainder := Copy(Remainder,p+PieceLen,9999); //kt //codex 8/3/26
       Dec(PieceNum);
     end;
   end;
@@ -450,8 +452,10 @@ implementation
     while (PieceNum > 1) and (Length(Remainder) > 0) do begin
       p := Pos(Delim,Remainder);
       if p=0 then p := length(Remainder)+1;
-      Result := MidStr(Remainder,1,p-1);
-      Remainder := MidStr(Remainder,p+PieceLen,9999);
+      //kt //codex original --> Result := MidStr(Remainder,1,p-1);
+      Result := Copy(Remainder,1,p-1); //kt //codex 8/3/26
+      //kt //codex original --> Remainder := MidStr(Remainder,p+PieceLen,9999);
+      Remainder := Copy(Remainder,p+PieceLen,9999); //kt //codex 8/3/26
       Dec(PieceNum);
     end;
     PieceNum := PieceEnd-PieceStart+1;
@@ -460,8 +464,10 @@ implementation
       p := Pos(Delim,Remainder);
       if p=0 then p := length(Remainder)+1;
       if Result <> '' then Result := Result + Delim;
-      Result := Result + MidStr(Remainder,1,p-1);
-      Remainder := MidStr(Remainder,p+PieceLen,9999);
+      //kt //codex original --> Result := Result + MidStr(Remainder,1,p-1);
+      Result := Result + Copy(Remainder,1,p-1); //kt //codex 8/3/26
+      //kt //codex original --> Remainder := MidStr(Remainder,p+PieceLen,9999);
+      Remainder := Copy(Remainder,p+PieceLen,9999); //kt //codex 8/3/26
       Dec(PieceNum);
     end;
   end;
@@ -530,10 +536,12 @@ implementation
       p := 0;
     end;
     if p = 0 then p := Length(s)+1;
-    StrB := MidStr(s, p, Length(s));
+    //kt //codex original --> StrB := MidStr(s, p, Length(s));
+    StrB := Copy(s, p, Length(s)); //kt //codex 8/3/26
     s := LeftStr(s, p-1) + NewPiece;
     p := Pos(Delim,StrB);
-    if p > 0 then s := s + MidStr(StrB, p, Length(StrB));
+    //kt //codex original --> if p > 0 then s := s + MidStr(StrB, p, Length(StrB));
+    if p > 0 then s := s + Copy(StrB, p, Length(StrB)); //kt //codex 8/3/26
   end;
 
 
@@ -593,7 +601,8 @@ implementation
   begin
     P1 := 1;
     FindPairedChars(Expr, DiscardErr, P1,P2, OpenChar);
-    Result := MidStr(Expr,P1+1, P2-P1-1);
+    //kt //codex original --> Result := MidStr(Expr,P1+1, P2-P1-1);
+    Result := Copy(Expr,P1+1, P2-P1-1); //kt //codex 8/3/26
   end;
 
   function GetPairedParentheses(var Expr: string; var ErrStr : string; OpenChar : char = '(') : string;
@@ -605,8 +614,10 @@ implementation
     P1 := 1;
     FindPairedChars(Expr, ErrStr, P1,P2, OpenChar);
     //kt original, bad --> Result := MidStr(Expr,P1, P2);
-    Result := MidStr(Expr,P1, P2-P1+1); //kt 2/2018
-    Expr := Trim(MidStr(Expr, P2+1,length(Expr)));
+    //kt //codex original --> Result := MidStr(Expr,P1, P2-P1+1); //kt 2/2018
+    Result := Copy(Expr,P1, P2-P1+1); //kt 2/2018 //kt //codex 8/3/26
+    //kt //codex original --> Expr := Trim(MidStr(Expr, P2+1,length(Expr)));
+    Expr := Trim(Copy(Expr, P2+1,length(Expr))); //kt //codex 8/3/26
   end;
 
   procedure PieceToSL(S : string; Delim : String; SL : TStringList; var ErrStr : string);
@@ -626,7 +637,8 @@ implementation
       repeat
         p := PosEx('(',s, p+1);
         if p > 0 then begin
-          tempS := MidStr(S,p,length(s));
+          //kt //codex original --> tempS := MidStr(S,p,length(s));
+          tempS := Copy(S,p,length(s)); //kt //codex 8/3/26
           ParenS := GetPairedParentheses(tempS, ErrStr); if ErrStr<>'' then exit;
           GuardedS := AnsiReplaceStr(ParenS,Delim, SUB_STR);
           s := AnsiReplaceStr(s,ParenS,GuardedS)
@@ -673,7 +685,8 @@ implementation
       if tempExpr[i] in ['A'..'Z','0'..'9','_','.','-'] then begin
         Result := Result + tempExpr[i];
       end else if Expr[i] = '(' then begin
-        Expr := MidStr(Expr,i,999999);
+        //kt //codex original --> Expr := MidStr(Expr,i,999999);
+        Expr := Copy(Expr,i,999999); //kt //codex 8/3/26
         Result := Result + GetPairedParentheses(Expr, ErrStr);
         break;
       end else begin
@@ -712,7 +725,8 @@ implementation
     if (Result = '') or (EndIndex = 0) then begin
       ErrStr := 'Unable to find numeric term in ''' + Expr + '''';
     end else begin
-      Expr := MidStr(Expr,EndIndex+1,99999);
+      //kt //codex original --> Expr := MidStr(Expr,EndIndex+1,99999);
+      Expr := Copy(Expr,EndIndex+1,99999); //kt //codex 8/3/26
     end;
   end;
 
@@ -723,8 +737,10 @@ implementation
   begin
     p := PosEx(QtChar,Expr,2);
     if p>0 then begin
-      Result := MidStr(Expr,2,p-2);
-      Expr := MidStr(Expr,p+1,length(Expr));
+      //kt //codex original --> Result := MidStr(Expr,2,p-2);
+      Result := Copy(Expr,2,p-2); //kt //codex 8/3/26
+      //kt //codex original --> Expr := MidStr(Expr,p+1,length(Expr));
+      Expr := Copy(Expr,p+1,length(Expr)); //kt //codex 8/3/26
     end else begin
       ErrStr := 'String with unmatched quote characters found: ' + Expr;
     end;
@@ -765,8 +781,10 @@ implementation
       inc (i);
     end;
     if OperIdx > 0 then begin
-      Term := Trim(MidStr(Expr,1,OperIdx-1));
-      Expr := MidStr(Expr,OperIdx,length(Expr));
+      //kt //codex original --> Term := Trim(MidStr(Expr,1,OperIdx-1));
+      Term := Trim(Copy(Expr,1,OperIdx-1)); //kt //codex 8/3/26
+      //kt //codex original --> Expr := MidStr(Expr,OperIdx,length(Expr));
+      Expr := Copy(Expr,OperIdx,length(Expr)); //kt //codex 8/3/26
     end else begin
       Term := Expr;
       Expr := '';
@@ -783,7 +801,8 @@ implementation
         exit;
       end;
       Operator := Expr[1];
-      Expr := Trim(MidStr(Expr,2,99999));
+      //kt //codex original --> Expr := Trim(MidStr(Expr,2,99999));
+      Expr := Trim(Copy(Expr,2,99999)); //kt //codex 8/3/26
     end else begin
       Operator := '';
     end;
@@ -823,7 +842,8 @@ implementation
                          var OperDone : boolean;
                          var ErrStr : string) : string;
     begin
-      Result := MidStr(Expr,i,length(Name));  i := i + length(Name);
+      //kt //codex original --> Result := MidStr(Expr,i,length(Name));  i := i + length(Name);
+      Result := Copy(Expr,i,length(Name));  i := i + length(Name); //kt //codex 8/3/26
       if Result <> Name then begin
         ErrStr := 'Invalid boolean operator: "' + Oper + '". Expected "'+Name+'".';
       end;
@@ -846,7 +866,8 @@ implementation
       if Expr[i] = '(' then begin
         SubExpr := GetPairedParentheses(Expr, ErrStr);   if ErrStr <> '' then exit;
         i := 1; //Expr is remainder string, so need to start set i index back to beginning of shorter string.
-        SubExpr := MidStr(SubExpr,2,length(SubExpr)-2);
+        //kt //codex original --> SubExpr := MidStr(SubExpr,2,length(SubExpr)-2);
+        SubExpr := Copy(SubExpr,2,length(SubExpr)-2); //kt //codex 8/3/26
         //kt BExpr1 := BExpr1 + EvalExpression (SubExpr, ErrStr);if ErrStr <> '' then exit;
         if UpperCase(BExpr1) <> 'TEXT' then begin
           SubExpr := EvalExpression (SubExpr, ErrStr);
@@ -893,11 +914,13 @@ implementation
       exit;
     end;
     //Now get second comparator of boolean expression
-    SubExpr := Trim(MidStr(Expr,i,length(Expr)));
+    //kt //codex original --> SubExpr := Trim(MidStr(Expr,i,length(Expr)));
+    SubExpr := Trim(Copy(Expr,i,length(Expr))); //kt //codex 8/3/26
     if SubExpr = '''''' then SubExpr := '';
     if (length(SubExpr)> 0) and (SubExpr[1] = '(') then begin
       SubExpr := GetPairedParentheses(SubExpr, ErrStr);   if ErrStr <> '' then exit;
-      SubExpr := MidStr(SubExpr,2,length(SubExpr)-2);
+      //kt //codex original --> SubExpr := MidStr(SubExpr,2,length(SubExpr)-2);
+      SubExpr := Copy(SubExpr,2,length(SubExpr)-2); //kt //codex 8/3/26
     end else if IsText(SubExpr) and IsText(BExpr1) then begin
       //Do nothing, leave SubExpr as is.
       BExpr2 := SubExpr;  //kt
@@ -1385,9 +1408,11 @@ implementation
       ErrStr := FnName + ' is not a valid function name.';
       Exit;
     end;
-    SubExpr := MidStr(Expr,Length(FnName)+1, Length(Expr));
+    //kt //codex original --> SubExpr := MidStr(Expr,Length(FnName)+1, Length(Expr));
+    SubExpr := Copy(Expr,Length(FnName)+1, Length(Expr)); //kt //codex 8/3/26
     SubExpr := Trim(SubExpr); //Handle potential space between fn name and ()
-    SubExpr := MidStr(SubExpr,2, Length(SubExpr)-2);
+    //kt //codex original --> SubExpr := MidStr(SubExpr,2, Length(SubExpr)-2);
+    SubExpr := Copy(SubExpr,2, Length(SubExpr)-2); //kt //codex 8/3/26
     try
       FnIndex := FunctionIndex(FnName);
       if FnIndex > MAX_SINGLE_VAL_FNS then begin
@@ -1460,7 +1485,8 @@ implementation
         if Pos('(',ExprSL.Strings[i])<1 then continue;
         SubExpr := ExprSL.Strings[i];
         if SubExpr[1] = '(' then begin
-          SubExpr := MidStr(SubExpr,2,Length(SubExpr)-2); //trim leading and trailing parentheses -- syntax already inforced.
+          //kt //codex original --> SubExpr := MidStr(SubExpr,2,Length(SubExpr)-2); //trim leading and trailing parentheses -- syntax already inforced.
+          SubExpr := Copy(SubExpr,2,Length(SubExpr)-2); //trim leading and trailing parentheses -- syntax already inforced. //kt //codex 8/3/26
           Val := EvalExpression(SubExpr, ErrStr);
         end else begin
           Val := EvalFn(SubExpr, ErrStr);

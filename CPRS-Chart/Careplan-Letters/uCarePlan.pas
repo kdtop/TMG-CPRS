@@ -5,7 +5,9 @@ unit uCarePlan;
 
 interface
 
-  uses StdCtrls, MSXML_TLB, ComCtrls, StrUtils, Menus,
+  uses
+  System.UITypes,
+ StdCtrls, MSXML_TLB, ComCtrls, StrUtils, Menus,
       ORCtrls, fFrame, fNotes,
       Classes, Controls, SysUtils, Forms, ORFn, ORNet, Dialogs, uTIU, uDCSumm, Variants, uTemplates;
 
@@ -351,7 +353,8 @@ end;
 function StripCarePlanTemplateTag(PrintName : string) : string;
 begin
   if Pos(CP_TEMPLATE_TAG, PrintName) <> 1 then exit;
-  Result := MidStr(PrintName,length(CP_TEMPLATE_TAG)+1,Length(PrintName));
+  //kt //codex original --> Result := MidStr(PrintName,length(CP_TEMPLATE_TAG)+1,Length(PrintName));
+  Result := Copy(PrintName,length(CP_TEMPLATE_TAG)+1,Length(PrintName)); //kt //codex 8/3/26
 end;
 
 procedure HandleTemplateIfCarePlan(Template: TTemplate);
@@ -497,7 +500,8 @@ procedure WrapCPSection(SL : TStrings; Name : string);
 begin
   if SL.Count = 0 then exit;  //down't wrap with header / footer if empty (i.e. user cancelled)
   if Pos('Template: ',Name)>0 then begin
-    Name := MidStr(Name, length('Template: ')+1,Length(Name));
+    //kt //codex original --> Name := MidStr(Name, length('Template: ')+1,Length(Name));
+    Name := Copy(Name, length('Template: ')+1,Length(Name)); //kt //codex 8/3/26
   end;
   if Pos(CarePlanTagHeader(Name),SL.Text)=0 then SL.Insert(0,CarePlanTagHeader(Name));
   if Pos(CarePlanTagFooter(Name),SL.Text)=0 then begin
@@ -584,7 +588,8 @@ var temp : string;
 begin
   temp := Piece(Name,'-',1);
   if Pos('Template: ',temp)>0 then begin
-    temp := MidStr(temp, length('Template: ')+1,Length(temp));
+    //kt //codex original --> temp := MidStr(temp, length('Template: ')+1,Length(temp));
+    temp := Copy(temp, length('Template: ')+1,Length(temp)); //kt //codex 8/3/26
   end;
   Result := (temp = NAMESPACE_TAG_FOR_MODE[EditMode]);
 end;
@@ -671,8 +676,10 @@ begin
   while (PieceNum > 1) and (Length(Remainder) > 0) do begin
     p := Pos(Delim,Remainder);
     if p=0 then p := length(Remainder)+1;
-    Result := MidStr(Remainder,1,p-1);
-    Remainder := MidStr(Remainder,p+PieceLen,length(Remainder));
+    //kt //codex original --> Result := MidStr(Remainder,1,p-1);
+    Result := Copy(Remainder,1,p-1); //kt //codex 8/3/26
+    //kt //codex original --> Remainder := MidStr(Remainder,p+PieceLen,length(Remainder));
+    Remainder := Copy(Remainder,p+PieceLen,length(Remainder)); //kt //codex 8/3/26
     Dec(PieceNum);
   end;
   PieceNum := PieceEnd-PieceStart+1;
@@ -681,8 +688,10 @@ begin
     p := Pos(Delim,Remainder);
     if p=0 then p := length(Remainder)+1;
     if Result <> '' then Result := Result + Delim;
-    Result := Result + MidStr(Remainder,1,p-1);
-    Remainder := MidStr(Remainder,p+PieceLen,Length(Remainder));
+    //kt //codex original --> Result := Result + MidStr(Remainder,1,p-1);
+    Result := Result + Copy(Remainder,1,p-1); //kt //codex 8/3/26
+    //kt //codex original --> Remainder := MidStr(Remainder,p+PieceLen,Length(Remainder));
+    Remainder := Copy(Remainder,p+PieceLen,Length(Remainder)); //kt //codex 8/3/26
     Dec(PieceNum);
   end;
 end;
@@ -753,8 +762,10 @@ end;
         PadAmount : integer;
     begin
       PadAmount := Length(s) - Length(TrimLeft(s));
-      s2 := TrimLeft(MidStr(s, p, MAX_STR_LEN));
-      s := MidStr(s, 1, p-1);
+      //kt //codex original --> s2 := TrimLeft(MidStr(s, p, MAX_STR_LEN));
+      s2 := TrimLeft(Copy(s, p, MAX_STR_LEN)); //kt //codex 8/3/26
+      //kt //codex original --> s := MidStr(s, 1, p-1);
+      s := Copy(s, 1, p-1); //kt //codex 8/3/26
       if s2 <> '' then begin
         Lines.Insert(i+1, PadStr(PadAmount) + s2);
       end;
@@ -772,7 +783,8 @@ end;
       if InCarePlan then begin
         p := Pos(FooterMarkerStart,s);
         if p > 1 then begin
-          s2 := Trim(MidStr(s, 1, p-1));
+          //kt //codex original --> s2 := Trim(MidStr(s, 1, p-1));
+          s2 := Trim(Copy(s, 1, p-1)); //kt //codex 8/3/26
           if s2 <> '' then begin
             SplitLineAt(s, i, p);
             p := Pos(FooterMarkerStart,s);
@@ -792,7 +804,8 @@ end;
       end;
       p := Pos(HeaderMarkerStart,s);
       if p > 1 then begin
-        s2 := Trim(MidStr(s, 1, p-1));
+        //kt //codex original --> s2 := Trim(MidStr(s, 1, p-1));
+        s2 := Trim(Copy(s, 1, p-1)); //kt //codex 8/3/26
         if s2 <> '' then begin
           SplitLineAt(s, i, p);
           p := Pos(HeaderMarkerStart,s);
@@ -957,7 +970,8 @@ end;
     EndP := PosEx(HeaderMarkerEnd,Text, P);
     if EndP=0 then exit;
     P := P+Length(HeaderMarkerStart);
-    Result := MidStr(Text, P, EndP-P);
+    //kt //codex original --> Result := MidStr(Text, P, EndP-P);
+    Result := Copy(Text, P, EndP-P); //kt //codex 8/3/26
   end;
 
   function GetFooterName(P : integer; var Text : string): string;
@@ -968,7 +982,8 @@ end;
     EndP := PosEx(CP_BRACKET_CLOSE,Text, P);
     if EndP=0 then exit;
     P := P+Length(FooterMarkerStart);
-    Result := MidStr(Text, P, EndP-P);
+    //kt //codex original --> Result := MidStr(Text, P, EndP-P);
+    Result := Copy(Text, P, EndP-P); //kt //codex 8/3/26
   end;
 
   function MoveBlockBack(HeaderStartP, FooterStartP, DestPos : integer; Text : string) : string;
@@ -999,7 +1014,8 @@ end;
   var count : integer;
   begin
     count := (P2-P1)+1;
-    Result := MidStr(Text, P1, count);
+    //kt //codex original --> Result := MidStr(Text, P1, count);
+    Result := Copy(Text, P1, count); //kt //codex 8/3/26
   end;
 
 

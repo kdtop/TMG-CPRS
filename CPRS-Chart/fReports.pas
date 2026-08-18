@@ -256,6 +256,7 @@ const
   HTML_POST = CRLF + '</pre></body></html>';
   BlankWebPage = 'about:blank';
   TMG_LAST_REPORT_KEY = 'Last Report Viewed';
+  TMG_LAST_REPORT_ID_KEY = 'Last Report Viewed ID'; //kt  //codex 8/18/26
 
 var
   uRemoteCount: Integer;
@@ -271,6 +272,13 @@ var
   ColumnSortForward: Boolean;
   GraphForm: TfrmGraphs;
   GraphFormActive: boolean;
+
+function ReportNodeID(Node: TTreeNode): string;
+begin
+  Result := '';
+  if (Node = nil) or (Node.Data = nil) then Exit; //kt  //codex 8/18/26
+  Result := PReportTreeObject(Node.Data)^.ID;
+end;
 
 procedure TfrmReports.ClearPtData;
 begin
@@ -559,13 +567,16 @@ begin
       TRemoteSite(RemoteSites.SiteList.Items[i]).ReportClear;
     pnlRightTop.Height := lblTitle.Height + TabControl1.Height;
     StatusText('');
-    if not SelectUserDefaultReport then begin  //kt added wrapper to this preexisting bloc  4/1/21
+    SelectUserDefaultReport;  //kt  //codex 8/18/26 Restores selection only; click/load is done once below.
+    if tvReports.Selected = nil then begin
       with tvReports do begin
         if Items.Count > 0 then begin
-          tvReports.Selected := tvReports.Items.GetFirstNode;
-          tvReportsClick(self);
+          tvReports.Selected := tvReports.Items.GetFirstNode; //kt  //codex 8/18/26
         end;
       end;
+    end;
+    if (tvReports.Selected <> nil) and (tvReports.Selected.Data <> nil) then begin
+      tvReportsClick(self); //kt  //codex 8/18/26
     end;
   end;
   case CallingContext of
@@ -667,8 +678,9 @@ procedure TfrmReports.LoadTreeView;
 var
   i,j: integer;
   currentNode, parentNode, grandParentNode, gtGrandParentNode: TTreeNode;
-  x: string;
+  x, MarkerText, NodeText, NodeDataText, QualifierText: string;
   addchild, addgrandchild, addgtgrandchild: boolean;
+  ReportObj: PReportTreeObject;
 begin
   tvReports.Items.Clear;
   memText.Clear;
@@ -693,7 +705,8 @@ begin
   currentNode := nil;
   for i := 0 to uTreeStrings.Count - 1 do begin
     x := uTreeStrings[i];
-    if UpperCase(Piece(x,'^',1))='[PARENT END]' then begin
+    MarkerText := UpperCase(Piece(x,'^',1)); //kt  //codex 8/18/26
+    if MarkerText='[PARENT END]' then begin
       if addgtgrandchild = true then begin
         currentNode := gtgrandParentNode;
         addgtgrandchild := false;
@@ -706,37 +719,47 @@ begin
       end;
       continue;
     end;
-    if UpperCase(Piece(x,'^',1))='[PARENT START]' then begin
+    if MarkerText='[PARENT START]' then begin
+      NodeText := Piece(x,'^',3); //kt  //codex 8/18/26
+      NodeDataText := Pieces(x,'^',2,21); //kt  //codex 8/18/26
+      ReportObj := MakeReportTreeObject(NodeDataText); //kt  //codex 8/18/26
       if addgtgrandchild = true then begin
-        currentNode := tvReports.Items.AddChildObject(gtGrandParentNode,Piece(x,'^',3),MakeReportTreeObject(Pieces(x,'^',2,21)))
+        currentNode := tvReports.Items.AddChildObject(gtGrandParentNode, NodeText, ReportObj) //kt  //codex 8/18/26
       end else if addgrandchild = true then begin
-        currentNode := tvReports.Items.AddChildObject(grandParentNode,Piece(x,'^',3),MakeReportTreeObject(Pieces(x,'^',2,21)));
+        currentNode := tvReports.Items.AddChildObject(grandParentNode, NodeText, ReportObj); //kt  //codex 8/18/26
         addgtgrandchild := true;
         gtgrandParentNode := currentNode;
       end else if addchild = true then begin
-        currentNode := tvReports.Items.AddChildObject(parentNode,Piece(x,'^',3),MakeReportTreeObject(Pieces(x,'^',2,21)));
+        currentNode := tvReports.Items.AddChildObject(parentNode, NodeText, ReportObj); //kt  //codex 8/18/26
         addgrandchild := true;
         grandParentNode := currentNode;
       end else begin
-        currentNode := tvReports.Items.AddObject(currentNode,Piece(x,'^',3),MakeReportTreeObject(Pieces(x,'^',2,21)));
+        currentNode := tvReports.Items.AddObject(currentNode, NodeText, ReportObj); //kt  //codex 8/18/26
         parentNode := currentNode;
         addchild := true;
       end;
     end else if addchild = false then begin
-      currentNode := tvReports.Items.AddObject(currentNode,Piece(x,'^',2),MakeReportTreeObject(x));
+      NodeText := Piece(x,'^',2); //kt  //codex 8/18/26
+      ReportObj := MakeReportTreeObject(x); //kt  //codex 8/18/26
+      currentNode := tvReports.Items.AddObject(currentNode, NodeText, ReportObj); //kt  //codex 8/18/26
       parentNode := currentNode;
     end else begin
+      NodeText := Piece(x,'^',2); //kt  //codex 8/18/26
+      ReportObj := MakeReportTreeObject(x); //kt  //codex 8/18/26
       if addgtgrandchild = true then begin
-        currentNode := tvReports.Items.AddChildObject(gtGrandParentNode,Piece(x,'^',2),MakeReportTreeObject(x))
+        currentNode := tvReports.Items.AddChildObject(gtGrandParentNode, NodeText, ReportObj) //kt  //codex 8/18/26
       end else if addgrandchild = true then begin
-        currentNode := tvReports.Items.AddChildObject(grandParentNode,Piece(x,'^',2),MakeReportTreeObject(x))
+        currentNode := tvReports.Items.AddChildObject(grandParentNode, NodeText, ReportObj) //kt  //codex 8/18/26
       end else begin
-        currentNode := tvReports.Items.AddChildObject(parentNode,Piece(x,'^',2),MakeReportTreeObject(x));
+        currentNode := tvReports.Items.AddChildObject(parentNode, NodeText, ReportObj); //kt  //codex 8/18/26
       end;
     end;
   end;
   for i := 0 to tvReports.Items.Count - 1 do begin
-    if Piece(PReportTreeObject(tvReports.Items[i].Data)^.Qualifier,';',4) = '1' then begin
+    ReportObj := PReportTreeObject(tvReports.Items[i].Data); //kt  //codex 8/18/26
+    if not Assigned(ReportObj) then Continue; //kt  //codex 8/18/26
+    QualifierText := ReportObj^.Qualifier; //kt  //codex 8/18/26
+    if Piece(QualifierText,';',4) = '1' then begin
       HealthSummaryCheck(uHSAll,'1');
       for j := 0 to uHSAll.Count - 1 do begin
         tvReports.Items.AddChildObject(tvReports.Items[i],Piece(uHSAll[j],'^',2),MakeReportTreeObject(uHSAll[j]));
@@ -1235,6 +1258,7 @@ var Qual : string;
 begin
   Result := False;
   if not assigned(Node) then exit;
+  if not Assigned(Node.Data) then Exit; //kt //codex 8/18/26
   Qual := PReportTreeObject(Node.Data)^.Qualifier; //kt added
   Result := (StrToIntDef(Piece(Qual,';',4),0) = QualType);
 end;
@@ -1557,16 +1581,22 @@ function TfrmReports.SelectUserDefaultReport() : boolean;
 //
 var
   RptName: String;
+  RptID: string;
+  NodeID: string;
   i: integer;
   ANode: TTreeNode;
 begin
   Result := false; //default
+  RptID := uTMGOptions.ReadString(TMG_LAST_REPORT_ID_KEY, ''); //kt  //codex 8/18/26
   RptName := uTMGOptions.ReadString(TMG_LAST_REPORT_KEY,''); //'Imaging (local only)'; //<--- change later to user stored data...
-  if RptName <> '' then for i := 0 to tvReports.Items.Count - 1 do begin
+  if (RptID = '') and (RptName = '') then Exit;
+  for i := 0 to tvReports.Items.Count - 1 do begin
     ANode := tvReports.Items[i];
-    if ANode.Text <> RptName then continue;
-    tvReports.Selected := ANode;
-    tvReportsClick(self);
+    if not Assigned(ANode.Data) then continue; //kt //codex 8/18/26
+    NodeID := ReportNodeID(ANode); //kt  //codex 8/18/26
+    if (RptID <> '') and (NodeID <> RptID) then continue; //kt  //codex 8/18/26
+    if (RptID = '') and (ANode.Text <> RptName) then continue; //kt  //codex 8/18/26
+    tvReports.Selected := ANode; //kt  //codex 8/18/26
     Result := True;
     break;
   end;
@@ -2112,29 +2142,35 @@ var
   aID, aHSTag, aRadParam, aColChange, aDirect, aHDR, aFHIE, aFHIEONLY, aQualifierID: string;
   CurrentParentNode, CurrentNode: TTreeNode;
   InsertSuccess : boolean;  //kt added
+  ReportObj: PReportTreeObject; //kt  //codex 8/18/26
 begin
   inherited;
+  if (tvReports.Selected = nil) or (tvReports.Selected.Data = nil) then Exit; //kt //codex 8/18/26
+  if csDestroying in ComponentState then Exit; //kt  //codex 8/18/26
+  ReportObj := PReportTreeObject(tvReports.Selected.Data); //kt  //codex 8/18/26
+  if not Assigned(ReportObj) then Exit; //kt  //codex 8/18/26
   uTMGOptions.WriteString(TMG_LAST_REPORT_KEY,tvReports.Selected.Text); //kt 4/1/21
+  uTMGOptions.WriteString(TMG_LAST_REPORT_ID_KEY, ReportNodeID(tvReports.Selected)); //kt  //codex 8/18/26
   lvReports.Hint := 'To sort, click on column headers|';
   tvReports.TopItem := tvReports.Selected;
   uRemoteCount := 0;
   Timer1.Interval := 3000;
   uReportInstruction := '';
-  aHeading    :=  PReportTreeObject(tvReports.Selected.Data)^.Heading;
-  aRemote     :=  PReportTreeObject(tvReports.Selected.Data)^.Remote;
-  aReportType :=  PReportTreeObject(tvReports.Selected.Data)^.RptType;
-  aQualifier  :=  PReportTreeObject(tvReports.Selected.Data)^.Qualifier;
-  aID         :=  PReportTreeObject(tvReports.Selected.Data)^.ID;
-  aRPC        :=  PReportTreeObject(tvReports.Selected.Data)^.RPCName;
-  aHSTag      :=  PReportTreeObject(tvReports.Selected.Data)^.HSTag;
-  aCategory   :=  PReportTreeObject(tvReports.Selected.Data)^.Category;
-  aSortOrder  :=  PReportTreeObject(tvReports.Selected.Data)^.SortOrder;
-  aDaysBack   :=  PReportTreeObject(tvReports.Selected.Data)^.MaxDaysBack;
-  aIFN        :=  StrToIntDef(PReportTreeObject(tvReports.Selected.Data)^.IFN,0);
-  aDirect     :=  PReportTreeObject(tvReports.Selected.Data)^.Direct;
-  aHDR        :=  PReportTreeObject(tvReports.Selected.Data)^.HDR;
-  aFHIE       :=  PReportTreeObject(tvReports.Selected.Data)^.FHIE;
-  aFHIEONLY   :=  PReportTreeObject(tvReports.Selected.Data)^.FHIEONLY;
+  aHeading    :=  ReportObj^.Heading; //kt  //codex 8/18/26
+  aRemote     :=  ReportObj^.Remote; //kt  //codex 8/18/26
+  aReportType :=  ReportObj^.RptType; //kt  //codex 8/18/26
+  aQualifier  :=  ReportObj^.Qualifier; //kt  //codex 8/18/26
+  aID         :=  ReportObj^.ID; //kt  //codex 8/18/26
+  aRPC        :=  ReportObj^.RPCName; //kt  //codex 8/18/26
+  aHSTag      :=  ReportObj^.HSTag; //kt  //codex 8/18/26
+  aCategory   :=  ReportObj^.Category; //kt  //codex 8/18/26
+  aSortOrder  :=  ReportObj^.SortOrder; //kt  //codex 8/18/26
+  aDaysBack   :=  ReportObj^.MaxDaysBack; //kt  //codex 8/18/26
+  aIFN        :=  StrToIntDef(ReportObj^.IFN,0); //kt  //codex 8/18/26
+  aDirect     :=  ReportObj^.Direct; //kt  //codex 8/18/26
+  aHDR        :=  ReportObj^.HDR; //kt  //codex 8/18/26
+  aFHIE       :=  ReportObj^.FHIE; //kt  //codex 8/18/26
+  aFHIEONLY   :=  ReportObj^.FHIEONLY; //kt  //codex 8/18/26
   aStartTime  :=  Piece(aQualifier,';',1);
   aStopTime   :=  Piece(aQualifier,';',2);
   aMax        :=  Piece(aQualifier,';',3);
@@ -2379,11 +2415,13 @@ begin
             if uColumns.Count > 1 then begin
               for j := 2 to uColumns.Count do begin
                 ListItem.SubItems.Add(piece(uLocalReportData[i],'^',j));
-                // if pieces are (added to/removed from) return string, PLEASE UPDATE THIS!!  (RV)
+              end;
+              //kt  //codex 8/18/26 The first subitem is index 0. Using 1 here faults when only one subitem exists.
+              if ListItem.SubItems.Count > 0 then begin
                 if Piece(uLocalReportData[i], U, 9) = 'Y' then begin
-                  ListItem.SubItemImages[1] := IMG_1_IMAGE
+                  ListItem.SubItemImages[0] := IMG_1_IMAGE //kt  //codex 8/18/26
                 end else begin
-                  ListItem.SubItemImages[1] := IMG_NO_IMAGES;
+                  ListItem.SubItemImages[0] := IMG_NO_IMAGES; //kt  //codex 8/18/26
                 end;
               end;
             end;
@@ -2401,7 +2439,7 @@ begin
           pnlLeftBottom.Visible := FALSE;
           pnlProcedures.Visible := TRUE;
           Splitter1.Visible := True;
-          if lvReports.Columns.Count > 0 then lvReports.Columns[1].Width := 0;
+          if lvReports.Columns.Count > 1 then lvReports.Columns[1].Width := 0; //kt  //codex 8/18/26
           Items.EndUpdate;
           tvProcedures.TopItem := tvProcedures.Selected;
         end;
@@ -2436,7 +2474,7 @@ begin
               end;
             end;
           end;
-          if lvReports.Columns.Count > 0 then lvReports.Columns[1].Width := 0;
+          if lvReports.Columns.Count > 1 then lvReports.Columns[1].Width := 0; //kt  //codex 8/18/26
           Items.EndUpdate;
         end;
         if TabControl1.TabIndex > 0 then TabControl1.TabIndex := 0;
@@ -2643,7 +2681,7 @@ begin
               end;
             end;
           end;
-          if lvReports.Columns.Count > 0 then lvReports.Columns[1].Width := 0;
+          if lvReports.Columns.Count > 1 then lvReports.Columns[1].Width := 0;
           Items.EndUpdate;
         end;
         if uLocalReportData.Count > 0 then
@@ -2674,7 +2712,7 @@ begin
               end;
             end;
           end;
-          if lvReports.Columns.Count > 0 then lvReports.Columns[1].Width := 0;
+          if lvReports.Columns.Count > 1 then lvReports.Columns[1].Width := 0;
           Items.EndUpdate;
         end;
         if uLocalReportData.Count > 0 then

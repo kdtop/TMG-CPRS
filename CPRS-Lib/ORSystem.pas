@@ -550,7 +550,7 @@ begin
   end;
   Winapi.Windows.GetModuleFileName(DLLHandle, DLLNamePath, 261);
   DLLVersion := ClientVersion(DLLNamePath);
-  if StrToIntDef(Piece(DLLVersion, '.', 1), 0) < DLL_CURRENT_VERSION then
+  if PieceAsIntDef(DLLVersion, '.', 1, 0) < DLL_CURRENT_VERSION then //kt //codex 8/18/26
   begin
     InfoBox(TX_NO_RUN + TX_OLD_DLL1 + '   ' + DLLNamePath + TX_OLD_DLL2 + DLLVersion + ')' +
             TX_CALL_IRM, TC_DLL_ERR, MB_ICONERROR or MB_OK);

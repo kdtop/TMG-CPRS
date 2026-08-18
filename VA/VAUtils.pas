@@ -50,6 +50,7 @@ type
   TShow508MessageButton = (smbOK, smbOKCancel, smbAbortRetryCancel, smbYesNoCancel,
                            smbYesNo, smbRetryCancel);
   TShow508MessageResult = (smrOK, srmCancel, smrAbort, smrRetry, smrIgnore, smrYes, smrNo);
+  TStringArray = array of string; //kt //codex 8/18/26
 
 function ShowMsg(const Msg, Caption: string; Icon: TShow508MessageIcon = smiNone;
                     Buttons: TShow508MessageButton = smbOK): TShow508MessageResult; overload;
@@ -61,9 +62,13 @@ const
   SHARE_DIR = '\VISTA\Common Files\';
 
 { returns the Nth piece (PieceNum) of a string delimited by Delim }
-function Piece(const S: string; Delim: char; PieceNum: Integer): string;
+function Piece(const S: string; Delim: char; PieceNum: Integer): string; //kt //codex 8/18/26
 { returns several contiguous pieces }
-function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string;
+function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string; //kt //codex 8/18/26
+function PieceEquals(const S: string; Delim: char; PieceNum: Integer; const Value: string; CaseInsensitive: Boolean = False): Boolean; //kt //codex 8/18/26
+function PieceAsIntDef(const S: string; Delim: char; PieceNum: Integer; Default: Integer = 0): Integer; //kt //codex 8/18/26
+function PieceAsInt64Def(const S: string; Delim: char; PieceNum: Integer; Default: Int64 = 0): Int64; //kt //codex 8/18/26
+procedure ParsePiecesMax(const S: string; Delim: Char; MaxPiece: Integer; var Pieces: TStringArray); //kt //codex 8/18/26
 
 function Piece2(const S: string; Delim: string; PieceNum: Integer): string; overload;             //kt 9/11 added
 function PieceNCS(const S: string; Delim: string; PieceNum: Integer): string; overload;           //kt 9/11 added
@@ -244,33 +249,168 @@ implementation
 uses
   ORFn;  //kt 9/11 added 
 
-function Piece(const S: string; Delim: char; PieceNum: Integer): string;
+function FindPieceBounds(const S: string; Delim: char; PieceNum: Integer; out PieceStart, PieceEnd: PChar): Boolean; //kt //codex 8/18/26
+var
+  i: Integer; //kt //codex 8/18/26
+  Strt, Next: PChar; //kt //codex 8/18/26
+begin
+  Result := False; //kt //codex 8/18/26
+  PieceStart := nil; //kt //codex 8/18/26
+  PieceEnd := nil; //kt //codex 8/18/26
+  if PieceNum < 1 then Exit; //kt //codex 8/18/26
+  i := 1; //kt //codex 8/18/26
+  Strt := PChar(S); //kt //codex 8/18/26
+  Next := StrScan(Strt, Delim); //kt //codex 8/18/26
+  while (i < PieceNum) and (Next <> nil) do //kt //codex 8/18/26
+  begin
+    Inc(i); //kt //codex 8/18/26
+    Strt := Next + 1; //kt //codex 8/18/26
+    Next := StrScan(Strt, Delim); //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  if i < PieceNum then Exit; //kt //codex 8/18/26
+  if Next = nil then Next := StrEnd(Strt); //kt //codex 8/18/26
+  PieceStart := Strt; //kt //codex 8/18/26
+  PieceEnd := Next; //kt //codex 8/18/26
+  Result := True; //kt //codex 8/18/26
+end;
+
+function TryPieceStrToInt64(PieceStart, PieceEnd: PChar; out Value: Int64): Boolean; //kt //codex 8/18/26
+var
+  Limit: UInt64; //kt //codex 8/18/26
+  Accum: UInt64; //kt //codex 8/18/26
+  Digit: UInt64; //kt //codex 8/18/26
+  Negative: Boolean; //kt //codex 8/18/26
+begin
+  Result := False; //kt //codex 8/18/26
+  Value := 0; //kt //codex 8/18/26
+  if (PieceStart = nil) or (PieceEnd = nil) or (PieceStart >= PieceEnd) then Exit; //kt //codex 8/18/26
+  Negative := False; //kt //codex 8/18/26
+  if PieceStart^ = '-' then //kt //codex 8/18/26
+  begin
+    Negative := True; //kt //codex 8/18/26
+    Inc(PieceStart); //kt //codex 8/18/26
+  end
+  else if PieceStart^ = '+' then Inc(PieceStart); //kt //codex 8/18/26
+  if PieceStart >= PieceEnd then Exit; //kt //codex 8/18/26
+  if Negative then Limit := UInt64(High(Int64)) + 1 else Limit := UInt64(High(Int64)); //kt //codex 8/18/26
+  Accum := 0; //kt //codex 8/18/26
+  while PieceStart < PieceEnd do //kt //codex 8/18/26
+  begin
+    if (PieceStart^ < '0') or (PieceStart^ > '9') then Exit; //kt //codex 8/18/26
+    Digit := UInt64(Ord(PieceStart^) - Ord('0')); //kt //codex 8/18/26
+    if Accum > ((Limit - Digit) div 10) then Exit; //kt //codex 8/18/26
+    Accum := (Accum * 10) + Digit; //kt //codex 8/18/26
+    Inc(PieceStart); //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  if Negative then //kt //codex 8/18/26
+  begin
+    if Accum = UInt64(High(Int64)) + 1 then Value := Low(Int64) else Value := -Int64(Accum); //kt //codex 8/18/26
+  end
+  else Value := Int64(Accum); //kt //codex 8/18/26
+  Result := True; //kt //codex 8/18/26
+end;
+
+function Piece(const S: string; Delim: char; PieceNum: Integer): string; //kt //codex 8/18/26
 { returns the Nth piece (PieceNum) of a string delimited by Delim }
 var
-  i: Integer;
-  Strt, Next: PChar;
+  PieceStart, PieceEnd: PChar; //kt //codex 8/18/26
 begin
-  i := 1;
-  Strt := PChar(S);
-  Next := StrScan(Strt, Delim);
-  while (i < PieceNum) and (Next <> nil) do
-  begin
-    Inc(i);
-    Strt := Next + 1;
-    Next := StrScan(Strt, Delim);
-  end;
-  if Next = nil then Next := StrEnd(Strt);
-  if i < PieceNum then Result := '' else SetString(Result, Strt, Next - Strt);
+  Result := ''; //kt //codex 8/18/26
+  if not FindPieceBounds(S, Delim, PieceNum, PieceStart, PieceEnd) then Exit; //kt //codex 8/18/26
+  SetString(Result, PieceStart, PieceEnd - PieceStart); //kt //codex 8/18/26
 end;
 
 function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string;
 { returns several contiguous pieces }
+// Rewrote entire function //kt //codex 8/18/26
+
 var
   PieceNum: Integer;
+  Strt, Next, ResultStart, ResultEnd: PChar;
 begin
   Result := '';
-  for PieceNum := FirstNum to LastNum do Result := Result + Piece(S, Delim, PieceNum) + Delim;
-  if Length(Result) > 0 then Delete(Result, Length(Result), 1);
+  if (FirstNum < 1) or (LastNum < FirstNum) then Exit;
+  PieceNum := 1;
+  Strt := PChar(S);
+  while PieceNum < FirstNum do begin
+    Next := StrScan(Strt, Delim);
+    if Next = nil then Exit;
+    Inc(PieceNum);
+    Strt := Next + 1;
+  end;
+  ResultStart := Strt;
+  while True do begin
+    Next := StrScan(Strt, Delim);
+    if PieceNum = LastNum then begin
+      if Next = nil then ResultEnd := StrEnd(Strt) else ResultEnd := Next;
+      SetString(Result, ResultStart, ResultEnd - ResultStart);
+      Exit;
+    end;
+    if Next = nil then begin
+      SetString(Result, ResultStart, StrEnd(Strt) - ResultStart);
+      Exit;
+    end;
+    Inc(PieceNum);
+    Strt := Next + 1;
+  end;
+end;
+
+function PieceEquals(const S: string; Delim: char; PieceNum: Integer; const Value: string; CaseInsensitive: Boolean = False): Boolean;
+// Added entire function //kt //codex 8/18/26
+var
+  PieceStart, PieceEnd: PChar;
+  PieceLen: Integer;
+begin
+  if not FindPieceBounds(S, Delim, PieceNum, PieceStart, PieceEnd) then begin
+    Result := Value = '';
+    Exit;
+  end;
+  PieceLen := PieceEnd - PieceStart;
+  if not CaseInsensitive then begin
+    Result := (PieceLen = Length(Value)) and CompareMem(PieceStart, PChar(Value), PieceLen * SizeOf(Char));
+    Exit;
+  end;
+  Result := SameText(Piece(S, Delim, PieceNum), Value);
+end;
+
+function PieceAsInt64Def(const S: string; Delim: char; PieceNum: Integer; Default: Int64 = 0): Int64;
+// Added entire function //kt //codex 8/18/26
+var
+  PieceStart, PieceEnd: PChar;
+begin
+  Result := Default;
+  if not FindPieceBounds(S, Delim, PieceNum, PieceStart, PieceEnd) then Exit;
+  if not TryPieceStrToInt64(PieceStart, PieceEnd, Result) then Result := Default;
+end;
+
+function PieceAsIntDef(const S: string; Delim: char; PieceNum: Integer; Default: Integer = 0): Integer;
+// Added entire function //kt //codex 8/18/26
+var
+  Temp: Int64;
+begin
+  Temp := PieceAsInt64Def(S, Delim, PieceNum, Default);
+  if (Temp < Low(Integer)) or (Temp > High(Integer)) then Result := Default else Result := Integer(Temp);
+end;
+
+procedure ParsePiecesMax(const S: string; Delim: Char; MaxPiece: Integer; var Pieces: TStringArray);
+// Added entire function //kt //codex 8/18/26
+var
+  PieceNum: Integer;
+  PieceStart, PieceEnd: PChar;
+begin
+  SetLength(Pieces, 0);
+  if MaxPiece < 1 then Exit;
+  SetLength(Pieces, MaxPiece);
+  PieceStart := PChar(S);
+  for PieceNum := 0 to MaxPiece - 1 do begin
+    PieceEnd := StrScan(PieceStart, Delim);
+    if PieceEnd = nil then begin
+      SetString(Pieces[PieceNum], PieceStart, StrEnd(PieceStart) - PieceStart);
+      Exit;
+    end;
+    SetString(Pieces[PieceNum], PieceStart, PieceEnd - PieceStart);
+    PieceStart := PieceEnd + 1;
+  end;
 end;
 
 function PieceNCS(const S: string; Delim: string; PieceNum: Integer): string; overload;

@@ -1150,7 +1150,7 @@ begin
   Code      := Piece(x, U, pnumCode);      //pnumCode      = 2;
   Category  := Piece(x, U, pnumCategory);  //pnumCategory  = 3;
   Narrative := Piece(x, U, pnumNarrative); //pnumNarrative = 4;
-  Provider  := StrToInt64Def(Piece(x, U, pnumProvider), 0);  //pnumProvider = 6;
+  Provider  := PieceAsInt64Def(x, U, pnumProvider, 0);  //pnumProvider = 6; //kt //codex 8/18/26
   Comment   := Piece(x, U, pnumComment);   //pnumComment   = 10;
 end;
 
@@ -1679,11 +1679,11 @@ var
 
 begin
   inherited SetFromString(x);
-  Quantity := StrToIntDef(Piece(x, U, pnumProcQty), 1);
-  Provider := StrToInt64Def(Piece(x, U, pnumProvider), 0);
+  Quantity := PieceAsIntDef(x, U, pnumProcQty, 1); //kt //codex 8/18/26
+  Provider := PieceAsInt64Def(x, U, pnumProvider, 0); //kt //codex 8/18/26
   Modifiers := '';
   Mods := Piece(x, U, pnumCPTMods);
-  cnt := StrToIntDef(Piece(Mods, ';', 1), 0);
+  cnt := PieceAsIntDef(Mods, ';', 1, 0); //kt //codex 8/18/26
   //kt old --> if(cnt > 0) then for i := 1 to cnt do begin   //kt no need for if test
   for i := 1 to cnt do begin  //kt
      Modifiers := Modifiers + Piece(Piece(Mods, ';' , i+1), '/', 2) + ';';
@@ -2105,9 +2105,9 @@ procedure TPCEDiag.SetFromString(const x: string);
 begin
   inherited SetFromString(x);
   OldComment := Comment;
-  Primary := (Piece(x, U, pnumDiagPrimary) = '1');
+  Primary := PieceEquals(x, U, pnumDiagPrimary, '1'); //kt //codex 8/18/26
   //Provider := StrToInt64Def(Piece(x, U, pnumProvider),0);
-  AddProb := (Piece(x, U, pnumDiagAdd2PL) = '1');
+  AddProb := PieceEquals(x, U, pnumDiagAdd2PL, '1'); //kt //codex 8/18/26
 end;
 
 { TPCEData methods ------------------------------------------------------------------------- }
@@ -2301,8 +2301,8 @@ var
   function SCCValue(x: string): Integer;
   begin
     Result := SCC_NA;
-    if Piece(x, U, 3) = '1' then Result := SCC_YES;
-    if Piece(x, U, 3) = '0' then Result := SCC_NO;
+    if PieceEquals(x, U, 3, '1') then Result := SCC_YES //kt //codex 8/18/26
+    else if PieceEquals(x, U, 3, '0') then Result := SCC_NO; //kt //codex 8/18/26
   end;
 
   function AppendComment(x: string): String;
@@ -2331,7 +2331,7 @@ begin //TPCEData.PCEForNote
     if(FEncSvcCat = #0) then begin
       GetCat :=TRUE
     end else if(GetVisitString = '0;0;A') then begin
-      FEncLocation := StrToIntDef(Piece(TmpVStr, ';', 1), 0);
+      FEncLocation := PieceAsIntDef(TmpVStr, ';', 1, 0); //kt //codex 8/18/26
       FEncDateTime := StrToFloatDef(Piece(TmpVStr, ';', 2),0);
       GetCat :=TRUE
     end else begin
@@ -2377,7 +2377,7 @@ begin //TPCEData.PCEForNote
   //health factor save, causing a crash. This is an attempt to keep the value from being
   //null.
   //FEncSvcCat := #0;
-  FEncLocation := StrToIntDef(Piece(TmpVStr,';',1),0);
+  FEncLocation := PieceAsIntDef(TmpVStr,';',1,0); //kt //codex 8/18/26
   FEncDateTime := StrToFloatDef(Piece(TmpVStr, ';', 2),0);
 
   if(IsSecondaryVisit and (FEncLocation > 0)) then begin
@@ -2411,10 +2411,10 @@ begin //TPCEData.PCEForNote
       {header information-------------------------------------------------------------}
       //kt if Copy(x, 1, 4) = 'HDR^' then begin          // HDR ^ Inpatient ^ ProcReq ^ VStr ^ Provider
       if MsgType = 'HDR' then begin          // HDR ^ Inpatient ^ ProcReq ^ VStr ^ Provider
-        FEncInpatient := Piece(x, U, 2) = '1';
+        FEncInpatient := PieceEquals(x, U, 2, '1'); //kt //codex 8/18/26
         //FCPTRequired  := Piece(x, U, 3) = '1';
         //FNoteHasCPT   := Piece(x, U, 6) = '1';    //4/21/99 error! PIECE 3 = cptRequired, not HasCPT!
-        FEncLocation  := StrToIntDef(Piece(Piece(x, U, 4), ';', 1), 0);
+        FEncLocation  := PieceAsIntDef(Piece(x, U, 4), ';', 1, 0); //kt //codex 8/18/26
         if DoRestore then begin
           FEncSvcCat := 'H';
           FEncDateTime := FRestDate;
@@ -2442,7 +2442,7 @@ begin //TPCEData.PCEForNote
             FEncDateTime := MakeFMDateTime(Piece(x, U, 3));
           end;
         end
-        else if MsgOpt1 = 'HL'  then FEncLocation := StrToIntDef(Piece(x, U, 3), 0)
+        else if MsgOpt1 = 'HL'  then FEncLocation := PieceAsIntDef(x, U, 3, 0) //kt //codex 8/18/26
         else if MsgOpt1 = 'VC'  then begin
           if DoRestore then begin
             FEncSvcCat := 'H'
@@ -4096,7 +4096,7 @@ var
   LastPrimary: integer;
 
 begin
-  SIEN := IntToStr(StrToInt64Def(Piece(S, U, pnumPrvdrIEN), 0));
+  SIEN := IntToStr(PieceAsInt64Def(S, U, pnumPrvdrIEN, 0)); //kt //codex 8/18/26
   if(SIEN = '0') then
     Result := -1
   else
@@ -4107,7 +4107,7 @@ begin
       Result := inherited Add(S)
     else
       Strings[Result] := S;
-    if(Piece(S, U, pnumPrvdrPrimary) = '1') then
+    if PieceEquals(S, U, pnumPrvdrPrimary, '1') then //kt //codex 8/18/26
     begin
       FNoUpdate := TRUE;
       try
@@ -4151,7 +4151,7 @@ var
   DoNotify: boolean;
 
 begin
-  DoNotify := (assigned(FOnPrimaryChanged) and (Piece(Strings[Index], U, pnumPrvdrPrimary) = '1'));
+  DoNotify := assigned(FOnPrimaryChanged) and PieceEquals(Strings[Index], U, pnumPrvdrPrimary, '1'); //kt //codex 8/18/26
   inherited Delete(Index);
   if(DoNotify) then
     FOnPrimaryChanged(Self);
@@ -4198,10 +4198,10 @@ var
 
 begin
   X := Strings[Index];
-  Result.IEN     := StrToInt64Def(Piece(X, U, pnumPrvdrIEN), 0);
+  Result.IEN     := PieceAsInt64Def(X, U, pnumPrvdrIEN, 0); //kt //codex 8/18/26
   Result.Name    := Piece(X, U, pnumPrvdrName);
-  Result.Primary := (Piece(X, U, pnumPrvdrPrimary) = '1');
-  Result.Delete  := (Piece(X, U, 1) = 'PRV-');
+  Result.Primary := PieceEquals(X, U, pnumPrvdrPrimary, '1'); //kt //codex 8/18/26
+  Result.Delete  := PieceEquals(X, U, 1, 'PRV-'); //kt //codex 8/18/26
 end;
 
 function TPCEProviderList.IndexOfProvider(AIEN: string): integer;
@@ -4232,9 +4232,9 @@ end;
 function TPCEProviderList.PendingIEN(ADefault: boolean): Int64;
 begin
   if(ADefault) then
-    Result := StrToInt64Def(Piece(FPendingDefault, U, 1), 0)
+    Result := PieceAsInt64Def(FPendingDefault, U, 1, 0) //kt //codex 8/18/26
   else
-    Result := StrToInt64Def(Piece(FPendingUser, U, 1), 0);
+    Result := PieceAsInt64Def(FPendingUser, U, 1, 0); //kt //codex 8/18/26
 end;
 
 function TPCEProviderList.PendingName(ADefault: boolean): string;
@@ -4254,7 +4254,7 @@ begin
   if(idx < 0) then
     Result := 0
   else
-    Result := StrToInt64Def(Piece(Strings[idx], U, pnumPrvdrIEN), 0);
+    Result := PieceAsInt64Def(Strings[idx], U, pnumPrvdrIEN, 0); //kt //codex 8/18/26
 end;
 
 function TPCEProviderList.PrimaryName: string;

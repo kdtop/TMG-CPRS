@@ -23,6 +23,11 @@ Secondary goal when needed:
 
 - If the user reports a new compile regression, return temporarily to compile-blocker triage using a fresh Delphi IDE compile log.
 
+Next planned feature goal for the next session:
+
+- Extend the server-side logic behind the Reports tab `Imaging (local only)` report so it can also include TIU documents that are effectively radiology studies, especially scanned outside reports that are currently only discoverable through specific note titles on the Notes tab.
+- On the CPRS client side, when one of those TIU-backed imaging entries is selected in the report list/tree flow, switch the display area to a browser/document view and render the TIU document similarly to the current Notes-tab document display path.
+
 Compile-log workflow, only when the user reports a new compile failure:
 
 1. User compiles in the Delphi IDE.
@@ -107,6 +112,38 @@ Recommended working assumption for the next session:
   - `CPRS-Chart\TMG_Extra\fSingleNote.pas`
   - The fix hardens `createRange` / selection handling and avoids an early warmup insert before the editor is ready.
 
+### Reports / `TDataStr` Status As Of 2026-08-18
+
+- The Reports tab had a runtime regression during default-report restore and initial click/load.
+- `CPRS-Chart\fReports.pas` was updated to make the startup path more tolerant and less re-entrant:
+  - `SelectUserDefaultReport()` now restores selection only and no longer directly drives report-load logic.
+  - Default-report persistence now stores and restores both:
+    - visible report caption via `TMG_LAST_REPORT_KEY`
+    - stable report ID via new `TMG_LAST_REPORT_ID_KEY`
+  - `tvReportsClick()` now exits safely when selection/data is missing or the form is destroying.
+- A runtime `List index out of bounds(1)` exception in `Vcl.ComCtrls.TListItem.SetSubItemImage` was fixed in the Imaging report path:
+  - the code was using `SubItemImages[1]` when only one subitem existed
+  - this was corrected to use the first subitem slot and to guard nearby `Columns[1]` accesses
+- `CPRS-Chart\fReports.pas` also received a small readability/perf cleanup:
+  - `LoadTreeView()` now avoids repeated `Piece(...)`/`Pieces(...)`/`MakeReportTreeObject(...)` calls on the same source line
+  - `tvReportsClick()` now dereferences `PReportTreeObject(tvReports.Selected.Data)` once into a local pointer instead of repeating the same cast/dereference many times
+- `CPRS-Lib\ORFn.pas` `TDataStr` was upgraded while preserving its public API:
+  - fixed `AssignViaMap(...)` bug where `<local>=<source>` mistakenly read both names from piece 1
+  - added cached field-name lookup via a sorted index list
+  - changed `DataStr` to a setter so cache invalidation happens on direct assignment too
+  - replaced cached copied-piece strings with cached piece spans (`StartPos`/`Len`) so the source string remains the single truth and values are materialized only on demand
+  - `StaticValue(...)` was simplified to avoid allocating a temporary `TStringList` on every call
+- User report after rebuild:
+  - compiles OK
+  - runs OK
+  - Reports tab regression appears resolved in current testing
+
+Recommended next session start:
+
+1. Re-open the Reports tab / imaging work from a product-design angle rather than low-level debugging.
+2. Review the server-side RPC contract for `Imaging (local only)` and define how TIU-scanned radiology studies should be represented in the returned dataset.
+3. Reuse existing Notes-tab TIU HTML/web-display behavior where possible instead of inventing a second document-rendering path.
+
 ### HTML / HTMLEdit Status As Of 2026-08-13
 
 - The current `HEAD` checkpoint is `e564182 Checkpoint HTML editor streamlining milestone`.
@@ -162,7 +199,6 @@ Recommended working assumption for the next session:
 - `lstNotes` is no longer present as a live control in `fNotes`.
 - Remaining `lstNotes` mentions in `fNotes.pas` are now historical comments or commented-out legacy blocks, not active runtime code.
 - For the next `fNotes` refactor session, read:
-  - `FNOTES_REVIEW.md`
   - `CPRS-Chart\TMG_Extra\uTRecStrList.pas`
   - `CPRS-Chart\fNotes.pas`
   - `CPRS-Chart\uDocTree.pas`
@@ -207,6 +243,53 @@ Recommended working assumption for the next session:
 - Important exception:
   - when `FCurrentContext.SearchString <> ''`, the code really does fetch each note's text with `TIU GET RECORD TEXT`
   - that slower path is expected only for explicit text-search mode
+
+### 2026-08-18 Note-Tree Performance Milestone
+
+- Final performance work completed in:
+  - `VA\VAUtils.pas`
+  - `CPRS-Lib\ORFn.pas`
+  - `CPRS-Lib\ORCtrls.pas`
+  - `CPRS-Chart\uDocTree.pas`
+  - `CPRS-Chart\fNotes.pas`
+  - `CPRS-Chart\fDCSumm.pas`
+  - `CPRS-Chart\Consults\fConsults.pas`
+- `Piece`/`Pieces` hot helpers were centralized and optimized in `VAUtils`, with compatibility wrappers preserved through `ORFn`/`ORCtrls`.
+- Added optimized helper surface:
+  - `PieceEquals`
+  - `PieceAsIntDef`
+  - `PieceAsInt64Def`
+  - `ParsePiecesMax`
+- Important runtime fix:
+  - Delphi `[Ref]` on the public string helpers caused runtime instability in `PieceEquals`
+  - this was fixed by reverting those public helper signatures back to normal `const string`
+- `uDocTree` now uses span-based parsing in the hot note-tree preparation/build paths instead of repeated `Piece(...)` rescans.
+- `BuildDocumentTree(...)` was structurally optimized:
+  - builds a parent-to-children index once
+  - then walks only actual child rows
+  - avoids the old recursive full-list rescanning behavior
+- Initial tree-node creation is now lazy with respect to `PDocTreeObject`:
+  - nodes are created with `Data = nil`
+  - `TORTreeNode.StringData` remains the source of truth
+  - `DocTreeData(ANode)` in `uDocTree` materializes and attaches `PDocTreeObject` on first demand
+- `SetTreeNodeImagesAndFormatting(...)` was updated so initial formatting derives from `StringData`, preserving lazy object creation during initial load.
+- Direct `PDocTreeObject(...Data)^` accesses in the main tree-interaction paths were converted to `DocTreeData(...)^` in:
+  - `CPRS-Chart\uDocTree.pas`
+  - `CPRS-Chart\fNotes.pas`
+  - `CPRS-Chart\fDCSumm.pas`
+  - `CPRS-Chart\Consults\fConsults.pas`
+- Progress-bar / `Application.ProcessMessages` churn was reduced substantially:
+  - updates are throttled by `TREE_PROGRESS_UPDATE_INTERVAL`
+  - current value is `100`
+- User-reported timing result for the same patient and `"1000"` notes:
+  - old CPRS: about `37 seconds`
+  - intermediate new CPRS: about `20 seconds`, then about `7 seconds`
+  - final new CPRS after lazy `PDocTreeObject` load: about `5 seconds`
+- The user explicitly agreed this is a good stopping point for the note-tree performance work.
+- Recommended next step only if future performance work resumes:
+  1. add instrumentation around remaining phases
+  2. measure UI costs such as custom draw / expand sorting / per-node formatting
+  3. avoid further speculative parsing rewrites until measurement shows a clear next bottleneck
 
 ### Current Compile Workflow Status
 
@@ -352,7 +435,7 @@ Recommended first step:
 5. If returning to `HTMLEdit` / browser-stack cleanup, start by reading the current `TMGHTML2.pas`, `uHTMLDlgObjs.pas`, `uHTMLTemplateFields.pas`, `docs\EMBEDDEDED_CUT_PLAN.md`, and `docs\EMBEDDEDED_DEPENDENCY_MAP.md` before assuming older `EmbeddedED` assumptions still apply.
 6. Do not run another broad automated unused-variable cleanup pass. If removing unused locals, do it manually and in very small scopes.
 7. Be careful with files converted from ANSI to UTF-8; conversion can surface warnings/errors in old character-set code.
-8. If returning to the `fNotes` cleanup, use `uTRecStrList` as the intended backing-store replacement for hidden `lstNotes`, and follow `FNOTES_REVIEW.md` rather than re-deriving the architecture from scratch.
+8. If returning to the `fNotes` cleanup, use `uTRecStrList` as the intended backing-store replacement for hidden `lstNotes`, and use the current `handoff.md` plus the live source files rather than relying on the removed `FNOTES_REVIEW.md`.
 
 Historical compile-porting notes follow below. They are preserved for context, not as the default current task. Do not resume that older Broker/compile sequence unless the user reports a new compile regression that points back into the same area.
 

@@ -39,6 +39,11 @@ interface
 uses SysUtils, Classes, ORNet, ORFn, rCore, uCore, uConst, ORCtrls, ComCtrls, uTIU
      ,Forms;  //tmg  5/6/22
 
+const
+  // Keep this in sync with the highest piece number accessed during tree-load preparse.
+  // Increase it if later code begins using higher-numbered RPC pieces in this path. //kt //codex 8/18/26
+  MAX_TREE_SPAN_PIECE = 18; //kt //codex 8/18/26
+  TREE_PROGRESS_UPDATE_INTERVAL = 100; //kt //codex 8/18/26
 
 type
   PDocTreeObject = ^TDocTreeObject;
@@ -60,6 +65,15 @@ type
     OrderID        : string;                  //Order file IEN (consults only, for now)
     OrderByTitle   : boolean;                 //Within ID Parents, order children by title, not date
   end;
+  TPieceSpan = record //kt //codex 8/18/26
+    StartPos: Integer; //kt //codex 8/18/26
+    Len: Integer; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  TDocPieceSpanArray = array[1..MAX_TREE_SPAN_PIECE] of TPieceSpan; //kt //codex 8/18/26
+  TDocTreeIndex = class(TStringList) //kt //codex 8/18/26
+  public
+    destructor Destroy; override; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
 
 // Procedures for document treeviews/listviews
 function IsComponent(Title, Subject : string) : boolean;       overload; //kt 5/15
@@ -85,6 +99,7 @@ procedure AddListViewItem(ANode: TTreeNode; AListView: TListView);
 function  MakeNoteTreeObject(x: string): PDocTreeObject;
 function  MakeDCSummTreeObject(x: string): PDocTreeObject;
 function  MakeConsultsNoteTreeObject(x: string): PDocTreeObject;
+function  DocTreeData(ANode: TTreeNode): PDocTreeObject; //kt //codex 8/18/26
 
 implementation
 
@@ -92,6 +107,269 @@ uses
   StrUtils, //kt added
   fNotes,fNotesLoading, uTMGOptions,     //tmg  5/6/22
   rConsults, uDCSumm, uConsults;
+
+function VisitDateLabel(const [Ref] VisitInfo: string): string; //kt //codex 8/18/26
+begin
+  Result := Piece(VisitInfo, ';', 1); //kt //codex 8/18/26
+end;
+
+function VisitDateFMDate(const [Ref] VisitInfo: string): string; //kt //codex 8/18/26
+begin
+  Result := Piece(Piece(VisitInfo, ';', 2), '.', 1); //kt //codex 8/18/26
+end;
+
+function NoteAuthorDisplay(const [Ref] NoteText: string): string; //kt //codex 8/18/26
+var
+  AuthorInfo: string; //kt //codex 8/18/26
+begin
+  AuthorInfo := Piece(NoteText, U, 5); //kt //codex 8/18/26
+  Result := Piece(AuthorInfo, ';', 1) + ';' + Piece(AuthorInfo, ';', 3); //kt //codex 8/18/26
+end;
+
+function NoteAuthorName(const [Ref] NoteText: string): string; //kt //codex 8/18/26
+begin
+  Result := Piece(Piece(NoteText, U, 5), ';', 3); //kt //codex 8/18/26
+end;
+
+function SpanText(const [Ref] S: string; const Span: TPieceSpan): string; forward; //kt //codex 8/18/26
+
+function SpanTextDef(const [Ref] S: string; const Span: TPieceSpan; const DefaultValue: string): string; //kt //codex 8/18/26
+begin
+  Result := SpanText(S, Span); //kt //codex 8/18/26
+  if Result = '' then Result := DefaultValue; //kt //codex 8/18/26
+end;
+
+function SpanStartsWithAny(const SpanValue: string; const Prefixes: array of Char): Boolean; //kt //codex 8/18/26
+var
+  i: Integer; //kt //codex 8/18/26
+begin
+  Result := False; //kt //codex 8/18/26
+  if SpanValue = '' then Exit; //kt //codex 8/18/26
+  for i := Low(Prefixes) to High(Prefixes) do //kt //codex 8/18/26
+    if SpanValue[1] = Prefixes[i] then begin Result := True; Exit; end; //kt //codex 8/18/26
+end;
+
+function SemicolonPiece(const [Ref] S: string; PieceNum: Integer): string; //kt //codex 8/18/26
+begin
+  Result := Piece(S, ';', PieceNum); //kt //codex 8/18/26
+end;
+
+function NoteAuthorNameFromInfo(const [Ref] AuthorInfo: string): string; //kt //codex 8/18/26
+begin
+  Result := SemicolonPiece(AuthorInfo, 2); //kt //codex 8/18/26
+end;
+
+function NoteAuthorDisplayFromInfo(const [Ref] AuthorInfo: string): string; //kt //codex 8/18/26
+begin
+  Result := SemicolonPiece(AuthorInfo, 1) + ';' + SemicolonPiece(AuthorInfo, 3); //kt //codex 8/18/26
+end;
+
+function NoteTitleDateFormat: string; //kt //codex 8/18/26
+const
+  DEFAULT_NOTE_TITLE_DATE_FORMAT = 'mmm dd,yy'; //kt //codex 8/18/26
+var
+  CachedValue: string; //kt //codex 8/18/26
+begin
+  if CachedValue = '' then CachedValue := uTMGOptions.ReadString('TMG CPRS NOTE DATE FORMAT', DEFAULT_NOTE_TITLE_DATE_FORMAT); //kt //codex 8/18/26
+  Result := CachedValue; //kt //codex 8/18/26
+end;
+
+function NormalizeDocHasChildren(const [Ref] RawValue: string): string; //kt //codex 8/18/26
+begin
+  Result := RawValue; //kt //codex 8/18/26
+  if (Result <> '') and (Result[1] = '*') then Result := Copy(Result, 2, 5); //kt //codex 8/18/26
+end;
+
+function NoteDisplayTextFromSpans(const [Ref] RawText: string; const Spans: TDocPieceSpanArray): string; //kt //codex 8/18/26
+var
+  DocID, DocTitle, Location, AuthorInfo, DocDate: string; //kt //codex 8/18/26
+begin
+  DocID := SpanText(RawText, Spans[1]); //kt //codex 8/18/26
+  DocTitle := SpanTextDef(RawText, Spans[2], '** No Title **'); //kt //codex 8/18/26
+  if SpanStartsWithAny(DocID, ['A', 'N', 'E']) then begin //kt //codex 8/18/26
+    Result := DocTitle; //kt //codex 8/18/26
+    Exit; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  Location := SpanTextDef(RawText, Spans[6], '** No Location **'); //kt //codex 8/18/26
+  AuthorInfo := SpanText(RawText, Spans[5]); //kt //codex 8/18/26
+  DocDate := FormatFMDateTime(NoteTitleDateFormat, MakeFMDateTime(SpanText(RawText, Spans[3]))); //kt //codex 8/18/26
+  Result := DocDate + '  ' + DocTitle + ', ' + Location + ', ' + NoteAuthorNameFromInfo(AuthorInfo); //kt //codex 8/18/26
+end;
+
+function DCSummDisplayTextFromSpans(const [Ref] RawText: string; const Spans: TDocPieceSpanArray): string; //kt //codex 8/18/26
+var
+  DocID, Piece9Text: string; //kt //codex 8/18/26
+begin
+  DocID := SpanText(RawText, Spans[1]); //kt //codex 8/18/26
+  if SpanStartsWithAny(DocID, ['A', 'N', 'E']) then begin //kt //codex 8/18/26
+    Result := SpanTextDef(RawText, Spans[2], '** No Title **'); //kt //codex 8/18/26
+    Exit; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  Piece9Text := SpanText(RawText, Spans[9]); //kt //codex 8/18/26
+  if Copy(Piece9Text, 1, 4) = '    ' then Piece9Text := 'Dis: '; //kt //codex 8/18/26
+  Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(SpanText(RawText, Spans[3]))) + '  ' + //kt //codex 8/18/26
+            SpanTextDef(RawText, Spans[2], '** No Title **') + ', ' + //kt //codex 8/18/26
+            SpanTextDef(RawText, Spans[6], '** No Location **') + ', ' + //kt //codex 8/18/26
+            NoteAuthorNameFromInfo(SpanText(RawText, Spans[5])) + '  (' + SpanText(RawText, Spans[7]) + '), ' + //kt //codex 8/18/26
+            VisitDateLabel(SpanText(RawText, Spans[8])) + ', ' + VisitDateLabel(Piece9Text); //kt //codex 8/18/26
+end;
+
+function ConsultIENTextFromID(const [Ref] DocID: string): string; //kt //codex 8/18/26
+begin
+  Result := SemicolonPiece(DocID, 1); //kt //codex 8/18/26
+end;
+
+function ConsultPackageFromID(const [Ref] DocID: string): string; //kt //codex 8/18/26
+begin
+  Result := SemicolonPiece(DocID, 2); //kt //codex 8/18/26
+end;
+
+function ConsultDisplayTextFromSpans(const [Ref] RawText: string; const Spans: TDocPieceSpanArray): string; //kt //codex 8/18/26
+var
+  DocID: string; //kt //codex 8/18/26
+begin
+  DocID := SpanText(RawText, Spans[1]); //kt //codex 8/18/26
+  if SpanStartsWithAny(DocID, ['A', 'N', 'E']) then begin //kt //codex 8/18/26
+    Result := SpanTextDef(RawText, Spans[2], '** No Title **'); //kt //codex 8/18/26
+    Exit; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(SpanText(RawText, Spans[3]))) + '  ' + //kt //codex 8/18/26
+            SpanTextDef(RawText, Spans[2], '** No Title **') + ' (#' + ConsultIENTextFromID(DocID) + ')'; //kt //codex 8/18/26
+  if not (Copy(ConsultPackageFromID(SpanText(RawText, Spans[10])), 1, 4) = 'MCAR') then //kt //codex 8/18/26
+    Result := Result + ', ' + SpanTextDef(RawText, Spans[6], '** No Location **') + ', ' + NoteAuthorNameFromInfo(SpanText(RawText, Spans[5])); //kt //codex 8/18/26
+end;
+
+function MakeNodeDisplayTextFast(const [Ref] RawText: string; const Spans: TDocPieceSpanArray; TabIndex: Integer): string; //kt //codex 8/18/26
+begin
+  case TabIndex of //kt //codex 8/18/26
+    CT_NOTES: Result := NoteDisplayTextFromSpans(RawText, Spans); //kt //codex 8/18/26
+    CT_CONSULTS: Result := ConsultDisplayTextFromSpans(RawText, Spans); //kt //codex 8/18/26
+    CT_DCSUMM: Result := DCSummDisplayTextFromSpans(RawText, Spans); //kt //codex 8/18/26
+    else Result := SpanTextDef(RawText, Spans[2], '** No Title **'); //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+end;
+
+procedure UpdateTreeLoadProgress(MaxValue, PositionValue: Integer; const LabelText: string = ''); //kt //codex 8/18/26
+begin
+  if frmNotes.frmNotesLoading = nil then Exit; //kt //codex 8/18/26
+  if MaxValue > 0 then frmNotes.frmNotesLoading.ProgressBar1.Max := MaxValue; //kt //codex 8/18/26
+  frmNotes.frmNotesLoading.ProgressBar1.Position := PositionValue; //kt //codex 8/18/26
+  if LabelText <> '' then frmNotes.frmNotesLoading.Label2.Caption := LabelText; //kt //codex 8/18/26
+  Application.ProcessMessages; //kt //codex 8/18/26
+end;
+
+procedure ParsePieceSpansMax(const [Ref] S: string; Delim: Char; MaxPiece: Integer; var Spans: TDocPieceSpanArray); forward; //kt //codex 8/18/26
+
+destructor TDocTreeIndex.Destroy; //kt //codex 8/18/26
+var
+  i: Integer; //kt //codex 8/18/26
+begin
+  for i := 0 to Count - 1 do TObject(Objects[i]).Free; //kt //codex 8/18/26
+  inherited Destroy; //kt //codex 8/18/26
+end;
+
+function GetChildIndexList(ParentIndex: TDocTreeIndex; const ParentID: string; CreateIfMissing: Boolean): TList; //kt //codex 8/18/26
+var
+  Idx: Integer; //kt //codex 8/18/26
+begin
+  Result := nil; //kt //codex 8/18/26
+  Idx := ParentIndex.IndexOf(ParentID); //kt //codex 8/18/26
+  if Idx < 0 then begin //kt //codex 8/18/26
+    if not CreateIfMissing then Exit; //kt //codex 8/18/26
+    Result := TList.Create; //kt //codex 8/18/26
+    ParentIndex.AddObject(ParentID, Result); //kt //codex 8/18/26
+    Exit; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  Result := TList(ParentIndex.Objects[Idx]); //kt //codex 8/18/26
+end;
+
+function DocTreeTabIndex(ANode: TTreeNode): Integer; //kt //codex 8/18/26
+var
+  TreeName: string; //kt //codex 8/18/26
+begin
+  Result := CT_NOTES; //kt //codex 8/18/26
+  if (ANode = nil) or (ANode.TreeView = nil) then Exit; //kt //codex 8/18/26
+  TreeName := UpperCase(ANode.TreeView.Name); //kt //codex 8/18/26
+  if TreeName = 'TVCSLTNOTES' then Result := CT_CONSULTS //kt //codex 8/18/26
+  else if TreeName = 'TVSUMMS' then Result := CT_DCSUMM; //kt //codex 8/18/26
+end;
+
+function MakeTreeObjectForNode(ANode: TTreeNode): PDocTreeObject; //kt //codex 8/18/26
+var
+  RawText: string; //kt //codex 8/18/26
+begin
+  Result := nil; //kt //codex 8/18/26
+  if not (ANode is TORTreeNode) then Exit; //kt //codex 8/18/26
+  RawText := TORTreeNode(ANode).StringData; //kt //codex 8/18/26
+  if RawText = '' then Exit; //kt //codex 8/18/26
+  case DocTreeTabIndex(ANode) of //kt //codex 8/18/26
+    CT_NOTES: Result := MakeNoteTreeObject(RawText); //kt //codex 8/18/26
+    CT_CONSULTS: Result := MakeConsultsNoteTreeObject(RawText); //kt //codex 8/18/26
+    CT_DCSUMM: Result := MakeDCSummTreeObject(RawText); //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+end;
+
+function DocTreeData(ANode: TTreeNode): PDocTreeObject; //kt //codex 8/18/26
+begin
+  Result := nil; //kt //codex 8/18/26
+  if ANode = nil then Exit; //kt //codex 8/18/26
+  if Assigned(ANode.Data) then begin Result := PDocTreeObject(ANode.Data); Exit; end; //kt //codex 8/18/26
+  Result := MakeTreeObjectForNode(ANode); //kt //codex 8/18/26
+  if Assigned(Result) then ANode.Data := Result; //kt //codex 8/18/26
+end;
+
+procedure BuildDocumentParentIndex(DocList: TStrings; ParentIndex: TDocTreeIndex); //kt //codex 8/18/26
+var
+  i: Integer; //kt //codex 8/18/26
+  ParentID, RawText: string; //kt //codex 8/18/26
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
+  ChildList: TList; //kt //codex 8/18/26
+begin
+  ParentIndex.Sorted := True; //kt //codex 8/18/26
+  ParentIndex.Duplicates := dupError; //kt //codex 8/18/26
+  ParentIndex.CaseSensitive := True; //kt //codex 8/18/26
+  for i := 0 to DocList.Count - 1 do begin //kt //codex 8/18/26
+    if (frmNotes.frmNotesLoading <> nil) and ((i and (TREE_PROGRESS_UPDATE_INTERVAL - 1)) = 0) then //kt //codex 8/18/26
+      UpdateTreeLoadProgress(0, i); //kt //codex 8/18/26
+    RawText := DocList[i]; //kt //codex 8/18/26
+    ParsePieceSpansMax(RawText, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+    ParentID := SpanText(RawText, Spans[14]); //kt //codex 8/18/26
+    ChildList := GetChildIndexList(ParentIndex, ParentID, True); //kt //codex 8/18/26
+    ChildList.Add(Pointer(i)); //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+end;
+
+procedure BuildDocumentTreeIndexed(DocList: TStrings; ParentIndex: TDocTreeIndex; const Parent: string; Tree: TORTreeView; Node: TORTreeNode;
+          TIUContext: TTIUContext; TabIndex: integer); forward; //kt //codex 8/18/26
+
+procedure ParsePieceSpansMax(const [Ref] S: string; Delim: Char; MaxPiece: Integer; var Spans: TDocPieceSpanArray); //kt //codex 8/18/26
+var
+  PieceNum: Integer; //kt //codex 8/18/26
+  StartPos, NextPos, TextLen: Integer; //kt //codex 8/18/26
+begin
+  for PieceNum := Low(Spans) to High(Spans) do //kt //codex 8/18/26
+  begin
+    Spans[PieceNum].StartPos := 0; //kt //codex 8/18/26
+    Spans[PieceNum].Len := 0; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+  if MaxPiece < 1 then Exit; //kt //codex 8/18/26
+  TextLen := Length(S); //kt //codex 8/18/26
+  StartPos := 1; //kt //codex 8/18/26
+  for PieceNum := 1 to MaxPiece do //kt //codex 8/18/26
+  begin
+    if StartPos > TextLen + 1 then Exit; //kt //codex 8/18/26
+    NextPos := StartPos; //kt //codex 8/18/26
+    while (NextPos <= TextLen) and (S[NextPos] <> Delim) do Inc(NextPos); //kt //codex 8/18/26
+    Spans[PieceNum].StartPos := StartPos; //kt //codex 8/18/26
+    Spans[PieceNum].Len := NextPos - StartPos; //kt //codex 8/18/26
+    StartPos := NextPos + 1; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
+end;
+
+function SpanText(const [Ref] S: string; const Span: TPieceSpan): string; //kt //codex 8/18/26
+begin
+  if Span.StartPos <= 0 then Result := '' else Result := Copy(S, Span.StartPos, Span.Len); //kt //codex 8/18/26
+end;
 
 {==============================================================
 RPC [TIU DOCUMENTS BY CONTEXT] returns
@@ -128,7 +406,7 @@ var  AnObject: PDocTreeObject;
 begin
   Result := false;
   if not assigned(Node) then exit;
-  AnObject := Node.Data; if not assigned(AnObject) then exit;
+  AnObject := DocTreeData(Node); if not assigned(AnObject) then exit; //kt //codex 8/18/26
   Subject := AnObject^.Subject;
   if (Subject = '') and (AnObject^.Status = 'new') then Subject := AnObject^.PkgRef;  //node position changes in different states...
   Result := IsComponent(AnObject^.DocTitle, Subject);
@@ -150,6 +428,7 @@ var
   i: Integer;
   x, x1, x2, x3, MyParent, MyTitle, MyLocation, MySubject: string;
   AList, SrcList: TStringList;
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
 begin
   AList := TStringList.Create;
   SrcList := TStringList.Create;
@@ -168,26 +447,22 @@ begin
         end;
       end;
       for i := 0 to Count - 1 do begin
-        //if assigned(frmNotes.frmNotesLoading) then begin
-        if frmNotes.frmNotesLoading<>nil then begin
-           //frmNotes.frmNotesLoading.Label1.Caption := inttostr(i)+' out of '+inttostr(srclist.count);
-           frmNotes.frmNotesLoading.ProgressBar1.Max := srclist.count;
-           frmNotes.frmNotesLoading.ProgressBar1.Position := i;
-           application.processmessages;
-        end;
+        if (frmNotes.frmNotesLoading <> nil) and ((i and (TREE_PROGRESS_UPDATE_INTERVAL - 1)) = 0) then
+          UpdateTreeLoadProgress(SrcList.Count, i);
         x := Strings[i];
-        MyParent   := Piece(x, U, 14);
-        MyTitle    := Piece(x, U, 2);
+        ParsePieceSpansMax(x, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+        MyParent   := SpanText(x, Spans[14]); //kt //codex 8/18/26
+        MyTitle    := SpanText(x, Spans[2]); //kt //codex 8/18/26
         if Length(Trim(MyTitle)) = 0 then begin
           MyTitle := '** No Title **';
           SetPiece(x, U, 2, MyTitle);
         end;
-        MyLocation := Piece(x, U, 6);
+        MyLocation := SpanText(x, Spans[6]); //kt //codex 8/18/26
         if Length(Trim(MyLocation)) = 0 then begin
           MyLocation := '** No Location **';
           SetPiece(x, U, 6, MyLocation);
         end;
-        MySubject  := Piece(x, U, 12);
+        MySubject  := SpanText(x, Spans[12]); //kt //codex 8/18/26
         if IsComponent(MyTitle, MySubject) then Ascending := true; //kt 5/15 Force order of display of components in tree to match sequence order in note.
 (*      case TIUContext.SearchField[1] of
           'T': if ((TextFound(MyTitle)) then continue;
@@ -196,8 +471,8 @@ begin
         end;*)
         if GroupBy <> '' then case GroupBy[1] of
           'D':  begin
-                  x1 := Piece(Piece(x, U, 8), ';', 1);                    // Visit date
-                  x2 := Piece(Piece(Piece(x, U, 8), ';', 2), '.', 1);     // Visit date (FM)   no time - v15.4
+                  x1 := VisitDateLabel(SpanText(x, Spans[8])); //kt //codex 8/18/26
+                  x2 := VisitDateFMDate(SpanText(x, Spans[8])); //kt //codex 8/18/26
                   if x2 = '' then begin
                     x2 := 'No Visit';
                     x1 := Piece(x1, ':', 1) + ':  No Visit';
@@ -211,8 +486,8 @@ begin
                     AList.Add(x3);   // '2980324Adm^Mar 24,98'
                   //TMG ADDITION  1/28/25
                   Dest.Add(x);
-                  x1 := Piece(Piece(x, U, 18), ';', 1);                    // Visit date
-                  x2 := Piece(Piece(Piece(x, U, 18), ';', 2), '.', 1);     // Visit date (FM)   no time - v15.4
+                  x1 := VisitDateLabel(SpanText(x, Spans[18])); //kt //codex 8/18/26
+                  x2 := VisitDateFMDate(SpanText(x, Spans[18])); //kt //codex 8/18/26
                   if x2 = '' then begin
                     x2 := 'No Creation Date';
                     x1 := Piece(x1, ':', 1) + ':  No Creation Date';
@@ -243,7 +518,7 @@ begin
                     AList.Add(x3);
                 end;
           'A':  begin
-                  x1 := Piece(Piece(x, U, 5), ';', 3);
+                  x1 := NoteAuthorName(x); //kt //codex 8/18/26
                   if x1 = '' then x1 := '** No Author **';
                   if MyParent = IntToStr(Context) then                  // keep ID notes together, or
                     SetPiece(x, U, 14, MyParent + x1);
@@ -254,7 +529,7 @@ begin
                     AList.Add(x3);
                 end;
 (*        'A':  begin                                                 // Makes note appear both places in tree,
-                  x1 := Piece(Piece(x, U, 5), ';', 3);                  // but also appears TWICE in lstNotes.
+                  x1 := NoteAuthorName(x);                  // but also appears TWICE in lstNotes. //kt //codex 8/18/26
                   if x1 = '' then x1 := '** No Author **';              // IS THIS REALLY A PROBLEM??
                   if MyParent = IntToStr(Context) then                  // Impact on EditingIndex?
                     SetPiece(x, U, 14, MyParent + x1);                  // Careful when deleting note being edited!!!
@@ -265,8 +540,8 @@ begin
                 end;*)
      {      'C':  begin
                              // TMG ADDING THIS PART   1/28/25
-                  x1 := Piece(Piece(x, U, 18), ';', 1);                    // Visit date
-                  x2 := Piece(Piece(Piece(x, U, 18), ';', 2), '.', 1);     // Visit date (FM)   no time - v15.4
+                  x1 := VisitDateLabel(Piece(x, U, 18)); //kt //codex 8/18/26
+                  x2 := VisitDateFMDate(Piece(x, U, 18)); //kt //codex 8/18/26
                   if x2 = '' then begin
                     x2 := 'No Creation Date';
                     x1 := Piece(x1, ':', 1) + ':  No Creation Date';
@@ -298,12 +573,8 @@ begin
         if (not Ascending) then InvertStringList(AList);
       for i := 0 to AList.Count-1 do begin
         Dest.Insert(0, IntToStr(Context) + Piece(AList[i], U, 1) + '^' + Piece(AList[i], U, 2) + '^^^^^^^^^^^%^' + Piece(AList[i], U, 3));
-        if frmNotes.frmNotesLoading<>nil then begin
-           //frmNotes.frmNotesLoading.Label1.Caption := inttostr(i)+' out of '+inttostr(alist.count);
-           frmNotes.frmNotesLoading.ProgressBar1.Max := alist.count;
-           frmNotes.frmNotesLoading.ProgressBar1.Position := i;
-           application.processmessages;
-        end;
+        if (frmNotes.frmNotesLoading <> nil) and ((i and (TREE_PROGRESS_UPDATE_INTERVAL - 1)) = 0) then
+          UpdateTreeLoadProgress(AList.Count, i);
       end;
     end; {with}
   finally
@@ -312,66 +583,65 @@ begin
   end;
 end;
 
-procedure BuildDocumentTree(DocList: TStrings; const Parent: string; Tree: TORTreeView; Node: TORTreeNode;
+procedure BuildDocumentTreeIndexed(DocList: TStrings; ParentIndex: TDocTreeIndex; const Parent: string; Tree: TORTreeView; Node: TORTreeNode;
           TIUContext: TTIUContext; TabIndex: integer);
 var
-  MyID, MyParent, Name: string;
-  i: Integer;
-  ChildNode, tmpNode: TORTreeNode;
+  MyID, MyParent, Name, RawText: string;
+  i, ChildIdx: Integer;
+  ChildList: TList;
+  ChildNode: TORTreeNode;
   DocHasChildren: Boolean;
-  AnObject: PDocTreeObject;
-  tmpStr : string;  //to make debugging easier.
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
 begin
-  with DocList do for i := 0 to Count - 1 do begin
-    tmpNode := nil;
-    tmpStr := Strings[i]; //kt, for easier debuggin.  
-    MyParent := Piece(Strings[i], U, 14);
+  ChildList := GetChildIndexList(ParentIndex, Parent, False); //kt //codex 8/18/26
+  if ChildList = nil then Exit; //kt //codex 8/18/26
+  for i := 0 to ChildList.Count - 1 do begin //kt //codex 8/18/26
+    ChildIdx := NativeInt(ChildList[i]); //kt //codex 8/18/26
+    RawText := DocList[ChildIdx]; //kt //codex 8/18/26
+    ParsePieceSpansMax(RawText, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+    MyParent := SpanText(RawText, Spans[14]); //kt //codex 8/18/26
     if (MyParent = Parent) then begin
-       if frmNotes.frmNotesLoading<>nil then begin
-        //frmNotes.frmNotesLoading.Label1.Caption := inttostr(i)+' out of '+inttostr(count);
-        //frmNotes.frmNotesLoading.ProgressBar1.Max := count;
-        frmNotes.frmNotesLoading.ProgressBar1.Position := frmNotes.frmNotesLoading.ProgressBar1.Position+1; 
-        //frmNotes.frmNotesLoading.label2.caption := Piece(Strings[i], U, 2); //Piece(Strings[i], U, 14);
-        {TESTING    application.processmessages;}
-      end;
-      MyID := Piece(Strings[i], U, 1);
-      if Piece(Strings[i], U, 13) <> '%' then
-        case TabIndex of
-          CT_NOTES:    Name := MakeNoteDisplayText(Strings[i]);
-          CT_CONSULTS: Name := MakeConsultNoteDisplayText(Strings[i]);
-          CT_DCSUMM:   Name := MakeDCSummDisplayText(Strings[i]);
-        end
+      if (frmNotes.frmNotesLoading <> nil) and ((i and (TREE_PROGRESS_UPDATE_INTERVAL - 1)) = 0) then
+        UpdateTreeLoadProgress(0, frmNotes.frmNotesLoading.ProgressBar1.Position + TREE_PROGRESS_UPDATE_INTERVAL, SpanTextDef(RawText, Spans[2], '** No Title **'));
+      MyID := SpanText(RawText, Spans[1]); //kt //codex 8/18/26
+      if SpanText(RawText, Spans[13]) <> '%' then //kt //codex 8/18/26
+        Name := MakeNodeDisplayTextFast(RawText, Spans, TabIndex) //kt //codex 8/18/26
       else
-        Name := Piece(Strings[i], U, 2);
-      DocHasChildren := (Piece(Strings[i], U, 13) <> '');
-      if Node <> nil then if Node.HasChildren then
-        tmpNode := Tree.FindPieceNode(MyID, 1, U, Node);
-      if (tmpNode <> nil) and tmpNode.HasAsParent(Node) then
-        Continue
-      else begin
-        case TabIndex of
-          CT_NOTES:    AnObject := MakeNoteTreeObject(Strings[i]);
-          CT_CONSULTS: AnObject := MakeConsultsNoteTreeObject(Strings[i]);
-          CT_DCSUMM:   AnObject := MakeDCSummTreeObject(Strings[i]);
-          else
-            AnObject := nil;
-        end; {case}
-        ChildNode := TORTreeNode(Tree.Items.AddChildObject(TORTreeNode(Node), Name, AnObject));
-        ChildNode.StringData := Strings[i];
-        SetTreeNodeImagesAndFormatting(ChildNode, TIUContext, TabIndex);
-        if DocHasChildren then begin
-           BuildDocumentTree(DocList, MyID, Tree, ChildNode, TIUContext, TabIndex);
-           if frmNotes.frmNotesLoading<>nil then frmNotes.frmNotesLoading.label2.caption := Piece(DocList.Strings[i], U, 2);
-        end;
+        Name := SpanTextDef(RawText, Spans[2], '** No Title **'); //kt //codex 8/18/26
+      DocHasChildren := SpanText(RawText, Spans[13]) <> ''; //kt //codex 8/18/26
+      ChildNode := TORTreeNode(Tree.Items.AddChildObject(TORTreeNode(Node), Name, nil)); //kt //codex 8/18/26
+      ChildNode.StringData := RawText;
+      SetTreeNodeImagesAndFormatting(ChildNode, TIUContext, TabIndex);
+      if DocHasChildren then begin
+         BuildDocumentTreeIndexed(DocList, ParentIndex, MyID, Tree, ChildNode, TIUContext, TabIndex);
+         if (frmNotes.frmNotesLoading <> nil) and ((i and (TREE_PROGRESS_UPDATE_INTERVAL - 1)) = 0) then
+           UpdateTreeLoadProgress(0, frmNotes.frmNotesLoading.ProgressBar1.Position, SpanTextDef(RawText, Spans[2], '** No Title **'));
       end;
     end;
   end;
+end;
+
+procedure BuildDocumentTree(DocList: TStrings; const Parent: string; Tree: TORTreeView; Node: TORTreeNode;
+          TIUContext: TTIUContext; TabIndex: integer);
+var
+  ParentIndex: TDocTreeIndex; //kt //codex 8/18/26
+begin
+  ParentIndex := TDocTreeIndex.Create; //kt //codex 8/18/26
+  try
+    BuildDocumentParentIndex(DocList, ParentIndex); //kt //codex 8/18/26
+    BuildDocumentTreeIndexed(DocList, ParentIndex, Parent, Tree, Node, TIUContext, TabIndex); //kt //codex 8/18/26
+  finally
+    ParentIndex.Free; //kt //codex 8/18/26
+  end; //kt //codex 8/18/26
 end;
 
 procedure SetTreeNodeImagesAndFormatting(Node: TORTreeNode; CurrentContext: TTIUContext; TabIndex: integer);
 var
   tmpAuthor: int64;
   i: integer;
+  RawText, DocID, DocTitle, DocHasChildren, DocParent, Status, AuthorInfo: string; //kt //codex 8/18/26
+  ImageCount: Integer; //kt //codex 8/18/26
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
 
   procedure MakeBold(ANode: TORTreeNode);
   var
@@ -398,7 +668,16 @@ var
   end;
 
 begin
-  with Node, PDocTreeObject(Node.Data)^ do begin
+  RawText := Node.StringData; //kt //codex 8/18/26
+  ParsePieceSpansMax(RawText, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+  DocID := SpanText(RawText, Spans[1]); //kt //codex 8/18/26
+  DocTitle := SpanTextDef(RawText, Spans[2], '** No Title **'); //kt //codex 8/18/26
+  DocHasChildren := NormalizeDocHasChildren(SpanText(RawText, Spans[13])); //kt //codex 8/18/26
+  DocParent := SpanText(RawText, Spans[14]); //kt //codex 8/18/26
+  Status := SpanText(RawText, Spans[7]); //kt //codex 8/18/26
+  AuthorInfo := SpanText(RawText, Spans[5]); //kt //codex 8/18/26
+  ImageCount := StrToIntDef(SpanText(RawText, Spans[11]), 0); //kt //codex 8/18/26
+  with Node do begin
     i := Pos('*', DocTitle);
     if i > 0 then i := i + 1 else i := 0;
     if (Copy(DocTitle, i + 1, 8) = 'Addendum') then
@@ -425,14 +704,16 @@ begin
         if TabIndex <> CT_CONSULTS then begin
           if (DocID = '2') or (DocID ='3') then begin
             if StrToIntDef(Status, 0) in [NC_UNSIGNED, NC_UNCOSIGNED] then begin
-              if Author = 0 then tmpAuthor := User.DUZ else tmpAuthor := Author;
+              tmpAuthor := StrToInt64Def(SemicolonPiece(AuthorInfo, 1), 0); //kt //codex 8/18/26
+              if tmpAuthor = 0 then tmpAuthor := User.DUZ; //kt //codex 8/18/26
               Text := Text + ' for ' + ExternalName(tmpAuthor, 200);
             end else begin
               Text := Text + ' for ' + User.Name;
             end;
           end;
           if DocID = '4' then begin
-            Text := Text + ' for ' + ExternalName(Author, 200);
+            tmpAuthor := StrToInt64Def(SemicolonPiece(AuthorInfo, 1), 0); //kt //codex 8/18/26
+            Text := Text + ' for ' + ExternalName(tmpAuthor, 200);
           end;
         end;
       end;
@@ -493,25 +774,25 @@ begin
   if ANode = nil then Exit;
   IncludeIt := False;
   if (ContextMatch(TORTreeNode(ANode), MyNodeID, AContext) and TextFound(TORTreeNode(ANode), AContext)) then begin
-    with PDocTreeObject(ANode.Data)^ do begin
+    with DocTreeData(ANode)^ do begin //kt //codex 8/18/26
       if (AContext.GroupBy <> '') and
         (ATree.Selected.ImageIndex in [IMG_GROUP_OPEN, IMG_GROUP_SHUT]) then begin
         case AContext.GroupBy[1] of
-          'T': if (UpperCase(DocTitle) = UpperCase(PDocTreeObject(ATree.Selected.Data)^.DocTitle)) or
-                 (UpperCase(DocTitle) = UpperCase('Addendum to ' + PDocTreeObject(ATree.Selected.Data)^.DocTitle)) or
+          'T': if (UpperCase(DocTitle) = UpperCase(DocTreeData(ATree.Selected)^.DocTitle)) or
+                 (UpperCase(DocTitle) = UpperCase('Addendum to ' + DocTreeData(ATree.Selected)^.DocTitle)) or
                  (AContext.Filtered and TextFound(TORTreeNode(ANode), AContext)) then
                  IncludeIt := True;
           'D': begin
-                 x := PDocTreeObject(ATree.Selected.Data)^.DocID;
+                 x := DocTreeData(ATree.Selected)^.DocID; //kt //codex 8/18/26
                  if (Copy(x, 2, 3) = 'Vis') or (Copy(x, 2, 3) = 'Adm') then begin
                    if Copy(VisitDate, 1, 3) = Copy(x, 2, 3) then
                      IncludeIt := True;
-                 end else if Piece(Piece(VisitDate, ';', 2), '.', 1) = Copy(x, 2, Length(x) - 4) then
+                 end else if VisitDateFMDate(VisitDate) = Copy(x, 2, Length(x) - 4) then //kt //codex 8/18/26
                    IncludeIt := True;
                end;
-          'L': if MyNodeID + Location = PDocTreeObject(ATree.Selected.Data)^.DocID then
+          'L': if MyNodeID + Location = DocTreeData(ATree.Selected)^.DocID then
                  IncludeIt := True;
-          'A': if MyNodeID + Piece(Author, ';', 2) = PDocTreeObject(ATree.Selected.Data)^.DocID then
+          'A': if MyNodeID + Piece(Author, ';', 2) = DocTreeData(ATree.Selected)^.DocID then
                  IncludeIt := True;
         end; {case}
       end else begin
@@ -528,18 +809,20 @@ function ContextMatch(ANode: TORTreeNode; AParentID: string; AContext: TTIUConte
 var
   Status: string;
   Author: int64;
+  AuthorID: string; //kt //codex 8/18/26
 begin
   Result := True;
-  if not Assigned(ANode.Data) then Exit;
-  Status := PDocTreeObject(ANode.Data)^.Status;
+  if not Assigned(DocTreeData(ANode)) then Exit; //kt //codex 8/18/26
+  Status := DocTreeData(ANode)^.Status; //kt //codex 8/18/26
 
   if (AContext.Status <> AParentID[1]) or (AContext.Author = 0) then
     Author := User.DUZ
   else
     Author := AContext.Author;
+  AuthorID := IntToStr(Author); //kt //codex 8/18/26
 
   if Length(Trim(Status)) = 0 then exit;
-  (*if PDocTreeObject(ANode.Data)^.DocHasChildren = '%' then Result := False else Result := True;
+  (*if DocTreeData(ANode)^.DocHasChildren = '%' then Result := False else Result := True;
   Result := False;*)
   case AParentID[1] of
     '1':  Result := (Status = 'completed') or
@@ -552,7 +835,7 @@ begin
                     (Status = 'deleted')   or
                     (Status = 'retracted') or
                     (Status = 'unverified')) and
-                    (Piece(PDocTreeObject(ANode.Data)^.Author, ';', 1) = IntToStr(Author));
+                    PieceEquals(DocTreeData(ANode)^.Author, ';', 1, AuthorID); //kt //codex 8/18/26
     '3':  Result := ((Status = 'uncosigned') or
                     (Status = 'unsigned')   or
                     (Status = 'unreleased') or
@@ -560,11 +843,11 @@ begin
                     (Status = 'retracted') or
                     (Status = 'unverified')) ;//and
  { TODO -oRich V. -cSort/Search : Uncosigned notes - need to check cosigner, not author, but don't have it }
-                    //(Piece(PDocTreeObject(ANode.Data)^.Author, ';', 1) = IntToStr(Author));
-    '4':  Result := (Piece(PDocTreeObject(ANode.Data)^.Author, ';', 1) = IntToStr(Author));
-    '5':  if PDocTreeObject(ANode.Data)^.DocHasChildren = '%' then Result := False
-          else Result := (StrToFloat(PDocTreeObject(ANode.Data)^.DocFMDate) >= AContext.FMBeginDate) and
-                         (Trunc(StrToFloat(PDocTreeObject(ANode.Data)^.DocFMDate)) <= AContext.FMEndDate);
+                    //(Piece(DocTreeData(ANode)^.Author, ';', 1) = IntToStr(Author));
+    '4':  Result := PieceEquals(DocTreeData(ANode)^.Author, ';', 1, AuthorID); //kt //codex 8/18/26
+    '5':  if DocTreeData(ANode)^.DocHasChildren = '%' then Result := False
+          else Result := (StrToFloat(DocTreeData(ANode)^.DocFMDate) >= AContext.FMBeginDate) and
+                         (Trunc(StrToFloat(DocTreeData(ANode)^.DocFMDate)) <= AContext.FMEndDate);
     'N':  Result := True;     // NEW NOTE
     'E':  Result := True;     // EDITING NOTE
     'A':  Result := True;     // NEW ADDENDUM or processing alert
@@ -576,12 +859,12 @@ var
   MySearch: string;
 begin
   Result := False;
-  if not Assigned(ANode.Data) then Exit;
+  if not Assigned(DocTreeData(ANode)) then Exit; //kt //codex 8/18/26
   if CurrentContext.SearchField <> '' then
     case CurrentContext.SearchField[1] of
-      'T': MySearch := PDocTreeObject(ANode.Data)^.DocTitle;
-      'S': MySearch := PDocTreeObject(ANode.Data)^.Subject;
-      'B': MySearch := PDocTreeObject(ANode.Data)^.DocTitle + ' ' + PDocTreeObject(ANode.Data)^.Subject;
+      'T': MySearch := DocTreeData(ANode)^.DocTitle;
+      'S': MySearch := DocTreeData(ANode)^.Subject;
+      'B': MySearch := DocTreeData(ANode)^.DocTitle + ' ' + DocTreeData(ANode)^.Subject;
     end;
   Result := (not CurrentContext.Filtered) or
             ((CurrentContext.Filtered) and (Pos(UpperCase(CurrentContext.KeyWord), UpperCase(MySearch)) > 0));
@@ -681,8 +964,8 @@ procedure AddListViewItem(ANode: TTreeNode; AListView: TListView);
 var
   ListItem: TListItem;
 begin
-  if not Assigned(ANode.Data) then Exit;
-  with Anode, PDocTreeObject(ANode.Data)^, AListView do begin
+  if not Assigned(DocTreeData(ANode)) then Exit; //kt //codex 8/18/26
+  with Anode, DocTreeData(ANode)^, AListView do begin //kt //codex 8/18/26
 (*      if (FCurrentContext.Status = '1') and
            (Copy(DocTitle, 1 , 8) = 'Addendum') then Exit;*)
     if ANode.ImageIndex in [IMG_TOP_LEVEL, IMG_GROUP_OPEN, IMG_GROUP_SHUT] then Exit;
@@ -704,27 +987,29 @@ end;
 function MakeNoteTreeObject(x: string): PDocTreeObject;
 var
   AnObject: PDocTreeObject;
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
+  AuthorInfo: string; //kt //codex 8/18/26
 begin
   New(AnObject);
+  ParsePieceSpansMax(x, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+  AuthorInfo := SpanText(x, Spans[5]); //kt //codex 8/18/26
   with AnObject^ do
     begin
-      DocID           := Piece(x, U, 1);
-      DocDate         := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 3)));
-      DocTitle        := Piece(x, U, 2);
-      Location        := Piece(x, U, 6);
-      NodeText        := MakeNoteDisplayText(x);
-      ImageCount      := StrToIntDef(Piece(x, U, 11), 0);
-      VisitDate       := Piece(x, U, 8);
-      DocFMDate       := Piece(x, U, 3);
-      DocHasChildren  := Piece(x, U, 13);
-      if Copy(DocHasChildren, 1, 1) = '*' then
-        DocHasChildren := Copy(DocHasChildren, 2, 5);
-      DocParent       := Piece(x, U, 14);
-      Author          := Piece(Piece(x, U, 5), ';', 1) + ';' + Piece(Piece(x, U, 5), ';', 3);
-      PkgRef          := Piece(x, U, 10);
-      Status          := Piece(x, U, 7);
-      Subject         := Piece(x, U, 12);
-      OrderByTitle    := Piece(x, U, 15) = '1';
+      DocID           := SpanText(x, Spans[1]); //kt //codex 8/18/26
+      DocDate         := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(SpanText(x, Spans[3]))); //kt //codex 8/18/26
+      DocTitle        := SpanTextDef(x, Spans[2], '** No Title **'); //kt //codex 8/18/26
+      Location        := SpanTextDef(x, Spans[6], '** No Location **'); //kt //codex 8/18/26
+      NodeText        := NoteDisplayTextFromSpans(x, Spans); //kt //codex 8/18/26
+      ImageCount      := StrToIntDef(SpanText(x, Spans[11]), 0); //kt //codex 8/18/26
+      VisitDate       := SpanText(x, Spans[8]); //kt //codex 8/18/26
+      DocFMDate       := SpanText(x, Spans[3]); //kt //codex 8/18/26
+      DocHasChildren  := NormalizeDocHasChildren(SpanText(x, Spans[13])); //kt //codex 8/18/26
+      DocParent       := SpanText(x, Spans[14]); //kt //codex 8/18/26
+      Author          := NoteAuthorDisplayFromInfo(AuthorInfo); //kt //codex 8/18/26
+      PkgRef          := SpanText(x, Spans[10]); //kt //codex 8/18/26
+      Status          := SpanText(x, Spans[7]); //kt //codex 8/18/26
+      Subject         := SpanText(x, Spans[12]); //kt //codex 8/18/26
+      OrderByTitle    := SpanText(x, Spans[15]) = '1'; //kt //codex 8/18/26
     end;
   Result := AnObject;
 end;
@@ -732,28 +1017,29 @@ end;
 function MakeDCSummTreeObject(x: string): PDocTreeObject;
 var
   AnObject: PDocTreeObject;
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
+  AuthorInfo: string; //kt //codex 8/18/26
 begin
   New(AnObject);
-  if Copy(Piece(x, U, 9), 1, 4) = '    ' then SetPiece(x, U, 9, 'Dis: ');
+  ParsePieceSpansMax(x, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+  AuthorInfo := SpanText(x, Spans[5]); //kt //codex 8/18/26
   with AnObject^ do
     begin
-      DocID            := Piece(x, U, 1);
-      DocDate          := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 3)));
-      DocTitle         := Piece(x, U, 2);
-      Location         := Piece(x, U, 6);
-      NodeText         := MakeDCSummDisplayText(x);
-      DocFMDate        := Piece(x, U, 3);
-      ImageCount       := StrToIntDef(Piece(x, U, 11), 0);
-      DocHasChildren   := Piece(x, U, 13);
-      if Copy(DocHasChildren, 1, 1) = '*' then
-        DocHasChildren := Copy(DocHasChildren, 2, 5);
-      DocParent        := Piece(x, U, 14);
-      Author           := Piece(Piece(x, U, 5), ';', 1) + ';' + Piece(Piece(x, U, 5), ';', 3);
-      PkgRef           := Piece(x, U, 10);
-      Status           := Piece(x, U, 7);
-      Subject          := Piece(x, U, 12);
-      VisitDate        := Piece(x, U, 8);
-      OrderByTitle    := Piece(x, U, 15) = '1';
+      DocID            := SpanText(x, Spans[1]); //kt //codex 8/18/26
+      DocDate          := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(SpanText(x, Spans[3]))); //kt //codex 8/18/26
+      DocTitle         := SpanTextDef(x, Spans[2], '** No Title **'); //kt //codex 8/18/26
+      Location         := SpanTextDef(x, Spans[6], '** No Location **'); //kt //codex 8/18/26
+      NodeText         := DCSummDisplayTextFromSpans(x, Spans); //kt //codex 8/18/26
+      DocFMDate        := SpanText(x, Spans[3]); //kt //codex 8/18/26
+      ImageCount       := StrToIntDef(SpanText(x, Spans[11]), 0); //kt //codex 8/18/26
+      DocHasChildren   := NormalizeDocHasChildren(SpanText(x, Spans[13])); //kt //codex 8/18/26
+      DocParent        := SpanText(x, Spans[14]); //kt //codex 8/18/26
+      Author           := NoteAuthorDisplayFromInfo(AuthorInfo); //kt //codex 8/18/26
+      PkgRef           := SpanText(x, Spans[10]); //kt //codex 8/18/26
+      Status           := SpanText(x, Spans[7]); //kt //codex 8/18/26
+      Subject          := SpanText(x, Spans[12]); //kt //codex 8/18/26
+      VisitDate        := SpanText(x, Spans[8]); //kt //codex 8/18/26
+      OrderByTitle     := SpanText(x, Spans[15]) = '1'; //kt //codex 8/18/26
     end;
   Result := AnObject;
 end;
@@ -761,28 +1047,31 @@ end;
 function MakeConsultsNoteTreeObject(x: string): PDocTreeObject;
 var
   AnObject: PDocTreeObject;
+  Spans: TDocPieceSpanArray; //kt //codex 8/18/26
+  DocIDText, PkgRefText: string; //kt //codex 8/18/26
 begin
   New(AnObject);
+  ParsePieceSpansMax(x, U, MAX_TREE_SPAN_PIECE, Spans); //kt //codex 8/18/26
+  DocIDText := SpanText(x, Spans[1]); //kt //codex 8/18/26
+  PkgRefText := SpanText(x, Spans[10]); //kt //codex 8/18/26
   with AnObject^ do
     begin
-      DocID           := Piece(x, U, 1);
-      DocDate         := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 3)));
-      DocTitle        := Piece(x, U, 2);
-      Location        := Piece(x, U, 6);
-      NodeText        := MakeConsultNoteDisplayText(x);
-      DocFMDate       := Piece(x, U, 3);
-      Status          := Piece(x, U, 7);
-      Author          := Piece(Piece(x, U, 5), ';', 1) + ';' + Piece(Piece(x, U, 5), ';', 3);
-      PkgRef          := Piece(x, U, 10);
-      if Piece(PkgRef, ';', 2) = PKG_CONSULTS then
-        OrderID       := GetConsultOrderIEN(StrToIntDef(Piece(PkgRef, ';', 1), 0));
-      ImageCount      := StrToIntDef(Piece(x, U, 11), 0);
-      VisitDate       := Piece(x, U, 8);
-      DocHasChildren  := Piece(x, U, 13);
-      if Copy(DocHasChildren, 1, 1) = '*' then
-        DocHasChildren := Copy(DocHasChildren, 2, 5);
-      DocParent       := Piece(x, U, 14);
-      OrderByTitle    := Piece(x, U, 15) = '1';
+      DocID           := DocIDText; //kt //codex 8/18/26
+      DocDate         := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(SpanText(x, Spans[3]))); //kt //codex 8/18/26
+      DocTitle        := SpanTextDef(x, Spans[2], '** No Title **'); //kt //codex 8/18/26
+      Location        := SpanTextDef(x, Spans[6], '** No Location **'); //kt //codex 8/18/26
+      NodeText        := ConsultDisplayTextFromSpans(x, Spans); //kt //codex 8/18/26
+      DocFMDate       := SpanText(x, Spans[3]); //kt //codex 8/18/26
+      Status          := SpanText(x, Spans[7]); //kt //codex 8/18/26
+      Author          := NoteAuthorDisplayFromInfo(SpanText(x, Spans[5])); //kt //codex 8/18/26
+      PkgRef          := PkgRefText; //kt //codex 8/18/26
+      if SemicolonPiece(PkgRefText, 2) = PKG_CONSULTS then //kt //codex 8/18/26
+        OrderID       := GetConsultOrderIEN(StrToIntDef(SemicolonPiece(PkgRefText, 1), 0)); //kt //codex 8/18/26
+      ImageCount      := StrToIntDef(SpanText(x, Spans[11]), 0); //kt //codex 8/18/26
+      VisitDate       := SpanText(x, Spans[8]); //kt //codex 8/18/26
+      DocHasChildren  := NormalizeDocHasChildren(SpanText(x, Spans[13])); //kt //codex 8/18/26
+      DocParent       := SpanText(x, Spans[14]); //kt //codex 8/18/26
+      OrderByTitle    := SpanText(x, Spans[15]) = '1'; //kt //codex 8/18/26
     end;
   Result := AnObject;
 end;

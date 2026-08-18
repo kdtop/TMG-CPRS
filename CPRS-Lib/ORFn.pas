@@ -40,6 +40,7 @@ unit ORFn;
 interface  // --------------------------------------------------------------------------------
 
 uses SysUtils, Windows, Messages, Classes, Controls, StdCtrls, ExtCtrls, ComCtrls, Forms,
+  VAUtils, //kt //codex 8/18/26
   VCLTee.TeEngine,
      DateUtils, //kt added 11/20
      Graphics, Menus, RichEdit, Buttons;
@@ -68,6 +69,12 @@ type
     function IndexOfPiece(PieceNum : integer; SearchValue : string) : integer;
   end;
 
+  TPieceSpan = record //kt  //codex 8/18/26
+    StartPos: Integer; //kt  //codex 8/18/26
+    Len: Integer; //kt  //codex 8/18/26
+  end; //kt  //codex 8/18/26
+  TPieceSpanArray = array of TPieceSpan; //kt  //codex 8/18/26
+
   TDataStr = class(TObject)   //kt added entire class 4/2023
   //Class to work with data strings, i.e. if s='123^abc^apple^pear^dog^cat', then data is being stored at each piece
   //E.g. FormatStr = 'Index^Name^Best^Worst^First^Last',
@@ -78,6 +85,12 @@ type
     FFormatStr : string;
     FDelimChar : char;   //default is '^'
     FFormatSL : TStringList;
+    FFormatIndex : TStringList;
+    FPieceSpans : TPieceSpanArray;
+    FPieceSpansValid : boolean;
+    procedure BuildFormatCaches;
+    procedure EnsurePieceSpans(MaxPiece : integer);
+    procedure InvalidatePieceSpans;
     procedure SetPieceValue(index : integer; Value : string);
     procedure SetValue(index : string; Value : string);
     procedure SetIntValue(index : string; Value : integer);
@@ -86,6 +99,7 @@ type
     function GetIntValue(index : string) : integer;
     procedure SetFormatStr(value : string);
     procedure SetDelimChar(value : char);
+    procedure SetDataStr(value : string);
     function GetIntIndex(Index : string; SuppressException : boolean = false) : integer;
   public
     procedure Clear;
@@ -103,7 +117,7 @@ type
     property IntValue[index : string] : integer read GetIntValue write SetIntValue;
     property FormatStr : string read FFormatStr write SetFormatStr;
     property DelimChar : char read FDelimChar write SetDelimChar;
-    property DataStr : string read FDataStr write FDataStr;
+    property DataStr : string read FDataStr write SetDataStr;
   end;
 
 
@@ -162,11 +176,15 @@ procedure MixedCaseByPiece(AList: TStrings; ADelim: Char; PieceNum: Integer);
 function Contains(const S, SubString : string) : boolean;                                  //kt 7/16
 function LeftMatches(S, SubString : string; CaseSensitive : boolean = true) : boolean;  //kt 7/16
 function RightMatches(S, SubString : string; CaseSensitive : boolean = true) : boolean; //kt 7/16
-function Piece(const S: string; Delim: char; PieceNum: Integer): string;
+function Piece(const S: string; Delim: char; PieceNum: Integer): string; //kt //codex 8/18/26
+function PieceEquals(const S: string; Delim: char; PieceNum: Integer; const Value: string; CaseInsensitive: Boolean = False): Boolean; //kt //codex 8/18/26
 function Piece2(const S: string; Delim: string; PieceNum: Integer): string;                //kt
 //function Piece(const S: string; Delim: string; PieceNum: Integer): string; overload;     //kt 8/09
 function PieceNCS(const S: string; Delim: string; PieceNum: Integer): string; overload;    //kt 8/09
-function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string;         //kt 8/09 added 'overload'
+function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string;         //kt 8/09 added 'overload' //kt //codex 8/18/26
+function PieceAsIntDef(const S: string; Delim: char; PieceNum: Integer; Default: Integer = 0): Integer; //kt //codex 8/18/26
+function PieceAsInt64Def(const S: string; Delim: char; PieceNum: Integer; Default: Int64 = 0): Int64; //kt //codex 8/18/26
+procedure ParsePiecesMax(const S: string; Delim: Char; MaxPiece: Integer; var Pieces: VAUtils.TStringArray); //kt //codex 8/18/26
 function Pieces2(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string;    //kt 8/09 added
 function PiecesNonQT(const S : string; Delim : string; PieceStart : integer; PieceEnd: Integer = 999999; QuoteCh : char = '"') : string;  //kt 8/17/21
 function FindPiecesNodes(SL : TStringList; Delim : char; NodeA : string = ''; NodeB : string = ''; NodeC : string = ''; nodeD : string = '') : integer;  //kt 5/15 addeed
@@ -265,7 +283,7 @@ implementation  // -------------------------------------------------------------
 
 uses
   StrUtils, Math,  //kt 8/09
-  ORCtrls, Grids, Chart, CheckLst, VAUtils;
+  ORCtrls, Grids, Chart, CheckLst;
 
 const
   { names of months used by FormatFMDateTime }
@@ -899,10 +917,15 @@ begin
   end;
 end;
 
-function Piece(const S: string; Delim: char; PieceNum: Integer): string;
+function Piece(const S: string; Delim: char; PieceNum: Integer): string; //kt //codex 8/18/26
 { returns the Nth piece (PieceNum) of a string delimited by Delim }
 begin
-  Result := VAUtils.Piece(S, Delim, PieceNum);
+  Result := VAUtils.Piece(S, Delim, PieceNum); //kt //codex 8/18/26
+end;
+
+function PieceEquals(const S: string; Delim: char; PieceNum: Integer; const Value: string; CaseInsensitive: Boolean = False): Boolean; //kt //codex 8/18/26
+begin
+  Result := VAUtils.PieceEquals(S, Delim, PieceNum, Value, CaseInsensitive); //kt //codex 8/18/26
 end;
 
 function PieceNCS(const S: string; Delim: string; PieceNum: Integer): string; overload;
@@ -1085,9 +1108,24 @@ begin
   end;
 end;
 
-function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string;
+function Pieces(const S: string; Delim: char; FirstNum, LastNum: Integer): string; //kt //codex 8/18/26
 begin
-  Result := VAUtils.Pieces(S, Delim, FirstNum, LastNum);
+  Result := VAUtils.Pieces(S, Delim, FirstNum, LastNum); //kt //codex 8/18/26
+end;
+
+function PieceAsIntDef(const S: string; Delim: char; PieceNum: Integer; Default: Integer = 0): Integer; //kt //codex 8/18/26
+begin
+  Result := VAUtils.PieceAsIntDef(S, Delim, PieceNum, Default); //kt //codex 8/18/26
+end;
+
+function PieceAsInt64Def(const S: string; Delim: char; PieceNum: Integer; Default: Int64 = 0): Int64; //kt //codex 8/18/26
+begin
+  Result := VAUtils.PieceAsInt64Def(S, Delim, PieceNum, Default); //kt //codex 8/18/26
+end;
+
+procedure ParsePiecesMax(const S: string; Delim: Char; MaxPiece: Integer; var Pieces: VAUtils.TStringArray); //kt //codex 8/18/26
+begin
+  VAUtils.ParsePiecesMax(S, Delim, MaxPiece, Pieces); //kt //codex 8/18/26
 end;
 
 function PiecesNCS(const S: string; Delim: string; PieceStart,PieceEnd: Integer): string;
@@ -3026,14 +3064,100 @@ end;
 //------ TDataStr ------------
 //kt added
 
+function FindFormatPieceIndex(const FormatStr: string; Delim: Char; const Index: string): Integer;
+var
+  PieceStart, PieceEnd: PChar;
+  PieceNum, IndexLen: Integer;
+begin
+  Result := -1;
+  if Index = '' then Exit;
+  PieceStart := PChar(FormatStr);
+  PieceNum := 0;
+  IndexLen := Length(Index);
+  while PieceStart^ <> #0 do begin
+    PieceEnd := StrScan(PieceStart, Delim);
+    if PieceEnd = nil then PieceEnd := StrEnd(PieceStart);
+    if (PieceEnd - PieceStart = IndexLen) and CompareMem(PieceStart, PChar(Index), IndexLen * SizeOf(Char)) then begin
+      Result := PieceNum;
+      Exit;
+    end;
+    Inc(PieceNum);
+    if PieceEnd^ = #0 then Exit;
+    PieceStart := PieceEnd + 1;
+  end;
+end;
+
+procedure ParsePieceSpansMax(const [Ref] S: string; Delim: Char; MaxPiece: Integer; var Spans: TPieceSpanArray);
+var
+  PieceNum: Integer;
+  StartPos, NextPos, TextLen: Integer;
+begin
+  SetLength(Spans, 0);
+  if MaxPiece < 1 then Exit;
+  SetLength(Spans, MaxPiece);
+  for PieceNum := 0 to MaxPiece - 1 do begin
+    Spans[PieceNum].StartPos := 0;
+    Spans[PieceNum].Len := 0;
+  end;
+  TextLen := Length(S);
+  StartPos := 1;
+  for PieceNum := 0 to MaxPiece - 1 do begin
+    if StartPos > TextLen + 1 then Exit;
+    NextPos := StartPos;
+    while (NextPos <= TextLen) and (S[NextPos] <> Delim) do Inc(NextPos);
+    Spans[PieceNum].StartPos := StartPos;
+    Spans[PieceNum].Len := NextPos - StartPos;
+    StartPos := NextPos + 1;
+  end;
+end;
+
+function SpanText(const [Ref] S: string; const Span: TPieceSpan): string;
+begin
+  if Span.StartPos <= 0 then Result := '' else Result := Copy(S, Span.StartPos, Span.Len);
+end;
+
+procedure TDataStr.BuildFormatCaches;
+var
+  i: Integer;
+begin
+  FFormatSL.Clear;
+  FFormatIndex.Clear;
+  if FFormatStr = '' then Exit;
+  PiecesToList(FFormatStr, FDelimChar, FFormatSL);
+  for i := 0 to FFormatSL.Count - 1 do begin
+    FFormatIndex.AddObject(FFormatSL[i], TObject(i)); //kt  //codex 8/18/26
+  end;
+end;
+
+procedure TDataStr.InvalidatePieceSpans;
+begin
+  FPieceSpansValid := False;
+  SetLength(FPieceSpans, 0);
+end;
+
+procedure TDataStr.EnsurePieceSpans(MaxPiece : integer);
+begin
+  if MaxPiece < 1 then Exit;
+  if FPieceSpansValid and (Length(FPieceSpans) >= MaxPiece) then Exit;
+  ParsePieceSpansMax(FDataStr, FDelimChar, MaxPiece, FPieceSpans);
+  FPieceSpansValid := True;
+end;
+
 function TDataStr.HasIndex(index : string) : boolean;
 begin
-  Result := (FFormatSL.IndexOf(index) > -1);
+  Result := (FFormatIndex.IndexOf(index) > -1); //kt  //codex 8/18/26
 end;
 
 function TDataStr.GetIntIndex(Index : string; SuppressException : boolean = false) : integer;
+var
+  i: Integer;
 begin
-  Result := FFormatSL.IndexOf(index);
+  i := FFormatIndex.IndexOf(index);
+  if i >= 0 then begin
+    Result := Integer(FFormatIndex.Objects[i]); //kt  //codex 8/18/26
+  end else begin
+    Result := -1;
+  end;
   if (Result = -1) and not SuppressException then begin
     raise Exception.Create('Index ['+index+'] not defined in DataString');
   end;
@@ -3042,6 +3166,7 @@ end;
 procedure TDataStr.SetPieceValue(index : integer; Value : string);
 begin
   SetPiece(FDataStr, FDelimChar, index, value);
+  InvalidatePieceSpans; //kt  //codex 8/18/26
 end;
 
 procedure TDataStr.SetValue(index : string; Value : string);
@@ -3049,6 +3174,7 @@ var intIndex : integer;
 begin
   intIndex := GetIntIndex(index);
   SetPiece(FDataStr, FDelimChar, intIndex+1, Value);
+  InvalidatePieceSpans; //kt  //codex 8/18/26
 end;
 
 procedure TDataStr.SetIntValue(index : string; Value : integer);
@@ -3068,7 +3194,16 @@ end;
 
 function TDataStr.GetPieceValue(index : integer) : string;
 begin
-  Result := ORFN.piece(FDataStr, FDelimChar, index);
+  if index < 1 then begin
+    Result := '';
+    Exit;
+  end;
+  EnsurePieceSpans(index); //kt  //codex 8/18/26
+  if index <= Length(FPieceSpans) then begin
+    Result := SpanText(FDataStr, FPieceSpans[index - 1]); //kt  //codex 8/18/26
+  end else begin
+    Result := '';
+  end;
 end;
 
 function TDataStr.ValueDef(index : string; DefaultValue : string) : string;
@@ -3076,26 +3211,23 @@ var intIndex : integer;
 begin
   Result := '';
   intIndex := GetIntIndex(index, true);
-  if intIndex > -1 then Result := ORFn.piece(FDataStr, FDelimChar, intIndex+1);
+  if intIndex > -1 then begin
+    EnsurePieceSpans(intIndex + 1); //kt  //codex 8/18/26
+    if intIndex < Length(FPieceSpans) then Result := SpanText(FDataStr, FPieceSpans[intIndex]); //kt  //codex 8/18/26
+  end;
   if Result = '' then Result := DefaultValue;
 end;
 
 class function TDataStr.StaticValue(DataStr, FormatStr, Index : string) : string;
-var FFormatSL : TStringList;
-    i : integer;
+var
+  i : integer;
 begin
   Result := '';
-  FFormatSL := TStringList.Create;
-  try
-    PiecesToList(FormatStr, '^', FFormatSL);
-    i := FFormatSL.IndexOf(Index);
-    if (i = -1) then begin
-      raise Exception.Create('Index ['+index+'] not defined in DataString');
-    end;
-    Result := ORFn.piece(DataStr, '^', i+1);
-  finally
-    FFormatSL.Free;
+  i := FindFormatPieceIndex(FormatStr, '^', Index); //kt  //codex 8/18/26
+  if (i = -1) then begin
+    raise Exception.Create('Index ['+index+'] not defined in DataString');
   end;
+  Result := ORFn.piece(DataStr, '^', i+1);
 end;
 
 class function TDataStr.StaticIntValue(DataStr, FormatStr, Index : string) : integer;
@@ -3114,13 +3246,21 @@ end;
 procedure TDataStr.SetFormatStr(value : string);
 begin
   FFormatStr := value;
-  PiecesToList(FFormatStr, FDelimChar, FFormatSL);
+  BuildFormatCaches; //kt  //codex 8/18/26
+  InvalidatePieceSpans; //kt  //codex 8/18/26
 end;
 
 procedure TDataStr.SetDelimChar(value : char);
 begin
   FDelimChar := value;
-  PiecesToList(FFormatStr, FDelimChar, FFormatSL);  //reparce format string.
+  BuildFormatCaches;  //kt  //codex 8/18/26 reparce format string.
+  InvalidatePieceSpans; //kt  //codex 8/18/26
+end;
+
+procedure TDataStr.SetDataStr(value : string);
+begin
+  FDataStr := value;
+  InvalidatePieceSpans; //kt  //codex 8/18/26
 end;
 
 procedure TDataStr.Clear;
@@ -3129,6 +3269,8 @@ begin
   FDelimChar := '^';
   FFormatStr := '';
   FFormatSL.Clear;
+  FFormatIndex.Clear; //kt  //codex 8/18/26
+  InvalidatePieceSpans; //kt  //codex 8/18/26
 end;
 
 procedure TDataStr.Assign(ASource : TDataStr);
@@ -3137,6 +3279,9 @@ begin
   FDelimChar := ASource.DelimChar;
   FFormatStr := ASource.FormatStr;
   FFormatSL.Assign(ASource.FFormatSL);
+  FFormatIndex.Assign(ASource.FFormatIndex); //kt  //codex 8/18/26
+  FPieceSpans := Copy(ASource.FPieceSpans); //kt  //codex 8/18/26
+  FPieceSpansValid := ASource.FPieceSpansValid; //kt  //codex 8/18/26
 end;
 
 procedure TDataStr.AssignViaMap(ASource : TDataStr; MapStr : string);
@@ -3157,7 +3302,7 @@ begin
       entry := MapSL.Strings[i];
       if Pos('=', entry)>0 then begin  //<local index>=<source index>^<local index>=<source index>^
         LocalIndex := ORFn.Piece(entry,'=',1);
-        SourceIndex := ORFn.Piece(entry,'=',1);
+        SourceIndex := ORFn.Piece(entry,'=',2); //kt  //codex 8/18/26 fixed bug
       end else begin  //<source index>^<source index>^
         LocalIndex := IfThen(i < FFormatSL.Count, FFormatSL.Strings[i], '');
         SourceIndex := entry;
@@ -3180,11 +3325,17 @@ begin
   FDataStr := ADataStr;
   FDelimChar := ADelimChar;
   FFormatSL := TStringList.Create;
+  FFormatIndex := TStringList.Create;
+  FFormatIndex.Sorted := True; //kt  //codex 8/18/26
+  FFormatIndex.Duplicates := dupError; //kt  //codex 8/18/26
+  FFormatIndex.CaseSensitive := True; //kt  //codex 8/18/26
+  FPieceSpansValid := False; //kt  //codex 8/18/26
   SetFormatStr(AFormatStr);
 end;
 
 destructor TDataStr.Destroy;
 begin
+  FFormatIndex.Free;
   FFormatSL.Free;
   Inherited;
 end;

@@ -1175,23 +1175,25 @@ begin
   if j < i then Result := j;
 end;
 
-function Piece(const S: string; Delim: char; PieceNum: Integer): string;
+function Piece(const [Ref] S: string; Delim: char; PieceNum: Integer): string; //kt //codex 8/18/26
 { returns the Nth piece (PieceNum) of a string delimited by Delim }
-var
-  i: Integer;
-  Strt, Next: PChar;
 begin
-  i := 1;
-  Strt := PChar(S);
-  Next := StrScan(Strt, Delim);
-  while (i < PieceNum) and (Next <> nil) do
-  begin
-    Inc(i);
-    Strt := Next + 1;
-    Next := StrScan(Strt, Delim);
-  end;
-  if Next = nil then Next := StrEnd(Strt);
-  if i < PieceNum then Result := '' else SetString(Result, Strt, Next - Strt);
+  Result := VAUtils.Piece(S, Delim, PieceNum); //kt //codex 8/18/26
+  //kt //codex original --> var
+  //kt //codex original -->   i: Integer;
+  //kt //codex original -->   Strt, Next: PChar;
+  //kt //codex original --> begin
+  //kt //codex original -->   i := 1;
+  //kt //codex original -->   Strt := PChar(S);
+  //kt //codex original -->   Next := StrScan(Strt, Delim);
+  //kt //codex original -->   while (i < PieceNum) and (Next <> nil) do
+  //kt //codex original -->   begin
+  //kt //codex original -->     Inc(i);
+  //kt //codex original -->     Strt := Next + 1;
+  //kt //codex original -->     Next := StrScan(Strt, Delim);
+  //kt //codex original -->   end;
+  //kt //codex original -->   if Next = nil then Next := StrEnd(Strt);
+  //kt //codex original -->   if i < PieceNum then Result := '' else SetString(Result, Strt, Next - Strt);
 end;
 
 procedure SetPiece(var x: string; Delim: Char; PieceNum: Integer; const NewPiece: string);
@@ -2776,7 +2778,7 @@ function TORListBox.GetIEN(AnIndex: Integer): Int64;
 { return as an integer the first piece of the Item identified by AnIndex }
 begin
   if (AnIndex < Items.Count) and (AnIndex > -1)
-    then Result := StrToInt64Def(Piece(Items[AnIndex], FDelimiter, 1), 0)
+    then Result := VAUtils.PieceAsInt64Def(Items[AnIndex], FDelimiter, 1, 0) //kt //codex 8/18/26
   else Result := 0;
 end;
 
@@ -2784,7 +2786,7 @@ function TORListBox.GetItemIEN: Int64;
 { return as an integer the first piece of the currently selected item }
 begin
   if ItemIndex > -1
-    then Result := StrToInt64Def(Piece(Items[ItemIndex], FDelimiter, 1), 0)
+    then Result := VAUtils.PieceAsInt64Def(Items[ItemIndex], FDelimiter, 1, 0) //kt //codex 8/18/26
   else Result := 0;
 end;
 
@@ -2839,7 +2841,7 @@ var
 begin
   Result := -1;
   for i := 0 to Items.Count - 1 do
-    if Piece(Items[i], FDelimiter, 1) = AnID then
+    if VAUtils.PieceEquals(Items[i], FDelimiter, 1, AnID) then //kt //codex 8/18/26
     begin
       ItemIndex := i;
       Result := i;

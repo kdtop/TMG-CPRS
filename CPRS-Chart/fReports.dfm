@@ -7,7 +7,6 @@ inherited frmReports: TfrmReports
   ClientWidth = 717
   HelpFile = 'qnoback'
   Menu = mnuMainMenu
-  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnShow = FormShow
   ExplicitWidth = 733
@@ -31,7 +30,6 @@ inherited frmReports: TfrmReports
   inherited pnlLeft: TPanel
     Width = 119
     Height = 604
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 119
     ExplicitHeight = 604
     object Splitter1: TSplitter
@@ -285,7 +283,6 @@ inherited frmReports: TfrmReports
     Left = 123
     Width = 594
     Height = 604
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 123
     ExplicitWidth = 594
     ExplicitHeight = 604

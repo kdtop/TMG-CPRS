@@ -90,7 +90,6 @@ type
     ClinProcFlag: integer;
     IsClinicalProcedure: Boolean;
   end;
-
   TProvisionalDiagnosis = record
     Code: string;
     Text: string;
@@ -159,6 +158,21 @@ implementation
 uses
   uConst;
 
+function ConsultIENText(const [Ref] X: string): string; //kt //codex 8/18/26
+begin
+  Result := Piece(Piece(X, U, 1), ';', 1); //kt //codex 8/18/26
+end;
+
+function ConsultIENPackage(const [Ref] X: string): string; //kt //codex 8/18/26
+begin
+  Result := Piece(Piece(X, U, 1), ';', 2); //kt //codex 8/18/26
+end;
+
+function ConsultAuthorName(const [Ref] X: string): string; //kt //codex 8/18/26
+begin
+  Result := Piece(Piece(X, U, 5), ';', 2); //kt //codex 8/18/26
+end;
+
 constructor TConsultTitles.Create;
 { creates an object to store Consult titles so only obtained from server once }
 begin
@@ -212,8 +226,8 @@ var
   x: string;
 begin
   x := InputString;
-  if Piece(x, U, 6) = '' then SetPiece(x, U, 6, ' ');
-  if Piece(x, U, 9) <> '' then
+  if PieceEquals(x, U, 6, '') then SetPiece(x, U, 6, ' '); //kt //codex 8/18/26
+  if not PieceEquals(x, U, 9, '') then //kt //codex 8/18/26
     case Piece(x, U, 9)[1] of
       'C':  SetPiece(x, U, 10, 'Consult');
       'P':  SetPiece(x, U, 10, 'Procedure');
@@ -223,7 +237,7 @@ begin
     end
   else
     begin
-      if Piece(x, U, 5) = 'Consult' then SetPiece(x, U, 10, 'Consult')
+      if PieceEquals(x, U, 5, 'Consult') then SetPiece(x, U, 10, 'Consult') //kt //codex 8/18/26
       else SetPiece(x, U, 10, 'Procedure');
     end;
   x := Piece(x, U, 1) + U + FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 2))) + '  ' + U + '(' + Piece(x, U, 3) + ')' + U + Piece(x, U, 6) + Piece(x, U, 7) + U +
@@ -251,9 +265,9 @@ begin
   else
     begin
       x := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(x, U, 3))) + '  ' + Piece(x, U, 2) +
-           ' (#' + Piece(Piece(x, U, 1), ';', 1) + ')';
-      if not (Copy(Piece(Piece(RawText, U, 1), ';', 2), 1, 4) = 'MCAR') then
-        x := x + ', ' + Piece(RawText, U, 6) + ', ' + Piece(Piece(RawText, U, 5), ';', 2);
+           ' (#' + ConsultIENText(x) + ')'; //kt //codex 8/18/26
+      if not (Copy(ConsultIENPackage(RawText), 1, 4) = 'MCAR') then //kt //codex 8/18/26
+        x := x + ', ' + Piece(RawText, U, 6) + ', ' + ConsultAuthorName(RawText); //kt //codex 8/18/26
     end;
   Result := x;
 end;
@@ -339,7 +353,7 @@ begin
     for i := 0 to SvcList.Count - 1 do
     begin
       item := SvcList[i];
-      if Piece(item, U, 5) = 'S' then Continue; 
+      if PieceEquals(item, U, 5, 'S') then Continue; //kt //codex 8/18/26
       MyParent := Piece(item, U, 3);
       MyID := Piece(item, U, 1);
       if not ParentNodes.Find(MyParent, Idx) then
@@ -351,7 +365,7 @@ begin
 //        if bad then Continue;
       end;
       Name := Piece(item, U, 2);
-      HasChildren := Piece(item, U, 4) = '+';
+      HasChildren := PieceEquals(item, U, 4, '+'); //kt //codex 8/18/26
       ChildNode := TORTreeNode(Tree.Items.AddChild(ParentNode, Name));
       ChildNode.StringData := item;
 //      AddNode;
@@ -379,7 +393,7 @@ begin
     FastAssign(Source, SrcList);
     with SrcList do
       begin
-        if (Count = 1) and (Piece(Strings[0], U, 1) = '-1') then
+        if (Count = 1) and PieceEquals(Strings[0], U, 1, '-1') then //kt //codex 8/18/26
           begin
             Dest.Insert(0, IntToStr(Context) + '^^^' + 'No Matching Consults Found' + '^^^^0^^^^');
             Exit;
@@ -462,7 +476,7 @@ begin
           Name := MakeConsultListDisplayText(Strings[i]);
           temp  := Strings[i];
           tmpNode := nil;
-          HasChildren := Piece(Strings[i], U, 7) = '+';
+          HasChildren := PieceEquals(Strings[i], U, 7, '+'); //kt //codex 8/18/26
           if Node <> nil then if Node.HasChildren then
             tmpNode := Tree.FindPieceNode(MyID, 1, U, Node);
           if (tmpNode <> nil) and tmpNode.HasAsParent(Node) then
@@ -484,22 +498,22 @@ procedure SetNodeImage(Node: TORTreeNode; CurrentContext: TSelectContext);
 begin
   with Node do
     begin
-      if Piece(Stringdata, U, 8) = '0' then
+      if PieceEquals(Stringdata, U, 8, '0') then //kt //codex 8/18/26
         begin
           ImageIndex    := IMG_GMRC_TOP_LEVEL;
           SelectedIndex := IMG_GMRC_TOP_LEVEL;
-          if (Piece(StringData, U, 4) = 'No Matching Consults Found') then exit;
-          if Piece(Stringdata, U, 1) <> '-1' then
+          if PieceEquals(StringData, U, 4, 'No Matching Consults Found') then exit; //kt //codex 8/18/26
+          if not PieceEquals(Stringdata, U, 1, '-1') then //kt //codex 8/18/26
             with CurrentContext, Node do
               if GroupBy <> '' then case GroupBy[1] of
-                'V': Text := CC_TV_TEXT[StrToInt(Piece(Stringdata, U, 1))] + ' by Service';
-                'S': Text := CC_TV_TEXT[StrToInt(Piece(Stringdata, U, 1))] + ' by Status';
-                'T': Text := CC_TV_TEXT[StrToInt(Piece(Stringdata, U, 1))] + ' by Type';
+                'V': Text := CC_TV_TEXT[PieceAsIntDef(Stringdata, U, 1, 0)] + ' by Service'; //kt //codex 8/18/26
+                'S': Text := CC_TV_TEXT[PieceAsIntDef(Stringdata, U, 1, 0)] + ' by Status'; //kt //codex 8/18/26
+                'T': Text := CC_TV_TEXT[PieceAsIntDef(Stringdata, U, 1, 0)] + ' by Type'; //kt //codex 8/18/26
               end;
         end
       else
         begin
-          if Piece(Stringdata, U, 7) <> '' then
+          if not PieceEquals(Stringdata, U, 7, '') then //kt //codex 8/18/26
             case Piece(Stringdata, U, 7)[1] of
               '+': begin
                      ImageIndex    := IMG_GMRC_GROUP_SHUT;
@@ -508,7 +522,7 @@ begin
             end
           else
             begin
-              if Piece(StringData, U, 12) <> '' then
+              if not PieceEquals(StringData, U, 12, '') then //kt //codex 8/18/26
                 case Piece(StringData, U, 12)[1] of
                   'C': ImageIndex := IMG_GMRC_CONSULT;
                   'P': ImageIndex := IMG_GMRC_ALL_PROC;  //IMG_GMRC_PROC;
@@ -518,7 +532,7 @@ begin
                 end
               else
                 begin
-                  if Piece(StringData, U, 9) = 'Procedure' then
+                  if PieceEquals(StringData, U, 9, 'Procedure') then //kt //codex 8/18/26
                     ImageIndex := IMG_GMRC_ALL_PROC
                   else
                     ImageIndex := IMG_GMRC_CONSULT;

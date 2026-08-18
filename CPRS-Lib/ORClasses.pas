@@ -513,7 +513,7 @@ begin
   Result := StartIdx;
   inc(Result);
   while((Result >= 0) and (Result < Count) and
-        (Piece(Strings[Result], Delim, PieceNum) <> Value)) do
+        (not PieceEquals(Strings[Result], Delim, PieceNum, Value))) do //kt //codex 8/18/26
     inc(Result);
   if(Result < 0) or (Result >= Count) then Result := -1;
 end;
@@ -599,7 +599,7 @@ begin
       p := Pieces[i]
     else
       p := cnt;
-    if(Piece(Strings[Index], Delim, p) <> Values[i]) then
+    if(not PieceEquals(Strings[Index], Delim, p, Values[i])) then //kt //codex 8/18/26
     begin
       Result := FALSE;
       break;
@@ -638,7 +638,7 @@ begin
   Result := StartIdx;
   inc(Result);
   while((Result >= 0) and (Result < Count) and
-        (CompareText(Piece(Strings[Result], Delim, PieceNum), Value) <> 0)) do
+        (not PieceEquals(Strings[Result], Delim, PieceNum, Value, TRUE))) do //kt //codex 8/18/26
     inc(Result);
   if(Result < 0) or (Result >= Count) then Result := -1;
 end;

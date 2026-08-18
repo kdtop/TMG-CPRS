@@ -1233,15 +1233,17 @@ function TfrmNotes.GetTitleText(AnIndex: Integer): string;
 { returns non-tabbed text for the title of a note given the ItemIndex in lstNotes }
 var
   NoteText: string;
+  AuthorInfo: string; //kt //codex 8/18/26
 begin
   NoteText := NoteRecordAt(AnIndex);
+  AuthorInfo := Piece(NoteText, U, 5); //kt //codex 8/18/26
   //original -->   with lstNotes do
   //original -->     Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(Items[AnIndex], U, 3))) +
   //original -->               '  ' + Piece(Items[AnIndex], U, 2) + ', ' + Piece(Items[AnIndex], U, 6) + ', ' +
   //original -->               Piece(Piece(Items[AnIndex], U, 5), ';', 2)
   Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(NoteText, U, 3))) +
             '  ' + Piece(NoteText, U, 2) + ', ' + Piece(NoteText, U, 6) + ', ' +
-            Piece(Piece(NoteText, U, 5), ';', 2)
+            Piece(AuthorInfo, ';', 2) //kt //codex 8/18/26
 end;
 
 function TfrmNotes.LacksRequiredForCreate: Boolean;
@@ -1348,7 +1350,7 @@ begin
   begin
     //original -->     x := GetPackageRefForNote(lstNotes.ItemIEN);
     x := GetPackageRefForNote(AnIEN);
-    AConsult := StrToIntDef(Piece(x, ';', 1), 0);
+    AConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
     Result := LockConsultRequest(AConsult);
   end;
   // now try to lock the note
@@ -1375,7 +1377,7 @@ begin
 (*  if (AConsult = 0) and IsConsultTitle(TitleForNote(ANote)) then
     begin
       x := GetPackageRefForNote(ANote);
-      AConsult := StrToIntDef(Piece(x, ';', 1), 0);
+      AConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
     end;
   if AConsult = 0 then Exit;*)
   if AConsult = 0 then AConsult := GetConsultIENForNote(ANote);
@@ -1710,7 +1712,7 @@ begin
   if not (DocumentType in [TYP_ADDENDUM, TYP_COMPONENT]) then exit;  //kt
   ClearEditControls;
   txtSubject.Text := DocSubject;  //kt added
-  ParentIEN := StrToInt64Def(Piece(ParentData, U, 1),0); //kt
+  ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
   with FEditNote do begin
     DocType      := DocumentType;
     IsNewNote    := False;
@@ -1727,10 +1729,10 @@ begin
     AuthorName   := User.Name;
     //kt x            := GetPackageRefForNote(lstNotes.ItemIEN);
     x            := GetPackageRefForNote(ParentIEN);     //kt
-    if Piece(x, U, 1) <> '-1' then begin
+    if not PieceEquals(x, U, 1, '-1') then begin //kt //codex 8/18/26
       //kt PkgRef   := GetPackageRefForNote(lstNotes.ItemIEN);
       PkgRef   := GetPackageRefForNote(ParentIEN);  //kt
-      PkgIEN   := StrToIntDef(Piece(PkgRef, ';', 1), 0);
+      PkgIEN   := PieceAsIntDef(PkgRef, ';', 1, 0); //kt //codex 8/18/26
       PkgPtr   := Piece(PkgRef, ';', 2);
     end;
     //kt original --> Addend := lstNotes.ItemIEN;
@@ -2406,12 +2408,16 @@ var
   EditedSelected   : boolean;      //kt 9/11
   Mode             : TViewModeSet; //kt 9/11
   IsHTML           : boolean;      //kt 9/11
+  VisitInfo        : string;       //kt //codex 8/18/26
+  AuthorInfo       : string;       //kt //codex 8/18/26
 
 begin
   if SelectedNoteIndex = -1 then Exit;                                       //kt 9/11
   SelectedNoteText := SelectedNoteRecord;
   SelectedNoteIDStr := SelectedNoteID;
   SelectedNoteIENStr := IntToStr(SelectedNoteIEN);
+  VisitInfo := Piece(SelectedNoteText, U, 8); //kt //codex 8/18/26
+  AuthorInfo := Piece(SelectedNoteText, U, 5); //kt //codex 8/18/26
   EditedSelected := EditingNoteSelected; //kt
   if EditedSelected then begin                                               //kt 9/11
     pnlWrite.Visible := True;
@@ -2437,8 +2443,8 @@ begin
     //original -->                           Piece(Items[ItemIndex], U, 6) + ', ' + Piece(Piece(Items[ItemIndex], U, 5), ';', 2) +
     //original -->                           '  (' + FormatFMDateTime('mmm dd,yy@hh:nn', MakeFMDateTime(Piece(Items[ItemIndex], U, 3)))
     //original -->                           + ')';
-    lblTitle.Caption := Piece(Piece(SelectedNoteText, U, 8), ';', 1) + #9 + Piece(SelectedNoteText, U, 2) + ', ' +
-                        Piece(SelectedNoteText, U, 6) + ', ' + Piece(Piece(SelectedNoteText, U, 5), ';', 2) +
+    lblTitle.Caption := Piece(VisitInfo, ';', 1) + #9 + Piece(SelectedNoteText, U, 2) + ', ' +
+                        Piece(SelectedNoteText, U, 6) + ', ' + Piece(AuthorInfo, ';', 2) +
                         '  (' + FormatFMDateTime('mmm dd,yy@hh:nn', MakeFMDateTime(Piece(SelectedNoteText, U, 3)))
                         + ')';
     //original -->       LoadDocumentText(FViewNote, ItemIEN, IsHTML);  //kt 9/11
@@ -3316,7 +3322,7 @@ begin
   if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
   //with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
   //ActOnDocument(ActionSts, lstNotes.ItemIEN, 'MAKE COMPONENT');   //kt custom server-side action.
-  ParentIEN := StrToInt64Def(Piece(ParentData, U, 1),0); //kt
+  ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
   ActOnDocument(ActionSts, ParentIEN, 'MAKE COMPONENT');   //kt custom server-side action.
   if not ActionSts.Success then begin
     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
@@ -3363,7 +3369,7 @@ begin
     LoadNotes;
     SelectTreeNodeByID(SavedDocID);  //kt //codex 8/17/26
   end;
-  if not CanBeAttached(PDocTreeObject(tvNotes.Selected.Data)^.DocID, WhyNot) then begin
+  if not CanBeAttached(DocTreeData(tvNotes.Selected)^.DocID, WhyNot) then begin
     WhyNot := StringReplace(WhyNot, 'ATTACH', 'DETACH', [rfIgnoreCase]);
     WhyNot := StringReplace(WhyNot, 'to an ID', 'from an ID', [rfIgnoreCase]);
     InfoBox(WhyNot, TX_DETACH_FAILURE, MB_OK);
@@ -3373,8 +3379,8 @@ begin
               '  FROM:   ' + tvNotes.Selected.Parent.Text + CRLF + CRLF +
               'Are you sure?', TX_DETACH_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES)
       then Exit;
-  DocID := PDocTreeObject(tvNotes.Selected.Data)^.DocID;
-  SavedDocID := PDocTreeObject(tvNotes.Selected.Parent.Data)^.DocID;
+  DocID := DocTreeData(tvNotes.Selected)^.DocID;
+  SavedDocID := DocTreeData(tvNotes.Selected.Parent)^.DocID;
   if DetachEntryFromParent(DocID, WhyNot) then
     begin
       LoadNotes;
@@ -3523,7 +3529,7 @@ begin
   // remove the note
   DeleteSts.Success := True;
   x := GetPackageRefForNote(SavedDocIEN);
-  SaveConsult := StrToIntDef(Piece(x, ';', 1), 0);
+  SaveConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
   AVisitStr := VisitStrForNote(SavedDocIEN);
   RemovePCEFromChanges(SavedDocIEN, AVisitStr);
   if (SavedDocIEN > 0) and (SelectedNoteIEN = SavedDocIEN) then DeleteDocument(DeleteSts, SavedDocIEN, ReasonForDelete);
@@ -3578,7 +3584,7 @@ var
 begin
   //kt 5/15 begin mod ---------
   IENString := piece(DataString, U, 1);
-  IEN := StrToInt64Def(IENString, 0);
+  IEN := PieceAsIntDef(DataString, U, 1, 0); //kt //codex 8/18/26
   if IEN <= 0 then Exit;
   NoteIsComponent := IsComponent(IEN, tvNotes);
   NoteDisplayText := MakeNoteDisplayText(DataString);
@@ -3630,7 +3636,7 @@ begin
   FConfirmed := False;
   DeleteSts.Success := True;
   x := GetPackageRefForNote(SavedDocIEN);
-  SaveConsult := StrToIntDef(Piece(x, ';', 1), 0);
+  SaveConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
   AVisitStr := VisitStrForNote(SavedDocIEN);
   RemovePCEFromChanges(SavedDocIEN, AVisitStr);
   //DBDialogFieldValuesDelete(Patient.DFN, inttostr(SavedDocIEN), AVisitStr,ErrStr);
@@ -3683,7 +3689,7 @@ begin
   Result := True;
   DataString := ANode.StringData;
   IENString := piece(DataString, U, 1);
-  IEN := StrToInt64Def(IENString, 0);
+  IEN := PieceAsIntDef(DataString, U, 1, 0); //kt //codex 8/18/26
   i := 0;
   while i < ANode.Count do begin
     ChildDelSuccess := false;
@@ -3714,7 +3720,7 @@ begin
   FConfirmed := False;
   DeleteSts.Success := True;
   x := GetPackageRefForNote(IEN);
-  SaveConsult := StrToIntDef(Piece(x, ';', 1), 0);
+  SaveConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
   AVisitStr := VisitStrForNote(IEN);
   RemovePCEFromChanges(IEN, AVisitStr);
   DeleteDocument(DeleteSts, IEN, ReasonForDelete);
@@ -3823,7 +3829,7 @@ begin
   SelectedNoteIENVal := SelectedNoteIEN;
   SelectedNoteIDStr := SelectedNoteID;
   SelectedNoteText := SelectedNoteRecord;
-  SelectedNoteTitle := Piece(Piece(SelectedNoteText, U, 2), ';', 1);
+  SelectedNoteTitle := Piece(Piece(SelectedNoteText, U, 2), ';', 1); //kt //codex 8/18/26
   //original -->   SavedDocID := lstNotes.ItemID;                             //v22.12 - RV
   SavedDocID := SelectedNoteIDStr;                             //v22.12 - RV
   FLastNoteID := SavedDocID;                                 //v22.12 - RV
@@ -3881,7 +3887,7 @@ begin
       //original -->       ForceSignPrompt := uTMGOptions.ReadBool('Prompt '+Trim(piece(piece(lstNotes.Items[lstNotes.ItemIndex],'^',2),';',1)),False);
       ForceSignPrompt := uTMGOptions.ReadBool('Prompt '+Trim(SelectedNoteTitle),False);
       //original -->       with lstNotes do SignatureForItem(Font.Size, MakeNoteDisplayText(Items[ItemIndex]), SignTitle, ESCode,piece(Items[ItemIndex],'^',16)<>'1',ForceSignPrompt);
-      SignatureForItem(Font.Size, MakeNoteDisplayText(SelectedNoteText), SignTitle, ESCode, Piece(SelectedNoteText,'^',16)<>'1', ForceSignPrompt);
+      SignatureForItem(Font.Size, MakeNoteDisplayText(SelectedNoteText), SignTitle, ESCode, not PieceEquals(SelectedNoteText, '^', 16, '1'), ForceSignPrompt); //kt //codex 8/18/26
       if Length(ESCode) > 0 then begin
         //original -->         SignDocument(SignSts, lstNotes.ItemIEN, ESCode);
         SignDocument(SignSts, SelectedNoteIENVal, ESCode);
@@ -4663,7 +4669,7 @@ begin
   //  show ALL unsigned/uncosigned for a patient, not just the alerted one
   //  what about cosignature?  How to get correct list?  ORB FOLLOWUP TYPE = OR alerts only
   x := Notifications.AlertData;
-  if StrToIntDef(Piece(x, U, 1), 0) = 0 then begin
+  if PieceAsIntDef(x, U, 1, 0) = 0 then begin //kt //codex 8/18/26
     InfoBox(TX_NO_ALERT, TX_CAP_NO_ALERT, MB_OK);
     Exit;
   end;
@@ -4690,8 +4696,9 @@ begin
   case Notifications.Followup of
     NF_NOTES_UNSIGNED_NOTE:   ;  //Automatically deleted by sig action!!!
   end;
-  if Copy(Piece(Notifications.RecordID, U, 2), 1, 6) = 'TIUADD' then Notifications.Delete;
-  if Copy(Piece(Notifications.RecordID, U, 2), 1, 5) = 'TIUID' then Notifications.Delete;
+  x := Piece(Notifications.RecordID, U, 2); //kt //codex 8/18/26
+  if Copy(x, 1, 6) = 'TIUADD' then Notifications.Delete; //kt //codex 8/18/26
+  if Copy(x, 1, 5) = 'TIUID' then Notifications.Delete; //kt //codex 8/18/26
   //uncheck all sort button
   //btnSortNone.Down := false;
   //btnSortDate.Down := false;
@@ -5119,10 +5126,10 @@ begin
             application.processmessages;
             application.processmessages;
             if SearchTextStopFlag = False then begin
-              noteId := StrToIntDef(Piece(FDocList.Strings[x],'^',1),-1);
+              noteId := PieceAsIntDef(FDocList.Strings[x], '^', 1, -1); //kt //codex 8/18/26
               if (noteId = INVALID_ID) or (noteId = INFO_ID) then
                 Continue;
-              CallV('TIU GET RECORD TEXT', [Piece(FDocList.Strings[x],'^',1)]);
+              CallV('TIU GET RECORD TEXT', [IntToStr(noteId)]); //kt //codex 8/18/26
               FastAssign(RPCBrokerV.Results, Dest);
               if Dest.Count > 0 then begin
                 for xx := 0 to Dest.Count-1 do begin
@@ -5217,7 +5224,7 @@ begin
     if Assigned(FNoteData) then  //kt //codex 8/17/26
       FNoteData.AppendFromSL(DocList);  //kt //codex 8/17/26
     if frmNotes.frmNotesLoading<>nil then begin
-       frmNotes.frmNotesLoading.ProgressBar1.Max := NoteCount;  //kt //codex 8/18/26
+       frmNotes.frmNotesLoading.ProgressBar1.Max := NoteCount * 2;  //kt //codex 8/18/26
        frmNotes.frmNotesLoading.ProgressBar1.Position := 0;
     end;
     BuildDocumentTree(DocList, '0', Tree, nil, FCurrentContext, CT_NOTES);
@@ -5390,7 +5397,7 @@ begin
   if StartNode = nil then Exit; //kt //codex 8/14/26
   if not IsNonSelectableGroupNode(StartNode) then begin //kt //codex 8/14/26
     NodeID := Piece(TORTreeNode(StartNode).StringData, U, 1); //kt //codex 8/14/26
-    if (Pos('PDF', NodeID) > 0) or (StrToIntDef(NodeID, 0) > 0) then begin //kt //codex 8/14/26
+    if (Pos('PDF', NodeID) > 0) or (PieceAsIntDef(TORTreeNode(StartNode).StringData, U, 1, 0) > 0) then begin //kt //codex 8/18/26
       Result := TORTreeNode(StartNode); //kt //codex 8/14/26
       Exit; //kt //codex 8/14/26
     end;
@@ -5499,14 +5506,14 @@ begin
         mnuActDetachFromIDParent.Enabled := (Selected.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD]);
         popNoteListDetachFromIDParent.Enabled := mnuActDetachFromIDParent.Enabled;
         if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT, IMG_ID_CHILD, IMG_ID_CHILD_ADD]) then
-          mnuActAttachtoIDParent.Enabled := CanBeAttached(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
+          mnuActAttachtoIDParent.Enabled := CanBeAttached(DocTreeData(Selected)^.DocID, WhyNot)
         else
           mnuActAttachtoIDParent.Enabled := False;
         popNoteListAttachtoIDParent.Enabled := mnuActAttachtoIDParent.Enabled;
         if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT,
                                     IMG_IDNOTE_OPEN, IMG_IDNOTE_SHUT,
                                     IMG_IDPAR_ADDENDA_OPEN, IMG_IDPAR_ADDENDA_SHUT]) then
-          mnuActAddIDEntry.Enabled := CanReceiveAttachment(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
+          mnuActAddIDEntry.Enabled := CanReceiveAttachment(DocTreeData(Selected)^.DocID, WhyNot)
         else
           mnuActAddIDEntry.Enabled := False;
         popNoteListAddIDEntry.Enabled := mnuActAddIDEntry.Enabled
@@ -5542,7 +5549,7 @@ begin
 
         //lstNotes.SelectByID(Piece(x, U, 1));
         //lstNotesClick(Self);    //<-- lots of action takes place here...
-      end else if StrToIntDef(Piece(x, U, 1), 0) > 0 then begin
+      end else if PieceAsIntDef(x, U, 1, 0) > 0 then begin //kt //codex 8/18/26
         memNote.Clear;
         HTMLViewer.Clear; //kt 9/11
         SelectAndDisplayNoteByID(Piece(x, U, 1)); //kt //codex 8/17/26
@@ -5580,7 +5587,7 @@ begin
   if tvNotes.Selected = nil then Exit;
   data := TORTreeNode(tvNotes.Selected).StringData;
   IEN := Piece(data, U, 1);
-  if StrToIntDef(IEN, 0) <= 0 then exit;
+  if PieceAsIntDef(data, U, 1, 0) <= 0 then exit; //kt //codex 8/18/26
   if not SelectAndDisplayNoteByID(IEN) then Exit; //kt //codex 8/17/26
   UpdateReminderFinish;
   //original -->   x := 'TIU^' + lstNotes.ItemID;
@@ -5616,10 +5623,11 @@ procedure TfrmNotes.tvNotesCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNo
     Result := (Pos(SubStr, Str) = 1) and (Length (SubStr) <= Length(Str));
   end;
 
-var s, ThisIEN, SelectedIEN, ParentTitle : string;
+var s, ThisIEN, SelectedIEN, ParentTitle, NodeData, NodeTitle, NodeColorName : string; //kt //codex 8/18/26
 begin
   inherited;
   if not assigned(Node) then exit;
+  NodeData := TORTreeNode(Node).StringData; //kt //codex 8/18/26
   //kt if (Node = tvNotes.Selected) then exit;
   if assigned(Node.Parent) then begin
     s := TORTreeNode(Node.Parent).StringData;
@@ -5632,24 +5640,26 @@ begin
       exit;
     end;
     //ELH added to highlight office notes
-    if piece(TORTreeNode(Node).StringData,'^',16)='1' then begin
+    if PieceEquals(NodeData, '^', 16, '1') then begin //kt //codex 8/18/26
        tvNotes.Canvas.Brush.Color := clTMGHighlight;  //server side set
     end;
     //ELH added to highlight other colors
-    if piece(TORTreeNode(Node).StringData,'^',17)<>'' then begin
-       clTMGHospitalColor := TColor(StringToColor(piece(TORTreeNode(Node).StringData,'^',17)));//TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
+    NodeColorName := Piece(NodeData, '^', 17); //kt //codex 8/18/26
+    if NodeColorName<>'' then begin
+       clTMGHospitalColor := TColor(StringToColor(NodeColorName));//TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
        tvNotes.Canvas.Brush.Color := clTMGHospitalColor;  //server side set
     end;
   end;
   if not assigned(tvNotes.Selected) then exit;
-  if pos('Loose documents (',piece(TORTreeNode(Node).StringData,'^',2))>0 then begin
+  NodeTitle := Piece(NodeData, '^', 2); //kt //codex 8/18/26
+  if pos('Loose documents (', NodeTitle)>0 then begin
        tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
   end;
-  if pos('Loose notes (',piece(TORTreeNode(Node).StringData,'^',2))>0 then begin
+  if pos('Loose notes (', NodeTitle)>0 then begin
        tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
   end;
   SelectedIEN := piece(TORTreeNode(tvNotes.Selected).StringData, '^', 1);
-  ThisIEN := piece(TORTreeNode(Node).StringData, '^', 1);
+  ThisIEN := piece(NodeData, '^', 1);
   if (ThisIEN = SelectedIEN) and (ThisIEN <> '') then begin
     //tvNotes.Canvas.Brush.Color := clSkyBlue;
     tvNotes.Canvas.Brush.Color := clHighlight;
@@ -5663,22 +5673,22 @@ procedure TfrmNotes.tvNotesExpanded(Sender: TObject; Node: TTreeNode);
   begin
     { Within an ID parent node, sorts in ascending order by title
     BUT - addenda to parent document are always at the top of the sort, in date order}
-    if (Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum') and
-       (Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum') then
+    if (Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum') and
+       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then
       begin
-        Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                PChar(PDocTreeObject(Node2.Data)^.DocFMDate));
+        Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                PChar(DocTreeData(Node2)^.DocFMDate));
       end
-    else if Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
-    else if Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
+    else if Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
+    else if Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
     else
       begin
         if Data = 0 then
-          Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocTitle),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocTitle))
+          Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocTitle),
+                                  PChar(DocTreeData(Node2)^.DocTitle))
         else
-          Result := -AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocTitle),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocTitle));
+          Result := -AnsiStrIComp(PChar(DocTreeData(Node1)^.DocTitle),
+                                  PChar(DocTreeData(Node2)^.DocTitle));
       end
   end;
 
@@ -5686,32 +5696,32 @@ procedure TfrmNotes.tvNotesExpanded(Sender: TObject; Node: TTreeNode);
   begin
     { Within an ID parent node, sorts in ascending order by document date
     BUT - addenda to parent document are always at the top of the sort, in date order}
-    if (Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum') and
-       (Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum') then
+    if (Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum') and
+       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then
       begin
-        Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                PChar(PDocTreeObject(Node2.Data)^.DocFMDate));
+        Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                PChar(DocTreeData(Node2)^.DocFMDate));
       end
-    else if Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
-    else if Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
+    else if Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
+    else if Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
     else
       begin
         if Data = 0 then
-          Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocFMDate))
+          Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                  PChar(DocTreeData(Node2)^.DocFMDate))
         else
-          Result := -AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocFMDate));
+          Result := -AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                  PChar(DocTreeData(Node2)^.DocFMDate));
       end;
   end;
 
 begin
   with Node do
     begin
-      if Assigned(Data) then
-        if (Pos('<', PDocTreeObject(Data)^.DocHasChildren) > 0) then
+      if Assigned(DocTreeData(Node)) then
+        if (Pos('<', DocTreeData(Node)^.DocHasChildren) > 0) then
           begin
-            if (PDocTreeObject(Node.Data)^.OrderByTitle) then
+            if (DocTreeData(Node)^.OrderByTitle) then
               CustomSort(@SortByTitle, 0)
             else
               CustomSort(@SortByDate, 0);
@@ -5858,7 +5868,7 @@ begin
     SaveCurrentNote(Saved);
     if not Saved then Exit;
   end;*)
-  if not CanBeAttached(PDocTreeObject(tvNotes.Selected.Data)^.DocID, WhyNot) then
+  if not CanBeAttached(DocTreeData(tvNotes.Selected)^.DocID, WhyNot) then
     begin
       InfoBox(WhyNot, TX_CAP_NO_DRAG, MB_OK);
       CancelDrag;
@@ -6114,10 +6124,13 @@ begin
 end;
 
 procedure TfrmNotes.mnuMoveToLooseClick(Sender: TObject);
+var
+  TitleInfo: string; //kt //codex 8/18/26
 begin
   inherited;
   //original -->   if MoveTIUToLoose(Patient.DFN,FloatTostr(lstNotes.ItemIEN),piece(piece(lstNotes.Items[lstNotes.ItemIndex],'^',2),';',1))=true then begin
-  if MoveTIUToLoose(Patient.DFN, FloatToStr(SelectedNoteIEN), Piece(Piece(SelectedNoteRecord,'^',2),';',1))=true then begin
+  TitleInfo := Piece(SelectedNoteRecord, '^', 2); //kt //codex 8/18/26
+  if MoveTIUToLoose(Patient.DFN, FloatToStr(SelectedNoteIEN), Piece(TitleInfo,';',1))=true then begin //kt //codex 8/18/26
     mnuActDeleteClick(self);
     Loadnotes;
   end;
@@ -6267,9 +6280,9 @@ var
 begin
   if (AChild = nil) or (AParent = nil) then exit;
   ErrMsg := '';
-  if not CanBeAttached(PDocTreeObject(AChild.Data)^.DocID, WhyNot) then
+  if not CanBeAttached(DocTreeData(AChild)^.DocID, WhyNot) then
     ErrMsg := ErrMsg + WhyNot + CRLF + CRLF;
-  if not CanReceiveAttachment(PDocTreeObject(AParent.Data)^.DocID, WhyNot) then
+  if not CanReceiveAttachment(DocTreeData(AParent)^.DocID, WhyNot) then
     ErrMsg := ErrMsg + WhyNot;
   if ErrMsg <> '' then
     begin
@@ -6283,13 +6296,13 @@ begin
                   '    TO:   ' + AParent.Text + CRLF + CRLF +
                   'Are you sure?', TX_ATTACH_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES)
           then Exit;
-      SavedDocID := PDocTreeObject(AParent.Data)^.DocID;
+      SavedDocID := DocTreeData(AParent)^.DocID;
     end;
   if AChild.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD] then
     begin
-      if DetachEntryFromParent(PDocTreeObject(AChild.Data)^.DocID, WhyNot) then
+      if DetachEntryFromParent(DocTreeData(AChild)^.DocID, WhyNot) then
         begin
-          if AttachEntryToParent(PDocTreeObject(AChild.Data)^.DocID, PDocTreeObject(AParent.Data)^.DocID, WhyNot) then
+          if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
             begin
               LoadNotes;
               SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26
@@ -6307,7 +6320,7 @@ begin
     end
   else
     begin
-      if AttachEntryToParent(PDocTreeObject(AChild.Data)^.DocID, PDocTreeObject(AParent.Data)^.DocID, WhyNot) then
+      if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
         begin
           LoadNotes;
           SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26

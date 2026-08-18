@@ -1737,7 +1737,7 @@ begin
     LoadSumms;
     with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
   end;
-  if not CanBeAttached(PDocTreeObject(tvSumms.Selected.Data)^.DocID, WhyNot) then
+  if not CanBeAttached(DocTreeData(tvSumms.Selected)^.DocID, WhyNot) then
     begin
       WhyNot := StringReplace(WhyNot, 'ATTACH', 'DETACH', [rfIgnoreCase]);
       WhyNot := StringReplace(WhyNot, 'to an ID', 'from an ID', [rfIgnoreCase]);
@@ -1748,8 +1748,8 @@ begin
               '  FROM:   ' + tvSumms.Selected.Parent.Text + CRLF + CRLF +
               'Are you sure?', TX_DETACH_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES)
       then Exit;
-  DocID := PDocTreeObject(tvSumms.Selected.Data)^.DocID;
-  SavedDocID := PDocTreeObject(tvSumms.Selected.Parent.Data)^.DocID;
+  DocID := DocTreeData(tvSumms.Selected)^.DocID;
+  SavedDocID := DocTreeData(tvSumms.Selected.Parent)^.DocID;
   if DetachEntryFromParent(DocID, WhyNot) then
     begin
       LoadSumms;
@@ -3133,14 +3133,14 @@ begin
           mnuActDetachFromIDParent.Enabled := (Selected.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD]);
           popSummListDetachFromIDParent.Enabled := (Selected.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD]);
           if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT, IMG_ID_CHILD, IMG_ID_CHILD_ADD]) then
-            mnuActAttachtoIDParent.Enabled := CanBeAttached(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
+            mnuActAttachtoIDParent.Enabled := CanBeAttached(DocTreeData(Selected)^.DocID, WhyNot)
           else
             mnuActAttachtoIDParent.Enabled := False;
           popSummListAttachtoIDParent.Enabled := mnuActAttachtoIDParent.Enabled;
           if (Selected.ImageIndex in [IMG_SINGLE, IMG_PARENT,
                                       IMG_IDNOTE_OPEN, IMG_IDNOTE_SHUT,
                                       IMG_IDPAR_ADDENDA_OPEN, IMG_IDPAR_ADDENDA_SHUT]) then
-            mnuActAddIDEntry.Enabled := CanReceiveAttachment(PDocTreeObject(Selected.Data)^.DocID, WhyNot)
+            mnuActAddIDEntry.Enabled := CanReceiveAttachment(DocTreeData(Selected)^.DocID, WhyNot)
           else
             mnuActAddIDEntry.Enabled := False;
           popSummListAddIDEntry.Enabled := mnuActAddIDEntry.Enabled
@@ -3268,22 +3268,22 @@ procedure TfrmDCSumm.tvSummsExpanded(Sender: TObject; Node: TTreeNode);
   begin
     { Within an ID parent node, sorts in ascending order by title
     BUT - addenda to parent document are always at the top of the sort, in date order}
-    if (Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum') and
-       (Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum') then
+    if (Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum') and
+       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then
       begin
-        Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                PChar(PDocTreeObject(Node2.Data)^.DocFMDate));
+        Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                PChar(DocTreeData(Node2)^.DocFMDate));
       end
-    else if Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
-    else if Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
+    else if Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
+    else if Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
     else
       begin
         if Data = 0 then
-          Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocTitle),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocTitle))
+          Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocTitle),
+                                  PChar(DocTreeData(Node2)^.DocTitle))
         else
-          Result := -AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocTitle),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocTitle));
+          Result := -AnsiStrIComp(PChar(DocTreeData(Node1)^.DocTitle),
+                                  PChar(DocTreeData(Node2)^.DocTitle));
       end
   end;
 
@@ -3291,32 +3291,32 @@ procedure TfrmDCSumm.tvSummsExpanded(Sender: TObject; Node: TTreeNode);
   begin
     { Within an ID parent node, sorts in ascending order by document date
     BUT - addenda to parent document are always at the top of the sort, in date order}
-    if (Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum') and
-       (Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum') then
+    if (Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum') and
+       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then
       begin
-        Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                PChar(PDocTreeObject(Node2.Data)^.DocFMDate));
+        Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                PChar(DocTreeData(Node2)^.DocFMDate));
       end
-    else if Copy(PDocTreeObject(Node1.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
-    else if Copy(PDocTreeObject(Node2.Data)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
+    else if Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum' then Result := -1
+    else if Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum' then Result := 1
     else
       begin
         if Data = 0 then
-          Result :=  AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocFMDate))
+          Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                  PChar(DocTreeData(Node2)^.DocFMDate))
         else
-          Result := -AnsiStrIComp(PChar(PDocTreeObject(Node1.Data)^.DocFMDate),
-                                  PChar(PDocTreeObject(Node2.Data)^.DocFMDate));
+          Result := -AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
+                                  PChar(DocTreeData(Node2)^.DocFMDate));
       end;
   end;
 
 begin
   with Node do
     begin
-      if Assigned(Data) then
-        if (Pos('<', PDocTreeObject(Data)^.DocHasChildren) > 0) then
+      if Assigned(DocTreeData(Node)) then
+        if (Pos('<', DocTreeData(Node)^.DocHasChildren) > 0) then
           begin
-            if (PDocTreeObject(Node.Data)^.OrderByTitle) then
+            if (DocTreeData(Node)^.OrderByTitle) then
               CustomSort(@SortByTitle, 0)
             else
               CustomSort(@SortByDate, 0);
@@ -3411,7 +3411,7 @@ begin
     SaveCurrentSumm(Saved);
     if not Saved then Exit;
   end;
-  if not CanBeAttached(PDocTreeObject(tvSumms.Selected.Data)^.DocID, WhyNot) then
+  if not CanBeAttached(DocTreeData(tvSumms.Selected)^.DocID, WhyNot) then
     begin
       InfoBox(WhyNot, TX_CAP_NO_DRAG, MB_OK);
       CancelDrag;
@@ -3551,9 +3551,9 @@ var
 begin
   if (AChild = nil) or (AParent = nil) then exit;
   ErrMsg := '';
-  if not CanBeAttached(PDocTreeObject(AChild.Data)^.DocID, WhyNot) then
+  if not CanBeAttached(DocTreeData(AChild)^.DocID, WhyNot) then
     ErrMsg := ErrMsg + WhyNot + CRLF + CRLF;
-  if not CanReceiveAttachment(PDocTreeObject(AParent.Data)^.DocID, WhyNot) then
+  if not CanReceiveAttachment(DocTreeData(AParent)^.DocID, WhyNot) then
     ErrMsg := ErrMsg + WhyNot;
   if ErrMsg <> '' then
     begin
@@ -3567,13 +3567,13 @@ begin
                   '    TO:   ' + AParent.Text + CRLF + CRLF +
                   'Are you sure?', TX_ATTACH_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES)
           then Exit;
-      SavedDocID := PDocTreeObject(AParent.Data)^.DocID;
+      SavedDocID := DocTreeData(AParent)^.DocID;
     end;
   if AChild.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD] then
     begin
-      if DetachEntryFromParent(PDocTreeObject(AChild.Data)^.DocID, WhyNot) then
+      if DetachEntryFromParent(DocTreeData(AChild)^.DocID, WhyNot) then
         begin
-          if AttachEntryToParent(PDocTreeObject(AChild.Data)^.DocID, PDocTreeObject(AParent.Data)^.DocID, WhyNot) then
+          if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
             begin
               LoadSumms;
               with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
@@ -3592,7 +3592,7 @@ begin
     end
   else
     begin
-      if AttachEntryToParent(PDocTreeObject(AChild.Data)^.DocID, PDocTreeObject(AParent.Data)^.DocID, WhyNot) then
+      if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
         begin
           LoadSumms;
           with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);

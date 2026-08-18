@@ -45,6 +45,7 @@ uses
 
 type
   TImageWhichDownload = (twdImageAndThumb, twdImgeOnly, twdThumbOnly, twdNone);
+  TGetActiveTIUIENProc = function: string of object;
   TImageInfo = class(TObject)
     private
     public
@@ -138,7 +139,7 @@ function  GetImageInfo(AImageInfoList : TList; Index : integer) : TImageInfo; ov
 procedure HandlePatientChanged();
 function  LoadAnyImageFormatToBMP(FPath : string; BMP : TBitmap) : boolean;
 procedure ForceServerImageReQuery();
-procedure SetActiveListBoxForImages(ListBox : TORListBox);
+procedure SetActiveTIUIENGetterForImages(AGetter : TGetActiveTIUIENProc);
 function  ActiveTIUIENForImages: string;
 function  ActiveTIUIENForImagesInt: int64;
 
@@ -166,7 +167,7 @@ var  //locally scoped (within unit) vars
   InsideProcessDownloadCue : boolean;
   NumImagesAvailableOnServer : integer;  //<-- this name probably needs to be changed...
   DownloadQueInfoList : TList;  //contains TImageInfo items, and owns them.  This is download cue
-  ActiveListBox : TORListBox; //will be set as pointer to frmNotes.lstNotes OR frmConsults.lstNotes
+  ActiveTIUIENGetter : TGetActiveTIUIENProc;
 
 //------------------------------------------------------------------------------
 
@@ -1206,9 +1207,9 @@ begin
   ClearImageList(DownloadQueInfoList);
 end;
 
-procedure SetActiveListBoxForImages(ListBox : TORListBox);
+procedure SetActiveTIUIENGetterForImages(AGetter : TGetActiveTIUIENProc);
 begin
-  ActiveListBox := ListBox
+  ActiveTIUIENGetter := AGetter;
 end;
 
 function ActiveTIUIENForImagesInt: int64;
@@ -1220,14 +1221,13 @@ end;
 function ActiveTIUIENForImages: string;
 begin
   Result := '0';
-  if not assigned(ActiveListBox) then exit;
-  if ActiveListBox.ItemID <> '' then begin
-    try
-      Result := IntToStr(ActiveListBox.ItemID);
-    except
-      //Error occurs after note is signed, and frmNotes.lstNotes.ItemID is "inaccessible"
-      on E: Exception do exit;
-    end;
+  if not Assigned(ActiveTIUIENGetter) then Exit;
+  try
+    Result := ActiveTIUIENGetter();
+    if Result = '' then
+      Result := '0';
+  except
+    on E: Exception do Exit;
   end;
 end;
 
@@ -1256,7 +1256,7 @@ end;
 
 initialization
   InsideProcessDownloadCue := false;
-  ActiveListBox := nil;
+  ActiveTIUIENGetter := nil;
 
 
 finalization

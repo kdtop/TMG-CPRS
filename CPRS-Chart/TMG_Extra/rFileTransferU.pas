@@ -456,7 +456,8 @@ var
   EncodedChar : AnsiChar; //kt //codex 7/30/26
   PlainInt : integer;
   PlainByte : byte;       //RGZ5
-  DecodedTrio : string[3];//RGZ6
+  DecodedTrio : AnsiString; //kt //codex 8/14/26
+  DecodedByte : AnsiChar; //kt //codex 8/14/26
 
 begin
   Result:='';
@@ -483,7 +484,8 @@ begin
     end;
     //Now take 3 bytes, and add to cumulative output (in same order)
     For j :=0 to 2 do begin
-      DecodedTrio := Chr(PlainTrio and $FF) + DecodedTrio;  //string concat (not math addition)
+      DecodedByte := AnsiChar(Byte(PlainTrio and $FF)); //kt //codex 8/14/26
+      DecodedTrio := DecodedByte + DecodedTrio;  //string concat (not math addition) //kt //codex 8/14/26
       PlainTrio := PlainTrio shr 8;  // PlainTrio := PlainTrio div 256
     end;
     //e.g. final DecodedTrio = 'chr($39) + chr(0) + chr(0)'

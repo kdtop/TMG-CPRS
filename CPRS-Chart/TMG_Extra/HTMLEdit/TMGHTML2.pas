@@ -1628,6 +1628,7 @@ var
   Sel: IHTMLSelectionObject;
   Disp: IDispatch;
   Range: IHTMLTxtRange;
+  SelType: WideString;
   var
   (* ParentEl, TD: IHTMLElement; *)
   Html: WideString;
@@ -1643,14 +1644,34 @@ begin
     Exit;
   end;  
 
-  // Only text selections are safe; Control selections often break pasteHTML
-  // Unneeded?  if not SameText(Sel.type_, 'Text') then Exit;
+  try  //kt //codex 8/17/26
+    SelType := Sel.type_;  //kt //codex 8/17/26
+  except  //kt //codex 8/17/26
+    Result := True;  //kt //codex 8/17/26
+    Exit;  //kt //codex 8/17/26
+  end;  //kt //codex 8/17/26
 
-  Disp := Sel.createRange;
-  if not Supports(Disp, IHTMLTxtRange, Range) then Exit;
+  // Only text selections are safe; Control selections often break pasteHTML
+  if SameText(SelType, 'Control') then Exit;  //kt //codex 8/17/26
+
+  try  //kt //codex 8/17/26
+    Disp := Sel.createRange;  //kt //codex 8/17/26
+  except  //kt //codex 8/17/26
+    Result := True;  //kt //codex 8/17/26
+    Exit;  //kt //codex 8/17/26
+  end;  //kt //codex 8/17/26
+  if not Supports(Disp, IHTMLTxtRange, Range) then begin  //kt //codex 8/17/26
+    Result := True;  //kt //codex 8/17/26
+    Exit;  //kt //codex 8/17/26
+  end;  //kt //codex 8/17/26
 
   // Get selected HTML to see if it spans multiple cells
-  Html := UpperCase(Range.htmlText);
+  try  //kt //codex 8/17/26
+    Html := UpperCase(Range.htmlText);  //kt //codex 8/17/26
+  except  //kt //codex 8/17/26
+    Result := True;  //kt //codex 8/17/26
+    Exit;  //kt //codex 8/17/26
+  end;  //kt //codex 8/17/26
 
   // If the selection is empty (caret only), it's safe
   if Html = '' then
@@ -1677,10 +1698,16 @@ end;
 procedure THtmlObj.InsertHTMLAtCaret(HTMLText : AnsiString);
 var
   Range: IHTMLTxtRange;
+  Body: IHTMLBodyElement;
   SanitizedHTML: string;
 begin
   if IsSafeToPasteHTML(self) then begin  
     Range:= GetTextRange;
+    if not assigned(Range) and Assigned(DOC) and Assigned(DOC.body) then begin  //kt //codex 8/17/26
+      Body := DOC.body as IHTMLBodyElement;  //kt //codex 8/17/26
+      Range := Body.createTextRange;  //kt //codex 8/17/26
+      if Assigned(Range) then Range.collapse(False);  //kt //codex 8/17/26
+    end;  //kt //codex 8/17/26
     if not assigned(Range) then exit;
     SanitizedHTML := string(HTMLText);
     SanitizeHTML(SanitizedHTML);  //kt 5/6/25
@@ -3246,4 +3273,3 @@ initialization
 finalization
 
 end.
-

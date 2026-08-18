@@ -1421,8 +1421,8 @@ begin  //btnFinishClick();
                                 HistData := TPCEData.Create;
                                 HistData.DateTime := MakeFMDateTime(CurDate);
                                 HistData.VisitCategory := 'E';
-                                if (VisitParent = '') then
-                                  VisitParent := GetVisitIEN(RemForm.NoteList.ItemIEN);
+                                if (VisitParent = '') and Assigned(RemForm.GetNoteIENProc) then
+                                  VisitParent := GetVisitIEN(StrToInt64Def(RemForm.GetNoteIENProc(), 0));
                                 HistData.Parent := VisitParent;
                                 if (StrToIntDef(CurLoc,0) = 0) then
                                   CurLoc := '0' + U + CurLoc;
@@ -1504,7 +1504,8 @@ begin  //btnFinishClick();
                             while RemForm.PCEObj.NeedProviderInfo do
                               MissingProviderInfo(RemForm.PCEObj, PCEType);
                             RemForm.PCEObj.Save(ForceForegroundSave);  //kt added added ForceForegroundSave parameter
-                            VisitParent := GetVisitIEN(RemForm.NoteList.ItemIEN);
+                            if Assigned(RemForm.GetNoteIENProc) then
+                              VisitParent := GetVisitIEN(StrToInt64Def(RemForm.GetNoteIENProc(), 0));
                           end;
                         end;
                       end; //end from:  if (TmpData.Count > 0 block
@@ -1882,4 +1883,3 @@ finalization
   KillObj(@PositionList);
 
 end.
-

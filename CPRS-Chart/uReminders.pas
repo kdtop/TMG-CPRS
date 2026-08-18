@@ -325,6 +325,7 @@ type
 
   TRemCanFinishProc = function: boolean of object;
   TRemDisplayPCEProc = procedure of object;
+  TRemGetNoteIENProc = function: string of object;
 
   TRemForm = record
     Form: TForm;
@@ -335,7 +336,7 @@ type
     Drawers: TFrmDrawers;
     NewNoteRE: TRichEdit;
     NewNoteHTMLE : THTMLObj; //kt 8/09
-    NoteList: TORListBox;
+    GetNoteIENProc: TRemGetNoteIENProc;
   end;
 
 var

@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-08-14
+Last updated: 2026-08-18
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -14,10 +14,10 @@ Project: `CPRS-Chart\CPRSChart.dproj`
 
 ## Goal
 
-Primary current goal as of 2026-08-14:
+Primary current goal as of 2026-08-18:
 
-- Keep CPRSChart working under Delphi 12 at runtime/debug time now that the project compiles successfully again in the Delphi IDE.
-- Continue cautiously simplifying the old HTML editor/browser wrapper area without breaking the current successful Delphi IDE build.
+- Keep CPRSChart working under Delphi 12 while continuing the `fNotes` refactor away from hidden-control note-selection architecture and into performance cleanup.
+- Preserve successful Delphi IDE compile/runtime behavior while centralizing note-list reads/writes behind helper methods and `uTRecStrList`.
 
 Secondary goal when needed:
 
@@ -35,7 +35,7 @@ Command-line build is not currently useful because the installed Delphi edition 
 
 `This version of the product does not support command line compiling.`
 
-When there is an active compile problem, use the fresh IDE compile log as the source of truth. Otherwise, assume runtime/debugging cleanup is the active work.
+When there is an active compile problem, use the fresh IDE compile log as the source of truth. Otherwise, assume `fNotes` refactoring plus normal runtime verification is the active work.
 
 ## Important Constraints
 
@@ -79,26 +79,33 @@ Important Git workflow:
 
 ## Current State
 
-As of 2026-08-14, the current local baseline includes the `e564182` HTML streamlining checkpoint. The user had previously confirmed a successful Delphi IDE compile, and active work remains runtime/debugging cleanup plus cautious HTML-stack simplification rather than basic compile blocking.
+As of 2026-08-15, the current local baseline still includes the `e564182` HTML streamlining checkpoint, but the active source work has shifted to `CPRS-Chart\fNotes.pas`. The user has repeatedly confirmed successful Delphi IDE compile and normal runtime startup after each `fNotes` refactor step.
 
 Important:
 
 - Do not assume older `CPRS-Chart\build_errors.txt` notes below are current.
 - If the user reports a new compile problem, ask for a fresh IDE compile log.
-- Otherwise, assume the main active work is runtime behavior under Delphi 12.
+- Otherwise, assume the main active work is `fNotes` refactoring under a currently working Delphi 12 runtime.
 
 Recommended working assumption for the next session:
 
-- Start from runtime/designer/debugging investigation unless the user explicitly says the build is failing again.
+- Start from `fNotes`/`uTRecStrList` refactoring unless the user explicitly says the build is failing again.
 - Treat `CPRS-Chart\build_errors.txt` as historical context unless the user has just saved a fresh compile log from the Delphi IDE.
 
-### Runtime / Debugging Status As Of 2026-08-14
+### Runtime / Debugging Status As Of 2026-08-18
 
 - The application compiles and can start, log in, and communicate with the RPC Broker.
 - Several Delphi 12 runtime/designer compatibility issues have been found and fixed incrementally.
 - Current work has shifted to runtime AV/debugger cleanup in chart tabs and older helper units.
 - The user is reviewing the `HTMLEdit` area cautiously. The `EmbeddedED` implementation has already been cut out of the active source tree; do not assume older `EmbeddedED`-specific cleanup notes still apply without re-checking the current files.
-- New active planning topic as of 2026-08-14: refactoring `CPRS-Chart\fNotes.pas` to replace the hidden `lstNotes: TORListBox` data-store role with a non-visual record-string model in `CPRS-Chart\TMG_Extra\uTRecStrList.pas`, while reducing tree/list duplication and event cascades.
+- Active source refactor as of 2026-08-18: `CPRS-Chart\fNotes.pas` has been converted so `FNoteData: TRecStrList` is the live note-list model.
+- The hidden `lstNotes: TORListBox` compatibility control has now been removed from the live form/runtime path and deleted from `CPRS-Chart\fNotes.dfm`.
+- Brief runtime testing after the removal was reported good by the user, and the project compiles again in the Delphi IDE.
+- A recent runtime bug involving corrupted downloaded images was fixed by restoring byte-oriented handling in the image transfer path. Do not casually reintroduce Unicode/string changes in RPC/image payload code.
+- A new runtime/editor crash in the single-note HTML path was also fixed:
+  - `CPRS-Chart\TMG_Extra\HTMLEdit\TMGHTML2.pas`
+  - `CPRS-Chart\TMG_Extra\fSingleNote.pas`
+  - The fix hardens `createRange` / selection handling and avoids an early warmup insert before the editor is ready.
 
 ### HTML / HTMLEdit Status As Of 2026-08-13
 
@@ -115,7 +122,7 @@ Recommended working assumption for the next session:
   - `docs\EMBEDDEDED_CUT_PLAN.md`
   - `docs\EMBEDDEDED_DEPENDENCY_MAP.md`
 
-### Notes / `uTRecStrList` Status As Of 2026-08-14
+### Notes / `uTRecStrList` Status As Of 2026-08-18
 
 - A new non-visual record-string helper unit now exists:
   - `CPRS-Chart\TMG_Extra\uTRecStrList.pas`
@@ -128,12 +135,85 @@ Recommended working assumption for the next session:
   - piece access via `ItemPiece[Index, PieceNum]`
   - optional field-name schema lookup via `SelectedData['fieldname']` after `SetSchema(...)`
 - The numeric identifier from piece 1 is cached in `TStringList.Objects[]`; non-numeric piece-1 values are stored as `-1`.
-- `uTRecStrList` is not yet wired into `fNotes`; it is preparatory infrastructure for the next refactor session.
+- `uTRecStrList` is now partially wired into `fNotes` through `FNoteData` and a growing helper layer.
+- `uTRecStrList` now also includes:
+  - `SaveToSL`
+  - `AppendFromSL`
+- Current `fNotes` helper/model surface includes:
+  - `NoteRecordAt`, `NoteIDAt`, `NoteIENAt`
+  - `NoteCount`
+  - `UpdateNoteRecordAt`
+  - `SelectedNoteIndex`, `SelectedNoteRecord`, `SelectedNoteID`, `SelectedNoteIEN`
+  - `SetSelectedNoteIndex`
+  - `ClearNoteRecords`, `AddNoteRecord`, `InsertNoteRecord`
+  - `SelectNoteIDViaModel`
+  - `GetCurrentNoteID`, `GetCurrentNoteIEN`
+- Many former direct `lstNotes` reads now route through those helpers, including much of:
+  - note display loading
+  - sign/cosign flows
+  - addendum/component flows
+  - delete flow entry
+  - image/reminder external integrations
+  - print path
+- External direct `frmNotes.lstNotes` dependencies were reduced:
+  - reminders now use callback getter(s) rather than `NoteList := lstNotes`
+  - image support now uses active TIU-IEN getter callbacks rather than `SetActiveListBoxForImages`
+  - upload-images uses `frmNotes.GetCurrentNoteID`
+- `lstNotes` is no longer present as a live control in `fNotes`.
+- Remaining `lstNotes` mentions in `fNotes.pas` are now historical comments or commented-out legacy blocks, not active runtime code.
 - For the next `fNotes` refactor session, read:
   - `FNOTES_REVIEW.md`
   - `CPRS-Chart\TMG_Extra\uTRecStrList.pas`
   - `CPRS-Chart\fNotes.pas`
   - `CPRS-Chart\uDocTree.pas`
+- Recommended next step:
+  1. performance review of note loading in `CPRS-Chart\fNotes.pas` and `CPRS-Chart\uDocTree.pas`
+  2. review `PDocTreeObject` eager parsing/allocation and consider lazy hydration from `TORTreeNode.StringData`
+  3. investigate progress-bar churn / repeated `Application.ProcessMessages` / recursive tree-build cost before making deeper model changes
+
+### 2026-08-18 `lstNotes` Removal Milestone
+
+- `CPRS-Chart\fNotes.dfm`
+  - removed hidden `lstNotes: TORListBox`
+  - adjusted `tvNotes.TabOrder`
+  - removed stale status entry referencing `lstNotes`
+- `CPRS-Chart\fNotes.pas`
+  - removed `lstNotes` field and `lstNotesClick` handler
+  - removed `SyncNoteDataToListBox`
+  - removed mirror writes from:
+    - `UpdateTreeView`
+    - `UpdateNoteRecordAt`
+    - `ClearNoteRecords`
+    - `AddNoteRecord`
+    - `InsertNoteRecord`
+    - `SetSelectedNoteIndex`
+  - added `NoteCount`
+- User report after rebuild:
+  - compiles OK
+  - brief runtime testing looks good
+
+### 2026-08-18 Note-Loading Performance Findings
+
+- Slow loading of large note sets is not primarily caused by fetching the full text of every note during a normal load.
+- The likely hot path is mostly client-side work in:
+  - `CPRS-Chart\fNotes.pas`
+  - `CPRS-Chart\uDocTree.pas`
+- Major likely costs:
+  - repeated `ListNotesForTree(...)` / grouping passes
+  - `CreateListItemsForDocumentTree(...)`
+  - `BuildDocumentTree(...)`
+  - per-item progress-bar updates and `Application.ProcessMessages`
+  - eager `PDocTreeObject` allocation/parsing for every node
+- Important exception:
+  - when `FCurrentContext.SearchString <> ''`, the code really does fetch each note's text with `TIU GET RECORD TEXT`
+  - that slower path is expected only for explicit text-search mode
+
+### Current Compile Workflow Status
+
+- On 2026-08-18 the user saved a fresh compile log to `CPRS-Chart\build_errors.txt`.
+- A compile blocker at `CPRS-Chart\fNotes.pas(5222)` was fixed.
+- After that fix, the user reported the project compiles again.
+- As always, treat `CPRS-Chart\build_errors.txt` as current only when the user has just saved a fresh IDE compile log.
 
 ### Important 2026-08-03 Cleanup Warning
 

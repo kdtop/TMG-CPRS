@@ -428,6 +428,8 @@ type
     procedure NotifyOrder(OrderAction: Integer; AnOrder: TOrder); override;
     function AuthorizedUser: Boolean;
     procedure AssignRemForm;
+    function GetCurrentNoteID: string;
+    function GetCurrentNoteIEN: string;
     property  ViewMode :TViewModeSet read FViewMode;   //kt 9/11
     constructor Create(AOwner: TComponent); override;  //kt 9/11
     destructor Destroy; override;                      //kt 9/11
@@ -4177,8 +4179,24 @@ begin
     DisplayPCEProc := DisplayPCE;
     Drawers := frmDrawers;
     NewNoteRE := memResults;
-    NoteList := lstNotes;
+    GetNoteIENProc := GetCurrentNoteIEN;
   end;
+end;
+
+function TfrmConsults.GetCurrentNoteID: string;
+begin
+  if lstNotes.ItemIndex < 0 then
+    Result := ''
+  else
+    Result := lstNotes.ItemID;
+end;
+
+function TfrmConsults.GetCurrentNoteIEN: string;
+begin
+  if lstNotes.ItemIndex < 0 then
+    Result := '0'
+  else
+    Result := IntToStr(lstNotes.ItemIEN);
 end;
 
 function TfrmConsults.CanFinishReminder: boolean;
@@ -4358,7 +4376,7 @@ var
   x, WhyNot: string;
   Mode : TViewModeSet; //kt
 begin
-  uImages.SetActiveListBoxForImages(frmConsults.lstNotes); //fImages.ListBox := frmConsults.lstNotes;        //kt  5/5/14, 11/29/20
+  uImages.SetActiveTIUIENGetterForImages(GetCurrentNoteID); //fImages.ListBox := frmConsults.lstNotes;        //kt  5/5/14, 11/29/20
   if uChanging then Exit;
   //This gives the change a chance to occur when keyboarding, so that WindowEyes
   //doesn't use the old value.

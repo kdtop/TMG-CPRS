@@ -1240,9 +1240,7 @@ begin
   if not FHTMLEditorWarmedUp then begin
     HTMLEditor.Loaded;
     HTMLEditor.Navigate('about:blank');
-    //HtmlEditor.Editable := true;  //Sets ContentEditable=true to doc.body, so needs to be done AFTER loading document.
-    HTMLEditor.MoveCaretToEnd;
-    HTMLEditor.InsertHTMLAtCaret(' ');
+    HTMLEditor.WaitForDocComplete;  //kt //codex 8/17/26
     HTMLEditor.BringToFront;
     FHTMLEditorWarmedUp :=true;
   end;
@@ -1641,7 +1639,7 @@ begin
     Drawers := fSingleNote.frmDrawers;
     //NewNoteRE := memNewNote;
     NewNoteHTMLE := HTMLEditor;  //kt
-    NoteList := frmNotes.lstNotes;
+    GetNoteIENProc := frmNotes.GetCurrentNoteIEN;
   end;
 end;
 
@@ -1663,5 +1661,3 @@ end;
 
 
 end.
-
-

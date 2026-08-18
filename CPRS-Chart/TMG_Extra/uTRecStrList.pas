@@ -17,10 +17,12 @@ type
     FSchema: TStringList;
     FSelIndex: Integer;
     FDelimiter: Char;
+    procedure ClearIDObjectCache;
     function EncodeIDAsObject(const S: string): TObject;
+    function GetCachedID(Index: Integer): Int64;
     function GetCount: Integer;
     function GetItem(Index: Integer): string;
-    function GetSelectedData(const FieldName: string): string;
+    function GetSelectedData(const SchemaFieldName: string): string;
     function GetSelectedID: Int64;
     function GetDisplayText(Index: Integer): string;
     function GetItemPiece(Index, PieceNum: Integer): string;
@@ -28,6 +30,7 @@ type
     procedure SetDelimiter(const Value: Char);
     procedure SetItem(Index: Integer; const Value: string);
     procedure SetSelIndex(const Value: Integer);
+    function GetItemData(Index : integer; SchemaFieldName: string): string;
   public
     constructor Create;
     destructor Destroy; override;
@@ -37,7 +40,10 @@ type
     procedure Delete(Index: Integer);
     procedure Exchange(Index1, Index2: Integer);
     procedure Clear;
-    procedure SetSchema(FieldNames: TStringList);
+    procedure LoadFromSL(SL: TStrings);
+    procedure AppendFromSL(SL: TStrings);  //kt //codex 8/17/26
+    procedure SaveToSL(SL: TStrings);  //kt //codex 8/17/26
+    procedure SetSchema(SchemaFieldNames: TStringList);  //Optional field names.  .strings[0] gives name for field #1, and .strings[1] for field #2 etc ...
 
     function GetID(Index: Integer): Int64;
     function SelectByID(AnID: Int64): Integer;
@@ -52,12 +58,13 @@ type
     property Delimiter: Char read FDelimiter write SetDelimiter;
     property DisplayText[Index: Integer]: string read GetDisplayText;
     property Items[Index: Integer]: string read GetItem write SetItem; default;
-    property SelectedData[const FieldName: string]: string read GetSelectedData;
+    property SelectedData[const SchemaFieldName: string]: string read GetSelectedData; //e.g. myVar.SelectedData['weight']
     property SelectedID: Int64 read GetSelectedID;
     property ItemIEN: Int64 read GetSelectedID;  //<-- included for legacy consistency
     property SelectedIndex: Integer read FSelIndex write SetSelIndex;
     property ItemIndex: Integer read FSelIndex write SetSelIndex;  //<-- included for legacy consistency
-    property ItemPiece[Index, PieceNum: Integer]: string read GetItemPiece;
+    property ItemPiece[Index, PieceNum: Integer]: string read GetItemPiece;        //e.g. myVar.ItemPiece[7, 2]
+    property ItemData[Index: Integer; SchemaFieldName: string]: string read GetItemData; //e.g. myVar.ItemData[7, 'weight']
   end;
 
 implementation
@@ -81,12 +88,12 @@ end;
 
 function TRecStrList.Add(const S: string): Integer;
 begin
-  Result := FItems.AddObject(S, EncodeIDAsObject(S));
+  Result := FItems.AddObject(S, TObject(NativeInt(-1)));
 end;
 
 procedure TRecStrList.Insert(Index: Integer; const S: string);
 begin
-  FItems.InsertObject(Index, S, EncodeIDAsObject(S));
+  FItems.InsertObject(Index, S, TObject(NativeInt(-1)));
   if (FSelIndex >= Index) then
     Inc(FSelIndex);
 end;
@@ -145,16 +152,28 @@ function TRecStrList.EncodeIDAsObject(const S: string): TObject;
 var
   AValue: Int64;
 begin
-  AValue := StrToInt64Def(Piece(S, FDelimiter, 1), -1);
+  //kt //codex original -->   AValue := StrToInt64Def(Piece(S, FDelimiter, 1), -1);
+  AValue := StrToInt64Def(S, -1);
   Result := TObject(NativeInt(AValue));
 end;
 
 function TRecStrList.GetID(Index: Integer): Int64;
 begin
   if (Index >= 0) and (Index < FItems.Count) then
-    Result := NativeInt(FItems.Objects[Index])
+    //kt //codex original -->     Result := NativeInt(FItems.Objects[Index])
+    Result := GetCachedID(Index)
   else
     Result := -1;
+end;
+
+function TRecStrList.GetCachedID(Index: Integer): Int64;
+begin
+  if (Index < 0) or (Index >= FItems.Count) then begin Result := -1; Exit; end;
+  Result := NativeInt(FItems.Objects[Index]);
+  if Result = -1 then begin
+    FItems.Objects[Index] := EncodeIDAsObject(Piece(FItems[Index], FDelimiter, 1));
+    Result := NativeInt(FItems.Objects[Index]);
+  end;
 end;
 
 function TRecStrList.GetIEN(Index: Integer): Int64;
@@ -172,17 +191,30 @@ begin
     Result := '';
 end;
 
-function TRecStrList.GetSelectedData(const FieldName: string): string;
+function TRecStrList.GetSelectedData(const SchemaFieldName: string): string;
 var
   PieceNum: Integer;
 begin
   Result := '';
-  if Trim(FieldName) = '' then
+  if Trim(SchemaFieldName) = '' then
     Exit;
-  PieceNum := FSchema.IndexOf(FieldName) + 1;
+  PieceNum := FSchema.IndexOf(SchemaFieldName) + 1;
   if PieceNum <= 0 then
     Exit;
   Result := GetItemPiece(FSelIndex, PieceNum);
+end;
+
+function TRecStrList.GetItemData(Index : integer; SchemaFieldName: string): string;
+var
+  PieceNum: Integer;
+begin
+  Result := '';
+  if Trim(SchemaFieldName) = '' then
+    Exit;
+  PieceNum := FSchema.IndexOf(SchemaFieldName) + 1;
+  if PieceNum <= 0 then
+    Exit;
+  Result := GetItemPiece(Index, PieceNum);
 end;
 
 function TRecStrList.GetSelectedID: Int64;
@@ -196,7 +228,8 @@ var
 begin
   Result := -1;
   for I := 0 to FItems.Count - 1 do
-    if NativeInt(FItems.Objects[I]) = AnID then
+    //kt //codex original -->     if NativeInt(FItems.Objects[I]) = AnID then
+    if GetCachedID(I) = AnID then
     begin
       Result := I;
       Exit;
@@ -216,8 +249,42 @@ var
   I: Integer;
 begin
   for I := 0 to FItems.Count - 1 do
-    FItems.Objects[I] := EncodeIDAsObject(FItems[I]);
+    //kt //codex original -->     FItems.Objects[I] := EncodeIDAsObject(FItems[I]);
+    FItems.Objects[I] := EncodeIDAsObject(Piece(FItems[I], FDelimiter, 1));
 end;
+
+procedure TRecStrList.ClearIDObjectCache;
+var
+  I: Integer;
+begin
+  for I := 0 to FItems.Count - 1 do
+    FItems.Objects[I] := TObject(NativeInt(-1));
+end;
+
+procedure TRecStrList.LoadFromSL(SL: TStrings);
+begin
+  if Assigned(SL) then
+    FItems.Assign(SL)
+  else
+    FItems.Clear;
+  ClearIDObjectCache;
+  FSelIndex := -1;
+end;
+
+procedure TRecStrList.AppendFromSL(SL: TStrings);  //kt //codex 8/17/26
+var
+  I: Integer;
+begin
+  if not Assigned(SL) then Exit;  //kt //codex 8/17/26
+  for I := 0 to SL.Count - 1 do  //kt //codex 8/17/26
+    Add(SL[I]);  //kt //codex 8/17/26
+end;  //kt //codex 8/17/26
+
+procedure TRecStrList.SaveToSL(SL: TStrings);  //kt //codex 8/17/26
+begin
+  if not Assigned(SL) then Exit;  //kt //codex 8/17/26
+  SL.Assign(FItems);  //kt //codex 8/17/26
+end;  //kt //codex 8/17/26
 
 function TRecStrList.SelectByID(AnID: Int64): Integer;
 begin
@@ -244,10 +311,10 @@ begin
 end;
 
 
-procedure TRecStrList.SetSchema(FieldNames: TStringList);
+procedure TRecStrList.SetSchema(SchemaFieldNames: TStringList);
 begin
-  if Assigned(FieldNames) then
-    FSchema.Assign(FieldNames)
+  if Assigned(SchemaFieldNames) then
+    FSchema.Assign(SchemaFieldNames)
   else
     FSchema.Clear;
 end;
@@ -255,7 +322,7 @@ end;
 procedure TRecStrList.SetDelimiter(const Value: Char);
 begin
   FDelimiter := Value;
-  RebuildIDObjectCache;
+  ClearIDObjectCache;
 end;
 
 procedure TRecStrList.SetItem(Index: Integer; const Value: string);
@@ -263,9 +330,11 @@ begin
   if Index < 0 then
     Exit;
   while FItems.Count <= Index do
-    FItems.AddObject('', EncodeIDAsObject(''));
+    //kt //codex original -->     FItems.AddObject('', EncodeIDAsObject(''));
+    FItems.AddObject('', TObject(NativeInt(-1)));
   FItems[Index] := Value;
-  FItems.Objects[Index] := EncodeIDAsObject(Value);
+  //kt //codex original -->   FItems.Objects[Index] := EncodeIDAsObject(Value);
+  FItems.Objects[Index] := TObject(NativeInt(-1));
 end;
 
 procedure TRecStrList.SetSelIndex(const Value: Integer);

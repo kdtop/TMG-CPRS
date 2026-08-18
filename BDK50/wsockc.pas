@@ -668,6 +668,7 @@ var
   sBuf: AnsiString; //kt //codex 7/24/26
   OldTimeOut: integer;
   BytesRead, BytesLeft, BytesTotal: longint;
+  ChunkLen, OldLen: Longint; //kt //codex 8/14/26
   TryNumber: Integer;
   BadXfer: Boolean;
   xString: String;
@@ -732,15 +733,13 @@ begin
             BytesRead := recv(hSocket, BufPtr^, BytesLeft, 0);
 
             if BytesRead > 0 then begin
-              if BufPtr[BytesRead-1] = #4 then
-              begin
-                sBuf := ConCat(sBuf, BufPtr);
-              end
-              else
-              begin
-                BufPtr[BytesRead] := #0;
-                sBuf := ConCat(sBuf, BufPtr);
-              end;
+              ChunkLen := BytesRead; //kt //codex 8/14/26
+              if BufPtr[BytesRead-1] = #4 then Dec(ChunkLen); //kt //codex 8/14/26
+              if ChunkLen > 0 then begin //kt //codex 8/14/26
+                OldLen := Length(sBuf); //kt //codex 8/14/26
+                SetLength(sBuf, OldLen + ChunkLen); //kt //codex 8/14/26
+                Move(BufPtr^, sBuf[OldLen + 1], ChunkLen); //kt //codex 8/14/26
+              end; //kt //codex 8/14/26
               Inc(BytesTotal, BytesRead);
             end;
 
@@ -753,7 +752,7 @@ begin
               break;
             end;
           until BufPtr[BytesRead-1] = #4;
-          sBuf := Copy(sBuf, 1, BytesTotal - 1);
+          //kt //codex original -->           sBuf := Copy(sBuf, 1, BytesTotal - 1);
   {
           StrDispose(BufRecv);
           BufRecv := StrAlloc(BytesTotal+1);   // cause of many memory leaks

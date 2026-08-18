@@ -85,27 +85,6 @@ inherited frmNotes: TfrmNotes
         ExplicitTop = 291
         ExplicitWidth = 64
       end
-      object lstNotes: TORListBox
-        Left = 0
-        Top = 0
-        Width = 64
-        Height = 18
-        TabStop = False
-        Ctl3D = True
-        ItemHeight = 13
-        ParentCtl3D = False
-        ParentShowHint = False
-        PopupMenu = popNoteList
-        ShowHint = True
-        TabOrder = 0
-        Visible = False
-        OnClick = lstNotesClick
-        Caption = ''
-        ItemTipColor = clWindow
-        LongList = False
-        Pieces = '2,3'
-        TabPositions = '10'
-      end
       object tvNotes: TORTreeView
         Left = 0
         Top = 0
@@ -119,7 +98,7 @@ inherited frmNotes: TfrmNotes
         PopupMenu = popNoteList
         ReadOnly = True
         StateImages = dmodShared.imgImages
-        TabOrder = 1
+        TabOrder = 0
         OnChange = tvNotesChange
         OnChanging = tvNotesChanging
         OnClick = tvNotesClick
@@ -451,11 +430,12 @@ inherited frmNotes: TfrmNotes
       end
       object sptList: TSplitter
         Left = 0
-        Top = 113
+        Top = 19
         Width = 792
         Height = 3
         Cursor = crVSplit
         Align = alTop
+        ExplicitTop = 113
         ExplicitWidth = 611
       end
       object btnOpenTOC: TSpeedButton
@@ -505,9 +485,9 @@ inherited frmNotes: TfrmNotes
       end
       object memNote: TRichEdit
         Left = 0
-        Top = 116
+        Top = 22
         Width = 792
-        Height = 514
+        Height = 608
         Align = alClient
         Color = clCream
         Ctl3D = True
@@ -529,66 +509,17 @@ inherited frmNotes: TfrmNotes
         TabOrder = 1
         WordWrap = False
       end
-      object lvNotes: TCaptionListView
-        Left = 0
-        Top = 19
-        Width = 792
-        Height = 94
-        Align = alTop
-        Columns = <
-          item
-            Caption = 'Date'
-            Width = 100
-          end
-          item
-            AutoSize = True
-            Caption = 'Title'
-          end
-          item
-            AutoSize = True
-            Caption = 'Subject'
-          end
-          item
-            AutoSize = True
-            Caption = 'Author'
-          end
-          item
-            AutoSize = True
-            Caption = 'Location'
-          end
-          item
-            Caption = 'fmdate'
-            Width = 0
-          end
-          item
-            Caption = 'TIUDA'
-            Width = 0
-          end>
-        Constraints.MinHeight = 50
-        HideSelection = False
-        ReadOnly = True
-        RowSelect = True
-        SmallImages = dmodShared.imgNotes
-        StateImages = dmodShared.imgImages
-        TabOrder = 0
-        ViewStyle = vsReport
-        Visible = False
-        OnColumnClick = lvNotesColumnClick
-        OnCompare = lvNotesCompare
-        OnResize = lvNotesResize
-        OnSelectItem = lvNotesSelectItem
-        AutoSize = False
-        Caption = 'No Progress Notes Found'
-      end
       object pnlHtmlView: TPanel
         Left = 0
-        Top = 116
+        Top = 22
         Width = 792
-        Height = 514
+        Height = 608
         Align = alClient
         BevelOuter = bvNone
         Color = clBtnShadow
-        TabOrder = 2
+        TabOrder = 0
+        ExplicitTop = 19
+        ExplicitHeight = 611
         object pnlHtmlViewer: TPanel
           Left = 0
           Top = 20
@@ -977,7 +908,7 @@ inherited frmNotes: TfrmNotes
             Left = 23
             Top = 0
             Width = 145
-            Height = 21
+            Height = 18
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0
@@ -1879,9 +1810,6 @@ inherited frmNotes: TfrmNotes
         'Component = pnlDrawers'
         'Status = stsDefault')
       (
-        'Component = lstNotes'
-        'Status = stsDefault')
-      (
         'Component = tvNotes'
         'Status = stsDefault')
       (
@@ -1926,9 +1854,6 @@ inherited frmNotes: TfrmNotes
         'Status = stsDefault')
       (
         'Component = memNote'
-        'Status = stsDefault')
-      (
-        'Component = lvNotes'
         'Status = stsDefault')
       (
         'Component = pnlLeft'
@@ -2609,9 +2534,6 @@ inherited frmNotes: TfrmNotes
   object imgLblNotes: TVA508ImageListLabeler
     Components = <
       item
-        Component = lvNotes
-      end
-      item
         Component = tvNotes
       end>
     Labels = <>
@@ -2668,9 +2590,6 @@ inherited frmNotes: TfrmNotes
   end
   object imgLblImages: TVA508ImageListLabeler
     Components = <
-      item
-        Component = lvNotes
-      end
       item
         Component = tvNotes
       end>

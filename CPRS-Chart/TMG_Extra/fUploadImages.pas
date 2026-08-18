@@ -943,7 +943,7 @@ implementation
       //if CallingForm = 'frmDCSumm' then
         //Info.TIUIEN := frmDCSumm.lstSumms.ItemID
       //else
-      Info.TIUIEN := frmNotes.lstNotes.ItemID;
+      Info.TIUIEN := StrToInt64Def(frmNotes.GetCurrentNoteID, 0);
     end;
     Info.UploadDateTime := 'NOW';
     Info.DFN := Patient.DFN;
@@ -997,7 +997,7 @@ implementation
       //if CallingForm = 'frmDCSumm' then
         //Info.TIUIEN := frmDCSumm.lstSumms.ItemID
       //else
-    Info.TIUIEN := frmNotes.lstNotes.ItemID;
+    Info.TIUIEN := StrToInt64Def(frmNotes.GetCurrentNoteID, 0);
     //end;
     Info.UploadDateTime := 'NOW';
     Info.DFN := Patient.DFN;

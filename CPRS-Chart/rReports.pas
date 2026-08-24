@@ -293,19 +293,79 @@ procedure ListImagingExamsForDFN(Dest: TStrings; DFN : string); //kt 11/1/21 spl
 var
   x: string;
   i: Integer;
+  DataMode : string;
+
 begin
-  CallV('ORWRA IMAGING EXAMS1', [DFN]);
+  //kt original 8/24/26 --> CallV('ORWRA IMAGING EXAMS1', [DFN]);
+  CallV('TMG TIU RAD/PROC EXAMS', [DFN]);
+
+  {  EXAMPLE return data   -- SEE ALSO BELOW.
+    Family Phys of Greeneville;777^6778973.86615-1^3221026.13375^CT ABDOMEN PELVIS W CONTRAST^64^Electronically Filed^^7252^9~COMPLETE^LAUGHLIN RADIOLOGY DEPT^RAD~GENERAL RADIOLOGY^^72193^^N^^
+    Family Phys of Greeneville;777^6779477.8881-1^3220522.1118^US LEG DUPLEX BILATERAL VENOUS^2^Electronically Filed^^6204^9~COMPLETE^LAUGHLIN RADIOLOGY DEPT^RAD~GENERAL RADIOLOGY^^93970^^N^^
+    Family Phys of Greeneville;777^6779482.8196-1^3220517.1803^CT ABDOMEN PELVIS W CONTRAST^53^Electronically Filed^^6182^9~COMPLETE^LAUGHLIN RADIOLOGY DEPT^RAD~GENERAL RADIOLOGY^^72193^^N^^
+    Family Phys of Greeneville;777^6779482.868658-1^3220517.131242^XR ABDOMEN 1 VIEW KUB^45^Electronically Filed^^6178^9~COMPLETE^LAUGHLIN RADIOLOGY DEPT^RAD~GENERAL RADIOLOGY^^74000^^N^^
+    Family Phys of Greeneville;777^6779489.919253-1^3220510.080647^CT ABDOMEN PELVIS WOW CONTRAST^39^Electronically Filed^^6126^9~COMPLETE^LAUGHLIN RADIOLOGY DEPT^RAD~GENERAL RADIOLOGY^^74178^^N^^
+
+    Breakdown of 1 line:
+    piece #     Usage    Format          Example
+    1           Site     SiteName;#      Family Phys of Greeneville;777^
+    2           ExamID   IDT-CaseIEN     6779489.919253-1^
+    3           Exam DT  Exam FMD    T   3220510.080647^
+    4     ProcedureName  Free Text       CT ABDOMEN PELVIS WOW CONTRAST^
+    5          Case#     #               39^
+    6          Status    Free Text       Electronically Filed^
+    7          Severity  Y or Null       ^                <-- (i.e. Is it an abnormal result?)
+    8            ?                       6126^
+    9            ?                       9~COMPLETE^
+    10           ?                       LAUGHLIN RADIOLOGY DEPT^
+    11           ?                       RAD~GENERAL RADIOLOGY^
+    12           ?                       ^
+    13           ?                       74178^
+    14           ?                       ^
+    15           ?                       N^
+    16           ?                       ^
+    ...
+    20          MODE     RAD or TIU      Specifies format of data line <--- //kt added 8/24/26
+
+    NOTE: With change from ORWRA IMAGING EXAMS1 --> TMG TIU RAD/PROC EXAMS, additional information is returned, sorted in reverse chronological order.
+    For example:
+
+    799039^RAD REPORT (IMAGE)^3240726.01^^^^^^^^^^^^^^^^^TIU
+    Family Phys of Greeneville;777^6759674.8454-1^3240325.1545^XR TOE RIGHT 2 VIEW +^110572^Electronically Filed^^10795^9~COMPLETE^LAUGHLIN RADIOLOGY DEPT^RAD~GENERAL RADIOLOGY^^73660^^N^^^^^RAD"
+    786017^RAD REPORT (IMAGE)^3240325.01^^^^^^^^^^^^^^^^^TIU"
+
+    Notice that piece 20 is 'TIU' for entries showing TIU note titles (scanned images of rad reports), or 'RAD' for traditional rad study reports.
+    Format of additional information
+    Breakdown of 1 line:
+    piece #     Usage         Format          Example
+    1           IEN 8925        #             786017
+    2           Title         string          RAD REPORT (IMAGE)
+    3           Ref Date       FMDT           3240726.01
+    ...
+    20          MODE          RAD or TIU      Specifies format of data line <--- //kt added 8/24/26
+  }
+
   with RPCBrokerV do begin
     SetListFMDateTime('mm/dd/yyyy hh:nn', TStringList(Results), U, 3);
     for i := 0 to Results.Count - 1 do begin
       x := Results[i];
-      if Piece(x,U,7) = 'Y' then SetPiece(x,U,7, ' - Abnormal');
-      x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
-             + U + Piece(x,U,6)  + Piece(x,U,7) + U
-             + MixedCase(Piece(Piece(x,U,9),'~',2)) + U + Piece(x,U,5) +  U + '[+]'
-             + U + Pieces(x, U, 15,17);
-(*      x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
-        + U + Piece(x,U,6) + Piece(x,U,7) + U + Piece(x,U,5) +  U + '[+]' + U + Piece(x, U, 15);*)
+      DataMode := Piece(x,U,20);        //kt
+      if DataMode = 'TIU' then begin  //kt
+        //Put future manipulation here if needed.  Nothing for now...  //kt
+      end else if DataMode = 'RAD' then begin  //kt
+        if Piece(x,U,7) = 'Y' then SetPiece(x,U,7, ' - Abnormal');
+        x := Piece(x,U,1) + U +                          //SiteName;#
+             'i' + Pieces(x,U,2,3)+ U +                  //'i'IDT-CaseIEN^Exam FMDT
+             Piece(x,U,4) + U +                          //ProcedureName
+             Piece(x,U,6) + Piece(x,U,7) + U +           //Status - [Abnormal]
+             MixedCase(Piece(Piece(x,U,9),'~',2)) + U +  //e.g. COMPLETE
+             Piece(x,U,5) +  U +                         //Case#
+             '[+]' + U +                                 //[+]
+             Pieces(x, U, 15,17);                        //?
+  (*      x := Piece(x,U,1) + U + 'i' + Pieces(x,U,2,3)+ U + Piece(x,U,4)
+          + U + Piece(x,U,6) + Piece(x,U,7) + U + Piece(x,U,5) +  U + '[+]' + U + Piece(x, U, 15);*)
+          SetPiece(x, U, 20, 'RAD');  //kt
+      end;
       Results[i] := x;
     end;
     FastAssign(Results, Dest);

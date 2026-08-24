@@ -50,6 +50,7 @@ uses
 
 type
   TNoteVerbs = (nvNone,nvNoteSelect);  //kt 9/20/22
+  TReportDisplayMode = (rdmText, rdmHTML); //kt //codex 8/21/26
 
   TfrmReports = class(TfrmHSplit)
     PopupMenu1: TPopupMenu;
@@ -174,12 +175,14 @@ type
       Headers: OleVariant; var Cancel: WordBool);
 
   private
+    FReportDisplayMode: TReportDisplayMode; //kt //codex 8/21/26
     SortIdx1, SortIdx2, SortIdx3: Integer;
     procedure ProcessNotifications;
     procedure ShowTabControl;
     procedure Graph(reportien: integer);
     procedure GraphPanel(active: boolean);
     procedure BlankWeb;
+    procedure SetDisplayToHTMLvsText(Mode: TReportDisplayMode; Lines: TStrings; ActivateOnly: boolean=False; Append: boolean=False); //kt //codex 8/21/26
     function TVNodeIsQual(Node: TTreeNode; QualType: integer): boolean; //kt added 3/20/17
     function TVImagingSelected(): boolean; //kt added 3/20/17
     function GetLVReportsVisibleHeight : integer; //kt added 3/20/17
@@ -231,7 +234,7 @@ implementation
 
 {$R *.DFM}
 
-uses ORFn, rCore, rReports, fFrame, uCore, uReports, fReportsPrint,
+uses ORFn, rCore, rReports, rTIU, fFrame, uCore, uReports, fReportsPrint,  //kt //codex 8/24/26
      fReportsAdhocComponent1, activex, mshtml, dShared, fGraphs, fGraphData, rGraphs,
      fSingleNote, fAlertSender, uHTMLTools, fViewLabPDF,   //kt
      fTaskEvents, //kt
@@ -441,6 +444,61 @@ begin
   try
     WebBrowser1.Navigate(BlankWebPage);
   except
+  end;
+end;
+
+procedure TfrmReports.SetDisplayToHTMLvsText(Mode: TReportDisplayMode; Lines: TStrings; ActivateOnly: boolean=False; Append: boolean=False); //kt //codex 8/21/26
+//kt //codex added entire procedure 8/21/26
+var
+  InsertSuccess: boolean;
+begin
+  FReportDisplayMode := Mode;
+  if Mode = rdmHTML then begin
+    Memo1.Visible := false;
+    Memo1.TabStop := false;
+    Memo1.Text := '';
+    memText.Visible := false;
+    memText.TabStop := false;
+    WebBrowser1.Visible := true;
+    WebBrowser1.TabStop := true;
+    if ActivateOnly = false then begin
+      uHTMLDoc := '';
+      if Lines <> nil then begin
+        if uReportType = 'R' then begin
+          uHTMLDoc := HTML_PRE + Lines.Text + HTML_POST;
+        end else begin
+          uHTMLDoc := PrefixBody(Lines.Text, uHTMLPatient, InsertSuccess);
+          if not InsertSuccess then begin
+            uHTMLDoc := uHTMLPatient + Lines.Text;
+          end;
+        end;
+      end;
+      BlankWeb;
+    end;
+    WebBrowser1.BringToFront;
+  end else begin
+    uHTMLDoc := '';
+    BlankWeb;
+    WebBrowser1.Visible := false;
+    WebBrowser1.TabStop := false;
+    memText.Visible := true;
+    memText.TabStop := true;
+    if (ActivateOnly = false) and (Lines <> nil) then begin //kt //codex 8/21/26
+      //kt //codex original --> memText.Lines.Assign(Lines);
+      if Append then begin //kt //codex 8/21/26
+        //kt //codex original --> if memText.Lines.Count > 0 then begin
+        //kt //codex original -->   memText.Lines.Add('===============================================================================');
+        //kt //codex original --> end;
+        if memText.Lines.Count > 0 then begin //kt //codex 8/21/26
+          memText.Lines.Add('==============================================================================='); //kt //codex 8/21/26
+        end; //kt //codex 8/21/26
+        memText.Lines.AddStrings(Lines); //kt //codex 8/21/26
+      end else begin //kt //codex 8/21/26
+        memText.Lines.Assign(Lines); //kt //codex 8/21/26
+      end; //kt //codex 8/21/26
+    end;
+    memText.BringToFront;
+    RedrawActivate(memText.Handle);
   end;
 end;
 
@@ -1015,21 +1073,26 @@ begin
   tvProcedures.Items.Clear;
   lblProcTypeMsg.Visible := FALSE;
   uHTMLDoc := '';
-  if uReportType = 'H' then begin
-    WebBrowser1.Visible := true;
-    WebBrowser1.TabStop := true;
-    BlankWeb;
-    WebBrowser1.BringToFront;
-    memText.Visible := false;
-    memText.TabStop := false;
-  end else begin
-    WebBrowser1.Visible := false;
-    WebBrowser1.TabStop := false;
-    memText.Visible := true;
-    memText.TabStop := true;
-    memText.BringToFront;
-    RedrawActivate(memText.Handle);
-  end;
+  //kt //codex original --> if uReportType = 'H' then begin
+  //kt //codex original -->   WebBrowser1.Visible := true;
+  //kt //codex original -->   WebBrowser1.TabStop := true;
+  //kt //codex original -->   BlankWeb;
+  //kt //codex original -->   WebBrowser1.BringToFront;
+  //kt //codex original -->   memText.Visible := false;
+  //kt //codex original -->   memText.TabStop := false;
+  //kt //codex original --> end else begin
+  //kt //codex original -->   WebBrowser1.Visible := false;
+  //kt //codex original -->   WebBrowser1.TabStop := false;
+  //kt //codex original -->   memText.Visible := true;
+  //kt //codex original -->   memText.TabStop := true;
+  //kt //codex original -->   memText.BringToFront;
+  //kt //codex original -->   RedrawActivate(memText.Handle);
+  //kt //codex original --> end;
+  if uReportType = 'H' then begin //kt //codex 8/21/26
+    SetDisplayToHTMLvsText(rdmHTML, nil, true); //kt //codex 8/21/26
+  end else begin //kt //codex 8/21/26
+    SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
+  end; //kt //codex 8/21/26
   uLocalReportData.Clear;
   uRemoteReportData.Clear;
   for i := 0 to RemoteSites.SiteList.Count - 1 do
@@ -1314,6 +1377,7 @@ begin
   inherited;
   PageID := CT_REPORTS;
   uFrozen := False;
+  FReportDisplayMode := rdmText; //kt //codex 8/21/26
   uHSComponents := TStringList.Create;
   uHSAll := TStringList.Create;
   uLocalReportData := TStringList.Create;
@@ -2043,7 +2107,7 @@ begin
   inherited;
   if uHTMLDoc = '' then Exit;
   //kt added, then removed.... if (uHTMLDoc = uLastHTMLDoc) and (uLastHTMLDoc <> '') then exit;  //kt  Don't reload if uHTMLDoc hasn't changed.
-  if not(uReportType = 'H') then Exit; //this can be removed if & when browser replaces memtext control
+  if FReportDisplayMode <> rdmHTML then Exit; //kt //codex 8/21/26
   if not Assigned(WebBrowser1.Document) then Exit;
   WebDoc := WebBrowser1.Document as IHtmlDocument2;
   v := VarArrayCreate([0, 0], varVariant);
@@ -2143,6 +2207,7 @@ var
   CurrentParentNode, CurrentNode: TTreeNode;
   InsertSuccess : boolean;  //kt added
   ReportObj: PReportTreeObject; //kt  //codex 8/18/26
+  DataMode : string;  //kt
 begin
   inherited;
   if (tvReports.Selected = nil) or (tvReports.Selected.Data = nil) then Exit; //kt //codex 8/18/26
@@ -2241,12 +2306,13 @@ begin
   if uReportType = 'H' then begin
     pnlRightMiddle.Visible := false;
     pnlRightBottom.Visible := true;
-    WebBrowser1.Visible := true;
-    WebBrowser1.TabStop := true;
-    BlankWeb;
-    WebBrowser1.BringToFront;
-    memText.Visible := false;
-    memText.TabStop := false;
+    //kt //codex original --> WebBrowser1.Visible := true;
+    //kt //codex original --> WebBrowser1.TabStop := true;
+    //kt //codex original --> BlankWeb;
+    //kt //codex original --> WebBrowser1.BringToFront;
+    //kt //codex original --> memText.Visible := false;
+    //kt //codex original --> memText.TabStop := false;
+    SetDisplayToHTMLvsText(rdmHTML, nil, true); //kt //codex 8/21/26
   end else if uReportType = 'V' then begin
     with lvReports do begin
       Columns.BeginUpdate;
@@ -2273,21 +2339,23 @@ begin
     end;
     pnlRightMiddle.Visible := true;
     sptHorzRight.Visible := true;
-    WebBrowser1.Visible := false;
-    WebBrowser1.TabStop := false;
     pnlRightBottom.Visible := true;
-    memText.Visible := true;
-    memText.TabStop := true;
-    memText.BringToFront;
+    //kt //codex original --> WebBrowser1.Visible := false;
+    //kt //codex original --> WebBrowser1.TabStop := false;
+    //kt //codex original --> memText.Visible := true;
+    //kt //codex original --> memText.TabStop := true;
+    //kt //codex original --> memText.BringToFront;
+    SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
   end else begin
     pnlRightMiddle.Visible := false;
     sptHorzRight.Visible := false;
-    WebBrowser1.Visible := false;
-    WebBrowser1.TabStop := false;
     pnlRightBottom.Visible := True;
-    memText.Visible := true;
-    memText.TabStop := true;
-    memText.BringToFront;
+    //kt //codex original --> WebBrowser1.Visible := false;
+    //kt //codex original --> WebBrowser1.TabStop := false;
+    //kt //codex original --> memText.Visible := true;
+    //kt //codex original --> memText.TabStop := true;
+    //kt //codex original --> memText.BringToFront;
+    SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
   end;
   uLocalReportData.Clear;
   RowObjects.Clear;
@@ -2411,24 +2479,55 @@ begin
           CurrentNode := nil;
           for i := 0 to uLocalReportData.Count - 1 do begin
             ListItem := Items.Add;
-            ListItem.Caption := piece(piece(uLocalReportData[i],'^',1),';',1);
-            if uColumns.Count > 1 then begin
-              for j := 2 to uColumns.Count do begin
-                ListItem.SubItems.Add(piece(uLocalReportData[i],'^',j));
-              end;
-              //kt  //codex 8/18/26 The first subitem is index 0. Using 1 here faults when only one subitem exists.
-              if ListItem.SubItems.Count > 0 then begin
-                if Piece(uLocalReportData[i], U, 9) = 'Y' then begin
-                  ListItem.SubItemImages[0] := IMG_1_IMAGE //kt  //codex 8/18/26
-                end else begin
-                  ListItem.SubItemImages[0] := IMG_NO_IMAGES; //kt  //codex 8/18/26
+            x := uLocalReportData[i];  //scratch variable.
+            DataMode := Piece(x, U, 20);
+            if DataMode = 'TIU' then begin  //kt added block
+              //Example data string: 799039^RAD REPORT (IMAGE)^3240726.01^^^^^^^^^^^^^^^^^TIU
+              //kt //codex original --> ListItem.Caption := piece(x,'^',2);  //kt
+              ListItem.Caption := '';  //kt //codex 8/24/26
+              if uColumns.Count > 1 then begin  //kt //codex 8/24/26
+                for j := 2 to uColumns.Count do begin  //kt //codex 8/24/26
+                  case j of  //kt //codex 8/24/26
+                    2: ListItem.SubItems.Add(Piece(x, '^', 1));  //kt //codex 8/24/26
+                    3: ListItem.SubItems.Add(Piece(x, '^', 3));  //kt //codex 8/24/26
+                    4: ListItem.SubItems.Add(Piece(x, '^', 2));  //kt //codex 8/24/26
+                    5: ListItem.SubItems.Add('Scanned Doc');  //kt //codex 8/24/26
+                    6: ListItem.SubItems.Add('TIU');  //kt //codex 8/24/26
+                    7: ListItem.SubItems.Add(Piece(x, '^', 1));  //kt //codex 8/24/26
+                    8: ListItem.SubItems.Add('');  //kt //codex 8/24/26
+                  else  //kt //codex 8/24/26
+                    ListItem.SubItems.Add('');  //kt //codex 8/24/26
+                  end;  //kt //codex 8/24/26
+                end;  //kt //codex 8/24/26
+                if ListItem.SubItems.Count > 0 then begin  //kt //codex 8/24/26
+                  ListItem.SubItemImages[0] := IMG_NO_IMAGES;  //kt //codex 8/24/26
+                end;  //kt //codex 8/24/26
+              end;  //kt //codex 8/24/26
+            end else if DataMode = 'RAD' then begin
+              //kt ListItem.Caption := piece(piece(uLocalReportData[i],'^',1),';',1);
+              ListItem.Caption := piece(piece(x,'^',1),';',1);  //kt
+              if uColumns.Count > 1 then begin
+                for j := 2 to uColumns.Count do begin
+                  //kt ListItem.SubItems.Add(piece(uLocalReportData[i],'^',j));
+                  ListItem.SubItems.Add(piece(x,'^',j));  //kt
+                end;
+                //kt  //codex 8/18/26 The first subitem is index 0. Using 1 here faults when only one subitem exists.
+                if ListItem.SubItems.Count > 0 then begin
+                  if Piece(uLocalReportData[i], U, 9) = 'Y' then begin
+                    ListItem.SubItemImages[0] := IMG_1_IMAGE //kt  //codex 8/18/26
+                  end else begin
+                    ListItem.SubItemImages[0] := IMG_NO_IMAGES; //kt  //codex 8/18/26
+                  end;
                 end;
               end;
             end;
-            LoadProceduresTreeView(uLocalReportData[i], CurrentParentNode, CurrentNode);
-            if CurrentNode <> nil then begin
-               PProcTreeObj(CurrentNode.Data)^.Associate := lvReports.Items.IndexOf(ListItem);
-            end;
+            if DataMode = 'RAD' then begin  //kt //codex 8/24/26
+              //kt //codex original --> LoadProceduresTreeView(uLocalReportData[i], CurrentParentNode, CurrentNode);
+              LoadProceduresTreeView(uLocalReportData[i], CurrentParentNode, CurrentNode);  //kt //codex 8/24/26
+              if CurrentNode <> nil then begin  //kt //codex 8/24/26
+                 PProcTreeObj(CurrentNode.Data)^.Associate := lvReports.Items.IndexOf(ListItem);  //kt //codex 8/24/26
+              end;  //kt //codex 8/24/26
+            end;  //kt //codex 8/24/26
           end;
           if tvProcedures.Items.Count > 0 then begin
              tvProcedures.Selected := tvProcedures.Items.GetFirstNode;
@@ -2761,13 +2860,13 @@ begin
   SendMessage(tvReports.Handle, WM_HSCROLL, SB_THUMBTRACK, 0);
   RedrawActivate(tvReports.Handle);
   RedrawActivate(memText.Handle);
-  if WebBrowser1.Visible = true then begin
-    BlankWeb;
-    WebBrowser1.BringToFront;
+  if FReportDisplayMode = rdmHTML then begin //kt //codex 8/21/26
+    SetDisplayToHTMLvsText(rdmHTML, nil, true); //kt //codex 8/21/26
   end else if not GraphFormActive then begin
-    memText.Visible := true;
-    memText.TabStop := true;
-    memText.BringToFront;
+    //kt //codex original --> memText.Visible := true;
+    //kt //codex original --> memText.TabStop := true;
+    //kt //codex original --> memText.BringToFront;
+    SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
   end else begin
     GraphPanel(true);
     with GraphForm do begin
@@ -2950,7 +3049,9 @@ var
   i,j,k: integer;
   aBasket: TStringList;
   aWPFlag: Boolean;
-  x, HasImages: string;
+  x, HasImages: string;  //kt //codex 8/24/26
+  IsHTMLReport: boolean;  //kt //codex 8/24/26
+  TIUIEN: Integer;  //kt //codex 8/24/26
 
 begin
   inherited;
@@ -2978,63 +3079,120 @@ begin
 
       QT_IMAGING:
         begin      //      = 3
-          if lvReports.SelCount = 1 then begin
-            memText.Lines.Clear;
-            if not UpdatingTvProcedures then begin
-              UpdatingLvReports := TRUE;
-              for i := 0 to (tvProcedures.Items.Count - 1) do begin
-                if PProcTreeObj(tvProcedures.Items[i].Data)^.ExamDtTm = Item.SubItems[0] then begin
-                  if PProcTreeObj(tvProcedures.Items[i].Data)^.ProcedureName = Item.SubItems[2] then begin
-                    if tvProcedures.Items[i].Parent <> nil then begin
-                      tvProcedures.Items[i].Parent.Expanded := True;
-                      if PProcTreeObj(tvProcedures.Items[i].Data)^.MemberOfSet = '1' then begin
-                        lblProcTypeMsg.Caption := 'Descendent Procedure'
-                      end else if PProcTreeObj(tvProcedures.Items[i].Data)^.MemberOfSet = '2' then begin
-                        lblProcTypeMsg.Caption := 'Descendent Procedure with shared report';
+          if (Item.SubItems.Count > 4) and (Item.SubItems[4] = 'TIU') then begin  //kt //codex 8/24/26
+            if lvReports.SelCount > 1 then begin  //kt //codex 8/24/26
+              SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/24/26
+              Exit;  //kt //codex 8/24/26
+            end;  //kt //codex 8/24/26
+            TIUIEN := StrToIntDef(aID, 0);  //kt //codex 8/24/26
+            if TIUIEN <= 0 then begin  //kt //codex 8/24/26
+              lblTitle.Caption := '';  //kt //codex 8/24/26
+              SetDisplayToHTMLvsText(rdmText, nil, true);  //kt //codex 8/24/26
+              memText.Lines.Clear;  //kt //codex 8/24/26
+              Exit;  //kt //codex 8/24/26
+            end;  //kt //codex 8/24/26
+            tvProcedures.Selected := nil;  //kt //codex 8/24/26
+            lblProcTypeMsg.Caption := 'Scanned document';  //kt //codex 8/24/26
+            lblTitle.Caption := Item.SubItems[2] + '  (' + Item.SubItems[1] + ')';  //kt //codex 8/24/26
+            StatusText('Retrieving selected progress note...');  //kt //codex 8/24/26
+            Screen.Cursor := crAppStart;  //kt //codex 8/24/26
+            try  //kt //codex 8/24/26
+              LoadDocumentText(uLocalReportData, TIUIEN, IsHTMLReport);  //kt //codex 8/24/26
+              if IsHTMLReport then begin  //kt //codex 8/24/26
+                SetDisplayToHTMLvsText(rdmHTML, uLocalReportData);  //kt //codex 8/24/26
+              end else begin  //kt //codex 8/24/26
+                SetDisplayToHTMLvsText(rdmText, uLocalReportData);  //kt //codex 8/24/26
+              end;  //kt //codex 8/24/26
+              NotifyOtherApps(NAE_REPORT, 'TIU^' + IntToStr(TIUIEN));  //kt //codex 8/24/26
+            finally  //kt //codex 8/24/26
+              Screen.Cursor := crDefault;  //kt //codex 8/24/26
+              StatusText('');  //kt //codex 8/24/26
+            end;  //kt //codex 8/24/26
+          end else begin  //kt //codex 8/24/26
+            if lvReports.SelCount = 1 then begin
+              memText.Lines.Clear;
+              if not UpdatingTvProcedures then begin
+                UpdatingLvReports := TRUE;
+                for i := 0 to (tvProcedures.Items.Count - 1) do begin
+                  if PProcTreeObj(tvProcedures.Items[i].Data)^.ExamDtTm = Item.SubItems[0] then begin
+                    if PProcTreeObj(tvProcedures.Items[i].Data)^.ProcedureName = Item.SubItems[2] then begin
+                      if tvProcedures.Items[i].Parent <> nil then begin
+                        tvProcedures.Items[i].Parent.Expanded := True;
+                        if PProcTreeObj(tvProcedures.Items[i].Data)^.MemberOfSet = '1' then begin
+                          lblProcTypeMsg.Caption := 'Descendent Procedure'
+                        end else if PProcTreeObj(tvProcedures.Items[i].Data)^.MemberOfSet = '2' then begin
+                          lblProcTypeMsg.Caption := 'Descendent Procedure with shared report';
+                        end;
+                      end else begin
+                        lblProcTypeMsg.Caption := 'Standalone (single) procedure';
                       end;
-                    end else begin
-                      lblProcTypeMsg.Caption := 'Standalone (single) procedure';
+                      tvProcedures.Items[i].Selected := TRUE;
                     end;
-                    tvProcedures.Items[i].Selected := TRUE;
                   end;
                 end;
+                UpdatingLvReports := False;
               end;
-              UpdatingLvReports := False;
+            end else if not UpdatingTvProcedures then begin
+              tvProcedures.Selected := nil;
             end;
-          end else if not UpdatingTvProcedures then begin
-            tvProcedures.Selected := nil;
-          end;
 
-          if MemText.Lines.Count > 0 then begin
-            memText.Lines.Add('===============================================================================');
-          end;
-          aMoreID := '#' + Item.SubItems[5];
-          SetPiece(uRemoteType,'^',5,aID + aMoreID);
-          if not(piece(uRemoteType, '^', 9) = '1') then begin
-            LoadReportText(uLocalReportData, uRptID, aID + aMoreID, uReportRPC, '');
-            for i := 0 to uLocalReportData.Count - 1 do
-              MemText.Lines.Add(uLocalReportData[i]);
-            if Item.SubItems.Count > 5 then
-              x := 'RA^' + aID + U + Item.SubItems[5]
-            else
-              x := 'RA^' + aID;
-            HasImages := BOOLCHAR[Item.SubItemImages[1] = IMG_1_IMAGE];
-            SetPiece(x, U, 10, HasImages);
-            NotifyOtherApps(NAE_REPORT, x);
-          end;
+            if lvReports.SelCount > 1 then begin
+              SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
+            end; //kt //codex 8/21/26
+            //kt //codex original --> if MemText.Lines.Count > 0 then begin
+            //kt //codex original -->   memText.Lines.Add('===============================================================================');
+            //kt //codex original --> end;
+            aMoreID := '#' + Item.SubItems[5];
+            SetPiece(uRemoteType,'^',5,aID + aMoreID);
+            if not(piece(uRemoteType, '^', 9) = '1') then begin
+              LoadReportText(uLocalReportData, uRptID, aID + aMoreID, uReportRPC, '');
+              IsHTMLReport := (lvReports.SelCount = 1) and uHTMLTools.TextIsHTML(uLocalReportData.Text); //kt //codex 8/21/26
+              if IsHTMLReport then begin //kt //codex 8/21/26
+                SetDisplayToHTMLvsText(rdmHTML, uLocalReportData); //kt //codex 8/21/26
+              end else begin //kt //codex 8/21/26
+                //kt //codex original --> if lvReports.SelCount = 1 then begin
+                //kt //codex original -->   SetDisplayToHTMLvsText(rdmText, uLocalReportData);
+                //kt //codex original --> end else begin
+                //kt //codex original -->   for i := 0 to uLocalReportData.Count - 1 do
+                //kt //codex original -->     MemText.Lines.Add(uLocalReportData[i]);
+                //kt //codex original --> end;
+                SetDisplayToHTMLvsText(rdmText, uLocalReportData, false, (lvReports.SelCount > 1)); //kt //codex 8/21/26
+              end; //kt //codex 8/21/26
+              if Item.SubItems.Count > 5 then
+                x := 'RA^' + aID + U + Item.SubItems[5]
+              else
+                x := 'RA^' + aID;
+              HasImages := BOOLCHAR[Item.SubItemImages[1] = IMG_1_IMAGE];
+              SetPiece(x, U, 10, HasImages);
+              NotifyOtherApps(NAE_REPORT, x);
+            end;
+          end;  //kt //codex 8/24/26
         end; //QT_IMAGING
 
       QT_NUTR:
         begin      //      = 4
           if lvReports.SelCount = 1 then
             memText.Lines.Clear;
-          if MemText.Lines.Count > 0 then
-            memText.Lines.Add('===============================================================================');
+          if lvReports.SelCount > 1 then begin
+            SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
+          end; //kt //codex 8/21/26
+          //kt //codex original --> if MemText.Lines.Count > 0 then
+          //kt //codex original -->   memText.Lines.Add('===============================================================================');
           SetPiece(uRemoteType,'^',5,aID);
           if not(piece(uRemoteType, '^', 9) = '1') then begin
             LoadReportText(uLocalReportData, uRptID, aID, uReportRPC, '');
-            for i := 0 to uLocalReportData.Count - 1 do
-              MemText.Lines.Add(uLocalReportData[i]);
+            IsHTMLReport := (lvReports.SelCount = 1) and uHTMLTools.TextIsHTML(uLocalReportData.Text); //kt //codex 8/21/26
+            if IsHTMLReport then begin //kt //codex 8/21/26
+              SetDisplayToHTMLvsText(rdmHTML, uLocalReportData); //kt //codex 8/21/26
+            end else begin //kt //codex 8/21/26
+              //kt //codex original --> if lvReports.SelCount = 1 then begin
+              //kt //codex original -->   SetDisplayToHTMLvsText(rdmText, uLocalReportData);
+              //kt //codex original --> end else begin
+              //kt //codex original -->   for i := 0 to uLocalReportData.Count - 1 do
+              //kt //codex original -->     MemText.Lines.Add(uLocalReportData[i]);
+              //kt //codex original --> end;
+              SetDisplayToHTMLvsText(rdmText, uLocalReportData, false, (lvReports.SelCount > 1)); //kt //codex 8/21/26
+            end; //kt //codex 8/21/26
           end;
         end; //QT_NUTR
 
@@ -3065,10 +3223,10 @@ begin
                     end;
                   end;
                 end;
-                if aWPFlag = true then begin
-                  memText.Lines.Add('Facility: ' + Item.Caption);
-                  memText.Lines.Add('===============================================================================');
-                end;
+                //kt //codex original --> if aWPFlag = true then begin
+                //kt //codex original -->   memText.Lines.Add('Facility: ' + Item.Caption);
+                //kt //codex original -->   memText.Lines.Add('===============================================================================');
+                //kt //codex original --> end;
               end;
             end;
           end;
@@ -3089,10 +3247,10 @@ begin
               end;
             end;
           end;
-          if aWPFlag = true then begin
-            memText.Lines.Add('Facility: ' + Item.Caption);
-            memText.Lines.Add('===============================================================================');
-          end;
+          //kt //codex original --> if aWPFlag = true then begin
+          //kt //codex original -->   memText.Lines.Add('Facility: ' + Item.Caption);
+          //kt //codex original -->   memText.Lines.Add('===============================================================================');
+          //kt //codex original --> end;
           if uRptID = 'OR_R18:IMAGING' then begin
             if (Item.SubItems.Count > 8) then begin   //has id, may have case (?)
               x := 'RA^' + Item.SubItems[8] + U + Item.SubItems[4] + U + Item.Caption;
@@ -3121,14 +3279,27 @@ begin
         begin      //      = 19
           if lvReports.SelCount = 1 then
             memText.Lines.Clear;
-          if MemText.Lines.Count > 0 then
-            memText.Lines.Add('===============================================================================');
+          if lvReports.SelCount > 1 then begin
+            SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
+          end; //kt //codex 8/21/26
+          //kt //codex original --> if MemText.Lines.Count > 0 then
+          //kt //codex original -->   memText.Lines.Add('===============================================================================');
           SetPiece(uRemoteType,'^',5,aID);
           if not(piece(uRemoteType, '^', 9) = '1') then begin
             LoadReportText(uLocalReportData, uRptID, aID + aMoreID, uReportRPC, '');
-            for i := 0 to uLocalReportData.Count - 1 do begin
-              MemText.Lines.Add(uLocalReportData[i]);
-            end;
+            IsHTMLReport := (lvReports.SelCount = 1) and uHTMLTools.TextIsHTML(uLocalReportData.Text); //kt //codex 8/21/26
+            if IsHTMLReport then begin //kt //codex 8/21/26
+              SetDisplayToHTMLvsText(rdmHTML, uLocalReportData); //kt //codex 8/21/26
+            end else begin //kt //codex 8/21/26
+              //kt //codex original --> if lvReports.SelCount = 1 then begin
+              //kt //codex original -->   SetDisplayToHTMLvsText(rdmText, uLocalReportData);
+              //kt //codex original --> end else begin
+              //kt //codex original -->   for i := 0 to uLocalReportData.Count - 1 do begin
+              //kt //codex original -->     MemText.Lines.Add(uLocalReportData[i]);
+              //kt //codex original -->   end;
+              //kt //codex original --> end;
+              SetDisplayToHTMLvsText(rdmText, uLocalReportData, false, (lvReports.SelCount > 1)); //kt //codex 8/21/26
+            end; //kt //codex 8/21/26
           end;
         end; //QT_PROCEDURES
 
@@ -3136,21 +3307,38 @@ begin
         begin      //      = 28
           if lvReports.SelCount = 1 then
             memText.Lines.Clear;
-          if MemText.Lines.Count > 0 then
-            memText.Lines.Add('===============================================================================');
+          if lvReports.SelCount > 1 then begin
+            SetDisplayToHTMLvsText(rdmText, nil, true); //kt //codex 8/21/26
+          end; //kt //codex 8/21/26
+          //kt //codex original --> if MemText.Lines.Count > 0 then
+          //kt //codex original -->   memText.Lines.Add('===============================================================================');
           SetPiece(uRemoteType,'^',5,aID);
           if not(piece(uRemoteType, '^', 9) = '1') then begin
             LoadReportText(uLocalReportData, uRptID, aID + aMoreID, uReportRPC, '');
-            for i := 0 to uLocalReportData.Count - 1 do
-              MemText.Lines.Add(uLocalReportData[i]);
+            IsHTMLReport := (lvReports.SelCount = 1) and uHTMLTools.TextIsHTML(uLocalReportData.Text); //kt //codex 8/21/26
+            if IsHTMLReport then begin //kt //codex 8/21/26
+              SetDisplayToHTMLvsText(rdmHTML, uLocalReportData); //kt //codex 8/21/26
+            end else begin //kt //codex 8/21/26
+              //kt //codex original --> if lvReports.SelCount = 1 then begin
+              //kt //codex original -->   SetDisplayToHTMLvsText(rdmText, uLocalReportData);
+              //kt //codex original --> end else begin
+              //kt //codex original -->   for i := 0 to uLocalReportData.Count - 1 do
+              //kt //codex original -->     MemText.Lines.Add(uLocalReportData[i]);
+              //kt //codex original --> end;
+              SetDisplayToHTMLvsText(rdmText, uLocalReportData, false, (lvReports.SelCount > 1)); //kt //codex 8/21/26
+            end; //kt //codex 8/21/26
             NotifyOtherApps(NAE_REPORT, 'SUR^' + aID);
           end;
         end; //QT_SURGERY
 
     end;  //case
 
-    memText.Lines.Insert(0,' ');
-    memText.Lines.Delete(0);
+    if FReportDisplayMode = rdmText then begin //kt //codex 8/21/26
+      //kt //codex original --> memText.Lines.Insert(0,' ');
+      //kt //codex original --> memText.Lines.Delete(0);
+      memText.Lines.Insert(0,' '); //kt //codex 8/21/26
+      memText.Lines.Delete(0); //kt //codex 8/21/26
+    end; //kt //codex 8/21/26
   end;
   aBasket.Free;
 end;

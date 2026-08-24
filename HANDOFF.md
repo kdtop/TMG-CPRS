@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-08-18
+Last updated: 2026-08-22
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -52,6 +52,7 @@ When there is an active compile problem, use the fresh IDE compile log as the so
 - Many Delphi source files are ANSI encoded. `apply_patch` may fail on them with invalid UTF-8; use encoding-preserving PowerShell edits only when necessary.
 - The git tree was intentionally baselined locally on 2026-07-24. In this Linux-mounted workspace, plain `git ...` may fail with a dubious ownership error. Prefer `git -c safe.directory=/mnt/WinPublic/vista/TMGCPRS_v30A_Delphi12 ...` for status/log commands. Do not assume the tree is clean; the user may have several days of local changes that are not yet committed.
 - For future Delphi/Pascal source edits, append `//kt //codex <date>` at the end of every modified source line, e.g. `//kt //codex 7/30/26`.
+- If adding an entirely new Delphi/Pascal function or procedure, do not tag every line inside it. Instead, put `//kt //codex added entire function <date>` or `//kt //codex added entire procedure <date>` on the line immediately below the declaration.
 - For future Delphi/Pascal source edits, when removing a line, leave the old line in place as a comment using this pattern: `//kt //codex original --> <old code>`.
 
 ## Git Baseline
@@ -140,9 +141,84 @@ Recommended working assumption for the next session:
 
 Recommended next session start:
 
-1. Re-open the Reports tab / imaging work from a product-design angle rather than low-level debugging.
-2. Review the server-side RPC contract for `Imaging (local only)` and define how TIU-scanned radiology studies should be represented in the returned dataset.
-3. Reuse existing Notes-tab TIU HTML/web-display behavior where possible instead of inventing a second document-rendering path.
+1. Runtime-test the new `fReports` list-view HTML detection path with:
+   - one plain-text report
+   - one HTML-backed report
+   - one multi-select text append case
+2. If the single-select HTML/text switching works, continue the Reports tab / imaging work from a product-design angle rather than low-level debugging.
+3. Review the server-side RPC contract for `Imaging (local only)` and define how TIU-scanned radiology studies should be represented in the returned dataset.
+4. Reuse existing Notes-tab TIU HTML/web-display behavior where possible instead of inventing a second document-rendering path.
+
+### Reports HTML Display Status As Of 2026-08-22
+
+- Active source work this session was in `CPRS-Chart\fReports.pas`.
+- A new Reports-side display mode helper now exists:
+  - `TReportDisplayMode = (rdmText, rdmHTML)`
+  - `FReportDisplayMode`
+  - `SetDisplayToHTMLvsText(...)`
+- This helper explicitly reasserts text-vs-browser UI state each time, similar in spirit to `fNotes`, instead of relying on the prior control state.
+- `WebBrowser1DocumentComplete()` no longer gates only on `uReportType = 'H'`; it now respects `FReportDisplayMode = rdmHTML`.
+- `lvReportsSelectItem()` now checks single-report content with `uHTMLTools.TextIsHTML(uLocalReportData.Text)` in these list-view branches:
+  - imaging
+  - nutrition
+  - procedures
+  - surgery
+- Current behavior:
+  - single selected HTML report switches to `WebBrowser1`
+  - single selected plain-text report switches to `memText`
+  - multi-select plain-text append now goes through `SetDisplayToHTMLvsText(..., Append=True)` instead of manual `memText.Lines.Add(...)` loops
+- `SetDisplayToHTMLvsText(..., Append=True)` now inserts the legacy `===============================================================================` separator before appended text, centralizing that behavior.
+- The old per-branch separator lines and the old `Facility: ...` lines were removed from active code but preserved in place as `//kt //codex original --> ...` comments.
+- The old `Freeze Text` / `uFrozen` feature was reviewed:
+  - it is separate from the new HTML/text mode work
+  - it pins selected `memText` text into `Memo1`
+  - HTML mode currently hides `Memo1`; this is acceptable for now because the feature is low priority
+- Important limitation not yet implemented:
+  - multi-select HTML aggregation is not solved
+  - do not assume concatenating multiple full HTML documents will be reliable in `TWebBrowser`
+  - if needed later, combine body fragments into one wrapper document instead
+- No Delphi IDE compile or runtime verification was performed after these `fReports` changes in this session.
+
+### Reports Imaging TIU Merge Status As Of 2026-08-24
+
+- Active source work this session was in:
+  - `CPRS-Chart\fReports.pas`
+  - `CPRS-Chart\rReports.pas`
+- The local `Imaging (local only)` report is now working toward a mixed row model where returned items may represent either:
+  - traditional radiology studies (`RAD`)
+  - TIU-backed scanned radiology documents (`TIU`)
+- `CPRS-Chart\rReports.pas`
+  - `ListImagingExamsForDFN()` now calls `TMG TIU RAD EXAMS`
+  - piece 20 is being used as the row mode discriminator
+  - `RAD` rows are still reshaped into the legacy client-facing imaging row format
+  - the user has restored `RAD` into piece 20 after reshaping so downstream code can still test row mode
+- `CPRS-Chart\fReports.pas`
+  - imaging list population now has explicit `TIU` handling in the `QT_IMAGING` branch
+  - `TIU` rows are displayed in the existing imaging columns with:
+    - date/time in the Date/Time column
+    - TIU title in the Procedure Name column
+    - `Scanned Doc` in Report Status
+    - `TIU` in the Exam Status column as the current client-side branch signal
+    - IEN8925 duplicated into the hidden row ID slot and the visible Case# column
+  - `TIU` rows are no longer sent through `LoadProceduresTreeView()`; that remains RAD-only
+  - `lvReportsSelectItem()` in the imaging branch now checks `Item.SubItems[4] = 'TIU'`
+  - when the row is `TIU`, the client now:
+    - skips RAD procedure-tree synchronization
+    - loads the document via `rTIU.LoadDocumentText(...)` instead of `LoadReportText(...)`
+    - reuses the normal TIU HTML/text detection path, including `ScanForSubs(...)` preprocessing for embedded images/downloaded local references
+    - displays the document via the Reports-side `SetDisplayToHTMLvsText(...)`
+    - sends `NotifyOtherApps(NAE_REPORT, 'TIU^<IEN8925>')`
+  - invalid TIU row IDs now clear the current display/title before exiting so stale report text is not left on screen
+- Current open design/implementation limitations:
+  - the branch signal currently depends on `Item.SubItems[4] = 'TIU'`; it is not yet driven from a preserved raw row model object
+  - TIU multi-select aggregation is not designed yet
+  - only the single-select TIU display path was updated in this session
+  - RAD shared-report / procedures-tree flows should be rechecked after runtime testing to ensure the new TIU branch did not disturb them
+- Recommended next session start:
+  1. Delphi IDE compile and runtime-test one `RAD` imaging row and one `TIU` imaging row
+  2. confirm scanned-image HTML actually renders through the reused TIU `ScanForSubs(...)` path in Reports
+  3. decide whether `Item.SubItems[4] = 'TIU'` is sufficient long-term or whether imaging rows should retain a cleaner per-row raw mode payload
+  4. only after runtime validation, consider cleanup/refactor of duplicated TIU identifiers in the imaging row layout
 
 ### HTML / HTMLEdit Status As Of 2026-08-13
 

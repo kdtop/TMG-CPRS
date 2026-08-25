@@ -77,6 +77,31 @@ const
   CT_UNKNOWN  =  0;                             // chart tab - unknown (shouldn't happen)
   CT_COVER    =  1;                             // chart tab - cover sheet
   CT_PROBLEMS =  2;                             // chart tab - problem list
+  CT_MEDS     =  100;                             // chart tab - medications screen
+  CT_ORDERS   =  3;                             // chart tab - doctor's orders
+  CT_HP       =  4;                             // chart tab - history & physical
+  CT_NOTES    =  5;                             // chart tab - progress notes
+  CT_CONSULTS =  6;                             // chart tab - consults
+  CT_DCSUMM   =  101;                             // chart tab - discharge summaries
+  CT_LABS     =  7;                             // chart tab - laboratory results
+  CT_REPORTS  =  8;                             // chart tab - reports
+  CT_SURGERY  =  9;                             // chart tab - surgery
+  CT_IMAGES   = 10;                             // chart tab - images      //kt 9/11 added
+  CT_MAILBOX  = 11;                             // chart tab - mailbox     //elh 4/30/19 added
+  CT_DASHBOARD= 12;                             // chart tab - dashboard   //elh 4/19/24 added
+  CT_POPHEALTH= 13;                             // chart tab - pop health  //elh 8/6/24 added
+  CT_WEBTAB1  = 14;                             // chart tab - web browser //kt 9/11 added
+  CT_WEBTAB2  = 15;                             // chart tab - web browser //kt 9/11 added
+  CT_WEBTAB3  = 16;                             // chart tab - web browser //kt 9/11 added
+  //kt 9/11 NOTE --> Option: add more CT_WEBTAB#'s here.  But set CT_LAST_WEBTAB= to last one...
+  CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
+
+{  //kt 8/24/26  original below.  I am removing unused tabs.
+  // Tab Indexes, moved from fFrame
+  CT_NOPAGE   = -1;                             // chart tab - none selected
+  CT_UNKNOWN  =  0;                             // chart tab - unknown (shouldn't happen)
+  CT_COVER    =  1;                             // chart tab - cover sheet
+  CT_PROBLEMS =  2;                             // chart tab - problem list
   CT_MEDS     =  3;                             // chart tab - medications screen
   CT_ORDERS   =  4;                             // chart tab - doctor's orders
   CT_HP       =  5;                             // chart tab - history & physical
@@ -96,6 +121,7 @@ const
   CT_WEBTAB3  = 19;                             // chart tab - web browser //kt 9/11 added
   //kt 9/11 NOTE --> Option: add more CT_WEBTAB#'s here.  But set CT_LAST_WEBTAB= to last one...
   CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
+}
 
   { Changes object item types }
   CH_DOC = 10;                        // TIU documents (progress notes)
@@ -398,10 +424,16 @@ const
 
   { TIU TreeView context strings}
   //Original line -> 3/12/19 NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_OTHER_UNSIGNED] of string =
+  {//kt original 8/24/26
   NC_TV_TEXT: array[CT_NOTES..CT_DCSUMM] of array[NC_RECENT..NC_LAST] of string =
     (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records','Loose documents','Loose notes','Signed notes by creation date',''),
      ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', ''),
      ('Recent Signed Summaries','All signed summaries','All unsigned summaries','All uncosigned summaries','Signed summaries by author','Signed summaries by date range',' ',' ',' ',' ',' ',' ',' ', '')
+    );
+  }
+  NC_TV_TEXT: array[CT_NOTES..CT_CONSULTS] of array[NC_RECENT..NC_LAST] of string =
+    (('Recent Signed Notes','All signed notes','All unsigned notes','All uncosigned notes','Signed notes by author','Signed notes by date range',' ',' ','All other users'' unsigned notes','Scanned records','Loose documents','Loose notes','Signed notes by creation date',''),
+     ('','Related Documents','Medicine Results',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ', '')
     );
 
   CC_ALL        = 1;                             // Consult context - all Consults

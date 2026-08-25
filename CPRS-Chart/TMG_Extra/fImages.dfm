@@ -8,12 +8,12 @@ inherited frmImages: TfrmImages
   HelpFile = 'overvw'
   Menu = mnuNotes
   Position = poDesigned
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnShow = FormShow
-  ExplicitWidth = 990
-  ExplicitHeight = 657
-  PixelsPerInch = 96
+  ExplicitWidth = 998
+  ExplicitHeight = 662
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 598
@@ -88,7 +88,6 @@ inherited frmImages: TfrmImages
       Height = 440
       Align = alClient
       TabOrder = 0
-      ExplicitTop = -6
       ControlData = {
         4C000000203500007A2D00000000000000000000000000000000000000000000
         000000004C000000000000000000000001000000E0D057007335CF11AE690800
@@ -271,8 +270,6 @@ inherited frmImages: TfrmImages
       Anchors = [akTop, akRight]
       Caption = 'Go To Note'
       Enabled = False
-      TabOrder = 0
-      OnClick = btnOpenLinkedDocClick
       Glyph.Data = {
         42100000424D4210000000000000420000002800000020000000200000000100
         20000300000000100000130B0000130B000000000000000000000000FF0000FF
@@ -405,6 +402,8 @@ inherited frmImages: TfrmImages
         D8FFD8D8D8FFD8D8D8FFD8D8D8FFD8D8D8FFD8D8D8FFE9E9E9FFF0F0F0FFF0F0
         F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
         F0FFF0F0F0FF}
+      TabOrder = 0
+      OnClick = btnOpenLinkedDocClick
     end
     object btnSort: TBitBtn
       Left = 0
@@ -413,8 +412,6 @@ inherited frmImages: TfrmImages
       Height = 27
       Anchors = [akLeft]
       Caption = 'Currently In Descending Order'
-      TabOrder = 1
-      OnClick = btnSortClick
       Glyph.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
         20000000000000040000130B0000130B00000000000000000000C8B49CFFC8B4
@@ -450,6 +447,8 @@ inherited frmImages: TfrmImages
         27FF7A5727FF7A5727FF7A5727FF7A5727FF7A5727FFC8B49CFFC8B49CFFC8B4
         9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B4
         9CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFFC8B49CFF}
+      TabOrder = 1
+      OnClick = btnSortClick
     end
   end
   inherited amgrMain: TVA508AccessibilityManager

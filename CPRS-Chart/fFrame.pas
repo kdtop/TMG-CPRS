@@ -213,9 +213,6 @@ type
     mnuUploadImages: TMenuItem;
     mnuExportChart: TMenuItem;
     mnuClosePatient: TMenuItem;
-    btnEditNormalZoom: TSpeedButton;
-    btnEditZoomOut: TSpeedButton;
-    btnEditZoomIn: TSpeedButton;
     mnuTestGraph: TMenuItem;
     mnuResetTimerSetting: TMenuItem;
     menuNurseNote: TMenuItem;
@@ -948,18 +945,29 @@ begin
     Reason := 'COM_OBJECT_ACTIVE';
     Result:= False;
   end;
-  if Result then Result := frmCover.AllowContextChange(Reason);
-  if Result then Result := frmProblems.AllowContextChange(Reason);
-  if Result then Result := frmMeds.AllowContextChange(Reason);
-  if Result then Result := frmOrders.AllowContextChange(Reason);
-  if Result then Result := frmNotes.AllowContextChange(Reason);
-  if Result then Result := frmConsults.AllowContextChange(Reason);
-  if Result then Result := frmDCSumm.AllowContextChange(Reason);
-  if Result then Result := frmImages.AllowContextChange(Reason);  //kt 9/11 added
+  //kt //codex original --> if Result then Result := frmCover.AllowContextChange(Reason);
+  if Result then if Assigned(frmCover) then Result := frmCover.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmProblems.AllowContextChange(Reason);
+  if Result then if Assigned(frmProblems) then Result := frmProblems.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmMeds.AllowContextChange(Reason);
+  if Result then if Assigned(frmMeds) then Result := frmMeds.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmOrders.AllowContextChange(Reason);
+  if Result then if Assigned(frmOrders) then Result := frmOrders.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmNotes.AllowContextChange(Reason);
+  if Result then if Assigned(frmNotes) then Result := frmNotes.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmConsults.AllowContextChange(Reason);
+  if Result then if Assigned(frmConsults) then Result := frmConsults.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmDCSumm.AllowContextChange(Reason);
+  if Result then if Assigned(frmDCSumm) then Result := frmDCSumm.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmImages.AllowContextChange(Reason);  //kt 9/11 added
+  if Result then if Assigned(frmImages) then Result := frmImages.AllowContextChange(Reason);  //kt 9/11 added //kt //codex 8/25/26
   if Result then if Assigned(frmSurgery) then Result := frmSurgery.AllowContextChange(Reason);;
-  if Result then Result := frmLabs.AllowContextChange(Reason);;
-  if Result then Result := frmReports.AllowContextChange(Reason);
-  if Result then Result := frmGraphData.AllowContextChange(Reason);
+  //kt //codex original --> if Result then Result := frmLabs.AllowContextChange(Reason);;
+  if Result then if Assigned(frmLabs) then Result := frmLabs.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmReports.AllowContextChange(Reason);
+  if Result then if Assigned(frmReports) then Result := frmReports.AllowContextChange(Reason);  //kt //codex 8/25/26
+  //kt //codex original --> if Result then Result := frmGraphData.AllowContextChange(Reason);
+  if Result then if Assigned(frmGraphData) then Result := frmGraphData.AllowContextChange(Reason);  //kt //codex 8/25/26
   if (not User.IsReportsOnly) then begin
     if Result and Changes.RequireReview then begin //Result := ReviewChanges(TimedOut);
       case BOOLCHAR[FCCOWContextChanging] of
@@ -1013,11 +1021,13 @@ begin
   pnlPrimaryCare.Hint := lblPtCare.Caption;
   frmCover.ClearPtData;
   frmProblems.ClearPtData;
-  frmMeds.ClearPtData;
+  //kt //codex original --> frmMeds.ClearPtData;
+  if Assigned(frmMeds) then frmMeds.ClearPtData;  //kt //codex 8/25/26
   frmOrders.ClearPtData;
   frmNotes.ClearPtData;
   frmConsults.ClearPtData;
-  frmDCSumm.ClearPtData;
+  //kt //codex original --> frmDCSumm.ClearPtData;
+  if Assigned(frmDCSumm) then frmDCSumm.ClearPtData;  //kt //codex 8/25/26
   if Assigned(frmSurgery) then frmSurgery.ClearPtData;
   frmLabs.ClearPtData;
   frmGraphData.ClearPtData;
@@ -1135,6 +1145,18 @@ var
   ClientVer, ServerVer, ServerReq, SAN: string;
   ASide : TTabPageSide;           //kt-tabs 11/26/22
 begin
+  frmCover := nil;  //kt //codex 8/25/26
+  frmProblems := nil;  //kt //codex 8/25/26
+  frmMeds := nil;  //kt //codex 8/25/26
+  frmOrders := nil;  //kt //codex 8/25/26
+  frmNotes := nil;  //kt //codex 8/25/26
+  frmConsults := nil;  //kt //codex 8/25/26
+  frmDCSumm := nil;  //kt //codex 8/25/26
+  frmSurgery := nil;  //kt //codex 8/25/26
+  frmLabs := nil;  //kt //codex 8/25/26
+  frmReports := nil;  //kt //codex 8/25/26
+  frmImages := nil;  //kt //codex 8/25/26
+  frmGraphData := nil;  //kt //codex 8/25/26
   FJustEnteredApp := false;
   SizeHolder := TSizeHolder.Create;
   FOldActiveFormChange := Screen.OnActiveFormChange;
@@ -1341,21 +1363,27 @@ begin
   CreateTab(tpsLeft, CT_DASHBOARD,'Dashboard');  //tmg 4/19/24
   CreateTab(tpsLeft, CT_COVER,    'Cover Sheet');
   CreateTab(tpsLeft, CT_PROBLEMS, 'Problems');
+  { //kt removing 8/24/26 since we don't use
   CreateTab(tpsLeft, CT_MEDS,     'Meds');
+  }
   CreateTab(tpsLeft, CT_ORDERS,   'Orders');
   CreateTab(tpsLeft, CT_NOTES,    'Notes');
   CreateTab(tpsLeft, CT_CONSULTS, 'Consults');
   CreateTab(tpsLeft, CT_SURGERY,  'Surgery');
+  { //kt removing 8/24/26 since we don't use
   CreateTab(tpsLeft, CT_DCSUMM,   'D/C Summ');
+  }
   CreateTab(tpsLeft, CT_LABS,     'Labs');
   CreateTab(tpsLeft, CT_REPORTS,  'Reports');
-  CreateTab(tpsLeft, CT_IMAGES,   'Images', ImagesEnabled);  //kt 9/11
+  CreateTab(tpsLeft, CT_IMAGES,   'Pics', ImagesEnabled);  //kt 9/11  //kt changed 'Images' -> 'Pics' 8/24/26
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
   CreateTab(tpsLeft, CT_POPHEALTH,'Pop. Health');  //kt 9/11
 
+  { //kt removing 8/24/26 since we don't use
   for APageID := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                   //kt 9/11
     CreateTab(tpsLeft, APageID, 'WebTab ' + IntToStr(integer(APageID)-CT_WEBTAB1+1), false);  //Hide until activated by RPC     //kt 9/11
   end;
+  }
   LoadTabColors(TabColorsList);                                          //kt 9/11
   for ASide := tpsLeft to tpsRight do FTabPages[ASide].OwnerDraw := TabColorsEnabled;  //kt 9/11  //kt-tabs
 
@@ -1558,6 +1586,7 @@ var
   i      : integer;
   result : string;
 begin
+  exit;  //kt 8/24/26  I am removing this since we don't use is.
   URLList := TStringList.Create;
   result := fWebTab.AskServerForURLs(URLList);
   try
@@ -1925,11 +1954,13 @@ begin
     mnuFrame.Merge(nil);
     frmCover.Close;      //frmCover.Release;
     frmProblems.Close;   //frmProblems.Release;
-    frmMeds.Close;       //frmMeds.Release;
+    //kt //codex original --> frmMeds.Close;       //frmMeds.Release;
+    if Assigned(frmMeds) then frmMeds.Close;       //frmMeds.Release;  //kt //codex 8/25/26
     frmOrders.Close;     //frmOrders.Release;
     frmNotes.Close;      //frmNotes.Release;
     frmConsults.Close;   //frmConsults.Release;
-    frmDCSumm.Close;     //frmDCSumm.Release;
+    //kt //codex original --> frmDCSumm.Close;     //frmDCSumm.Release;
+    if Assigned(frmDCSumm) then frmDCSumm.Close;     //frmDCSumm.Release;  //kt //codex 8/25/26
     if Assigned(frmSurgery) then frmSurgery.Close;    //frmSurgery.Release;
     frmLabs.Close;       //frmLabs.Release;
     frmReports.Close;    //frmReports.Release;
@@ -1972,11 +2003,13 @@ begin
     if assigned(frmEncounterFrame) then frmEncounterFrame.NotifyOrder(WParam, TOrder(LParam));  //kt added
     frmCover.NotifyOrder(WParam, TOrder(LParam));
     frmProblems.NotifyOrder(WParam, TOrder(LParam));
-    frmMeds.NotifyOrder(WParam, TOrder(LParam));
+    //kt //codex original --> frmMeds.NotifyOrder(WParam, TOrder(LParam));
+    if Assigned(frmMeds) then frmMeds.NotifyOrder(WParam, TOrder(LParam));  //kt //codex 8/25/26
     frmOrders.NotifyOrder(WParam, TOrder(LParam));
     frmNotes.NotifyOrder(WParam, TOrder(LParam));
     frmConsults.NotifyOrder(WParam, TOrder(LParam));
-    frmDCSumm.NotifyOrder(WParam, TOrder(LParam));
+    //kt //codex original --> frmDCSumm.NotifyOrder(WParam, TOrder(LParam));
+    if Assigned(frmDCSumm) then frmDCSumm.NotifyOrder(WParam, TOrder(LParam));  //kt //codex 8/25/26
     if Assigned(frmSurgery) then frmSurgery.NotifyOrder(WParam, TOrder(LParam));
     frmLabs.NotifyOrder(WParam, TOrder(LParam));
     frmReports.NotifyOrder(WParam, TOrder(LParam));
@@ -2075,8 +2108,12 @@ begin
     else frmConsults.Align := alNone;
   if NewForm.Name = frmReports.Name then frmReports.Align := alClient
     else frmReports.Align := alNone;
-  if NewForm.Name = frmDCSumm.Name then frmDCSumm.Align := alClient
-    else frmDCSumm.Align := alNone;
+  //kt //codex original --> if NewForm.Name = frmDCSumm.Name then frmDCSumm.Align := alClient
+  //kt //codex original -->   else frmDCSumm.Align := alNone;
+  if Assigned(frmDCSumm) then begin  //kt //codex 8/25/26
+    if NewForm.Name = frmDCSumm.Name then frmDCSumm.Align := alClient  //kt //codex 8/25/26
+      else frmDCSumm.Align := alNone;  //kt //codex 8/25/26
+  end;  //kt //codex 8/25/26
   if Assigned(frmSurgery) then
     if NewForm.Name = frmSurgery.Name then frmSurgery.Align := alclient
       else frmSurgery.Align := alNone;
@@ -2162,9 +2199,12 @@ procedure TfrmFrame.SelectChartTab(ASide : TTabPageSide; PageID : TPageID);
 //kt NOTE PageID example:  CT_NOTES    =  6;  defined in uConst
 var
   ATabPage : TTabControl;
+  ATabIndex: Integer;  //kt //codex 8/25/26
 begin
   ATabPage := FTabPages[ASide];
-  ATabPage.TabIndex := PageIDToTabIndex(ASide, PageID);
+  ATabIndex := PageIDToTabIndex(ASide, PageID);  //kt //codex 8/25/26
+  if ATabIndex < 0 then Exit;  //kt //codex 8/25/26
+  ATabPage.TabIndex := ATabIndex;  //kt //codex 8/25/26
   LastTabPageID[ASide] := PageID; //kt TabIndexToPageID(ATabPage.TabIndex);
   tabPagesChange(ASide);
 end;
@@ -2300,7 +2340,14 @@ begin
   }
   if PageID = CT_PROBLEMS then ProbTabClicked := true; //needed in fProbs
   if User.IsReportsOnly then PageID := CT_REPORTS;  // Reports Only tab.
-  OtherPageID := TabIndexToPageID(Otherside, OtherTabPage.TabIndex);
+  //kt //codex 8/25/26
+  // When the right-side panel is collapsed, its remembered tab selection should
+  // not force the left side away from the requested page.
+  if (OtherSide = tpsRight) and (FTabPageOpenMode = tpoClosed) then begin
+    OtherPageID := CT_NOPAGE;
+  end else begin
+    OtherPageID := TabIndexToPageID(Otherside, OtherTabPage.TabIndex);
+  end;
   if (PageID = OtherPageID) and (PageID <> CT_NOPAGE) then begin   //kt-tabs
     if User.IsReportsOnly then begin
       OtherPageID := CT_NOPAGE;
@@ -2325,11 +2372,11 @@ begin
     CT_NOPAGE:    SwitchToPage(Aside,nil);
     CT_COVER:     SwitchToPage(Aside,frmCover);
     CT_PROBLEMS:  SwitchToPage(Aside,frmProblems);
-    CT_MEDS:      SwitchToPage(Aside,frmMeds);
+    //kt 8/24/26 CT_MEDS:      SwitchToPage(Aside,frmMeds);
     CT_ORDERS:    SwitchToPage(Aside,frmOrders);
     CT_NOTES:     SwitchToPage(Aside,frmNotes);
     CT_CONSULTS:  SwitchToPage(Aside,frmConsults);
-    CT_DCSUMM:    SwitchToPage(Aside,frmDCSumm);
+    //kt 8/24/26 CT_DCSUMM:    SwitchToPage(Aside,frmDCSumm);
     CT_SURGERY:   SwitchToPage(Aside,frmSurgery);
     CT_LABS:      SwitchToPage(Aside,frmLabs);
     CT_REPORTS:   SwitchToPage(Aside,frmReports);
@@ -2337,7 +2384,7 @@ begin
     CT_MAILBOX:   SwitchToPage(Aside,frmMailbox);    //tmg
     CT_DASHBOARD: SwitchToPage(Aside,frmDashboard);  //tmg  4/19/24
     CT_POPHEALTH: SwitchToPage(Aside,frmPopHealth);
-    CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
+    //kt 8/24/26 CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
   end; {case}
   if ScreenReaderSystemActive and FCtrlTabUsed then
     SpeakPatient;
@@ -2346,45 +2393,8 @@ end;
 
 procedure TfrmFrame.tabPageChange(Sender: TObject);
 { switches to form linked to NewTab }
-//var
-//  PageID   : integer;
 begin
   tabPagesChange(TabSide(TTabControl(sender))); //kt
-  {
-  //kt ----------
-  PageID := TabIndexToPageID(ATabPage.TabIndex);
-  if (PageID <> CT_NOPAGE) and (TabPage.CanFocus) and Assigned(FLastPage) and (not TabPage.Focused) then begin
-    try       //eRx  9/4/12   SetFocus caused as error if eRx alert was selected before the first patient
-      TabPage.SetFocus;  //CQ: 14854
-    except
-      //Do Nothing
-    end;
-  end;
-  if (not User.IsReportsOnly) then begin
-    case PageID of
-      CT_NOPAGE:   SwitchToPage(nil);
-      CT_COVER:    SwitchToPage(frmCover);
-      CT_PROBLEMS: SwitchToPage(frmProblems);
-      CT_MEDS:     SwitchToPage(frmMeds);
-      CT_ORDERS:   SwitchToPage(frmOrders);
-      CT_NOTES:    SwitchToPage(frmNotes);
-      CT_CONSULTS: SwitchToPage(frmConsults);
-      CT_DCSUMM:   SwitchToPage(frmDCSumm);
-      CT_SURGERY:  SwitchToPage(frmSurgery);
-      CT_LABS:     SwitchToPage(frmLabs);
-      CT_REPORTS:  SwitchToPage(frmReports);
-      CT_IMAGES:   SwitchToPage(frmImages);     //kt 9/11
-      CT_MAILBOX:  SwitchToPage(frmMailbox);
-      CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
-    end; //case
-  end else begin // Reports Only tab.
-    SwitchToPage(frmReports);
-  end;
-  if ScreenReaderSystemActive and FCtrlTabUsed then begin
-    SpeakPatient;
-  end;
-  ChangingTab := PageID;
-  }
 end;
 
 procedure TfrmFrame.PatientImageClick(Sender: TObject);
@@ -2510,7 +2520,8 @@ begin
     //WV age includes months for minors  ->    lblPtAge.Caption := FormatFMDateTime('mmm dd,yyyy', DOB) + ' (' + GetPatientBriefAge(Patient.DFN) + ')';
     lblPtAge.Caption := FormatFMDateTime('mmm dd,yyyy', DOB) + ' (' + IntToStr(Age) + ')';
     //WV End Change to patient age
-    pnlPatient.Caption := lblPtName.Caption + ' ' + lblPtSSN.Caption + ' ' + lblPtAge.Caption;
+    //kt //codex original --> pnlPatient.Caption := lblPtName.Caption + ' ' + lblPtSSN.Caption + ' ' + lblPtAge.Caption;
+    pnlPatient.Caption := '';  //kt //codex 8/24/26
     if Length(CWAD) > 0
       then lblPtPostings.Caption := 'Postings'
       else lblPtPostings.Caption := 'No Postings';
@@ -3422,13 +3433,16 @@ begin
   SetUserWidths(TControl(frmOrders.pnlLeft));
   SetUserWidths(TControl(frmNotes.pnlLeft));
   SetUserWidths(TControl(frmConsults.pnlLeft));
-  SetUserWidths(TControl(frmDCSumm.pnlLeft));
+  //kt //codex original --> SetUserWidths(TControl(frmDCSumm.pnlLeft));
+  if Assigned(frmDCSumm) then SetUserWidths(TControl(frmDCSumm.pnlLeft));  //kt //codex 8/25/26
   if Assigned(frmSurgery) then SetUserWidths(TControl(frmSurgery.pnlLeft));
   SetUserWidths(TControl(frmLabs.pnlLeft));
   SetUserWidths(TControl(frmReports.pnlLeft));
   SetUserColumns(TControl(frmOrders.hdrOrders));
-  SetUserColumns(TControl(frmMeds.hdrMedsIn));  // still need conversion
-  SetUserColumns(TControl(frmMeds.hdrMedsOut));
+  //kt //codex original --> SetUserColumns(TControl(frmMeds.hdrMedsIn));  // still need conversion
+  if Assigned(frmMeds) then SetUserColumns(TControl(frmMeds.hdrMedsIn));  // still need conversion //kt //codex 8/25/26
+  //kt //codex original --> SetUserColumns(TControl(frmMeds.hdrMedsOut));
+  if Assigned(frmMeds) then SetUserColumns(TControl(frmMeds.hdrMedsOut));  //kt //codex 8/25/26
   SetUserString('frmPtSel.lstvAlerts',EnduringPtSelColumns);
   SetUserString(SpellCheckerSettingName, SpellCheckerSettings);
   SetUserBounds2(TemplateEditorSplitters, tmplEditorSplitterMiddle,
@@ -3442,17 +3456,19 @@ begin
   if Assigned(frmSurgery) then frmSurgery.Drawers.LastOpenSize := Dummy; //CQ7315
   frmNotes.Drawers.LastOpenSize := s1;
   frmConsults.Drawers.LastOpenSize := s2;
-  frmDCSumm.Drawers.LastOpenSize := s3;
+  //kt //codex original --> frmDCSumm.Drawers.LastOpenSize := s3;
+  if Assigned(frmDCSumm) then frmDCSumm.Drawers.LastOpenSize := s3;  //kt //codex 8/25/26
 
-  with frmMeds do begin
-    SetUserBounds2(frmMeds.Name+'Split', panelBottom, panelMedIn, Dummy, Dummy);
-    if (panelBottom > frmMeds.Height-50) then panelBottom := frmMeds.Height-50;
-    if (panelMedIn > panelBottom-50) then panelMedIn := panelBottom-50;
-    frmMeds.pnlBottom.Height := panelBottom;
-    frmMeds.pnlMedIn.Height := panelMedIn;
+  //kt //codex original --> with frmMeds do begin
+  if Assigned(frmMeds) then begin  //kt //codex 8/25/26
+    SetUserBounds2(frmMeds.Name+'Split', panelBottom, panelMedIn, Dummy, Dummy);  //kt //codex 8/25/26
+    if (panelBottom > frmMeds.Height-50) then panelBottom := frmMeds.Height-50;  //kt //codex 8/25/26
+    if (panelMedIn > panelBottom-50) then panelMedIn := panelBottom-50;  //kt //codex 8/25/26
+    frmMeds.pnlBottom.Height := panelBottom;  //kt //codex 8/25/26
+    frmMeds.pnlMedIn.Height := panelMedIn;  //kt //codex 8/25/26
     //Meds Tab Non-VA meds columns
-    SetUserColumns(TControl(hdrMedsNonVA)); //CQ7314
-  end;
+    SetUserColumns(TControl(frmMeds.hdrMedsNonVA)); //CQ7314  //kt //codex 8/25/26
+  end;  //kt //codex 8/25/26
 
   frmCover.DisableAlign;
   try
@@ -3489,13 +3505,16 @@ begin
       Add(StrUserWidth(frmOrders.pnlLeft));
       Add(StrUserWidth(frmNotes.pnlLeft));
       Add(StrUserWidth(frmConsults.pnlLeft));
-      Add(StrUserWidth(frmDCSumm.pnlLeft));
+      //kt //codex original --> Add(StrUserWidth(frmDCSumm.pnlLeft));
+      if Assigned(frmDCSumm) then Add(StrUserWidth(frmDCSumm.pnlLeft));  //kt //codex 8/25/26
       if Assigned(frmSurgery) then Add(StrUserWidth(frmSurgery.pnlLeft));
       Add(StrUserWidth(frmLabs.pnlLeft));
       Add(StrUserWidth(frmReports.pnlLeft));
       Add(StrUserColumns(frmOrders.hdrOrders));
-      Add(StrUserColumns(frmMeds.hdrMedsIn));
-      Add(StrUserColumns(frmMeds.hdrMedsOut));
+      //kt //codex original --> Add(StrUserColumns(frmMeds.hdrMedsIn));
+      if Assigned(frmMeds) then Add(StrUserColumns(frmMeds.hdrMedsIn));  //kt //codex 8/25/26
+      //kt //codex original --> Add(StrUserColumns(frmMeds.hdrMedsOut));
+      if Assigned(frmMeds) then Add(StrUserColumns(frmMeds.hdrMedsOut));  //kt //codex 8/25/26
       Add(StrUserString(SpellCheckerSettingName, SpellCheckerSettings));
       Add(StrUserBounds2(TemplateEditorSplitters, tmplEditorSplitterMiddle,
           tmplEditorSplitterProperties, tmplEditorSplitterMain, tmplEditorSplitterBoil));
@@ -3506,9 +3525,16 @@ begin
 
       //v26.47 - RV - access violation if Surgery Tab not enabled.  Set to designer height as default.
       if Assigned(frmSurgery) then SurgTempHt := frmSurgery.Drawers.pnlTemplates.Height else SurgTempHt := 85;
+
+      {//kt 8/24/26 original, removing DCSummaries
       Add(StrUserBounds2(DrawerSplitters, frmNotes.Drawers.LastOpenSize,
                          frmConsults.Drawers.LastOpenSize,
-                         frmDCSumm.Drawers.LastOpenSize,
+                         IfThen(Assigned(frmDCSumm), frmDCSumm.Drawers.LastOpenSize, 0),  //kt //codex 8/25/26
+                         SurgTempHt)); // last parameter = CQ7315
+      }
+      Add(StrUserBounds2(DrawerSplitters, frmNotes.Drawers.LastOpenSize,
+                         frmConsults.Drawers.LastOpenSize,
+                         0,  //kt //codex 8/25/26
                          SurgTempHt)); // last parameter = CQ7315
 
       Add(StrUserBounds2(CoverSplitters1,
@@ -3523,10 +3549,12 @@ begin
           0));
 
       //Meds Tab Splitters
-      Add(StrUserBounds2(frmMeds.Name+'Split',frmMeds.pnlBottom.Height,frmMeds.pnlMedIn.Height,0,0));
+      //kt //codex original --> Add(StrUserBounds2(frmMeds.Name+'Split',frmMeds.pnlBottom.Height,frmMeds.pnlMedIn.Height,0,0));
+      if Assigned(frmMeds) then Add(StrUserBounds2(frmMeds.Name+'Split',frmMeds.pnlBottom.Height,frmMeds.pnlMedIn.Height,0,0));  //kt //codex 8/25/26
 
       //Meds Tab Non-VA meds columns
-      Add(StrUserColumns(fMeds.frmMeds.hdrMedsNonVA)); //CQ7314
+      //kt //codex original --> Add(StrUserColumns(fMeds.frmMeds.hdrMedsNonVA)); //CQ7314
+      if Assigned(frmMeds) then Add(StrUserColumns(fMeds.frmMeds.hdrMedsNonVA)); //CQ7314  //kt //codex 8/25/26
 
       //Orders Tab columns
       Add(StrUserColumns(fOrders.frmOrders.hdrOrders)); //CQ6328
@@ -3568,22 +3596,27 @@ begin
 
   DoMove(frmCover);
   DoMove(frmProblems);
-  DoMove(frmMeds);
+  //kt //codex original --> DoMove(frmMeds);
+  if Assigned(frmMeds) then DoMove(frmMeds);  //kt //codex 8/25/26
   DoMove(frmOrders);
   DoMove(frmNotes);
   DoMove(frmConsults);
-  DoMove(frmDCSumm);
+  //kt //codex original --> DoMove(frmDCSumm);
+  if Assigned(frmDCSumm) then DoMove(frmDCSumm);  //kt //codex 8/25/26
   DoMove(frmSurgery);
   DoMove(frmLabs);
   DoMove(frmReports);
   DoMove(frmMailbox);
 
+  {//kt 8/24/26 removing, we don't use.
   //kt 9/11 -- start addition --
   for i := CT_WEBTAB1 to CT_LAST_WEBTAB do begin
     index := i-CT_WEBTAB1;
+    if index>=WebTabsList.Count then break;  //kt 8/24/26
     tempFrmWebTab := TfrmWebTab(WebTabsList[index]);
     DoMove(tempFrmWebTab);
   end;
+  }
   PositionSplitterHandle;
   //kt 9/11 -- end addition --
   with stsArea do begin
@@ -3801,11 +3834,13 @@ begin
   //Now that the form elements are resized, the pages will know what size to take.
   frmCover.SetFontSize(NewFontSize);                // child pages lack a ParentFont property
   frmProblems.SetFontSize(NewFontSize);
-  frmMeds.SetFontSize(NewFontSize);
+  //kt //codex original --> frmMeds.SetFontSize(NewFontSize);
+  if Assigned(frmMeds) then frmMeds.SetFontSize(NewFontSize);  //kt //codex 8/25/26
   frmOrders.SetFontSize(NewFontSize);
   frmNotes.SetFontSize(NewFontSize);
   frmConsults.SetFontSize(NewFontSize);
-  frmDCSumm.SetFontSize(NewFontSize);
+  //kt //codex original --> frmDCSumm.SetFontSize(NewFontSize);
+  if Assigned(frmDCSumm) then frmDCSumm.SetFontSize(NewFontSize);  //kt //codex 8/25/26
   if Assigned(frmSurgery) then frmSurgery.SetFontSize(NewFontSize);
   frmLabs.SetFontSize(NewFontSize);
   frmReports.SetFontSize(NewFontSize);
@@ -4035,16 +4070,18 @@ begin
   case mnuFilePrint.Tag of       //note: this is set in the DisplayPage function of the various tab pages forms.
   CT_NOTES:    frmNotes.RequestPrint;
   CT_CONSULTS: frmConsults.RequestPrint;
-  CT_DCSUMM:   frmDCSumm.RequestPrint;
+  //kt 8/24/26 CT_DCSUMM:   frmDCSumm.RequestPrint;
   CT_REPORTS:  frmReports.RequestPrint;
   CT_LABS:     frmLabs.RequestPrint;
   CT_ORDERS:   frmOrders.RequestPrint;
   CT_PROBLEMS: frmProblems.RequestPrint;
   CT_SURGERY:  if Assigned(frmSurgery) then frmSurgery.RequestPrint;
+  {//kt 8/24/26
   CT_WEBTAB1..CT_LAST_WEBTAB:  begin                                                     //kt 9/11
                  tempFrmWebTab := TfrmWebTab(WebTabsList[mnuFilePrint.Tag-CT_WEBTAB1]);   //kt 9/11
                  if tempFrmWebTab <> nil then tempFrmWebTab.RequestPrint;                //kt 9/11
                end;
+  }
   end;
 end;
 
@@ -4065,7 +4102,8 @@ begin
     CT_DCSUMM: begin
       if Assigned(Screen.ActiveControl.Parent) and (Screen.ActiveControl.Parent.Name = 'cboAttending') then begin
         with Message do begin
-          SendMessage(frmDCSumm.Handle, Msg, WParam, lParam);
+          //kt //codex original --> SendMessage(frmDCSumm.Handle, Msg, WParam, lParam);
+          if Assigned(frmDCSumm) then SendMessage(frmDCSumm.Handle, Msg, WParam, lParam);  //kt //codex 8/25/26
           Result := 0;
         end;
       end else inherited;
@@ -4085,14 +4123,16 @@ begin
     // form becomes maximized;
     frmOrders.mnuOptimizeFieldsClick(self);
     frmProblems.mnuOptimizeFieldsClick(self);
-    frmMeds.mnuOptimizeFieldsClick(self);
+    //kt //codex original --> frmMeds.mnuOptimizeFieldsClick(self);
+    if Assigned(frmMeds) then frmMeds.mnuOptimizeFieldsClick(self);  //kt //codex 8/25/26
   end else if Message.WParam = SC_MINIMIZE then begin
     // form becomes maximized;
   end else if Message.WParam = SC_RESTORE then begin
     // form is restored (from maximized);
     frmOrders.mnuOptimizeFieldsClick(self);
     frmProblems.mnuOptimizeFieldsClick(self);
-    frmMeds.mnuOptimizeFieldsClick(self);
+    //kt //codex original --> frmMeds.mnuOptimizeFieldsClick(self);
+    if Assigned(frmMeds) then frmMeds.mnuOptimizeFieldsClick(self);  //kt //codex 8/25/26
   end;
 end;
 
@@ -4662,7 +4702,7 @@ end;
 
 
 procedure TfrmFrame.CreateTab(ASide: TTabPageSide; APageID: integer; ALabel: string; visible : boolean = true);  //kt-tabs
-//note: This is overloade version of code below. Later combine to avoid duplicate code
+//note: This is overloaded version of code below. Later combine to avoid duplicate code
 var TempFrmWebTab : TfrmWebTab;  //kt 9/11 added
     HolderPanel : TPanel;        //kt-tabs
     ATabPage : TTabControl;      //kt-tabs
@@ -4677,12 +4717,14 @@ begin
                     frmProblems.Parent := HolderPanel;
                     FfrmPagesList.AddObject(frmProblems.Name, frmProblems);  //kt-tabs
                   end;
+    {//kt 8/24/26
     CT_MEDS     : begin
                     frmMeds := TfrmMeds.Create(Self);
                     frmMeds.Parent := HolderPanel;
                     frmMeds.InitfMedsSize;
                     FfrmPagesList.AddObject(frmMeds.Name, frmMeds);     //kt-tabs
                   end;
+    }
     CT_ORDERS   : begin
                     frmOrders := TfrmOrders.Create(Self);
                     frmOrders.Parent := HolderPanel;
@@ -4707,11 +4749,13 @@ begin
                     frmConsults.Parent := HolderPanel;
                     FfrmPagesList.AddObject(frmConsults.Name, frmConsults);   //kt-tabs
                   end;
+    {//kt 8/24/26
     CT_DCSUMM   : begin
                     frmDCSumm := TfrmDCSumm.Create(Self);
                     frmDCSumm.Parent := HolderPanel;
                     FfrmPagesList.AddObject(frmDCSumm.Name, frmDCSumm);  //kt-tabs
                   end;
+    }
     CT_LABS     : begin
                     frmLabs := TfrmLabs.Create(Self);
                     frmLabs.Parent := HolderPanel;
@@ -4752,6 +4796,7 @@ begin
                     frmPopHealth.Parent := HolderPanel;                 //kt 9/11
                     FfrmPagesList.AddObject(frmPopHealth.Name, frmPopHealth);   //kt-tabs
                   end;                                                                 //kt 9/11
+    {//kt 8/24/26
     CT_WEBTAB1..CT_LAST_WEBTAB : begin                                //kt 9/11
                     TempFrmWebTab := TfrmWebTab.Create(Self);         //kt 9/11
                     TempFrmWebTab.Parent := HolderPanel;              //kt 9/11
@@ -4761,6 +4806,7 @@ begin
                     FfrmPagesList.AddObject(TempFrmWebTab.Name, TempFrmWebTab);    //kt-tabs
                     WebTabsList[APageID-CT_WEBTAB1] := TempFrmWebTab;  //kt 9/11
                   end;                                                //kt 9/11
+    }
     else {case}
       Exit;
   end; {case}
@@ -4770,13 +4816,14 @@ begin
     if (APageSide = tpsRight )and not (APageID in [CT_DASHBOARD,
                                                    CT_COVER,
                                                    CT_PROBLEMS,
-                                                   CT_MEDS,
+                                                   //CT_MEDS,
                                                    CT_ORDERS,
                                                    CT_LABS,
-                                                   CT_REPORTS,
-                                                   CT_WEBTAB1,
-                                                   CT_WEBTAB2,
-                                                   CT_WEBTAB3])  then continue;
+                                                   CT_REPORTS
+                                                   //CT_WEBTAB1,
+                                                   //CT_WEBTAB2,
+                                                   //CT_WEBTAB3]
+                                                   ])  then continue;
     ATabPage := FTabPages[APageSide];
     FTabList[APageSide].AddObject(IntToStr(APageID), pointer(ATabPage.Tabs.Count)); //   .Add(IntToStr(ATabID));
     ATabPage.Tabs.Add(ALabel);
@@ -4875,11 +4922,13 @@ begin
   // Forms for other tabs:
   frmCover.visible := false;
   frmProblems.visible := false;
-  frmMeds.visible := false;
+  //kt //codex original --> frmMeds.visible := false;
+  if Assigned(frmMeds) then frmMeds.visible := false;  //kt //codex 8/25/26
   frmOrders.visible := false;
   frmNotes.visible := false;
   frmConsults.visible := false;
-  frmDCSumm.visible := false;
+  //kt //codex original --> frmDCSumm.visible := false;
+  if Assigned(frmDCSumm) then frmDCSumm.visible := false;  //kt //codex 8/25/26
   if Assigned(frmSurgery) then
     frmSurgery.visible := false;
   frmLabs.visible := false;

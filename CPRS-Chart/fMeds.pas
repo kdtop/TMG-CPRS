@@ -577,8 +577,6 @@ begin
   FParentComplexOrderID := '';
   ChildODList := TStringList.Create;
 
-
-
   //DETECT 1st TIME USER.
   //If first time user (medSplitFound=false), then manually set panel heights.
   //if NOT first time user (medSplitFound=true), then set Meds tab windows to saved settings.

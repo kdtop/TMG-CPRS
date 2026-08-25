@@ -45,7 +45,8 @@ uses
   OleCtrls, SHDocVw, ShellAPI,Variants,
   VAUtils,  TMGHTML2, ActiveX,
   fImageTransferProgress, fUploadImages, rFileTransferU, uImages,
-  ORNet, TRPCB, fHSplit, Buttons, ExtDlgs, VA508AccessibilityManager;
+  ORNet, TRPCB, fHSplit, Buttons, ExtDlgs, VA508AccessibilityManager,
+  System.ImageList;
 
 
 type

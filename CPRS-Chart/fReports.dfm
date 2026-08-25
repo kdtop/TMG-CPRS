@@ -387,7 +387,6 @@ inherited frmReports: TfrmReports
         TabOrder = 1
         OnBeforeNavigate2 = WebBrowser1BeforeNavigate2
         OnDocumentComplete = WebBrowser1DocumentComplete
-        ExplicitHeight = 377
         ControlData = {
           4C0000002F3D0000491B00000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800

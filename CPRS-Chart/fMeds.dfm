@@ -9,13 +9,13 @@ inherited frmMeds: TfrmMeds
   HelpFile = 'qnoback'
   Menu = mnuMeds
   Visible = True
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnMouseUp = FormMouseUp
   OnResize = FormResize
   OnShow = FormShow
-  ExplicitWidth = 709
-  ExplicitHeight = 725
-  PixelsPerInch = 96
+  ExplicitWidth = 717
+  ExplicitHeight = 730
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 524
@@ -318,6 +318,9 @@ inherited frmMeds: TfrmMeds
       Caption = 'txtView'
       TabOrder = 0
       ShowAccelChar = True
+      WordWrap = False
+      LabelAlignment = taLeftJustify
+      LabelLayout = tlTop
     end
   end
   inherited amgrMain: TVA508AccessibilityManager

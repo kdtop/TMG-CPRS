@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-08-22
+Last updated: 2026-08-25
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -219,6 +219,34 @@ Recommended next session start:
   2. confirm scanned-image HTML actually renders through the reused TIU `ScanForSubs(...)` path in Reports
   3. decide whether `Item.SubItems[4] = 'TIU'` is sufficient long-term or whether imaging rows should retain a cleaner per-row raw mode payload
   4. only after runtime validation, consider cleanup/refactor of duplicated TIU identifiers in the imaging row layout
+
+### Frame / Tab Cleanup Status As Of 2026-08-25
+
+- Active source work this session was primarily in:
+  - `CPRS-Chart\fFrame.pas`
+  - `CPRS-Chart\fFrame.dfm`
+  - `CPRS-Chart\uConst.pas`
+- The application was reported by the user to compile and run after substantial local tab-removal work.
+- Banner/header cleanup completed:
+  - the stray `pnlRemoteData` caption bleed-through was removed
+  - `lblCIRN` was hidden to avoid overlap with local site-specific banner content
+  - the unused top-banner zoom buttons were removed from the form/class definition
+  - the green ghost demographics text behind the patient name was fixed by clearing `pnlPatient.Caption` instead of duplicating patient text into that panel
+- Tab-removal hardening completed for omitted tabs such as `CT_MEDS`, `CT_DCSUMM`, and local web tabs:
+  - key page-form variables are explicitly initialized to `nil` in `FormCreate()`
+  - `AllowContextChangeAll(...)` now checks `Assigned(...)` before calling into tab forms that may not exist
+  - many remaining `frmMeds` and `frmDCSumm` references in `fFrame.pas` were guarded with `Assigned(...)` to avoid immediate startup/runtime AVs when those tabs are not created
+  - `SelectChartTab(...)` now exits cleanly if `PageIDToTabIndex(...)` returns `-1`
+- A runtime selector bug was then fixed in `tabPagesChange()`:
+  - symptom: clicking `Dashboard` displayed the dashboard page, but the selector highlight snapped to `Cover Sheet`
+  - cause: duplicate-tab avoidance still considered the remembered right-side tab even when the right panel was collapsed
+  - fix: when the other side is `tpsRight` and `FTabPageOpenMode = tpoClosed`, the other side is treated as `CT_NOPAGE` for duplicate-page arbitration
+- User report after runtime test:
+  - the dashboard-tab selection issue now appears fixed
+- Recommended next session start:
+  1. continue removing/retaining tabs cautiously, assuming `fFrame` still has many historical references to optional pages
+  2. if another selector anomaly appears, re-check `tabPagesChange()` first before changing page-ID constants
+  3. if the user wants another checkpoint after more runtime testing, commit the current `fFrame`/form cleanup separately from unrelated feature work when practical
 
 ### HTML / HTMLEdit Status As Of 2026-08-13
 

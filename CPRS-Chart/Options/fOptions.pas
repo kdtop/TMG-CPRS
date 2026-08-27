@@ -42,6 +42,7 @@ uses
  Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ComCtrls, ExtCtrls, ORCtrls, OrFn, Dialogs, ORDtTmRng, fBAOptionsDiagnoses,
   inifiles, uConst, strUtils, uImages, //kt 9/11 added line
+  Vcl.Themes,     //TMG  8/25/26
   uBAGlobals, fBase508Form, VA508AccessibilityManager, fAutoSz;
 
 type
@@ -164,6 +165,9 @@ type
     lblAddSigPic: TLabel;
     btnAddSigImage: TBitBtn;
     btnEmptyImageCache: TBitBtn;
+    Bevel1: TBevel;
+    Label1: TLabel;
+    cmbStyles: TComboBox;
     procedure btnEmptyImageCacheClick(Sender: TObject);
     procedure btnAddSigImageClick(Sender: TObject);
     procedure FormShow(Sender: TObject);                                    //kt 9/11
@@ -211,6 +215,7 @@ type
     procedure btnGraphSettingsClick(Sender: TObject);
     procedure btnGraphViewsClick(Sender: TObject);
     procedure pagOptionsEnter(Sender: TObject);
+    procedure cmbStylesChange(Sender: TObject);
   private
     { Private declarations }
     FdirtyNotifications: boolean;  // used to determine edit changes to Notifications
@@ -363,6 +368,7 @@ procedure TfrmOptions.FormCreate(Sender: TObject);
 // initialize form
 var   i : integer;  //kt 9/11
       j : TImgTransferMethod;
+      idx : integer;   //TMG 8/25/26
       iniFileTypes,FileType: string;
 begin
   //kt 9/11 start mod -----
@@ -399,6 +405,15 @@ begin
   if (Encounter.Provider = 0) and not IsCIDCProvider(User.DUZ) then
       btnDiagnoses.Enabled := False;
   FGiveMultiTabMessage := ScreenReaderSystemActive;
+
+  cmbStyles.Items.Clear;
+
+  for I := 0 to Length(TStyleManager.StyleNames) - 1 do
+    cmbStyles.Items.Add(TStyleManager.StyleNames[I]);
+
+  cmbStyles.ItemIndex := cmbStyles.Items.IndexOf(
+    TStyleManager.ActiveStyle.Name
+  );
 end;
 
 procedure TfrmOptions.FormDestroy(Sender: TObject);
@@ -670,6 +685,15 @@ procedure TfrmOptions.chkNotificationsFlaggedClick(Sender: TObject);
 begin
   FdirtyOtherStuff := true;
   CheckApply;
+end;
+
+procedure TfrmOptions.cmbStylesChange(Sender: TObject);
+begin
+  inherited;
+  if cmbStyles.ItemIndex >= 0 then begin
+    TStyleManager.SetStyle(cmbStyles.Text);
+    uTMGOptions.WriteString('CPRS Style',cmbStyles.Text);
+  end;
 end;
 
 procedure TfrmOptions.LoadListView(aListView: TListView; aList: TStrings);
@@ -1037,7 +1061,7 @@ begin
 end;
 
 procedure TfrmOptions.btnBrowseScannedImagesClick(Sender: TObject);
-//kt 9/11 added 
+//kt 9/11 added
 var
    sFolder: string;
 begin
@@ -1085,7 +1109,7 @@ end;
 
 
 procedure TfrmOptions.btnDelTypeClick(Sender: TObject);
-//kt 9/11 added 
+//kt 9/11 added
 var  newTypes : string;
      DelTypeName : string;
 begin

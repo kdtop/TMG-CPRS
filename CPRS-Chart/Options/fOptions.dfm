@@ -1,7 +1,7 @@
 inherited frmOptions: TfrmOptions
   Left = 315
   Top = 110
-  Height = 397
+  Height = 474
   HelpContext = 9999
   VertScrollBar.Range = 360
   BorderIcons = [biSystemMenu, biHelp]
@@ -12,22 +12,19 @@ inherited frmOptions: TfrmOptions
   Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  ExplicitWidth = 320
-  ExplicitHeight = 397
-  PixelsPerInch = 96
+  ExplicitHeight = 474
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 339
-    Width = 437
+    Top = 405
+    Width = 427
     Height = 30
     HelpContext = 9999
     Align = alBottom
     BevelOuter = bvNone
     ParentColor = True
     TabOrder = 1
-    ExplicitTop = 335
-    ExplicitWidth = 429
+    ExplicitTop = 330
     object btnOK: TButton
       Left = 187
       Top = 2
@@ -66,37 +63,31 @@ inherited frmOptions: TfrmOptions
   object pnlMain: TPanel [1]
     Left = 0
     Top = 0
-    Width = 437
-    Height = 339
+    Width = 427
+    Height = 405
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
     ParentColor = True
     TabOrder = 0
-    ExplicitWidth = 429
-    ExplicitHeight = 335
+    ExplicitHeight = 330
     object pagOptions: TPageControl
       Left = 5
       Top = 5
-      Width = 427
-      Height = 329
+      Width = 417
+      Height = 395
       HelpContext = 9999
-      ActivePage = tsNotes
+      ActivePage = tsCoverSheet
       Align = alClient
       TabOrder = 0
       OnEnter = pagOptionsEnter
-      ExplicitWidth = 419
-      ExplicitHeight = 325
+      ExplicitHeight = 320
       object tsCoverSheet: TTabSheet
         HelpContext = 9700
         Caption = 'General'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
-          419
-          301)
+          409
+          367)
         object bvlCoverDays: TBevel
           Left = 125
           Top = 16
@@ -238,6 +229,19 @@ inherited frmOptions: TfrmOptions
             F0000000F0000000F0000000F000000000000000000000008000000080000000
             C0000000C0000000E0000000E0000000F0000000F0000000FDB60000}
         end
+        object Bevel1: TBevel
+          Left = 111
+          Top = 321
+          Width = 288
+          Height = 2
+        end
+        object Label1: TLabel
+          Left = 40
+          Top = 352
+          Width = 58
+          Height = 13
+          Caption = 'CPRS Styles'
+        end
         object lblCoverReminderDesc: TMemo
           Left = 125
           Top = 115
@@ -378,14 +382,19 @@ inherited frmOptions: TfrmOptions
           TabOrder = 2
           OnClick = btnOtherParametersClick
         end
+        object cmbStyles: TComboBox
+          Left = 119
+          Top = 349
+          Width = 287
+          Height = 21
+          TabOrder = 9
+          Text = 'cmbStyles'
+          OnChange = cmbStylesChange
+        end
       end
       object tsNotifications: TTabSheet
         HelpContext = 9030
         Caption = 'Notifications'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object bvlNotifications: TBevel
           Left = 88
           Top = 16
@@ -500,8 +509,8 @@ inherited frmOptions: TfrmOptions
         end
         object lvwNotifications: TCaptionListView
           Left = 0
-          Top = 138
-          Width = 411
+          Top = 237
+          Width = 409
           Height = 159
           HelpContext = 9035
           Align = alBottom
@@ -528,9 +537,11 @@ inherited frmOptions: TfrmOptions
           OnDblClick = lvwNotificationsDblClick
           OnEnter = lvwNotificationsEnter
           OnMouseDown = lvwNotificationsMouseDown
+          AutoSize = False
           Caption = 
             'You can turn on or off these notifications except those that are' +
             ' mandatory.'
+          ExplicitTop = 133
         end
         object btnNotificationsRemove: TButton
           Left = 191
@@ -580,10 +591,6 @@ inherited frmOptions: TfrmOptions
         HelpContext = 9040
         Caption = 'Order Checks'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object lblOrderChecksDesc: TLabel
           Left = 125
           Top = 27
@@ -671,8 +678,8 @@ inherited frmOptions: TfrmOptions
         end
         object lvwOrderChecks: TCaptionListView
           Left = 0
-          Top = 89
-          Width = 411
+          Top = 188
+          Width = 409
           Height = 208
           HelpContext = 9041
           Align = alBottom
@@ -699,19 +706,17 @@ inherited frmOptions: TfrmOptions
           OnDblClick = lvwNotificationsDblClick
           OnEnter = lvwNotificationsEnter
           OnMouseDown = lvwNotificationsMouseDown
+          AutoSize = False
           Caption = 
             'You can turn on or off these notifications except those that are' +
             ' mandatory.'
+          ExplicitTop = 84
         end
       end
       object tsListsTeams: TTabSheet
         HelpContext = 9050
         Caption = 'Lists/Teams'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object bvlPatientSelection: TBevel
           Left = 144
           Top = 16
@@ -942,13 +947,9 @@ inherited frmOptions: TfrmOptions
         HelpContext = 9200
         Caption = 'Notes'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
-          419
-          301)
+          409
+          367)
         object bvlNotesNotes: TBevel
           Left = 88
           Top = 16
@@ -1136,10 +1137,6 @@ inherited frmOptions: TfrmOptions
       object tsCprsReports: TTabSheet
         Caption = 'Reports'
         ImageIndex = 5
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object bvlReports: TBevel
           Left = 80
           Top = 16
@@ -1404,13 +1401,9 @@ inherited frmOptions: TfrmOptions
       object tsGraphs: TTabSheet
         Caption = 'Graphs'
         ImageIndex = 6
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
-          419
-          301)
+          409
+          367)
         object bvlGraphSettings: TBevel
           Left = 104
           Top = 16
@@ -1558,10 +1551,6 @@ inherited frmOptions: TfrmOptions
         Caption = 'Images'
         ImageIndex = 7
         OnShow = tsImagesShow
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object lblImageRetvMethod: TLabel
           Left = 16
           Top = 26
@@ -1674,7 +1663,6 @@ inherited frmOptions: TfrmOptions
           Top = 42
           Width = 145
           Height = 21
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 1
           Text = 'Dropbox Transfer'
@@ -1697,8 +1685,6 @@ inherited frmOptions: TfrmOptions
           Width = 41
           Height = 20
           Caption = '...'
-          TabOrder = 3
-          OnClick = btnBrowseDropBoxClick
           Glyph.Data = {
             F6000000424DF600000000000000760000002800000010000000100000000100
             0400000000008000000000000000000000001000000000000000000000000000
@@ -1708,6 +1694,8 @@ inherited frmOptions: TfrmOptions
             30FF0B033333333330FF0BB033333333330F0BB000000000000F0BBBBBBBBBBB
             0FFF0BBBBBBBBBBB0FFF0BB0000000000FFF0000FFFFFFFFF000FFFFFFFFFFFF
             FF00FFFFF00FFFFF00F0FFFFFF0000000FFFFFFFFFFFFFFFFFFF}
+          TabOrder = 3
+          OnClick = btnBrowseDropBoxClick
         end
         object cbEnableScanning: TCheckBox
           Left = 17
@@ -1732,8 +1720,6 @@ inherited frmOptions: TfrmOptions
           Width = 41
           Height = 20
           Caption = '...'
-          TabOrder = 6
-          OnClick = btnBrowseScannedImagesClick
           Glyph.Data = {
             F6000000424DF600000000000000760000002800000010000000100000000100
             0400000000008000000000000000000000001000000000000000000000000000
@@ -1743,6 +1729,8 @@ inherited frmOptions: TfrmOptions
             30FF0B033333333330FF0BB033333333330F0BB000000000000F0BBBBBBBBBBB
             0FFF0BBBBBBBBBBB0FFF0BB0000000000FFF0000FFFFFFFFF000FFFFFFFFFFFF
             FF00FFFFF00FFFFF00F0FFFFFF0000000FFFFFFFFFFFFFFFFFFF}
+          TabOrder = 6
+          OnClick = btnBrowseScannedImagesClick
         end
         object edtPolFreq: TEdit
           Left = 233
@@ -1758,7 +1746,6 @@ inherited frmOptions: TfrmOptions
           Top = 151
           Width = 153
           Height = 21
-          ItemHeight = 13
           TabOrder = 8
           Text = '<Select File Type>'
           OnChange = cboImageTypeChange
@@ -1785,8 +1772,6 @@ inherited frmOptions: TfrmOptions
           Height = 20
           Caption = '...'
           Enabled = False
-          TabOrder = 10
-          OnClick = btnPickEditorClick
           Glyph.Data = {
             F6000000424DF600000000000000760000002800000010000000100000000100
             0400000000008000000000000000000000001000000000000000000000000000
@@ -1796,6 +1781,8 @@ inherited frmOptions: TfrmOptions
             30FF0B033333333330FF0BB033333333330F0BB000000000000F0BBBBBBBBBBB
             0FFF0BBBBBBBBBBB0FFF0BB0000000000FFF0000FFFFFFFFF000FFFFFFFFFFFF
             FF00FFFFF00FFFFF00F0FFFFFF0000000FFFFFFFFFFFFFFFFFFF}
+          TabOrder = 10
+          OnClick = btnPickEditorClick
         end
         object editStockLocation: TEdit
           Left = 16
@@ -1811,8 +1798,6 @@ inherited frmOptions: TfrmOptions
           Width = 41
           Height = 20
           Caption = '...'
-          TabOrder = 12
-          OnClick = btnBrowseStockImagesClick
           Glyph.Data = {
             F6000000424DF600000000000000760000002800000010000000100000000100
             0400000000008000000000000000000000001000000000000000000000000000
@@ -1822,6 +1807,8 @@ inherited frmOptions: TfrmOptions
             30FF0B033333333330FF0BB033333333330F0BB000000000000F0BBBBBBBBBBB
             0FFF0BBBBBBBBBBB0FFF0BB0000000000FFF0000FFFFFFFFF000FFFFFFFFFFFF
             FF00FFFFF00FFFFF00F0FFFFFF0000000FFFFFFFFFFFFFFFFFFF}
+          TabOrder = 12
+          OnClick = btnBrowseStockImagesClick
         end
         object btnAddSigImage: TBitBtn
           Left = 17
@@ -1829,8 +1816,6 @@ inherited frmOptions: TfrmOptions
           Width = 97
           Height = 22
           Caption = '&Add Image'
-          TabOrder = 13
-          OnClick = btnAddSigImageClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             18000000000000030000120B0000120B00000000000000000000FF00FF0274AC
@@ -1858,6 +1843,8 @@ inherited frmOptions: TfrmOptions
             FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF046B0B2DB851046B0BFF00FFFF00
             FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
             00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+          TabOrder = 13
+          OnClick = btnAddSigImageClick
         end
         object btnEmptyImageCache: TBitBtn
           Left = 248
@@ -1865,8 +1852,6 @@ inherited frmOptions: TfrmOptions
           Width = 130
           Height = 22
           Caption = '&Empty Image Cache'
-          TabOrder = 14
-          OnClick = btnEmptyImageCacheClick
           Glyph.Data = {
             36040000424D3604000000000000360000002800000010000000100000000100
             20000000000000040000130B0000130B00000000000000000000D8E9ECFFD7E8
@@ -1902,6 +1887,8 @@ inherited frmOptions: TfrmOptions
             4FFF6F7273FF969FA0FFDAEBEEFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
             ECFFD7E8EBFFD8E9ECFFD9EAEDFFCCDADDFF9AA3A4FF6A6C6DFFAFB8B9FFD1DF
             E2FFD7E8EBFFDAEBEEFFD8E9ECFFD7E8EBFFD8E9ECFFD8E9ECFF}
+          TabOrder = 14
+          OnClick = btnEmptyImageCacheClick
         end
       end
     end
@@ -2141,6 +2128,9 @@ inherited frmOptions: TfrmOptions
         'Status = stsDefault')
       (
         'Component = btnEmptyImageCache'
+        'Status = stsDefault')
+      (
+        'Component = cmbStyles'
         'Status = stsDefault'))
   end
   object dlgPickDir: TOpenDialog

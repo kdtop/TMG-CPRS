@@ -107,7 +107,7 @@ implementation
 uses UCore, rCore, rPCE, fPCELex, fPCEOther, fVitals,fVisit, fFrame, fEncnt,
      fEncounterFrame, uInit
   //   , fGMV_InputTemp // Vitals Lite 2004-05-21
-     , VA508AccessibilityRouter;
+     , VA508AccessibilityRouter, uTMGVitalsBridge;  //kt //codex 8/26/26
 
 const
   TX_VDATE_REQ1 = 'Entered vitals information can not be saved without a Date.' + CRLF +
@@ -403,10 +403,6 @@ begin
   //uVisitType.Free;
   uVitalOld.Free;
   uVitalNew.free;
-
-{== Vitals Lite 2004-05-21 ===================================================}
-  UnloadVitalsDLL;
-{== Vitals Lite 2004-05-21 ===================================================}
   inherited;
 end;
 
@@ -429,14 +425,7 @@ end;
 procedure TfrmEncVitals.FormShow(Sender: TObject);
 begin
   inherited;
-  //Begin Vitals Lite
-  {Visit is Assumed to Be selected when Opening Encounter Dialog}
-  LoadVitalsDLL;
-  if VitalsDLLHandle = 0 then // No Handle found
-    MessageDLG('Can''t find library '+VitalsDLLName+'.',mtError,[mbok],0)
-  else
-    LoadVitalsList;
-  //End Vitals Lite
+  LoadVitalsList;  //kt //codex 8/26/26
 //  frmEncVitals.caption := 'Vital entry for - '+ patient.name; {RAB 6/15/98}
   FormActivate(Sender);
 end;
@@ -589,53 +578,44 @@ begin
   tmpList.Free;
 end;
 
-procedure TfrmEncVitals.btnEnterVitalsClick(Sender: TObject);
+procedure TfrmEncVitals.btnEnterVitalsClick(Sender: TObject);  //kt //codex 8/26/26
 var
-  VLPtVitals : TGMV_VitalsEnterDLG;
-  GMV_FName : String;
+  ALocation: string;  //kt //codex 8/26/26
+  ATemplate: string;  //kt //codex 8/26/26
+  AInfo: string;  //kt //codex 8/26/26
 begin
-  inherited;
-  if VitalsDLLHandle = 0 then Exit;//The DLL was initialized on Create, but just in case....
-  GMV_FName := 'GMV_VitalsEnterDLG';
-  @VLPtVitals := GetProcAddress(VitalsDLLHandle,PChar(GMV_FName));
-  if assigned(VLPtVitals) then
-  begin
-    VLPtVitals(
-      RPCBrokerV,
-      Patient.DFN,
-      FloatToStr(uEncPCEData.Location),
-      GMV_DEFAULT_TEMPLATE,
-      GMV_APP_SIGNATURE,
-      FMDateTimeToDateTime(uEncPCEData.DateTime),
-      Patient.Name,
-      frmFrame.lblPtSSN.Caption + '    ' + frmFrame.lblPtAge.Caption
-    );
-  end
-  else
-    MessageDLG('Unable to find function "'+GMV_FName+'".',mtError,[mbok],0);
-  @VLPtVitals := nil;
-  LoadVitalsList;
-end;
+  inherited;  //kt //codex 8/26/26
+  ALocation := IntToStr(uEncPCEData.Location);  //kt //codex 8/26/26
+  ATemplate := GMV_DEFAULT_TEMPLATE;  //kt //codex 8/26/26
+  AInfo := frmFrame.lblPtSSN.Caption + '    ' + frmFrame.lblPtAge.Caption;  //kt //codex 8/26/26
+  OutputDebugString(PChar(Format(  //kt //codex 8/26/26
+    'CPRS Vitals in-process call GMV_VitalsEnterDLG DFN=%s Loc=%s Date=%s Template=%s',  //kt //codex 8/26/26
+    [Patient.DFN, ALocation, DateTimeToStr(FMDateTimeToDateTime(uEncPCEData.DateTime)), ATemplate])));  //kt //codex 8/26/26
+  TMG_VitalsEnterDLG(  //kt //codex 8/26/26
+    RPCBrokerV,  //kt //codex 8/26/26
+    Patient.DFN,  //kt //codex 8/26/26
+    ALocation,  //kt //codex 8/26/26
+    ATemplate,  //kt //codex 8/26/26
+    GMV_APP_SIGNATURE,  //kt //codex 8/26/26
+    FMDateTimeToDateTime(uEncPCEData.DateTime),  //kt //codex 8/26/26
+    Patient.Name,  //kt //codex 8/26/26
+    AInfo);  //kt //codex 8/26/26
+  LoadVitalsList;  //kt //codex 8/26/26
+end;  //kt //codex 8/26/26
 
-procedure TfrmEncVitals.LoadVitalsList;
+procedure TfrmEncVitals.LoadVitalsList;  //kt //codex 8/26/26
 var
-  VitalsList : TStringList;
-  VLPtVitals : TGMV_LatestVitalsList;
-  GMV_FName : String;
+  VitalsList: TStringList;  //kt //codex 8/26/26
 begin
-  if VitalsDLLHandle = 0 then Exit;//The DLL was initialized on Create, but just in case....
-  GMV_FName := 'GMV_LatestVitalsList';
-  @VLPtVitals := GetProcAddress(VitalsDLLHandle,PChar(GMV_FName));
-  if assigned(VLPtVitals) then
-  begin
-    VitalsList := VLPtVitals(RPCBrokerV,Patient.DFN,U,false);
-    if assigned(VitalsList) then
-      LoadVitalView(VitalsList);
-  end
-  else
-    MessageDLG('Can''t find function "'+GMV_FName+'".',mtError,[mbok],0);
-  @VLPtVitals := nil;
-end;
+  OutputDebugString(PChar(Format(  //kt //codex 8/26/26
+    'CPRS Vitals in-process call GMV_LatestVitalsList DFN=%s Delim=%s',  //kt //codex 8/26/26
+    [Patient.DFN, U])));  //kt //codex 8/26/26
+  VitalsList := TMG_LatestVitalsList(RPCBrokerV, Patient.DFN, U, False);  //kt //codex 8/26/26
+  if Assigned(VitalsList) then  //kt //codex 8/26/26
+  begin  //kt //codex 8/25/26
+    LoadVitalView(VitalsList);  //kt //codex 8/26/26
+  end;  //kt //codex 8/26/26
+end;  //kt //codex 8/26/26
 //End Vitals Lite
 
 initialization

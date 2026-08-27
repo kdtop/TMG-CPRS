@@ -9,10 +9,8 @@ inherited frmCover: TfrmCover
   HelpFile = 'overvw'
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitTop = -38
-  ExplicitWidth = 640
-  ExplicitHeight = 384
-  PixelsPerInch = 96
+  ExplicitWidth = 648
+  ExplicitHeight = 389
   TextHeight = 13
   inherited shpPageBottom: TShape
     Top = 345
@@ -136,6 +134,7 @@ inherited frmCover: TfrmCover
               TabOrder = 0
               OnClick = CoverItemClick
               OnExit = CoverItemExit
+              Caption = ''
               ItemTipColor = clWindow
               LongList = False
               TabPositions = '2,3'
@@ -178,6 +177,7 @@ inherited frmCover: TfrmCover
               TabOrder = 0
               OnClick = CoverItemClick
               OnExit = CoverItemExit
+              Caption = ''
               ItemTipColor = clWindow
               LongList = False
             end
@@ -252,6 +252,7 @@ inherited frmCover: TfrmCover
               TabOrder = 0
               OnClick = lstFlagClick
               OnKeyDown = lstFlagKeyDown
+              Caption = ''
               ItemTipColor = clWindow
               LongList = False
               Pieces = '2'
@@ -278,6 +279,7 @@ inherited frmCover: TfrmCover
             TabOrder = 1
             OnClick = CoverItemClick
             OnExit = CoverItemExit
+            Caption = ''
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '20'
@@ -337,11 +339,10 @@ inherited frmCover: TfrmCover
             TabOrder = 0
             OnClick = CoverItemClick
             OnExit = CoverItemExit
+            Caption = ''
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '35'
-            ExplicitLeft = -1
-            ExplicitTop = 19
           end
         end
         object pnl_5: TPanel
@@ -381,6 +382,7 @@ inherited frmCover: TfrmCover
             TabOrder = 0
             OnClick = CoverItemClick
             OnExit = CoverItemExit
+            Caption = ''
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '34,44'
@@ -458,6 +460,7 @@ inherited frmCover: TfrmCover
             TabOrder = 0
             OnClick = CoverItemClick
             OnExit = CoverItemExit
+            Caption = ''
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '34'
@@ -499,6 +502,7 @@ inherited frmCover: TfrmCover
             TabOrder = 0
             OnClick = CoverItemClick
             OnExit = CoverItemExit
+            Caption = ''
             ItemTipColor = clWindow
             LongList = False
             TabPositions = '4,13,15,24'
@@ -540,6 +544,7 @@ inherited frmCover: TfrmCover
           TabOrder = 0
           OnClick = CoverItemClick
           OnExit = CoverItemExit
+          Caption = ''
           ItemTipColor = clWindow
           LongList = False
           TabPositions = '15,35'

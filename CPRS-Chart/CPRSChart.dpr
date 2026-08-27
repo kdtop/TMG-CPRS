@@ -325,6 +325,11 @@ uses
   fCarePlan in 'Careplan-Letters\fCarePlan.pas' {frmCarePlan},
   uCore in 'uCore.pas',
   fUploadImages in 'TMG_Extra\fUploadImages.pas' {frmImageUpload},
+  fPatientVitals in 'TMG_Extra\tmg-vitals\VitalsView\fPatientVitals.pas' {frmPatientVitals},  //kt //codex 8/26/26
+  uGMV_VitalTypes in 'TMG_Extra\tmg-vitals\VitalsCommon\uGMV_VitalTypes.pas',  //kt //codex 8/26/26
+  mGMV_GridGraph in 'TMG_Extra\tmg-vitals\VitalsView\mGMV_GridGraph.pas' {fraGMV_GridGraph: TFrame},  //kt //codex 8/26/26
+  fGMV_InputLite in 'TMG_Extra\tmg-vitals\VitalsDataEntry\fGMV_InputLite.pas' {frmGMV_InputLite},  //kt //codex 8/26/26
+  uTMGVitalsBridge in 'TMG_Extra\uTMGVitalsBridge.pas',
   uTMGUtil in 'TMG_Extra\uTMGUtil.pas',
   AddOneFileEntryU in 'TMG_Extra\AddOneFileEntryU.pas',
   ColorUtil in 'TMG_Extra\ColorUtil.pas',
@@ -438,7 +443,9 @@ uses
   fPopHealth in 'TMG_Extra\fPopHealth.pas' {frmPopHealth},
   fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
   fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
-  fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants};
+  fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants},
+  Vcl.Themes,
+  Vcl.Styles;
 
 {$R *.TLB}
 
@@ -468,6 +475,7 @@ begin
     frmSplash.Show;                             //         "
     frmSplash.Refresh;                          //         "
   end;
+  TStyleManager.TrySetStyle('Windows10');
   Application.Title := 'CPRS - Patient Chart';
   Application.HelpFile := 'cprs.hlp';
   Application.CreateForm(TdmodShared, dmodShared);

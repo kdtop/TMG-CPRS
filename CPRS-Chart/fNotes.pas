@@ -1920,6 +1920,7 @@ begin
      Encounter.DateTime      := uPCEEdit.DateTime;
      Encounter.VisitCategory := uPCEEdit.VisitCategory;
      Encounter.StandAlone    := uPCEEdit.StandAlone;
+     Encounter.Provider      := User.DUZ;       //This is a test   8/4/26
      frmFrame.DisplayEncounterText;
   end;      //TMG addition
   FEditNote.NeedCPT := uPCEEdit.CPTRequired;

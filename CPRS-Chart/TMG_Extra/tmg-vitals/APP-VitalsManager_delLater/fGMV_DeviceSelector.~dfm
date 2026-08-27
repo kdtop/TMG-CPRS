@@ -1,0 +1,97 @@
+object frmGMV_DeviceSelector: TfrmGMV_DeviceSelector
+  Left = 489
+  Top = 179
+  BorderStyle = bsDialog
+  Caption = 'Device Selection'
+  ClientHeight = 172
+  ClientWidth = 233
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object lblDevice: TLabel
+    Left = 8
+    Top = 8
+    Width = 37
+    Height = 13
+    Caption = '&Device:'
+    FocusControl = fraDevice
+  end
+  object Label1: TLabel
+    Left = 8
+    Top = 56
+    Width = 86
+    Height = 13
+    Caption = '&Queue To Run at:'
+    FocusControl = dtpDate
+  end
+  inline fraDevice: TfraGMV_Lookup
+    Left = 8
+    Top = 24
+    Width = 209
+    Height = 26
+    TabOrder = 0
+    OnExit = fraDeviceExit
+    inherited cbxValues: TComboBox
+      Width = 209
+    end
+    inherited edtValue: TComboBox
+      Width = 209
+    end
+  end
+  object dtpDate: TDateTimePicker
+    Left = 8
+    Top = 72
+    Width = 105
+    Height = 21
+    CalAlignment = dtaLeft
+    Date = 37391.3520092708
+    Time = 37391.3520092708
+    DateFormat = dfShort
+    DateMode = dmComboBox
+    Kind = dtkDate
+    ParseInput = False
+    TabOrder = 1
+    OnChange = dtpDateChange
+  end
+  object dtpTime: TDateTimePicker
+    Left = 120
+    Top = 72
+    Width = 96
+    Height = 21
+    CalAlignment = dtaLeft
+    Date = 37391.3523091088
+    Time = 37391.3523091088
+    DateFormat = dfShort
+    DateMode = dmComboBox
+    Kind = dtkTime
+    ParseInput = False
+    TabOrder = 2
+    OnChange = dtpTimeChange
+  end
+  object btnCancel: TButton
+    Left = 141
+    Top = 136
+    Width = 75
+    Height = 25
+    Caption = '&Cancel'
+    ModalResult = 2
+    TabOrder = 4
+  end
+  object btnOK: TButton
+    Left = 56
+    Top = 136
+    Width = 75
+    Height = 25
+    Caption = '&OK'
+    TabOrder = 3
+    OnClick = btnOKClick
+  end
+end

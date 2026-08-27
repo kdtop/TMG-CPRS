@@ -1,0 +1,197 @@
+unit uHEVDR_pCall;
+
+interface
+
+uses
+  Classes
+  , uHEVDR_Redirector
+  ;
+
+
+type
+  TRPCMode = set of (
+
+    rpcSilent,          // Do not show any error messages
+                        // (only return the error codes)
+
+    rpcNoResChk         // Do not check the Results array for the errors
+                        // returned by the remote procedure. This flag must be
+                        // used for the remote procedures that do not conform
+                        // to the error reporting format supported by the
+                        // CheckRPCError function.
+
+  );
+
+function  CallRemoteProc(
+            Broker: THEVDRedirector;
+            RemoteProcedure: String;
+            Parameters: array of String; MultList: TStringList = nil;
+            RPCMode: TRPCMode = []; RetList: TStrings = nil ): Boolean;
+
+var
+  RPCBroker: THEVDRedirector;
+
+implementation
+
+uses
+  uGMV_Common
+  , SysUtils
+  , Controls
+  , Dialogs
+  ;
+
+
+function CheckRPCError(RPCName: String; Results: TStrings;
+           RPCMode: TRPCMode = [] ): Integer;
+var
+  i, n: Integer;
+  buf, rc: String;
+  SL : TStringList;
+//  form: TRPCErrorForm;
+begin
+  if Results.Count = 0 then
+    begin
+      Result := mrOK;
+      buf := 'The ''' + RPCName + ''' remote procedure returned nothing!';
+      if Not (rpcSilent in RPCMode) then
+        MessageDialog('RPC Error', buf, mtError, [mbOK], mrOK, 0);
+      Results.Add('-1001^1');
+      Results.Add('-1001^' + buf);
+      Exit;
+    end;
+
+  Result := 0;
+  rc := Piece(Results[0], '^');
+
+  if StrToIntDef(rc, 0) < 0 then
+    begin
+      Result := mrOK;
+      if Not (rpcSilent in RPCMode) then
+        begin
+//          form := TRPCErrorForm.Create(Application);
+          SL := TStringList.Create;
+          n := StrToIntDef(Piece(Results[0], '^', 2), 0);
+//          with form.Msg.Lines do
+          with SL do
+            begin
+              buf := 'The error code ''' + rc + ''' was returned by the '''
+                + RPCName + ''' remote procedure!';
+              if n > 0 then
+                begin
+                  buf := buf + ' The problem had been caused by the following ';
+                  if n > 1 then
+                    buf := buf + 'errors (in reverse chronological order):'
+                  else
+                    buf := buf + 'error: ';
+                  Add(buf);
+                  for i := 1 to n do
+                    begin
+                      buf := Results[i];
+                      Add('');  Add(' ' + Piece(buf,'^',2));
+                      Add(' Error Code: ' + Piece(buf,'^',1) + ';' + #9 +
+                        'Place: ' + StringReplace(Piece(buf,'^',3),'~','^',[]));
+                    end;
+                end
+              else
+                Add(buf);
+            end;
+//          Result := form.ShowModal;
+            ShowMessage(SL.Text);
+//          form.Free;
+          SL.Free;
+        end;
+    end;
+
+end;
+
+function RPCErrorCode(Results: TStrings): Integer;
+var
+  res: TStrings;
+begin
+  if Assigned(Results) then
+    res := Results
+  else
+//    res := RPCBroker.Results;
+    res := RPCBroker.Results;
+  if res.Count > 0 then
+    Result := StrToIntDef(Piece(Piece(res[0], '^'), '.'), -999)
+  else
+    Result := -999;
+end;
+
+function CallRemoteProc(
+           Broker: THEVDRedirector;
+           RemoteProcedure: String;
+           Parameters: array of String; MultList: TStringList = nil;
+           RPCMode: TRPCMode = []; RetList: TStrings = nil): Boolean;
+var
+  i, j: Integer;
+begin
+  Broker.RemoteProcedure := RemoteProcedure;
+  i := 0;
+  while i <= High(Parameters) do
+    begin
+      if (Copy(Parameters[i], 1, 1) = '@') and (Parameters[i] <> '@') then
+        begin
+          Broker.Param[i].Value := Copy(Parameters[i], 2, Length(Parameters[i]));
+          Broker.Param[i].PType := Reference;
+        end
+      else
+        begin
+          Broker.Param[i].Value := Parameters[i];
+          Broker.Param[i].PType := Literal;
+        end;
+      Inc(i);
+    end;
+
+  if MultList <> nil then
+    if MultList.Count > 0 then
+      begin
+        for j := 1 to MultList.Count do
+          Broker.Param[i].Mult[IntToStr(j)] := MultList[j-1];
+        Broker.Param[i].PType := List;
+      end;
+
+  try
+    Result := True;
+    if RetList <> nil then
+      begin
+        RetList.Clear;
+        Broker.lstCall(RetList);
+      end
+    else
+      begin
+        Broker.Call;
+        RetList := Broker.Results;
+      end;
+
+    if Not (rpcNoResChk in RPCMode) then
+      if CheckRPCError(RemoteProcedure, RetList, RPCMode) <> 0 then
+        Result := False;
+
+  except
+    on e: EBrokerError do
+    begin
+      if Not (rpcSilent in RPCMode) then
+        MessageDialog('RPC Error',
+          'Error encountered retrieving VistA data.' + #13 +
+          'Server: ' + Broker.Server + #13 +
+          'Listener port: ' + IntToStr(Broker.ListenerPort) + #13 +
+          'Remote procedure: ' + Broker.RemoteProcedure + #13 +
+          'Error is: ' + #13 +
+          e.Message, mtError, [mbOK], mrOK, e.HelpContext);
+      with Broker do
+      begin
+        Results.Clear;
+        Results.Add('-1000^1');
+        Results.Add('-1000^' + e.Message);
+      end;
+      Result := False;
+    end;
+  else
+    raise;
+  end;
+end;
+
+
+end.

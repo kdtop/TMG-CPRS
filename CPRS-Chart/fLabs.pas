@@ -5511,7 +5511,7 @@ var
 const
  BG_COLOR = '#ffffe6';
 begin
-  result := '<font face="Consolas">';
+  result := '<font face="Consolas"><pre>';  //TMG 7/9/26 added pre
   HasNotes := (LabInfo.Notes.Count>0);
   HasData := (LabInfo.Data.Count>0);
   //Build the header
@@ -5538,7 +5538,7 @@ begin
     result := result+'</td></tr></table>';
   end;
   if (HasNotes and HasData) then result := result+'</tr></td></table>';
-  if result <> '' then result := result + '</font><BR>'
+  if result <> '' then result := result + '</font><BR></pre>'   //TMG   7/9/26 added end pre
 end;
 
 

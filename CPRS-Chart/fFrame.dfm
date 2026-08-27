@@ -7,7 +7,6 @@ inherited frmFrame: TfrmFrame
   FormStyle = fsMDIForm
   Menu = mnuFrame
   Visible = True
-  StyleElements = [seFont, seClient, seBorder]
   OnActivate = FormActivate
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
@@ -290,6 +289,7 @@ inherited frmFrame: TfrmFrame
         Font.Style = []
         ParentFont = False
         ParentShowHint = False
+        ShowCaption = False
         ShowHint = True
         TabOrder = 0
         TabStop = True
@@ -375,6 +375,7 @@ inherited frmFrame: TfrmFrame
         Font.Style = []
         ParentFont = False
         ParentShowHint = False
+        ShowCaption = False
         ShowHint = True
         TabOrder = 1
         TabStop = True
@@ -435,6 +436,7 @@ inherited frmFrame: TfrmFrame
         Font.Style = []
         ParentFont = False
         ParentShowHint = False
+        ShowCaption = False
         ShowHint = True
         TabOrder = 2
         TabStop = True
@@ -514,6 +516,7 @@ inherited frmFrame: TfrmFrame
         Font.Style = []
         ParentFont = False
         ParentShowHint = False
+        ShowCaption = False
         ShowHint = True
         TabOrder = 6
         TabStop = True
@@ -522,6 +525,7 @@ inherited frmFrame: TfrmFrame
         OnExit = pnlPrimaryCareExit
         OnMouseDown = pnlRemindersMouseDown
         OnMouseUp = pnlRemindersMouseUp
+        ExplicitTop = -3
         object imgReminder: TImage
           Left = 2
           Top = 2
@@ -559,6 +563,7 @@ inherited frmFrame: TfrmFrame
         Font.Style = []
         ParentFont = False
         ParentShowHint = False
+        ShowCaption = False
         ShowHint = True
         TabOrder = 7
         TabStop = True
@@ -1005,6 +1010,7 @@ inherited frmFrame: TfrmFrame
         ParentBackground = False
         ParentFont = False
         ParentShowHint = False
+        ShowCaption = False
         ShowHint = True
         TabOrder = 11
         TabStop = True

@@ -1,0 +1,150 @@
+:Base broker.hlp>main
+:Title RPC Broker Developer's Guide
+
+1 RPC Broker V. 1.1 Developer's Guide
+2 Overview
+3 Introduction=introduction
+3 Broker Overview=Broker_Overview
+3 Orientation=Orientation
+3 About this Version of the RPC Broker=About_this_version
+3 What's New in the BDK=Whats_New_in_the_BDK
+3 Developer Considerations=Developer_Considerations
+3 Application Issues=Application_Level_Issues
+3 Silent Login=Silent_Login
+3 Context-sensitive Help for the TRPCBroker Component=ig_helpfile
+2 RPC Broker Components and Classes
+3 TCCOWRPCBroker=TCCOWRPCBroker_Component
+3 TRPCBroker Component=TRPCBroker
+3 TSharedRPCBroker Component=TSharedRPCBroker_Component
+3 TXWBRichEdit Component=TXWBRichEdit_Component
+3 TMult Class=TMult_Class
+3 TParamRecord Class=TParamRecord_Class
+3 TParams Class=TParams_Class
+3 TVistaLogin Class=TVistaLogin_Class
+3 TVistaUser Class=TVistaUser_Class
+3 EBrokerError Exception=EBrokerError
+3 Units
+4 Hash Unit=Hash_unit
+4 LoginFrm Unit=LoginFrm_Unit
+4 MFunStr Unit=MFunStr_unit
+4 RPCConf1 Unit=RPCConf1_unit
+4 RpcSLogin Unit=RpcSLogin_Unit
+4 SplVista Unit=SplVista_unit
+4 TCCOWRPCBroker Unit=TCCOWRPRCBroker_unit
+4 TRPCB Unit=TRPCB_unit
+4 TVCEdit Unit=TVCEdit_Unit
+2 Remote Procedure Calls (RPCs)
+3 Overview=rpc_overview
+3 What Makes a Good RPC?=rpc_good
+3 Creating RPCs=rpc_create
+3 Using an Existing M API=Using_an_Existing_M_API
+3 M Entry Point for an RPC
+4 Relationship Between an M Entry Point and an RPC=rpc_routine_relationship
+4 First Input Parameter=rpc_first_input_param
+4 Return Value Types=rpc_return_value_types
+4 Input Parameters=rpc_input_parameter_types
+4 Examples=rpc_entry_point_examples
+3 RPC Entry in the Remote Procedure File
+4 RPC Entry in the Remote Procedure File=rpc_file_entry
+4 RPC Version in the Remote Procedure File=RPC_Version_in_Remote_Procedure_File
+4 Blocking an RPC in the Remote Procedure File=Blocking_an_RPC
+4 Cleanup after RPC Execution=rpc_cleanup
+4 Documenting RPCs=rpc_document
+3 Executing RPCs from Clients
+4 How to Execute an RPC from a Client=rpc_execute_from_client
+4 RPC Security: How to Register an RPC=rpc_register
+4 RPC Limits=RPC_limits
+4 BrokerExample Online Code Example=BrokerExample
+2 Other RPC Broker APIs
+3 Overview=otherapi_Overview
+3 Encryption Functions=otherapi_encrypt
+3 GetServerInfo Function=otherapi_getserverinfo
+3 M Emulation Functions=otherapi_m_emulation
+3 VistA Splash Screen Procedures=otherapi_splash
+3 $$BROKER^XWBLIB=otherapi_broker
+3 $$RTRNFMT^XWBLIB=otherapi_rtrnfmt
+3 XWB ARE RPCS AVAILABLE=XWB_ARE_RPCS_AVAILABLE
+3 XWB IS RPC AVAILABLE=XWB_IS_RPC_AVAILABLE
+3 XWB GET VARIABLE VALUE RPC=otherapi_getvarvalue
+3 Running RPCs on a Remote Server
+4 Options For Running RPCs on a Remote Server=Options_For_Running_RPCs_on_a_Remote_Server
+4 Checking RPC Availability on a Remote Server=Checking_RPC_Availability_on_a_Remote_Server
+4 XWB DIRECT RPC=XWB_DIRECT_RPC
+4 XWB REMOTE RPC=XWB_REMOTE_RPC
+4 XWB REMOTE STATUS CHECK=XWB_REMOTE_STATUS_CHECK
+4 XWB REMOTE GETDATA=XWB_REMOTE_GETDATA
+4 XWB REMOTE CLEAR=XWB_REMOTE_CLEAR
+3 Deferred RPCs
+4 Overview of Deferred RPCs=Overview_of_Deferred_RPCs
+4 XWB DEFERRED RPC=XWB_DEFERRED_RPC
+4 XWB DEFERRED STATUS=XWB_DEFERRED_STATUS
+4 XWB DEFERRED GETDATA=XWB_DEFERRED_GETDATA
+4 XWB DEFERRED CLEAR=XWB_DEFERRED_CLEAR
+4 XWB DEFERRED CLEARALL=XWB_DEFERRED_CLEARALL
+2 Debugging and Troubleshooting
+3 Overview=debug_overview
+3 How to Debug Your Application=debug
+3 RPC Error Trapping=Error_Handling
+3 Identifying the Listener Process on the Server=ID_Listener
+3 Identifying the Handler Process on the Server=ID_Handler
+3 Testing Your RPC Broker Connection=Testing_Connection
+3 Client Timeout and Buffer Clearing=Buffer_Clearing
+3 Memory Leaks=memory_leaks
+2 Developer Utilities
+3 RPC Broker Programmer Preferences=IDH_brokprogpref
+2 Tutorial
+3 Introduction=tut_intro
+3 Advanced Preparation=tut_prep
+3 Step  1: Create Application with an RPC Broker Component=tut_step1
+3 Step  2: Get Server/Port=tut_step2
+3 Step  3: Establish Broker Connection=tut_step3
+3 Step  4: RPC Routine to List Terminal Types=tut_step4
+3 Step  5: RPC to List Terminal Types=tut_step5
+3 Step  6: Call the ZxxxTT LIST RPC=tut_step6
+3 Step  7: Associate IENs=tut_step7
+3 Step  8: Routine to Retrieve Terminal Types=tut_step8
+3 Step  9: RPC to Retrieve Terminal Types=tut_step9
+3 Step 10: Call Zxxx RETRIEVE RPC=tut_step10
+3 Step 11: Register RPCs=tut_register
+3 See Also: FileMan Delphi Components (FMDC)=tut_fmdc
+3 Tutorial Source Code=tut_pascal
+2 DLL Interface
+3 Introduction=dll_intro
+3 DLL Special Issues
+4 RPC Results from DLL Calls=dll_results
+4 GetServerInfo Function and the DLL=dll_getserverinfo
+3 DLL Exported Functions
+4 RPCBCall=dll_function_rpcbcall
+4 RPCBCreate=dll_function_rpcbcreate
+4 RPCBCreateContext=dll_function_rpcbcreatecontext
+4 RPCBFree=dll_function_rpcbfree
+4 RPCBMultItemGet=dll_function_rpcbmultitemget
+4 RPCBMultPropGet=dll_function_rpcbmultpropget
+4 RPCBMultSet=dll_function_rpcbmultset
+4 RPCBMultSortedSet=dll_function_rpcbmultsortedset
+4 RPCBParamGet=dll_function_rpcbParamGet
+4 RPCBParamSet=dll_function_rpcbParamSet
+4 RPCBPropGet=dll_function_rpcbpropget
+4 RPCBPropSet=dll_function_rpcbpropset
+3 Guidelines for C++
+4 Overview=dll_cpp_intro
+4 TRPCBroker C++ Class Methods=dll_cpp_methods
+4 Initialize the Class=dll_cpp_init
+4 Create Broker Instances=dll_cpp_create
+4 Connect to the Server=dll_cpp_connect
+4 Execute RPCs=dll_cpp_execute
+4 Destroy Broker Instances=dll_cpp_destroy
+3 Guidelines for C
+4 Overview=dll_c_intro
+4 Initialize—LoadLibrary and GetProcAddress=dll_c_init
+4 Create Broker Components=dll_c_create
+4 Connect to the Server=dll_c_connect
+4 Execute RPCs=dll_c_execute
+4 Destroy Broker Components=dll_c_destroy
+3 Guidelines for Visual Basic
+4 Overview=dll_vb_intro
+4 Initialize=dll_vb_init
+4 Create Broker Components=dll_vb_create
+4 Connect to the Server=dll_vb_connect
+4 Execute RPCs=dll_vb_execute
+4 Destroy Broker Components=dll_vb_destroy

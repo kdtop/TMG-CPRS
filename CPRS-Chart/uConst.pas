@@ -77,31 +77,6 @@ const
   CT_UNKNOWN  =  0;                             // chart tab - unknown (shouldn't happen)
   CT_COVER    =  1;                             // chart tab - cover sheet
   CT_PROBLEMS =  2;                             // chart tab - problem list
-  CT_MEDS     =  100;                             // chart tab - medications screen
-  CT_ORDERS   =  3;                             // chart tab - doctor's orders
-  CT_HP       =  4;                             // chart tab - history & physical
-  CT_NOTES    =  5;                             // chart tab - progress notes
-  CT_CONSULTS =  6;                             // chart tab - consults
-  CT_DCSUMM   =  101;                             // chart tab - discharge summaries
-  CT_LABS     =  7;                             // chart tab - laboratory results
-  CT_REPORTS  =  8;                             // chart tab - reports
-  CT_SURGERY  =  9;                             // chart tab - surgery
-  CT_IMAGES   = 10;                             // chart tab - images      //kt 9/11 added
-  CT_MAILBOX  = 11;                             // chart tab - mailbox     //elh 4/30/19 added
-  CT_DASHBOARD= 12;                             // chart tab - dashboard   //elh 4/19/24 added
-  CT_POPHEALTH= 13;                             // chart tab - pop health  //elh 8/6/24 added
-  CT_WEBTAB1  = 14;                             // chart tab - web browser //kt 9/11 added
-  CT_WEBTAB2  = 15;                             // chart tab - web browser //kt 9/11 added
-  CT_WEBTAB3  = 16;                             // chart tab - web browser //kt 9/11 added
-  //kt 9/11 NOTE --> Option: add more CT_WEBTAB#'s here.  But set CT_LAST_WEBTAB= to last one...
-  CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
-
-{  //kt 8/24/26  original below.  I am removing unused tabs.
-  // Tab Indexes, moved from fFrame
-  CT_NOPAGE   = -1;                             // chart tab - none selected
-  CT_UNKNOWN  =  0;                             // chart tab - unknown (shouldn't happen)
-  CT_COVER    =  1;                             // chart tab - cover sheet
-  CT_PROBLEMS =  2;                             // chart tab - problem list
   CT_MEDS     =  3;                             // chart tab - medications screen
   CT_ORDERS   =  4;                             // chart tab - doctor's orders
   CT_HP       =  5;                             // chart tab - history & physical
@@ -112,16 +87,15 @@ const
   CT_REPORTS  = 10;                             // chart tab - reports
   CT_SURGERY  = 11;                             // chart tab - surgery
   CT_IMAGES   = 12;                             // chart tab - images      //kt 9/11 added
-  CT_CONSOLE  = 13;                             // chart tab - console     //kt 9/11 added
-  CT_MAILBOX  = 14;                             // chart tab - mailbox     //elh 4/30/19 added
-  CT_DASHBOARD= 15;                             // chart tab - dashboard   //elh 4/19/24 added
-  CT_POPHEALTH= 16;                             // chart tab - pop health  //elh 8/6/24 added
-  CT_WEBTAB1  = 17;                             // chart tab - web browser //kt 9/11 added
-  CT_WEBTAB2  = 18;                             // chart tab - web browser //kt 9/11 added
-  CT_WEBTAB3  = 19;                             // chart tab - web browser //kt 9/11 added
+  CT_MAILBOX  = 13;                             // chart tab - mailbox     //elh 4/30/19 added
+  CT_DASHBOARD= 14;                             // chart tab - dashboard   //elh 4/19/24 added
+  CT_POPHEALTH= 15;                             // chart tab - pop health  //elh 8/6/24 added
+  CT_WEBTAB1  = 16;                             // chart tab - web browser //kt 9/11 added
+  CT_WEBTAB2  = 17;                             // chart tab - web browser //kt 9/11 added
+  CT_WEBTAB3  = 18;                             // chart tab - web browser //kt 9/11 added
   //kt 9/11 NOTE --> Option: add more CT_WEBTAB#'s here.  But set CT_LAST_WEBTAB= to last one...
   CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
-}
+
 
   { Changes object item types }
   CH_DOC = 10;                        // TIU documents (progress notes)

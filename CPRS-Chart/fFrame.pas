@@ -53,6 +53,7 @@ uses
   StrUtils, Variants, Types,   //eRx 9/4/12
   rTIU, math,                  //TMG
   uTMGEvent,                   //TMG  10/29/20
+  Vcl.Themes,                  //TMG 8/25/26
   fImagePatientPhotoID, fTMGChartExporter, //kt
   VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw, ImgList,
   System.UITypes,
@@ -1074,6 +1075,7 @@ begin
   if bTimerOn then btnTimerResetClick(nil);    //3/21/22
     HideEverything();
     Patient.DFN := '';   //4/19/24
+    Encounter.Clear;  //8/4/26
   if assigned(frmPatientPhotoID) then begin
     frmPatientPhotoID.WebBrowser.Navigate(string(frmImages.NullImageName));  //Make sure previous image isn't shown  6/7/22
     Application.Processmessages;
@@ -1376,7 +1378,9 @@ begin
   CreateTab(tpsLeft, CT_LABS,     'Labs');
   CreateTab(tpsLeft, CT_REPORTS,  'Reports');
   CreateTab(tpsLeft, CT_IMAGES,   'Pics', ImagesEnabled);  //kt 9/11  //kt changed 'Images' -> 'Pics' 8/24/26
+  { //kt removing 8/26/26 since we don't use
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
+  }
   CreateTab(tpsLeft, CT_POPHEALTH,'Pop. Health');  //kt 9/11
 
   { //kt removing 8/24/26 since we don't use
@@ -1687,9 +1691,13 @@ begin
 end;
 
 procedure TfrmFrame.UMInitiate(var Message: TMessage);
+var UserStyle : string;
 begin
   NotifyOtherApps(NAE_OPEN, IntToStr(User.DUZ));
   LoadUserPreferences;
+  UserStyle := uTMGOptions.ReadString('CPRS Style', '');
+  if UserStyle <> '' then
+    TStyleManager.SetStyle(UserStyle);
   TMGInitialFontSize := MainFontSize;  //kt 4/28/21
   GetBAStatus(User.DUZ,Patient.DFN);
   mnuFileOpenClick(Self);
@@ -2202,6 +2210,12 @@ var
   ATabIndex: Integer;  //kt //codex 8/25/26
 begin
   ATabPage := FTabPages[ASide];
+  if PageID = CT_NOPAGE then begin
+    ATabPage.TabIndex := -1;  //kt //codex 8/25/26
+    LastTabPageID[ASide] := PageID;  //kt //codex 8/25/26
+    tabPagesChange(ASide);  //kt //codex 8/25/26
+    Exit;  //kt //codex 8/25/26
+  end;  //kt //codex 8/25/26
   ATabIndex := PageIDToTabIndex(ASide, PageID);  //kt //codex 8/25/26
   if ATabIndex < 0 then Exit;  //kt //codex 8/25/26
   ATabPage.TabIndex := ATabIndex;  //kt //codex 8/25/26

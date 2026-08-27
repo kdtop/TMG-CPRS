@@ -39,7 +39,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ORCtrls, TeEngine, Series, TeeProcs, Chart, ExtCtrls, Grids,Buttons,
   ORNet, ORFn, uConst, Menus, ORDtTmRng, fBase508Form, ComCtrls, uVitals, VAUtils,
-  VA508AccessibilityManager;
+  VA508AccessibilityManager, VclTee.TeeGDIPlus;  //kt //codex 8/25/26
 
 type
   TfrmVitals = class(TfrmBase508Form)
@@ -129,7 +129,8 @@ function VitalsMemo(const patient: string; date1, date2: TFMDateTime; tests: TSt
 
 implementation
 
-uses fCover, uCore, rCore, fVit, fFrame, fEncnt, fVisit, fRptBox, rReports, uInit;
+uses fCover, uCore, rCore, fVit, fFrame, fEncnt, fVisit, fRptBox, rReports, uInit,
+  uTMGVitalsBridge;  //kt //codex 8/26/26
 
 const
   ZOOM_PERCENT = 99;        // padding for inflating margins
@@ -168,40 +169,38 @@ begin
     result := FormatDateTime('mm/dd/yy',IncMonth(Now,-6));
 end;
 
-procedure SelectVitals(VitalType: String);
+procedure SelectVitals(VitalType: String);  //kt //codex 8/26/26
 var
-  VLPtVitals : TGMV_VitalsViewForm;
-  GMV_FName: String;
-  
+  ALocation: string;  //kt //codex 8/26/26
+  ADateStart: string;  //kt //codex 8/26/26
+  ADateStop: string;  //kt //codex 8/26/26
+  AInfo: string;  //kt //codex 8/26/26
+  ADynamicParameter: string;  //kt //codex 8/26/26
 begin
- { Availble Forms:
-  GMV_FName :='GMV_VitalsEnterDLG';
-  GMV_FName :='GMV_VitalsEnterForm';
-  GMV_FName :='GMV_VitalsViewForm';
-  GMV_FName :='GMV_VitalsViewDLG';
-  }
-  GMV_FName :='GMV_VitalsViewDLG';
-  LoadVitalsDLL;
- // UpdateTimeOutInterval(5000);
-  if VitalsDLLHandle <> 0 then
-    begin
-     @VLPtVitals := GetProcAddress(VitalsDLLHandle,PChar(GMV_FName));
-     if assigned(VLPtVitals) then
-       VLPtVitals(RPCBrokerV,Patient.DFN,FloatToStr(Encounter.Location),
-                  getVitalsStartDate(),FormatDateTime('mm/dd/yy',Now),
-                  GMV_APP_SIGNATURE,
-                  GMV_CONTEXT,GMV_CONTEXT,
-                  Patient.Name,
-                  frmFrame.lblPtSSN.Caption + '    ' + frmFrame.lblPtAge.Caption,
-                  Encounter.LocationName +U+ VitalType)
-     else
-       MessageDLG('Can''t find function "'+GMV_FName+'".',mtError,[mbok],0);
-    end
-  else
-    MessageDLG('Can''t find library '+VitalsDLLName+'.',mtError,[mbok],0);
-  @VLPtVitals := nil;
-  UnloadVitalsDLL;
-end;
+  if Encounter.Location <= 0 then  //kt //codex 8/26/26
+  begin  //kt //codex 8/26/26
+    if Encounter.NeedVisit then  //kt //codex 8/26/26
+    begin  //kt //codex 8/26/26
+      UpdateVisit(frmFrame.Font.Size);  //kt //codex 8/26/26
+      frmFrame.DisplayEncounterText;  //kt //codex 8/26/26
+    end;  //kt //codex 8/26/26
+    if Encounter.NeedVisit and (not frmFrame.CCOWDrivedChange) then  //kt //codex 8/26/26
+    begin  //kt //codex 8/26/26
+      InfoBox(TX_NEED_VISIT, TX_NO_VISIT, MB_OK or MB_ICONWARNING);  //kt //codex 8/26/26
+      Exit;  //kt //codex 8/26/26
+    end;  //kt //codex 8/26/26
+  end;  //kt //codex 8/26/26
+
+  ALocation := IntToStr(Encounter.Location);  //kt //codex 8/26/26
+  ADateStart := getVitalsStartDate();  //kt //codex 8/26/26
+  ADateStop := FormatDateTime('mm/dd/yy', Now);  //kt //codex 8/26/26
+  AInfo := frmFrame.lblPtSSN.Caption + '    ' + frmFrame.lblPtAge.Caption;  //kt //codex 8/26/26
+  ADynamicParameter := Encounter.LocationName + U + VitalType;  //kt //codex 8/26/26
+  OutputDebugString(PChar(Format(  //kt //codex 8/26/26
+    'CPRS Vitals in-process call GMV_VitalsViewDLG DFN=%s Loc=%s Start=%s Stop=%s ContextIn=%s ContextOut=%s Dyn=%s',  //kt //codex 8/26/26
+    [Patient.DFN, ALocation, ADateStart, ADateStop, GMV_CONTEXT, GMV_CONTEXT, ADynamicParameter])));  //kt //codex 8/26/26
+  TMG_VitalsViewDLG(VitalType);  //kt //codex 8/26/26
+end;  //kt //codex 8/26/26
 
 (*
 procedure SelectVitals(FontSize: Integer);

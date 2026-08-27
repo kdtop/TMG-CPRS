@@ -85,42 +85,49 @@ const
 type
   VitalTags = TAG_VITBP..TAG_VITPAIN;
 
-  TGMV_VitalsEnterForm = function(
-         RPCBrokerV: TRPCBroker;
-        aPatient, aLocation, aTemplate,aSignature:String;
-        aDateTime:TDateTime): TCustomForm; stdcall;
+  TGMV_VitalsEnterForm = function(  //kt //codex 8/25/26
+         RPCBrokerV: TRPCBroker;  //kt //codex 8/25/26
+        //kt //codex original --> aPatient, aLocation, aTemplate,aSignature:String;
+        aPatient, aLocation, aTemplate, aSignature: ShortString;  //kt //codex 8/25/26
+        aDateTime:TDateTime): TCustomForm; stdcall;  //kt //codex 8/25/26
 
-  TGMV_VitalsEnterDLG = function(
-         RPCBrokerV: TRPCBroker;
-        aDFN, aLocation, aTemplate,aSignature:String;
-        aDateTime:TDateTime;
-        aName,anInfo:String): Integer; stdcall;
+  TGMV_VitalsEnterDLG = function(  //kt //codex 8/25/26
+         RPCBrokerV: TRPCBroker;  //kt //codex 8/25/26
+        //kt //codex original --> aDFN, aLocation, aTemplate,aSignature:String;
+        aDFN, aLocation, aTemplate, aSignature: ShortString;  //kt //codex 8/25/26
+        aDateTime:TDateTime;  //kt //codex 8/25/26
+        //kt //codex original --> aName,anInfo:String): Integer; stdcall;
+        aName, anInfo: ShortString): Integer; stdcall;  //kt //codex 8/25/26
 
-  TGFM_VitalsViewDLG = function(
-         RPCBrokerV: TRPCBroker;
-        aDFN, aLocation,
-        DateStart, DateStop,
-        aSignature,
-        aContextIn,aContextOut,
-        aName,anInfo,aHospitalName:String): Integer; stdcall;
+  TGFM_VitalsViewDLG = function(  //kt //codex 8/25/26
+         RPCBrokerV: TRPCBroker;  //kt //codex 8/25/26
+        aDFN, aLocation,  //kt //codex 8/25/26
+        DateStart, DateStop,  //kt //codex 8/25/26
+        aSignature,  //kt //codex 8/25/26
+        aContextIn, aContextOut,  //kt //codex 8/25/26
+        //kt //codex original --> aName,anInfo,aHospitalName:String): Integer; stdcall;
+        aName, anInfo, aHospitalName: ShortString): Integer; stdcall;  //kt //codex 8/25/26
 
-  TGMV_VitalsViewForm = function(
-         RPCBrokerV: TRPCBroker;
-        aDFN, aLocation,
-        DateStart, DateStop,
-        aSignature,
-        aContextIn,aContextOut,
-        aName,anInfo,
-        aDynamicParameter {HospitolName^Vital Type Abbreviation} :String): TCustomForm; stdcall;
+  TGMV_VitalsViewForm = function(  //kt //codex 8/25/26
+         RPCBrokerV: TRPCBroker;  //kt //codex 8/25/26
+        aDFN, aLocation,  //kt //codex 8/25/26
+        DateStart, DateStop,  //kt //codex 8/25/26
+        aSignature,  //kt //codex 8/25/26
+        aContextIn, aContextOut,  //kt //codex 8/25/26
+        aName, anInfo,  //kt //codex 8/25/26
+        //kt //codex original --> aDynamicParameter {HospitolName^Vital Type Abbreviation} :String): TCustomForm; stdcall;
+        aDynamicParameter {HospitolName^Vital Type Abbreviation}: ShortString): TCustomForm; stdcall;  //kt //codex 8/25/26
 
-  TGMV_LatestVitalsList = function (
-         RPCBrokerV: TRPCBroker;
-        aDFN,
-        aDelim:String;
-        bSilent:Boolean
-        ): TStringList; stdcall;
+  TGMV_LatestVitalsList = function (  //kt //codex 8/25/26
+         RPCBrokerV: TRPCBroker;  //kt //codex 8/25/26
+        aDFN,  //kt //codex 8/25/26
+        //kt //codex original --> aDelim:String;
+        aDelim: ShortString;  //kt //codex 8/25/26
+        bSilent:Boolean  //kt //codex 8/25/26
+        ): TStringList; stdcall;  //kt //codex 8/25/26
 
-  TGMV_VitalsExit = Procedure;
+  //kt //codex original --> TGMV_VitalsExit = Procedure;
+  TGMV_VitalsExit = procedure; stdcall;  //kt //codex 8/25/26
 
 var
   VitalsDLLHandle : THandle = 0;

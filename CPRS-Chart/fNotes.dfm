@@ -8,6 +8,7 @@ inherited frmNotes: TfrmNotes
   HelpFile = 'overvw'
   Menu = mnuNotes
   Position = poDesigned
+  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnResize = FormResize
@@ -31,6 +32,7 @@ inherited frmNotes: TfrmNotes
   inherited pnlLeft: TPanel
     Width = 260
     Height = 679
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 260
     ExplicitHeight = 679
     object lblSpace1: TLabel
@@ -364,6 +366,7 @@ inherited frmNotes: TfrmNotes
     Left = 264
     Width = 792
     Height = 679
+    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 264
     ExplicitWidth = 792
     ExplicitHeight = 679
@@ -518,13 +521,11 @@ inherited frmNotes: TfrmNotes
         BevelOuter = bvNone
         Color = clBtnShadow
         TabOrder = 0
-        ExplicitTop = 19
-        ExplicitHeight = 611
         object pnlHtmlViewer: TPanel
           Left = 0
           Top = 20
           Width = 792
-          Height = 494
+          Height = 588
           Align = alClient
           BevelOuter = bvNone
           Color = clBtnShadow
@@ -908,7 +909,7 @@ inherited frmNotes: TfrmNotes
             Left = 23
             Top = 0
             Width = 145
-            Height = 18
+            Height = 21
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0

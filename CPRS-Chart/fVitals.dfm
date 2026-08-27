@@ -5,13 +5,13 @@ inherited frmVitals: TfrmVitals
   Caption = 'Vitals'
   ClientHeight = 375
   ClientWidth = 514
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
+  ExplicitWidth = 530
+  ExplicitHeight = 414
   TextHeight = 13
   object pnlTop: TPanel [0]
     Left = 0
@@ -35,9 +35,11 @@ inherited frmVitals: TfrmVitals
       Width = 419
       Height = 221
       AllowPanning = pmNone
-      AllowZoom = False
-      BackWall.Brush.Color = clWhite
       BackWall.Brush.Style = bsClear
+      Legend.Alignment = laTop
+      Legend.Inverted = True
+      Legend.Shadow.HorizSize = 2
+      Legend.Shadow.VertSize = 2
       Title.Text.Strings = (
         'test name')
       Title.Visible = False
@@ -45,20 +47,20 @@ inherited frmVitals: TfrmVitals
       OnClickSeries = chtChartClickSeries
       OnUndoZoom = chtChartUndoZoom
       LeftAxis.Title.Caption = 'units'
-      Legend.Alignment = laTop
-      Legend.Inverted = True
-      Legend.ShadowSize = 2
       View3D = False
+      Zoom.Allow = False
       Align = alClient
       BevelOuter = bvNone
       PopupMenu = popChart
       TabOrder = 1
       OnMouseDown = chtChartMouseDown
+      DefaultCanvas = 'TGDIPlusCanvas'
+      ColorPaletteIndex = 13
       object serTestY: TLineSeries
-        Marks.ArrowLength = 8
-        Marks.Visible = False
+        HoverElement = [heCurrent]
         SeriesColor = clBlue
         Title = 'Mean'
+        Brush.BackColor = clDefault
         Pointer.Brush.Color = clBlue
         Pointer.Draw3D = False
         Pointer.InflateMargins = True
@@ -66,18 +68,15 @@ inherited frmVitals: TfrmVitals
         Pointer.Visible = True
         XValues.DateTime = True
         XValues.Name = 'X'
-        XValues.Multiplier = 1.000000000000000000
         XValues.Order = loAscending
-        YValues.DateTime = False
         YValues.Name = 'Y'
-        YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end
       object serTestX: TLineSeries
-        Marks.ArrowLength = 8
-        Marks.Visible = False
+        HoverElement = [heCurrent]
         SeriesColor = clBlue
         Title = 'Dialstolic'
+        Brush.BackColor = clDefault
         Pointer.Brush.Color = clBlue
         Pointer.Draw3D = False
         Pointer.HorizSize = 3
@@ -87,49 +86,41 @@ inherited frmVitals: TfrmVitals
         Pointer.Visible = True
         XValues.DateTime = True
         XValues.Name = 'X'
-        XValues.Multiplier = 1.000000000000000000
         XValues.Order = loAscending
-        YValues.DateTime = False
         YValues.Name = 'Y'
-        YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end
       object serTest: TLineSeries
-        Marks.ArrowLength = 8
-        Marks.Visible = False
+        HoverElement = [heCurrent]
         SeriesColor = clBlue
         Title = 'Systolic'
+        Brush.BackColor = clDefault
         Pointer.InflateMargins = True
         Pointer.Style = psCircle
         Pointer.Visible = True
         XValues.DateTime = True
         XValues.Name = 'X'
-        XValues.Multiplier = 1.000000000000000000
         XValues.Order = loAscending
-        YValues.DateTime = False
         YValues.Name = 'Y'
-        YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end
       object serTime: TPointSeries
-        Marks.ArrowLength = 8
-        Marks.Visible = False
+        HoverElement = [heCurrent]
+        Legend.Visible = False
+        Marks.Callout.Length = 8
         SeriesColor = clSilver
         ShowInLegend = False
         Title = 'Time'
+        ClickableLine = False
         Pointer.Draw3D = False
         Pointer.HorizSize = 3
         Pointer.InflateMargins = True
         Pointer.Style = psCircle
         Pointer.VertSize = 3
         Pointer.Visible = False
-        XValues.DateTime = False
         XValues.Name = 'X'
-        XValues.Multiplier = 1.000000000000000000
         XValues.Order = loAscending
-        YValues.DateTime = False
         YValues.Name = 'Y'
-        YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end
     end
@@ -278,7 +269,6 @@ inherited frmVitals: TfrmVitals
         Height = 119
         Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akRight, akBottom]
-        ItemHeight = 16
         Items.Strings = (
           'Temperature'
           'Pulse'

@@ -314,6 +314,7 @@ implementation
     nextleft := 6;
     for i := 0 to 5 do begin
       newPGBar := TProgressBarWithText.Create(pnl);
+      newPGBar.styleelements := [];   //8/25/26
       newPGBar.Parent := pnl;
       newPGBar.Top := nexttop;
       newPGBar.OnClick := frmFrame.ClickOneAppointment;

@@ -47,7 +47,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_UnitSearchPath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;.;..\CPRS-Lib;..\VA;..\VA\VA508Accessibility;..\WVEHR-Lib;TMG_Extra;TMG_Extra\DirectXDelphiWebcamCapture;TMG_Extra\DirectXDelphiWebcamCapture\DirectX;TMG_Extra\Twain;TMG_Extra\png_Graphics;TMG_Extra\HTMLEdit;TMG_Extra\HTMLEdit\EmbeddedED;BA;Consults;Encounter;Careplan-Letters;Images;Options;Orders;Templates;Vitals;Window-Eyes Support Files;D:\Embarcadero\packages\Project Groups\11.0\Resource;XuDigSig;..\DCU;..\BDK50;TMG_Extra\AnticoagMgmtTool;..\Packages;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;.;..\CPRS-Lib;..\VA;..\VA\VA508Accessibility;..\WVEHR-Lib;TMG_Extra;TMG_Extra\DirectXDelphiWebcamCapture;TMG_Extra\DirectXDelphiWebcamCapture\DirectX;TMG_Extra\Twain;TMG_Extra\png_Graphics;TMG_Extra\HTMLEdit;TMG_Extra\HTMLEdit\EmbeddedED;BA;Consults;Encounter;Careplan-Letters;Images;Options;Orders;Templates;Vitals;Window-Eyes Support Files;D:\Embarcadero\packages\Project Groups\11.0\Resource;XuDigSig;..\DCU;..\BDK50;TMG_Extra\AnticoagMgmtTool;TMG_Extra\tmg-vitals\VitalsView;TMG_Extra\tmg-vitals\VitalsDataEntry;TMG_Extra\tmg-vitals\VitalsPatient;TMG_Extra\tmg-vitals\VitalsDateTime;TMG_Extra\tmg-vitals\ROR;TMG_Extra\tmg-vitals\Casmed;TMG_Extra\tmg-vitals\VSMonitors;TMG_Extra\tmg-vitals\VitalsCommon;TMG_Extra\tmg-vitals\VitalsUtils;..\Packages;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <DCC_UsePackage>vcl;vclx;dbrtl;Rave65VCL;bdertl;rtl;vcldb;adortl;dbxcds;dbexpress;vclib;ibxpress;xmlrtl;vclactnband;inet;IntrawebDB_80_100;Intraweb_80_100;vclie;inetdbbde;inetdbxpress;IndyCore;IndySystem;dclOfficeXP;soaprtl;dsnap;IndyProtocols;teeui;teedb;tee;vcldbx;XWB_R2006;VclSmp;TSortStringGrid;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_ImageBase>00400000</DCC_ImageBase>
@@ -67,6 +67,7 @@
         <VerInfo_Keys>CompanyName=Department of Veterans Affairs / Family Physicians of Greeneville, PC;FileDescription=2018.06.11;FileVersion=1.0.30.16;InternalName=1.0.30.16 server required;LegalCopyright=Unauthorized access or misuse of this system and/or its data is a federal crime. Use of all data shall be in accordance with VA policy on security and privacy.;LegalTrademarks=;OriginalFilename=Patch 385 (404);ProductName=Computerized Patient Record System;ProductVersion=1.0.30.16;Comments=Version 1.0.30.16</VerInfo_Keys>
         <DCC_K>false</DCC_K>
         <SanitizedProjectName>CPRSChart</SanitizedProjectName>
+        <Custom_Styles>&quot;Aqua Light Slate|VCLSTYLE|$(BDSCOMMONDIR)\Styles\AquaLightSlate.vsf&quot;;Glow|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Glow.vsf;&quot;Iceberg Classico|VCLSTYLE|$(BDSCOMMONDIR)\Styles\IcebergClassico.vsf&quot;;&quot;Lavender Classico|VCLSTYLE|$(BDSCOMMONDIR)\Styles\LavenderClassico.vsf&quot;;Sky|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Sky.vsf;&quot;Slate Classico|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SlateClassico.vsf&quot;;&quot;Tablet Dark|VCLSTYLE|$(BDSCOMMONDIR)\Styles\TabletDark.vsf&quot;;&quot;Tablet Light|VCLSTYLE|$(BDSCOMMONDIR)\Styles\TabletLight.vsf&quot;;Windows10|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10.vsf;&quot;Windows10 Blue|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10Blue.vsf&quot;;&quot;Windows10 Dark|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10Dark.vsf&quot;;&quot;Windows10 Green|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10Green.vsf&quot;;&quot;Windows10 Purple|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10Purple.vsf&quot;;&quot;Windows10 SlateGray|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10SlateGray.vsf&quot;;Amakrits|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Amakrits.vsf;&quot;Amethyst Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\AmethystKamri.vsf&quot;;&quot;Aqua Graphite|VCLSTYLE|$(BDSCOMMONDIR)\Styles\AquaGraphite.vsf&quot;;Auric|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Auric.vsf;Carbon|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Carbon.vsf;&quot;Charcoal Dark Slate|VCLSTYLE|$(BDSCOMMONDIR)\Styles\CharcoalDarkSlate.vsf&quot;;&quot;Cobalt XEMedia|VCLSTYLE|$(BDSCOMMONDIR)\Styles\CobaltXEMedia.vsf&quot;;&quot;Cyan Dusk|VCLSTYLE|$(BDSCOMMONDIR)\Styles\CyanDusk.vsf&quot;;&quot;Cyan Night|VCLSTYLE|$(BDSCOMMONDIR)\Styles\CyanNight.vsf&quot;;&quot;Emerald Light Slate|VCLSTYLE|$(BDSCOMMONDIR)\Styles\EmeraldLightSlate.vsf&quot;;&quot;Golden Graphite|VCLSTYLE|$(BDSCOMMONDIR)\Styles\GoldenGraphite.vsf&quot;;Light|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Light.vsf;Luna|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Luna.vsf;Obsidian|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Obsidian.vsf;&quot;Onyx Blue|VCLSTYLE|$(BDSCOMMONDIR)\Styles\OnyxBlue.vsf&quot;;&quot;Ruby Graphite|VCLSTYLE|$(BDSCOMMONDIR)\Styles\RubyGraphite.vsf&quot;;&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;;Silver|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Silver.vsf;&quot;Smokey Quartz Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SmokeyQuartzKamri.vsf&quot;;&quot;Turquoise Gray|VCLSTYLE|$(BDSCOMMONDIR)\Styles\TurquoiseGray.vsf&quot;;Glossy|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Glossy.vsf</Custom_Styles>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
@@ -903,6 +904,18 @@
         <DCCReference Include="TMG_Extra\fUploadImages.pas">
             <Form>frmImageUpload</Form>
         </DCCReference>
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsView\fPatientVitals.pas"> <!-- //kt //codex 8/26/26 -->
+            <Form>frmPatientVitals</Form>
+        </DCCReference>
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsCommon\uGMV_VitalTypes.pas"/> <!-- //kt //codex 8/26/26 -->
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsView\mGMV_GridGraph.pas"> <!-- //kt //codex 8/26/26 -->
+            <Form>fraGMV_GridGraph</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsDataEntry\fGMV_InputLite.pas"> <!-- //kt //codex 8/26/26 -->
+            <Form>frmGMV_InputLite</Form>
+        </DCCReference>
+        <DCCReference Include="TMG_Extra\uTMGVitalsBridge.pas"/>
         <DCCReference Include="TMG_Extra\uTMGUtil.pas"/>
         <DCCReference Include="TMG_Extra\AddOneFileEntryU.pas"/>
         <DCCReference Include="TMG_Extra\ColorUtil.pas"/>

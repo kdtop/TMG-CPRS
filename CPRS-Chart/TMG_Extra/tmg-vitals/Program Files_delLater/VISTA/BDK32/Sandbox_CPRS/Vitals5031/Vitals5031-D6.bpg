@@ -1,0 +1,36 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = GMV_VitalsViewEnterRD.dll VitalsManager.exe GMV_VitalsViewEnter.dll \
+  Vitals.exe Components.bpl designide1.bpl
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+GMV_VitalsViewEnterRD.dll: DLL-VitalsViewEnterRD\GMV_VitalsViewEnterRD.dpr
+  $(DCC)
+
+VitalsManager.exe: APP-VitalsManager\VitalsManager.dpr
+  $(DCC)
+
+GMV_VitalsViewEnter.dll: DLL-VitalsViewEnter\GMV_VitalsViewEnter.dpr
+  $(DCC)
+
+Vitals.exe: APP-Vitals\Vitals.dpr
+  $(DCC)
+
+Components.bpl: ..\CCR_Components\Components\Components.dpk
+  $(DCC)
+
+designide1.bpl: ..\..\..\..\BORLAND\Delphi7\Bin\designide1.dpk
+  $(DCC)
+
+

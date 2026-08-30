@@ -1,7 +1,7 @@
 inherited frmOptions: TfrmOptions
   Left = 315
   Top = 110
-  Height = 474
+  Height = 503
   HelpContext = 9999
   VertScrollBar.Range = 360
   BorderIcons = [biSystemMenu, biHelp]
@@ -12,11 +12,11 @@ inherited frmOptions: TfrmOptions
   Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  ExplicitHeight = 474
+  ExplicitHeight = 503
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 405
+    Top = 434
     Width = 427
     Height = 30
     HelpContext = 9999
@@ -64,7 +64,7 @@ inherited frmOptions: TfrmOptions
     Left = 0
     Top = 0
     Width = 427
-    Height = 405
+    Height = 434
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
@@ -75,7 +75,7 @@ inherited frmOptions: TfrmOptions
       Left = 5
       Top = 5
       Width = 417
-      Height = 395
+      Height = 424
       HelpContext = 9999
       ActivePage = tsCoverSheet
       Align = alClient
@@ -87,7 +87,7 @@ inherited frmOptions: TfrmOptions
         Caption = 'General'
         DesignSize = (
           409
-          367)
+          396)
         object bvlCoverDays: TBevel
           Left = 125
           Top = 16
@@ -541,7 +541,6 @@ inherited frmOptions: TfrmOptions
           Caption = 
             'You can turn on or off these notifications except those that are' +
             ' mandatory.'
-          ExplicitTop = 133
         end
         object btnNotificationsRemove: TButton
           Left = 191
@@ -710,7 +709,6 @@ inherited frmOptions: TfrmOptions
           Caption = 
             'You can turn on or off these notifications except those that are' +
             ' mandatory.'
-          ExplicitTop = 84
         end
       end
       object tsListsTeams: TTabSheet
@@ -949,7 +947,7 @@ inherited frmOptions: TfrmOptions
         ImageIndex = 4
         DesignSize = (
           409
-          367)
+          396)
         object bvlNotesNotes: TBevel
           Left = 88
           Top = 16
@@ -1403,7 +1401,7 @@ inherited frmOptions: TfrmOptions
         ImageIndex = 6
         DesignSize = (
           409
-          367)
+          396)
         object bvlGraphSettings: TBevel
           Left = 104
           Top = 16

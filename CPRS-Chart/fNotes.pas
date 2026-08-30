@@ -5385,8 +5385,14 @@ begin
 end;
 
 function TfrmNotes.IsNonSelectableGroupNode(Node: TTreeNode): Boolean;
+var
+  DocHasChildren: string; //kt //codex 8/30/26
 begin
-  Result := Assigned(Node) and (Node.ImageIndex in [IMG_TOP_LEVEL, IMG_GROUP_OPEN, IMG_GROUP_SHUT]); //kt //codex 8/14/26
+  Result := False; //kt //codex 8/30/26
+  if not Assigned(Node) then Exit; //kt //codex 8/30/26
+  DocHasChildren := Piece(TORTreeNode(Node).StringData, U, 13); //kt //codex 8/30/26
+  if (DocHasChildren <> '') and (DocHasChildren[1] = '*') then DocHasChildren := Copy(DocHasChildren, 2, 5); //kt //codex 8/30/26
+  Result := (DocHasChildren <> '') and (DocHasChildren[1] = '%'); //kt //codex 8/30/26
 end;
 
 function TfrmNotes.GetFirstSelectableNoteNode(StartNode: TTreeNode): TORTreeNode;
@@ -5464,7 +5470,7 @@ var
   AutoEditPlanned :         boolean;       //kt 5/15
   UnsignedDocsNode:         TORTreeNode;   //kt 5/15
   DescendentDepth:          Integer;       //kt 5/15
-  TargetNode:               TORTreeNode;   //kt //codex 8/14/26
+  //kt //codex original --> TargetNode: TORTreeNode;
 begin
   //original -->   SetActiveListBoxForImages(frmNotes.lstNotes);  //fImages.ListBox := frmNotes.lstNotes;  //kt
   SetActiveTIUIENGetterForImages(GetCurrentNoteID);
@@ -5490,11 +5496,12 @@ begin
     Exit;
   end;
   if IsNonSelectableGroupNode(Node) then begin //kt //codex 8/14/26
-    TargetNode := GetFirstSelectableNoteNode(Node); //kt //codex 8/14/26
-    if Assigned(TargetNode) and (tvNotes.Selected <> TargetNode) then begin //kt //codex 8/14/26
-      tvNotes.Selected := TargetNode; //kt //codex 8/14/26
-      Exit; //kt //codex 8/14/26
-    end;
+    //kt //codex original --> TargetNode := GetFirstSelectableNoteNode(Node);
+    //kt //codex original --> if Assigned(TargetNode) and (tvNotes.Selected <> TargetNode) then begin
+    //kt //codex original -->   tvNotes.Selected := TargetNode;
+    //kt //codex original -->   Exit;
+    //kt //codex original --> end;
+    Exit; //kt //codex 8/30/26
   end;
   //kt end mod block -------
   with tvNotes do begin

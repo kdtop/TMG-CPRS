@@ -904,15 +904,15 @@
         <DCCReference Include="TMG_Extra\fUploadImages.pas">
             <Form>frmImageUpload</Form>
         </DCCReference>
-        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsView\fPatientVitals.pas"> <!-- //kt //codex 8/26/26 -->
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsView\fPatientVitals.pas">
             <Form>frmPatientVitals</Form>
         </DCCReference>
-        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsCommon\uGMV_VitalTypes.pas"/> <!-- //kt //codex 8/26/26 -->
-        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsView\mGMV_GridGraph.pas"> <!-- //kt //codex 8/26/26 -->
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsCommon\uGMV_VitalTypes.pas"/>
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsView\mGMV_GridGraph.pas">
             <Form>fraGMV_GridGraph</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsDataEntry\fGMV_InputLite.pas"> <!-- //kt //codex 8/26/26 -->
+        <DCCReference Include="TMG_Extra\tmg-vitals\VitalsDataEntry\fGMV_InputLite.pas">
             <Form>frmGMV_InputLite</Form>
         </DCCReference>
         <DCCReference Include="TMG_Extra\uTMGVitalsBridge.pas"/>

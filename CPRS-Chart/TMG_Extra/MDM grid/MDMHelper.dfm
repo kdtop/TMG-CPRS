@@ -12,11 +12,9 @@ object frmMDMGrid: TfrmMDMGrid
   Font.Name = 'Tahoma'
   Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 13
   object sbMain: TScrollBox
     Left = 0
@@ -553,10 +551,6 @@ object frmMDMGrid: TfrmMDMGrid
           Width = 20
           Height = 20
           Hint = 'Define "Test"'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 14
-          OnClick = btnTestsHelpClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -584,6 +578,10 @@ object frmMDMGrid: TfrmMDMGrid
             202020AFAFAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEFAFAFAF2020
             20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF404040707070BFBFBFBF
             BFBFBFBFBF707070404040FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 14
+          OnClick = btnTestsHelpClick
         end
         object btnOrderTestsHelp: TBitBtn
           Left = 384
@@ -591,10 +589,6 @@ object frmMDMGrid: TfrmMDMGrid
           Width = 20
           Height = 20
           Hint = 'Define "Test"'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 15
-          OnClick = btnTestsHelpClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -622,6 +616,10 @@ object frmMDMGrid: TfrmMDMGrid
             202020AFAFAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEFAFAFAF2020
             20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF404040707070BFBFBFBF
             BFBFBFBFBF707070404040FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 15
+          OnClick = btnTestsHelpClick
         end
         object btnReviewDocsHelp: TBitBtn
           Left = 384
@@ -629,10 +627,6 @@ object frmMDMGrid: TfrmMDMGrid
           Width = 20
           Height = 20
           Hint = 'Define "External"'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 16
-          OnClick = btnReviewDocsHelpClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -660,6 +654,10 @@ object frmMDMGrid: TfrmMDMGrid
             202020AFAFAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEFAFAFAF2020
             20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF404040707070BFBFBFBF
             BFBFBFBFBF707070404040FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 16
+          OnClick = btnReviewDocsHelpClick
         end
         object btnIndependentHxHelp: TBitBtn
           Left = 384
@@ -667,10 +665,6 @@ object frmMDMGrid: TfrmMDMGrid
           Width = 20
           Height = 20
           Hint = 'Define "Independent"'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 17
-          OnClick = btnIndependentHxHelpClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -698,6 +692,10 @@ object frmMDMGrid: TfrmMDMGrid
             202020AFAFAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEFAFAFAF2020
             20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF404040707070BFBFBFBF
             BFBFBFBFBF707070404040FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 17
+          OnClick = btnIndependentHxHelpClick
         end
         object btnInterpretTestHelp: TBitBtn
           Left = 384
@@ -705,10 +703,6 @@ object frmMDMGrid: TfrmMDMGrid
           Width = 20
           Height = 20
           Hint = 'Define "Interpret"'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 18
-          OnClick = btnInterpretTestHelpClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -736,6 +730,10 @@ object frmMDMGrid: TfrmMDMGrid
             202020AFAFAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEFAFAFAF2020
             20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF404040707070BFBFBFBF
             BFBFBFBFBF707070404040FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 18
+          OnClick = btnInterpretTestHelpClick
         end
         object btnDiscussExternalDocHelp: TBitBtn
           Left = 384
@@ -743,10 +741,6 @@ object frmMDMGrid: TfrmMDMGrid
           Width = 20
           Height = 20
           Hint = 'Define "External"'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 19
-          OnClick = btnDiscussExternalDocHelpClick
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
             1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -774,6 +768,10 @@ object frmMDMGrid: TfrmMDMGrid
             202020AFAFAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEFAFAFAF2020
             20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF404040707070BFBFBFBF
             BFBFBFBFBF707070404040FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 19
+          OnClick = btnDiscussExternalDocHelpClick
         end
       end
     end
@@ -926,9 +924,6 @@ object frmMDMGrid: TfrmMDMGrid
         Anchors = [akTop, akRight]
         Caption = '&OK'
         Enabled = False
-        ModalResult = 1
-        TabOrder = 0
-        OnClick = btnOKClick
         Glyph.Data = {
           42240000424D4224000000000000420000002800000030000000300000000100
           20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -1221,6 +1216,9 @@ object frmMDMGrid: TfrmMDMGrid
           E2FFFAFCFAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFF}
+        ModalResult = 1
+        TabOrder = 0
+        OnClick = btnOKClick
       end
       object btnCancel: TBitBtn
         Left = 750
@@ -1229,9 +1227,6 @@ object frmMDMGrid: TfrmMDMGrid
         Height = 57
         Anchors = [akTop, akRight]
         Caption = '&Cancel'
-        ModalResult = 2
-        TabOrder = 1
-        OnClick = btnCancelClick
         Glyph.Data = {
           42240000424D4224000000000000420000002800000030000000300000000100
           20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -1524,6 +1519,9 @@ object frmMDMGrid: TfrmMDMGrid
           F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
           F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0
           F0FFF0F0F0FF}
+        ModalResult = 2
+        TabOrder = 1
+        OnClick = btnCancelClick
       end
       object btnOKRelaunch: TBitBtn
         Left = 899
@@ -1533,9 +1531,6 @@ object frmMDMGrid: TfrmMDMGrid
         Anchors = [akTop, akRight]
         Caption = '&OK and Relaunch'
         Enabled = False
-        ModalResult = 1
-        TabOrder = 2
-        OnClick = btnOKRelaunchClick
         Glyph.Data = {
           42240000424D4224000000000000420000002800000030000000300000000100
           20000300000000240000130B0000130B000000000000000000000000FF0000FF
@@ -1828,6 +1823,9 @@ object frmMDMGrid: TfrmMDMGrid
           E2FFFAFCFAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFF}
+        ModalResult = 1
+        TabOrder = 2
+        OnClick = btnOKRelaunchClick
       end
     end
     object pnlTelemedTimeAmount: TPanel

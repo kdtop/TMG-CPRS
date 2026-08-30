@@ -182,6 +182,56 @@ implementation
     Msg.lpData will contain incoming message, copied to 's'.
     s format:  COMMAND^data   <-- Only recognized commands will be handled
   }
+
+  var
+  s: AnsiString;
+  Command, DataStr: string;
+  SendToHandle: THandle;
+  begin
+    Self.FFrameHandle := FrameHandle;
+
+    // WM_COPYDATA contains raw bytes. Delphi 12 PChar is Unicode,
+    // so explicitly interpret the incoming data as ANSI.
+    if (Msg.CopyDataStruct = nil) or
+       (Msg.CopyDataStruct.cbData = 0) then
+    begin
+      Msg.Result := 0;
+      Exit;
+    end;
+
+    SetString(
+      s,
+      PAnsiChar(Msg.CopyDataStruct.lpData),
+      Msg.CopyDataStruct.cbData - 1
+    );
+
+    // Convert to Delphi 12 Unicode string
+    Command := UpperCase(piece(string(s), '^', 1));
+
+    if Msg.From <> 0 then
+      SendToHandle := Msg.From
+    else if piece(string(s), '^', 3) <> '' then
+      SendToHandle := StrToInt(piece(string(s), '^', 3))
+    else
+      SendToHandle := FindWindow(
+        PChar('AutoHotkeyGUI'),
+        PChar('Windows Message Receiver')
+      );
+
+    if SendToHandle = 0 then
+    begin
+      ShowMessage('CopyData Receiver NOT found!');
+      Exit;
+    end;
+
+    DataStr := Copy(string(s), Length(Command) + 2, Length(string(s)));
+
+    HandleCommand(Command, DataStr, SendToHandle);
+
+    Msg.Result := 2006;
+  end;
+
+  {     OLD DELPHI 2006 CODE BELOW. CAN BE REMOVED LATER    ELH     8/28/26
   var
     s : string;
     Command, DataStr : string;
@@ -203,7 +253,7 @@ implementation
     DataStr := Copy(s, Length(Command)+2, Length(s)); //kt //codex 8/3/26
     HandleCommand(Command, DataStr, SendToHandle);
     msg.Result := 2006; //Found on web.  ?? meaning ??
-  end;
+  end;       }
 
   procedure TTMGWMAPI.PushPriorRPCBrokerVResults();
   begin

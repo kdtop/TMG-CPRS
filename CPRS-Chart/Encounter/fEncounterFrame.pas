@@ -503,7 +503,7 @@ procedure TfrmEncounterFrame.FreeChildForms;
 begin
   if FormListContains(CT_TMG_FolwUpNm)     then FreeAndNil(frmFollowUp);        //kt added
   if FormListContains(CT_TMG_EnctrMDMNm)   then FreeAndNil(frmEncounterMDM);    //kt added
-  if FormListContains(CT_TMG_EnctrMDMNm)   then FreeAndNil(frmEnounterLabs);    //kt added
+  if FormListContains(CT_TMG_LabsNm)   then FreeAndNil(frmEnounterLabs);    //kt added
   if FormListContains(CT_TMG_VisitNm)      then FreeAndNil(frmTMGVisitType);    //kt added
   if FormListContains(CT_TMG_DiagNm)       then FreeAndNil(frmTMGDiagnoses);    //kt added
   if FormListContains(CT_TMG_ProcNm)       then FreeAndNil(frmTMGProcedures);   //kt added

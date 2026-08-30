@@ -1,4 +1,4 @@
-unit MDMHelper;
+﻿unit MDMHelper;
 
 
 interface
@@ -481,7 +481,7 @@ begin
   else memBillingModeHint.Color := clSkyBlue;
   }
 
-  tRadioButton(rgBillingMode.Controls[2]).enabled := False;        //added 1/16/25 to suppress AUDIO ONLY, without removing it
+  //tRadioButton(rgBillingMode.Controls[2]).enabled := False;        //added 1/16/25 to suppress AUDIO ONLY, without removing it
 
   {$IFNDEF STAND_ALONE_APP}
   CPTAvgPayments := TStringList.Create();

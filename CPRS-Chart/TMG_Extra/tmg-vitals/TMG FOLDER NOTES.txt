@@ -1,0 +1,10 @@
+NOTE: This folder contains only a subset of all the files that come from the VA.  
+That full package is used to create .dll's that can be used in a variety of 
+applications, that are not used in our private medical office.  So, instead,
+we narrowed down to these files and compiled the functionality directly into
+CPRS. 
+
+So if you need the full set of files, look elsewhere.
+
+KT
+8/26/27

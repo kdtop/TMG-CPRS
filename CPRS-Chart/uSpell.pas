@@ -1000,7 +1000,8 @@ begin
   Application.OnActivate := OnAppActivate;
   FOldFormChange := Screen.OnActiveFormChange;
   Screen.OnActiveFormChange := OnFormChange;
-  Resume;
+  //kt //codex original -->   Resume;
+  Start; //kt //codex 8/30/26
 end;
 
 procedure TMSWordThread.WordError;

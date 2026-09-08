@@ -20,7 +20,7 @@ interface
 uses Messages, Windows, SysUtils, Classes, Controls, Forms,
   System.Types,
   System.UITypes,
-  Menus, Graphics, StdCtrls, RichEdit, ToolWin, ImgList, ExtCtrls, ComCtrls;
+  Menus, Graphics, StdCtrls, RichEdit, ToolWin, ImgList, ExtCtrls, ComCtrls, CommDlg; //kt //codex 8/30/26
 
 type
   TXWBCustomRichEdit = class;
@@ -1157,7 +1157,8 @@ var
   Ext: string;
   Convert: PConversionFormat;
 begin
-  Ext := AnsiLowerCaseFileName(ExtractFileExt(Filename));
+  //kt //codex original -->   Ext := AnsiLowerCaseFileName(ExtractFileExt(Filename));
+  Ext := AnsiLowerCase(ExtractFileExt(Filename)); //kt //codex 8/30/26
   System.Delete(Ext, 1, 1);
   Convert := ConversionFormatList;
   while Convert <> nil do
@@ -1182,7 +1183,8 @@ var
   Ext: string;
   Convert: PConversionFormat;
 begin
-  Ext := AnsiLowerCaseFileName(ExtractFileExt(Filename));
+  //kt //codex original -->   Ext := AnsiLowerCaseFileName(ExtractFileExt(Filename));
+  Ext := AnsiLowerCase(ExtractFileExt(Filename)); //kt //codex 8/30/26
   System.Delete(Ext, 1, 1);
   Convert := ConversionFormatList;
   while Convert <> nil do
@@ -1650,8 +1652,10 @@ begin
     cpMax := cpMin + Length;
   end;
   Flags := 0;
-  if stWholeWord in Options then Flags := Flags or FT_WHOLEWORD;
-  if stMatchCase in Options then Flags := Flags or FT_MATCHCASE;
+  //kt //codex original -->   if stWholeWord in Options then Flags := Flags or FT_WHOLEWORD;
+  if stWholeWord in Options then Flags := Flags or CommDlg.FR_WHOLEWORD; //kt //codex 8/30/26
+  //kt //codex original -->   if stMatchCase in Options then Flags := Flags or FT_MATCHCASE;
+  if stMatchCase in Options then Flags := Flags or CommDlg.FR_MATCHCASE; //kt //codex 8/30/26
   Find.lpstrText := PChar(SearchStr);
   Result := SendMessage(Handle, EM_FINDTEXT, Flags, LongInt(@Find));
 end;
@@ -1663,7 +1667,8 @@ begin
   New(NewRec);
   with NewRec^ do
   begin
-    Extension := AnsiLowerCaseFileName(Ext);
+    //kt //codex original -->     Extension := AnsiLowerCaseFileName(Ext);
+    Extension := AnsiLowerCase(Ext); //kt //codex 8/30/26
     ConversionClass := AClass;
     Next := ConversionFormatList;
   end;

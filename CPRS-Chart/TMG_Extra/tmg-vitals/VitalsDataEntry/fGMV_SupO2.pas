@@ -85,6 +85,7 @@ unit fGMV_SupO2;
 interface
 
 uses
+  System.Types, //kt //codex 8/30/26
   Windows,
   Messages,
   SysUtils,

@@ -240,7 +240,8 @@ begin
   end;
   // ignore if delay from other than current itemindex
   // (prevents completion of an order set from calling DoNextItem)
-  if Message.WParam = lstSet.ItemIndex then
+  //kt //codex original -->   if Message.WParam = lstSet.ItemIndex then
+  if Integer(Message.WParam) = lstSet.ItemIndex then //kt //codex 8/30/26
     if lstSet.ItemIndex < lstSet.Items.Count - 1 then DoNextItem else Close;
 end;
 

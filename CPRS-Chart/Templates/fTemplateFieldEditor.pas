@@ -417,7 +417,8 @@ begin //UpdateControls
         if tmp then begin
           edtDateDef.Visible := not FFld.IsDBControl_Reader;             //kt 5/16
           edtDateDef.Text := FFld.EditDefault;
-          cbxDateType.SelectByID(TemplateFieldDateCodes[FFld.DateType]);
+          //kt //codex original -->           cbxDateType.SelectByID(TemplateFieldDateCodes[FFld.DateType]);
+          cbxDateType.SelectByID(string(TemplateFieldDateCodes[FFld.DateType])); //kt //codex 8/30/26
         end;
 
         //kt original --> tmp := ok and (FFld.FldType in ItemDfltTypes);
@@ -961,10 +962,10 @@ begin
   if(assigned(FFld)) then
   begin
     TmpSL := TStringList.Create;
+    DBControlData := TDBControlData.Create;  //kt added 5/16
     try
       TmpSL.Add(TemplateFieldBeginSignature + FFld.FldName + TemplateFieldEndSignature);
       //kt original --> CheckBoilerplate4Fields(TmpSL, 'Preview Template Field: ' + FFld.FldName, TRUE);
-      DBControlData := TDBControlData.Create;  //kt added 5/16
       CheckBoilerplate4Fields(TmpSL, 'Preview Template Field: ' + FFld.FldName, [tPreview], DBControlData);
       DBControlData.MsgNoSave;  //kt added 5/16
     finally
@@ -1324,7 +1325,8 @@ begin
       FFld.DateType := TTmplFldDateType(cbxDateType.ItemIndex + 1)
     else
       FFld.DateType := dtDate;
-    cbxDateType.SelectByID(TemplateFieldDateCodes[FFld.DateType]);
+    //kt //codex original -->     cbxDateType.SelectByID(TemplateFieldDateCodes[FFld.DateType]);
+    cbxDateType.SelectByID(string(TemplateFieldDateCodes[FFld.DateType])); //kt //codex 8/30/26
   end;
 
 end;

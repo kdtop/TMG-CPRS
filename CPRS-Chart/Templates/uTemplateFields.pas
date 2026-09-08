@@ -833,8 +833,10 @@ var
       while (pos('<',temp1)>0) and (pos('>',temp1)>0) do begin
         //kt //codex original --> temp2 := MidStr(temp1,pos('<',temp1),pos('>',temp1)-pos('<',temp1)+1);
         temp2 := Copy(temp1,pos('<',temp1),pos('>',temp1)-pos('<',temp1)+1); //kt //codex 8/3/26
-        HTMLStrLen := HTMLStrLen + strlen(PChar(temp2));
-        temp1 := Rightstr(temp1,strlen(PChar(temp1))-pos('>',temp1));
+        //kt //codex original -->         HTMLStrLen := HTMLStrLen + strlen(PChar(temp2));
+        HTMLStrLen := HTMLStrLen + Length(temp2); //kt //codex 8/30/26
+        //kt //codex original -->         temp1 := Rightstr(temp1,strlen(PChar(temp1))-pos('>',temp1));
+        temp1 := Rightstr(temp1, Length(temp1) - pos('>', temp1)); //kt //codex 8/30/26
       end;
     end else begin
     Result := WrapText(Result, #13#10, [' '], MAX_ENTRY_WIDTH);
@@ -1227,7 +1229,8 @@ begin
   if(length(Fld.FldName) < 3) then
     msg := 'Field Name must be at least three characters in length'
   else
-  if(not (Fld.FldName[1] in ['A'..'Z','0'..'9'])) then
+  //kt //codex original --> if(not (Fld.FldName[1] in ['A'..'Z','0'..'9'])) then
+  if not CharInSet(Fld.FldName[1], ['A'..'Z','0'..'9']) then //kt //codex 8/30/26
     msg := 'First Field Name character must be "A" - "Z", or "0" - "9"'
   else
   if(assigned(uTmplFlds)) then
@@ -1480,7 +1483,8 @@ var
 begin
   Result := dftUnknown;
   for typ := low(TTemplateFieldType) to high(TTemplateFieldType) do begin
-    if Code = TemplateFieldTypeCodes[typ] then begin
+    //kt //codex original -->     if Code = TemplateFieldTypeCodes[typ] then begin
+    if Code = string(TemplateFieldTypeCodes[typ]) then begin //kt //codex 8/30/26
       Result := typ;
       break;
     end;
@@ -1494,7 +1498,8 @@ var
 begin
   Result := dtUnknown;
   for typ := low(TTmplFldDateType) to high(TTmplFldDateType) do begin
-    if Code = TemplateFieldDateCodes[typ] then begin
+    //kt //codex original -->     if Code = TemplateFieldDateCodes[typ] then begin
+    if Code = string(TemplateFieldDateCodes[typ]) then begin //kt //codex 8/30/26
       Result := typ;
       break;
     end;
@@ -1711,6 +1716,7 @@ begin
           else
             cbo.ListItemsOnly := TRUE;
           {Clear out embedded fields}
+          cbo.Items.LineBreak := #13#10;  //9/3/26  ELH
           cbo.Items.Text := StripEmbedded(Items);
           //kt original --> cbo.SelectByID(StripEmbedded(FItemDefault));
           cbo.SelectByID(DefaultStr);  //kt mod
@@ -2209,7 +2215,8 @@ begin
         else
           AID := '0';
         FldSL.Add('.01='+FFldName);
-        FldSL.Add('.02='+TemplateFieldTypeCodes[FFldType]);
+        //kt //codex original -->         FldSL.Add('.02='+TemplateFieldTypeCodes[FFldType]);
+        FldSL.Add('.02='+string(TemplateFieldTypeCodes[FFldType])); //kt //codex 8/30/26
         FldSL.Add('.03='+BOOLCHAR[FInactive]);
         FldSL.Add('.04='+IntToStr(FMaxLen));
         FldSL.Add('.05='+FEditDefault);
@@ -2238,7 +2245,8 @@ begin
         if FDateType = dtUnknown then
           FldSL.Add('.16=@')
         else
-          FldSL.Add('.16='+TemplateFieldDateCodes[FDateType]);
+          //kt //codex original -->           FldSL.Add('.16='+TemplateFieldDateCodes[FDateType]);
+          FldSL.Add('.16='+string(TemplateFieldDateCodes[FDateType])); //kt //codex 8/30/26
 
         if FURL='' then
           FldSL.Add('3=@')

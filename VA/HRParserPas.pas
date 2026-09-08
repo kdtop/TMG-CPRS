@@ -76,6 +76,9 @@ type
 
 implementation
 
+uses
+  SysUtils; //kt //codex 8/30/26
+
 
 { T H R P a r s e r P a s }
 
@@ -202,7 +205,8 @@ begin
     begin
       //FTokenBuf.Write(FSourceBuf[FSourcePos]);
       Inc( FSourcePos );
-      while FSourceBuf[ FSourcePos ] in [ '0'..'9' ] do
+      //kt //codex original --> while FSourceBuf[ FSourcePos ] in [ '0'..'9' ] do
+      while CharInSet(FSourceBuf[ FSourcePos ], [ '0'..'9' ]) do //kt //codex 8/30/26
       begin
         FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
         Inc( FSourcePos );
@@ -216,7 +220,8 @@ begin
     begin
       //FTokenBuf.Write(FSourceBuf[FSourcePos]);
       Inc( FSourcePos );
-      while FSourceBuf[ FSourcePos ] in [ '0'..'9', 'A'..'F', 'a'..'f' ] do
+      //kt //codex original --> while FSourceBuf[ FSourcePos ] in [ '0'..'9', 'A'..'F', 'a'..'f' ] do
+      while CharInSet(FSourceBuf[ FSourcePos ], [ '0'..'9', 'A'..'F', 'a'..'f' ]) do //kt //codex 8/30/26
         begin
         FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
         Inc( FSourcePos );

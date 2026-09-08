@@ -9,7 +9,7 @@ uses
 
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, Buttons, ComCtrls, StrUtils, Math,
-  rCore, uCore, ORFn, ORNet, ORDtTm, ORCtrls;
+  rCore, uCore, ORFn, ORNet, ORDtTm, ORCtrls, Vcl.Mask;
 
 type
   TTaskEventData = class(TObject)
@@ -28,7 +28,7 @@ type
     ServerUnmodifiedData : TTaskEventData; //doesn't own object. Will be nil for original server objects.  Ignored for Equals()
     Updates : TStringList;  //will hold list of IEN's (if any).  These will be children objects.  UPDATE: NOT USED....
     LinkedTreeNode : TTreeNode; //doesn't own object
-    function Equals(Other : TTaskEventData) : boolean;
+    function Equals(Other : TTaskEventData) : boolean; reintroduce; //kt //codex 8/30/26
     procedure Subtract(Other : TTaskEventData);
     procedure ToGlobalFormat(SL : TStringList);
     function HasData : boolean;
@@ -36,7 +36,7 @@ type
     procedure Assign(Source : TTaskEventData);
     constructor Create(); overload;
     constructor Create(ACopySource : TTaskEventData); overload;
-    destructor Destroy();
+    destructor Destroy(); override; //kt //codex 8/30/26
   end;
 
   TTaskEventDataList = class(TList)
@@ -114,8 +114,8 @@ type
     procedure PostDataIfNeeded();
     procedure FixAddedData(InfoIENStr : string);
   public
-    constructor Create(AOwner: TComponent);
-    destructor Destroy();
+    constructor Create(AOwner: TComponent); override; //kt //codex 8/30/26
+    destructor Destroy(); override; //kt //codex 8/30/26
     { Public declarations }
   end;
 
@@ -552,6 +552,7 @@ end;
 procedure TfrmEditTaskEvents.SetButtonEnableStatus(mode : string);
 var Modified : boolean;
 begin
+  modified := false; //kt default
   if mode = 'check' then begin
     modified := DataList.IsModified;  // <-- this may be computationally expensive
   end else if mode = 'true' then begin

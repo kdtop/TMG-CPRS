@@ -169,7 +169,8 @@ begin
   if Piece(x, U, 1) = '' then
     Result := FormatFMDateTime(DateFormat, MakeFMDateTime(Piece(x, U, 3))) + '  ' +  //tmg 9/17/18
         Piece(x, U, 2) + ', ' + Piece(x, U, 6) + ', ' + Piece(Piece(x, U, 5), ';', 2)
-  else if Piece(x, U, 1)[1] in ['A', 'N', 'E'] then
+  //kt //codex original --> else if Piece(x, U, 1)[1] in ['A', 'N', 'E'] then
+  else if CharInSet(Piece(x, U, 1)[1], ['A', 'N', 'E']) then //kt //codex 8/30/26
     Result := Piece(x, U, 2)
   else
     Result := FormatFMDateTime(DateFormat, MakeFMDateTime(Piece(x, U, 3))) + '  ' +     //tmg 9/17/18

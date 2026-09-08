@@ -716,10 +716,14 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure MakeAccessible(Accessible: IAccessible);
+    // AfterNode is exclusive; nil searches from the first node. //kt //codex 9/8/26
+    // Searches the rest of the entire tree, not just descendants. //kt //codex 9/8/26
     function FindPieceNode(Value: string;
-                           ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+                           //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+                           ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; overload; //kt //codex 9/8/26
     function FindPieceNode(Value: string; APiece: integer;
-                           ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+                           //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+                           ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; overload; //kt //codex 9/8/26
     procedure RenameNodes;
     function GetExpandedIDStr(APiece: integer; ParentDelim: char = #0): string;
     procedure SetExpandedIDStr(APiece: integer; const Value: string); overload;
@@ -5365,20 +5369,25 @@ begin
 end;
 
 function TORTreeView.FindPieceNode(Value: string;
-                                   ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+                                   //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+                                   ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; //kt //codex 9/8/26
 begin
-  Result := FindPieceNode(Value, FPiece, ParentDelim, StartNode);
+  //kt //codex original --> Result := FindPieceNode(Value, FPiece, ParentDelim, StartNode);
+  Result := FindPieceNode(Value, FPiece, ParentDelim, AfterNode); //kt //codex 9/8/26
 end;
 
 function TORTreeView.FindPieceNode(Value: string; APiece: integer;
-                                   ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+                                   //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+                                   ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; //kt //codex 9/8/26
 var
   StartIdx, i: integer;
   Node: TORTreeNode;
 
 begin
-  if assigned(StartNode) then
-    StartIdx := StartNode.AbsoluteIndex+1
+  //kt //codex original --> if assigned(StartNode) then
+  if assigned(AfterNode) then //kt //codex 9/8/26
+    //kt //codex original --> StartIdx := StartNode.AbsoluteIndex+1
+    StartIdx := AfterNode.AbsoluteIndex+1 //kt //codex 9/8/26
   else
     StartIdx := 0;
   Result := nil;

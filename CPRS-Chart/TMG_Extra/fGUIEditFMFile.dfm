@@ -14,7 +14,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
@@ -22,7 +21,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
   DesignSize = (
     682
     526)
-  PixelsPerInch = 96
   TextHeight = 13
   object PageControl: TPageControl
     Left = 0
@@ -63,6 +61,7 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
           Anchors = [akLeft, akTop, akRight]
           Style = orcsDropDown
           AutoSelect = True
+          Caption = ''
           Color = clWindow
           DropDownCount = 8
           ItemHeight = 13
@@ -75,6 +74,7 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
           Sorted = False
           SynonymChars = '<>'
           TabOrder = 0
+          Text = ''
           CharsNeedMatch = 1
         end
         object btnEdit: TBitBtn
@@ -84,8 +84,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
           Height = 25
           Anchors = [akTop, akRight]
           Caption = '&Edit'
-          TabOrder = 1
-          OnClick = btnEditClick
           Glyph.Data = {
             66010000424D6601000000000000760000002800000014000000140000000100
             040000000000F000000000000000000000001000000010000000000000000000
@@ -99,6 +97,8 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
             0000500000000008FF803007000050EEEEEEEE70880B43000000500000000000
             00FBB43000005555555555550BFFBB43000055555555555550BFFBB400005555
             55555555550BFFBB0000}
+          TabOrder = 1
+          OnClick = btnEditClick
         end
         object btnAdd: TBitBtn
           Left = 612
@@ -107,8 +107,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
           Height = 25
           Anchors = [akTop, akRight]
           Caption = '&New'
-          TabOrder = 2
-          OnClick = btnAddClick
           Glyph.Data = {
             36040000424D3604000000000000360000002800000010000000100000000100
             20000000000000040000120B0000120B00000000000000000000FFFFFFFFFFFF
@@ -144,6 +142,8 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
             FFFFFBFFFFFFFEFFFFFFFFFFFFFFFFFFFFFF3830EFFFFFFFFFFFFFFFFFFFFFFF
             FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD7D6FCFFFFFF
             FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+          TabOrder = 2
+          OnClick = btnAddClick
         end
       end
       object sgBasic: TSortStringGrid
@@ -195,8 +195,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
     Anchors = [akRight, akBottom]
     Caption = '&Apply'
     Enabled = False
-    TabOrder = 2
-    OnClick = btnApplyClick
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
       18000000000000030000120B0000120B00000000000000000000FF00FF0274AC
@@ -224,6 +222,8 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
       FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF046B0B2DB851046B0BFF00FFFF00
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    TabOrder = 2
+    OnClick = btnApplyClick
   end
   object btnRevert: TBitBtn
     Left = 418
@@ -233,8 +233,6 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
     Anchors = [akRight, akBottom]
     Caption = '&Revert'
     Enabled = False
-    TabOrder = 3
-    OnClick = btnRevertClick
     Glyph.Data = {
       36040000424D3604000000000000360000002800000010000000100000000100
       20000000000000040000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -270,5 +268,7 @@ object frmGUIEditFMFile: TfrmGUIEditFMFile
       FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
       80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+    TabOrder = 3
+    OnClick = btnRevertClick
   end
 end

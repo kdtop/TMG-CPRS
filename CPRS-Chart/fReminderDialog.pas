@@ -83,6 +83,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean); //AGP Change 24.8
+    procedure ChangeFontSize(Sender: TObject);  //kt //codex 9/3/26
+    procedure SelectFont(Sender: TObject);  //kt //codex 9/3/26
   private
     FSCCond: TSCConditions;
     FSCPrompt: boolean;
@@ -96,6 +98,10 @@ type
     FCVRelated: integer;
     FSHDRelated: integer;
     FLastWidth: integer;
+    FDefaultFontSize: integer;  //kt //codex 9/3/26
+    FReminderFontName: string;  //kt //codex 9/3/26
+    FReminderFontSize: integer;  //kt //codex 9/3/26
+    FRestoringSavedLayout: boolean;  //kt //codex 9/3/26
     FUseBox2: boolean;
     FExitOK: boolean;
     FReminder: TReminderDialog;
@@ -124,6 +130,7 @@ type
     procedure ClinMaintDestroyed(Sender: TObject);
     procedure ProcessTemplate(Template: TTemplate);
     procedure ClearMHTest(Rien: string);
+    procedure RestoreSavedLayout;  //kt //codex 9/3/26
   public
     procedure ProcessReminder(ARemData: string; NodeID: string);
     procedure SetFontSize;
@@ -162,7 +169,7 @@ uses fNotes, uPCE, uOrders, rOrders, uCore, rMisc, rReminders,
   {uTemplateFields,} fRemVisitInfo, rCore, uVA508CPRSCompatibility,
   TMGHTML2, //kt 4/8/21
   fSingleNote,   //8/13/24
-  VA508AccessibilityRouter, VAUtils, uHTMLTools;
+  VA508AccessibilityRouter, VAUtils, uHTMLTools, uTMGOptions;  //kt //codex 9/3/26
 
 {$R *.DFM}
 
@@ -400,6 +407,7 @@ begin
     ClearControls(TRUE);
     FReminder := Rem;
     Rem.PCEDataObj := RemForm.PCEObj;
+    RestoreSavedLayout;  //kt //codex 9/3/26
     BuildControls;
     UpdateText(nil);
   end;
@@ -422,10 +430,16 @@ begin
 end;
 
 procedure TfrmRemDlg.FormCreate(Sender: TObject);
+var
+  FontSizeMenu: TPopupMenu;  //kt //codex 9/3/26
+  MenuItem: TMenuItem;  //kt //codex 9/3/26
 begin
  // reData.Color := ReadOnlyColor;
 //  reText.Color := ReadOnlyColor;
   FSCCond := EligbleConditions;
+  FDefaultFontSize := MainFontSize;  //kt //codex 9/3/26
+  FReminderFontName := uTMGOptions.ReadString('Reminder Dialog Font Name', Font.Name);  //kt //codex 9/3/26
+  FReminderFontSize := uTMGOptions.ReadInteger('Reminder Dialog Font Size', FDefaultFontSize);  //kt //codex 9/3/26
   FDBControlData := TDBControlData.Create; //kt added 5/16
  (* FSCRelated  := SCC_NA;
   FAORelated  := SCC_NA;
@@ -439,6 +453,95 @@ begin
   NotifyWhenRemindersChange(RemindersChanged);
   RemForm.Drawers.NotifyWhenRemTreeChanges(RemindersChanged);
   KillReminderDialogProc := KillReminderDialog;
+  FontSizeMenu := TPopupMenu.Create(Self);  //kt //codex 9/3/26
+  PopupMenu := FontSizeMenu;  //kt //codex 9/3/26
+  sb1.PopupMenu := FontSizeMenu;  //kt //codex 9/3/26
+  sb2.PopupMenu := FontSizeMenu;  //kt //codex 9/3/26
+  MenuItem := TMenuItem.Create(FontSizeMenu);  //kt //codex 9/3/26
+  MenuItem.Caption := 'Enlarge font size';  //kt //codex 9/3/26
+  MenuItem.Tag := 1;  //kt //codex 9/3/26
+  MenuItem.OnClick := ChangeFontSize;  //kt //codex 9/3/26
+  FontSizeMenu.Items.Add(MenuItem);  //kt //codex 9/3/26
+  MenuItem := TMenuItem.Create(FontSizeMenu);  //kt //codex 9/3/26
+  MenuItem.Caption := 'Restore font size';  //kt //codex 9/3/26
+  MenuItem.Tag := 0;  //kt //codex 9/3/26
+  MenuItem.OnClick := ChangeFontSize;  //kt //codex 9/3/26
+  FontSizeMenu.Items.Add(MenuItem);  //kt //codex 9/3/26
+  MenuItem := TMenuItem.Create(FontSizeMenu);  //kt //codex 9/3/26
+  MenuItem.Caption := 'Decrease font size';  //kt //codex 9/3/26
+  MenuItem.Tag := -1;  //kt //codex 9/3/26
+  MenuItem.OnClick := ChangeFontSize;  //kt //codex 9/3/26
+  FontSizeMenu.Items.Add(MenuItem);  //kt //codex 9/3/26
+  MenuItem := TMenuItem.Create(FontSizeMenu);  //kt //codex 9/3/26
+  MenuItem.Caption := 'Select Custom Font/Size';  //kt //codex 9/3/26
+  MenuItem.OnClick := SelectFont;  //kt //codex 9/3/26
+  FontSizeMenu.Items.Add(MenuItem);  //kt //codex 9/3/26
+end;
+
+procedure TfrmRemDlg.ChangeFontSize(Sender: TObject);
+//kt //codex added entire procedure 9/3/26
+type
+  TSizeMode = (smSmaller = -1, smNormal = 0, smLarger = 1);
+const
+  //kt //codex original --> NUM_SIZES = 5;
+  NUM_SIZES = 6;
+  //kt //codex original --> ALLOWED_SIZES: array[1..NUM_SIZES] of integer = (8, 10, 12, 14, 18);
+  ALLOWED_SIZES: array[1..NUM_SIZES] of integer = (8, 10, 12, 14, 18, 24);
+var
+  SizeMode: TSizeMode;
+  CurSize, NewSize, SizeIdx, I: integer;
+begin
+  //kt //codex original --> MessageDlg('Here we can change font size', mtInformation, [mbOK], 0);
+  SizeMode := TSizeMode(TMenuItem(Sender).Tag);
+  CurSize := sb1.Font.Size;
+  NewSize := CurSize;
+  case SizeMode of
+    smNormal: NewSize := FDefaultFontSize;
+    smSmaller, smLarger: begin
+      SizeIdx := -1;
+      for I := 1 to NUM_SIZES do begin
+        if ALLOWED_SIZES[I] = CurSize then begin
+          SizeIdx := I;
+          Break;
+        end;
+      end;
+      if SizeIdx < 0 then Exit;
+      if SizeMode = smSmaller then Dec(SizeIdx) else Inc(SizeIdx);
+      if (SizeIdx < 1) or (SizeIdx > NUM_SIZES) then Exit;
+      NewSize := ALLOWED_SIZES[SizeIdx];
+    end;
+  end;
+  if NewSize = CurSize then Exit;
+  Font.Size := NewSize;
+  sb1.Font.Size := NewSize;
+  sb2.Font.Size := NewSize;
+  FReminderFontName := Font.Name;
+  FReminderFontSize := Font.Size;
+  uTMGOptions.WriteString('Reminder Dialog Font Name', FReminderFontName);
+  uTMGOptions.WriteInteger('Reminder Dialog Font Size', FReminderFontSize);
+  BuildControls;
+end;
+
+procedure TfrmRemDlg.SelectFont(Sender: TObject);
+//kt //codex added entire procedure 9/3/26
+var
+  FontDialog: TFontDialog;
+begin
+  FontDialog := TFontDialog.Create(Self);
+  try
+    FontDialog.Font.Assign(Font);
+    if not FontDialog.Execute then Exit;
+    Font.Assign(FontDialog.Font);
+    sb1.Font.Assign(FontDialog.Font);
+    sb2.Font.Assign(FontDialog.Font);
+    FReminderFontName := Font.Name;
+    FReminderFontSize := Font.Size;
+    uTMGOptions.WriteString('Reminder Dialog Font Name', FReminderFontName);
+    uTMGOptions.WriteInteger('Reminder Dialog Font Size', FReminderFontSize);
+    BuildControls;
+  finally
+    FontDialog.Free;
+  end;
 end;
 
 procedure TfrmRemDlg.FormDestroy(Sender: TObject);
@@ -721,6 +824,7 @@ end;
 procedure TfrmRemDlg.sbResize(Sender: TObject);
 begin
 { If you remove this logic you will get an infinite loop in some cases }
+  if FRestoringSavedLayout then Exit;  //kt //codex 9/3/26
   if (FLastWidth <> GetBox(TRUE).ClientWidth) then
     ControlsChanged(Sender);
 end;
@@ -1814,6 +1918,7 @@ begin
   FReminder.DBControlData := Self.FDBControlData;
   ClearControls(TRUE);
   FReminder.PCEDataObj := RemForm.PCEObj;
+  RestoreSavedLayout;  //kt //codex 9/3/26
   BuildControls;
   UpdateText(nil);
   UpdateButtons;
@@ -1823,6 +1928,10 @@ end;
 procedure TfrmRemDlg.SetFontSize;
 begin
   ResizeAnchoredFormToFont(frmRemDlg);
+  Font.Name := FReminderFontName;  //kt //codex 9/3/26
+  Font.Size := FReminderFontSize;  //kt //codex 9/3/26
+  sb1.Font.Assign(Font);  //kt //codex 9/3/26
+  sb2.Font.Assign(Font);  //kt //codex 9/3/26
   if Assigned(FClinMainBox) then
     ResizeAnchoredFormToFont(FClinMainBox);
   BuildControls;
@@ -1868,12 +1977,31 @@ end;
 procedure TfrmRemDlg.FormShow(Sender: TObject);
 begin
   //Set The form to it's Saved Position
-  Left := RemDlgLeft;
-  Top := RemDlgTop;
-  Width := RemDlgWidth;
-  Height := RemDlgHeight;
-  pnlFrmBottom.Height := RemDlgSpltr1 + lblFootnotes.Height;
-  reData.Height := RemDlgSpltr2;
+  //kt //codex original --> Left := RemDlgLeft;
+  //kt //codex original --> Top := RemDlgTop;
+  //kt //codex original --> Width := RemDlgWidth;
+  //kt //codex original --> Height := RemDlgHeight;
+  //kt //codex original --> pnlFrmBottom.Height := RemDlgSpltr1 + lblFootnotes.Height;
+  //kt //codex original --> reData.Height := RemDlgSpltr2;
+  RestoreSavedLayout;  //kt //codex 9/3/26
+  //kt //codex original --> if Assigned(FReminder) then BuildControls;
+end;
+
+procedure TfrmRemDlg.RestoreSavedLayout;
+//kt //codex added entire procedure 9/3/26
+begin
+  FRestoringSavedLayout := True;
+  try
+    Left := RemDlgLeft;
+    Top := RemDlgTop;
+    Width := RemDlgWidth;
+    Height := RemDlgHeight;
+    pnlFrmBottom.Height := RemDlgSpltr1 + lblFootnotes.Height;
+    reData.Height := RemDlgSpltr2;
+  finally
+    FRestoringSavedLayout := False;
+    FLastWidth := GetBox(TRUE).ClientWidth;
+  end;
 end;
 
 initialization

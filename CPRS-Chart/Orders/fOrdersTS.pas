@@ -98,7 +98,8 @@ begin
       else
         frmOrdersTS.lblPtInfo.Caption := Patient.Name + ' currently is an outpatient.' + SpeCap;
     end;
-    if not (AnLimitEvent in ['A','D','T','M','O']) then
+    //kt //codex original --> if not (AnLimitEvent in ['A','D','T','M','O']) then
+    if not (CharInSet(AnLimitEvent, ['A','D','T','M','O'])) then //kt //codex 8/30/26
       AnLimitEvent := #0;
     frmOrdersTs.fraEvntDelayList.EvntLimit := AnLimitEvent;
     if AnEvent.EventIFN > 0 then

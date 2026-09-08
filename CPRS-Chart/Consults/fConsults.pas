@@ -962,7 +962,8 @@ begin
             tvCsltNotes.Items.BeginUpdate;
             if IsIDChild then
               begin
-                tmpNode := tvCsltNotes.FindPieceNode(IntToStr(AnIDParent), 1, U, tvCsltNotes.Items.GetFirstNode);
+                //kt //codex original --> tmpNode := tvCsltNotes.FindPieceNode(IntToStr(AnIDParent), 1, U, tvCsltNotes.Items.GetFirstNode);
+                tmpNode := tvCsltNotes.FindPieceNode(IntToStr(AnIDParent), 1, U, nil); //kt //codex 9/8/26
                 tmpNode.ImageIndex := IMG_IDNOTE_OPEN;
                 tmpNode.SelectedIndex := IMG_IDNOTE_OPEN;
                 tmpNode := tvCsltNotes.Items.AddChildObjectFirst(tmpNode, MakeConsultNoteDisplayText(x), MakeNoteTreeObject(x));
@@ -1285,7 +1286,8 @@ begin
     lstNotes.ItemIndex := EditingIndex;
     x := lstNotes.ItemID;
     uChanging := True;
-    tvCsltNotes.Selected := tvCsltNotes.FindPieceNode(x, 1, U, tvCsltNotes.Items.GetFirstNode);
+    //kt //codex original --> tvCsltNotes.Selected := tvCsltNotes.FindPieceNode(x, 1, U, tvCsltNotes.Items.GetFirstNode);
+    tvCsltNotes.Selected := tvCsltNotes.FindPieceNode(x, 1, U, nil); //kt //codex 9/8/26
     uChanging := False;
     tvCsltNotesChange(Self, tvCsltNotes.Selected);
     if FSilent or
@@ -1627,7 +1629,8 @@ begin
   SelectNoteForProcessing(Font.Size, FActionType, lstNotes.Items, NoteIEN, MenuAccessRec.ClinProcFlag);
   if NoteIEN > 0 then
     begin
-      with tvCsltNotes do Selected := FindPieceNode(IntToStr(NoteIEN), 1, U, Items.GetFirstNode);
+      //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(IntToStr(NoteIEN), 1, U, Items.GetFirstNode);
+      with tvCsltNotes do Selected := FindPieceNode(IntToStr(NoteIEN), 1, U, nil); //kt //codex 9/8/26
       if tvCsltNotes.Selected = nil then exit;
       ActOnDocument(ActionSts, lstNotes.ItemIEN, 'EDIT RECORD');
       if not ActionSts.Success then
@@ -1778,9 +1781,11 @@ begin
   begin
     SaveCurrentNote(Saved);
     if not Saved then Exit;
-    with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, Items.GetFirstNode);
+    //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, Items.GetFirstNode);
+    with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, nil); //kt //codex 9/8/26
     tvConsultsClick(Self);
-    with tvCsltNotes do Selected := FindPieceNode(SavedDocID, 1, U, Items.GetFirstNode);
+    //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, 1, U, Items.GetFirstNode);
+    with tvCsltNotes do Selected := FindPieceNode(SavedDocID, 1, U, nil); //kt //codex 9/8/26
   end;
   if not CanBeAttached(DocTreeData(tvCsltNotes.Selected)^.DocID, WhyNot) then
     begin
@@ -1798,7 +1803,8 @@ begin
   if DetachEntryFromParent(DocID, WhyNot) then
     begin
       tvConsultsChange(Self, tvConsults.Selected);
-      with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
       if tvCsltNotes.Selected <> nil then tvCsltNotes.Selected.Expand(False);
     end
   else
@@ -1933,7 +1939,8 @@ begin
       pnlConsultList.Enabled := True; //CQ#15785
 //      lstConsults.Enabled := True ;
 //      tvConsults.Enabled := True;
-      with tvConsults do Selected := FindPieceNode(IntToStr(SaveConsult), 1, U, Items.GetFirstNode);
+      //kt //codex original --> with tvConsults do Selected := FindPieceNode(IntToStr(SaveConsult), 1, U, Items.GetFirstNode);
+      with tvConsults do Selected := FindPieceNode(IntToStr(SaveConsult), 1, U, nil); //kt //codex 9/8/26
       tvConsultsClick(Self);
 (*      lstConsults.SelectByIEN(ConsultRec.IEN);
       if lstConsults.ItemIEN > 0 then
@@ -1997,7 +2004,8 @@ begin
             with tvConsults do
               begin
                 uChanging := True;
-                Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+                //kt //codex original --> Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+                Selected := FindPieceNode(SavedCsltID, 1, U, nil); //kt //codex 9/8/26
                 if Selected <> nil then Selected.Delete;
                 x := FindConsult(StrToIntDef(SavedCsltID, 0));
                 tmpNode := TORTreeNode(Items.AddChildFirst(Items.GetFirstNode, MakeConsultListDisplayText(x)));
@@ -2010,16 +2018,19 @@ begin
           else
             begin
               UpdateList ;  {update consult list after success}
-              with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+              //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+              with tvConsults do Selected := FindPieceNode(SavedCsltID, U, nil); //kt //codex 9/8/26
               tvConsultsClick(Self);
-              with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+              //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+              with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
             end;
           pnlLeft.Refresh ;
         end;
     end
   else InfoBox(TX_NO_CONSULT, TX_SAVE_CONSULT, MB_OK or MB_ICONWARNING);
   if frmFrame.TimedOut then Exit;
-  with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+  //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+  with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
 end;
 
 procedure TfrmConsults.mnuActSignatureSignClick(Sender: TObject);
@@ -2118,7 +2129,8 @@ begin
             with tvConsults do
               begin
                 uChanging := True;
-                Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+                //kt //codex original --> Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+                Selected := FindPieceNode(SavedCsltID, 1, U, nil); //kt //codex 9/8/26
                 if Selected <> nil then Selected.Delete;
                 x := FindConsult(StrToIntDef(SavedCsltID, 0));
                 tmpNode := TORTreeNode(Items.AddChildFirst(Items.GetFirstNode, MakeConsultListDisplayText(x)));
@@ -2131,7 +2143,8 @@ begin
           else
             begin
               UpdateList ;  {update consult list after success}
-              with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+              //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+              with tvConsults do Selected := FindPieceNode(SavedCsltID, U, nil); //kt //codex 9/8/26
               //tvConsultsClick(Self);
               //with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
             end;
@@ -2164,7 +2177,8 @@ begin
   //with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);  //v22.12 - RV
   with tvCsltNotes do                                                                  //v22.12 - RV
   begin                                                                                //v22.12 - RV
-    Selected := FindPieceNode(FLastNoteID, U, Items.GetFirstNode);                     //v22.12 - RV
+    //kt //codex original --> Selected := FindPieceNode(FLastNoteID, U, Items.GetFirstNode);                     //v22.12 - RV
+    Selected := FindPieceNode(FLastNoteID, U, nil);                     //v22.12 - RV //kt //codex 9/8/26
     if Selected <> nil then tvCsltNotesChange(Self, Selected);                         //v22.12 - RV
   end;
 end;
@@ -2273,7 +2287,8 @@ begin
       begin
         if (AnIndex = lstNotes.ItemIndex) and (not frmFrame.ContextChanging) then lstNotesClick(Self);
         uChanging := True;
-        Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+        //kt //codex original --> Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+        Selected := FindPieceNode(SavedCsltID, 1, U, nil); //kt //codex 9/8/26
         if Selected <> nil then Selected.Delete;
         x := FindConsult(StrToIntDef(SavedCsltID, 0));
         tmpNode := TORTreeNode(Items.AddChildFirst(Items.GetFirstNode, MakeConsultListDisplayText(x)));
@@ -2287,9 +2302,11 @@ begin
     begin
       UpdateList ;  {update consult list after success}
       if (AnIndex = lstNotes.ItemIndex) and (not frmFrame.ContextChanging) then lstNotesClick(Self);
-      with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+      //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+      with tvConsults do Selected := FindPieceNode(SavedCsltID, U, nil); //kt //codex 9/8/26
       tvConsultsClick(Self);
-      with tvCsltNotes do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+      //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+      with tvCsltNotes do Selected := FindPieceNode(IntToStr(IEN), U, nil); //kt //codex 9/8/26
     end;
   pnlLeft.Refresh ;
 end ;
@@ -2329,7 +2346,8 @@ begin
 //  tvConsults.Enabled := False;
   x := Piece(lstConsults.Items[lstConsults.ItemIndex], U, 12);
   if x <> '' then
-    IsProcedure := (x[1] in ['P', 'M'])
+    //kt //codex original --> IsProcedure := (x[1] in ['P', 'M'])
+    IsProcedure := (CharInSet(x[1], ['P', 'M'])) //kt //codex 8/30/26
   else
     IsProcedure := (Piece(lstConsults.Items[lstConsults.ItemIndex], U, 9) = 'Procedure');
   //if SetActionContext(Font.Size,FActionType, IsProcedure, ConsultRec.ConsultProcedure) then
@@ -2339,7 +2357,8 @@ begin
         with tvConsults do
           begin
             uChanging := True;
-            Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+            //kt //codex original --> Selected := FindPieceNode(SavedCsltID, 1, U, Items.GetFirstNode);
+            Selected := FindPieceNode(SavedCsltID, 1, U, nil); //kt //codex 9/8/26
             if Selected <> nil then Selected.Delete;
             x := FindConsult(StrToIntDef(SavedCsltID, 0));
             tmpNode := TORTreeNode(Items.AddChildFirst(Items.GetFirstNode, MakeConsultListDisplayText(x)));
@@ -2359,7 +2378,8 @@ begin
       else
         begin
           UpdateList ;  {update consult list after success}
-          with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+          //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+          with tvConsults do Selected := FindPieceNode(SavedCsltID, U, nil); //kt //codex 9/8/26
           tvConsultsClick(Self);
         end;
     end;
@@ -3123,7 +3143,8 @@ begin
   end;
   if SavedCsltID <> '' then with tvConsults do
   begin
-    Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+    //kt //codex original --> Selected := FindPieceNode(SavedCsltID, U, Items.GetFirstNode);
+    Selected := FindPieceNode(SavedCsltID, U, nil); //kt //codex 9/8/26
     tvConsultsChange(Self, Selected);
   end;
 end;
@@ -3279,7 +3300,8 @@ begin
       SaveCurrentNote(Saved);
       if not Saved then Exit;
       tvConsultsChange(Self, tvConsults.Selected);
-      with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
     end;
   x := CanChangeCosigner(lstNotes.ItemIEN);
   ActOnDocument(ActionSts, lstNotes.ItemIEN, 'IDENTIFY SIGNERS');
@@ -3396,7 +3418,8 @@ begin
   tmpNode := TORTreeNode(tvConsults.Items.AddChildFirst(tmpNode, MakeConsultListDisplayText(x)));
   tmpNode.StringData := x;
   SetNodeImage(tmpNode, FCurrentContext);
-  with tvConsults do Selected := FindPieceNode(Piece(x, U, 1), U, Items.GetFirstNode);
+  //kt //codex original --> with tvConsults do Selected := FindPieceNode(Piece(x, U, 1), U, Items.GetFirstNode);
+  with tvConsults do Selected := FindPieceNode(Piece(x, U, 1), U, nil); //kt //codex 9/8/26
   tvConsults.Items.EndUpdate;
   uChanging := False;
   tvConsultsChange(Self, tvConsults.Selected);
@@ -3434,7 +3457,8 @@ begin
           tmpNode := TORTreeNode(tvCsltNotes.Items.AddChildObjectFirst(tmpNode, AnObject.NodeText, AnObject));
           tmpNode.StringData := x;
           SetTreeNodeImagesAndFormatting(tmpNode, FCurrentNoteContext, CT_CONSULTS);
-          with tvCsltNotes do Selected := FindPieceNode(Piece(x, U, 1), U, Items.GetFirstNode);
+          //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(Piece(x, U, 1), U, Items.GetFirstNode);
+          with tvCsltNotes do Selected := FindPieceNode(Piece(x, U, 1), U, nil); //kt //codex 9/8/26
           tvCsltNotes.Items.EndUpdate;
           uChanging := False;
         end
@@ -3564,7 +3588,8 @@ begin
   if Resubmitted then
     begin
       LoadConsults;
-      with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, Items.GetFirstNode);
+      //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, Items.GetFirstNode);
+      with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, nil); //kt //codex 9/8/26
       tvConsultsClick(Self);
     (*      lstConsults.Clear;
       lstConsults.Items.Add(FindConsult(ConsultRec.IEN));
@@ -3919,9 +3944,11 @@ begin
         if not Saved then Result := False
         else
           begin
-            with tvConsults do Selected := FindPieceNode(AConsultID, 1, U, Items.GetFirstNode);
+            //kt //codex original --> with tvConsults do Selected := FindPieceNode(AConsultID, 1, U, Items.GetFirstNode);
+            with tvConsults do Selected := FindPieceNode(AConsultID, 1, U, nil); //kt //codex 9/8/26
             tvConsultsClick(Self);
-            with tvCsltNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+            //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+            with tvCsltNotes do Selected := FindPieceNode(ANoteID, 1, U, nil); //kt //codex 9/8/26
           end;
       end;
   end;
@@ -4316,7 +4343,8 @@ begin
               UpdateList ;  {update consult list after success}
               ItemIndex := 0 ;
               {ItemIndex may have changed - need to look up by IEN}
-              with tvConsults do Selected := FindPieceNode(IntToStr(AConsult), 1, U, Items.GetFirstNode);
+              //kt //codex original --> with tvConsults do Selected := FindPieceNode(IntToStr(AConsult), 1, U, Items.GetFirstNode);
+              with tvConsults do Selected := FindPieceNode(IntToStr(AConsult), 1, U, nil); //kt //codex 9/8/26
               tvConsultsClick(Self);
             end
           else
@@ -4863,15 +4891,18 @@ begin
   begin
     SaveCurrentNote(Saved);
     if not Saved then Exit;
-    with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, Items.GetFirstNode);
+    //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, Items.GetFirstNode);
+    with tvConsults do Selected := FindPieceNode(SavedConsultID, 1, U, nil); //kt //codex 9/8/26
     tvConsultsClick(Self);
-    with tvCsltNotes do Selected := FindPieceNode(SavedDocID, 1, U, Items.GetFirstNode);
+    //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, 1, U, Items.GetFirstNode);
+    with tvCsltNotes do Selected := FindPieceNode(SavedDocID, 1, U, nil); //kt //codex 9/8/26
   end;
   if tvCsltNotes.Selected = nil then exit;
   AChildNode := TORTreeNode(tvCsltNotes.Selected);
   AParentID := SelectParentNodeFromList(tvCsltNotes);
   if AParentID = '' then exit;
-  with tvCsltNotes do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  with tvCsltNotes do Selected := FindPieceNode(AParentID, 1, U, nil); //kt //codex 9/8/26
   DoAttachIDChild(AChildNode, TORTreeNode(tvCsltNotes.Selected));
 end;
 
@@ -4910,7 +4941,8 @@ begin
           if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
             begin
               tvConsultsChange(Self, tvConsults.Selected);
-              with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+              //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+              with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
               if tvCsltNotes.Selected <> nil then tvCsltNotes.Selected.Expand(False);
             end
           else
@@ -4929,7 +4961,8 @@ begin
       if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
         begin
           tvConsultsChange(Self, tvConsults.Selected);
-          with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          //kt //codex original --> with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          with tvCsltNotes do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
           if tvCsltNotes.Selected <> nil then tvCsltNotes.Selected.Expand(False);
         end
       else
@@ -5027,12 +5060,14 @@ begin
     SaveCurrentNote(Saved);
     if not Saved then Exit;
     LoadConsults;
-    with tvConsults do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    //kt //codex original --> with tvConsults do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    with tvConsults do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
   end;
   if tvConsults.Selected = nil then exit;
   AParentID := frmPrintList.SelectParentFromList(tvConsults,CT_CONSULTS);
   if AParentID = '' then exit;
-  with tvConsults do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvConsults do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  with tvConsults do Selected := FindPieceNode(AParentID, 1, U, nil); //kt //codex 9/8/26
 end;
 
 procedure TfrmConsults.tvConsultsExit(Sender: TObject);

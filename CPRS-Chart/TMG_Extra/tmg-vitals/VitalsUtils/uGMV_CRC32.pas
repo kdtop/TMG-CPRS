@@ -5,7 +5,7 @@ function GetFileCrc32(FileName: string): string;
 
 implementation
 uses
-  SysUtils;
+  SysUtils, Winapi.Windows; //kt //codex 8/30/26
 type
   TBuffer = array[0..1048576] of byte;
   TCrc32Table = array[0..255] of Int64;
@@ -98,7 +98,8 @@ var
   Handle, Loaded: integer;
   TempResult: LongInt;
 begin
-  TempResult := $FFFFFFFF;
+  //kt //codex original -->   TempResult := $FFFFFFFF;
+  TempResult := -1; // CRC32 initial value is all bits set //kt //codex 8/30/26
   GetMem(Buffer, BUFFERSIZE);
   Handle := FileOpen(FileName, fmShareDenyWrite);
   repeat

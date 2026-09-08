@@ -1185,13 +1185,15 @@ begin
   IfUDGrp := False;
   TheOrder := ResolvedDialog.InputID;
   IfUDGrpForQO := CheckQOGroup(TheOrder);
-  if (CharAt(TheOrder,1) in ['C','T']) then
+  //kt //codex original --> if (CharAt(TheOrder,1) in ['C','T']) then
+  if CharInSet(CharAt(TheOrder,1), ['C','T']) then //kt //codex 8/30/26
   begin
     Delete(TheOrder,1,1);
     tmpOrderGroup := CheckOrderGroup(TheOrder);
     if tmpOrderGroup = 1 then IfUDGrp := True else IfUDGrp := False;
   end;
-  if (not IfUDGrp) and (AnEvent.EventType in ['A','T']) then
+  //kt //codex original --> if (not IfUDGrp) and (AnEvent.EventType in ['A','T']) then
+  if (not IfUDGrp) and CharInSet(AnEvent.EventType, ['A','T']) then //kt //codex 8/30/26
     IfUDGrp := True;
   //FLDS=DFN^LOC^ORNP^INPT^SEX^AGE^EVENT^SC%^^^Key Variables
   if (Patient.Inpatient = true) and (tmpOrderGroup = 2) then temp := '0';
@@ -2423,10 +2425,11 @@ begin
     PromptForWorkCopy     := CharAt(Piece(x, U, 4),1);
     if Piece(x, U, 8) <> '' then
     WorkCopyDevice      := Piece(Piece(x, U, 8),';',1) + '^' + Piece(Piece(x, U, 8),';',2);
-    AnyPrompts            := ((PromptForChartCopy    in ['1','2']) or
-                              (PromptForLabels       in ['1','2']) or
-                              (PromptForRequisitions in ['1','2']) or
-                              (PromptForWorkCopy     in ['1','2']));
+    //kt //codex original --> AnyPrompts := ((PromptForChartCopy in ['1','2']) or (PromptForLabels in ['1','2']) or (PromptForRequisitions in ['1','2']) or (PromptForWorkCopy in ['1','2']));
+    AnyPrompts            := (CharInSet(PromptForChartCopy, ['1','2']) or
+                              CharInSet(PromptForLabels, ['1','2']) or
+                              CharInSet(PromptForRequisitions, ['1','2']) or
+                              CharInSet(PromptForWorkCopy, ['1','2'])); //kt //codex 8/30/26
   end;
   if Nature <> #0 then
     begin

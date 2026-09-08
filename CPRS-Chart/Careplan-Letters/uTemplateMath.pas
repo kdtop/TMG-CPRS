@@ -481,7 +481,8 @@ var
    i: integer;
 begin
    for i := 1 to length(test) do begin
-      if test[i] in ['0'..'9','+','-','*','/','(',')','^'] then begin
+      //kt //codex original --> if test[i] in ['0'..'9','+','-','*','/','(',')','^'] then begin
+      if CharInSet(test[i], ['0'..'9','+','-','*','/','(',')','^']) then begin //kt //codex 8/30/26
          test2 := test2 + test[i];
       end;
    end;

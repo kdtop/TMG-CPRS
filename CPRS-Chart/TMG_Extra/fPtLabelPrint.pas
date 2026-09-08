@@ -170,7 +170,8 @@ var
   //BatchFlag: string;
   YPos,XPos : integer;    
   PtIDInfo : TPtIDInfo;
-  FNamePath : AnsiString;
+  //kt //codex original -->   FNamePath : AnsiString;
+  FNamePath : string; // passed only to Unicode-capable VCL file APIs //kt //codex 8/30/26
   pic : TPicture;
   SrcRec,DestRec :TRect; 
   DestPos : TPoint;
@@ -218,10 +219,10 @@ begin
   FPrinter.Title := 'Patient Label -- ' + PtIDInfo.Name;
   //FPrinter.Copies := StrToInt(QuantitySpinEdit.Text);
 
+  pic := TPicture.Create;
   try
-    pic := TPicture.Create;
     FNamePath := DoCreateBarcode(BCLine,'png');
-    pic.LoadFromFile(FNamePath);  
+    pic.LoadFromFile(FNamePath);
     //barcodeWidth := pic.Bitmap.Width;
     //barcodeHeight := pic.Bitmap.Height;
     SrcRec.Top := 0;
@@ -234,42 +235,42 @@ begin
     DestRec.TopLeft := DestPos;
     DestRec.Right := DestPos.X+BarCodeSize;
     DestRec.Bottom := DestPos.Y+BarCodeSize;
-           
+
     FPrinter.BeginDoc; //start print job.
 
     //copy barcode bitmap to printer canvas.
     FPrinter.Canvas.CopyMode := cmSrcCopy;
     FPrinter.Canvas.StretchDraw(DestRec,pic.Graphic);
-    
+
     FPrinter.Canvas.Font.Name := 'Arial';
     FPrinter.Canvas.Font.Size := 10;  //# point
-      
-    //Print out Name line      
+
+    //Print out Name line
     FPrinter.Canvas.TextOut(XPos,YPos,NameLine);
     YPos := YPos + FPrinter.Canvas.TextHeight(NameLine)+5;
-  
+
     FPrinter.Canvas.Font.Size := 8;  //# point
-    //Print out DOB line      
+    //Print out DOB line
     FPrinter.Canvas.TextOut(XPos,YPos,DOBLine);
     YPos := YPos + FPrinter.Canvas.TextHeight(DOBLine)+5;
 
-    //Print out Provider/Author line      
+    //Print out Provider/Author line
     FPrinter.Canvas.TextOut(XPos,YPos,ProvLine);
     YPos := YPos + FPrinter.Canvas.TextHeight(ProvLine)+5;
 
-    //Print out Location line      
+    //Print out Location line
     FPrinter.Canvas.TextOut(XPos,YPos,LocLine);
     YPos := YPos + FPrinter.Canvas.TextHeight(LocLine)+5;
 
-    //Print out Note Title line      
+    //Print out Note Title line
     FPrinter.Canvas.TextOut(XPos,YPos,TitleLine);
     YPos := YPos + FPrinter.Canvas.TextHeight(TitleLine)+5;
-  
-    //Print out clear-text of barcode data line 
+
+    //Print out clear-text of barcode data line
     FPrinter.Canvas.Font.Size := 8;  //x point
     FPrinter.Canvas.TextOut(XPos,YPos,BCLine);
     YPos := YPos + FPrinter.Canvas.TextHeight(BCLine)+5;
-    
+
   finally
     FPrinter.EndDoc;  //close and launch print job
     pic.Free;

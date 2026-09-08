@@ -40,6 +40,7 @@ unit mGMV_GridGraph;
 interface
 
 uses
+  System.Types, //kt //codex 8/30/26
   Windows,
   Messages,
   SysUtils,
@@ -57,7 +58,8 @@ uses
   ExtDlgs,
   Menus, ActnList, ImgList, ComCtrls,
   uGMV_VitalTypes,   //kt added
-  mGMV_MDateTime, TeeProcs, Series, TeEngine, StdActns
+  mGMV_MDateTime, TeeProcs, Series, TeEngine, StdActns, VclTee.TeeGDIPlus,
+  System.ImageList, System.Actions
   ;
 
 type
@@ -1187,6 +1189,7 @@ var
   DeltaMinutes : double;
 
 begin
+  VMEntry := nil; //kt providing initialization 8/30/26
   if not Assigned(MDateTimeRange)
     or (MDateTimeRange.getSWRange = '')
     or (FPatientDFN = '') then Exit;
@@ -2254,7 +2257,7 @@ function TfraGMV_GridGraph.GraphNameByGridRow(aRow:Integer):String;
   begin
 //elh converted hard coded numbers to constants, added wounds,  3/12/08
     if (aRow>=0) or (aRow<=rMAX_ROW) then begin
-      Result := cRowLabel[aRow];
+      Result := string(cRowLabel[aRow]); //kt //codex 8/30/26
     end else begin
       Result := sgnNoGraph;
     end;
@@ -3361,7 +3364,7 @@ begin
   lbDateRange.Items.Add(sDateRange);  //vhaishandria 050421
 
   for e := rTemp to rMax_Row do begin      //Changed the combobox to add the items
-    cbxGraph.Items.add(cRowLabel[e]);      //in the order they are listed in the
+    cbxGraph.Items.add(string(cRowLabel[e]));      //in the order they are listed in the //kt //codex 8/30/26
   end;                                     //array.    elh    3/13/08
   {
   cbxGraph.Items.Add(sgnTemperature);
@@ -4168,6 +4171,7 @@ var
   i: integer;
 begin
   s := '';
+  iStartLine := 0; //kt providing initialization 8/30/26
   iEnd := getVisibleColCount;
   if ScrollBarIsVisible then Dec(iEnd);
   if iEnd > grdVitals.ColCount-1 then

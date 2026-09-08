@@ -10,10 +10,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnClose = FormClose
-  PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 185
@@ -42,8 +40,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Height = 33
       Anchors = [akLeft, akRight, akBottom]
       Caption = '&Add New'
-      TabOrder = 0
-      OnClick = btnAddClick
       Glyph.Data = {
         66090000424D660900000000000036000000280000001C0000001C0000000100
         18000000000030090000130B0000130B00000000000000000000FF00FFFF00FF
@@ -121,6 +117,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
         00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF679C6E7DAB8989B294
         89B2947DAB88679B6EFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FF}
+      TabOrder = 0
+      OnClick = btnAddClick
     end
     object tvTaskEventList: TORTreeView
       Left = 1
@@ -197,7 +195,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Top = 45
       Width = 116
       Height = 21
-      ItemHeight = 13
       ItemIndex = 0
       TabOrder = 0
       Text = 'Pending'
@@ -228,8 +225,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = '&Cancel'
-      TabOrder = 5
-      OnClick = btnCancelClick
       Glyph.Data = {
         66090000424D660900000000000036000000280000001C0000001C0000000100
         18000000000030090000130B0000130B00000000000000000000FFFFFFFFFFFF
@@ -307,6 +302,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
         FFFFFFFFFFFFFFFFFFFFFFFFFFFF565A9C3337872B30844448965256A05C60A5
         5C60A55256A04448962B3084333787565A9CFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFF}
+      TabOrder = 5
+      OnClick = btnCancelClick
     end
     object cboResponsiblePerson: TORComboBox
       Left = 290
@@ -316,6 +313,7 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Anchors = [akLeft, akTop, akRight]
       Style = orcsDropDown
       AutoSelect = True
+      Caption = ''
       Color = clWindow
       DropDownCount = 8
       ItemHeight = 13
@@ -330,6 +328,7 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       SynonymChars = '<>'
       TabOrder = 1
       TabStop = True
+      Text = ''
       OnChange = cboResponsiblePersonChange
       OnNeedData = cboResponsiblePersonNeedData
       CharsNeedMatch = 1
@@ -341,8 +340,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = '&Apply All'
-      TabOrder = 4
-      OnClick = btnApplyClick
       Glyph.Data = {
         F6060000424DF606000000000000360000002800000018000000180000000100
         180000000000C0060000130B0000130B00000000000000000000FF00FFFF00FF
@@ -400,6 +397,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
         EED9CDECD5C9EAD3C6F3E6DFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
         00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 4
+      OnClick = btnApplyClick
     end
     object btnAddFollowup: TBitBtn
       Left = 9
@@ -408,8 +407,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Height = 33
       Anchors = [akLeft, akBottom]
       Caption = '&Add Followup Item'
-      TabOrder = 6
-      OnClick = btnAddFollowupClick
       Glyph.Data = {
         66090000424D660900000000000036000000280000001C0000001C0000000100
         18000000000030090000130B0000130B00000000000000000000FF00FFFF00FF
@@ -487,6 +484,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
         AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8B
         D6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BD6AF8BFF00FFFF00FFFF00FFFF00
         FFFF00FFFF00FFFF00FF}
+      TabOrder = 6
+      OnClick = btnAddFollowupClick
     end
     object btnDone: TBitBtn
       Left = 479
@@ -495,8 +494,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Height = 33
       Anchors = [akRight, akBottom]
       Caption = '&Done'
-      TabOrder = 7
-      OnClick = btnDoneClick
       Glyph.Data = {
         66090000424D660900000000000036000000280000001C0000001C0000000100
         18000000000030090000130B0000130B00000000000000000000FFFFFFFFFFFF
@@ -574,6 +571,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
         FFFFFFFFFFFFFFFFFFFFFFFFFFFF659E66458A463D864054975A61A1686AA670
         6AA67061A1685497593D8640458A46659E66FFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFF}
+      TabOrder = 7
+      OnClick = btnDoneClick
     end
     object btnDelete: TBitBtn
       Left = 183
@@ -582,8 +581,6 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       Height = 33
       Anchors = [akLeft, akBottom]
       Caption = '&Delete'
-      TabOrder = 8
-      OnClick = btnDeleteClick
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         20000000000000090000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -659,6 +656,8 @@ object frmEditTaskEvents: TfrmEditTaskEvents
         ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD7E7EAFFCCDA
         DCFF626566FF696D6EFFBDC7C8FFD8E7EAFFD8E8EBFFD8E9ECFFD8E9ECFFD8E9
         ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+      TabOrder = 8
+      OnClick = btnDeleteClick
     end
     object ordtActionDate: TORDateBox
       Left = 128
@@ -669,6 +668,7 @@ object frmEditTaskEvents: TfrmEditTaskEvents
       OnChange = ordtActionDateChange
       DateOnly = False
       RequireTime = False
+      Caption = ''
     end
   end
 end

@@ -192,7 +192,8 @@ var
 begin
   Result := nil;
   // allows the FormCreate to check event under which dialog is created
-  if AnEvent.EventType in ['A','D','T','M','O'] then begin
+  //kt //codex original --> if AnEvent.EventType in ['A','D','T','M','O'] then begin
+  if CharInSet(AnEvent.EventType, ['A','D','T','M','O']) then begin //kt //codex 8/30/26
     SetOrderEventTypeOnCreate(AnEvent.EventType);
     SetOrderEventIDOnCreate(AnEvent.EventIFN);
   end else begin
@@ -902,7 +903,8 @@ begin
 
   //We need to get the first numeric postion
   for FirstNumericPos := 1 to Length(AnID) do begin
-    if AnID[FirstNumericPos] in ['0'..'9'] then break;
+    //kt //codex original --> if AnID[FirstNumericPos] in ['0'..'9'] then break;
+    if CharInSet(AnID[FirstNumericPos], ['0'..'9']) then break; //kt //codex 8/30/26
   end;
 
   //QOAltOI.OI := 0;
@@ -1188,7 +1190,8 @@ begin
     end;
 
     if ResolvedDialog.QuickLevel <> QL_AUTO then begin
-      if CharAt(AnID, 1) in ['C','T','X'] then begin
+      //kt //codex original --> if CharAt(AnID, 1) in ['C','T','X'] then begin
+      if CharInSet(CharAt(AnID, 1), ['C','T','X']) then begin //kt //codex 8/30/26
         Position := poScreenCenter;
         FormStyle := fsNormal;
         ShowModal;
@@ -1511,7 +1514,8 @@ begin
   if not CloseOrdering then Exit;
   uKeepLock := False;
   { get the delay event for this order (if applicable) }
-  if AnEvent.EventType in ['A','D','T','M','O'] then begin
+  //kt //codex original --> if AnEvent.EventType in ['A','D','T','M','O'] then begin
+  if CharInSet(AnEvent.EventType, ['A','D','T','M','O']) then begin //kt //codex 8/30/26
     if (AnEvent.EventName = '') and (AnEvent.EventType <> 'D') then begin
       Exit;
     end;
@@ -1553,7 +1557,8 @@ begin
   if not CloseOrdering then Exit;
   uKeepLock := False;
   { get the delay event for this order (if applicable) }
-  if AnEvent.EventType in ['A','D','T','M','O'] then begin
+  //kt //codex original --> if AnEvent.EventType in ['A','D','T','M','O'] then begin
+  if CharInSet(AnEvent.EventType, ['A','D','T','M','O']) then begin //kt //codex 8/30/26
     x := AnEvent.EventType + IntToStr(AnEvent.Specialty);
     if (uLastConfirm <> x ) and (not XfInToOutNow) then begin
       uLastConfirm := x;
@@ -2023,7 +2028,8 @@ begin
     Td := IMOTimeFrame;
     if IsValidIMOLoc(Encounter.Location,Patient.DFN) and (Encounter.DateTime > Td) then begin
       Result := True
-    end else if AnEvtTyp in ['A','T'] then begin
+    //kt //codex original --> end else if AnEvtTyp in ['A','T'] then begin
+    end else if CharInSet(AnEvtTyp, ['A','T']) then begin //kt //codex 8/30/26
       Result := True;
     end;
   end;
@@ -2035,7 +2041,8 @@ var
 begin
   // jd imo change
   Result := True;
-  if CharAt(AnID, 1) in ['X','C'] then  // transfer IMO order doesn't need check
+  //kt //codex original --> if CharAt(AnID, 1) in ['X','C'] then
+  if CharInSet(CharAt(AnID, 1), ['X','C']) then  // transfer IMO order doesn't need check //kt //codex 8/30/26
   begin
     IsIMOOD := IsIMOOrder(Copy(AnID, 2, Length(AnID)));
     If IsIMOOD then begin

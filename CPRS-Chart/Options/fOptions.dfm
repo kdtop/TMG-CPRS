@@ -1,7 +1,7 @@
 inherited frmOptions: TfrmOptions
   Left = 315
   Top = 110
-  Height = 503
+  Height = 489
   HelpContext = 9999
   VertScrollBar.Range = 360
   BorderIcons = [biSystemMenu, biHelp]
@@ -12,11 +12,12 @@ inherited frmOptions: TfrmOptions
   Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  ExplicitHeight = 503
+  ExplicitTop = -136
+  ExplicitHeight = 489
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 434
+    Top = 420
     Width = 427
     Height = 30
     HelpContext = 9999
@@ -64,7 +65,7 @@ inherited frmOptions: TfrmOptions
     Left = 0
     Top = 0
     Width = 427
-    Height = 434
+    Height = 420
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
@@ -75,7 +76,7 @@ inherited frmOptions: TfrmOptions
       Left = 5
       Top = 5
       Width = 417
-      Height = 424
+      Height = 410
       HelpContext = 9999
       ActivePage = tsCoverSheet
       Align = alClient
@@ -87,7 +88,7 @@ inherited frmOptions: TfrmOptions
         Caption = 'General'
         DesignSize = (
           409
-          396)
+          382)
         object bvlCoverDays: TBevel
           Left = 125
           Top = 16
@@ -509,7 +510,7 @@ inherited frmOptions: TfrmOptions
         end
         object lvwNotifications: TCaptionListView
           Left = 0
-          Top = 237
+          Top = 223
           Width = 409
           Height = 159
           HelpContext = 9035
@@ -677,7 +678,7 @@ inherited frmOptions: TfrmOptions
         end
         object lvwOrderChecks: TCaptionListView
           Left = 0
-          Top = 188
+          Top = 174
           Width = 409
           Height = 208
           HelpContext = 9041
@@ -947,7 +948,7 @@ inherited frmOptions: TfrmOptions
         ImageIndex = 4
         DesignSize = (
           409
-          396)
+          382)
         object bvlNotesNotes: TBevel
           Left = 88
           Top = 16
@@ -1401,7 +1402,7 @@ inherited frmOptions: TfrmOptions
         ImageIndex = 6
         DesignSize = (
           409
-          396)
+          382)
         object bvlGraphSettings: TBevel
           Left = 104
           Top = 16

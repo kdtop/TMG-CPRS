@@ -24,7 +24,7 @@ type
     procedure HandleOnTimer(Sender: TObject);
   public
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
     procedure Clear;
     procedure Remember(Value : string;
                        Duration : integer = DEFAULT_SAVE_DURATION;
@@ -61,6 +61,7 @@ implementation
   var Interval : integer;
   begin
     Clear;
+    Interval := 0 ; //default  //kt
     case Units of
       min: Interval := Duration * 60 * 1000;
       sec: Interval := Duration * 1000;

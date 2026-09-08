@@ -5,7 +5,6 @@ inherited frmPtSel: TfrmPtSel
   Caption = 'Patient Selection'
   ClientHeight = 559
   ClientWidth = 784
-  OldCreateOrder = True
   Position = poMainFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
@@ -13,8 +12,7 @@ inherited frmPtSel: TfrmPtSel
   OnResize = FormResize
   OnShow = FormShow
   ExplicitWidth = 800
-  ExplicitHeight = 597
-  PixelsPerInch = 96
+  ExplicitHeight = 598
   TextHeight = 13
   object sptVert: TSplitter [0]
     Left = 0
@@ -106,6 +104,7 @@ inherited frmPtSel: TfrmPtSel
       SynonymChars = '<>'
       TabPositions = '20,25,30'
       TabOrder = 1
+      Text = ''
       OnChange = cboPatientChange
       OnDblClick = cboPatientDblClick
       OnEnter = cboPatientEnter
@@ -166,10 +165,6 @@ inherited frmPtSel: TfrmPtSel
       Height = 27
       Hint = 'Advanced Search'
       Anchors = [akTop, akRight]
-      ParentShowHint = False
-      ShowHint = False
-      TabOrder = 6
-      OnClick = btnSearchPtClick
       Glyph.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
         1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -197,6 +192,10 @@ inherited frmPtSel: TfrmPtSel
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFF7FFFFF7F
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      ParentShowHint = False
+      ShowHint = False
+      TabOrder = 6
+      OnClick = btnSearchPtClick
     end
     object RadioGroup1: TRadioGroup
       Left = 494
@@ -243,6 +242,9 @@ inherited frmPtSel: TfrmPtSel
       TabOrder = 6
       Visible = False
       ShowAccelChar = True
+      WordWrap = False
+      LabelAlignment = taLeftJustify
+      LabelLayout = tlTop
     end
     object txtCmdRemove: TVA508StaticText
       Name = 'txtCmdRemove'
@@ -255,6 +257,9 @@ inherited frmPtSel: TfrmPtSel
       TabOrder = 9
       Visible = False
       ShowAccelChar = True
+      WordWrap = False
+      LabelAlignment = taLeftJustify
+      LabelLayout = tlTop
     end
     object txtCmdForward: TVA508StaticText
       Name = 'txtCmdForward'
@@ -267,6 +272,9 @@ inherited frmPtSel: TfrmPtSel
       TabOrder = 7
       Visible = False
       ShowAccelChar = True
+      WordWrap = False
+      LabelAlignment = taLeftJustify
+      LabelLayout = tlTop
     end
     object txtCmdProcess: TVA508StaticText
       Name = 'txtCmdProcess'
@@ -279,6 +287,9 @@ inherited frmPtSel: TfrmPtSel
       TabOrder = 8
       Visible = False
       ShowAccelChar = True
+      WordWrap = False
+      LabelAlignment = taLeftJustify
+      LabelLayout = tlTop
     end
     object cmdProcessInfo: TButton
       Left = 11
@@ -407,6 +418,7 @@ inherited frmPtSel: TfrmPtSel
     OnInfoTip = lstvAlertsInfoTip
     OnKeyDown = lstvAlertsKeyDown
     OnSelectItem = lstvAlertsSelectItem
+    AutoSize = False
     Caption = 'Notifications'
   end
   object pnlPatientImage: TPanel [5]

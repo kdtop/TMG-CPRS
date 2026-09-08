@@ -990,7 +990,8 @@ begin
   begin
     if Responses.IValueFor('PICKUP', 1) = '' then SetError(TX_NO_PICK);
     temp := Responses.IValueFor('REFILLS', 1);
-    for i := 1 to Length(temp) do if not (temp[i] in ['0'..'9']) then
+    //kt //codex original --> for i := 1 to Length(temp) do if not (temp[i] in ['0'..'9']) then
+    for i := 1 to Length(temp) do if not CharInSet(temp[i], ['0'..'9']) then //kt //codex 8/30/26
       begin
         SetError('Refills can only be a number');
         Exit;
@@ -3036,7 +3037,8 @@ begin
             if DoseFields = '' then
             begin
               for UnitIndex := 1 to Length(ADose) do
-                if not (ADose[UnitIndex] in ['0'..'9','.']) then Break;
+                //kt //codex original --> if not (ADose[UnitIndex] in ['0'..'9','.']) then Break;
+                if not CharInSet(ADose[UnitIndex], ['0'..'9','.']) then Break; //kt //codex 8/30/26
               DoseUnits := Copy(ADose, UnitIndex, Length(ADose));
             end
             else DoseUnits := Piece(DoseFields, '&', 2);
@@ -3439,7 +3441,8 @@ end;
 procedure TfrmODMeds.grdDosesKeyPress(Sender: TObject; var Key: Char);
 begin
   inherited;
-  if Key in [#32..#127] then ShowEditor(grdDoses.Col, grdDoses.Row, Key);
+  //kt //codex original --> if Key in [#32..#127] then ShowEditor(grdDoses.Col, grdDoses.Row, Key);
+  if CharInSet(Key, [#32..#127]) then ShowEditor(grdDoses.Col, grdDoses.Row, Key); //kt //codex 8/30/26
   if grdDoses.Col <> COL_DOSAGE then
     DropLastSequence;
 end;
@@ -4640,12 +4643,14 @@ begin
           //AGP Change Admin Time Wrap 27.73
           //Admin := Copy(self.lblAdminSch.text,  14, (Length(self.lblAdminSch.text)-1));
           Admin := lblAdminSchGetText;
-          if (Admin <> '') and (not (Admin[1] in ['0'..'9'])) then Admin := '';
+          //kt //codex original --> if (Admin <> '') and (not (Admin[1] in ['0'..'9'])) then Admin := '';
+          if (Admin <> '') and not CharInSet(Admin[1], ['0'..'9']) then Admin := ''; //kt //codex 8/30/26
         end
       else if self.tabDose.TabIndex = TI_COMPLEX then
         begin
           Admin := Self.grdDoses.Cells[COL_ADMINTIME, 1];
-          if (Admin <> '') and (not (Admin[1] in ['0'..'9'])) then Admin := '';
+          //kt //codex original --> if (Admin <> '') and (not (Admin[1] in ['0'..'9'])) then Admin := '';
+          if (Admin <> '') and not CharInSet(Admin[1], ['0'..'9']) then Admin := ''; //kt //codex 8/30/26
         end;           
       LoadAdminInfo(ASchedule, txtMed.Tag, ShowText, AdminTime, Duration, Admin);
      end;
@@ -4782,7 +4787,8 @@ begin
     end;
    if (self.tabDose.TabIndex = TI_DOSE) and (CurSchedule <> FLastSchedule) then
      UpdateStartExpires(CurSchedule);
-    if Responses.EventType in ['A','D','T','M','O'] then lblAdminTime.Visible := False;
+    //kt //codex original --> if Responses.EventType in ['A','D','T','M','O'] then lblAdminTime.Visible := False;
+    if CharInSet(Responses.EventType, ['A','D','T','M','O']) then lblAdminTime.Visible := False; //kt //codex 8/30/26
   end;
   if not FInptDlg then
   begin
@@ -4941,7 +4947,8 @@ begin
   DUName := Trim(DUName);
   if CharAt(UnitNum,1)='.' then
   begin
-    if CharAt(UnitNum,2) in ['0','1','2','3','4','5','6','7','8','9'] then
+    //kt //codex original --> if CharAt(UnitNum,2) in ['0','1','2','3','4','5','6','7','8','9'] then
+    if CharInSet(CharAt(UnitNum,2), ['0','1','2','3','4','5','6','7','8','9']) then //kt //codex 8/30/26
     begin
       UnitNum := '0' + UnitNum;
       AStr := '0' + AStr;

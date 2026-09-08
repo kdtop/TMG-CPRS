@@ -147,7 +147,7 @@ type
     procedure ExtractVarPtrInfo(FieldNum : string; VarPtrInfo : TStringList);
     function SubfileNum(FieldNum : string) : string;
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
   end;
 
   TCompleteGridInfo = class (TGridInfo)
@@ -160,9 +160,9 @@ type
     //Data         : TStringList;       //DOES own object
     procedure Clear; override;
     procedure Assign(Source : TGridInfo); overload; override;
-    procedure Assign(Source : TCompleteGridInfo); overload;
+    procedure Assign(Source : TCompleteGridInfo); reintroduce; overload; //kt //codex 8/30/26
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 

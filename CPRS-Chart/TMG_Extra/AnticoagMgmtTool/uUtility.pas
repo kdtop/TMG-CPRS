@@ -157,7 +157,8 @@ begin
 end;
 
 procedure SLToHTML(SL : TStrings; HTMLObj: THtmlObj; ErasePrior : boolean = true);
-var str : AnsiString;  //single byte characters.  If not specified, then default string is Unicodestring
+//kt //codex original --> var str : AnsiString;  //single byte characters.  If not specified, then default string is Unicodestring
+var str : string; // HTML text is Unicode within CPRS //kt //codex 8/30/26
     i   : integer;
 begin
   Str := '';

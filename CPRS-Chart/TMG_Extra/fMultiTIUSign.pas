@@ -49,7 +49,7 @@ type
     DateStr : string;
     procedure AddErrMsg(msg : string);
     constructor Create();
-    destructor Destroy();
+    destructor Destroy(); override; //kt //codex 8/30/26
   end;
 
   TfrmMultiTIUSign = class(TForm)
@@ -130,7 +130,7 @@ type
     FMaximizedOnce:Boolean;
     FFormMode: TMultiSignMode;
     FItemsTitleName : string;
-    procedure WndProc(var Msg:TMessage);
+    procedure WndProc(var Msg:TMessage); override; //kt //codex 8/30/26
     procedure LoadInfoListIntoLV;
     Procedure InitializeFromAlerts(Items : TListItems);
     Procedure InitializeFromLoose();
@@ -1366,21 +1366,22 @@ function TfrmMultiTIUSign.DeleteOneTIU(ItemInfo : TItemInfo): boolean;  //result
 var ActionSts:TActionRec;
     x : String;
 begin
-    if ItemInfo.DeferredToDelete <> True then begin
-        ShowMsg('NOTE: A note not set for deletion got to the Delete Function!');
-        exit;
-    end;
-    ActOnDocument(ActionSts, ItemInfo.intIEN8925, 'DELETE RECORD');
-    if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
-        ExtDeleteAllAttachedImages(ItemInfo.IEN8925, idmDelete, nil, False);
-        ActOnDocument(ActionSts, ItemInfo.intIEN8925, 'DELETE RECORD');
-    end;
-    if ActionSts.Success <>True then begin
-        ShowMsg(ActionSts.Reason);
-        exit;
-    end;
-    x := sCallV('TIU DELETE RECORD', [ItemInfo.intIEN8925, 'Deleted via MultiTIUSign']);
-    result := Piece(x, U, 1) = '0';
+  result := false; //kt providing a default 8/30/26
+  if ItemInfo.DeferredToDelete <> True then begin
+      ShowMsg('NOTE: A note not set for deletion got to the Delete Function!');
+      exit;
+  end;
+  ActOnDocument(ActionSts, ItemInfo.intIEN8925, 'DELETE RECORD');
+  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
+      ExtDeleteAllAttachedImages(ItemInfo.IEN8925, idmDelete, nil, False);
+      ActOnDocument(ActionSts, ItemInfo.intIEN8925, 'DELETE RECORD');
+  end;
+  if ActionSts.Success <>True then begin
+      ShowMsg(ActionSts.Reason);
+      exit;
+  end;
+  x := sCallV('TIU DELETE RECORD', [ItemInfo.intIEN8925, 'Deleted via MultiTIUSign']);
+  result := Piece(x, U, 1) = '0';
 end;
 
 function TfrmMultiTIUSign.SignOneTIU(ItemInfo : TItemInfo; ESCode : string) : boolean;  //result TRUE if successful sign.

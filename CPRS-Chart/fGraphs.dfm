@@ -12,9 +12,8 @@ inherited frmGraphs: TfrmGraphs
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  ExplicitWidth = 700
-  ExplicitHeight = 596
-  PixelsPerInch = 96
+  ExplicitWidth = 710
+  ExplicitHeight = 603
   TextHeight = 13
   object pnlHeader: TPanel [0]
     Left = 0
@@ -55,11 +54,12 @@ inherited frmGraphs: TfrmGraphs
       Width = 105
       Height = 17
       AllowPanning = pmNone
-      AllowZoom = False
-      BackWall.Brush.Color = clWhite
       BackWall.Brush.Style = bsClear
       Gradient.EndColor = clPurple
       Gradient.Visible = True
+      Legend.Alignment = laTop
+      Legend.LegendStyle = lsSeries
+      Legend.ResizeChart = False
       Title.Text.Strings = (
         'fsdfs dfs fsd')
       Title.Visible = False
@@ -73,17 +73,17 @@ inherited frmGraphs: TfrmGraphs
       BottomAxis.Increment = 0.000694444444444444
       BottomAxis.Maximum = 25.000000000000000000
       BottomAxis.Visible = False
-      Legend.Alignment = laTop
-      Legend.LegendStyle = lsSeries
-      Legend.ResizeChart = False
       TopAxis.LabelsOnAxis = False
       View3D = False
+      Zoom.Allow = False
       Color = clRed
       TabOrder = 0
       Visible = False
       OnDblClick = mnuPopGraphDetailsClick
       OnMouseDown = chartBaseMouseDown
       OnMouseUp = chartBaseMouseUp
+      DefaultCanvas = 'TGDIPlusCanvas'
+      ColorPaletteIndex = 13
     end
   end
   object pnlFooter: TPanel [1]
@@ -126,6 +126,7 @@ inherited frmGraphs: TfrmGraphs
       Height = 21
       Style = orcsDropDown
       AutoSelect = True
+      Caption = ''
       Color = clWindow
       DropDownCount = 9
       Items.Strings = (
@@ -150,6 +151,7 @@ inherited frmGraphs: TfrmGraphs
       SynonymChars = '<>'
       TabOrder = 0
       TabStop = True
+      Text = ''
       OnChange = cboDateRangeChange
       OnDropDown = cboDateRangeDropDown
       CharsNeedMatch = 1
@@ -333,10 +335,6 @@ inherited frmGraphs: TfrmGraphs
           object tsTopViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object splViewsTop: TSplitter
               Left = 0
               Top = 361
@@ -359,6 +357,7 @@ inherited frmGraphs: TfrmGraphs
               TabOrder = 0
               OnEnter = lstViewsTopEnter
               OnMouseDown = lstViewsTopMouseDown
+              Caption = ''
               ItemTipColor = clWindow
               LongList = False
               Pieces = '2'
@@ -390,10 +389,6 @@ inherited frmGraphs: TfrmGraphs
           object tsTopCustom: TTabSheet
             Caption = 'Custom'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
         end
       end
@@ -454,11 +449,16 @@ inherited frmGraphs: TfrmGraphs
             Width = 508
             Height = 30
             AllowPanning = pmNone
-            BackWall.Brush.Color = clWhite
             BackWall.Brush.Style = bsClear
             BackWall.Pen.Visible = False
             Gradient.EndColor = clWhite
             Gradient.StartColor = 8421631
+            Legend.Alignment = laBottom
+            Legend.Color = clCream
+            Legend.LegendStyle = lsSeries
+            Legend.Shadow.HorizSize = 1
+            Legend.Shadow.VertSize = 1
+            Legend.Visible = False
             Title.Text.Strings = (
               '')
             Title.Visible = False
@@ -479,22 +479,19 @@ inherited frmGraphs: TfrmGraphs
             LeftAxis.Axis.Visible = False
             LeftAxis.Grid.Visible = False
             LeftAxis.Labels = False
+            LeftAxis.LabelsFormat.Visible = False
             LeftAxis.LabelsOnAxis = False
             LeftAxis.Maximum = 9.000000000000000000
             LeftAxis.MinorGrid.Visible = True
             LeftAxis.RoundFirstLabel = False
             LeftAxis.Title.Caption = ' '
             LeftAxis.Visible = False
-            Legend.Alignment = laBottom
-            Legend.Color = clCream
-            Legend.LegendStyle = lsSeries
-            Legend.ShadowSize = 1
-            Legend.Visible = False
             RightAxis.Automatic = False
             RightAxis.AutomaticMaximum = False
             RightAxis.AutomaticMinimum = False
             RightAxis.Axis.Visible = False
             RightAxis.Labels = False
+            RightAxis.LabelsFormat.Visible = False
             RightAxis.LabelsOnAxis = False
             RightAxis.RoundFirstLabel = False
             RightAxis.Visible = False
@@ -507,35 +504,28 @@ inherited frmGraphs: TfrmGraphs
             OnDblClick = mnuPopGraphDetailsClick
             OnMouseDown = chartBaseMouseDown
             OnMouseUp = chartBaseMouseUp
+            DefaultCanvas = 'TGDIPlusCanvas'
+            ColorPaletteIndex = 13
             object serDatelineTop: TGanttSeries
-              ColorEachPoint = True
-              Marks.ArrowLength = 0
-              Marks.Visible = False
+              HoverElement = [heCurrent]
+              Legend.Visible = False
               SeriesColor = clRed
               ShowInLegend = False
               OnGetMarkText = serDatelineTopGetMarkText
+              ClickableLine = False
               Pointer.InflateMargins = False
               Pointer.Style = psRectangle
-              Pointer.Visible = True
-              XValues.DateTime = True
               XValues.Name = 'Start'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
-              StartValues.DateTime = True
+              Callout.Style = psRightTriangle
+              Callout.Arrow.Visible = False
               StartValues.Name = 'Start'
-              StartValues.Multiplier = 1.000000000000000000
               StartValues.Order = loAscending
-              EndValues.DateTime = True
               EndValues.Name = 'End'
-              EndValues.Multiplier = 1.000000000000000000
               EndValues.Order = loNone
-              NextTask.DateTime = False
               NextTask.Name = 'NextTask'
-              NextTask.Multiplier = 1.000000000000000000
               NextTask.Order = loNone
             end
           end
@@ -697,10 +687,6 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomViews: TTabSheet
             Caption = 'Views'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object splViewsBottom: TSplitter
               Left = 0
               Top = 45
@@ -722,6 +708,7 @@ inherited frmGraphs: TfrmGraphs
               ShowHint = False
               TabOrder = 0
               OnEnter = lstViewsBottomEnter
+              Caption = ''
               ItemTipColor = clWindow
               LongList = False
               Pieces = '2'
@@ -753,10 +740,6 @@ inherited frmGraphs: TfrmGraphs
           object tsBottomCustom: TTabSheet
             Caption = 'Custom'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
         end
       end
@@ -802,10 +785,15 @@ inherited frmGraphs: TfrmGraphs
             Width = 508
             Height = 30
             AllowPanning = pmNone
-            BackWall.Brush.Color = clWhite
             BackWall.Brush.Style = bsClear
             BackWall.Pen.Visible = False
             Gradient.EndColor = clGradientActiveCaption
+            Legend.Alignment = laBottom
+            Legend.Color = clCream
+            Legend.LegendStyle = lsSeries
+            Legend.Shadow.HorizSize = 1
+            Legend.Shadow.VertSize = 1
+            Legend.Visible = False
             Title.Text.Strings = (
               '')
             Title.Visible = False
@@ -826,21 +814,18 @@ inherited frmGraphs: TfrmGraphs
             LeftAxis.Axis.Visible = False
             LeftAxis.Grid.Visible = False
             LeftAxis.Labels = False
+            LeftAxis.LabelsFormat.Visible = False
             LeftAxis.LabelsOnAxis = False
             LeftAxis.Maximum = 9.000000000000000000
             LeftAxis.MinorGrid.Visible = True
             LeftAxis.RoundFirstLabel = False
             LeftAxis.Title.Caption = ' '
-            Legend.Alignment = laBottom
-            Legend.Color = clCream
-            Legend.LegendStyle = lsSeries
-            Legend.ShadowSize = 1
-            Legend.Visible = False
             RightAxis.Automatic = False
             RightAxis.AutomaticMaximum = False
             RightAxis.AutomaticMinimum = False
             RightAxis.Axis.Visible = False
             RightAxis.Labels = False
+            RightAxis.LabelsFormat.Visible = False
             RightAxis.LabelsOnAxis = False
             RightAxis.RoundFirstLabel = False
             RightAxis.Visible = False
@@ -853,35 +838,28 @@ inherited frmGraphs: TfrmGraphs
             OnDblClick = mnuPopGraphDetailsClick
             OnMouseDown = chartBaseMouseDown
             OnMouseUp = chartBaseMouseUp
+            DefaultCanvas = 'TGDIPlusCanvas'
+            ColorPaletteIndex = 13
             object serDatelineBottom: TGanttSeries
-              ColorEachPoint = True
-              Marks.ArrowLength = 0
-              Marks.Visible = False
+              HoverElement = [heCurrent]
+              Legend.Visible = False
               SeriesColor = clRed
               ShowInLegend = False
               OnGetMarkText = serDatelineTopGetMarkText
+              ClickableLine = False
               Pointer.InflateMargins = True
               Pointer.Style = psRectangle
-              Pointer.Visible = True
-              XValues.DateTime = True
               XValues.Name = 'Start'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
-              StartValues.DateTime = True
+              Callout.Style = psRightTriangle
+              Callout.Arrow.Visible = False
               StartValues.Name = 'Start'
-              StartValues.Multiplier = 1.000000000000000000
               StartValues.Order = loAscending
-              EndValues.DateTime = True
               EndValues.Name = 'End'
-              EndValues.Multiplier = 1.000000000000000000
               EndValues.Order = loNone
-              NextTask.DateTime = False
               NextTask.Name = 'NextTask'
-              NextTask.Multiplier = 1.000000000000000000
               NextTask.Order = loNone
             end
           end

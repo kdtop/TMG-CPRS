@@ -11,14 +11,12 @@ object frmPatientInformation: TfrmPatientInformation
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignSize = (
     598
     388)
-  PixelsPerInch = 96
   TextHeight = 13
   object gbxUpdate: TGroupBox
     Left = 11
@@ -400,8 +398,6 @@ object frmPatientInformation: TfrmPatientInformation
     Width = 113
     Height = 25
     Caption = '&OK'
-    ModalResult = 1
-    TabOrder = 1
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
       18000000000000030000120B0000120B00000000000000000000FF00FFFF00FF
@@ -429,6 +425,8 @@ object frmPatientInformation: TfrmPatientInformation
       FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
       FFFF00FFFF00FF3EB961FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    ModalResult = 1
+    TabOrder = 1
   end
   object btnCancel: TBitBtn
     Left = 348
@@ -436,8 +434,6 @@ object frmPatientInformation: TfrmPatientInformation
     Width = 123
     Height = 25
     Caption = '&Cancel'
-    ModalResult = 2
-    TabOrder = 2
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
       18000000000000030000130B0000130B00000000000000000000FF00FFFF00FF
@@ -465,6 +461,8 @@ object frmPatientInformation: TfrmPatientInformation
       FF00FFFF00FFFF00FF808080000000000000000000000000000000808080FF00
       FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    ModalResult = 2
+    TabOrder = 2
   end
   object btnDischargeFromClinic: TBitBtn
     Left = 8
@@ -473,8 +471,6 @@ object frmPatientInformation: TfrmPatientInformation
     Height = 25
     Anchors = [akBottom]
     Caption = '&Discharge From Clinic'
-    TabOrder = 3
-    OnClick = btnDischargeFromClinicClick
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
       18000000000000030000120B0000120B00000000000000000000FFFFFFFFFFFF
@@ -502,5 +498,7 @@ object frmPatientInformation: TfrmPatientInformation
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+    TabOrder = 3
+    OnClick = btnDischargeFromClinicClick
   end
 end

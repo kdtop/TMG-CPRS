@@ -169,12 +169,14 @@ function TTMGAllscriptsDriver.GetWebSitePatient(var ErrMsg : string): boolean; /
   begin
     //process  LastNameRaw --> LastName
     temp := UpperCase(WSPatient.LastNameRaw);
-    while (length(temp)>0) and (temp[length(temp)] in [' ',',']) do temp := LeftStr(temp, length(temp)-1);
+    //kt //codex original --> while (length(temp)>0) and (temp[length(temp)] in [' ',',']) do temp := LeftStr(temp, length(temp)-1);
+    while (length(temp)>0) and (CharInSet(temp[length(temp)], [' ',','])) do temp := LeftStr(temp, length(temp)-1); //kt //codex 8/30/26
     WSPatient.LastName := temp;
 
     //process  FirstnameRaw --> FirstName
     temp := UpperCase(WSPatient.FirstNameRaw);
-    while (length(temp)>0) and (temp[length(temp)] in [' ',',']) do temp := LeftStr(temp, length(temp)-1);
+    //kt //codex original --> while (length(temp)>0) and (temp[length(temp)] in [' ',',']) do temp := LeftStr(temp, length(temp)-1);
+    while (length(temp)>0) and (CharInSet(temp[length(temp)], [' ',','])) do temp := LeftStr(temp, length(temp)-1); //kt //codex 8/30/26
     WSPatient.FirstName := temp;
 
     //Process  DOBGenderRaw --> DOB and Gender   e.g. of value: 'April 14, 1972 (45 Y) | Female'
@@ -406,31 +408,37 @@ end;
 function TTMGAllscriptsDriver.DriveEnterPatientInfoAndSearch(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
 begin
   //finish
+  result := false;
 end;
 
 function TTMGAllscriptsDriver.DriveSelectSingleFoundPatient(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
 begin
   //finish
+  result := false;
 end;
 
 function TTMGAllscriptsDriver.DriveClickSelectMed(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
 begin
   //finish
+  result := false;
 end;
 
 function TTMGAllscriptsDriver.DriveClickReviewHistory(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
 begin
   //finish
+  result := false;
 end;
 
 function TTMGAllscriptsDriver.DriveClickBackToSelectPt(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
 begin
   //finish
+  result := false;
 end;
 
 function TTMGAllscriptsDriver.DriveScrapeMeds(var ErrMsg : string) : boolean; //returns false if ErrMsg <> ''
 begin
   //finish
+  result := false;
 end;
 
 

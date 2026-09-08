@@ -99,7 +99,8 @@ begin
   begin
     if UserDefaultEvent > 0 then
       defaultEvtType := CharAt(EventInfo1(IntToStr(UserDefaultEvent)),1);
-      if defaultEvtType in ['T','D'] then
+      //kt //codex original --> if defaultEvtType in ['T','D'] then
+      if CharInSet(defaultEvtType, ['T','D']) then //kt //codex 8/30/26
         NoUserDefault := True;
   end;
   if (UserDefaultEvent > 0) and (not NoUserDefault) then

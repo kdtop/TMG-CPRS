@@ -357,7 +357,8 @@ end;
 
 procedure TfrmPtAdd.SequelAcctEditKeyPress(Sender: TObject; var Key: Char);
 begin
-  if not (Key in ['0'..'9']) then Key := #0;
+  //kt //codex original --> if not (Key in ['0'..'9']) then Key := #0;
+  if not CharInSet(Key, ['0'..'9']) then Key := #0; //kt //codex 8/30/26
 end;
 
 procedure TfrmPtAdd.SexComboBoxChange(Sender: TObject);
@@ -579,7 +580,8 @@ begin
   end else if Key='P' then begin  
     CreatePSSN;
     Key := #0;
-  end else if not (Key in ['0'..'9','-']) then Key := #0;
+  //kt //codex original --> end else if not (Key in ['0'..'9','-']) then Key := #0;
+  end else if not CharInSet(Key, ['0'..'9','-']) then Key := #0; //kt //codex 8/30/26
 end;
 //------------------------------------------------------------------------
 function TfrmPtAdd.FrmtSSNum(SSNumStr : string) : string;
@@ -609,32 +611,38 @@ end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.DOBEditKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key in ['-', '\'] then Key := '/';
-  if Key in ['0'..'9'] + ['/'] then Key := Key 
+  //kt //codex original --> if Key in ['-', '\'] then Key := '/';
+  if CharInSet(Key, ['-', '\']) then Key := '/'; //kt //codex 8/30/26
+  //kt //codex original --> if Key in ['0'..'9'] + ['/'] then Key := Key
+  if CharInSet(Key, ['0'..'9','/']) then Key := Key //kt //codex 8/30/26
   else if Key <> #8 then Key := #0;
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.LNameEditKeyPress(Sender: TObject; var Key: Char);
 begin
   Key := Uppercase(Key)[1];
-  if Key in ['0'..'9',','] then Key := #0
+  //kt //codex original --> if Key in ['0'..'9',','] then Key := #0
+  if CharInSet(Key, ['0'..'9',',']) then Key := #0 //kt //codex 8/30/26
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.FNameEditKeyPress(Sender: TObject; var Key: Char);
 begin
   Key := Uppercase(Key)[1];
-  if Key in ['0'..'9'] then Key := #0
+  //kt //codex original --> if Key in ['0'..'9'] then Key := #0
+  if CharInSet(Key, ['0'..'9']) then Key := #0 //kt //codex 8/30/26
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.MNameEditKeyPress(Sender: TObject; var Key: Char);
 begin
   Key := Uppercase(Key)[1];
-  if Key in ['0'..'9'] then Key := #0
+  //kt //codex original --> if Key in ['0'..'9'] then Key := #0
+  if CharInSet(Key, ['0'..'9']) then Key := #0 //kt //codex 8/30/26
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.SuffixEditKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key in ['0'..'9'] then Key := #0
+  //kt //codex original --> if Key in ['0'..'9'] then Key := #0
+  if CharInSet(Key, ['0'..'9']) then Key := #0 //kt //codex 8/30/26
 end;
 //------------------------------------------------------------------------
 procedure TfrmPtAdd.SexComboBoxKeyPress(Sender: TObject; var Key: Char);
@@ -734,16 +742,26 @@ begin
 
   tempPseudo := '';
   for i := 1 to 3 do begin
-    if      Init[i] in ['A','B','C'] then code := '1'
-    else if Init[i] in ['D','E','F'] then code := '2'
-    else if Init[i] in ['G','H','I'] then code := '3'
-    else if Init[i] in ['J','K','L'] then code := '4'
-    else if Init[i] in ['M','N','O'] then code := '5'
-    else if Init[i] in ['P','Q','R'] then code := '6'
-    else if Init[i] in ['S','T','U'] then code := '7'
-    else if Init[i] in ['V','W','X'] then code := '8'
-    else if Init[i] in ['Y','Z']     then code := '9'
-    else if Init[i] in [' ']         then code := '0'
+    //kt //codex original --> if      Init[i] in ['A','B','C'] then code := '1'
+    if      CharInSet(Init[i], ['A','B','C']) then code := '1' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['D','E','F'] then code := '2'
+    else if CharInSet(Init[i], ['D','E','F']) then code := '2' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['G','H','I'] then code := '3'
+    else if CharInSet(Init[i], ['G','H','I']) then code := '3' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['J','K','L'] then code := '4'
+    else if CharInSet(Init[i], ['J','K','L']) then code := '4' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['M','N','O'] then code := '5'
+    else if CharInSet(Init[i], ['M','N','O']) then code := '5' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['P','Q','R'] then code := '6'
+    else if CharInSet(Init[i], ['P','Q','R']) then code := '6' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['S','T','U'] then code := '7'
+    else if CharInSet(Init[i], ['S','T','U']) then code := '7' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['V','W','X'] then code := '8'
+    else if CharInSet(Init[i], ['V','W','X']) then code := '8' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in ['Y','Z']     then code := '9'
+    else if CharInSet(Init[i], ['Y','Z']) then code := '9' //kt //codex 8/30/26
+    //kt //codex original --> else if Init[i] in [' ']         then code := '0'
+    else if CharInSet(Init[i], [' ']) then code := '0' //kt //codex 8/30/26
     else code := '0';
     tempPseudo := tempPseudo + code;
   end;  

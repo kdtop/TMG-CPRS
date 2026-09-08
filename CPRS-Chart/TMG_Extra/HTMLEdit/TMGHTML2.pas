@@ -241,7 +241,7 @@ type
     function  GetFullHTMLText:string; //html text including from <head> </head>
     procedure HandleLocalTimerAction(Sender : TObject);
     procedure SetMsgActive (Active : boolean);
-    constructor Create(Owner: TControl; Application : TApplication);
+    constructor Create(Owner: TControl; Application : TApplication); reintroduce; //kt //codex 8/30/26
     destructor Destroy; override;
     function  WaitForDocComplete: Boolean;
     procedure ShowCaret;
@@ -292,8 +292,8 @@ type
     procedure ZoomIn;
     procedure ZoomOut;
     procedure ZoomReset;
-    procedure InsertHTMLAtCaret(HTMLText : AnsiString);             //kt 4/21/10
-    procedure InsertTextAtCaret(Text : AnsiString); //Note: Text is NOT HTMLtext
+    procedure InsertHTMLAtCaret(HTMLText : string);             //kt 4/21/10 //kt //codex 8/30/26
+    procedure InsertTextAtCaret(Text : string); //Note: Text is NOT HTMLtext //kt //codex 8/30/26
     function GetCaretLocation() : TPoint;
     function GetScrollLocation: integer;
     property  HTMLText:string read GetHTMLText write SetHTMLText;
@@ -941,24 +941,21 @@ end;
 function THtmlObj.MSHTMLStrToColor(MSHTMLColor : string) : TColor;
 //Function converts '#RRGGBB' -- TColor
 //Note: TColor stores colors lo-byte --> hi-byte as RGB
-var tempColor : TMGColor;            
-    strHexRed,strHexGreen,strHexBlue : string[2];
+var
+  TempColor: TMGColor; //kt //codex 8/30/26
+  R, G, B: Integer; //kt //codex 8/30/26
 begin
-  Result := clBlack;  //FIX!!!! IMPLEMENT LATER...
-  if Pos('#',MSHTMLColor)=1 then begin
-   // MSHTMLColor := MidStr(MSHTMLColor,2,99);
-   //kt //codex original --> strHexRed := MidStr(MSHTMLColor,2,2);
-   strHexRed := Copy(MSHTMLColor,2,2); //kt //codex 8/3/26
-   //kt //codex original --> strHexGreen := MidStr(MSHTMLColor,4,2);
-   strHexGreen := Copy(MSHTMLColor,4,2); //kt //codex 8/3/26
-   //kt //codex original --> strHexBlue := MidStr(MSHTMLColor,6,2);
-   strHexBlue := Copy(MSHTMLColor,6,2); //kt //codex 8/3/26
-   tempColor.RGBColor.R := StrToIntDef('$'+StrHexRed,0);
-   tempColor.RGBColor.G := StrToIntDef('$'+StrHexGreen,0);
-   tempColor.RGBColor.B := StrToIntDef('$'+StrHexBlue,0);
-   Result := tempColor.Color;
-   //NOTE: This function has not yet been tested....
-  end;
+  Result := clBlack; //kt //codex 8/30/26
+  if (Length(MSHTMLColor) <> 7) or (MSHTMLColor[1] <> '#') then //kt //codex 8/30/26
+    Exit; //kt //codex 8/30/26
+  if not TryStrToInt('$' + Copy(MSHTMLColor, 2, 2), R) or //kt //codex 8/30/26
+     not TryStrToInt('$' + Copy(MSHTMLColor, 4, 2), G) or //kt //codex 8/30/26
+     not TryStrToInt('$' + Copy(MSHTMLColor, 6, 2), B) then //kt //codex 8/30/26
+    Exit; //kt //codex 8/30/26
+  TempColor.RGBColor.R := Byte(R); //kt //codex 8/30/26
+  TempColor.RGBColor.G := Byte(G); //kt //codex 8/30/26
+  TempColor.RGBColor.B := Byte(B); //kt //codex 8/30/26
+  Result := TempColor.Color; //kt //codex 8/30/26
 end;
 
 procedure THtmlObj.ToggleBullet;
@@ -1089,7 +1086,8 @@ procedure THtmlObj.PasteEvent(Sender : TObject; var AllowPaste : boolean);
         SetLength(Result, Length(s));
         Count := 0;
         for i := 1 to Length(s) do begin
-          if ((s[i] >= #32) and (s[i] <= #127)) or (s[i] in [#10, #13]) then begin
+          //kt //codex original --> if ((s[i] >= #32) and (s[i] <= #127)) or (s[i] in [#10, #13]) then begin
+          if ((s[i] >= #32) and (s[i] <= #127)) or (CharInSet(s[i], [#10, #13])) then begin //kt //codex 8/30/26
             inc(Count);
             Result[Count] := s[i];
           end else begin
@@ -1695,7 +1693,7 @@ begin
 end;
 
 
-procedure THtmlObj.InsertHTMLAtCaret(HTMLText : AnsiString);
+procedure THtmlObj.InsertHTMLAtCaret(HTMLText : string); //kt //codex 8/30/26
 var
   Range: IHTMLTxtRange;
   Body: IHTMLBodyElement;
@@ -1709,7 +1707,7 @@ begin
       if Assigned(Range) then Range.collapse(False);  //kt //codex 8/17/26
     end;  //kt //codex 8/17/26
     if not assigned(Range) then exit;
-    SanitizedHTML := string(HTMLText);
+    SanitizedHTML := HTMLText; //kt //codex 8/30/26
     SanitizeHTML(SanitizedHTML);  //kt 5/6/25
     Range.pasteHTML(SanitizedHTML);
   end else begin
@@ -1717,7 +1715,7 @@ begin
   end;
 end;
 
-procedure THtmlObj.InsertTextAtCaret(Text : AnsiString);
+procedure THtmlObj.InsertTextAtCaret(Text : string); //kt //codex 8/30/26
 //kt added.  Note: inserts external format (not HTML markup)
 var WText : WideString;
     P : PWord;
@@ -1766,6 +1764,7 @@ begin
   Result := False;
   if not assigned(DOC) then exit;
   Sel := DOC.selection;
+  SelP1 := 0;
   if not assigned(Sel) then exit;
   If Mode = fmFirst then Sel.empty (); // get an empty selection, so we start from the beginning
   TextRange := IHTMLTxtRange(Sel.createRange());
@@ -2212,6 +2211,7 @@ end;
 function THtmlObj.SubFocusHandler(fGotFocus: BOOL): HResult;
 begin
   SetMsgActive(fGotFocus);
+  Result := S_OK;  //kt //codex 8/30/26
 end;
 
 function THtmlObj.GetActive : boolean;
@@ -2940,14 +2940,13 @@ var SelectorSLInBrowser, CSSLineSLInBrowser : TStringList;
     i:                                        integer;
     SelectorText, CSSText :                   string;
 begin //EnsureStyles
+  SelectorSL := TStringList.Create;
+  CSSLineSL := TStringList.Create;
+  SelectorSLInBrowser := TStringList.Create;
+  CSSLineSLInBrowser := TStringList.Create;
+  SelectorSLToAdd := TStringList.Create;
+  CSSLineSLToAdd := TStringList.Create;
   try
-    SelectorSL := TStringList.Create;
-    CSSLineSL := TStringList.Create;
-    SelectorSLInBrowser := TStringList.Create;
-    CSSLineSLInBrowser := TStringList.Create;
-    SelectorSLToAdd := TStringList.Create;
-    CSSLineSLToAdd := TStringList.Create;
-
     ConvertHumanReadableStylesToSL(HumanReadableStyleCodes,SelectorSL, CSSLineSL);
     GetDocStyles(SelectorSLInBrowser, CSSLineSLInBrowser);
     for i := 0 to SelectorSL.Count - 1 do begin

@@ -227,9 +227,6 @@ object frmPatientVitals: TfrmPatientVitals
           DesignSize = (
             235
             47)
-          inherited lblHospital: TLabel
-            Width = 31
-          end
           inherited Bevel3: TBevel
             Left = 226
             Height = 47

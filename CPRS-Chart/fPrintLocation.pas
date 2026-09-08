@@ -211,7 +211,8 @@ end;
 procedure TfrmPrintLocation.orderGridKeyPress(Sender: TObject; var Key: Char);
 begin
   inherited;
-  if Key in [#32..#127] then ShowEditor(OrderGrid.Col, OrderGrid.Row, Key);
+  //kt //codex original --> if Key in [#32..#127] then ShowEditor(OrderGrid.Col, OrderGrid.Row, Key);
+  if CharInSet(Key, [#32..#127]) then ShowEditor(OrderGrid.Col, OrderGrid.Row, Key); //kt //codex 8/30/26
 end;
 
 procedure TfrmPrintLocation.orderGridMouseDown(Sender: TObject;

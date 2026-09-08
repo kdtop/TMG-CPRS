@@ -49,6 +49,7 @@
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_UnitSearchPath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;.;..\CPRS-Lib;..\VA;..\VA\VA508Accessibility;..\WVEHR-Lib;TMG_Extra;TMG_Extra\DirectXDelphiWebcamCapture;TMG_Extra\DirectXDelphiWebcamCapture\DirectX;TMG_Extra\Twain;TMG_Extra\png_Graphics;TMG_Extra\HTMLEdit;TMG_Extra\HTMLEdit\EmbeddedED;BA;Consults;Encounter;Careplan-Letters;Images;Options;Orders;Templates;Vitals;Window-Eyes Support Files;D:\Embarcadero\packages\Project Groups\11.0\Resource;XuDigSig;..\DCU;..\BDK50;TMG_Extra\AnticoagMgmtTool;TMG_Extra\tmg-vitals\VitalsView;TMG_Extra\tmg-vitals\VitalsDataEntry;TMG_Extra\tmg-vitals\VitalsPatient;TMG_Extra\tmg-vitals\VitalsDateTime;TMG_Extra\tmg-vitals\ROR;TMG_Extra\tmg-vitals\Casmed;TMG_Extra\tmg-vitals\VSMonitors;TMG_Extra\tmg-vitals\VitalsCommon;TMG_Extra\tmg-vitals\VitalsUtils;..\Packages;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
+        <DCC_J>true</DCC_J>
         <DCC_UsePackage>vcl;vclx;dbrtl;Rave65VCL;bdertl;rtl;vcldb;adortl;dbxcds;dbexpress;vclib;ibxpress;xmlrtl;vclactnband;inet;IntrawebDB_80_100;Intraweb_80_100;vclie;inetdbbde;inetdbxpress;IndyCore;IndySystem;dclOfficeXP;soaprtl;dsnap;IndyProtocols;teeui;teedb;tee;vcldbx;XWB_R2006;VclSmp;TSortStringGrid;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DebugSourcePath>TMG_Extra\HTMLEdit\EmbeddedED\;TMG_Extra\png_Graphics;TMG_Extra\Twain;TMG_Extra\DirectXDelphiWebcamCapture;TMG_Extra\TSortStringGrid;$(DebugSourcePath)</DebugSourcePath>
@@ -106,7 +107,10 @@
         <VerInfo_Keys>CompanyName=Family Physicians of Greeneville (TMG) modification of code from Veterans Administration (VA);FileVersion=1.0.30.16;InternalName=1.0.30.16 server required;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.30.16;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <Debugger_RunParams>s=192.168.3.99 p=9260</Debugger_RunParams>
-        <DCC_IMPLICIT_STRING_CAST>false</DCC_IMPLICIT_STRING_CAST>
+        <DCC_UNSAFE_VOID_POINTER>true</DCC_UNSAFE_VOID_POINTER>
+        <DCC_TYPEINFO_IMPLICITLY_ADDED>false</DCC_TYPEINFO_IMPLICITLY_ADDED>
+        <DCC_INVALID_DIRECTIVE>false</DCC_INVALID_DIRECTIVE>
+        <DCC_Optimize>true</DCC_Optimize>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

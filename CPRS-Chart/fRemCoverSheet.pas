@@ -478,7 +478,8 @@ var
   i, idx: integer;
 
 begin
-  idx := FData.IndexOfPiece(DataCode[Level] + IntToStr(IEN));
+  //kt //codex original -->   idx := FData.IndexOfPiece(DataCode[Level] + IntToStr(IEN));
+  idx := FData.IndexOfPiece(string(DataCode[Level]) + IntToStr(IEN)); //kt //codex 8/30/26
   if idx < 0 then
   begin
     if (IEN = 0) and (not (Level in [dlPackage, dlSystem])) then
@@ -503,7 +504,8 @@ begin
         FastAssign(GetCoverSheetLvlData(lvl, cls),  tmpSL);
         if (not Add) and (tmpSL.Count = 0) then
           FreeAndNil(tmpSL);
-        idx := FData.AddObject(DataCode[Level] + IntToStr(IEN), tmpSL);
+        //kt //codex original -->         idx := FData.AddObject(DataCode[Level] + IntToStr(IEN), tmpSL);
+        idx := FData.AddObject(string(DataCode[Level]) + IntToStr(IEN), tmpSL); //kt //codex 8/30/26
       except
         tmpSL.Free;
         raise;
@@ -1052,7 +1054,7 @@ var
   idx: integer;
 
 begin
-  idx := FData.IndexOfPiece(DataCode[FEditingLevel] + IntToStr(FEditingIEN));
+  idx := FData.IndexOfPiece(string(DataCode[FEditingLevel]) + IntToStr(FEditingIEN)); //kt //codex 8/30/26
   if idx >= 0 then
   begin
     tmp := FData[idx];
@@ -1574,7 +1576,8 @@ begin
         Code := copy(FData[i],1,1);
         for lvl := low(TRemCoverDataLevel) to high(TRemCoverDataLevel) do
         begin
-          if DataCode[lvl] = Code then
+          //kt //codex original -->           if DataCode[lvl] = Code then
+          if string(DataCode[lvl]) = Code then //kt //codex 8/30/26
           begin
             Level := lvl;
             break;

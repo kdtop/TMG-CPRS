@@ -717,7 +717,7 @@ begin
             move(fFourCC, FourCCSt[1], 4);
           end;
         FBitmap.Canvas.TextOut(0,  0, 'Unknown compression');
-        FBitmap.Canvas.TextOut(0, FBitmap.Canvas.TextHeight('X'), 'DataSize: '+INtToStr(Size)+'  FourCC: '+FourCCSt);
+        FBitmap.Canvas.TextOut(0, FBitmap.Canvas.TextHeight('X'), 'DataSize: '+INtToStr(Size)+'  FourCC: '+string(FourCCSt)); //kt //codex 8/30/26
       end;
 
     fImageUnpacked := true;

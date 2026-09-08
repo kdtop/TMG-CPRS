@@ -1183,6 +1183,7 @@ implementation
   begin
     PriorCursor := GetCursorImage;
     SetCursorImage(crHourGlass);
+    try //kt //codex 8/30/26
     IENS := GridInfo.IENS;
     GridFilter := ''; FilteringList := false;
     if Pos(GRID_FILTER, CmdName)>0 then begin
@@ -1225,7 +1226,9 @@ implementation
         end;
       end;
     end;
-    SetCursorImage(PriorCursor);
+    finally //kt //codex 8/30/26
+      SetCursorImage(PriorCursor);
+    end; //kt //codex 8/30/26
   end;
 
 
@@ -1531,7 +1534,8 @@ implementation
   begin
     for i := 1 to NUM_FINDING_TYPE_NAMES do begin
       OneTemplate := TStringList.Create;
-      FIType := FINDING_TYPES_NAMES[i].Prefix;
+      //kt //codex original -->       FIType := FINDING_TYPES_NAMES[i].Prefix;
+      FIType := string(FINDING_TYPES_NAMES[i].Prefix); //kt //codex 8/30/26
       InitRemFindingsTemplate(FIType, OneTemplate);
       ListOfTemplates.AddObject(FIType, OneTemplate);
     end;
@@ -1562,6 +1566,7 @@ implementation
     {
     Result := BasicUsersGrid.Cursor;
     }
+    Result := Screen.Cursor; //kt //codex 8/30/26
   end;
 
 
@@ -1580,6 +1585,7 @@ implementation
     BasicPatientGrid.Cursor := Cursor;
     AdvancedPatientGrid.Cursor := Cursor;
     }
+    Screen.Cursor := Cursor; //kt //codex 8/30/26
   end;
 
 

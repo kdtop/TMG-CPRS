@@ -78,11 +78,18 @@ type
 
 TParamType = (literal, reference, list, global, empty, stream, undefined);  // 030107 JLI Modified for new message protocol
 
+{//kt 8/30/26
 //P14 -- pack split -- Types moved from RpcbEdtr.pas.
 TAccessVerifyCodes = string[255];  //to use TAccessVerifyCodesProperty editor use this type
 TRemoteProc = string[100];         //to use TRemoteProcProperty editor use this type
 TServer = string[255];             //to use TServerProperty editor use this type
 TRpcVersion = string[255];         //to use TRpcVersionProperty editor use this type
+}
+//kt mode below, using plain strings... 8/30/26
+TAccessVerifyCodes = string;
+TRemoteProc = string;
+TServer = string;
+TRpcVersion = string;
 
 TRPCBroker = class;
 TVistaLogin = class;
@@ -106,7 +113,7 @@ end;
 {------ TString ------}
 
 TString = class(TObject)
-  Str: AnsiString; //kt //codex 7/24/26
+  Str: string; //kt //codex 8/30/26
 end;
 
 {------ TMult ------}
@@ -120,9 +127,9 @@ private
   function  GetCount: Word;
   function  GetFirst: string;
   function  GetLast: string;
-  function  GetFMultiple(Index: string): AnsiString; //kt //codex 7/24/26
+  function  GetFMultiple(Index: string): string; //kt //codex 8/30/26
   function  GetSorted: boolean;
-  procedure SetFMultiple(Index: string; value: AnsiString); //kt //codex 7/24/26
+  procedure SetFMultiple(Index: string; value: string); //kt //codex 8/30/26
   procedure SetSorted(Value: boolean);
 protected
 public
@@ -135,8 +142,8 @@ public
   property Count: Word read GetCount;
   property First: string read GetFirst;
   property Last: string read GetLast;
-  property MultArray[I: string]: AnsiString //kt //codex 7/24/26
-           read GetFMultiple write SetFMultiple; default; //kt //codex 7/24/26
+  property MultArray[I: string]: string //kt //codex 8/30/26
+           read GetFMultiple write SetFMultiple; default; //kt //codex 8/30/26
   property Sorted: boolean read GetSorted write SetSorted;
 end;
 
@@ -146,13 +153,13 @@ end;
 TParamRecord = class(TComponent)
 private
   FMult: TMult;
-  FValue: AnsiString; //kt //codex 7/24/26
+  FValue: string; //kt //codex 8/30/26
   FPType: TParamType;
 protected
 public
   constructor Create(AOwner: TComponent); override;
   destructor Destroy; override;
-  property Value: AnsiString read FValue write FValue; //kt //codex 7/24/26
+  property Value: string read FValue write FValue; //kt //codex 8/30/26
   property PType: TParamType read FPType write FPType;
   property Mult: TMult read FMult write FMult;
 end;
@@ -545,7 +552,7 @@ end;
 {---------------------- TMult.GetFMultiple ------------------------
 Returns the VALUE of the element whose subscript is passed.
 ------------------------------------------------------------------}
-function TMult.GetFMultiple(Index: string): AnsiString; //kt //codex 7/24/26
+function TMult.GetFMultiple(Index: string): string; //kt //codex 8/30/26
 var
   S: TString;
   BrokerComponent,ParamRecord: TComponent;
@@ -591,7 +598,7 @@ Stores a new element in the multiple.  FMultiple (TStringList) is the
 structure, which is used to hold the subscript and value pair.  Subscript
 is stored as the String, value is stored as an object of the string.
 ------------------------------------------------------------------}
-procedure TMult.SetFMultiple(Index: string; Value: AnsiString); //kt //codex 7/24/26
+procedure TMult.SetFMultiple(Index: string; Value: string); //kt //codex 8/30/26
 var
   S: TString;
   Pos: integer;
@@ -2131,4 +2138,3 @@ begin
 end;
 
 end.
-

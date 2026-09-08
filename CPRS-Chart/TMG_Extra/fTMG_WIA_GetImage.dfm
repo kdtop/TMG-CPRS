@@ -14,7 +14,6 @@ object frmGetImage: TfrmGetImage
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCanResize = FormCanResize
   OnCreate = FormCreate
@@ -23,7 +22,6 @@ object frmGetImage: TfrmGetImage
   DesignSize = (
     692
     414)
-  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 11
@@ -95,10 +93,6 @@ object frmGetImage: TfrmGetImage
     Height = 41
     Hint = 'Import Picture from Device'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 0
-    OnClick = btnGetImageFromCameraClick
     Glyph.Data = {
       36100000424D3610000000000000360000002800000020000000200000000100
       20000000000000100000130B0000130B00000000000000000000C0CFD2FFABB9
@@ -230,6 +224,10 @@ object frmGetImage: TfrmGetImage
       ECFFECECECFFECECECFFECECECFFECECECFFECECECFFECECECFFECECECFFECEC
       ECFFECECECFFECECECFFECECECFFECECECFFECECECFFECECECFFECECECFFEBEB
       EBFFE9E9EAFFE5E8E8FFDEE7E9FFD8E8EBFFD8E9ECFFD8E9ECFF}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 0
+    OnClick = btnGetImageFromCameraClick
   end
   object btnOK: TBitBtn
     Left = 460
@@ -238,8 +236,6 @@ object frmGetImage: TfrmGetImage
     Height = 41
     Anchors = [akRight, akBottom]
     Caption = '&Use Picture'
-    TabOrder = 5
-    OnClick = btnOKClick
     Glyph.Data = {
       66090000424D660900000000000036000000280000001C0000001C0000000100
       18000000000030090000130B0000130B00000000000000000000FFFFFFFFFFFF
@@ -317,6 +313,8 @@ object frmGetImage: TfrmGetImage
       FFFFFFFFFFFFFFFFFFFFFFFFFFFF659E66458A463D864054975A61A1686AA670
       6AA67061A1685497593D8640458A46659E66FFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFF}
+    TabOrder = 5
+    OnClick = btnOKClick
   end
   object btnCancel: TBitBtn
     Left = 574
@@ -326,8 +324,6 @@ object frmGetImage: TfrmGetImage
     Anchors = [akRight, akBottom]
     Caption = '&Cancel'
     Default = True
-    TabOrder = 6
-    OnClick = btnCancelClick
     Glyph.Data = {
       66090000424D660900000000000036000000280000001C0000001C0000000100
       18000000000030090000130B0000130B00000000000000000000FFFFFFFFFFFF
@@ -405,6 +401,8 @@ object frmGetImage: TfrmGetImage
       FFFFFFFFFFFFFFFFFFFFFFFFFFFF565A9C3337872B30844448965256A05C60A5
       5C60A55256A04448962B3084333787565A9CFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFF}
+    TabOrder = 6
+    OnClick = btnCancelClick
   end
   object btnRotateCCW: TBitBtn
     Left = 254
@@ -413,10 +411,6 @@ object frmGetImage: TfrmGetImage
     Height = 41
     Hint = 'Rotate Counter-Clockwise'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 2
-    OnClick = btnRotateCCWClick
     Glyph.Data = {
       36090000424D3609000000000000360000002800000018000000180000000100
       20000000000000090000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -492,6 +486,10 @@ object frmGetImage: TfrmGetImage
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD4E4E7FFC9D8DAFFBBC1C2FFAA9E
       A0FFA48C8EFFA27F81FFA37F82FFAC9194FFB8A8ABFFCBCCCEFFD6E3E5FFD7E7
       EAFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 2
+    OnClick = btnRotateCCWClick
   end
   object btnRotateCW: TBitBtn
     Left = 311
@@ -500,10 +498,6 @@ object frmGetImage: TfrmGetImage
     Height = 41
     Hint = 'Rotate Clockwise'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 3
-    OnClick = btnRotateCWClick
     Glyph.Data = {
       36090000424D3609000000000000360000002800000018000000180000000100
       20000000000000090000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -579,6 +573,10 @@ object frmGetImage: TfrmGetImage
       ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD3E0E2FFC6CA
       CCFFB8B5B5FFAEA0A0FFA89697FFA9A1A1FFAEAFB0FFBCC5C6FFCEDEE0FFD7E8
       EBFFD8E9EDFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 3
+    OnClick = btnRotateCWClick
   end
   object btnCrop: TBitBtn
     Left = 362
@@ -587,10 +585,6 @@ object frmGetImage: TfrmGetImage
     Height = 40
     Hint = 'Crop Image'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 4
-    OnClick = btnCropClick
     Glyph.Data = {
       36100000424D3610000000000000360000002800000020000000200000000100
       20000000000000100000130B0000130B000000000000000000005B5E5FFF5958
@@ -722,6 +716,10 @@ object frmGetImage: TfrmGetImage
       D6FF4763D7FF4A64D8FF4E67D9FF4D66DBFF5469DDFF556CE0FF526BDFFF516A
       DFFF536BE0FF566FE2FF5A71E5FF5872E6FF536FE5FF516DE5FF3343EFFF3D43
       B5FF696F71FF6A7071FF6B7071FF6D7171FF6C7071FF6C7171FF}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 4
+    OnClick = btnCropClick
   end
   object ScrollBox: TScrollBox
     Left = 0
@@ -753,10 +751,6 @@ object frmGetImage: TfrmGetImage
     Height = 41
     Hint = 'Take New Picture with Device'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 1
-    OnClick = btnTakePictureClick
     Glyph.Data = {
       36100000424D3610000000000000360000002800000020000000200000000100
       20000000000000100000130B0000130B00000000000000000000C0CFD2FFABB9
@@ -888,6 +882,10 @@ object frmGetImage: TfrmGetImage
       EEFFD1E0EFFFC6E9EFFFC4E5EEFFC8F0DDFFBDEEE8FFC9DDE6FFC1DCF0FFBFDF
       EFFFCDDDE0FFC3E9E3FFC2F0DEFFCEEEDCFFCDEEDEFFCEEFE0FFD4EEE1FFD4ED
       E2FFD5EBE3FFD4E9E3FFD2E8E6FFD0E7EBFFD4E9EBFFD7E8EBFF}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+    OnClick = btnTakePictureClick
   end
   object btnResize: TBitBtn
     Left = 414
@@ -896,10 +894,6 @@ object frmGetImage: TfrmGetImage
     Height = 40
     Hint = 'Resize Image'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 8
-    OnClick = btnResizeClick
     Glyph.Data = {
       36100000424D3610000000000000360000002800000020000000200000000100
       20000000000000100000130B0000130B000000000000000000004E5253FF4C4B
@@ -1031,6 +1025,10 @@ object frmGetImage: TfrmGetImage
       62FF5A6162FF5B6162FF5C6262FF5C6263FF5D6263FF5D6364FF5D6364FF5D63
       64FF5D6364FF5E6465FF5F6465FF5E6465FF5D6465FF5D6365FF5D6365FF5D64
       65FF5D6466FF5F6466FF5F6566FF616666FF606566FF616666FF}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 8
+    OnClick = btnResizeClick
   end
   object BitBtn1: TBitBtn
     Left = 460
@@ -1053,10 +1051,6 @@ object frmGetImage: TfrmGetImage
     Height = 41
     Hint = 'Take New Picture with Device'
     Anchors = [akLeft, akBottom]
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 10
-    OnClick = btnGetFromScannerClick
     Glyph.Data = {
       42080000424D4208000000000000420000002800000020000000200000000100
       10000300000000080000202E0000202E00000000000000000000007C0000E003
@@ -1125,6 +1119,10 @@ object frmGetImage: TfrmGetImage
       FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F9A6BF2466B2A49226C2E1453BB6F
       FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F
       FF7FFF7FFF7F}
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 10
+    OnClick = btnGetFromScannerClick
   end
   object MainMenu1: TMainMenu
     Left = 80

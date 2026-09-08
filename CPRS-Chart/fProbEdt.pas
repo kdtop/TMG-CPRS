@@ -1527,7 +1527,8 @@ begin
     UnitName := Trim(UnitName);
     if (Length(UnitName) > 0) then UnitName := UnitName[1];
     V := clYellow; //error color
-    if (StrToFloatDef(Num, 0) > 0) and (Length(UnitName) > 0) and (UnitName[1] in ['Y','M','W','D']) then begin
+    //kt //codex original --> if (StrToFloatDef(Num, 0) > 0) and (Length(UnitName) > 0) and (UnitName[1] in ['Y','M','W','D']) then begin
+    if (StrToFloatDef(Num, 0) > 0) and (Length(UnitName) > 0) and (CharInSet(UnitName[1], ['Y','M','W','D'])) then begin //kt //codex 8/30/26
       V := clWindow;
     end;
     NewStr := Num;
@@ -1634,7 +1635,7 @@ begin
     PLProblem := InputBox('Change problem','Enter new problem name: ','') ;
     if PLProblem<>'' then
       //kt original --> PLProblem := u + PLProblem + u + TX799 + u
-      PLProblem := u + PLProblem + u + UNDEF_DX[FI10Active] + u  //kt 10/15
+      PLProblem := u + PLProblem + u + string(UNDEF_DX[FI10Active]) + u  //kt 10/15 //kt //codex 8/30/26
     else
       exit ;
   end ;
@@ -1684,7 +1685,7 @@ end ;
 procedure TfrmdlgProb.SetICDCodeText(Value : string; Description : string);
 //kt added entire funtion 10/15
 begin
-  if Value  = '' then Value := UNDEF_DX[FI10Active];
+  if Value  = '' then Value := string(UNDEF_DX[FI10Active]); //kt //codex 8/30/26
   if (Value = TXR69) or (Value = TX799) then begin
     edICDcode.Color := clMaroon;
   end else begin

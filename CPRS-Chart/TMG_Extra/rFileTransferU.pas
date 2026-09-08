@@ -1,5 +1,7 @@
 unit rFileTransferU;
 
+{$WARN SYMBOL_PLATFORM OFF} // Windows-specific file-transfer APIs are intentional. //kt //codex 8/30/26
+
 //kt Entire unit added 10/2020
  (*
  Copyright 10/27/20 Kevin S. Toppenberg, MD
@@ -73,7 +75,7 @@ function UploadFile(LocalFNamePath,FPath,FName: string;
                     ProgressCallback : TProgressCallback = nil): boolean;
 function UploadFileViaDropBox(LocalFNamePath, FPath, FName, DropboxDir: string; var ErrMsg : string): boolean;
 
-function Encode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
+function Encode64(Input: AnsiString) : string; //kt //codex 8/30/26
 function Decode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
 function FileSize(fileName : wideString) : Int64;
 
@@ -135,7 +137,7 @@ begin
 
     OutFile := TFileStream.Create(LocalSaveFNamePath, fmCreate);
     for i:=1 to (LocalBrokerResults.Count-1) do begin
-      s := Decode64(LocalBrokerResults[i]);
+      s := Decode64(AnsiString(LocalBrokerResults[i])); //kt //codex 8/30/26
       count := Length(s);
       if count>1024 then begin
         ErrMsg := 'During download, server sent line that was too long.';
@@ -365,7 +367,7 @@ begin
 end;
 
 
-function Encode64(Input: AnsiString) : AnsiString; //kt //codex 7/30/26
+function Encode64(Input: AnsiString) : string; //kt //codex 8/30/26
 //This function is based on ENCODE^RGUTUU, which is match for
 //DECODE^RGUTUU that is used to decode (ascii armouring) on the
 //server side.  This is a base64 encoder.
@@ -381,7 +383,7 @@ var
   PlainTrio : longword;   //RGZ3   //unsigned 32-bit
   EncodedByte : Byte;
   PlainByte : byte;       //RGZ5
-  EncodedQuad : string[4];//RGZ6
+  EncodedQuad : string;//RGZ6 //kt //codex 8/30/26
 
 begin
   //e.g. input (10 bytes):
@@ -472,7 +474,7 @@ begin
       //e.g. last 4 chars --> 0A==
       if (i+j) <= Length(Input) then begin
         EncodedChar := Input[i+j];
-        PlainInt := Pos(EncodedChar,CharSet)-2; //A=0, B=1 etc.
+        PlainInt := Pos(Char(EncodedChar), CharSet)-2; //A=0, B=1 etc. //kt //codex 8/30/26
         if (PlainInt>=0) then PlainByte := (PlainInt and $FF) else PlainByte := 0;
       end else PlainByte := 0;
       //e.g. with last 4 characters:

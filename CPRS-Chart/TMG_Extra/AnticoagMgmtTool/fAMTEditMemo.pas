@@ -19,7 +19,8 @@ type
     { Private declarations }
   public
     { Public declarations }
-    function ShowModal(SourceSL : TStrings) : integer; overload;
+    //kt //codex original -->     function ShowModal(SourceSL : TStrings) : integer; overload;
+    function ShowModal(SourceSL : TStrings) : integer; reintroduce; overload; //kt //codex 8/30/26
   end;
 
 //var

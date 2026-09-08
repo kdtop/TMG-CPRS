@@ -290,7 +290,8 @@ begin
   result := 'ERROR' ;
   if (Pos(' ',shortdate) <> 4) or ((Pos(',',shortdate) <> 7) and (Pos(',',shortdate) <> 6)) then exit ;  {no spaces or comma}
   for i := 1 to 12 do
-    if Months[i] = UpperCase(Copy(shortdate,1,3)) then month := IntToStr(i);
+    //kt //codex original -->     if Months[i] = UpperCase(Copy(shortdate,1,3)) then month := IntToStr(i);
+    if string(Months[i]) = UpperCase(Copy(shortdate,1,3)) then month := IntToStr(i); //kt //codex 8/30/26
   if month = '' then exit ;    {invalid month name}
   if length(month) = 1 then month := '0' + month;
   if Pos(',',shortdate) = 7 then

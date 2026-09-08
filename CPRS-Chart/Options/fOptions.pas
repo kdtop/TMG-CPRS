@@ -373,7 +373,8 @@ var   i : integer;  //kt 9/11
 begin
   //kt 9/11 start mod -----
   cboTransMethod.Items.Clear;
-  for j := itmDropbox to itmRPC do cboTransMethod.Items.Add(IMAGE_TRANSFER_METHODS[j]);
+  //kt //codex original -->   for j := itmDropbox to itmRPC do cboTransMethod.Items.Add(IMAGE_TRANSFER_METHODS[j]);
+  for j := itmDropbox to itmRPC do cboTransMethod.Items.Add(string(IMAGE_TRANSFER_METHODS[j])); //kt //codex 8/30/26
 
   cboImageType.Clear;
   //This is for settings that are MACHINE specific, and are not stored
@@ -956,13 +957,15 @@ procedure TfrmOptions.cboTransMethodChange(Sender: TObject);
 //kt 9/11 added
 var Show : boolean;
 begin
-  if cboTransMethod.Text = IMAGE_TRANSFER_METHODS[itmDirect] then begin
+  //kt //codex original -->   if cboTransMethod.Text = IMAGE_TRANSFER_METHODS[itmDirect] then begin
+  if cboTransMethod.Text = string(IMAGE_TRANSFER_METHODS[itmDirect]) then begin //kt //codex 8/30/26
     MessageDlg('Sorry.  Direct file access not yet supported.',mtInformation,[mbOK],0);
     cboTransMethod.ItemIndex := -1;
   end;
   if cboTransMethod.ItemIndex < 0 then begin
     cboTransMethod.ItemIndex := ord(itmRPC);
-    cboTransMethod.Text := IMAGE_TRANSFER_METHODS[itmRPC];
+    //kt //codex original -->     cboTransMethod.Text := IMAGE_TRANSFER_METHODS[itmRPC];
+    cboTransMethod.Text := string(IMAGE_TRANSFER_METHODS[itmRPC]); //kt //codex 8/30/26
   end;
   Show := (cboTransMethod.ItemIndex = ord(itmDropbox));
   editDropboxLocation.Visible := Show;

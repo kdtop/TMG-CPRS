@@ -440,14 +440,16 @@ begin
     i := 1;
     while (Ht[i] <> '''') do
     begin
-      if (Ht[i] in ['0'..'9']) or (Ht[i] = '.') then
+      //kt //codex original -->       if (Ht[i] in ['0'..'9']) or (Ht[i] = '.') then
+      if CharInSet(Ht[i], ['0'..'9']) or (Ht[i] = '.') then //kt //codex 8/30/26
         feetstr := feetstr + Ht[i];
       inc(i);
     end;
     while (i <= length(Ht)) and (Ht[i] <> '"') and
      (Ht[i] <> '') do
       begin
-      if (Ht[i] in ['0'..'9']) or (Ht[i] = '.') then
+      //kt //codex original -->       if (Ht[i] in ['0'..'9']) or (Ht[i] = '.') then
+      if CharInSet(Ht[i], ['0'..'9']) or (Ht[i] = '.') then //kt //codex 8/30/26
         inchstr := inchstr + Ht[i];
         inc(i);
       end;
@@ -465,7 +467,8 @@ begin
     for i := 1 to (length(Ht)) do
     begin
       c := Ht[i]; //first character
-      if (c in ['0'..'9']) or (c = '.') then
+      //kt //codex original -->       if (c in ['0'..'9']) or (c = '.') then
+      if CharInSet(c, ['0'..'9']) or (c = '.') then //kt //codex 8/30/26
         result := result + c;
       if (c = '"') then break;
     end;
@@ -626,7 +629,8 @@ var
     i: Integer;
 begin
   Result := True;
-  for i := 1 to Length(x) do if not (x[i] in ['0'..'9','.']) then Result := False;
+  //kt //codex original -->   for i := 1 to Length(x) do if not (x[i] in ['0'..'9','.']) then Result := False;
+  for i := 1 to Length(x) do if not CharInSet(x[i], ['0'..'9','.']) then Result := False; //kt //codex 8/30/26
 end;
 
 procedure LoadVitalsDLL;

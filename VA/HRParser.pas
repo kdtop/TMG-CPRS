@@ -248,7 +248,8 @@ begin
     end;
 
     {symbols}
-    if FSourceBuf[ FSourcePos ] in [ 'A'..'Z', 'a'..'z', '_' ] then
+    //kt //codex original --> if FSourceBuf[ FSourcePos ] in [ 'A'..'Z', 'a'..'z', '_' ] then
+    if CharInSet(FSourceBuf[ FSourcePos ], [ 'A'..'Z', 'a'..'z', '_' ]) then //kt //codex 8/30/26
     begin
       FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
       Inc( FSourcePos );
@@ -264,7 +265,8 @@ begin
 
           '''' :
           begin{apostrophies}
-            if FSourceBuf[ FSourcePos + 1 ] in [ 'A'..'Z', 'a'..'z', '0'..'9', '_' ] then
+            //kt //codex original --> if FSourceBuf[ FSourcePos + 1 ] in [ 'A'..'Z', 'a'..'z', '0'..'9', '_' ] then
+            if CharInSet(FSourceBuf[ FSourcePos + 1 ], [ 'A'..'Z', 'a'..'z', '0'..'9', '_' ]) then //kt //codex 8/30/26
             begin
               FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
               Inc( FSourcePos );
@@ -275,7 +277,8 @@ begin
 
           '-' :
           begin{hyphenated words}
-            if FSourceBuf[ FSourcePos + 1 ] in [ 'A'..'Z', 'a'..'z', '0'..'9', '_' ] then
+            //kt //codex original --> if FSourceBuf[ FSourcePos + 1 ] in [ 'A'..'Z', 'a'..'z', '0'..'9', '_' ] then
+            if CharInSet(FSourceBuf[ FSourcePos + 1 ], [ 'A'..'Z', 'a'..'z', '0'..'9', '_' ]) then //kt //codex 8/30/26
             begin
               FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
               Inc( FSourcePos );
@@ -293,14 +296,17 @@ begin
     end;
 
     {numbers}
-    if ( FSourceBuf[ FSourcePos ] in [ '0'..'9' ] ) or
-       ( ( FSourceBuf[ FSourcePos ] = '-' ) and ( FSourceBuf[ FSourcePos + 1 ] in [ '.', '0'..'9' ] ) ) then
+    //kt //codex original --> if ( FSourceBuf[ FSourcePos ] in [ '0'..'9' ] ) or
+    //kt //codex original -->    ( ( FSourceBuf[ FSourcePos ] = '-' ) and ( FSourceBuf[ FSourcePos + 1 ] in [ '.', '0'..'9' ] ) ) then
+    if CharInSet(FSourceBuf[ FSourcePos ], [ '0'..'9' ]) or
+       ((FSourceBuf[ FSourcePos ] = '-') and CharInSet(FSourceBuf[ FSourcePos + 1 ], [ '.', '0'..'9' ])) then //kt //codex 8/30/26
     begin
 
       {integer numbers}
       FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
       Inc( FSourcePos );
-      while FSourceBuf[ FSourcePos ] in [ '0'..'9' ] do
+      //kt //codex original --> while FSourceBuf[ FSourcePos ] in [ '0'..'9' ] do
+      while CharInSet(FSourceBuf[ FSourcePos ], [ '0'..'9' ]) do //kt //codex 8/30/26
       begin
         FTokenBuf.Write( FSourceBuf[ FSourcePos ] );
         Inc( FSourcePos );
@@ -308,7 +314,8 @@ begin
       end;
 
       {floating point numbers}
-      while ( FSourceBuf[ FSourcePos ] in [ '0'..'9', 'e', 'E', '+', '-' ] ) or
+      //kt //codex original --> while ( FSourceBuf[ FSourcePos ] in [ '0'..'9', 'e', 'E', '+', '-' ] ) or
+      while CharInSet(FSourceBuf[ FSourcePos ], [ '0'..'9', 'e', 'E', '+', '-' ]) or //kt //codex 8/30/26
             ( ( FSourceBuf[ FSourcePos ] = '.') and ( FSourceBuf[ FSourcePos + 1 ] <> '.' ) ) do
       begin
         FTokenBuf.Write( FSourceBuf[ FSourcePos ] );

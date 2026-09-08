@@ -14,11 +14,9 @@ object frmGMV_AboutDlg: TfrmGMV_AboutDlg
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   KeyPreview = True
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlImage: TPanel
     Left = 0

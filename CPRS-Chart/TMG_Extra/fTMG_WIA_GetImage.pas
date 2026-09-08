@@ -319,9 +319,9 @@ procedure TfrmGetImage.btnGetImageFromCameraClick(Sender: TObject);
        DeviceMan: TWIADeviceManager;
   begin
     ClearSelectRect;
+    DeviceMan:= TWIADeviceManager.Create(self);
+    CommonDialog := nil;
     try
-      CommonDialog := nil;
-      DeviceMan:= TWIADeviceManager.Create(self);
       if DeviceMan.DeviceInfos.Count = 0 then begin
         MessageDlg('No device found to get images from.'+#13#10+'If using a webcam, try the webcam button',mtError,[mbOK],0);
       end else begin

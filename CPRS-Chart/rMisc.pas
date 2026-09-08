@@ -271,7 +271,7 @@ end;
 function UserFontSize: integer;
 begin
   Result := StrToIntDef(sCallV('ORWCH LDFONT', [nil]),8);
-  If Result = 24 then Result := 18; // CQ #12322 removed 24 pt font
+  //kt //codex original --> If Result = 24 then Result := 18; // CQ #12322 removed 24 pt font
 end;
 
 procedure LoadSizes;

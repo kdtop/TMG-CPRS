@@ -487,7 +487,8 @@ begin
   with DialogCtrl do
   begin
     GblRef := DialogItem.Domain;
-    if CharAt(GblRef, 1) in ['0'..'9','.']
+    //kt //codex original -->     if CharAt(GblRef, 1) in ['0'..'9','.']
+    if CharInSet(CharAt(GblRef, 1), ['0'..'9','.']) //kt //codex 8/30/26
       then GblRef := GlobalRefForFile(Piece(GblRef, ':', 1))
       else GblRef := Piece(GblRef, ':', 1);
     if CharAt(GblRef, 1) <> U then GblRef := U + GblRef;
@@ -667,7 +668,8 @@ begin
   if DialogCtrl.ID = '' then DialogCtrl.ID := 'EMPTY';
 
   for i := 1 to length(DialogCtrl.ID) do begin
-    if (DialogCtrl.ID[i] in ['A'..'Z']) or (DialogCtrl.ID[i] in ['a'..'z']) or (DialogCtrl.ID[i] in ['0'..'9']) then begin
+    //kt //codex original --> if (DialogCtrl.ID[i] in ['A'..'Z']) or (DialogCtrl.ID[i] in ['a'..'z']) or (DialogCtrl.ID[i] in ['0'..'9']) then begin
+    if CharInSet(DialogCtrl.ID[i], ['A'..'Z']) or CharInSet(DialogCtrl.ID[i], ['a'..'z']) or CharInSet(DialogCtrl.ID[i], ['0'..'9']) then begin //kt //codex 8/30/26
      SaveName := SaveName + DialogCtrl.ID[i];
     end;
   end;

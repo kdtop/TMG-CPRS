@@ -104,7 +104,7 @@ type
     MostRecentThumbBitmap: TBitmap;
     MostRecentFileName: string;
     procedure ShowPreviewMode(DFN : string;RelativeTo:TControl;Location:TLocationType) overload;
-    function ShowModal(DFN : string; UploadMode: boolean = True) : integer; overload;
+    function ShowModal(DFN : string; UploadMode: boolean = True) : integer; reintroduce; overload; //kt //codex 8/30/26
     function ShowModalUploadFName(DFN : string; FName : string) : integer; overload;
     property UploadMode: boolean read FUploadMode write SetUploadMode;
   end;

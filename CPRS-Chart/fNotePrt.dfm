@@ -4,7 +4,6 @@ inherited frmNotePrint: TfrmNotePrint
   Caption = 'frmNotePrint'
   ClientHeight = 306
   Position = poScreenCenter
-  StyleElements = [seFont, seClient, seBorder]
   OnCreate = FormCreate
   ExplicitHeight = 345
   TextHeight = 13

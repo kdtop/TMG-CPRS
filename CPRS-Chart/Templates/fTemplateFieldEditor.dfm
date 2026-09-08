@@ -10,9 +10,8 @@ inherited frmTemplateFieldEditor: TfrmTemplateFieldEditor
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  ExplicitWidth = 796
-  ExplicitHeight = 434
-  PixelsPerInch = 96
+  ExplicitWidth = 804
+  ExplicitHeight = 439
   TextHeight = 13
   object splLeft: TSplitter [0]
     Left = 429
@@ -145,6 +144,7 @@ inherited frmTemplateFieldEditor: TfrmTemplateFieldEditor
       SynonymChars = '<Inactive>'
       TabPositions = '50,60,70,80,90'
       TabOrder = 0
+      Text = ''
       OnChange = cbxObjsChange
       OnKeyDown = cbxObjsKeyDown
       OnNeedData = cbxObjsNeedData
@@ -384,6 +384,7 @@ inherited frmTemplateFieldEditor: TfrmTemplateFieldEditor
         Sorted = False
         SynonymChars = '<>'
         TabOrder = 1
+        Text = ''
         OnChange = cbxTypeChange
         CharsNeedMatch = 1
         ExplicitWidth = 111
@@ -628,6 +629,7 @@ inherited frmTemplateFieldEditor: TfrmTemplateFieldEditor
           SynonymChars = '<>'
           TabOrder = 1
           TabStop = True
+          Text = ''
           OnChange = cbxDefaultChange
           CharsNeedMatch = 1
           ExplicitTop = 45
@@ -695,6 +697,7 @@ inherited frmTemplateFieldEditor: TfrmTemplateFieldEditor
             Sorted = False
             SynonymChars = '<>'
             TabOrder = 1
+            Text = ''
             OnChange = cbxDateTypeChange
             CharsNeedMatch = 1
             ExplicitLeft = 176
@@ -849,7 +852,6 @@ inherited frmTemplateFieldEditor: TfrmTemplateFieldEditor
           Top = 52
           Width = 135
           Height = 21
-          ItemHeight = 0
           TabOrder = 4
           OnChange = cboDataModeChange
         end

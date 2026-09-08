@@ -41,7 +41,7 @@ interface  // ------------------------------------------------------------------
 
 uses SysUtils, Windows, Messages, Classes, Controls, StdCtrls, ExtCtrls, ComCtrls, Forms,
   VAUtils, //kt //codex 8/18/26
-  VCLTee.TeEngine,
+  VCLTee.TeEngine, VCLTee.TeCanvas, //kt //codex 8/30/26
      DateUtils, //kt added 11/20
      Graphics, Menus, RichEdit, Buttons;
 
@@ -109,7 +109,7 @@ type
     function ValueDef(index : string; DefaultValue : string) : string;
     function HasIndex(index : string) : boolean;
     constructor Create(AFormatStr: string = ''; ADataStr : string=''; ADelimChar : char = '^');
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
     class function StaticValue(DataStr, FormatStr, Index : string) : string; static;
     class function StaticIntValue(DataStr, FormatStr, Index : string) : integer; static;
     property Piece[index : integer] : string read GetPieceValue write SetPieceValue;
@@ -491,7 +491,8 @@ begin {FormatFMDateTime}
     case UpCase(AFormat[1]) of
     '"': begin                                                                 // literal
            Delete(AFormat, 1, 1);
-           while not (CharAt(AFormat, 1) in [#0, '"']) do
+           //kt //codex original --> while not (CharAt(AFormat, 1) in [#0, '"']) do
+           while not CharInSet(CharAt(AFormat, 1), [#0, '"']) do //kt //codex 8/30/26
            begin
              Result := Result + AFormat[1];
              Delete(AFormat, 1, 1);
@@ -509,8 +510,10 @@ begin {FormatFMDateTime}
     'M': case TrimFormatCount of                                               // month
          1: if m > 0 then Result := Result + IntToStr(m);
          2: if m > 0 then Result := Result + FormatFloat('00', m);
-         3: if m in [1..12] then Result := Result + MONTH_NAMES_SHORT[m];
-         4: if m in [1..12] then Result := Result + MONTH_NAMES_LONG[m];
+         //kt //codex original -->          3: if m in [1..12] then Result := Result + MONTH_NAMES_SHORT[m];
+         3: if m in [1..12] then Result := Result + string(MONTH_NAMES_SHORT[m]); //kt //codex 8/30/26
+         //kt //codex original -->          4: if m in [1..12] then Result := Result + MONTH_NAMES_LONG[m];
+         4: if m in [1..12] then Result := Result + string(MONTH_NAMES_LONG[m]); //kt //codex 8/30/26
          end;
     'N': case TrimFormatCount of                                               // minute
          1: Result := Result + IntToStr(n);
@@ -549,9 +552,11 @@ var
 begin
   Result := False;
   if Length(x) < 7 then Exit;
-  for i := 1 to 7 do if not (x[i] in ['0'..'9']) then Exit;
+  //kt //codex original --> for i := 1 to 7 do if not (x[i] in ['0'..'9']) then Exit;
+  for i := 1 to 7 do if not CharInSet(x[i], ['0'..'9']) then Exit; //kt //codex 8/30/26
   if (Length(x) > 7) and (x[8] <> '.') then Exit;
-  if (Length(x) > 8) and not (x[9] in ['0'..'9']) then Exit;
+  //kt //codex original --> if (Length(x) > 8) and not (x[9] in ['0'..'9']) then Exit;
+  if (Length(x) > 8) and not CharInSet(x[9], ['0'..'9']) then Exit; //kt //codex 8/30/26
   Result := True;
 end;
 
@@ -682,7 +687,8 @@ var
   i: Integer;
 begin
   Result := False;
-  for i := 1 to Length(x) do if x[i] in ['A'..'Z','a'..'z'] then
+  //kt //codex original --> for i := 1 to Length(x) do if x[i] in ['A'..'Z','a'..'z'] then
+  for i := 1 to Length(x) do if CharInSet(x[i], ['A'..'Z','a'..'z']) then //kt //codex 8/30/26
   begin
     Result := True;
     break;
@@ -695,7 +701,8 @@ var
   i: Integer;
 begin
   Result := False;
-  for i := 1 to Length(x) do if x[i] in ['!'..'~'] then  // ordinal values 33..126
+  //kt //codex original --> for i := 1 to Length(x) do if x[i] in ['!'..'~'] then
+  for i := 1 to Length(x) do if CharInSet(x[i], ['!'..'~']) then  // ordinal values 33..126 //kt //codex 8/30/26
   begin
     Result := True;
     break;
@@ -819,8 +826,10 @@ function ExtractInteger(x: string): Integer;
 var
   i: Integer;
 begin
-  while (Length(x) > 0) and not (x[1] in ['0'..'9']) do Delete(x, 1, 1);
-  for i := 1 to Length(x) do if not (x[i] in ['0'..'9']) then break;
+  //kt //codex original --> while (Length(x) > 0) and not (x[1] in ['0'..'9']) do Delete(x, 1, 1);
+  while (Length(x) > 0) and not CharInSet(x[1], ['0'..'9']) do Delete(x, 1, 1); //kt //codex 8/30/26
+  //kt //codex original --> for i := 1 to Length(x) do if not (x[i] in ['0'..'9']) then break;
+  for i := 1 to Length(x) do if not CharInSet(x[i], ['0'..'9']) then break; //kt //codex 8/30/26
   Result := StrToIntDef(Copy(x, 1, i - 1), 0);
 end;
 
@@ -829,8 +838,10 @@ function ExtractFloat(x: string): Extended;
 var
   i: Integer;
 begin
-  while (Length(x) > 0) and not (x[1] in ['0'..'9', '.']) do Delete(x, 1, 1);
-  for i := 1 to Length(x) do if not (x[i] in ['0'..'9','.']) then break;
+  //kt //codex original --> while (Length(x) > 0) and not (x[1] in ['0'..'9', '.']) do Delete(x, 1, 1);
+  while (Length(x) > 0) and not CharInSet(x[1], ['0'..'9', '.']) do Delete(x, 1, 1); //kt //codex 8/30/26
+  //kt //codex original --> for i := 1 to Length(x) do if not (x[i] in ['0'..'9','.']) then break;
+  for i := 1 to Length(x) do if not CharInSet(x[i], ['0'..'9','.']) then break; //kt //codex 8/30/26
   Result := StrToFloatDef(Copy(x, 1, i - 1), 0);
 end;
 
@@ -887,10 +898,12 @@ var
 begin
   Result := x;
   for i := 2 to Length(x) do
-     if (not (x[i-1] in [' ',',','-','.','/','^'])) and (x[i] in ['A'..'Z'])
+     //kt //codex original --> if (not (x[i-1] in [' ',',','-','.','/','^'])) and (x[i] in ['A'..'Z'])
+     if (not CharInSet(x[i-1], [' ',',','-','.','/','^'])) and CharInSet(x[i], ['A'..'Z']) //kt //codex 8/30/26
  // save line    if (not (x[i-1] in [' ','''',',','-','.','/','^'])) and (x[i] in ['A'..'Z'])
       then Result[i] := Chr(Ord(x[i]) + 32)
-     else if ((x[i-1] in [' ',',','-','.','/','^'])) and (x[i] in ['a'..'z'])
+     //kt //codex original --> else if ((x[i-1] in [' ',',','-','.','/','^'])) and (x[i] in ['a'..'z'])
+     else if (CharInSet(x[i-1], [' ',',','-','.','/','^']) and CharInSet(x[i], ['a'..'z'])) //kt //codex 8/30/26
       then Result[i] := Chr(Ord(x[i]) - 32);
   //Call added to satisfy the need for special string handling(Roman Numerals II-XI) GRE-06/02
   Result := ConvertSpecialStrings(Result); //kt //codex 7/30/26
@@ -1086,7 +1099,6 @@ function NumPieces(const s : string; ADelim : char) : integer;
 var SL : TStringList;
 begin
   SL := TStringList.Create;
-  Result := 0;
   try
     PiecesToList(s, ADelim, SL);
     Result := SL.Count;
@@ -1098,9 +1110,8 @@ end;
 function NumPieces2(const s : string; ADelim : string) : integer;   //kt 1/24/24
 var SL : TStringList;
 begin
-  Result := 0;
+  SL := TStringList.Create;
   try
-    SL := TStringList.Create;
     PiecesToList2(s, ADelim, SL);
     Result := SL.Count;
   finally
@@ -1581,7 +1592,8 @@ begin
   i := 1;
   while i <= length(Result) do
   begin
-    if Result[i] in ['a'..'z','A'..'Z','0'..'9',#32] then
+    //kt //codex original --> if Result[i] in ['a'..'z','A'..'Z','0'..'9',#32] then
+    if CharInSet(Result[i], ['a'..'z','A'..'Z','0'..'9',#32]) then //kt //codex 8/30/26
       inc(i)
     else
       delete(Result,i,1);

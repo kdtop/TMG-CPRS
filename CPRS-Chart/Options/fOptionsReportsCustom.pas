@@ -204,7 +204,8 @@ begin
       edtMax.Visible := False;
       ShowEditor(grdReport.Col, grdReport.Row, #0);
     end;
-  if Key in [#32..#127] then ShowEditor(grdReport.Col, grdReport.Row, Key);
+  //kt //codex original --> if Key in [#32..#127] then ShowEditor(grdReport.Col, grdReport.Row, Key);
+  if CharInSet(Key, [#32..#127]) then ShowEditor(grdReport.Col, grdReport.Row, Key); //kt //codex 8/30/26
  signal := 0;
 end;
 

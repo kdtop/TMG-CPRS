@@ -76,7 +76,8 @@ begin
   for I := 1 to Length(Val) do    // Iterate
   begin
     C := Val[I];
-    if not (C in ['0','1','2','3','4','5','6','7','8','9','.']) then
+    //kt //codex original -->     if not (C in ['0','1','2','3','4','5','6','7','8','9','.']) then
+    if not CharInSet(C, ['0'..'9', '.']) then //kt //codex 8/30/26
     begin
       Result := False;
       Break;

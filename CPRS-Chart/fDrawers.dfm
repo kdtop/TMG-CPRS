@@ -11,7 +11,6 @@ inherited frmDrawers: TfrmDrawers
   OnResize = FormResize
   ExplicitWidth = 189
   ExplicitHeight = 365
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlRemindersButton: TKeyClickPanel [0]
     Left = 0
@@ -313,10 +312,6 @@ inherited frmDrawers: TfrmDrawers
         Height = 21
         Hint = 'Quick Search'
         Anchors = [akTop, akRight]
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 5
-        OnClick = btnMultiSearchClick
         Glyph.Data = {
           42040000424D4204000000000000420000002800000010000000100000000100
           20000300000000040000130B0000130B00000000000000000000000000FF0000
@@ -353,6 +348,10 @@ inherited frmDrawers: TfrmDrawers
           00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF7F55EDFF17
           B3E0FF37BFE6FF58CCEBFF6FD5EEFF6FD5EEFF58CCEBFF37BFE6FF17B3E0FF40
           7FE5FFFF00FF}
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+        OnClick = btnMultiSearchClick
       end
     end
   end

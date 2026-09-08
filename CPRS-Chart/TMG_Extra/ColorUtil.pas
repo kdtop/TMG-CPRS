@@ -61,7 +61,8 @@ implementation
   begin
     red := (Color and $0000FF);
     red := Round (red * (Percent/100));
-    Result := (Color and $FFFF00) or red;
+    //kt //codex original -->     Result := (Color and $FFFF00) or red;
+    Result := TColor((Cardinal(Color) and $FFFF00) or red); //kt //codex 8/30/26
   end;
 
   function DarkenGreen(Color : TColor; Percent : byte) : TColor;
@@ -71,7 +72,8 @@ implementation
     green := green shr 8;
     green := Round(green * (Percent/100));
     green := green shl 8;
-    Result := (Color and $FF00FF) or green;
+    //kt //codex original -->     Result := (Color and $FF00FF) or green;
+    Result := TColor((Cardinal(Color) and $FF00FF) or green); //kt //codex 8/30/26
   end;
 
   function DarkenBlue(Color : TColor; Percent : byte) : TColor;
@@ -81,7 +83,8 @@ implementation
     blue := blue shr 16;
     Blue := Round (blue * (Percent/100));
     blue := blue shl 16;
-    Result := (Color and $00FFFF) or blue;
+    //kt //codex original -->     Result := (Color and $00FFFF) or blue;
+    Result := TColor((Cardinal(Color) and $00FFFF) or blue); //kt //codex 8/30/26
   end;
 
   function Darken(Color : TColor; Percent : byte) : TColor;

@@ -753,6 +753,7 @@ procedure TfrmCarePlan.UpdateResultGrid(CP : TCarePlan);
     DBControlData : TDBControlData;
 
   begin
+    DBControlData := TDBControlData.Create; //kt added 5/16
     try
       TMGForcePlainTextEditMode := True;   //kt only works once. Effects TfrmNotes.InsertNewNote
       DocInfo := '';
@@ -760,7 +761,6 @@ procedure TfrmCarePlan.UpdateResultGrid(CP : TCarePlan);
       if not CarePlanOK(CPTemplate) then exit;
       if not AvoidDuplicateDataIfCarePlan(FRichEditControl, CPTemplate.PrintName) then exit;
       CPTemplate.TemplatePreviewMode:= FALSE;
-      DBControlData := TDBControlData.Create; //kt added 5/16
       if CPTemplate.IsReminderDialog then begin
         CPTemplate.ExecuteReminderDialog(TForm(Owner))
       end else begin

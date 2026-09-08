@@ -280,7 +280,8 @@ begin
       if result = '' then result := ' ';
       //Maybe later replace text with "Enter F1 for more help."
       Result := ReplaceText(Result,'Enter ''??'' for more help.','');
-      while Result[Length(Result)] in [#10,#13] do begin
+      //kt //codex original --> while Result[Length(Result)] in [#10,#13] do begin
+      while CharInSet(Result[Length(Result)], [#10,#13]) do begin //kt //codex 8/30/26
         Result := LeftStr(Result,Length(Result)-1);
       end;
       Idx := CachedHelp.Add(result);

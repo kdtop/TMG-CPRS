@@ -365,7 +365,7 @@ type
     procedure RemoveWebBrowser(AWebBrowser: THtmlObj);
     procedure ClearWebBrowser(AWebBrowser: THtmlObj);
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
     property HTMLAnswerOpenTag : string read FAnswerOpenTag;
     property HTMLAnswerCloseTag : string read FAnswerCloseTag;
   end; //THTMLTemplateDialogsMgr
@@ -377,7 +377,7 @@ type
     InterfaceList : TInterfaceList;
     SL            : TStringList;
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 var
@@ -727,7 +727,8 @@ begin
         end;
         FPseudoHTML :=  FPseudoHTML + 'id="'+HTMLCtrlID+'" ';
         if ItemDefault <> '' then FPseudoHTML := FPseudoHTML + 'initial="' + DefaultStr + '" ';
-        FPseudoHTML := FPseudoHTML + 'inline='+BoolStr[not FSepLines] + ' ';  //kt
+        //kt //codex original -->         FPseudoHTML := FPseudoHTML + 'inline='+BoolStr[not FSepLines] + ' ';  //kt
+        FPseudoHTML := FPseudoHTML + 'inline=' + string(BoolStr[not FSepLines]) + ' ';  //kt //codex 8/30/26
         FPseudoHTML := FPseudoHTML + '>';  //kt
         for i := 0 to TmpSL.Count-1 do begin
           if FFldType = dftRadioButtons then begin
@@ -957,7 +958,8 @@ begin
         else
           AID := '0';
         FldSL.Add('.01='+FFldName);
-        FldSL.Add('.02='+TemplateFieldTypeCodes[FFldType]);
+        //kt //codex original -->         FldSL.Add('.02='+TemplateFieldTypeCodes[FFldType]);
+        FldSL.Add('.02='+string(TemplateFieldTypeCodes[FFldType])); //kt //codex 8/30/26
         FldSL.Add('.03='+BOOLCHAR[FInactive]);
         FldSL.Add('.04='+IntToStr(FMaxLen));
         FldSL.Add('.05='+EditDefault);  //kt was FEditDefault
@@ -984,7 +986,8 @@ begin
         if FDateType = dtUnknown then
           FldSL.Add('.16=@')
         else
-          FldSL.Add('.16='+TemplateFieldDateCodes[FDateType]);
+          //kt //codex original -->           FldSL.Add('.16='+TemplateFieldDateCodes[FDateType]);
+          FldSL.Add('.16='+string(TemplateFieldDateCodes[FDateType])); //kt //codex 8/30/26
 
         if FURL='' then
           FldSL.Add('3=@')
@@ -1246,9 +1249,9 @@ begin
     PosPastStartTag := PosStartTag + length(SCRIPT_OPEN_TAG);
     PosEndTag := PosEx(SCRIPT_CLOSE_TAG, s, PosPastStartTag);
     if PosEndTag > 0 then begin
+      ScriptSL := TStringList.Create;
+      FnNames := TStringList.Create;
       try
-        ScriptSL := TStringList.Create;
-        FnNames := TStringList.Create;
         PosPastEndTag := PosEndTag + length(SCRIPT_CLOSE_TAG);
         //kt //codex original --> Script := MidStr(FDefinitionText, PosPastStartTag, PosEndTag - PosPastStartTag);
         Script := Copy(FDefinitionText, PosPastStartTag, PosEndTag - PosPastStartTag); //kt //codex 8/3/26
@@ -2266,8 +2269,10 @@ var InstanceID, InstanceID2, TemplateIEN, s : string;
     FoundDlgsInDOM : TInterfaceListAndTStrings;
 begin
   //Scan DOM and look for additions and subtractions.
+  FoundDlgsInDOM := TInterfaceListAndTStrings.Create;
+  DiscardSL1 := nil;  //kt providing default initialization 8/30/26
+  DiscardSL2 := nil;  //kt providing default initialization 8/30/26
   try
-    FoundDlgsInDOM := TInterfaceListAndTStrings.Create;
     //Get a listing of all the tmgembeddeddlg* elements
     FWebBrowser.IterateElements(IterateCallBackForDocSync, '', FoundDlgsInDOM);  //fills SL.Strings[i] with element id, and .Objects[i] with Elem
 
@@ -2348,8 +2353,8 @@ begin
     end;
   finally
     FoundDlgsInDOM.Free;
-    DiscardSL1.Free;
-    DiscardSL2.Free;
+    If Assigned(DiscardSL1) then DiscardSL1.Free;
+    If Assigned(DiscardSL2) then DiscardSL2.Free;
   end;
 end;
 

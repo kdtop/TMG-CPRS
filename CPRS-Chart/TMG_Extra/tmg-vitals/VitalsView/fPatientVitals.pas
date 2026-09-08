@@ -3,7 +3,7 @@ unit fPatientVitals;  //kt //codex 8/26/26
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  System.UITypes, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, //kt //codex 8/30/26
   Dialogs, mGMV_GridGraph, ExtCtrls, StdCtrls, ComCtrls
   , ImgList
   , mGMV_MDateTime, Menus
@@ -50,8 +50,7 @@ type
     procedure Index1Click(Sender: TObject);
     procedure SelectGraphColor1Click(Sender: TObject);
     procedure VitalsWe1Click(Sender: TObject);
-    function AppEvHelp(Command: Word; Data: Integer;
-      var CallHelp: Boolean): Boolean;
+    function AppEvHelp(Command: Word; Data: Integer; var CallHelp: Boolean): Boolean;
     procedure VitalsReport1Click(Sender: TObject);
   private
     { Private declarations }
@@ -414,12 +413,12 @@ begin
   ShellExecute(0, nil, PChar('http://vista.med.va.gov/ClinicalSpecialties/vitals/'), nil, nil, SW_NORMAL)
 end;
 
-function TfrmPatientVitals.AppEvHelp(Command: Word; Data: Integer;
-  var CallHelp: Boolean): Boolean;  //kt //codex 8/26/26
+function TfrmPatientVitals.AppEvHelp(Command: Word; Data: Integer; var CallHelp: Boolean): Boolean;  //kt //codex 8/26/26
 var
   s: String;
 //  iHelp: Integer;
 begin
+  Result := false; //kt providing a default. 8/30/26
   AppEv.CancelDispatch;
   s := GetProgramFilesPath+'\Vista\Common Files\GMV_VitalsViewEnter.hlp';
 

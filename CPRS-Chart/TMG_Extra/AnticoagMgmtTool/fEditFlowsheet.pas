@@ -58,7 +58,8 @@ type
   public
     { Public declarations }
     procedure ClearForm;
-    function ShowModal(AFlowsheet : TOneFlowsheet; AppState : TAppState) : integer; overload;
+    //kt //codex original -->     function ShowModal(AFlowsheet : TOneFlowsheet; AppState : TAppState) : integer; overload;
+    function ShowModal(AFlowsheet : TOneFlowsheet; AppState : TAppState) : integer; reintroduce; overload; //kt //codex 8/30/26
     property EditedFlowSheet : TOneFlowSheet read FOneFlowSheet;
     property Modified : boolean read FModified;
   end;

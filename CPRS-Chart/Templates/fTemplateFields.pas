@@ -208,11 +208,11 @@ begin
   if(cboObjects.ItemIndex >= 0) then
   begin
     FormStyle := fsNormal;
+    DBControlData := TDBControlData.Create;  //kt added 5/16
     try
       txt := Piece(cboObjects.Items[cboObjects.ItemIndex],U,2);
       tmp := TemplateFieldBeginSignature + txt + TemplateFieldEndSignature;
       //kt original ---> CheckBoilerplate4Fields(tmp, 'Preview Template Field: ' + txt, TRUE);
-      DBControlData := TDBControlData.Create;  //kt added 5/16
       CheckBoilerplate4Fields(tmp, 'Preview Template Field: ' + txt, [tPreview], DBControlData);
       DBControlData.MsgNoSave;  //kt added 5/16
     finally

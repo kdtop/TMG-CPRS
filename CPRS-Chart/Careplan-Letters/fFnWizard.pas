@@ -289,8 +289,8 @@ type
   public
     { Public declarations }
     UserFunction : string;
-    constructor Create(AOwner: TComponent; ARichEdit : TRichEdit);
-    destructor Destroy;
+    constructor Create(AOwner: TComponent; ARichEdit : TRichEdit); reintroduce; //kt //codex 8/30/26
+    destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 var
@@ -358,7 +358,8 @@ var NumS : string;
 begin
   NumS := '';
   for i := Length(AName) downto 1 do begin
-    if AName[i] in ['0'..'9'] then begin
+    //kt //codex original --> if AName[i] in ['0'..'9'] then begin
+    if CharInSet(AName[i], ['0'..'9']) then begin //kt //codex 8/30/26
       NumS := AName[i] + NumS;
     end else begin
       break;

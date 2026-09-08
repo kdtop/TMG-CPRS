@@ -267,7 +267,7 @@ var
   uHTMLDoc: string;
   uLastHTMLDoc : string; //kt added
   uReportRPC: string;
-  uHTMLPatient: ANSIstring;
+  uHTMLPatient: string; //kt //codex 8/30/26
   uRptID: String;
   uDirect: String;
   uEmptyImageList: TImageList;
@@ -467,9 +467,9 @@ begin
         if uReportType = 'R' then begin
           uHTMLDoc := HTML_PRE + Lines.Text + HTML_POST;
         end else begin
-          uHTMLDoc := PrefixBody(Lines.Text, uHTMLPatient, InsertSuccess);
+          uHTMLDoc := PrefixBody(Lines.Text, uHTMLPatient, InsertSuccess); //kt //codex 8/30/26
           if not InsertSuccess then begin
-            uHTMLDoc := uHTMLPatient + Lines.Text;
+            uHTMLDoc := uHTMLPatient + Lines.Text; //kt //codex 8/30/26
           end;
         end;
       end;
@@ -582,7 +582,7 @@ begin
   uListState := GetAdhocLookup();
   memText.SelStart := 0;
   FormShow(self);
-  uHTMLPatient := '<DIV align left>'
+  uHTMLPatient := '<DIV align left>' //kt //codex 8/30/26
                   + '<TABLE width="75%" border="0" cellspacing="0" cellpadding="1">'
                   + '<TR valign="bottom" align="left">'
                   + '<TD nowrap><B>Patient: ' + Patient.Name + '</B></TD>'
@@ -591,7 +591,7 @@ begin
                   + '<TD nowrap><B>Age: ' + GetPatientBriefAge(Patient.DFN) + '</B></TD>'
 //                  + '<TD nowrap><B>Age: ' + IntToStr(Patient.Age) + '</B></TD>'
                   //WV end changes
-                  + '</TR></TABLE></DIV><HR>';
+                  + '</TR></TABLE></DIV><HR>'; //kt //codex 8/30/26
                   //the preferred method would be to use headers and footers
                   //so this is just an interim solution.
   {if not GraphFormActive then
@@ -1253,9 +1253,9 @@ begin
     else begin
       //kt original --> uHTMLDoc := uHTMLPatient + uLocalReportData.Text;  //kt 5/1/25
       //kt mod -- 5/1/25
-      uHTMLDoc := PrefixBody(uLocalReportData.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added
+      uHTMLDoc := PrefixBody(uLocalReportData.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added //kt //codex 8/30/26
       if not InsertSuccess then begin
-        uHTMLDoc := uHTMLPatient + uLocalReportData.Text;
+        uHTMLDoc := uHTMLPatient + uLocalReportData.Text; //kt //codex 8/30/26
       end;
       //kt end mod -- 5/1/25
     end;
@@ -1833,9 +1833,9 @@ begin
       else begin
         //kt original --> uHTMLDoc := uHTMLPatient + memText.Lines.Text;  //kt 5/1/25
       //kt mod -- 5/1/25
-        uHTMLDoc := PrefixBody(memText.Lines.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added
+        uHTMLDoc := PrefixBody(memText.Lines.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added //kt //codex 8/30/26
         if not InsertSuccess then begin
-          uHTMLDoc := uHTMLPatient + memText.Lines.Text;
+          uHTMLDoc := uHTMLPatient + memText.Lines.Text; //kt //codex 8/30/26
         end;
       end;
       //kt end mod -- 5/1/25
@@ -2414,9 +2414,9 @@ begin
               end else begin
                 //kt original --> uHTMLDoc := uHTMLPatient + uLocalReportData.Text;  //kt 5/1/25
                 //kt mod -- 5/1/25
-                uHTMLDoc := PrefixBody(uLocalReportData.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added
+                uHTMLDoc := PrefixBody(uLocalReportData.Text, uHTMLPatient, InsertSuccess);  //-- if success=false, then OK, but just uHTMLPatient not added //kt //codex 8/30/26
                 if not InsertSuccess then begin
-                  uHTMLDoc := uHTMLPatient + uLocalReportData.Text;
+                  uHTMLDoc := uHTMLPatient + uLocalReportData.Text; //kt //codex 8/30/26
                 end;
               end;
               //kt end mod -- 5/1/25
@@ -3491,7 +3491,7 @@ begin
   TableHTML := StringReplace(TableHTML, #$D#$A,'<BR>', [rfReplaceAll]);
   TableHTML := StringReplace(TableHTML, '<pre>','', [rfReplaceAll]);
   TableHTML := StringReplace(TableHTML, '</pre>','', [rfReplaceAll]);
-  CopyHTMLToClipBoard('',TableHTML);
+  CopyHTMLToClipBoard('', TableHTML); //kt //codex 8/30/26
   MessageDlg('Lab data has been copied.  It can now be pasted into a note' + CRLF +
                'with Ctrl-V.', mtInformation, [mbOK], 0);
 end;
@@ -3621,8 +3621,8 @@ begin
       AlertLevels := TStringList.Create;
       AlertLevels.Add('1^Routine Status');
       AlertLevels.Add('2^Abnormal / Needs Attention');
+      AlertSender := TfrmAlertSender.Create(Self);
       try
-        AlertSender := TfrmAlertSender.Create(Self);
         ResizeAnchoredFormToFont(AlertSender);
         AlertSender.Initialize(TMGSendImagingAlert, Info, '', AlertLevels);
         AlertSenderModalResult := AlertSender.ShowModal;

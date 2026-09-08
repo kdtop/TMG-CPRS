@@ -725,10 +725,14 @@ type
     procedure SetNodePiece(const Value: integer);
   public
     constructor Create(AOwner: TComponent); override;
+    // AfterNode is exclusive; nil searches from the first node. //kt //codex 9/8/26
+    // Searches the rest of the entire tree, not just descendants. //kt //codex 9/8/26
     function FindPieceNode(Value: string;
-      ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+      //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+      ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; overload; //kt //codex 9/8/26
     function FindPieceNode(Value: string; APiece: integer;
-      ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+      //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode; overload;
+      ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; overload; //kt //codex 9/8/26
     procedure RenameNodes;
     function GetExpandedIDStr(APiece: integer; ParentDelim: char = #0): string;
     procedure SetExpandedIDStr(APiece: integer; const Value: string); overload;
@@ -1849,7 +1853,8 @@ begin
       if (assigned(ItemRec)) then
         ItemRec^.UserObject := TObject(LParam);
       LParam := Integer(ItemRec);
-      if uItemTip.FShowing and (uItemTip.FListBox = Self) and (uItemTip.FListItem = WParam) then
+      //kt //codex original -->       if uItemTip.FShowing and (uItemTip.FListBox = Self) and (uItemTip.FListItem = WParam) then
+      if uItemTip.FShowing and (uItemTip.FListBox = Self) and (uItemTip.FListItem = Integer(WParam)) then //kt //codex 8/30/26
         uItemTip.UpdateText(FALSE);
     end;
   inherited;
@@ -1958,7 +1963,8 @@ begin
       end
       else with Message do
         begin
-          if WParam > FWaterMark then
+          //kt //codex original -->           if WParam > FWaterMark then
+          if Integer(WParam) > FWaterMark then //kt //codex 8/30/26
           begin // make sure insert above watermark
             FMItems.MList.Move(WParam, FWaterMark);
             WParam := FWaterMark;
@@ -2760,7 +2766,8 @@ begin
   begin
     TrueOffset := TopIndex;
     TmpIdx := TopIndex;
-    while ((TmpIdx < Message.wParam) and (TmpIdx < Items.Count)) do
+    //kt //codex original -->     while ((TmpIdx < Message.wParam) and (TmpIdx < Items.Count)) do
+    while ((TmpIdx < Integer(Message.WParam)) and (TmpIdx < Items.Count)) do //kt //codex 8/30/26
     begin
       if (Perform(LB_GETITEMHEIGHT, TmpIdx, 0) > 0) then
         inc(TrueOffset);
@@ -3294,7 +3301,8 @@ begin {NeedData}
   end;
   StartFrom := Copy(StartFrom, 1, 128); // limit length to 128 characters
   CtrlPos := 0; // make sure no ctrl characters
-  for CharPos := 1 to Length(StartFrom) do if StartFrom[CharPos] in [#0..#31] then begin
+  //kt //codex original --> for CharPos := 1 to Length(StartFrom) do if StartFrom[CharPos] in [#0..#31] then begin
+  for CharPos := 1 to Length(StartFrom) do if CharInSet(StartFrom[CharPos], [#0..#31]) then begin //kt //codex 8/30/26
     CtrlPos := CharPos;
     break;
   end;
@@ -3315,7 +3323,8 @@ begin
   x := DisplayText[TopIndex];
   if (FWaterMark > 0) and (TopIndex < FWaterMark)
     then Result := 0 // short list visible
-  else while (CompareText(ALPHA_DISTRIBUTION[Result], x) < 0) and (Result < 100) do
+  //kt //codex original -->   else while (CompareText(ALPHA_DISTRIBUTION[Result], x) < 0) and (Result < 100) do
+  else while (CompareText(string(ALPHA_DISTRIBUTION[Result]), x) < 0) and (Result < 100) do //kt //codex 8/30/26
       Inc(Result); // only long list visible
 end;
 
@@ -3338,7 +3347,8 @@ begin
   FCurrentTop := TopIndex;
   if (ScrollCode = scPosition) then
   begin
-    NeedData(LL_POSITION, ALPHA_DISTRIBUTION[ScrollPos]);
+    //kt //codex original -->     NeedData(LL_POSITION, ALPHA_DISTRIBUTION[ScrollPos]);
+    NeedData(LL_POSITION, string(ALPHA_DISTRIBUTION[ScrollPos])); //kt //codex 8/30/26
     case ScrollPos of
       0: TopIndex := 0;
       1..99: TopIndex := FWaterMark;
@@ -5640,20 +5650,26 @@ begin
 end;
 
 function TORTreeView.FindPieceNode(Value: string;
-  ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+  //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+  ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; //kt //codex 9/8/26
 begin
-  Result := FindPieceNode(Value, FPiece, ParentDelim, StartNode);
+  //kt //codex original --> Result := FindPieceNode(Value, FPiece, ParentDelim, StartNode);
+  Result := FindPieceNode(Value, FPiece, ParentDelim, AfterNode); //kt //codex 9/8/26
 end;
 
 function TORTreeView.FindPieceNode(Value: string; APiece: integer;
-  ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+  //kt //codex original --> ParentDelim: Char = #0; StartNode: TTreeNode = nil): TORTreeNode;
+  ParentDelim: Char = #0; AfterNode: TTreeNode = nil): TORTreeNode; //kt //codex 9/8/26
+  //kt NOTE:  Renamed StartNode to AfterNode, because StartNode is NOT included in the search.
 var
   StartIdx, i: integer;
   Node: TORTreeNode;
 
 begin
-  if assigned(StartNode) then
-    StartIdx := StartNode.AbsoluteIndex + 1
+  //kt //codex original --> if assigned(StartNode) then
+  if assigned(AfterNode) then //kt //codex 9/8/26
+    //kt //codex original --> StartIdx := StartNode.AbsoluteIndex + 1
+    StartIdx := AfterNode.AbsoluteIndex + 1 //kt //codex 9/8/26
   else
     StartIdx := 0;
   Result := nil;

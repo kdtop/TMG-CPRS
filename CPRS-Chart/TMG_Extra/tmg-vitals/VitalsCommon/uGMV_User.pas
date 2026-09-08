@@ -1,5 +1,7 @@
 unit uGMV_User;
 
+{$WARN SYMBOL_PLATFORM OFF} // Windows-specific path handling is intentional. //kt //codex 8/30/26
+
 interface
 
 uses

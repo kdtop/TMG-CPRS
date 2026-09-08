@@ -582,7 +582,7 @@ begin
   LogEvent('In SizeFrame');
   repeat
     ARect := cp.CurrentRect;
-    MaxRight := Max(ARect.Right, MaxRight);
+    //MaxRight := Max(ARect.Right, MaxRight);
     MaxBottom := Max(ARect.Bottom, MaxBottom);
     LogEvent('  After considering panel ['+cp.name+'], MaxBottom='+IntToStr(MaxBottom)+'.');
     cp := cp.UnitAfter;

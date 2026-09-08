@@ -1339,7 +1339,8 @@ end;
 
 procedure TORDateCombo.YearKeyPress(Sender: TObject; var Key: Char);
 begin
-  if(Key in ['0'..'9']) and (FYearEdit.Text = '    ') then
+  //kt //codex original -->   if(Key in ['0'..'9']) and (FYearEdit.Text = '    ') then
+  if CharInSet(Key, ['0'..'9']) and (FYearEdit.Text = '    ') then //kt //codex 8/30/26
   begin
     FYearEdit.Text := Key + '   ';
     Key := #0;

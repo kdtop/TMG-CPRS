@@ -1276,20 +1276,24 @@ begin
   piece9 := Piece(thisList[listIndex],U,9);
   piece10 := Piece(thisList[listIndex],U,1);
 
-  thisDateTime := Piece(thisList[listIndex],U,5);
+  //kt //codex original -->   thisDateTime := Piece(thisList[listIndex],U,5);
+  thisDateTime := ShortString(Piece(thisList[listIndex],U,5)); // date/time field is String[16] //kt //codex 8/30/26
 
   tempYr := '';
   for k := 1 to 4 do
-   tempYr := tempYr + thisDateTime[k];
+   //kt //codex original -->    tempYr := tempYr + thisDateTime[k];
+   tempYr := tempYr + string(thisDateTime[k]); //kt //codex 8/30/26
 
   tempDt := '';
   for k := 6 to 10 do
-   tempDt := tempDt + thisDateTime[k];
+   //kt //codex original -->    tempDt := tempDt + thisDateTime[k];
+   tempDt := tempDt + string(thisDateTime[k]); //kt //codex 8/30/26
 
   tempTime := '';
   //Use 'Length' to prevent stuffing the control chars into the date when a trailing zero is missing
   for k := 11 to Length(thisDateTime) do //16 do
-   tempTime := tempTime + thisDateTime[k];
+   //kt //codex original -->    tempTime := tempTime + thisDateTime[k];
+   tempTime := tempTime + string(thisDateTime[k]); //kt //codex 8/30/26
 
   newDtTime := '';
   newDtTime := newDtTime + tempDt + '/' + tempYr + tempTime;

@@ -1057,7 +1057,7 @@ begin
         GetPropList(ClsInfo, STRING_FILTER, pList);
         for i := 0 to pCount - 1 do
         begin
-          name := pList^[I]^.Name;
+          name := string(pList^[I]^.Name); //kt //codex 8/30/26
           if (info.IndexOf(name) < 0) then
             info.Add(name);
         end;

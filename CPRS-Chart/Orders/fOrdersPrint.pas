@@ -357,7 +357,8 @@ end;
 
 procedure TfrmOrdersPrint.edtNumToPrintKeyPress(Sender: TObject; var Key: Char);
 begin
- if Key In ['0'..'9', #8] Then // #8 = backspace
+ //kt //codex original -->  if Key In ['0'..'9', #8] Then // #8 = backspace
+ if CharInSet(Key, ['0'..'9', #8]) Then // #8 = backspace //kt //codex 8/30/26
    inherited
  else
    Key := #0;

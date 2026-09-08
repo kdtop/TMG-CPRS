@@ -106,8 +106,10 @@ type
     procedure BuildCB(CBidx: integer; var Y: integer; FirstTime: boolean);
     procedure ItemChecked(Sender: TObject);
     procedure BuildAllControls;
+    //kt //codex original -->     procedure AppShowHint(var HintStr: string; var CanShow: Boolean;
+    //kt //codex original -->                           var HintInfo: THintInfo);
     procedure AppShowHint(var HintStr: string; var CanShow: Boolean;
-                          var HintInfo: THintInfo);
+                          var HintInfo: Controls.THintInfo); //kt //codex 8/30/26
     procedure FieldChanged(Sender: TObject);
     procedure EntryDestroyed(Sender: TObject);
     function GetObjectID( Control: TControl): string;
@@ -335,6 +337,7 @@ var
   begin
     AVisitStr := VisitStrForNote(0);  //<-- TO DO!!!  replace 0 with IEN of target note
     SL := nil;
+    LineArr := TStringList.Create;
     try;
       for i := 0 to VEFANameToObjID.Count - 1 do begin  //kt added block 5/16
         ATmplFld := GetTemplateField(VEFANameToObjID[i], FALSE); // TmplFld is TTemplateField.  Uses uTmplFlds in global scope.
@@ -357,7 +360,6 @@ var
         //      ask the server for updated values.
         if DBDialogFieldValuesGet(Patient.DFN, AVisitStr, SL, RPCErrStr) then begin
           // expected format back:  RESULT[#]'VALUE^<Template IEN>^<value of db control>^<any tag value>
-          LineArr := TStringList.Create;
           for i := 0 to SL.Count - 1 do begin
             PiecesToList(SL.Strings[i], '^', LineArr);
             if LineArr.Count < 4 then continue;
@@ -424,13 +426,13 @@ begin //DoTemplateDialog
   VEFANameToObjID.Clear;  //kt added 5/16
   SetTemplateDialogCanceled(FALSE);
   //kt 3/16 AfrmTemplateDialog := TfrmTemplateDialog.Create(Application);
+  SLWithTransformedFormulas := TStringList.Create;  //kt 3/16
+  SLWithFormulasAndObjsRemoved := TStringList.Create;  //kt 3/16
   try
     DlgIDCounts := TStringList.Create;
     DlgIDCounts.Sorted := TRUE;
     DlgIDCounts.Duplicates := dupError;
     Caption := CaptionText;
-    SLWithTransformedFormulas := TStringList.Create;  //kt 3/16
-    SLWithFormulasAndObjsRemoved := TStringList.Create;  //kt 3/16
     //kt 12/27/12 frmTemplateDialog.HTMLMode := uTemplates.UsingHTMLMode; //kt 9/11
     if AtIntracareLoc() then begin
       SetHTMLAnswerOpenCloseTags('<B><I><font size="+1" face="Arial">', '</B></I></font>');
@@ -1178,8 +1180,10 @@ begin
   HtmlEditor.PopupMenu := DialogPopupMenu;
 end;
 
+//kt //codex original --> procedure TfrmTemplateDialog.AppShowHint(var HintStr: string;
+//kt //codex original -->   var CanShow: Boolean; var HintInfo: THintInfo);
 procedure TfrmTemplateDialog.AppShowHint(var HintStr: string;
-  var CanShow: Boolean; var HintInfo: THintInfo);
+  var CanShow: Boolean; var HintInfo: Controls.THintInfo); //kt //codex 8/30/26
 const
   HistHintDelay = 1200000; // 20 minutes
 
@@ -1340,4 +1344,3 @@ begin
   result := uTemplates.UsingHTMLTargetMode;
 end;
 end.
-

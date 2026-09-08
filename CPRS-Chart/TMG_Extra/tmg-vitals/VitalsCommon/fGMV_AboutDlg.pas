@@ -203,7 +203,7 @@ const
     aXMargin,Y,aWidth:Integer;aFColor:TColor;aText:String);
   var
     iLen,iWidth, iHeight,
-    i: integer;
+    i, FinalI, FinalLen: integer; //kt //codex 8/30/26
   begin
     with aCanvas do
       begin
@@ -249,6 +249,7 @@ const
     iX,
     iLen,iWidth, iHeight,
     i: integer;
+    FinalI, FinalLen : integer;
   begin
     with aCanvas do
       begin
@@ -258,6 +259,8 @@ const
         iHeight := TextHeight(aText);
         Font.Color := aFColor;
         iX := Max(aXMargin,aWidth-iWidth-aXMargin);
+        FinalI := iX - 1; //kt //codex 8/30/26
+        FinalLen := Min(iWidth, aWidth - aXMargin - iX); //kt //codex 8/30/26
         for i := aWidth - aXMargin downto iX do
           begin
             iLen := Min(iWidth,aWidth - aXMargin - i);
@@ -270,9 +273,11 @@ const
                   Sleep(aWait);
               end;
           end;
-        FillRect(Rect(i,y,i+iLen+2,y+iHeight));
+        //kt //codex original -->         FillRect(Rect(i,y,i+iLen+2,y+iHeight));
+        FillRect(Rect(FinalI, y, FinalI + FinalLen + 2, y + iHeight)); //kt //codex 8/30/26
         Font.Style := [];
-        TextRect(Rect(i,y,i+iLen,y+iHeight),i,y,aText);
+        //kt //codex original -->         TextRect(Rect(i,y,i+iLen,y+iHeight),i,y,aText);
+        TextRect(Rect(FinalI, y, FinalI + FinalLen, y + iHeight), FinalI, y, aText); //kt //codex 8/30/26
       end;
     Application.ProcessMessages;
   end;

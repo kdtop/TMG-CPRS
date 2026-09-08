@@ -7,7 +7,6 @@ inherited frmLabs: TfrmLabs
   ClientWidth = 1042
   HelpFile = 'qnoback'
   Menu = mnuLabs
-  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnShow = FormShow
   ExplicitWidth = 1058
@@ -40,7 +39,6 @@ inherited frmLabs: TfrmLabs
   inherited pnlLeft: TPanel
     Height = 615
     Constraints.MinWidth = 37
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitHeight = 615
     object Splitter1: TSplitter
       Left = 0
@@ -232,7 +230,6 @@ inherited frmLabs: TfrmLabs
     Width = 941
     Height = 615
     Constraints.MinWidth = 30
-    StyleElements = [seFont, seClient, seBorder]
     OnResize = pnlRightResize
     ExplicitWidth = 941
     ExplicitHeight = 615
@@ -432,13 +429,12 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 939
+            Width = 367
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
-            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162

@@ -59,18 +59,20 @@ implementation
 {---------------------------- BuildSect ---------------------------
 ------------------------------------------------------------------}
 Function BuildSect(s1: string; s2: string): string;
+//kt NOTE: I can't find anyone using this function.
 var
-   s, x: string[100];
+   //kt original --> s, x: string[100];
+   s, x: string;  //kt 8/30/26
 begin
-     if s2 <> '' then
-          s := s1 + s2
-     else
-         s := s1;
+   if s2 <> '' then
+     s := s1 + s2
+   else
+     s := s1;
 
-     x := IntToStr(length(s));
-     if length(x) = 1 then x := '00' + x;
-     if length(x) = 2 then x := '0' + x;
-     Result := x + s;
+   x := IntToStr(length(s));
+   if length(x) = 1 then x := '00' + x;
+   if length(x) = 2 then x := '0' + x;
+   Result := x + s;
 end;
 
 

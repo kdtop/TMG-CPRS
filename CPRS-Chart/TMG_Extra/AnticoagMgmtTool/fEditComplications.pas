@@ -53,7 +53,8 @@ type
     function GetComplications : TStringList;
   public
     { Public declarations }
-    function ShowModal(DataSL : TStringList; DateStr : string) : integer; overload;
+    //kt //codex original -->     function ShowModal(DataSL : TStringList; DateStr : string) : integer; overload;
+    function ShowModal(DataSL : TStringList; DateStr : string) : integer; reintroduce; overload; //kt //codex 8/30/26
     property Complications : TStringList read GetComplications;  //This is an encoded string
     property ComplicationScore : integer read FComplicationScore;
   end;

@@ -133,7 +133,7 @@ function AllowChartPrintForNote(ANote: Integer): Boolean;
 procedure PrintNoteToDevice(ANote: Integer; const ADevice: string; ChartCopy: Boolean;
   var ErrMsg: string);
 function GetFormattedNote(ANote: Integer; ChartCopy: Boolean): TStrings;
-function GetFormattedMultiNotes(NotesList: TStringList; ChartCopy: Boolean): TStrings;  //kt
+procedure GetFormattedMultiNotes(NotesList: TStringList; ChartCopy: Boolean; Result : TStrings); //kt
 
 //  Interdisciplinary Notes
 function IDNotesInstalled: boolean;
@@ -1447,7 +1447,7 @@ begin
   Result := RPCBrokerV.Results;
 end;
 
-function GetFormattedMultiNotes(NotesList: TStringList; ChartCopy: Boolean): TStrings;
+procedure GetFormattedMultiNotes(NotesList: TStringList; ChartCopy: Boolean; Result : TStrings);
 //kt 7/23/18 --- FINISH!!
 //The server should concatinate all the files into one long single document.
 //<p style="page-break-before: always"> can suggest to browser to split into separate pages during printing.
@@ -1457,6 +1457,7 @@ var
   RPCResult : string;
   i : integer;
 begin
+  if not Assigned(Result) then exit;
   RPCBrokerV.remoteprocedure := 'TMG CPRS GET NOTES TO PRINT';
   RPCBrokerV.Param[0].Value := '.X';  // not used
   RPCBrokerV.param[0].ptype := list;
@@ -1464,32 +1465,31 @@ begin
     RPCBrokerV.Param[0].Mult[piece(NotesList.Strings[i],'^',1)] := NotesList.Strings[i];
   end;
   CallBroker;
-  RPCResult := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
-  if piece(RPCResult,'^',1)='-1' then begin
-    Result[0] := RPCBrokerV.Results[0];
-  end else begin  //success - return result
-    RPCBrokerV.Results.Delete(0);
-    Result := RPCBrokerV.Results;
-  end;
+  Result.Assign(RPCBrokerV.Results);
+  RPCResult := Result[0];    //returns:  error: -1;  success=1
+  if piece(RPCResult,'^',1)='-1' then exit;
+  Result.Delete(0);
 end;
+
+
+function ExportUniqueFName : String;
+//NOTE: Could also consider using uHTMLTool.UniqueCacheFName(FName : string) : AnsiString;
+var  FName,tempFName : String;
+     count : integer;
+begin
+  FName := 'ChartExport';
+  count := 0;
+  repeat
+    tempFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\' + FName + inttostr(count) + '.pdf';
+    //FName := FName + '1';
+    count := count+1;
+  until (fileExists(tempFName)=false);
+  result := tempFName;
+end;
+
 
 function ExportChart(NotesList,LabList,RadList,OrdersList,ScansList,OtherDocList: TStringList; Recip,Fax,Re,Mode,Uploaded,Consultant,Template,Demographics:String; Comments:TStrings): String;
 //Export selected chart items into one PDF files and download to client
-
-  function UniqueFName : AnsiString;
-  //NOTE: Could also consider using uHTMLTool.UniqueCacheFName(FName : string) : AnsiString;
-  var  FName,tempFName : AnsiString;
-       count : integer;
-  begin
-    FName := 'ChartExport';
-    count := 0;
-    repeat
-      tempFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\' + FName + inttostr(count) + '.pdf';
-      //FName := FName + '1';
-      count := count+1;
-    until (fileExists(tempFName)=false);
-    result := tempFName;
-  end;
 
 var
   //RPCResult : string;
@@ -1564,12 +1564,11 @@ begin
   BrokerResult := RPCBrokerV.Results[0];
   if Piece(BrokerResult,'^',1)='1' then begin
 
-    FileName := UniqueFName;
+    FileName := ExportUniqueFName();
     //OutFile := TFileStream.Create(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\ChartExport.pdf',fmCreate);
     OutFile := TFileStream.Create(FileName,fmCreate);
     for i:=1 to (RPCBrokerV.Results.Count-1) do begin
-      //s :=frmImages.Decode(RPCBrokerV.Results[i]);
-      s :=Decode64(RPCBrokerV.Results[i]);
+      s :=Decode64(AnsiString(RPCBrokerV.Results[i]));
       count := Length(s);
       if count>1024 then begin
         bResult := false; //failure of load.
@@ -1592,21 +1591,6 @@ end;
 
 function ReExportChart(ExportIEN:String): String;
 //Export selected chart items into one PDF files and download to client
-
-  function UniqueFName : AnsiString;
-  //NOTE: Could also consider using uHTMLTool.UniqueCacheFName(FName : string) : AnsiString;
-  var  FName,tempFName : AnsiString;
-       count : integer;
-  begin
-    FName := 'ChartExport';
-    count := 0;
-    repeat
-      tempFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\' + FName + inttostr(count) + '.pdf';
-      //FName := FName + '1';
-      count := count+1;
-    until (fileExists(tempFName)=false);
-    result := tempFName;
-  end;
 
 var
   //RPCResult : string;
@@ -1636,12 +1620,12 @@ begin
   BrokerResult := RPCBrokerV.Results[0];
   if Piece(BrokerResult,'^',1)='1' then begin
 
-    FileName := UniqueFName;
+    FileName := ExportUniqueFName();
     //OutFile := TFileStream.Create(GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\ChartExport.pdf',fmCreate);
     OutFile := TFileStream.Create(FileName,fmCreate);
     for i:=1 to (RPCBrokerV.Results.Count-1) do begin
       //s :=frmImages.Decode(RPCBrokerV.Results[i]);
-      s :=Decode64(RPCBrokerV.Results[i]);
+      s :=Decode64(Ansistring(RPCBrokerV.Results[i]));
       count := Length(s);
       if count>1024 then begin
         bResult := false; //failure of load.

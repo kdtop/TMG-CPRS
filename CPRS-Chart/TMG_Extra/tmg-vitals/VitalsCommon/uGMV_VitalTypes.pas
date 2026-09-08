@@ -593,7 +593,8 @@ begin
     HasNumericValue := true;
     FValueStr := '';
     for i := 1 to FOwner.NumSubDataValues do begin
-      if FValueStr<>'' then FValueStr := FValueStr + FOwner.DataDelim;
+      //kt //codex original -->       if FValueStr<>'' then FValueStr := FValueStr + FOwner.DataDelim;
+      if FValueStr <> '' then FValueStr := FValueStr + string(FOwner.DataDelim); //kt //codex 8/30/26
       FValueStr := FValueStr + FloatToStr(FNumericValue[i]);
     end;
   end;
@@ -611,12 +612,14 @@ begin
   if s='' then s :='0';
   for i := 0 to MAX_COMBINED_VALUES do FNumericValue[i] := 0;
   s := UpperCase(s);
-  Delim := UpperCase(FOwner.DataDelim);
+  //kt //codex original -->   Delim := UpperCase(FOwner.DataDelim);
+  Delim := UpperCase(string(FOwner.DataDelim)); //kt //codex 8/30/26
   for i := 1 to FOwner.NumSubDataValues do begin
     if i > MAX_COMBINED_VALUES then continue;  //prob won't happen
     if Delim<>'' then subS := Piece(s,Delim,i)
     else subS := s;
-    if (subS<>'') and (subS[1] in ['0'..'9','-']) then begin
+    //kt //codex original --> if (subS<>'') and (subS[1] in ['0'..'9','-']) then begin
+    if (subS<>'') and (CharInSet(subS[1], ['0'..'9','-'])) then begin //kt //codex 8/30/26
       try
         FNumericValue[i-1] := StrToFloat(subS);
       except
@@ -691,7 +694,8 @@ begin
 
   s := Piece(FormatString,'^',4);  //e.g. '/' if value is '120/78', 'x' if value is '123x12x56'
   if s='' then DataDelim := '' //was ' '
-  else DataDelim := s;
+  //kt //codex original -->   else DataDelim := s;
+  else DataDelim := ShortString(Copy(s, 1, MAX_COMBINED_VALUES)); // DataDelim is String[MAX_COMBINED_VALUES] //kt //codex 8/30/26
 
   s := Piece(FormatString,'^',5);  //e.g. if have ..^104*-^... and only 104* is wanted, set to 1
   if s='' then s := '';   //'' ==> use ALL pieces
@@ -1115,7 +1119,8 @@ begin
     if OneRow.DesiredSubPieces <> '' then begin
       tempValue := '';
       for subI := 1 to PieceLen(Value,',') do begin
-        tempValue := tempValue + Piece(Value,OneRow.DataDelim,subI); // <-- why no delimiter separating concatenated values?
+        //kt //codex original -->         tempValue := tempValue + Piece(Value,OneRow.DataDelim,subI); // <-- why no delimiter separating concatenated values?
+        tempValue := tempValue + Piece(Value, string(OneRow.DataDelim), subI); // <-- why no delimiter separating concatenated values? //kt //codex 8/30/26
       end;
       Value := tempValue;
     end;

@@ -498,6 +498,7 @@ function TfrmGMV_HospitalSelector2.ReadyToSelect:Boolean;
 var
   lv: TListView;
 begin
+  Result := false; //kt default.
   case pcMain.ActivePageIndex of
     0:begin
         lv := lvAppt;

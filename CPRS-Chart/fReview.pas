@@ -1262,8 +1262,10 @@ var
     for i := 0 to Pred(OrderList.Count) do
     begin
       s := Piece(OrderList[i], U, 2);
-      x := s[1];
-      if ((s <> '') and (s[1] in [SS_ONCHART, SS_ESIGNED, SS_NOTREQD])) or
+      //kt //codex original -->       x := s[1];
+      x := Copy(s, 1, 1); //kt //codex 8/30/26
+      //kt //codex original -->       if ((s <> '') and (s[1] in [SS_ONCHART, SS_ESIGNED, SS_NOTREQD])) or
+      if ((s <> '') and (Pos(Copy(s, 1, 1), SS_ONCHART + SS_ESIGNED + SS_NOTREQD) > 0)) or //kt //codex 8/30/26
          (Piece(OrderList[i], U, 3) = RS_RELEASE) then
       begin
          Result := TRUE;
@@ -1274,8 +1276,10 @@ var
     for i := 0 to Pred(csOrderList.Count) do
     begin
       s := Piece(CSOrderList[i], U, 2);
-      x := s[1];
-      if ((s <> '') and (s[1] in [SS_ONCHART, SS_ESIGNED, SS_NOTREQD])) or
+      //kt //codex original -->       x := s[1];
+      x := Copy(s, 1, 1); //kt //codex 8/30/26
+      //kt //codex original -->       if ((s <> '') and (s[1] in [SS_ONCHART, SS_ESIGNED, SS_NOTREQD])) or
+      if ((s <> '') and (Pos(Copy(s, 1, 1), SS_ONCHART + SS_ESIGNED + SS_NOTREQD) > 0)) or //kt //codex 8/30/26
          (Piece(CSOrderList[i], U, 3) = RS_RELEASE) then
       begin
          Result := TRUE;

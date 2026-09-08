@@ -855,7 +855,8 @@ function TUser.CanMakeTemplatesWithScripts : boolean;
 //kt added function 6/23/16
 begin
   if FCanMakeTemplatesWithScripts = '' then begin
-    FCanMakeTemplatesWithScripts := uTMGOptions.ReadString('Create Templates With Scripts','N');  //Set to false by default
+    //kt //codex original -->     FCanMakeTemplatesWithScripts := uTMGOptions.ReadString('Create Templates With Scripts','N');  //Set to false by default
+    FCanMakeTemplatesWithScripts := ShortString(Copy(uTMGOptions.ReadString('Create Templates With Scripts','N'), 1, 1));  //Set to false by default //kt //codex 8/30/26
   end;
   Result := (FCanMakeTemplatesWithScripts = 'Y');
 end;

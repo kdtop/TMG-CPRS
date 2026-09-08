@@ -172,7 +172,8 @@ end;
 function DietDialogType(GroupIEN: Integer): Char;
 begin
   Result := CharAt(sCallV('ORWDFH FINDTYP', [GroupIEN]), 1);
-  if not (Result in ['A', 'D', 'E', 'N', 'P', 'T', 'M']) then Result := 'D';
+  //kt //codex original --> if not (Result in ['A', 'D', 'E', 'N', 'P', 'T', 'M']) then Result := 'D';
+  if not (CharInSet(Result, ['A', 'D', 'E', 'N', 'P', 'T', 'M'])) then Result := 'D'; //kt //codex 8/30/26
 end;
 
 function OutpatientPatchInstalled: boolean;

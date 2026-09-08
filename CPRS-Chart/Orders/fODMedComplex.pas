@@ -242,7 +242,8 @@ procedure TfrmODMedComplex.grdDosesKeyPress(Sender: TObject; var Key: Char);
 begin
   inherited;
   if Key = #13 then ShowEditor(grdDoses.Col, grdDoses.Row, #0);
-  if Key in [#32..#127] then ShowEditor(grdDoses.Col, grdDoses.Row, Key);
+  //kt //codex original -->   if Key in [#32..#127] then ShowEditor(grdDoses.Col, grdDoses.Row, Key);
+  if CharInSet(Key, [#32..#127]) then ShowEditor(grdDoses.Col, grdDoses.Row, Key); //kt //codex 8/30/26
 end;
 
 procedure TfrmODMedComplex.grdDosesMouseUp(Sender: TObject; Button: TMouseButton;

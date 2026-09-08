@@ -179,7 +179,7 @@ type
     constructor Create(SearchFileNumber,SearchFileName : string;
                        SimpleMode : Boolean;
                        AParent : TWinControl; AParentSet : TLogicSet; Row : integer);
-    Destructor Destroy;
+    Destructor Destroy; override; //kt //codex 8/30/26
     procedure CloseRow;
     procedure OpenRow;
     function GetFieldDataType : TFieldDataType;
@@ -237,7 +237,7 @@ type
     btnAddSrchField  : TBitBtn;
     constructor Create(SearchFileNumber,SearchFileName : string;
                        AParent : TWinControl; AOwner : TComponent);
-    Destructor Destroy;
+    Destructor Destroy; override; //kt //codex 8/30/26
     function RowBefore (ARow : TLogicRow) : TLogicRow;
     function PriorRow : TLogicRow;  //Next to last row.
     function LastRow : TLogicRow;
@@ -562,7 +562,8 @@ implementation
   procedure TLogicRow.SetSearchLabelCaption;
   begin
     If FParentSet.lblValue <> nil then begin
-      FParentSet.lblValue.Caption := SearchCaption[FSimpleMode,(FSearchValueMode = vmRange)];
+      //kt //codex original -->       FParentSet.lblValue.Caption := SearchCaption[FSimpleMode,(FSearchValueMode = vmRange)];
+      FParentSet.lblValue.Caption := string(SearchCaption[FSimpleMode, (FSearchValueMode = vmRange)]); //kt //codex 8/30/26
     end;
   end;
 
@@ -984,10 +985,12 @@ implementation
     repeat
       ch := S[i];
       i := i + 1;
-      if ch in ['0'..'9','.'] then begin
+      //kt //codex original --> if ch in ['0'..'9','.'] then begin
+      if CharInSet(ch, ['0'..'9','.']) then begin //kt //codex 8/30/26
         Result := Result + ch;
       end;
-    until (i > length(S)) or not  (ch in ['0'..'9','.'])
+    //kt //codex original --> until (i > length(S)) or not  (ch in ['0'..'9','.'])
+    until (i > length(S)) or not  (CharInSet(ch, ['0'..'9','.'])) //kt //codex 8/30/26
   end;
 
 

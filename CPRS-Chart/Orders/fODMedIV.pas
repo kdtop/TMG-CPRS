@@ -499,7 +499,8 @@ begin
   if (self.lblAdminTime.visible = True) and (self.lblAdminTime.Caption <> '') then
     begin
       Admin := Copy(self.lblAdminTime.Caption,  14, (Length(self.lblAdminTime.Caption)-1));
-      if not (Admin[1] in ['0'..'9']) then Admin := '';
+      //kt //codex original --> if not (Admin[1] in ['0'..'9']) then Admin := '';
+      if not CharInSet(Admin[1], ['0'..'9']) then Admin := ''; //kt //codex 8/30/26
     end;
   if (fSolIEN = oSolIEN) and (fAddIEN = oAddIEN) and (OSchedule = SchTxt) and (oAdmin = Admin) then CalFirstDose := false
   else
@@ -614,7 +615,8 @@ begin
                    SetError(cells[0, i] + TX_LEADING_NUMERIC);
                    Exit;
                  end;
-              for j := 1 to temp -1 do if not (tempStr[j] in ['0'..'9']) then
+              //kt //codex original --> for j := 1 to temp -1 do if not (tempStr[j] in ['0'..'9']) then
+              for j := 1 to temp -1 do if not CharInSet(tempStr[j], ['0'..'9']) then //kt //codex 8/30/26
                 begin
                   SetError(cells[0, i] + TX_LEADING_NUMERIC);
                   Exit;
@@ -687,7 +689,8 @@ begin
                 end;
               for i := 1 to Length(x) do
                 begin
-                  if  not (x[i] in ['0'..'9']) and (x[i] <> '.') then
+                  //kt //codex original --> if not (x[i] in ['0'..'9']) and (x[i] <> '.') then
+                  if not CharInSet(x[i], ['0'..'9']) and (x[i] <> '.') then //kt //codex 8/30/26
                     begin
                       SetError(TX_BAD_RATE);
                       exit;
@@ -768,7 +771,8 @@ begin
       exit;
     end
   else if LeftStr(Rate, 1) = '0' then Result := 'Infuse Over Time cannot start with a zero.';
-  for i := 1 to Length(Rate) do if not (Rate[i] in ['0'..'9']) then Temp := True;
+  //kt //codex original --> for i := 1 to Length(Rate) do if not (Rate[i] in ['0'..'9']) then Temp := True;
+  for i := 1 to Length(Rate) do if not CharInSet(Rate[i], ['0'..'9']) then Temp := True; //kt //codex 8/30/26
   if Temp = True then Result := 'The Infusion time can only be a whole number';
 end;
 
@@ -1940,7 +1944,8 @@ var
     i: Integer;
   begin
     Result := True;
-    for i := 1 to Length(x) do if not (x[i] in ['0'..'9','.']) then Result := False;
+    //kt //codex original --> for i := 1 to Length(x) do if not (x[i] in ['0'..'9','.']) then Result := False;
+    for i := 1 to Length(x) do if not CharInSet(x[i], ['0'..'9','.']) then Result := False; //kt //codex 8/30/26
   end;
 
 begin

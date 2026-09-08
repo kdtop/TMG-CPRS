@@ -73,6 +73,7 @@ begin
   RPCResults := TStringList.create;
   LastConsultType := '';
   tCallV(RPCResults,'TMG CHART EXPORTER CONSULTANTS',[Patient.DFN]);
+  ParentNode := nil;  //default //kt 8/30/26
   for I := 0 to RPCResults.Count - 1 do begin
     Entry := RPCResults[i];
     ThisConsultType := piece(Entry,'^',1);

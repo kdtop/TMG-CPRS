@@ -174,7 +174,7 @@ type
     function DecodeBarcode(LocalFNamePath,ImageType: string): string;
     procedure GetThumbnailBitmapForFName (FName : string; Bitmap : TBitmap);
     function ThumbnailIndexForFName (FName : string) : integer;
-    function AllowContextChange(var WhyNot: string): Boolean;
+    function AllowContextChange(var WhyNot: string): Boolean; override; //kt //codex 8/30/26
     procedure HandlePatientChanged();
   published
   end;
@@ -1047,4 +1047,3 @@ begin
 end;}
 
 end.
-

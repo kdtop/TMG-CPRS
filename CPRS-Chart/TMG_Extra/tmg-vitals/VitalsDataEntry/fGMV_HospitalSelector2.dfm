@@ -48,14 +48,12 @@ object frmGMV_HospitalSelector2: TfrmGMV_HospitalSelector2
     000020000000E79E00003B69000020000000FCF300003FCD000020000000E7BE
     00003B7F000020000000FCFF00003FFF000020000000}
   KeyPreview = True
-  OldCreateOrder = False
   Position = poScreenCenter
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -358,7 +356,6 @@ object frmGMV_HospitalSelector2: TfrmGMV_HospitalSelector2
             Height = 21
             Anchors = []
             Color = clInfoBk
-            ItemHeight = 13
             TabOrder = 0
             Visible = False
             OnChange = cmbTargetChange
@@ -390,6 +387,7 @@ object frmGMV_HospitalSelector2: TfrmGMV_HospitalSelector2
           SynonymChars = '<>'
           TabOrder = 2
           TabStop = True
+          Text = ''
           CheckEntireLine = True
           OnChange = LocationORComboBoxChange
           OnDblClick = LocationORComboBoxDblClick

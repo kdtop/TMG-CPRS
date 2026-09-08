@@ -11,7 +11,6 @@ inherited frmPtSelDemog: TfrmPtSelDemog
   OnShow = FormShow
   ExplicitWidth = 169
   ExplicitHeight = 193
-  PixelsPerInch = 96
   TextHeight = 13
   object orapnlMain: TORAutoPanel [0]
     Left = 0
@@ -34,6 +33,8 @@ inherited frmPtSelDemog: TfrmPtSelDemog
       TabOrder = 12
       Visible = False
       WantReturns = False
+      StyleElements = []
+      Caption = ''
     end
     object lblPtName: TStaticText
       Tag = 2
@@ -42,13 +43,17 @@ inherited frmPtSelDemog: TfrmPtSelDemog
       Width = 166
       Height = 17
       Caption = 'Winchester,Charles Emerson'
+      Color = clBtnFace
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentColor = False
       ParentFont = False
       TabOrder = 11
+      Transparent = False
+      StyleElements = []
     end
     object lblSSN: TStaticText
       Tag = 1
@@ -108,7 +113,7 @@ inherited frmPtSelDemog: TfrmPtSelDemog
       Tag = 2
       Left = 1
       Top = 75
-      Width = 116
+      Width = 118
       Height = 17
       Caption = 'Service Connected 50%'
       TabOrder = 6

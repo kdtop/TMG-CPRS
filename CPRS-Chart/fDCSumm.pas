@@ -614,12 +614,14 @@ begin
     SaveCurrentSumm(Saved);
     if not Saved then Exit;
     LoadSumms;
-    with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
   end;
   if tvSumms.Selected = nil then exit;
   AParentID := frmPrintList.SelectParentFromList(tvSumms,CT_DCSUMM);
   if AParentID = '' then exit;
-  with tvSumms do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvSumms do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  with tvSumms do Selected := FindPieceNode(AParentID, 1, U, nil); //kt //codex 9/8/26
 end;
 
 procedure TfrmDCSumm.ClearPtData;
@@ -973,7 +975,8 @@ begin
             tvSumms.Items.BeginUpdate;
             if IsIDChild then
               begin
-                tmpNode := tvSumms.FindPieceNode(IntToStr(AnIDParent), 1, U, tvSumms.Items.GetFirstNode);
+                //kt //codex original --> tmpNode := tvSumms.FindPieceNode(IntToStr(AnIDParent), 1, U, tvSumms.Items.GetFirstNode);
+                tmpNode := tvSumms.FindPieceNode(IntToStr(AnIDParent), 1, U, nil); //kt //codex 9/8/26
                 tmpNode.ImageIndex := IMG_IDNOTE_OPEN;
                 tmpNode.SelectedIndex := IMG_IDNOTE_OPEN;
                 tmpNode := tvSumms.Items.AddChildObjectFirst(tmpNode, MakeDCSummDisplayText(x), MakeDCSummTreeObject(x));
@@ -1253,7 +1256,8 @@ begin
     lstSumms.ItemIndex := EditingIndex;
     x := lstSumms.ItemID;
     uChanging := True;
-    tvSumms.Selected := tvSumms.FindPieceNode(x, 1, U, tvSumms.Items.GetFirstNode);
+    //kt //codex original --> tvSumms.Selected := tvSumms.FindPieceNode(x, 1, U, tvSumms.Items.GetFirstNode);
+    tvSumms.Selected := tvSumms.FindPieceNode(x, 1, U, nil); //kt //codex 9/8/26
     uChanging := False;
     tvSummsChange(Self, tvSumms.Selected);
     if FSilent or
@@ -1674,7 +1678,8 @@ begin
   AnIDParent := lstSumms.ItemIEN;
   if not StartNewEdit(DC_ACT_ID_ENTRY) then Exit;
   //LoadSumms;
-  with tvSumms do Selected := FindPieceNode(IntToStr(AnIDParent), U, Items.GetFirstNode);
+  //kt //codex original --> with tvSumms do Selected := FindPieceNode(IntToStr(AnIDParent), U, Items.GetFirstNode);
+  with tvSumms do Selected := FindPieceNode(IntToStr(AnIDParent), U, nil); //kt //codex 9/8/26
   // make sure a visit (time & location) is available before creating the note
   if Encounter.NeedVisit then
   begin
@@ -1700,7 +1705,8 @@ begin
   ASummID := lstSumms.ItemID;
   if not StartNewEdit(DC_ACT_ADDENDUM) then Exit;
   //LoadSumms;
-  with tvSumms do Selected := FindPieceNode(ASummID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvSumms do Selected := FindPieceNode(ASummID, 1, U, Items.GetFirstNode);
+  with tvSumms do Selected := FindPieceNode(ASummID, 1, U, nil); //kt //codex 9/8/26
   if lstSumms.ItemIndex = EditingIndex then
   begin
     InfoBox(TX_ADDEND_NO, TX_ADDEND_MK, MB_OK);
@@ -1735,7 +1741,8 @@ begin
     SaveCurrentSumm(Saved);
     if not Saved then Exit;
     LoadSumms;
-    with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
   end;
   if not CanBeAttached(DocTreeData(tvSumms.Selected)^.DocID, WhyNot) then
     begin
@@ -1753,7 +1760,8 @@ begin
   if DetachEntryFromParent(DocID, WhyNot) then
     begin
       LoadSumms;
-      with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
       if tvSumms.Selected <> nil then tvSumms.Selected.Expand(False);
     end
   else
@@ -1905,7 +1913,8 @@ begin
   ASummID := lstSumms.ItemID;
   if not StartNewEdit(DC_ACT_EDIT_SUMM) then Exit;
   //LoadSumms;
-  with tvSumms do Selected := FindPieceNode(ASummID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvSumms do Selected := FindPieceNode(ASummID, 1, U, Items.GetFirstNode);
+  with tvSumms do Selected := FindPieceNode(ASummID, 1, U, nil); //kt //codex 9/8/26
   ActOnDCDocument(ActionSts, lstSumms.ItemIEN, 'EDIT RECORD');
   if not ActionSts.Success then
   begin
@@ -1931,7 +1940,8 @@ begin
       //if Saved then
         begin
           LoadSumms;
-          with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
        end;
     end
     else InfoBox(TX_NO_NOTE, TX_SAVE_NOTE, MB_OK or MB_ICONWARNING);
@@ -2045,7 +2055,8 @@ begin
   //with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);  //v22.12 - RV
   with tvSumms do                                                                  //v22.12 - RV
   begin                                                                            //v22.12 - RV
-    Selected := FindPieceNode(FLastSummID, U, Items.GetFirstNode);                 //v22.12 - RV
+    //kt //codex original --> Selected := FindPieceNode(FLastSummID, U, Items.GetFirstNode);                 //v22.12 - RV
+    Selected := FindPieceNode(FLastSummID, U, nil);                 //v22.12 - RV //kt //codex 9/8/26
     if Selected <> nil then tvSummsChange(Self, Selected);                         //v22.12 - RV
   end;                                                                             //v22.12 - RV
 end;
@@ -2138,7 +2149,8 @@ begin
   if (AnIndex = lstSumms.ItemIndex) and (not frmFrame.ContextChanging) then
     begin
       LoadSumms;
-      with tvSumms do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+      //kt //codex original --> with tvSumms do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+      with tvSumms do Selected := FindPieceNode(IntToStr(IEN), U, nil); //kt //codex 9/8/26
     end;
 end;
 
@@ -2427,7 +2439,8 @@ begin
       SaveCurrentSumm(Saved);
       if not Saved then Exit;
       LoadSumms;
-      with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
     end;
   x := CanChangeCosigner(lstSumms.ItemIEN);
   ActOnDocument(ActionSts, lstSumms.ItemIEN, 'IDENTIFY SIGNERS');
@@ -2673,7 +2686,7 @@ begin
   SetDisplayToHTMLvsText(Mode,FEditDCSumm.Lines);
   if not Quiet then begin
     if uTMGOptions.ReadBool(DEFAULT_HTML_EDIT_MODE,FALSE) <> HTMLEditMode then begin
-      if MessageDlg('Start new notes in '+HTML_MODE_S[HTMLEditMode]+' TEXT by default?',mtConfirmation,[mbYES,mbNO],0) = mrYES then begin
+      if MessageDlg('Start new notes in '+string(HTML_MODE_S[HTMLEditMode])+' TEXT by default?',mtConfirmation,[mbYES,mbNO],0) = mrYES then begin //kt //codex 8/30/26
         fOptionsNotes.SetDefaultEditHTMLMode(HTMLEditMode);
       end;
     end;
@@ -3531,13 +3544,15 @@ begin
     SaveCurrentSumm(Saved);
     if not Saved then Exit;
     LoadSumms;
-    with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+    with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
   end;
   if tvSumms.Selected = nil then exit;
   AChildNode := TORTreeNode(tvSumms.Selected);
   AParentID := SelectParentNodeFromList(tvSumms);
   if AParentID = '' then exit;
-  with tvSumms do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvSumms do Selected := FindPieceNode(AParentID, 1, U, Items.GetFirstNode);
+  with tvSumms do Selected := FindPieceNode(AParentID, 1, U, nil); //kt //codex 9/8/26
   DoAttachIDChild(AChildNode, TORTreeNode(tvSumms.Selected));
 end;
 
@@ -3576,7 +3591,8 @@ begin
           if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
             begin
               LoadSumms;
-              with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+              //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+              with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
               if tvSumms.Selected <> nil then tvSumms.Selected.Expand(False);
             end
           else
@@ -3595,7 +3611,8 @@ begin
       if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
         begin
           LoadSumms;
-          with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          //kt //codex original --> with tvSumms do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          with tvSumms do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
           if tvSumms.Selected <> nil then tvSumms.Selected.Expand(False);
         end
       else
@@ -4108,7 +4125,7 @@ var
    ImageFName : string;
 begin
   ImageFName := GetInsertImgHTMLName(FName);
-  HTMLEditor.InsertHTMLAtCaret(ImageFName+#13#10);
+    HTMLEditor.InsertHTMLAtCaret(ImageFName+#13#10); //kt //codex 8/30/26
 end;
 
 procedure TfrmDCSumm.mnuAddNewImageClick(Sender: TObject);
@@ -4170,7 +4187,7 @@ begin
   inherited;
   oneImage :=  SelectExistingImageClick();
   if oneImage <> '' then begin
-    HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10);
+    HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10); //kt //codex 8/30/26
   end;
 end;
 

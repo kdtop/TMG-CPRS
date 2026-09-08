@@ -493,7 +493,7 @@ begin
   result := True;
   if (FSaveAndCloseTriggered) and (not chkSavewosignature.checked) then begin
     if (chkCopyToClipboard.visible=True)and(chkCopyToClipboard.Checked=True) then    //11/2/23
-        CopyHTMLToClipboard('',HtmlEditor.HTMLText);
+        CopyHTMLToClipboard('', HtmlEditor.HTMLText); //kt //codex 8/30/26
     if (FAddCosigner = True) or (NotifyOK=True) then begin      //Added NotifyOK  7/9/24
       AddlSigners := TStringList.create();
       AddlUser := sCallV('TMG GET USER FROM MGR NAME',[cmbUsers.Text]);
@@ -675,7 +675,7 @@ begin
         HTML := TmpBoilerPlate.Text;
         if not uHTMLTools.TextIsHTML(HTML) then HTML := Text2HTML(HTML);
         HTML := '<div>'+HTML+'</div>';
-        HTMLEditor.InsertHTMLAtCaret(HTML);
+        HTMLEditor.InsertHTMLAtCaret(HTML); //kt //codex 8/30/26
         Application.ProcessMessages;
         UpdateNoteAuthor(DocInfo, FEditNote);
         UpdateNoteTitleDisplay();
@@ -1038,7 +1038,7 @@ begin
 end;
 
 procedure TfrmSingleNote.HandleInsertDate(Sender: TObject);  //kt
-begin inherited; HTMLEditor.InsertHTMLAtCaret(datetostr(date)); end;
+begin inherited; HTMLEditor.InsertHTMLAtCaret(datetostr(date)); end; //kt //codex 8/30/26
 
 procedure TfrmSingleNote.btnBoldClick(Sender: TObject);
 begin inherited; HTMLEditor.ToggleBold; end;
@@ -1053,7 +1053,7 @@ procedure TfrmSingleNote.btnCarryFwdClick(Sender: TObject);
 var HTML:string;
 begin
   HTML := '[CARRY FORWARD TOPICS]<br><br><br><br>[END OF CARRY FORWARD TOPICS]';
-  HTMLEditor.InsertHTMLAtCaret(HTML);
+  HTMLEditor.InsertHTMLAtCaret(HTML); //kt //codex 8/30/26
   HTMLEditor.SetFocus;
 end;
 
@@ -1383,9 +1383,9 @@ begin  //Initialize()
   HTMLEditor.MoveCaretToEnd;
   if self.NotifyOK then begin
     if FMode = snmLab then begin
-      HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.');
+      HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.'); //kt //codex 8/30/26
     end else if FMode= snmReport then begin
-      HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.');
+      HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.'); //kt //codex 8/30/26
     end;
   end;
   if FMode=snmLab then UpdateButtons;
@@ -1438,7 +1438,7 @@ begin
       TableHTML := StringReplace(TableHTML, '</pre>','', [rfReplaceAll]);
     end;
   end; //case
-  if TableHTML <> '' then HTMLEditor.InsertHTMLAtCaret(TableHTML);
+  if TableHTML <> '' then HTMLEditor.InsertHTMLAtCaret(TableHTML); //kt //codex 8/30/26
   HTMLEditor.SetFocus;
   HTMLEditor.SetFocusToDoc;
 end;
@@ -1454,7 +1454,7 @@ begin
     snmLab: begin
       //for labs: copy abnormal lab results
       TableHTML := frmLabs.GetAbnormalCurrentLabsHTMLTable;
-      HTMLEditor.InsertHTMLAtCaret(TableHTML);
+      HTMLEditor.InsertHTMLAtCaret(TableHTML); //kt //codex 8/30/26
       HTMLEditor.SetFocus;
       HTMLEditor.SetFocusToDoc;
     end;
@@ -1474,7 +1474,7 @@ begin
     snmLab: begin
       //for labs: copy notes
       TableHTML := frmLabs.GetCurrentLabNotesHTMLTable;
-      HTMLEditor.InsertHTMLAtCaret(TableHTML);
+      HTMLEditor.InsertHTMLAtCaret(TableHTML); //kt //codex 8/30/26
       HTMLEditor.SetFocus;
       HTMLEditor.SetFocusToDoc;
     end;
@@ -1494,7 +1494,7 @@ begin
     snmLab: begin
       //for labs: copy notes
       TableHTML := frmLabs.GetPickedLabNotesHTMLTable;
-      if TableHTML <> '' then HTMLEditor.InsertHTMLAtCaret(TableHTML);
+      if TableHTML <> '' then HTMLEditor.InsertHTMLAtCaret(TableHTML); //kt //codex 8/30/26
       HTMLEditor.SetFocus;
       HTMLEditor.SetFocusToDoc;
     end;

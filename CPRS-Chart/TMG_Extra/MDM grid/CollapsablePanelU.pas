@@ -41,13 +41,13 @@ type
                        AUnitBefore: TCollapsablePanel;
                        AOpenMode : TOpenMode;
                        ADisplayPanel : TPanel = nil;
-                       ACommonLog : TStrings = nil); overload;
+                       ACommonLog : TStrings = nil); reintroduce; overload; //kt //codex 8/30/26
     constructor Create(AName : string;
                        ParentPanel : TWinControl;
                        Location : TPoint;
                        AOpenMode : TOpenMode;
                        ADisplayPanel : TPanel = nil;
-                       ACommonLog : TStrings = nil); overload;
+                       ACommonLog : TStrings = nil); reintroduce; overload; //kt //codex 8/30/26
     destructor Destroy(); override;
     procedure Initialize(InitState : TOpenState = OpenPanel);
     procedure HandleUnitBeforeResized(Sender: TCollapsablePanel; NewTop, NewLeft : integer);

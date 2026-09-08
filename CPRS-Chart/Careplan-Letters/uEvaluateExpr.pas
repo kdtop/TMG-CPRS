@@ -328,7 +328,8 @@ implementation
     //'-543' is numberic, but '-Buy More Chips' is text.
     //  so look at character after '-' when found.
     if (S[i] = '-') and (length(s) > 1) then inc(i);
-    Result := not (S[i] in ['0'..'9','(','-']);
+    //kt //codex original --> Result := not (S[i] in ['0'..'9','(','-']);
+    Result := not CharInSet(S[i], ['0'..'9','(','-']); //kt //codex 8/30/26
   end;
 
   function JustNumbers(S : string) : string;
@@ -348,7 +349,8 @@ implementation
         if DecimalFound then break;
         Result := Result + '.';
         DecimalFound := true;
-      end else if S[i] in ['0'..'9'] then begin
+      //kt //codex original --> end else if S[i] in ['0'..'9'] then begin
+      end else if CharInSet(S[i], ['0'..'9']) then begin //kt //codex 8/30/26
         Result := Result + S[i];
       end else break;
     end;
@@ -682,7 +684,8 @@ implementation
     SavedExpr := Expr;
     tempExpr := UpperCase(Expr);
     for i := 1 to length(Expr) do begin
-      if tempExpr[i] in ['A'..'Z','0'..'9','_','.','-'] then begin
+      //kt //codex original --> if tempExpr[i] in ['A'..'Z','0'..'9','_','.','-'] then begin
+      if CharInSet(tempExpr[i], ['A'..'Z','0'..'9','_','.','-']) then begin //kt //codex 8/30/26
         Result := Result + tempExpr[i];
       end else if Expr[i] = '(' then begin
         //kt //codex original --> Expr := MidStr(Expr,i,999999);
@@ -714,7 +717,8 @@ implementation
     EndIndex := 0;
     Result := '';
     for i := 1 to length(Expr) do begin
-      if (Expr[i] in ['0'..'9','.']) or ((Expr[i] = '-') and (i = 1)) then begin
+      //kt //codex original --> if (Expr[i] in ['0'..'9','.']) or ((Expr[i] = '-') and (i = 1)) then begin
+      if CharInSet(Expr[i], ['0'..'9','.']) or ((Expr[i] = '-') and (i = 1)) then begin //kt //codex 8/30/26
         Result := Result + Expr[i];
         EndIndex := i;
       end else begin
@@ -876,7 +880,8 @@ implementation
         end else begin
           BExpr1 := SubExpr;  //kt
         end;
-      end else if Expr[i] in ['&','!','''','>','<','=','A','O','N'] then begin
+      //kt //codex original --> end else if Expr[i] in ['&','!','''','>','<','=','A','O','N'] then begin
+      end else if CharInSet(Expr[i], ['&','!','''','>','<','=','A','O','N']) then begin //kt //codex 8/30/26
         break;
       end else begin
         BExpr1 := BExpr1 + Expr[i];
@@ -904,7 +909,8 @@ implementation
         Oper := GetWordOper('OR', Expr, i, OperDone, ErrStr); if ErrStr <> '' then exit;
       end else if Expr[i]='N' then begin
         Oper := GetWordOper('NOT', Expr, i, OperDone, ErrStr);if ErrStr <> '' then exit;
-      end else if Expr[i] in ['&','!','''','>','<','='] then begin
+      //kt //codex original --> end else if Expr[i] in ['&','!','''','>','<','='] then begin
+      end else if CharInSet(Expr[i], ['&','!','''','>','<','=']) then begin //kt //codex 8/30/26
         Oper := Oper + Expr[i];
       end else OperDone := true;
       if not OperDone then inc(i);

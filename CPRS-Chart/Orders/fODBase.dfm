@@ -1,8 +1,6 @@
 inherited frmODBase: TfrmODBase
   Left = 277
   Top = 179
-  Width = 528
-  Height = 275
   HorzScrollBar.Range = 500
   HorzScrollBar.Tracking = True
   HorzScrollBar.Visible = True
@@ -16,12 +14,9 @@ inherited frmODBase: TfrmODBase
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
-  ExplicitWidth = 528
-  ExplicitHeight = 275
   DesignSize = (
-    512
-    237)
-  PixelsPerInch = 96
+    427
+    273)
   TextHeight = 13
   object memOrder: TCaptionMemo [0]
     Left = 6
@@ -81,7 +76,7 @@ inherited frmODBase: TfrmODBase
       Width = 332
       Height = 32
       Color = clInfoBk
-      Font.Charset = DEFAULT_CHARSET
+      Font.Charset = ANSI_CHARSET
       Font.Color = clInfoText
       Font.Height = -11
       Font.Name = 'MS Sans Serif'

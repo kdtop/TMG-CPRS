@@ -800,10 +800,10 @@ implementation
     RPCBrokerV.Param[0].Mult['"DATETIME"'] := '7^NOW'; {date/time image collected}
     RPCBrokerV.Param[0].Mult['"DATETIMEPROC"'] := '15^' +  Info.ImageDateTime; {Date/Time of Procedure}
     if Info.ProcName <> '' then
-      RPCBrokerV.Param[0].Mult['"PROC"'] := '6^' + Info.ProcName; {procedure}
+      RPCBrokerV.Param[0].Mult['"PROC"'] := '6^' + string(Info.ProcName); {procedure} //kt //codex 8/30/26
     RPCBrokerV.Param[0].Mult['"DESC"'] := '10^(Hard coded Short Description)'; {image description}
     if Info.ShortDesc <> '' then
-      RPCBrokerV.Param[0].Mult['"DESC"'] := '10^' + Info.ShortDesc; {image description}
+      RPCBrokerV.Param[0].Mult['"DESC"'] := '10^' + string(Info.ShortDesc); {image description} //kt //codex 8/30/26
     RPCBrokerV.Param[0].Mult['"DUZ"'] := '8^' + IntToStr(Info.UploadDUZ); {Duz}
     //The field (#14) below is used for images that are part of a group,
     //for example a CT exam might contain 30 images.  This field
@@ -814,7 +814,7 @@ implementation
     //object.
     //RPCBrokerV.Param[0].Mult['"GROUP"'] := '14^' + group;
     RPCBrokerV.Param[0].Mult['"OBJTYPE"'] := '3^' + IntToStr(Info.ObjectType);
-    RPCBrokerV.Param[0].Mult['"FileExt"'] := 'EXT^' + Info.Extension;
+    RPCBrokerV.Param[0].Mult['"FileExt"'] := 'EXT^' + string(Info.Extension); //kt //codex 8/30/26
     if assigned(Info.pLongDesc) then begin
       for i := 0 to Info.pLongDesc.Count - 1 do begin
         index := IntToStr(i);
@@ -922,7 +922,8 @@ implementation
 
     //Load up info class/record
     //kt //codex original --> Info.ShortDesc := MidStr(ShortDescEdit.Text,1,60);
-    Info.ShortDesc := Copy(ShortDescEdit.Text,1,60); //kt //codex 8/3/26
+    //kt //codex original -->     Info.ShortDesc := Copy(ShortDescEdit.Text,1,60); //kt //codex 8/3/26
+    Info.ShortDesc := ShortString(Copy(ShortDescEdit.Text,1,60)); //kt //codex 8/30/26
     if Info.ShortDesc = DefShortDesc then Info.ShortDesc := ' ';
     Info.UploadDUZ := User.DUZ;
     if LongDescMemo.Lines.Count>0 then begin
@@ -950,9 +951,11 @@ implementation
 
     for i:= 0 to FilesToUploadList.Items.Count-1 do begin
       Info.ImageFPathName := FilesToUploadList.Items.Strings[i];
-      Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
+      //kt //codex original -->       Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
       //kt //codex original --> Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
-      Info.Extension := Copy(Info.Extension,2,99); //remove '.'  //changed 17 --> 99 //kt //codex 8/3/26
+      //kt //codex original -->       Info.Extension := Copy(Info.Extension,2,99); //remove '.'  //changed 17 --> 99 //kt //codex 8/3/26
+      //kt //codex original -->       Info.Extension := ShortString(Copy(Info.Extension,2,16)); //remove '.'; Extension is String[16] //kt //codex 8/30/26
+      Info.Extension := ShortString(Copy(ExtractFileExt(Info.ImageFPathName),2,16)); //remove '.'; Extension is String[16] //kt //codex 8/30/26
       if UploadFile(Info,MoveCheckBox.Checked) then begin   //Upload function passes back filename info in Info class
         FUploadedImagesList.Add(Info.ServerFName);
         FUploadedImagesIENList.Add(IntToStr(Info.IMAGEIEN)); //1:1 relief between two lists
@@ -1004,9 +1007,11 @@ implementation
 
     //for i:= 0 to FilesToUploadList.Items.Count-1 do begin
     Info.ImageFPathName := FilePathName;
-    Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
+    //kt //codex original -->     Info.Extension := ExtractFileExt(Info.ImageFPathName); //includes '.'
     //kt //codex original --> Info.Extension := MidStr(Info.Extension,2,99); //remove '.'  //changed 17 --> 99
-    Info.Extension := Copy(Info.Extension,2,99); //remove '.'  //changed 17 --> 99 //kt //codex 8/3/26
+    //kt //codex original -->     Info.Extension := Copy(Info.Extension,2,99); //remove '.'  //changed 17 --> 99 //kt //codex 8/3/26
+    //kt //codex original -->     Info.Extension := ShortString(Copy(Info.Extension,2,16)); //remove '.'; Extension is String[16] //kt //codex 8/30/26
+    Info.Extension := ShortString(Copy(ExtractFileExt(Info.ImageFPathName),2,16)); //remove '.'; Extension is String[16] //kt //codex 8/30/26
     if frmImageUpload.UploadFile(Info,False) then begin   //Upload function passes back filename info in Info class
        result := Info.ServerFName;
     end;
@@ -1495,9 +1500,11 @@ implementation
         AutoUploadNote.ImageInfo.UploadDateTime := 'NOW';
         AutoUploadNote.ImageInfo.DFN := AutoUploadNote.Patient.DFN;
         AutoUploadNote.ImageInfo.ImageFPathName := FilePaths.Strings[i];
-        AutoUploadNote.ImageInfo.Extension := ExtractFileExt(AutoUploadNote.ImageInfo.ImageFPathName); //includes '.'
+        //kt //codex original -->         AutoUploadNote.ImageInfo.Extension := ExtractFileExt(AutoUploadNote.ImageInfo.ImageFPathName); //includes '.'
         //kt //codex original --> AutoUploadNote.ImageInfo.Extension := MidStr(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.'
-        AutoUploadNote.ImageInfo.Extension := Copy(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.' //kt //codex 8/3/26
+        //kt //codex original -->         AutoUploadNote.ImageInfo.Extension := Copy(AutoUploadNote.ImageInfo.Extension,2,17); //remove '.' //kt //codex 8/3/26
+        //kt //codex original -->         AutoUploadNote.ImageInfo.Extension := ShortString(Copy(AutoUploadNote.ImageInfo.Extension,2,16)); //remove '.'; Extension is String[16] //kt //codex 8/30/26
+        AutoUploadNote.ImageInfo.Extension := ShortString(Copy(ExtractFileExt(AutoUploadNote.ImageInfo.ImageFPathName),2,16)); //remove '.'; Extension is String[16] //kt //codex 8/30/26
         if not UploadFile(AutoUploadNote.ImageInfo, true, ErrLog) then begin   //Upload function passes back filename info in Info class
           Result := 'ERROR UPLOADING IMAGE FILE';
         end;    
@@ -1726,7 +1733,8 @@ implementation
         pFInfo.MetaFileName := MetaFilename;
         pFInfo.FPath := FoundFile;
         pFInfo.SrcRec := Found;
-        pFInfo.STimeStamp := FloatToStr(FileDateToDateTime(Found.Time));
+        //kt //codex original -->         pFInfo.STimeStamp := FloatToStr(FileDateToDateTime(Found.Time));
+        pFInfo.STimeStamp := FloatToStr(Found.TimeStamp); //kt //codex 8/30/26
         pFInfo.MetaFileExists := FileExists(MetaFilename);
         pFInfo.SBarCode := '';  //default to empty.
         pFInfo.BatchCount := 0;        
@@ -1760,7 +1768,8 @@ implementation
       for i := 0 to AllFiles.Count-1 do begin
         pFInfo := TFileInfo(AllFiles.Objects[i]);
         if pFInfo.MetaFileExists = false then continue;
-        CurFileTimeStamp := FileDateToDateTime(pFInfo.SrcRec.Time);
+        //kt //codex original -->         CurFileTimeStamp := FileDateToDateTime(pFInfo.SrcRec.Time);
+        CurFileTimeStamp := pFInfo.SrcRec.TimeStamp; //kt //codex 8/30/26
         DeltaMinutes := DeltaMins(CurFileTimeStamp,LastFileTimeStamp);
         // *.barcode.txt file exists at this point
         if pFInfo.SBarCode <> '' then begin  //Found a new barcode

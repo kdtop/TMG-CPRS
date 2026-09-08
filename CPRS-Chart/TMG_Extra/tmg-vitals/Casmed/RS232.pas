@@ -208,7 +208,8 @@ begin
   Purge;
   StrPCopy(charCommandBuffer,Command);  //  Null terminated strings...
   WriteFile(FComPortHandle, charCommandBuffer, Length(Command), BytesWritten, nil);
-  result := (BytesWritten = Length(Command));
+  //kt //codex original -->   result := (BytesWritten = Length(Command));
+  result := (BytesWritten = DWORD(Length(Command))); //kt //codex 8/30/26
 end;
 //******************************************************************************
 procedure TComPort.Close;

@@ -1,4 +1,6 @@
 unit fLabs;
+
+{$WARN SYMBOL_PLATFORM OFF} // VCL/Windows-specific file compatibility is intentional. //kt //codex 8/30/26
  (*
  NOTE: The original version of this file may be obtained freely from the VA.
 
@@ -416,7 +418,7 @@ var
   uRemoteCount: Integer;
   uHTMLDoc: string;
   uReportRPC: string;
-  uHTMLPatient: ANSIstring;
+  uHTMLPatient: string;  //kt 8/30/26, was AnsiString;
   uEmptyImageList: TImageList;
   uRptID: String;
   uDirect: String;
@@ -1475,179 +1477,179 @@ begin
       else
         begin
           Screen.Cursor := crDefault;
-case StrToInt(Piece(uRptID,':',1)) of
-  21: begin                // Cumulative
-       lstHeaders.Clear;
-       memLab.Clear;
-       uLabLocalReportData.Clear;
-       uLabRemoteReportData.Clear;
-       StatusText('Retrieving data for cumulative report...');
-       GoRemoteOld(uLabRemoteReportData,0,2,'',uReportRPC,'',IntToStr(daysback),'',date1,date2);
-       TabControl1.OnChange(nil);
-       Cumulative(uLabLocalReportData, Patient.DFN, daysback, date1, date2, uReportRPC);
-       if uLabLocalReportData.Count > 0 then
-         begin
-           TabControl1.OnChange(nil);
-           if lstHeaders.Items.Count > 0 then lstHeaders.ItemIndex := 0;
-         end;
-       memLab.Lines.Insert(0,' ');
-       memLab.Lines.Delete(0);
-     end;
-  3: begin            // Interim
-       memLab.Clear;
-       uLabLocalReportData.Clear;
-       uLabRemoteReportData.Clear;
-       StatusText('Retrieving data for interim report...');
-       GoRemoteOld(uLabRemoteReportData,0,3,'',uReportRPC,'','','',date1,date2);
-       TabControl1.OnChange(nil);
-       Interim(uLabLocalReportData, Patient.DFN, date1, date2, uReportRPC);
-       if uLabLocalReportData.Count < 1 then
-         uLabLocalReportData.Add('<No results for this date range.>');
-       if TabControl1.TabIndex < 1 then
-         QuickCopy(uLabLocalReportData,memLab);
-       memLab.Lines.Insert(0,' ');
-       memLab.Lines.Delete(0);
-       memLab.SelStart := 0;
-     end;
-  4: begin            // Interim for Selected Tests
-       memLab.Clear;
-       uLabLocalReportData.Clear;
-       uLabRemoteReportData.Clear;
-       try
-         StatusText('Retrieving data for selected tests...');
-         FastAssign(InterimSelect(Patient.DFN, date1, date2, lstTests.Items), uLabLocalReportData);
-         if uLabLocalReportData.Count > 0 then
-           QuickCopy(uLabLocalReportData,memLab)
-         else
-           memLab.Lines.Add('<No results for selected tests in this date range.>');
-         memLab.SelStart := 0;
-       finally
-         //tmpList.Free;
-       end;
-     end;
-  5: begin            // Worksheet
-       chtChart.BottomAxis.Automatic := true;
-       chkZoom.Checked := false;
-       chkAbnormals.Checked := false;
-       memLab.Clear;
-       uLabLocalReportData.Clear;
-       uLabRemoteReportData.Clear;
-       grdLab.Align := alClient;
-       StatusText('Retrieving data for worksheet...');
-       FastAssign(Worksheet(Patient.DFN, date1, date2,
-         Piece(lblSpecimen.Caption, '^', 1), lstTests.Items), tmpGrid);
-       if ragHorV.ItemIndex = 0 then
-         HGrid(tmpGrid)
-       else
-         VGrid(tmpGrid);
-       GraphList(tmpGrid);
-       GridComments(tmpGrid);
-       ragCorGClick(self);
-     end;
-  6: begin            // Graph
-       if not uGraphingActivated then
-       begin
-         chtChart.BottomAxis.Automatic := true;
-         chkGraphZoom.Checked := false;
-         chkGraphZoomClick(self);
-         memLab.Clear;
-         uLabLocalReportData.Clear;
-         uLabRemoteReportData.Clear;
-         tmpList := TStringList.Create;
-         try
-           StatusText('Retrieving data for graph...');
-           FastAssign(GetChart(Patient.DFN, date1, date2,
-             Piece(lblSpecimen.Caption, '^', 1),
-             Piece(lblSingleTest.Caption, '^', 1)), tmpList);
-           if tmpList.Count > 1 then
-           begin
-             chtChart.Visible := true;
-             GraphChart(lblSingleTest.Caption, tmpList);
-             chtChart.ZoomPercent(ZOOM_PERCENT);
-             for i := strtoint(Piece(tmpList[0], '^', 1)) + 1 to tmpList.Count - 1
-               do memLab.Lines.Add(tmpList[i]);
-             if memLab.Lines.Count < 2 then
-               memLab.Lines.Add('<No comments on specimens.>');
-             memLab.SelStart := 0;
-             lblGraph.Visible := false;
-           end
-           else
-           begin
-             lblGraph.Left := chtChart.Left + ((chtChart.Width - lblGraph.Width) div 2);
-             lblGraph.Top := 2;
-             lblGraph.Visible := true;
-             if Piece(lblSpecimen.Caption, '^', 1) = '0' then
-               pnlChart.Caption := '<No results can be graphed for ' +
-                 Piece(lblSingleTest.Caption, '^', 2) + ' in this date range.> '
-                 + 'Results may be available, but cannot be graphed. Please try an alternate view.'
-             else
-               pnlChart.Caption := '<No results can be graphed for ' +
-                 Piece(lblSingleTest.Caption, '^', 2)
-                 + ' (' + Piece(lblSpecimen.Caption, '^', 2) +
-                   ') in this date range.> '
-                 + 'Results may be available, but cannot be graphed. Please try an alternate view.';
-             chtChart.Visible := false;
-           end;
-         finally
-           tmpList.Free;
-         end;
-       end;
-     end;
-  9: begin            // Micro
-       memLab.Clear;
-       uLabLocalReportData.Clear;
-       uLabRemoteReportData.Clear;
-       StatusText('Retrieving microbiology data...');
-       GoRemoteOld(uLabRemoteReportData,0,4,'',uReportRPC,'','','',date1,date2);
-       TabControl1.OnChange(nil);
-       Micro(uLabLocalReportData, Patient.DFN, date1, date2, uReportRPC);
-       if uLabLocalReportData.Count < 1 then
-         uLabLocalReportData.Add('<No microbiology results for this date range.>');
-       if TabControl1.TabIndex < 1 then
-         QuickCopy(uLabLocalReportData,memLab);
-       memLab.Lines.Insert(0,' ');
-       memLab.Lines.Delete(0);
-       memLab.SelStart := 0;
-     end;
-  10: begin           // Lab Status
-       memLab.Clear;
-       uLabLocalReportData.Clear;
-       uLabRemoteReportData.Clear;
-       StatusText('Retrieving lab status data...');
-       GoRemoteOld(uLabRemoteReportData,9,1,'',uReportRPC,'',IntToStr(daysback),'',date1,date2);
-       TabControl1.OnChange(nil);
-       Reports(uLabLocalReportData,Patient.DFN, 'L:' + '9', '', IntToStr(daysback),'',
-         date1, date2, uReportRPC);
-       if uLabLocalReportData.Count < 1 then
-         uLabLocalReportData.Add('<No laboratory orders for this date range.>');
-       if TabControl1.TabIndex < 1 then
-         QuickCopy(uLabLocalReportData,memLab);
-       memLab.Lines.Insert(0,' ');
-       memLab.Lines.Delete(0);
-       memLab.SelStart := 0;
-      end;
-  else begin          //Anything Else
-         lstHeaders.Clear;
-         memLab.Clear;
-         uLabLocalReportData.Clear;
-         uLabRemoteReportData.Clear;
-         StatusText('Retrieving lab data...');
-         GoRemoteOld(uLabRemoteReportData, 1, 1, '', uReportRPC, '', IntToStr(daysback), '', date1, date2);
-         //GoRemoteOld(uLabRemoteReportData, StrToInt(Piece(uRptID,'^',1)), 1, '', uReportRPC, '', IntToStr(daysback), '', date1, date2);
-         TabControl1.OnChange(nil);
-         Reports(uLabLocalReportData,Patient.DFN, 'L:' + Piece(uRptID,'^',1), '',
-           IntToStr(daysback), '', date1, date2, uReportRPC);
-         if uLabLocalReportData.Count < 1 then
-           uLabLocalReportData.Add('<No data for this date range.>');
-         if TabControl1.TabIndex < 1 then
-           QuickCopy(uLabLocalReportData,memLab);
-         memLab.Lines.Insert(0,' ');
-         memLab.Lines.Delete(0);
-         memLab.SelStart := 0;
-       end;
-  end;
-        end;
-    end;
+          case StrToInt(Piece(uRptID,':',1)) of
+          21: begin                // Cumulative
+               lstHeaders.Clear;
+               memLab.Clear;
+               uLabLocalReportData.Clear;
+               uLabRemoteReportData.Clear;
+               StatusText('Retrieving data for cumulative report...');
+               GoRemoteOld(uLabRemoteReportData,0,2,'',uReportRPC,'',IntToStr(daysback),'',date1,date2);
+               TabControl1.OnChange(nil);
+               Cumulative(uLabLocalReportData, Patient.DFN, daysback, date1, date2, uReportRPC);
+               if uLabLocalReportData.Count > 0 then
+                 begin
+                   TabControl1.OnChange(nil);
+                   if lstHeaders.Items.Count > 0 then lstHeaders.ItemIndex := 0;
+                 end;
+               memLab.Lines.Insert(0,' ');
+               memLab.Lines.Delete(0);
+             end;
+          3: begin            // Interim
+               memLab.Clear;
+               uLabLocalReportData.Clear;
+               uLabRemoteReportData.Clear;
+               StatusText('Retrieving data for interim report...');
+               GoRemoteOld(uLabRemoteReportData,0,3,'',uReportRPC,'','','',date1,date2);
+               TabControl1.OnChange(nil);
+               Interim(uLabLocalReportData, Patient.DFN, date1, date2, uReportRPC);
+               if uLabLocalReportData.Count < 1 then
+                 uLabLocalReportData.Add('<No results for this date range.>');
+               if TabControl1.TabIndex < 1 then
+                 QuickCopy(uLabLocalReportData,memLab);
+               memLab.Lines.Insert(0,' ');
+               memLab.Lines.Delete(0);
+               memLab.SelStart := 0;
+             end;
+          4: begin            // Interim for Selected Tests
+               memLab.Clear;
+               uLabLocalReportData.Clear;
+               uLabRemoteReportData.Clear;
+               try
+                 StatusText('Retrieving data for selected tests...');
+                 FastAssign(InterimSelect(Patient.DFN, date1, date2, lstTests.Items), uLabLocalReportData);
+                 if uLabLocalReportData.Count > 0 then
+                   QuickCopy(uLabLocalReportData,memLab)
+                 else
+                   memLab.Lines.Add('<No results for selected tests in this date range.>');
+                 memLab.SelStart := 0;
+               finally
+                 //tmpList.Free;
+               end;
+             end;
+          5: begin            // Worksheet
+               chtChart.BottomAxis.Automatic := true;
+               chkZoom.Checked := false;
+               chkAbnormals.Checked := false;
+               memLab.Clear;
+               uLabLocalReportData.Clear;
+               uLabRemoteReportData.Clear;
+               grdLab.Align := alClient;
+               StatusText('Retrieving data for worksheet...');
+               FastAssign(Worksheet(Patient.DFN, date1, date2,
+                 Piece(lblSpecimen.Caption, '^', 1), lstTests.Items), tmpGrid);
+               if ragHorV.ItemIndex = 0 then
+                 HGrid(tmpGrid)
+               else
+                 VGrid(tmpGrid);
+               GraphList(tmpGrid);
+               GridComments(tmpGrid);
+               ragCorGClick(self);
+             end;
+          6: begin            // Graph
+               if not uGraphingActivated then
+               begin
+                 chtChart.BottomAxis.Automatic := true;
+                 chkGraphZoom.Checked := false;
+                 chkGraphZoomClick(self);
+                 memLab.Clear;
+                 uLabLocalReportData.Clear;
+                 uLabRemoteReportData.Clear;
+                 tmpList := TStringList.Create;
+                 try
+                   StatusText('Retrieving data for graph...');
+                   FastAssign(GetChart(Patient.DFN, date1, date2,
+                     Piece(lblSpecimen.Caption, '^', 1),
+                     Piece(lblSingleTest.Caption, '^', 1)), tmpList);
+                   if tmpList.Count > 1 then
+                   begin
+                     chtChart.Visible := true;
+                     GraphChart(lblSingleTest.Caption, tmpList);
+                     chtChart.ZoomPercent(ZOOM_PERCENT);
+                     for i := strtoint(Piece(tmpList[0], '^', 1)) + 1 to tmpList.Count - 1
+                       do memLab.Lines.Add(tmpList[i]);
+                     if memLab.Lines.Count < 2 then
+                       memLab.Lines.Add('<No comments on specimens.>');
+                     memLab.SelStart := 0;
+                     lblGraph.Visible := false;
+                   end
+                   else
+                   begin
+                     lblGraph.Left := chtChart.Left + ((chtChart.Width - lblGraph.Width) div 2);
+                     lblGraph.Top := 2;
+                     lblGraph.Visible := true;
+                     if Piece(lblSpecimen.Caption, '^', 1) = '0' then
+                       pnlChart.Caption := '<No results can be graphed for ' +
+                         Piece(lblSingleTest.Caption, '^', 2) + ' in this date range.> '
+                         + 'Results may be available, but cannot be graphed. Please try an alternate view.'
+                     else
+                       pnlChart.Caption := '<No results can be graphed for ' +
+                         Piece(lblSingleTest.Caption, '^', 2)
+                         + ' (' + Piece(lblSpecimen.Caption, '^', 2) +
+                           ') in this date range.> '
+                         + 'Results may be available, but cannot be graphed. Please try an alternate view.';
+                     chtChart.Visible := false;
+                   end;
+                 finally
+                   tmpList.Free;
+                 end;
+               end;
+             end;
+          9: begin            // Micro
+               memLab.Clear;
+               uLabLocalReportData.Clear;
+               uLabRemoteReportData.Clear;
+               StatusText('Retrieving microbiology data...');
+               GoRemoteOld(uLabRemoteReportData,0,4,'',uReportRPC,'','','',date1,date2);
+               TabControl1.OnChange(nil);
+               Micro(uLabLocalReportData, Patient.DFN, date1, date2, uReportRPC);
+               if uLabLocalReportData.Count < 1 then
+                 uLabLocalReportData.Add('<No microbiology results for this date range.>');
+               if TabControl1.TabIndex < 1 then
+                 QuickCopy(uLabLocalReportData,memLab);
+               memLab.Lines.Insert(0,' ');
+               memLab.Lines.Delete(0);
+               memLab.SelStart := 0;
+             end;
+          10: begin           // Lab Status
+               memLab.Clear;
+               uLabLocalReportData.Clear;
+               uLabRemoteReportData.Clear;
+               StatusText('Retrieving lab status data...');
+               GoRemoteOld(uLabRemoteReportData,9,1,'',uReportRPC,'',IntToStr(daysback),'',date1,date2);
+               TabControl1.OnChange(nil);
+               Reports(uLabLocalReportData,Patient.DFN, 'L:' + '9', '', IntToStr(daysback),'',
+                 date1, date2, uReportRPC);
+               if uLabLocalReportData.Count < 1 then
+                 uLabLocalReportData.Add('<No laboratory orders for this date range.>');
+               if TabControl1.TabIndex < 1 then
+                 QuickCopy(uLabLocalReportData,memLab);
+               memLab.Lines.Insert(0,' ');
+               memLab.Lines.Delete(0);
+               memLab.SelStart := 0;
+              end;
+          else begin          //Anything Else
+                 lstHeaders.Clear;
+                 memLab.Clear;
+                 uLabLocalReportData.Clear;
+                 uLabRemoteReportData.Clear;
+                 StatusText('Retrieving lab data...');
+                 GoRemoteOld(uLabRemoteReportData, 1, 1, '', uReportRPC, '', IntToStr(daysback), '', date1, date2);
+                 //GoRemoteOld(uLabRemoteReportData, StrToInt(Piece(uRptID,'^',1)), 1, '', uReportRPC, '', IntToStr(daysback), '', date1, date2);
+                 TabControl1.OnChange(nil);
+                 Reports(uLabLocalReportData,Patient.DFN, 'L:' + Piece(uRptID,'^',1), '',
+                   IntToStr(daysback), '', date1, date2, uReportRPC);
+                 if uLabLocalReportData.Count < 1 then
+                   uLabLocalReportData.Add('<No data for this date range.>');
+                 if TabControl1.TabIndex < 1 then
+                   QuickCopy(uLabLocalReportData,memLab);
+                 memLab.Lines.Insert(0,' ');
+                 memLab.Lines.Delete(0);
+                 memLab.SelStart := 0;
+               end;
+          end;
+                end;
+            end;
     Screen.Cursor := crDefault;
     StatusText('');
     memLab.Lines.Insert(0,' ');
@@ -5303,8 +5305,8 @@ begin
   AlertLevels.Add('1^Normal Status');
   AlertLevels.Add('2^Abnormal Status');
   //AlertLevels.Add('3^Critical Status');  to do, enable server side via parameters 
+  AlertSender := TfrmAlertSender.Create(Self);
   try
-    AlertSender := TfrmAlertSender.Create(Self);
     ResizeAnchoredFormToFont(AlertSender);
     AlertSender.Initialize(TMGSendLabAlert, Info, '', AlertLevels);
     if AlertSender.ShowModal = mrOK then begin
@@ -5330,7 +5332,7 @@ const
   RetryDelay = 500; //milliseconds
 
 var
-  LocalFNamePath, FName: AnsiString;
+  LocalFNamePath, FName: String;
   var
   (* FPath: AnsiString; *)
   ReadCount                     : Word;
@@ -5340,8 +5342,8 @@ var
   j                             : word;
   InFile                        : TFileStream;
   Buffer                        : array[0..1024] of byte;
-  OneLine                       : AnsiString;
-  RPCResult                     : AnsiString;
+  OneLine                       : AnsiString; //kt //codex 8/30/26
+  RPCResult                     : String;
   var
   (* Abort                         : boolean; *)
   frmImagePickPDF               : TfrmImagePickPDF;
@@ -5350,19 +5352,20 @@ var
 begin
   Retries := 0;
   FileOpened := False;
+  InFile := nil;
   frmImagePickPDF := TfrmImagePickPDF.Create(Self);   //free'd in OnHide  <-- no longer true
   if frmImagePickPDF.Execute then begin
-      LocalFNamePath := frmImagePickPDF.Files.Strings[0];
+    LocalFNamePath := frmImagePickPDF.Files.Strings[0];
   end else begin
-      ShowMessage('PDF picker was cancelled');
+    ShowMessage('PDF picker was cancelled');
   end;
   FName := Patient.DFN+'-'+DateTimeToFMDTStr(Now)+'.pdf';
   frmImagePickPDF.Free;
   Application.ProcessMessages;
   LocalFileSize := FileSize(LocalFNamePath);
   while (not FileOpened) and (Retries < MaxRetries) do begin
+    InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
     try
-      InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
       FileOpened := True;
     except
       on E:EFOpenError do begin
@@ -5373,9 +5376,9 @@ begin
   end;
 
   if not FileOpened then begin
-     InFile.Free;
-     ShowMessage('Error with streaming PDF to local variable');
-     exit;
+    if Assigned(InFile) then InFile.Free;
+    ShowMessage('Error with streaming PDF to local variable');
+    exit;
   end;
   RPCBrokerV.remoteprocedure := 'TMG LAB UPLOAD ONE PDF';
   RPCBrokerV.ClearParameters := true;

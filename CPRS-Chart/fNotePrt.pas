@@ -235,7 +235,7 @@ begin
     end;
     if Piece(ItemID, ';', 1) = 'WIN' then begin
       TempLines := TStringList.Create;
-      TempLines.Assign(GetFormattedMultiNotes(NotesList, ChartCopy));  //kt Get all notes concatenated into 1 long note.
+      GetFormattedMultiNotes(NotesList, ChartCopy, TempLines);  //kt Get all notes concatenated into 1 long note, output in TempLines
       ScanForSubs(TempLines);    //Added to correct Printing issue  elh
       PrintHTMLReport(TempLines, ErrMsg, Patient.Name,
                       FormatFMDateTime('mm/dd/yyyy', Patient.DOB),

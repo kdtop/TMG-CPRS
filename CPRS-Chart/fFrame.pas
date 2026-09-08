@@ -98,6 +98,7 @@ type
     mnu12pt1: TMenuItem;
     mnu10pt1: TMenuItem;
     mnu8pt: TMenuItem;
+    mnu24pt1: TMenuItem;  //kt //codex 9/3/26
     mnuHelp: TMenuItem;
     mnuHelpContents: TMenuItem;
     mnuHelpTutor: TMenuItem;
@@ -3843,6 +3844,7 @@ begin
     12: mnu12pt1.Checked := true;
     14: mnu14pt1.Checked := true;
     18: mnu18pt1.Checked := true;
+    24: mnu24pt1.Checked := true;  //kt //codex 9/3/26
   end;
 
   //Now that the form elements are resized, the pages will know what size to take.
@@ -4620,8 +4622,10 @@ procedure TfrmFrame.sbtnFontChangeClick(Sender: TObject);
 type
   TSizeMode = (smSmaller=-1, smNormal=0, smLarger=1);
 const
-  NUM_SIZES = 5;
-  ALLOWED_SIZES : array[1..NUM_SIZES] of integer = (8, 10, 12, 14, 18);
+  //kt //codex original --> NUM_SIZES = 5;
+  NUM_SIZES = 6;  //kt //codex 9/3/26
+  //kt //codex original --> ALLOWED_SIZES : array[1..NUM_SIZES] of integer = (8, 10, 12, 14, 18);
+  ALLOWED_SIZES : array[1..NUM_SIZES] of integer = (8, 10, 12, 14, 18, 24);  //kt //codex 9/3/26
 var
   ATag              : integer;
   SizeMode          : TSizeMode;

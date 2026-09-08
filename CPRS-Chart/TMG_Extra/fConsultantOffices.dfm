@@ -10,13 +10,11 @@ object frmConsultantOffices: TfrmConsultantOffices
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnDestroy = FormDestroy
   OnShow = FormShow
   DesignSize = (
     405
     395)
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0

@@ -85,8 +85,8 @@ end;
 procedure TfrmTMGTestHTML.btnTestStylesClick(Sender: TObject);
 var MsgForm:         TFMErrorForm;
 begin
+  MsgForm := TFMErrorForm.Create(Self);
   try
-    MsgForm := TFMErrorForm.Create(Self);
     MsgForm.Caption := '';
     HTMLEditor.GetDocStyles(MsgForm.Memo.Lines);
     HTMLEditor.GetDocScripts(MsgForm.Memo.Lines);

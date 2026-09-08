@@ -3,6 +3,7 @@ unit uGMV_Template;
 interface
 
 uses
+  System.UITypes, //kt //codex 8/30/26
   SysUtils
   ,Classes
   ,Dialogs

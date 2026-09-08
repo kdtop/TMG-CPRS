@@ -2228,11 +2228,11 @@ begin
       Clipboard.SetTextBuf(PChar(txt));
       GetScreenReader.Speak('Text Copied to Clip board');
     end;
+    DBControlData.Free;  //kt 5/16 added
   end;
   if txt <> '' then begin
     StatusText('Templated Text copied to clipboard.');
   end;
-  DBControlData.Free;  //kt 5/16 added
 end;
 
 {

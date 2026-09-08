@@ -108,7 +108,7 @@ type
   public
     { Public declarations }
     InitialFormula : string;
-    constructor Create(AOwner: TComponent; ARichEdit : TRichEdit);
+    constructor Create(AOwner: TComponent; ARichEdit : TRichEdit); reintroduce; //kt //codex 8/30/26
     function GetFormula : string;
   end;
 
@@ -558,7 +558,8 @@ var i : integer;
 begin
   Result := true;
   for i  := 1 to Length(Name) do begin
-    if not (Name[i] in ['a'..'z','A'..'Z','0'..'9']) then begin
+    //kt //codex original --> if not (Name[i] in ['a'..'z','A'..'Z','0'..'9']) then begin
+    if not (CharInSet(Name[i], ['a'..'z','A'..'Z','0'..'9'])) then begin //kt //codex 8/30/26
       Result := false;
       exit;
     end;
@@ -569,7 +570,8 @@ Function TfrmFormulaHelper.ValidStoreChar(Key : Char): boolean;
 //var i : integer;
 begin
   Result := true;
-  if not (Key in ['a'..'z','A'..'Z','0'..'9']) then Result := false;
+  //kt //codex original --> if not (Key in ['a'..'z','A'..'Z','0'..'9']) then Result := false;
+  if not (CharInSet(Key, ['a'..'z','A'..'Z','0'..'9'])) then Result := false; //kt //codex 8/30/26
 end;
 
 
@@ -1011,7 +1013,8 @@ end;
     Result := false;
     if Expr='' then exit;
     if Pos('(',Expr) = 0 then exit;
-    if Expr[1] in ['[','|'] then exit;
+    //kt //codex original --> if Expr[1] in ['[','|'] then exit;
+    if CharInSet(Expr[1], ['[','|']) then exit; //kt //codex 8/30/26
     Result := true;
   end;
 

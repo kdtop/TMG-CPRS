@@ -487,7 +487,8 @@ begin
        Param[7].Mult[y] := OCStr;
       end;
     end;
-    if ConstructOrder.DelayEvent in ['A','D','T','M','O'] then
+    //kt //codex original --> if ConstructOrder.DelayEvent in ['A','D','T','M','O'] then
+    if CharInSet(ConstructOrder.DelayEvent, ['A','D','T','M','O']) then //kt //codex 8/30/26
       Param[7].Mult['"OREVENT"'] := ConstructOrder.PTEventPtr;
     if ConstructOrder.LogTime > 0
       then Param[7].Mult['"ORSLOG"'] := FloatToStr(ConstructOrder.LogTime);

@@ -22,7 +22,8 @@ type
   public
     ESCode: string;
     { Public declarations }
-    function ShowModal(AText, ACaption: string) : integer;  overload;
+    //kt //codex original -->     function ShowModal(AText, ACaption: string) : integer;  overload;
+    function ShowModal(AText, ACaption: string) : integer; reintroduce; overload; //kt //codex 8/30/26
     property CosignerWanted : boolean read GetCosignerWanted;
   end;
 

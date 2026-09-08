@@ -260,7 +260,8 @@ var
   x: string;
 begin
   x := RawText;
-  if Piece(x, U, 1)[1] in ['A', 'N', 'E'] then
+  //kt //codex original -->   if Piece(x, U, 1)[1] in ['A', 'N', 'E'] then
+  if CharInSet(Piece(x, U, 1)[1], ['A', 'N', 'E']) then //kt //codex 8/30/26
     x := Piece(x, U, 2)
   else
     begin

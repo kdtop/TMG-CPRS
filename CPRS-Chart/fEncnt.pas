@@ -129,8 +129,10 @@ type
     FOldHintEvent: TShowHintEvent;
     OKPressed: Boolean;
     DoNotNeedLocation: Boolean;     //AGP This is used to not force a location when writing a delayed order
+    //kt //codex original -->     procedure AppShowHint(var HintStr: string; var CanShow: Boolean;
+    //kt //codex original -->                           var HintInfo: THintInfo);
     procedure AppShowHint(var HintStr: string; var CanShow: Boolean;
-                          var HintInfo: THintInfo);
+                          var HintInfo: Controls.THintInfo); //kt //codex 8/30/26
     procedure SetVisitCat;
     function AllowAutoFocusChange: Boolean;
   public
@@ -554,8 +556,10 @@ begin
 end;
  }
 
+//kt //codex original --> procedure TfrmEncounter.AppShowHint(var HintStr: string;
+//kt //codex original -->   var CanShow: Boolean; var HintInfo: THintInfo);
 procedure TfrmEncounter.AppShowHint(var HintStr: string;
-  var CanShow: Boolean; var HintInfo: THintInfo);
+  var CanShow: Boolean; var HintInfo: Controls.THintInfo); //kt //codex 8/30/26
 const
   HistHintDelay = 30000; // 30 seconds
 

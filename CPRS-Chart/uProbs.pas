@@ -1703,7 +1703,8 @@ procedure LoadProblemNodes(TV : TORTreeView; AddProbRootNode : boolean = true);
           Add(ATag);
         end;
       end;
-      if ch in [',',' '] then begin
+      //kt //codex original --> if ch in [',',' '] then begin
+      if CharInSet(ch, [',',' ']) then begin //kt //codex 8/30/26
         Add(ATag);
       end else begin
         ATag := ATag + Ch;
@@ -1763,13 +1764,15 @@ begin
    Temp := piece(x, U, 2);
    Name := piece(x, U, 3) + ' {' + piece(x, U, 4) + '}';
    Tags := piece(x, U, 28);
-   if Temp = TemplateActiveCode[TRUE] then begin
+   //kt //codex original -->    if Temp = TemplateActiveCode[TRUE] then begin
+   if Temp = string(TemplateActiveCode[TRUE]) then begin //kt //codex 8/30/26
      ActiveFound := true;
      if not assigned(ActiveProbs) then begin
        ActiveProbs := AddNode(ProbNode, NODE_ACTIVE_PROBLEMS);
      end;
      AddNode(ActiveProbs, Name, x);
-   end else if Temp = TemplateActiveCode[FALSE] then begin
+   //kt //codex original -->    end else if Temp = TemplateActiveCode[FALSE] then begin
+   end else if Temp = string(TemplateActiveCode[FALSE]) then begin //kt //codex 8/30/26
      InactiveFound := true;
      if not assigned(InactiveProbs) then begin
        InactiveProbs := AddNode(ProbNode, NODE_INACTIVE_PROBLEMS);

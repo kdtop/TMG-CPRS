@@ -402,12 +402,16 @@ begin
 end;
 
 function TVersionInfo.GetCompileDateTime: TDateTime;
+var
+  FileName: string;
 begin
 {$IFDEF DLL}
-  Result := FileDateToDateTime(FileAge(GetProgramFilesPath+'\Vista\Common Files\GMV_VitalsViewEnter.dll'));
+  FileName := GetProgramFilesPath+'\Vista\Common Files\GMV_VitalsViewEnter.dll';
 {$ELSE}
-  Result := FileDateToDateTime(FileAge(Application.ExeName));
+  FileName := Application.ExeName;
 {$ENDIF}
+  if not FileAge(FileName, Result) then
+    Result := 0; //kt //codex added fallback 8/30/26
 end;
 
 function TVersionInfo.GetVAPatchNumber: string;

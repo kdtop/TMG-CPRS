@@ -1,5 +1,7 @@
 unit uImages;
 
+{$WARN SYMBOL_PLATFORM OFF} // VCL/Windows-specific image compatibility is intentional. //kt //codex 8/30/26
+
 //kt Entire unit added 11/24/20
  (*
  Copyright 11/24/20 Kevin S. Toppenberg, MD
@@ -91,7 +93,7 @@ type
       procedure Clear;
       constructor Create(); overload;
       constructor Create(Source : TImageInfo); overload;
-      destructor Destroy;
+      destructor Destroy; override; //kt //codex 8/30/26
     published
   end;
 
@@ -762,8 +764,8 @@ begin
   result := '';  //default of failure
   if not FileExists(LocalFNamePath) then exit;
   RPCResult := '';
+  InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
   try
-    InFile := TFileStream.Create(LocalFNamePath,fmOpenRead or fmShareCompat);
     RPCBrokerV.ClearParameters := true;
     RPCBrokerV.Param.Clear;
     RPCBrokerV.Param[0].PType := list;
@@ -846,7 +848,7 @@ begin
   if (SavedResult.Count>0) and (SavedResult[0]='1') then begin
     OutFile := TFileStream.Create(LocalSaveFNamePath,fmCreate);
     for i:=1 to (SavedResult.Count-1) do begin
-      s :=Decode64(SavedResult[i]);
+      s := Decode64(AnsiString(SavedResult[i])); //kt //codex 8/30/26
       count := Length(s);
       if count>1024 then begin
         Result := ''; //failure of load.
@@ -1178,10 +1180,10 @@ Var
   //BMP         : TBitmap;
 Begin
   Result := false;  //default to failure.
+  OleGraphic := TOleGraphic.Create; {The magic class!}
+  Source := Timage.Create(Nil);
+  fs := TFileStream.Create(FPath, fmOpenRead Or fmSharedenyNone);
   Try
-    OleGraphic := TOleGraphic.Create; {The magic class!}
-    Source := Timage.Create(Nil);
-    fs := TFileStream.Create(FPath, fmOpenRead Or fmSharedenyNone);
     OleGraphic.LoadFromStream(fs);
     Source.Picture.Assign(OleGraphic);
     bmp.Width := Source.Picture.Width;

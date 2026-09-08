@@ -28,7 +28,7 @@ type
   public
     { Public declarations }
     VarName: string;
-    constructor Create(AOwner: TComponent; ARichEdit : TRichEdit);
+    constructor Create(AOwner: TComponent; ARichEdit : TRichEdit); reintroduce; //kt //codex 8/30/26
   end;
 
 var

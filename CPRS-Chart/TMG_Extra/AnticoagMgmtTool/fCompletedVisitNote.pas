@@ -48,7 +48,8 @@ type
   public
     { Public declarations }
     HtmlEditor : THtmlObj;
-    function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; overload;
+    //kt //codex original -->     function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; overload;
+    function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; reintroduce; overload; //kt //codex 8/30/26
     function MakeAndSaveTIUNote(Var ErrMsg : string) : boolean; //kt
     property ModifiedAppState : TAppState read FAppState;
     property ModifiedFlowsheet : TOneFlowsheet read FFlowsheet;

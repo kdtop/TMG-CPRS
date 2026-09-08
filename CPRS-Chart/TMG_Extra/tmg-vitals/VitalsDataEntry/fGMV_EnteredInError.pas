@@ -78,6 +78,7 @@ unit fGMV_EnteredInError;
 interface
 
 uses
+  System.UITypes, //kt //codex 8/30/26
   Windows,
   Messages,
   SysUtils,

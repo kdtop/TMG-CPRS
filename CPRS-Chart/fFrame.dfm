@@ -293,6 +293,7 @@ inherited frmFrame: TfrmFrame
         ShowHint = True
         TabOrder = 0
         TabStop = True
+        StyleElements = [seBorder]
         OnClick = pnlPatientClick
         OnEnter = pnlPrimaryCareEnter
         OnExit = pnlPrimaryCareExit
@@ -525,7 +526,6 @@ inherited frmFrame: TfrmFrame
         OnExit = pnlPrimaryCareExit
         OnMouseDown = pnlRemindersMouseDown
         OnMouseUp = pnlRemindersMouseUp
-        ExplicitTop = -3
         object imgReminder: TImage
           Left = 2
           Top = 2
@@ -717,8 +717,8 @@ inherited frmFrame: TfrmFrame
           object lblVistaWeb: TLabel
             Left = 2
             Top = 2
-            Width = 46
-            Height = 13
+            Width = 65
+            Height = 14
             Cursor = crHandPoint
             Align = alClient
             Alignment = taCenter
@@ -732,6 +732,8 @@ inherited frmFrame: TfrmFrame
             Transparent = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
+            ExplicitWidth = 46
+            ExplicitHeight = 13
           end
         end
         object pnlCIRN: TKeyClickPanel
@@ -759,7 +761,7 @@ inherited frmFrame: TfrmFrame
           object lblCIRN: TLabel
             Left = 2
             Top = 2
-            Width = 63
+            Width = 65
             Height = 13
             Align = alClient
             Alignment = taCenter
@@ -775,11 +777,12 @@ inherited frmFrame: TfrmFrame
             Layout = tlCenter
             Visible = False
             OnClick = pnlCIRNClick
+            ExplicitWidth = 63
           end
           object lblLoadSequelPat: TLabel
             Left = 2
             Top = 2
-            Width = 52
+            Width = 65
             Height = 13
             Hint = 'Load patient who is selected in SequelMed'
             Align = alClient
@@ -794,6 +797,7 @@ inherited frmFrame: TfrmFrame
             Transparent = False
             Layout = tlCenter
             OnClick = lblLoadSequelPatClick
+            ExplicitWidth = 52
           end
         end
       end
@@ -839,7 +843,7 @@ inherited frmFrame: TfrmFrame
           object lblFlag: TLabel
             Left = 2
             Top = 22
-            Width = 25
+            Width = 85
             Height = 13
             Cursor = crHandPoint
             Align = alBottom
@@ -857,6 +861,7 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlFlagClick
             OnMouseDown = pnlFlagMouseDown
             OnMouseUp = pnlFlagMouseUp
+            ExplicitWidth = 25
           end
         end
       end
@@ -978,6 +983,7 @@ inherited frmFrame: TfrmFrame
         PopupMenu = popTimerMenu
         TabOrder = 10
         VerticalAlignment = taAlignTop
+        StyleElements = [seBorder]
         OnClick = btnTimerClick
         OnMouseDown = pnlTimerMouseDown
         object btnTimerReset: TButton
@@ -1563,6 +1569,12 @@ inherited frmFrame: TfrmFrame
           object mnu18pt1: TMenuItem
             Tag = 18
             Caption = '18 pt'
+            RadioItem = True
+            OnClick = mnuFontSizeClick
+          end
+          object mnu24pt1: TMenuItem
+            Tag = 24
+            Caption = '24 pt'
             RadioItem = True
             OnClick = mnuFontSizeClick
           end

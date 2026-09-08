@@ -89,7 +89,7 @@ uses
       function GetValueByID(ID : string; var Disabled : boolean; NoCommas : boolean = false) : string;
       function HasID(ID : string) : boolean;
       constructor Create(AWebBrowser: THtmlObj);
-      destructor Destroy;
+      destructor Destroy; override; //kt //codex 8/30/26
       property ResultValues : TStringList read GetResultValues;
       property HTML : TStringList read GetCompletedHTML;
       property PartialHTML  : TStringList read GetPartialHTML;
@@ -423,4 +423,3 @@ uses
   end;
 
 end.
-

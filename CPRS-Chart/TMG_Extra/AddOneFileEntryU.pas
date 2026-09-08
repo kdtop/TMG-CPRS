@@ -67,8 +67,8 @@ type
     NewRecordName : string;
     procedure PrepForm(FileNum: string);
     property ChangesMade : boolean read GetChangesMade;
-    constructor Create(AOwner: TComponent);
-    destructor Destroy;
+    constructor Create(AOwner: TComponent); override; //kt //codex 8/30/26
+    destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 //var

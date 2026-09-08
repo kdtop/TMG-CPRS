@@ -90,7 +90,7 @@ uses
       function GetValue(HtmlDlg : TObject; id, StartTag : string; var Disabled : boolean; NoCommas : boolean = false) : string;
       procedure Clear;
       constructor Create(AWebBrowser: THtmlObj);
-      destructor Destroy;
+      destructor Destroy; override; //kt //codex 8/30/26
     end;
 
   function SLStr(SL : TStringList) : string;
@@ -139,6 +139,7 @@ implementation
       QuoteCh       : char;
       InQuote, Done : boolean;
   begin
+    QuoteCh := #0; //default //kt 8/30/26
     Attrs.Clear;
     strAttribs := ORFn.piece2(Source, StartTag, 2);
     strAttribs := ORFn.piece2(strAttribs,'>',1);
@@ -149,7 +150,8 @@ implementation
       Len := Length(strAttribs);
       for i := 1 to Len do begin
         ch := strAttribs[i];
-        if ch in ['"',''''] then begin
+        //kt //codex original --> if ch in ['"',''''] then begin
+        if CharInSet(ch, ['"','''']) then begin //kt //codex 8/30/26
           if not InQuote then begin
             QuoteCh := ch;
             InQuote := true;
@@ -198,7 +200,8 @@ implementation
     if not assigned(SL) then begin Result := ''; exit; end;
     Result := SL.Text;
     Len := Length(Result); PosNum := Len;
-    while (PosNum > 0) and (Result[PosNum] in [#10, #13]) do dec(PosNum);
+    //kt //codex original --> while (PosNum > 0) and (Result[PosNum] in [#10, #13]) do dec(PosNum);
+    while (PosNum > 0) and (CharInSet(Result[PosNum], [#10, #13])) do dec(PosNum); //kt //codex 8/30/26
     //kt //codex original --> if PosNum <> Len then Result := MidStr(Result, 1, PosNum);
     if PosNum <> Len then Result := Copy(Result, 1, PosNum); //kt //codex 8/3/26
   end;
@@ -231,7 +234,8 @@ implementation
   begin
     Str := piece(AttribStr,'=',2);
     //Here I need to trim any quote chars.
-    if (Str <> '') and (Str[1] in ['"','''']) then begin
+    //kt //codex original --> if (Str <> '') and (Str[1] in ['"','''']) then begin
+    if (Str <> '') and (CharInSet(Str[1], ['"',''''])) then begin //kt //codex 8/30/26
       Len := Length(Str);
       if Str[Len] = Str[1] then X := 1 else X := 0;
       //kt //codex original --> Str := MidStr(Str, 2, Len-1-X);
@@ -2163,4 +2167,3 @@ initialization
   IDMasterIndex := 0;
 
 end.
-

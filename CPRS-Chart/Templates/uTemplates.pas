@@ -519,13 +519,15 @@ begin
     Result := TRUE;
     if(WholeWordsOnly) then
     begin
-      if((i > 1) and (Str[i-1] in AlphaNumeric)) then
+      //kt //codex original -->       if((i > 1) and (Str[i-1] in AlphaNumeric)) then
+      if((i > 1) and CharInSet(Str[i-1], AlphaNumeric)) then //kt //codex 8/30/26
         Result := FALSE
       else
       begin
         j := length(SubStr);
         if((i+j) <= length(Str)) then
-          Result := (not (Str[i+j] in AlphaNumeric));
+          //kt //codex original -->           Result := (not (Str[i+j] in AlphaNumeric));
+          Result := not CharInSet(Str[i+j], AlphaNumeric); //kt //codex 8/30/26
       end;
     end;
   end
@@ -551,7 +553,8 @@ begin
       GetTemplateRoots;
       for i := 0 to RPCBrokerV.Results.Count-1 do
       begin
-        if(Piece(RPCBrokerV.Results[i],U,2)=TemplateTypeCodes[ttRoot]) then
+        //kt //codex original -->         if(Piece(RPCBrokerV.Results[i],U,2)=TemplateTypeCodes[ttRoot]) then
+        if Piece(RPCBrokerV.Results[i], U, 2) = string(TemplateTypeCodes[ttRoot]) then //kt //codex 8/30/26
         begin
           Result := TTemplateAccess(GetTemplateAccess(Piece(RPCBrokerV.Results[i],U,1)));
           LastTemplateLocation := Encounter.Location;
@@ -916,10 +919,12 @@ begin
     end;
 
     if(NoCheck or (SavedRealType and (BRealType <> RealType))) then
-      TempSL.Add('.03='+TemplateTypeCodes[RealType]);
+      //kt //codex original -->       TempSL.Add('.03='+TemplateTypeCodes[RealType]);
+      TempSL.Add('.03='+string(TemplateTypeCodes[RealType])); //kt //codex 8/30/26
 
     if(NoCheck or (SavedActive and (BActive <> Active))) then
-      TempSL.Add('.04='+TemplateActiveCode[Active]);
+      //kt //codex original -->       TempSL.Add('.04='+TemplateActiveCode[Active]);
+      TempSL.Add('.04='+string(TemplateActiveCode[Active])); //kt //codex 8/30/26
 
     if(NoCheck or (SavedExclude and (BExclude <> FExclude))) then
       TempSL.Add('.05='+BOOLCHAR[Exclude]);
@@ -1167,14 +1172,16 @@ begin
   if Mode = cptemNormal then begin  //kt
     if(Text = NewTemplateName) or (length(Text) < 3) then begin
     Result := TRUE
-    end else if(not (Text[1] in ['a'..'z','A'..'Z','0'..'9'])) then begin
+    //kt //codex original --> end else if(not (Text[1] in ['a'..'z','A'..'Z','0'..'9'])) then begin
+    end else if(not (CharInSet(Text[1], ['a'..'z','A'..'Z','0'..'9']))) then begin //kt //codex 8/30/26
       Result := TRUE;
     end;
   end else begin   //kt added this block
     StrippedName := StripNamespacePartOfName(Text, Mode);
     if(Text = NewTemplateName(Mode)) or
     (length(StrippedName) < 3) or
-    (not (StrippedName[1] in ['a'..'z','A'..'Z','0'..'9'])) then begin
+    //kt //codex original --> (not (StrippedName[1] in ['a'..'z','A'..'Z','0'..'9'])) then begin
+    (not (CharInSet(StrippedName[1], ['a'..'z','A'..'Z','0'..'9']))) then begin //kt //codex 8/30/26
     Result := TRUE;
     end;
   end;
@@ -1298,7 +1305,8 @@ var
       tmp := tmp + '>';
     Fields.Add(tmp);
     if First then
-      AddField(tfType, TemplateFieldTypeCodes[FldType]);
+      //kt //codex original -->       AddField(tfType, TemplateFieldTypeCodes[FldType]);
+      AddField(tfType, string(TemplateFieldTypeCodes[FldType])); //kt //codex 8/30/26
   end;
 
   procedure WordWrap(var Str: string);
@@ -1376,8 +1384,10 @@ begin
               else
                 tmp := TemplateName;
               Data.Add('<' + XMLTemplateTag + ' ' + TemplateExportTag[efName] + '="' + Text2XML(tmp) + '">');
-              AddXMLData(Data, '', efType, TemplateTypeCodes[ttDoc], '');
-              AddXMLData(Data, '', efStatus, TemplateActiveCode[TRUE], '');
+              //kt //codex original -->               AddXMLData(Data, '', efType, TemplateTypeCodes[ttDoc], '');
+              AddXMLData(Data, '', efType, string(TemplateTypeCodes[ttDoc]), ''); //kt //codex 8/30/26
+              //kt //codex original -->               AddXMLData(Data, '', efStatus, TemplateActiveCode[TRUE], '');
+              AddXMLData(Data, '', efStatus, string(TemplateActiveCode[TRUE]), ''); //kt //codex 8/30/26
 
               Boiler := '';
               Fields := TStringList.Create;
@@ -1476,7 +1486,8 @@ begin
                                 end;
                             end;
                             if tmpDate <> dtUnknown then
-                              AddField(tfDateType, TemplateFieldDateCodes[tmpDate], TRUE);
+                              //kt //codex original -->                               AddField(tfDateType, TemplateFieldDateCodes[tmpDate], TRUE);
+                              AddField(tfDateType, string(TemplateFieldDateCodes[tmpDate]), TRUE); //kt //codex 8/30/26
                             if tmp <> '' then
                               AddField(tfDefault, tmp);
                             FastAddStrings(PendingAdd, Fields);
@@ -1745,7 +1756,8 @@ begin
     FFieldsUsed  := TStringList.Create;        //kt 5/16
     FNodes := TStringList.Create;
     FID := Piece(DataString, U, 1);
-    Code := Piece(DataString, U, 2);
+    //kt //codex original -->     Code := Piece(DataString, U, 2);
+    Code := ShortString(Copy(Piece(DataString, U, 2), 1, 8)); // template type code is String[8] //kt //codex 8/30/26
     FRealType := ttNone;
     for i := FirstRealTemplateType to LastRealTemplateType do
     begin
@@ -1756,8 +1768,10 @@ begin
       end;
     end;
     if FRealType = ttNone then
-      raise ETemplateError.Create('Template has invalid Type Code of "' + Code + '"');
-    FActive := (Piece(DataString, U, 3) = TemplateActiveCode[TRUE]);
+      //kt //codex original -->       raise ETemplateError.Create('Template has invalid Type Code of "' + Code + '"');
+      raise ETemplateError.Create('Template has invalid Type Code of "' + string(Code) + '"'); //kt //codex 8/30/26
+    //kt //codex original -->     FActive := (Piece(DataString, U, 3) = TemplateActiveCode[TRUE]);
+    FActive := Piece(DataString, U, 3) = string(TemplateActiveCode[TRUE]); //kt //codex 8/30/26
     FPrintName := Piece(DataString, U, 4);
     FExclude := (Piece(DataString, U, 5) = '1');
     //kt original --> FDialog :=  (Piece(DataString, U, 9) = '1');
@@ -2261,7 +2275,8 @@ var
   Code, DataStr: string;
 
 begin
-  DataStr := ID+U+TemplateTypeCodes[RealType]+U+TemplateActiveCode[Active]+U+PrintName+U;
+  //kt //codex original -->   DataStr := ID+U+TemplateTypeCodes[RealType]+U+TemplateActiveCode[Active]+U+PrintName+U;
+  DataStr := ID + U + string(TemplateTypeCodes[RealType]) + U + string(TemplateActiveCode[Active]) + U + PrintName + U; //kt //codex 8/30/26
   if(Exclude) then
     DataStr := DataStr + '1'
   else
@@ -2719,11 +2734,14 @@ begin
   Data.Add(Pad + '<' + XMLTemplateTag + ' ' + TemplateExportTag[efName] + '="' + Text2XML(PrintName) + '">');
   AddXMLData(Data, Pad, efBlankLines, IntToStr(Gap), '0');
   if(RealType in AllTemplateRootTypes) then
-    Tmp := TemplateTypeCodes[ttClass]
+    //kt //codex original -->     Tmp := TemplateTypeCodes[ttClass]
+    Tmp := string(TemplateTypeCodes[ttClass]) //kt //codex 8/30/26
   else
-    Tmp := TemplateTypeCodes[RealType];
+    //kt //codex original -->     Tmp := TemplateTypeCodes[RealType];
+    Tmp := string(TemplateTypeCodes[RealType]); //kt //codex 8/30/26
   AddXMLData(Data, Pad, efType, Tmp, '');
-  AddXMLData(Data, Pad, efStatus, TemplateActiveCode[Active], '');
+  //kt //codex original -->   AddXMLData(Data, Pad, efStatus, TemplateActiveCode[Active], '');
+  AddXMLData(Data, Pad, efStatus, string(TemplateActiveCode[Active]), ''); //kt //codex 8/30/26
   AddXMLBool(Data, Pad, efExclude, Exclude);
   AddXMLBool(Data, Pad, efDialog, Dialog);
   //kt NOTE: To support exporting EmbeddedDialog, would have to ensure recipient CPRS is TMG-CPRS --> difficult.  Won't implement for now...  6/16

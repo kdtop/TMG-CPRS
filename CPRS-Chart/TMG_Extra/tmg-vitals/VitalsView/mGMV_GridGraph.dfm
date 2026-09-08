@@ -320,7 +320,7 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
                 BorderStyle = bsNone
                 Color = clSilver
                 Ctl3D = False
-                ItemHeight = 13
+                ItemHeight = 15
                 ParentCtl3D = False
                 PopupMenu = PopupMenu1
                 TabOrder = 0
@@ -379,26 +379,33 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
             Top = 0
             Width = 509
             Height = 186
-            AnimatedZoomSteps = 10
-            BackImageInside = True
-            BackWall.Brush.Color = clWhite
+            BackImage.Inside = True
             BackWall.Brush.Style = bsClear
-            BackWall.Color = clSilver
             BottomWall.Size = 1
             Foot.Visible = False
             Gradient.EndColor = 15724527
-            LeftWall.Brush.Color = clWhite
+            Legend.Alignment = laTop
+            Legend.ColorWidth = 65
+            Legend.Font.Charset = ANSI_CHARSET
+            Legend.Font.Name = 'Times New Roman'
+            Legend.HorizMargin = 5
+            Legend.LegendStyle = lsSeries
+            Legend.Shadow.Color = clSilver
+            Legend.Shadow.HorizSize = 0
+            Legend.Shadow.VertSize = 0
+            Legend.Symbol.Width = 65
+            Legend.TextStyle = ltsRightValue
+            Legend.TopPos = 40
+            Legend.VertMargin = 12
             MarginBottom = 2
             MarginLeft = 4
             MarginRight = 4
             MarginTop = 3
             PrintProportional = False
             Title.Alignment = taLeftJustify
-            Title.Font.Charset = DEFAULT_CHARSET
             Title.Font.Color = clBlack
             Title.Font.Height = -13
             Title.Font.Name = 'Microsoft Sans Serif'
-            Title.Font.Style = []
             Title.Frame.Color = clWhite
             Title.Frame.Style = psClear
             Title.Text.Strings = (
@@ -407,7 +414,6 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
             OnClickLegend = chrtVitalsClickLegend
             OnClickSeries = chrtVitalsClickSeries
             OnScroll = scbHGraphChange
-            BackColor = clSilver
             BottomAxis.DateTimeFormat = 'M/d/yyyy'
             BottomAxis.Grid.Color = 3947580
             BottomAxis.Increment = 0.083333333333333300
@@ -420,40 +426,22 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
             BottomAxis.TickLength = 8
             Chart3DPercent = 10
             ClipPoints = False
-            DepthAxis.Grid.Style = psSolid
             LeftAxis.ExactDateTime = False
             LeftAxis.Increment = 1.000000000000000000
-            LeftAxis.LabelsFont.Charset = DEFAULT_CHARSET
-            LeftAxis.LabelsFont.Color = clBlack
-            LeftAxis.LabelsFont.Height = -9
-            LeftAxis.LabelsFont.Name = 'Arial'
-            LeftAxis.LabelsFont.Style = []
+            LeftAxis.LabelsFormat.Font.Height = -9
             LeftAxis.LabelsSeparation = 5
             LeftAxis.MinorTickCount = 4
             LeftAxis.MinorTickLength = 4
             LeftAxis.TickLength = 5
             LeftAxis.TickOnLabelsOnly = False
-            Legend.Alignment = laTop
-            Legend.ColorWidth = 65
-            Legend.Font.Charset = ANSI_CHARSET
-            Legend.Font.Color = clBlack
-            Legend.Font.Height = -11
-            Legend.Font.Name = 'Times New Roman'
-            Legend.Font.Style = []
-            Legend.HorizMargin = 5
-            Legend.LegendStyle = lsSeries
-            Legend.ShadowColor = clSilver
-            Legend.ShadowSize = 0
-            Legend.TextStyle = ltsRightValue
-            Legend.TopPos = 40
-            Legend.VertMargin = 12
-            MaxPointsPerPage = 10
+            Pages.MaxPointsPerPage = 10
             TopAxis.Visible = False
             View3D = False
             View3DOptions.Elevation = 330
             View3DOptions.Perspective = 0
             View3DOptions.Rotation = 316
             View3DOptions.VertOffset = 5
+            Zoom.AnimatedSteps = 10
             OnAfterDraw = chrtVitalsAfterDraw
             OnBeforeDrawSeries = chrtVitalsBeforeDrawSeries
             Align = alClient
@@ -465,13 +453,19 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
             TabOrder = 0
             OnDblClick = chrtVitalsDblClick
             OnResize = chrtVitalsResize
+            DefaultCanvas = 'TGDIPlusCanvas'
+            ColorPaletteIndex = 13
             object Series1: TLineSeries
-              Marks.Arrow.Color = 4194368
-              Marks.ArrowLength = 4
-              Marks.BackColor = 16777088
-              Marks.Style = smsValue
+              HoverElement = [heCurrent]
               Marks.Visible = True
+              Marks.Style = smsValue
+              Marks.Arrow.Color = 4194368
+              Marks.BackColor = 16777088
+              Marks.Callout.Arrow.Color = 4194368
+              Marks.Callout.Length = 4
+              Marks.Color = 16777088
               SeriesColor = 10485760
+              Brush.BackColor = clDefault
               LinePen.Width = 2
               Pointer.HorizSize = 5
               Pointer.InflateMargins = True
@@ -482,20 +476,21 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Visible = True
               XValues.DateTime = True
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
             object Series2: TLineSeries
-              Marks.Arrow.Color = 4194368
-              Marks.ArrowLength = 4
-              Marks.BackColor = 8454016
-              Marks.Style = smsValue
+              HoverElement = [heCurrent]
               Marks.Visible = True
+              Marks.Style = smsValue
+              Marks.Arrow.Color = 4194368
+              Marks.BackColor = 8454016
+              Marks.Callout.Arrow.Color = 4194368
+              Marks.Callout.Length = 4
+              Marks.Color = 8454016
               SeriesColor = clGreen
+              Brush.BackColor = clDefault
               LinePen.Width = 2
               Pointer.HorizSize = 5
               Pointer.InflateMargins = True
@@ -505,18 +500,17 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Visible = True
               XValues.DateTime = True
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
             object Series3: TLineSeries
-              Marks.ArrowLength = 4
-              Marks.Style = smsValue
+              HoverElement = [heCurrent]
               Marks.Visible = True
+              Marks.Style = smsValue
+              Marks.Callout.Length = 4
               SeriesColor = 8421631
+              Brush.BackColor = clDefault
               LinePen.Width = 2
               Pointer.HorizSize = 5
               Pointer.InflateMargins = True
@@ -526,19 +520,17 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Visible = True
               XValues.DateTime = True
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
             object Series4: TLineSeries
-              Marks.ArrowLength = 8
+              HoverElement = [heCurrent]
               Marks.Style = smsValue
-              Marks.Visible = False
               SeriesColor = clGray
               Title = 'NormalA'
+              Brush.Style = bsCross
+              Brush.BackColor = clDefault
               LineBrush = bsCross
               LinePen.Color = clGray
               LinePen.Style = psDash
@@ -547,21 +539,18 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Style = psDiamond
               Pointer.VertSize = 2
               Pointer.Visible = True
-              XValues.DateTime = False
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
             object Series5: TLineSeries
-              Marks.ArrowLength = 8
+              HoverElement = [heCurrent]
               Marks.Style = smsValue
-              Marks.Visible = False
               SeriesColor = clGray
               Title = 'NormalB'
+              Brush.Style = bsCross
+              Brush.BackColor = clDefault
               Dark3D = False
               LineBrush = bsCross
               LinePen.Color = clGray
@@ -571,21 +560,18 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Style = psDiamond
               Pointer.VertSize = 2
               Pointer.Visible = True
-              XValues.DateTime = False
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
             object Series6: TLineSeries
-              Marks.ArrowLength = 8
+              HoverElement = [heCurrent]
               Marks.Style = smsValue
-              Marks.Visible = False
               SeriesColor = clGray
               Title = 'NormalC'
+              Brush.Style = bsCross
+              Brush.BackColor = clDefault
               Dark3D = False
               LineBrush = bsCross
               LinePen.Color = clGray
@@ -595,21 +581,18 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Style = psDiamond
               Pointer.VertSize = 2
               Pointer.Visible = True
-              XValues.DateTime = False
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
             object Series7: TLineSeries
-              Marks.ArrowLength = 8
+              HoverElement = [heCurrent]
               Marks.Style = smsValue
-              Marks.Visible = False
               SeriesColor = clGray
               Title = 'NormalD'
+              Brush.Style = bsCross
+              Brush.BackColor = clDefault
               Dark3D = False
               LineBrush = bsCross
               LinePen.Color = clGray
@@ -619,13 +602,9 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Pointer.Style = psDiamond
               Pointer.VertSize = 2
               Pointer.Visible = True
-              XValues.DateTime = False
               XValues.Name = 'X'
-              XValues.Multiplier = 1.000000000000000000
               XValues.Order = loAscending
-              YValues.DateTime = False
               YValues.Name = 'Y'
-              YValues.Multiplier = 1.000000000000000000
               YValues.Order = loNone
             end
           end
@@ -741,12 +720,11 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
               Left = 4
               Top = 4
               Width = 109
-              Height = 21
+              Height = 23
               Style = csDropDownList
               Anchors = [akLeft, akTop, akRight]
               Color = clSilver
               DropDownCount = 12
-              ItemHeight = 13
               TabOrder = 0
               OnChange = cbxGraphChange
             end
@@ -1129,7 +1107,7 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
           Left = 40
           Top = 10
           Width = 185
-          Height = 19
+          Height = 21
           Ctl3D = False
           ParentCtl3D = False
           TabOrder = 0
@@ -1248,135 +1226,7 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
     Top = 32
     Bitmap = {
       494C01010B000E00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
-      0000000000003600000028000000400000004000000001002000000000000040
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000FFFFFF007F7F7F00FFFFFF000000000000000000000000000000
@@ -1762,12 +1612,8 @@ object fraGMV_GridGraph: TfraGMV_GridGraph
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000424D3E000000000000003E000000
-      2800000040000000400000000100010000000000000200000000000000000000
-      000000000000000000000000FFFFFF0000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000FFF8FFFFFC1F0000FFF0F83FF0070000
+      2800000040000000300000000100010000000000800100000000000000000000
+      000000000000000000000000FFFFFF00FFF8FFFFFC1F0000FFF0F83FF0070000
       FFE1E00FE3830000FFC3C447CE410000F8878C639C310000E10F9C739EF80000
       CE1F3FF91F7800009F9F3EF91E3D0000BFAF3C7F1C3F0000304F3C7F1C200000
       20CF3C410C0000005FDF9C61A42000009F9F8C7190200000A73FC441CA800000

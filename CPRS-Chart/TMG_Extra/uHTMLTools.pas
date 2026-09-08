@@ -1,4 +1,5 @@
-unit uHTMLTools;
+﻿unit uHTMLTools;
+{$WARN SYMBOL_PLATFORM OFF} // HTML clipboard and Windows printer APIs are intentional. //kt //codex 8/30/26
 //kt 9/11 Added entire unit.
 //kt 9/11 NAME CHANGED rHTMLTools --> uHTMLTools 
 
@@ -38,7 +39,7 @@ interface
 
   uses
   System.UITypes,
- Windows, SysUtils, Classes, Printers, ComCtrls, ExtCtrls,
+ Windows, SysUtils, AnsiStrings, Classes, Printers, ComCtrls, ExtCtrls, //kt //codex 8/30/26
        Controls, StdCtrls, StrUtils, MSHTML, ActiveX, Variants,
        ShDocVw, {//kt added ShDocVw 5-2-05 for TWebBrowser access}
        Dialogs,
@@ -119,7 +120,8 @@ interface
   procedure HTMLEncode(const SL : TStringList); overload;
   function  HTMLDecode(const AStr: String): String;
   procedure MakeWrapperHTMLFile(FullFilePathName, TargetSaveFilePathName : string; Parent:TControl; FileType: TFileType);
-  function  UniqueCacheFName(FName : string) : AnsiString;
+  //kt //codex original -->   function  UniqueCacheFName(FName : string) : AnsiString;
+  function  UniqueCacheFName(FName : string) : string; // cache file names are Unicode VCL paths //kt //codex 8/30/26
   function GetClipboardHTML:string;
   function GetClipHTMLText:string;
   function PrefixBody(HTMLText: string; Text2Insert : string; var Success:boolean) : string;  //kt 5/1/25
@@ -139,7 +141,7 @@ interface
   function GetTag(HTMLText : string; TagName : string; var PartA, PartB : string; AttributesSL : TStringList) : string;
 
   function FormatHTMLClipboardHeader(HTMLText: string): string;
-  procedure CopyHTMLToClipBoard(const str: AnsiString; const htmlStr: AnsiString = '');
+  procedure CopyHTMLToClipBoard(const str: string; const htmlStr: string = ''); //kt //codex 8/30/26
 
   function StripHTMLTags(strHTML: string): string;
   function HTMLResize(ImageFName: string) : string;
@@ -205,29 +207,31 @@ implementation
   procedure SetDefaultPrinter(PrinterName: String) ;
   var
       j                    : Integer;
-      Device, Driver, Port : PChar;
+      //kt //codex original -->       Device, Driver, Port : PChar;
+      Device, Driver, Port : string; //kt //codex 8/30/26
       HdeviceMode          : THandle;
       aPrinter             : TPrinter;
   begin    
      Printer.PrinterIndex := -1;
-     getmem(Device, 255) ;
-     getmem(Driver, 255) ;
-     getmem(Port, 255) ;
+     //kt //codex original -->     getmem(Device, 255) ;
+     //kt //codex original -->     getmem(Driver, 255) ;
+     //kt //codex original -->     getmem(Port, 255) ;
      aPrinter := TPrinter.create;
      j := Printer.Printers.IndexOf(PrinterName);
      if j >= 0 then begin
        aprinter.printerindex := j;
-       aPrinter.getprinter(device, driver, port, HdeviceMode) ;
-       StrCat(Device, ',') ;
-       StrCat(Device, Driver ) ;
-       StrCat(Device, Port ) ;
-       WriteProfileString('windows', 'device', Device) ;
-       StrCopy( Device, 'windows' ) ;
+       aPrinter.GetPrinter(Device, Driver, Port, HdeviceMode); //kt //codex 8/30/26
+       //kt //codex original -->       StrCat(Device, ',') ;
+       //kt //codex original -->       StrCat(Device, Driver ) ;
+       //kt //codex original -->       StrCat(Device, Port ) ;
+       Device := Device + ',' + Driver + ',' + Port; //kt //codex 8/30/26
+       WriteProfileString('windows', 'device', PChar(Device)); //kt //codex 8/30/26
+       //kt //codex original -->       StrCopy( Device, 'windows' ) ;
        //SendMessage(HWND_BROADCAST, WM_WININICHANGE, 0, Longint(@Device)) ;
      end;
-     Freemem(Device, 255) ;
-     Freemem(Driver, 255) ;
-     Freemem(Port, 255) ;
+     //kt //codex original -->     Freemem(Device, 255) ;
+     //kt //codex original -->     Freemem(Driver, 255) ;
+     //kt //codex original -->     Freemem(Port, 255) ;
      aPrinter.Free;
   end;
 
@@ -963,8 +967,8 @@ implementation
   (* HTMLText : string; *)
       frmView : TfrmMemoEdit;
   begin
+    frmView := TfrmMemoEdit.Create(Application);
     try
-      frmView := TfrmMemoEdit.Create(Application);
       frmView.memEdit.ReadOnly := false;
       frmView.memEdit.ScrollBars := ssBoth;
       frmView.memEdit.Lines.Assign(Lines);
@@ -1160,7 +1164,8 @@ implementation
               break;
             end;
           end;
-          if (ch in [' ', ',', ')']) and SafeToBreak then begin
+          //kt //codex original --> if (ch in [' ', ',', ')']) and SafeToBreak then begin
+          if (CharInSet(ch, [' ', ',', ')'])) and SafeToBreak then begin //kt //codex 8/30/26
             LastGoodBreakI  := i;
           end;
           if (i > MaxLineLen)  and (LastGoodBreakI > 0) then begin
@@ -1356,7 +1361,8 @@ const
            As with html, end-of-lines and white space is not preserved or significant
   }
 
-    function GetBetween (var Text : AnsiString; OpenTag,CloseTag : string;
+    //kt //codex original -->     function GetBetween (var Text : AnsiString; OpenTag,CloseTag : string;
+    function GetBetween (var Text : string; OpenTag,CloseTag : string; //kt //codex 8/30/26
                          KeepTags : Boolean) : string;
     {Purpose: Gets text between Open and Close tags.  Removes any CR's or LF's
      Input: Text - the text to work on.  It IS changed as code is removed
@@ -1367,7 +1373,8 @@ const
      Note: Both OpenTag and CloseTag MUST be present for anything to happen.
     }
 
-      procedure CutInThree(var Text : AnsiString; p1, p2 : Integer; var s1,s2,s3 : AnsiString);
+      //kt //codex original -->       procedure CutInThree(var Text : AnsiString; p1, p2 : Integer; var s1,s2,s3 : AnsiString);
+      procedure CutInThree(var Text : string; p1, p2 : Integer; var s1,s2,s3 : string); //kt //codex 8/30/26
       {Purpose: Cut input string Text into 3 parts, with cut points given by p1 & p2.
                 p1 points to first character to be in s2
                 p2 points to last character to be in s2        }
@@ -1383,7 +1390,8 @@ const
 
     var
       p1,p2 : integer;
-      s1,s2,s3, ResultPart : AnsiString;
+      //kt //codex original -->       s1,s2,s3, ResultPart : AnsiString;
+      s1, s2, s3, ResultPart : string; //kt //codex 8/30/26
 
     begin
       Result := ''; //default of no result.
@@ -1400,9 +1408,11 @@ const
             p1 := Pos (Chr(13),Result);
             if p1= 0 then p1 := Pos (Chr(10),Result);
             if (p1 > 0) then begin
-              ResultPart := AnsiString(Result);
+              //kt //codex original -->               ResultPart := AnsiString(Result);
+              ResultPart := Result; //kt //codex 8/30/26
               CutInThree (ResultPart, p1,p1, s1,s2,s3);
-              Result := string(s1+s3);
+              //kt //codex original -->               Result := string(s1+s3);
+              Result := s1 + s3; //kt //codex 8/30/26
   //            Text := MidStr(Text,1,p1-1) + MidStr(Text,p1+1,Length(Text)-p1);
             end;
           until (p1=0);
@@ -1410,16 +1420,18 @@ const
           if not KeepTags then begin
             p1 := Length(OpenTag) + 1;
             p2 := Length (Result) - Length (CloseTag);
-            ResultPart := AnsiString(Result);
+            //kt //codex original -->             ResultPart := AnsiString(Result);
+            ResultPart := Result; //kt //codex 8/30/26
             CutInThree (ResultPart, p1,p2, s1,s2,s3);
-            Result := s2;
+          Result := s2;
           end;
         end;
       end;
     end;
 
   var
-    Text : AnsiString;
+    //kt //codex original -->     Text : AnsiString;
+    Text : string; // internal HTML parsing text //kt //codex 8/30/26
     LineStr : string;
 
   begin
@@ -1538,8 +1550,10 @@ const
         c := ord(ch);
         //if (c < 32) or (c >= 127) or (ch = '"') then begin
         if (c < 32) or (c >= 127) then begin
-          s := ENCODE_CHART_OPEN_TAG + IntToStr(c) + ENCODE_CHART_CLOSE_TAG;
-          Result := Result + s;
+          //kt //codex original -->           s := ENCODE_CHART_OPEN_TAG + IntToStr(c) + ENCODE_CHART_CLOSE_TAG;
+          s := ShortString(string(ENCODE_CHART_OPEN_TAG) + IntToStr(c) + string(ENCODE_CHART_CLOSE_TAG)); // s is String[12] //kt //codex 8/30/26
+          //kt //codex original -->           Result := Result + s;
+          Result := Result + string(s); //kt //codex 8/30/26
         end else begin
           Result := Result + Text[i];
         end;
@@ -1799,12 +1813,14 @@ const
     Sp := PChar(AStr);
     Rp := PChar(Result);
     while Sp^ <> #0 do begin
-      if Sp^ in NoConversion then
+      //kt //codex original -->       if Sp^ in NoConversion then
+      if CharInSet(Sp^, NoConversion) then //kt //codex 8/30/26
         Rp^ := Sp^
       //kt else if Sp^ = ' ' then
       //kt   Rp^ := '+'
       else begin
-        FormatBuf(Rp^, 3, '%%%.2x', 6, [Ord(Sp^)]);
+        //kt //codex original --> FormatBuf(Rp^, 3, '%%%.2x', 6, [Ord(Sp^)]);
+        AnsiStrings.FormatBuf(Rp^, 3, '%%%.2x', 6, [Ord(Sp^)]); //kt //codex 8/30/26
         Inc(Rp, 2);
       end;
       Inc(Rp);
@@ -2289,11 +2305,12 @@ end;
 //($define USEVCLCLIPBOARD}
 //(and clipboard.open, clipboard.close).
 //Code from http://www.lorriman.com
-procedure CopyHTMLToClipBoard(const str: AnsiString; const htmlStr: AnsiString = '');
+procedure CopyHTMLToClipBoard(const str: string; const htmlStr: string = ''); //kt //codex 8/30/26
 var
   gMem: HGLOBAL;
-  lp: PChar;
+  lp: PAnsiChar; //kt //codex 8/30/26
   Strings: array[0..1] of AnsiString;
+  AnsiHTMLStr: AnsiString; //kt //codex 8/30/26
   Formats: array[0..1] of UINT;
   i: Integer;
 begin
@@ -2303,7 +2320,8 @@ begin
   {$ENDIF}
   try
     //most descriptive first as per api docs
-    Strings[0] := FormatHTMLClipboardHeader(htmlStr);
+    AnsiHTMLStr := AnsiString(FormatHTMLClipboardHeader(htmlStr)); //kt //codex 8/30/26
+    Strings[0] := AnsiHTMLStr; //kt //codex 8/30/26
     //Strings[1] := str;
     Formats[0] := RegisterClipboardFormat('HTML Format');
     //Formats[1] := CF_TEXT;
@@ -2320,7 +2338,7 @@ begin
         Win32Check(gmem <> 0);
         lp := GlobalLock(gMem);
         Win32Check(lp <> nil);
-        CopyMemory(lp, PChar(Strings[i]), Length(Strings[i]) + 1);
+        CopyMemory(lp, PAnsiChar(Strings[i]), Length(Strings[i]) + 1); //kt //codex 8/30/26
       finally
         GlobalUnlock(gMem);
       end;
@@ -2360,10 +2378,12 @@ begin
 end;
 
 
-function UniqueCacheFName(FName : string) : AnsiString;
+//kt //codex original --> function UniqueCacheFName(FName : string) : AnsiString;
+function UniqueCacheFName(FName : string) : string; //kt //codex 8/30/26
 //NOTE: FName should not include path.
 
-var  Ext, PartA, TempFName : AnsiString;
+//kt //codex original --> var  Ext, PartA, TempFName : AnsiString;
+var  Ext, PartA, TempFName : string; //kt //codex 8/30/26
      count: integer;
      (* Num: integer; *)
 begin
@@ -2399,7 +2419,8 @@ begin
       else
         if not InTag then
         begin
-          if (P^ in [#9, #32]) and ((P+1)^ in [#10, #13, #32, #9, '<']) then
+          //kt //codex original -->           if (P^ in [#9, #32]) and ((P+1)^ in [#10, #13, #32, #9, '<']) then
+          if CharInSet(P^, [#9, #32]) and CharInSet((P+1)^, [#10, #13, #32, #9, '<']) then //kt //codex 8/30/26
           else
             Result := Result + P^;
         end;
@@ -2585,9 +2606,11 @@ begin
   p2 := 0;
   Result := HTMLText;  //default to input value
   for i := 1 to NUM_TAGS do begin
-    p1 := Pos(BODY_TAGS[i],HTMLText);  //p1 is index of BEGINNING of BodyTag
+    //kt //codex original -->     p1 := Pos(BODY_TAGS[i],HTMLText);  //p1 is index of BEGINNING of BodyTag
+    p1 := Pos(string(BODY_TAGS[i]), HTMLText);  //p1 is index of BEGINNING of BodyTag //kt //codex 8/30/26
     if (p1 > 0) then begin
-      BodyTag := BODY_TAGS[i];
+      //kt //codex original -->       BodyTag := BODY_TAGS[i];
+      BodyTag := string(BODY_TAGS[i]); //kt //codex 8/30/26
       break;
     end;
   end;
@@ -2639,10 +2662,10 @@ var
     HTMLText : string;
     frmView : TfrmMemoEdit;
 begin
+  frmView := TfrmMemoEdit.Create(application);
   try
     if not assigned(HtmlObj) then exit;
     HTMLText := HtmlObj.GetFullHTMLText;
-    frmView := TfrmMemoEdit.Create(application);
     frmView.memEdit.ReadOnly := false;
     frmView.memEdit.ScrollBars := ssBoth;
     frmView.memEdit.Lines.Text := HTMLText;

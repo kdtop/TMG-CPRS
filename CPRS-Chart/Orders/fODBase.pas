@@ -1261,7 +1261,8 @@ end;
 
 procedure TResponses.SetEventDelay(AnEvent: TOrderDelayEvent);
 begin
-  with AnEvent do if EventType in ['A','D','T','M','O'] then
+  //kt //codex original -->   with AnEvent do if EventType in ['A','D','T','M','O'] then
+  with AnEvent do if CharInSet(EventType, ['A','D','T','M','O']) then //kt //codex 8/30/26
   begin
     FEventIFN  := EventIFN;
     FEventName := EventName;
@@ -1399,7 +1400,8 @@ begin
     ORDER_COPY:  Responses.SetCopyOrder(ID);
     ORDER_QUICK: Responses.SetQuickOrderByID(ID);
   end;
-  if Responses.FEventType in ['A','D','T','M','O'] then Caption := Caption + ' (Delayed ' + Responses.FEventName + ')'; // ' (Event Delayed)';
+  //kt //codex original -->   if Responses.FEventType in ['A','D','T','M','O'] then Caption := Caption + ' (Delayed ' + Responses.FEventName + ')'; // ' (Event Delayed)';
+  if CharInSet(Responses.FEventType, ['A','D','T','M','O']) then Caption := Caption + ' (Delayed ' + Responses.FEventName + ')'; // ' (Event Delayed)'; //kt //codex 8/30/26
   if OrderAction in [ORDER_EDIT, ORDER_COPY] then cmdQuit.Caption := 'Cancel';
 end;
 

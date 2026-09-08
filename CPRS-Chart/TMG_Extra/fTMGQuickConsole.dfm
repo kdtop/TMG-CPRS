@@ -11,12 +11,10 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object lbOptions: TORListBox
     Left = 0
@@ -30,6 +28,7 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
     TabOrder = 1
     OnClick = lbOptionsClick
     OnDblClick = lbOptionsDblClick
+    Caption = ''
     ItemTipColor = clWindow
     LongList = False
     OnChange = lbOptionsChange
@@ -64,8 +63,6 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
       Height = 24
       Anchors = [akTop, akRight]
       Caption = '&Cancel'
-      ModalResult = 1
-      TabOrder = 2
       Glyph.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
         20000000000000040000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -101,6 +98,8 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
         FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
         ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
         80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+      ModalResult = 1
+      TabOrder = 2
     end
     object btnAccept: TBitBtn
       Left = 404
@@ -110,9 +109,6 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
       Anchors = [akTop, akRight]
       Caption = '&Use'
       Default = True
-      ModalResult = 1
-      TabOrder = 1
-      OnClick = btnAcceptClick
       Glyph.Data = {
         9E050000424D9E05000000000000360400002800000012000000120000000100
         08000000000068010000130B0000130B00000001000000010000000000000000
@@ -160,6 +156,9 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
         020204F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6FA0202F60000F6F6F6F6F6F6
         F6F6F6F6F6F6F6F6F6FAF6F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6
         0000}
+      ModalResult = 1
+      TabOrder = 1
+      OnClick = btnAcceptClick
     end
   end
   object pnlBottom: TPanel
@@ -223,6 +222,7 @@ object frmTMGQuickConsole: TfrmTMGQuickConsole
         OnChange = ORDateBoxChange
         DateOnly = False
         RequireTime = False
+        Caption = ''
       end
     end
   end

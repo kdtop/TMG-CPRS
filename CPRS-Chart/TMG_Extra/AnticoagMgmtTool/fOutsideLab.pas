@@ -78,9 +78,12 @@ type
     //function GetFeeBasisExpiration : TDateTime;
   public
     { Public declarations }
+    //kt //codex original -->     function ShowModal(AFlowsheet : TOneFlowsheet;
+    //kt //codex original -->                        AppState : TAppState;
+    //kt //codex original -->                        Patient : TPatient) : integer; overload;
     function ShowModal(AFlowsheet : TOneFlowsheet;
-                       AppState : TAppState;
-                       Patient : TPatient) : integer; overload;
+                       AppState : TAppState; //kt //codex 8/30/26
+                       Patient : TPatient) : integer; reintroduce; overload; //kt //codex 8/30/26
     property Flowsheet : TOneFlowsheet read FLocalFlowsheet;
     property Patient : TPatient read FLocalPatient;
     property Historical : boolean read FHistorical;

@@ -13,7 +13,6 @@ object frmPtLabelPrint: TfrmPtLabelPrint
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -22,7 +21,6 @@ object frmPtLabelPrint: TfrmPtLabelPrint
   DesignSize = (
     430
     402)
-  PixelsPerInch = 96
   TextHeight = 13
   object NameLabel: TLabel
     Left = 29
@@ -334,7 +332,6 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Width = 325
     Height = 21
     Anchors = [akLeft, akTop, akRight]
-    ItemHeight = 0
     TabOrder = 4
     OnChange = PrinterComboBoxChange
   end
@@ -345,8 +342,6 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Height = 32
     Anchors = [akTop, akRight]
     Caption = '&Print Label'
-    TabOrder = 8
-    OnClick = PrintButtonClick
     Glyph.Data = {
       C4060000424DC406000000000000360400002800000020000000180000000100
       0800010000008E020000110B0000110B000000010000000100000C1106000B0F
@@ -403,6 +398,8 @@ object frmPtLabelPrint: TfrmPtLabelPrint
       FCFE7B1A101C303071F6F3EBEBE1B3DBFC000AFF000007FF000DFEBF40354546
       607A91ABBCE2FB000CFF000008FF000BFCFBEBD5BCB0A6B2C4E5FB000DFF0000
       09FF01FE16FF0001}
+    TabOrder = 8
+    OnClick = PrintButtonClick
   end
   object DoneButton: TBitBtn
     Left = 172
@@ -411,8 +408,6 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Height = 32
     Anchors = [akTop, akRight]
     Caption = '&Done'
-    TabOrder = 7
-    OnClick = DoneButtonClick
     Glyph.Data = {
       36010000424D3601000000000000760000002800000014000000100000000100
       040000000000C000000000000000000000001000000000000000000000000000
@@ -424,6 +419,8 @@ object frmPtLabelPrint: TfrmPtLabelPrint
       EF990FEE0000EEEEEEEEEEEEEEF990FE0000EEEEEEEEEEEEEEF790FE0000EEEE
       EEEEEEEEEEEF790F0000EEEEEEEEEEEEEEEEF7900000EEEEEEEEEEEEEEEEEFFF
       0000EEEEEEEEEEEEEEEEEEEE0000EEEEEEEEEEEEEEEEEEEE0000}
+    TabOrder = 7
+    OnClick = DoneButtonClick
   end
   object cboAuthor: TORComboBox
     Left = 65
@@ -449,6 +446,7 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Sorted = False
     SynonymChars = '<>'
     TabOrder = 1
+    Text = ''
     OnChange = cboAuthorChange
     OnNeedData = cboAuthorNeedData
     CharsNeedMatch = 1
@@ -488,6 +486,7 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Sorted = False
     SynonymChars = '<>'
     TabOrder = 3
+    Text = ''
     OnChange = cboLocationChange
     OnNeedData = cboLocationNeedData
     CharsNeedMatch = 1
@@ -516,6 +515,7 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Sorted = False
     SynonymChars = '<>'
     TabOrder = 2
+    Text = ''
     OnChange = cboNoteTitleChange
     OnNeedData = cboNoteTitleNeedData
     CharsNeedMatch = 1
@@ -544,6 +544,7 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Sorted = False
     SynonymChars = '<>'
     TabOrder = 0
+    Text = ''
     OnChange = cboPatientChange
     OnNeedData = cboPatientNeedData
     CharsNeedMatch = 1
@@ -554,7 +555,6 @@ object frmPtLabelPrint: TfrmPtLabelPrint
     Width = 65
     Height = 21
     Anchors = [akTop, akRight]
-    ItemHeight = 13
     TabOrder = 6
     Text = '<ANY>'
     OnChange = BatchNumComboBoxChange

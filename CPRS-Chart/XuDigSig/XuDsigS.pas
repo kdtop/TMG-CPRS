@@ -1184,11 +1184,11 @@ begin
     ChainPara.cbSize := sizeof(chainPara);
     ChainPara.RequestedUsage := CertUsage;
     ChainConfig.cbSize := sizeof(CERT_CHAIN_ENGINE_CONFIG);
-    ChainConfig.hRestrictedRoot := 0;
-    ChainConfig.hRestrictedTrust := 0;
-    ChainConfig.hRestrictedOther := 0;
+    ChainConfig.hRestrictedRoot := nil;
+    ChainConfig.hRestrictedTrust := nil;
+    ChainConfig.hRestrictedOther := nil;
     ChainConfig.cAdditionalStore := 0;
-    ChainConfig.rghAdditionalStore := 0;
+    ChainConfig.rghAdditionalStore := nil;
     ChainConfig.dwFlags := CERT_CHAIN_REVOCATION_CHECK_CHAIN;
     ChainConfig.dwUrlRetrievalTimeout := 30000;
     ChainConfig.MaximumCachedCertificates := 0;
@@ -1212,8 +1212,8 @@ begin
     if (CertGetCertificateChain(hChainEngine,
         // Use 0 the default chain engine.
         pCertContext,          // Pointer to the end certificate.
-        nil,                  // Use the default time.
-        0,              // Search no additional stores.
+        nil,                   // Use the default time.
+        nil,                   // Search no additional stores.
         @ChainPara,            // Use AND logic, and enhanced key usage
         // as indicated in the ChainPara
         // data structure.
@@ -1377,6 +1377,7 @@ var
     dwI: DWORD;
     cch: integer;
     Str: AnsiString;
+    ErrorText: string; //kt //codex 8/30/26
     ActiveProtocol: DWORD;
     fhSC: sCardContext;
     fhCard: longint;
@@ -1408,7 +1409,7 @@ begin
     // check for card in reader
     offset := 1;
     done := false;
-    Str := StrPas(PAnsiChar(szReaders));
+    Str := AnsiString(PAnsiChar(szReaders)); //kt //codex 8/30/26
     while not done do
     begin
       dwi := SCardConnectA(fhSC, PAnsiChar(Str), SCARD_SHARE_SHARED, 3, fhCard, @ActiveProtocol);
@@ -1432,7 +1433,7 @@ begin
           begin
             szReaders[index] := szReaders[index+offset-1];
           end;
-          Str := StrPas(PAnsiChar(szReaders));
+          Str := AnsiString(PAnsiChar(szReaders)); //kt //codex 8/30/26
           offset := 1;
         end;
       end;
@@ -1440,8 +1441,8 @@ begin
     if not (dwi = SCARD_S_SUCCESS) then
     begin
       Result := false;
-      Str := SysErrorMessage(dwi);
-      ShowMessage(Str);
+      ErrorText := SysErrorMessage(dwi); //kt //codex 8/30/26
+      ShowMessage(ErrorText); //kt //codex 8/30/26
     end;
 end;
 

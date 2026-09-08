@@ -11,7 +11,6 @@ object frmTemplateSearch: TfrmTemplateSearch
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -19,7 +18,6 @@ object frmTemplateSearch: TfrmTemplateSearch
   DesignSize = (
     540
     317)
-  PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl
     Left = 0
@@ -64,9 +62,6 @@ object frmTemplateSearch: TfrmTemplateSearch
     Anchors = [akTop, akRight]
     Caption = '&Use'
     Default = True
-    ModalResult = 1
-    TabOrder = 2
-    OnClick = btnTemAcceptClick
     Glyph.Data = {
       9E050000424D9E05000000000000360400002800000012000000120000000100
       08000000000068010000130B0000130B00000001000000010000000000000000
@@ -114,6 +109,9 @@ object frmTemplateSearch: TfrmTemplateSearch
       020204F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6FA0202F60000F6F6F6F6F6F6
       F6F6F6F6F6F6F6F6F6FAF6F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6
       0000}
+    ModalResult = 1
+    TabOrder = 2
+    OnClick = btnTemAcceptClick
   end
   object btnTemCancel: TBitBtn
     Left = 423
@@ -122,8 +120,6 @@ object frmTemplateSearch: TfrmTemplateSearch
     Height = 24
     Anchors = [akTop, akRight]
     Caption = '&Cancel'
-    ModalResult = 2
-    TabOrder = 3
     Glyph.Data = {
       36040000424D3604000000000000360000002800000010000000100000000100
       20000000000000040000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -159,6 +155,8 @@ object frmTemplateSearch: TfrmTemplateSearch
       FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
       ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
       80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+    ModalResult = 2
+    TabOrder = 3
   end
   object lbTemMatches: TListBox
     Left = 4

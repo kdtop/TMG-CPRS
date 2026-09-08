@@ -114,8 +114,8 @@ type
       function GetSLByIndex(Index : integer) : TStringList;
     public
       constructor Create();
-      destructor Destroy();
-      function Add(AStringList : TStringList) : integer;  //returns ID
+      destructor Destroy(); override; //kt //codex 8/30/26
+      function Add(AStringList : TStringList) : integer; reintroduce;  //returns ID //kt //codex 8/30/26
       procedure DeleteAndFree(ID : Integer);  //this will delete entry and free contained TStringList, if ID is valid;
       procedure DeleteAndFreeIndex(Index : integer);
       procedure ClearAndFree;
@@ -294,7 +294,7 @@ var
 begin
   with RPCBrokerV.Param[ParamIndex] do begin
     PType := list;
-	  with AStringList do for i := 0 to Count - 1 do Mult[IntToStr(i+1)] := AnsiString(Strings[i]); //kt //codex 7/24/26
+	  with AStringList do for i := 0 to Count - 1 do Mult[IntToStr(i+1)] := Strings[i]; //kt //codex 8/30/26
   end;
 end;
 
@@ -307,9 +307,9 @@ var //kt //codex 7/24/26
   i: integer; //kt //codex 7/24/26
   TmpExt: Extended; //kt //codex 7/24/26
 
-  procedure AssignBrokerParam(ParamIndex: Integer; const AValue: AnsiString); //kt //codex 7/24/26
+  procedure AssignBrokerParam(ParamIndex: Integer; const AValue: string); //kt //codex 8/30/26
   var //kt //codex 7/24/26
-    BrokerValue: AnsiString; //kt //codex 7/24/26
+    BrokerValue: string; //kt //codex 8/30/26
 
   begin //kt //codex 7/24/26
     BrokerValue := AValue; //kt //codex 7/24/26
@@ -332,33 +332,33 @@ begin //kt //codex 7/24/26
     for i := 0 to High(AParam) do with AParam[i] do begin
       Param[i].PType := literal;
       case VType of
-        vtInteger:    AssignBrokerParam(i, AnsiString(IntToStr(VInteger))); //kt //codex 7/24/26
-        vtBoolean:    AssignBrokerParam(i, AnsiString(BoolChar[VBoolean])); //kt //codex 7/24/26
+        vtInteger:    AssignBrokerParam(i, IntToStr(VInteger)); //kt //codex 8/30/26
+        vtBoolean:    AssignBrokerParam(i, BoolChar[VBoolean]); //kt //codex 8/30/26
         vtChar:       if VChar = #0 then //kt //codex 7/24/26
                         AssignBrokerParam(i, '') //kt //codex 7/24/26
                       else //kt //codex 7/24/26
-                        AssignBrokerParam(i, AnsiString(VChar)); //kt //codex 7/24/26
+                        AssignBrokerParam(i, string(VChar)); //kt //codex 8/30/26
         vtWideChar:   if VWideChar = #0 then //kt //codex 7/24/26
                           AssignBrokerParam(i, '') //kt //codex 7/24/26
                         else //kt //codex 7/24/26
-                          AssignBrokerParam(i, AnsiString(VWideChar)); //kt //codex 7/24/26
+                          AssignBrokerParam(i, VWideChar); //kt //codex 8/30/26
         //vtExtended:   Param[i].Value := FloatToStr(VExtended^);
         vtExtended:   begin //kt //codex 7/24/26
                         TmpExt := VExtended^; //kt //codex 7/24/26
                         if(abs(TmpExt) < 0.0000000000001) then TmpExt := 0; //kt //codex 7/24/26
-                          AssignBrokerParam(i, AnsiString(FloatToStr(TmpExt))); //kt //codex 7/24/26
+                          AssignBrokerParam(i, FloatToStr(TmpExt)); //kt //codex 8/30/26
                         end; //kt //codex 7/24/26
-        vtString:     AssignBrokerParam(i, AnsiString(VString^)); //kt //codex 7/24/26
-        vtPChar:      AssignBrokerParam(i, AnsiString(StrPas(VPChar))); //kt //codex 7/24/26
-        vtPWideChar:  AssignBrokerParam(i, AnsiString(WideString(VPWideChar))); //kt //codex 7/24/26
+        vtString:     AssignBrokerParam(i, string(VString^)); //kt //codex 8/30/26
+        vtPChar:      AssignBrokerParam(i, string(VPChar)); //kt //codex 8/30/26
+        vtPWideChar:  AssignBrokerParam(i, WideString(VPWideChar)); //kt //codex 8/30/26
         vtPointer:    if VPointer = nil //kt //codex 7/24/26
                         then ClearParameters := True {Param[i].PType := null} //kt //codex 7/24/26
                         else raise Exception.Create('Pointer type must be nil.'); //kt //codex 7/24/26
         vtObject:     if VObject is TStrings then SetList(TStrings(VObject), i);
-        vtAnsiString: AssignBrokerParam(i, AnsiString(VAnsiString)); //kt //codex 7/24/26
-        vtWideString: AssignBrokerParam(i, AnsiString(WideString(VWideString))); //kt //codex 7/24/26
-        vtUnicodeString: AssignBrokerParam(i, AnsiString(UnicodeString(VUnicodeString))); //kt //codex 7/24/26
-        vtInt64:      AssignBrokerParam(i, AnsiString(IntToStr(VInt64^))); //kt //codex 7/24/26
+        vtAnsiString: AssignBrokerParam(i, string(AnsiString(VAnsiString))); //kt //codex 8/30/26
+        vtWideString: AssignBrokerParam(i, WideString(VWideString)); //kt //codex 8/30/26
+        vtUnicodeString: AssignBrokerParam(i, UnicodeString(VUnicodeString)); //kt //codex 8/30/26
+        vtInt64:      AssignBrokerParam(i, IntToStr(VInt64^)); //kt //codex 8/30/26
         else raise Exception.Create('Unable to pass parameter type to Broker.');
       end; {case}
     end; {for}

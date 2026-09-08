@@ -1,7 +1,7 @@
 unit uGMV_SaveRestore;
 
 interface
-uses SysUtils, Forms, Dialogs;
+uses System.UITypes, SysUtils, Forms, Dialogs; //kt //codex 8/30/26
 
 procedure SaveWindowSettings(Form: TForm);
 procedure RestoreWindowSettings(var Form: TForm);

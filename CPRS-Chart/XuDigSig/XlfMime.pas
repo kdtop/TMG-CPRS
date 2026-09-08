@@ -136,7 +136,8 @@ begin
   if L > 0 then
   begin
     SetLength(Result, MimeEncodedSize(L));
-    MimeEncode(PChar(S)^, L, PChar(Result)^);
+    //kt //codex original --> MimeEncode(PChar(S)^, L, PChar(Result)^);
+    MimeEncode(PAnsiChar(S)^, L, PAnsiChar(Result)^); //kt //codex 8/30/26
   end
   else
     Result := '';
@@ -155,8 +156,10 @@ begin
     SetLength(Result, MimeDecodedSize(L));
     ByteBuffer := 0;
     ByteBufferSpace := 4;
-    L := MimeDecodePartial(PChar(S)^, L, PChar(Result)^, ByteBuffer, ByteBufferSpace);
-    Inc(L, MimeDecodePartialEnd(PChar(Cardinal(Result) + L)^, ByteBuffer, ByteBufferSpace));
+    //kt //codex original --> L := MimeDecodePartial(PChar(S)^, L, PChar(Result)^, ByteBuffer, ByteBufferSpace);
+    L := MimeDecodePartial(PAnsiChar(S)^, L, PAnsiChar(Result)^, ByteBuffer, ByteBufferSpace); //kt //codex 8/30/26
+    //kt //codex original --> Inc(L, MimeDecodePartialEnd(PChar(Cardinal(Result) + L)^, ByteBuffer, ByteBufferSpace));
+    Inc(L, MimeDecodePartialEnd(PAnsiChar(Cardinal(Result) + L)^, ByteBuffer, ByteBufferSpace)); //kt //codex 8/30/26
     SetLength(Result, L);
   end;
 end;

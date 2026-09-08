@@ -865,11 +865,13 @@ end;
         FPos := PosEx(FooterMarkerStart,Text,P);
         if ((HPos < FPos) and (HPos <> 0)) or ((HPos > FPos) and (FPos=0)) then begin
           //Header found next in sequence
-          P := HPos + StrLen(HeaderMarkerStart);
+          //kt //codex original -->           P := HPos + StrLen(HeaderMarkerStart);
+          P := HPos + Length(HeaderMarkerStart); //kt //codex 8/30/26
           FPos := 0;
         end else if ((FPos < HPos) and (FPos <> 0)) or ((FPos > HPos) and (HPos=0)) then begin
           //Footer found next in sequence
-          P := FPos + StrLen(FooterMarkerStart);
+          //kt //codex original -->           P := FPos + StrLen(FooterMarkerStart);
+          P := FPos + Length(FooterMarkerStart); //kt //codex 8/30/26
           HPos := 0;
         end;
         //------------------------------------------
@@ -958,7 +960,8 @@ end;
     EndP := PosEx(CP_BRACKET_CLOSE,Text, FooterStartP);
     if EndP=0 then exit;
     EndP := EndP + Length(CP_BRACKET_CLOSE);
-    while Text[EndP] in [#10,#13] do Inc(EndP);
+    //kt //codex original --> while Text[EndP] in [#10,#13] do Inc(EndP);
+    while CharInSet(Text[EndP], [#10,#13]) do Inc(EndP); //kt //codex 8/30/26
     Result := EndP;
   end;
 

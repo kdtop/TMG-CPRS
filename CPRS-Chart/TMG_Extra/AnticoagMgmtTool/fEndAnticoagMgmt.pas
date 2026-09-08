@@ -26,7 +26,8 @@ type
     FAppState : TAppState; //owned elsewhere.  Copy of pointer, not original object
   public
     { Public declarations }
-    function ShowModal(AppState : TAppState) : integer;  overload;
+    //kt //codex original -->     function ShowModal(AppState : TAppState) : integer;  overload;
+    function ShowModal(AppState : TAppState) : integer; reintroduce; overload; //kt //codex 8/30/26
   end;
 
 //var

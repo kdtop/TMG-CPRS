@@ -39,7 +39,7 @@ type
     TagDeltaSL : TStringList;
     procedure MakeSnapshot(SaveToFile : boolean = false);
     constructor Create(WebBrowser : THtmlObj; OutputDir : string);
-    destructor Destroy;
+    destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 implementation
@@ -137,7 +137,8 @@ implementation
           for j := (SavedIdx-1) downto (i+ NUM_CONTEXT_LINES + 1) do begin
             SL.Delete(j);
           end;
-          SL.Insert(j+1,'<B>==== snip =====</B><BR>');
+          //kt //codex original -->           SL.Insert(j+1,'<B>==== snip =====</B><BR>');
+          SL.Insert(i + NUM_CONTEXT_LINES + 1, '<B>==== snip =====</B><BR>'); //kt //codex 8/30/26
           Mode := smLookingForStart;
           inc(i); //so that dec below will leave us on same line.  Close and Open often on same line.
         end;

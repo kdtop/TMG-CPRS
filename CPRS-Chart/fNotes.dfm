@@ -8,7 +8,6 @@ inherited frmNotes: TfrmNotes
   HelpFile = 'overvw'
   Menu = mnuNotes
   Position = poDesigned
-  StyleElements = [seFont, seClient, seBorder]
   OnDestroy = FormDestroy
   OnHide = FormHide
   OnResize = FormResize
@@ -32,7 +31,6 @@ inherited frmNotes: TfrmNotes
   inherited pnlLeft: TPanel
     Width = 260
     Height = 679
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitWidth = 260
     ExplicitHeight = 679
     object lblSpace1: TLabel
@@ -103,9 +101,7 @@ inherited frmNotes: TfrmNotes
         TabOrder = 0
         OnChange = tvNotesChange
         OnChanging = tvNotesChanging
-        OnClick = tvNotesClick
         OnCollapsed = tvNotesCollapsed
-        OnCustomDraw = tvNotesCustomDraw
         OnCustomDrawItem = tvNotesCustomDrawItem
         OnDblClick = tvNotesDblClick
         OnDragDrop = tvNotesDragDrop
@@ -366,7 +362,6 @@ inherited frmNotes: TfrmNotes
     Left = 264
     Width = 792
     Height = 679
-    StyleElements = [seFont, seClient, seBorder]
     ExplicitLeft = 264
     ExplicitWidth = 792
     ExplicitHeight = 679
@@ -864,6 +859,8 @@ inherited frmNotes: TfrmNotes
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitLeft = -74
+          ExplicitTop = 90
         end
         object ToolBar: TToolBar
           Left = 0
@@ -909,7 +906,7 @@ inherited frmNotes: TfrmNotes
             Left = 23
             Top = 0
             Width = 145
-            Height = 21
+            Height = 18
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0
@@ -1885,8 +1882,8 @@ inherited frmNotes: TfrmNotes
         'Status = stsDefault'))
   end
   object mnuNotes: TMainMenu
-    Left = 617
-    Top = 304
+    Left = 737
+    Top = 256
     object mnuView: TMenuItem
       Caption = '&View'
       GroupIndex = 3
@@ -2202,8 +2199,8 @@ inherited frmNotes: TfrmNotes
   end
   object popNoteMemo: TPopupMenu
     OnPopup = popNoteMemoPopup
-    Left = 540
-    Top = 304
+    Left = 580
+    Top = 200
     object popNoteMemoCut: TMenuItem
       Caption = 'Cu&t'
       ShortCut = 16472
@@ -2404,8 +2401,8 @@ inherited frmNotes: TfrmNotes
   end
   object popNoteList: TPopupMenu
     OnPopup = popNoteListPopup
-    Left = 500
-    Top = 305
+    Left = 452
+    Top = 273
     object popNoteListAll: TMenuItem
       Tag = 1
       Caption = '&Signed Notes (All)'
@@ -2523,14 +2520,14 @@ inherited frmNotes: TfrmNotes
   object dlgFindText: TFindDialog
     Options = [frDown, frHideUpDown]
     OnFind = dlgFindTextFind
-    Left = 452
-    Top = 312
+    Left = 412
+    Top = 400
   end
   object dlgReplaceText: TReplaceDialog
     OnFind = dlgReplaceTextFind
     OnReplace = dlgReplaceTextReplace
-    Left = 413
-    Top = 312
+    Left = 341
+    Top = 288
   end
   object imgLblNotes: TVA508ImageListLabeler
     Components = <
@@ -2543,8 +2540,8 @@ inherited frmNotes: TfrmNotes
     Top = 195
   end
   object popupAddImage: TPopupMenu
-    Left = 580
-    Top = 304
+    Left = 620
+    Top = 336
     object mnuSelectExistingImage: TMenuItem
       Bitmap.Data = {
         F6000000424DF600000000000000760000002800000010000000100000000100

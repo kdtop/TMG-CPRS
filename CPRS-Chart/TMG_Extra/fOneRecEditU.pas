@@ -101,8 +101,8 @@ type
     property Posted : boolean read FPosted;
     property ChangesMade : boolean read GetChangesMade;  //Signal that data was changed somehow.
     property GridInfo : TGridInfo read GetGridInfo;
-    constructor Create(AOwner : TComponent);
-    Destructor Destroy;
+    constructor Create(AOwner : TComponent); override; //kt //codex 8/30/26
+    Destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 const
@@ -172,7 +172,7 @@ implementation
     TempGridInfo := TGridInfo.Create;
     TempGridInfo.FileNum := FileNum;
     TempGridInfo.IENS := IENS;
-    EditOneRecordModal(AOwner, TempGridInfo, SuppressAutoViewPress);
+    Result := EditOneRecordModal(AOwner, TempGridInfo, SuppressAutoViewPress);
 
     TempGridInfo.Free;
   end;

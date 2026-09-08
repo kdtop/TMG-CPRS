@@ -194,6 +194,7 @@ implementation
 
   function OppositeCorner(Corner : tCorner) : tCorner;
   begin
+    Result := cTopLeft; //kt providing default 8/30/26
     case Corner of
       cTopLeft:    Result := cBottomRight;
       cBottomLeft: Result := cTopRight;

@@ -5,7 +5,6 @@ inherited frmCarePlan: TfrmCarePlan
   ClientHeight = 421
   ClientWidth = 1090
   Position = poMainFormCenter
-  StyleElements = [seFont, seClient, seBorder]
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -748,6 +747,11 @@ inherited frmCarePlan: TfrmCarePlan
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0

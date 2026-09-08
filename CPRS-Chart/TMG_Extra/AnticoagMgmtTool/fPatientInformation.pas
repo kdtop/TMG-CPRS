@@ -91,7 +91,8 @@ type
     procedure DataToGUI;
   public
     { Public declarations }
-    function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; overload;
+    //kt //codex original -->     function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; overload;
+    function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; reintroduce; overload; //kt //codex 8/30/26
     //property RestrictedDrawDaysStr : string read GetRestrictedDrawDaysStr;
     property ModifiedAppState : TAppState read FAppState;
   end;
@@ -250,6 +251,7 @@ var Discharged : boolean;
     TempFlowsheet : TOneFlowsheet;
 
 begin
+  Discharged := false; //kt providing default 8/30/26
   if not FPatient.DischargedFromClinic then begin
     frmDischargeInfo := TfrmDischargeInfo.Create(Self);
     TempAppState := TAppState.Create;

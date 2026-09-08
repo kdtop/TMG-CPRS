@@ -132,8 +132,10 @@ begin
       txtKeyword.Text := CurrentContext.Keyword;
       if CurrentContext.SearchField <> '' then
         begin
-          ckTitle.Checked := (CurrentContext.SearchField[1] in ['T','B']) and (CurrentContext.Keyword <> '');
-          ckSubject.Checked := (CurrentContext.SearchField[1] in ['S','B'])and (CurrentContext.Keyword <> '');
+          //kt //codex original --> ckTitle.Checked := (CurrentContext.SearchField[1] in ['T','B']) and (CurrentContext.Keyword <> '');
+          ckTitle.Checked := CharInSet(CurrentContext.SearchField[1], ['T','B']) and (CurrentContext.Keyword <> ''); //kt //codex 8/30/26
+          //kt //codex original --> ckSubject.Checked := (CurrentContext.SearchField[1] in ['S','B'])and (CurrentContext.Keyword <> '');
+          ckSubject.Checked := CharInSet(CurrentContext.SearchField[1], ['S','B'])and (CurrentContext.Keyword <> ''); //kt //codex 8/30/26
         end;
       ckShowSubject.Checked := CurrentContext.ShowSubject;
       //with radTreeSort do if SortNotesAscending then ItemIndex := 1 else ItemIndex := 0;

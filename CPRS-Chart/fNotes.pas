@@ -348,7 +348,6 @@ type
     procedure btnEditZoomOutClick(Sender: TObject);
     procedure btnEditZoomNormalClick(Sender: TObject);
     procedure btnEditZoomInClick(Sender: TObject);
-    procedure tvNotesCustomDraw(Sender: TCustomTreeView; const ARect: TRect; var DefaultDraw: Boolean);
     procedure tvNotesCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);  //kt 6/15
     procedure popAddComponentClick(Sender: TObject);
     procedure mnuHideTitleClick(Sender: TObject);
@@ -405,7 +404,6 @@ type
     procedure popNoteMemoSaveContinueClick(Sender: TObject);
     procedure mnuEditDialgFieldsClick(Sender: TObject);
     procedure tvNotesChange(Sender: TObject; Node: TTreeNode);
-    procedure tvNotesClick(Sender: TObject);
     procedure tvNotesCollapsed(Sender: TObject; Node: TTreeNode);
     procedure tvNotesExpanded(Sender: TObject; Node: TTreeNode);
     procedure tvNotesStartDrag(Sender: TObject;
@@ -495,7 +493,6 @@ type
     FOldDrawerPnlEncounterButtonExit: TNotifyEvent;
     FOldDrawerEdtSearchExit: TNotifyEvent;
     FStarting: boolean;
-    //9/28/15 frmSearchStop: TfrmSearchStop;                  //kt added 9/25/15
     FViewNote : TStringList;                        //kt 9/11
     FWarmedUp : boolean;                            //kt 9/11
     LastAuthor: Int64;                              //kt 9/11
@@ -620,10 +617,11 @@ type
     procedure UpdateEncounterInfo(AEditPCEObj, AShowPCEObj : TPCEData);                 //kt 5/11/23
     procedure UpdateEncounterInfoNonModal(AEditPCEObj, AShowPCEObj : TPCEData;
                                           CallBackProcs : TNotifyPCEEventList);         //kt 5/11/23
-    procedure ChangeStatus(Status:string);    //7/18/23
-    procedure AdjustEncButton;  //5/15/25
-    function IsMemoEncTooShort:boolean;  //5/15/25
-    procedure SetEncIcon;  //5/15/25
+    procedure ChangeStatus(Status:string);                                              //7/18/23
+    procedure AdjustEncButton;                                                          //5/15/25
+    function IsMemoEncTooShort:boolean;                                                 //5/15/25
+    procedure SetEncIcon;                                                               //5/15/25
+    procedure HandleSortBy(GroupBy : string);
 
   public
     HtmlEditor : THtmlObj;                                                              //kt 9/11
@@ -643,7 +641,8 @@ type
     procedure ReloadNotes;                                                              //kt added 4/15
     function AllowSignature(ContextChanging : boolean=false): Boolean;                  //VEFA 2/8/15  //kt 4/9/23
     //procedure TMG_CMDialogKey(var AMessage: TMessage); message CM_DIALOGKEY;          //kt 9/2016
-    procedure LoadNotes;                                                                //TMG moved from Private  2/17
+    //kt //codex original --> procedure LoadNotes;
+    procedure LoadNotes(PreferredNoteIEN: Int64 = 0; ActivateSelection: Boolean = True); //kt //codex 9/8/26
     procedure cmdPCEClickNonModal(Sender: TObject);                                     //kt 5/11/23
     function ActiveEditOf(AnIEN: Int64; ARequest: integer): Boolean;
     function AllowContextChange(var WhyNot: string): Boolean; override;
@@ -743,7 +742,6 @@ const
   NT_ACT_EDIT_NOTE = 4;
   NT_ACT_ID_ENTRY  = 5;
 
-  //HTML_ZOOM_STEP = 20;  //e.g. 5% change with each button click  //kt 6/2014
   VIEW_ACTIVATE_ONLY = true; //kt 9/11
   DEFAULT_HTML_EDIT_MODE = 'Edit-in-HTML default mode';       //kt 9/11
 
@@ -802,8 +800,6 @@ begin
     WhyNot := 'Please wait until note loading is done.';
   end;
 
-  //kt 3/16 original --> if Assigned(frmTemplateDialog) then
-  //kt 3/16 original -->   if Screen.ActiveForm = frmTemplateDialog then
   if Screen.ActiveForm is TfrmTemplateDialog then begin
     AfrmTemplateDialog := TfrmTemplateDialog(Screen.ActiveForm);
     //if (fsModal in frmTemplateDialog.FormState) then
@@ -813,8 +809,7 @@ begin
              Result := False;
            end;
       '0': begin
-             if WhyNot = 'COMMIT' then
-               begin
+             if WhyNot = 'COMMIT' then begin
                  FSilent := True;
                  //kt 3/16 original --> frmTemplateDialog.Silent := True;
                  AfrmTemplateDialog.Silent := True;
@@ -831,18 +826,15 @@ begin
              Result := False;
            end;
       '0': begin
-             if WhyNot = 'COMMIT' then
-               begin
+             if WhyNot = 'COMMIT' then begin
                  FSilent := True;
                  frmRemDlg.Silent := True;
                  frmRemDlg.btnCancelClick(Self);
                end;
              //agp fix for a problem with reminders not clearing out when switching patients
-             if WhyNot = '' then
-                begin
+             if WhyNot = '' then begin
                  frmRemDlg.btnCancelClick(Self);
-                 if assigned(frmRemDlg) then
-                   begin
+                 if assigned(frmRemDlg) then begin
                      result := false;
                      exit;
                    end;
@@ -850,7 +842,6 @@ begin
            end;
     end; //case
   end;  //kt
-  //kt if EditingIndex <> -1 then begin
   if EditingNoteActive then begin
     case BOOLCHAR[frmFrame.CCOWContextChanging] of
       '1': begin
@@ -876,8 +867,7 @@ begin
              Result := False;
            end;
       '0': begin
-             if WhyNot = 'COMMIT' then
-               begin
+             if WhyNot = 'COMMIT' then begin
                  FSilent := True;
                  frmEncounterFrame.Abort := False;
                  frmEncounterFrame.Cancel := True;
@@ -931,16 +921,16 @@ begin
   uChanging := False;
   ClearNoteRecords;
   memNote.Clear;
-  HTMLViewer.Clear;   //kt 9/11
-  HTMLEditor.Clear;   //kt 9/11
-  FWarmedUp := false; //kt 9/11
-  SetDisplayToHTMLvsText([vmText,vmView], nil, VIEW_ACTIVATE_ONLY); //kt 9/11
-  ResetHideButton;    //kt 5/12/14
-  GLOBAL_HTMLTemplateDialogsMgr.Clear;  //kt 4/16
+  HTMLViewer.Clear;
+  HTMLEditor.Clear;
+  FWarmedUp := false;
+  SetDisplayToHTMLvsText([vmText,vmView], nil, VIEW_ACTIVATE_ONLY);
+  ResetHideButton;
+  GLOBAL_HTMLTemplateDialogsMgr.Clear;
   memPCEShow.Clear;
   uPCEShow.Clear;
   uPCEEdit.Clear;
-  frmDrawers.ClearPtData;  //kt added 6/15
+  frmDrawers.ClearPtData;
   frmDrawers.ResetTemplates;
   NoteTotal := sCallV('ORCNOTE GET TOTAL', [Patient.DFN]);
 end;
@@ -1002,16 +992,12 @@ var
   NoteIEN: int64;
   i: integer;
 begin
-  with AForm.lbIDParents do
-  begin
-    for i := 0 to Items.Count - 1 do
-     begin
-       if Selected[i] then
-        begin
+  with AForm.lbIDParents do begin
+    for i := 0 to Items.Count - 1 do begin
+       if Selected[i] then begin
          AForm.lbIDParents.ItemIndex := i;
          NoteIEN := ItemIEN;  //StrToInt64def(Piece(TStringList(Items.Objects[i])[0],U,1),0);
-         if NoteIEN > 0 then PrintNote(NoteIEN, DisplayText[i], TRUE) else
-         begin
+         if NoteIEN > 0 then PrintNote(NoteIEN, DisplayText[i], TRUE) else begin
            if NoteIEN = 0 then InfoBox(TX_NONOTE, TX_NONOTE_CAP, MB_OK);
            if NoteIEN < 0 then InfoBox(TX_NOPRT_NEW, TX_NOPRT_NEW_CAP, MB_OK);
          end;
@@ -1053,7 +1039,6 @@ end;
 procedure TfrmNotes.ClearEditControls;
 { resets controls used for entering a new progress note }
 begin
-  // clear FEditNote (should FEditNote be an object with a clear method?)
   with FEditNote do
   begin
     DocType      := 0;
@@ -1072,10 +1057,9 @@ begin
     PkgRef       := '';
     NeedCPT      := False;
     Addend       := 0;
-    IsComponent  := false;  //kt added 
+    IsComponent  := false;  //kt added
     {LastCosigner & LastCosignerName aren't cleared because they're used as default for next note.}
-    //kt 9/11  Lines        := nil;
-    if Assigned (Lines) then Lines.Clear;  //kt 9/11
+    if Assigned (Lines) then Lines.Clear;
     PRF_IEN := 0;
     ActionIEN := '';
   end;
@@ -1083,9 +1067,9 @@ begin
   txtSubject.Text := '';
   SearchTextStopFlag := false;
   if memNewNote <> nil then memNewNote.Clear; //CQ7012 Added test for nil
-  HTMLEditor.Clear;  //kt 9/11
-  HTMLViewer.Clear;  //kt 9/11
-  FHTMLEditMode := emNone; //kt 9/11
+  HTMLEditor.Clear;
+  HTMLViewer.Clear;
+  FHTMLEditMode := emNone;
   timAutoSave.Enabled := False;
   // clear the PCE object for editing
   uPCEEdit.Clear;
@@ -1130,12 +1114,12 @@ begin
   memPCEShow.Visible := ShouldShow;
   if(ShouldShow) then
     sptVert.Top := memPCEShow.Top - sptVert.Height;
-  if (vmHTML in FViewMode) then begin              //kt 9/11
-    HTMLViewer.Invalidate;                         //kt 9/11
-  end else begin                                   //kt 9/11
+  if (vmHTML in FViewMode) then begin
+    HTMLViewer.Invalidate;
+  end else begin
   memNote.Invalidate;
-  end;                                             //kt 9/11
-  Application.ProcessMessages;                     //kt 5/15
+  end;
+  Application.ProcessMessages;
   btnOpenEnc.Visible := ShouldShow;
   if ShouldShow then begin  //5/15/25
     memPCEShow.height := 45;
@@ -1153,72 +1137,65 @@ var
   AnIEN: integer;
 begin
   memPCEShow.Clear;
-  //with lstNotes do if ItemIndex = EditingIndex then begin
   if EditingNoteSelected then begin
-    //kt with uPCEEdit do begin
-      uPCEEdit.AddStrData(memPCEShow.Lines);
-      NoPCE := (memPCEShow.Lines.Count = 0);
-      VitalStr  := TStringList.create;
-      try
-        GetVitalsFromDate(VitalStr, uPCEEdit);
-        uPCEEdit.AddVitalData(VitalStr, memPCEShow.Lines);
-      finally
-        VitalStr.free;
-      end;
-      ShowPCEButtons(TRUE);
-      ShowPCEControls(cmdPCE.Enabled or (memPCEShow.Lines.Count > 0));
-      if(NoPCE and memPCEShow.Visible) then
-        memPCEShow.Lines.Insert(0, TX_NOPCE);
-      memPCEShow.SelStart := 0;
+    uPCEEdit.AddStrData(memPCEShow.Lines);
+    NoPCE := (memPCEShow.Lines.Count = 0);
+    VitalStr  := TStringList.create;
+    try
+      GetVitalsFromDate(VitalStr, uPCEEdit);
+      uPCEEdit.AddVitalData(VitalStr, memPCEShow.Lines);
+    finally
+      VitalStr.free;
+    end;
+    ShowPCEButtons(TRUE);
+    ShowPCEControls(cmdPCE.Enabled or (memPCEShow.Lines.Count > 0));
+    if(NoPCE and memPCEShow.Visible) then
+      memPCEShow.Lines.Insert(0, TX_NOPCE);
+    memPCEShow.SelStart := 0;
 
-      if(InteractiveRemindersActive) then begin
-        if(GetReminderStatus = rsNone) then begin
-          EnableList := [odTemplates]
-        end else begin
-          if FutureEncounter(uPCEEdit) then begin
-            EnableList := [odTemplates];
-            ShowList := [odTemplates];
-          end else begin
-            EnableList := [odTemplates, odReminders];
-            ShowList := [odTemplates, odReminders];
-          end;
-        end;
+    if(InteractiveRemindersActive) then begin
+      if(GetReminderStatus = rsNone) then begin
+        EnableList := [odTemplates]
       end else begin
-        EnableList := [odTemplates];
-        ShowList := [odTemplates];
+        if FutureEncounter(uPCEEdit) then begin
+          EnableList := [odTemplates];
+          ShowList := [odTemplates];
+        end else begin
+          EnableList := [odTemplates, odReminders];
+          ShowList := [odTemplates, odReminders];
+        end;
       end;
+    end else begin
+      EnableList := [odTemplates];
+      ShowList := [odTemplates];
+    end;
 
-      //kt if uTMGOptions.ReadString('SpecialLocation','')='FPG' then begin  //kt added if block 10/7/15
-      if AtFPGLoc() then begin  //kt added if block 10/7/15
-        ShowList := ShowList + [odProblems]; EnableList := EnableList + [odProblems]; //kt added 6/15
-      end;
-      frmDrawers.DisplayDrawers(TRUE, EnableList, ShowList);
-    //kt end; //with uPCEEdit
+    if AtFPGLoc() then begin
+      ShowList := ShowList + [odProblems]; EnableList := EnableList + [odProblems]; //kt added 6/15
+    end;
+    frmDrawers.DisplayDrawers(TRUE, EnableList, ShowList);
   end else begin  //i.e. NOT editing (lstNotes.ItemIndex <> EditingIndex)
     ShowPCEButtons(FALSE);
     frmDrawers.DisplayDrawers(TRUE, [odTemplates], [odTemplates]);
-    //original -->     AnIEN := lstNotes.ItemIEN;
     AnIEN := SelectedNoteIEN;
     ActOnDocument(ActionSts, AnIEN, 'VIEW');
     if ActionSts.Success then begin
       StatusText('Retrieving encounter information...');
-      //kt with uPCEShow do begin
-        uPCEShow.NoteDateTime := GetSelectedNoteFMDateTime; //kt MakeFMDateTime(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3));  //uPCEShow.NoteDateTime
-        uPCEShow.PCEForNote(AnIEN, uPCEEdit);  //uPCEShow.PCEForNote
-        uPCEShow.AddStrData(memPCEShow.Lines); //uPCEShow.AddStrData
-        NoPCE := (memPCEShow.Lines.Count = 0);
-        VitalStr  := TStringList.create;
-        try
-          GetVitalsFromNote(VitalStr, uPCEShow, AnIEN);
-          uPCEShow.AddVitalData(VitalStr, memPCEShow.Lines); //uPCEShow.AddVitalData
-        finally
-          VitalStr.free;
-        end;
-        ShowPCEControls(memPCEShow.Lines.Count > 0);   //This will enable PCE display window, if there is anything to show. 
-        if(NoPCE and memPCEShow.Visible) then
-          memPCEShow.Lines.Insert(0, TX_NOPCE);
-        memPCEShow.SelStart := 0;
-      //kt end; //with uPCEShow
+      uPCEShow.NoteDateTime := GetSelectedNoteFMDateTime; //kt MakeFMDateTime(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3));  //uPCEShow.NoteDateTime
+      uPCEShow.PCEForNote(AnIEN, uPCEEdit);  //uPCEShow.PCEForNote
+      uPCEShow.AddStrData(memPCEShow.Lines); //uPCEShow.AddStrData
+      NoPCE := (memPCEShow.Lines.Count = 0);
+      VitalStr  := TStringList.create;
+      try
+        GetVitalsFromNote(VitalStr, uPCEShow, AnIEN);
+        uPCEShow.AddVitalData(VitalStr, memPCEShow.Lines); //uPCEShow.AddVitalData
+      finally
+        VitalStr.free;
+      end;
+      ShowPCEControls(memPCEShow.Lines.Count > 0);   //This will enable PCE display window, if there is anything to show.
+      if(NoPCE and memPCEShow.Visible) then
+        memPCEShow.Lines.Insert(0, TX_NOPCE);
+      memPCEShow.SelStart := 0;
       StatusText('');
     end else begin
       ShowPCEControls(FALSE);
@@ -1237,10 +1214,6 @@ var
 begin
   NoteText := NoteRecordAt(AnIndex);
   AuthorInfo := Piece(NoteText, U, 5); //kt //codex 8/18/26
-  //original -->   with lstNotes do
-  //original -->     Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(Items[AnIndex], U, 3))) +
-  //original -->               '  ' + Piece(Items[AnIndex], U, 2) + ', ' + Piece(Items[AnIndex], U, 6) + ', ' +
-  //original -->               Piece(Piece(Items[AnIndex], U, 5), ';', 2)
   Result := FormatFMDateTime('mmm dd,yy', MakeFMDateTime(Piece(NoteText, U, 3))) +
             '  ' + Piece(NoteText, U, 2) + ', ' + Piece(NoteText, U, 6) + ', ' +
             Piece(AuthorInfo, ';', 2) //kt //codex 8/18/26
@@ -1260,11 +1233,9 @@ begin
     if IsConsultTitle(Title) and (PkgIEN = 0) then Result := True;
     if IsSurgeryTitle(Title) and (PkgIEN = 0) then Result := True;
     if IsPRFTitle(Title) and (PRF_IEN = 0) and (not DocType = TYP_ADDENDUM) then Result := True;
-    if (DocType = TYP_ADDENDUM) then
-    begin
+    if (DocType = TYP_ADDENDUM) then begin
       if AskCosignerForDocument(Addend, Author, DateTime) and (Cosigner <= 0) then Result := True;
-    end else
-    begin
+    end else begin
       if Title > 0 then CurTitle := Title else CurTitle := DocType;
       if AskCosignerForTitle(CurTitle, Author, DateTime) and (Cosigner <= 0) then Result := True;
     end;
@@ -1297,13 +1268,11 @@ end;
 procedure TfrmNotes.SetSubjectVisible(ShouldShow: Boolean);
 { hide/show subject & resize panel accordingly - leave 6 pixel margin above memNewNote }
 begin
-  if ShouldShow then
-  begin
+  if ShouldShow then begin
     lblSubject.Visible := True;
     txtSubject.Visible := True;
     pnlFields.Height   := txtSubject.Top + txtSubject.Height + 6;
-  end else
-  begin
+  end else begin
     lblSubject.Visible := False;
     txtSubject.Visible := False;
     pnlFields.Height   := lblVisit.Top + lblVisit.Height + 6;
@@ -1319,8 +1288,7 @@ begin
   //     deletes another, FOrderID will be for editing note, then delete note, then null
   Result := True;
   FOrderID := GetConsultOrderIEN(AConsult);
-  if (FOrderID <> '') and (FOrderID = frmConsults.OrderID) then
-  begin
+  if (FOrderID <> '') and (FOrderID = frmConsults.OrderID) then begin
     InfoBox(TX_ORDER_LOCKED, TC_ORDER_LOCKED, MB_OK);
     Result := False;
     Exit;
@@ -1338,31 +1306,26 @@ var
 begin
   Result := True;
   AConsult := 0;
-  if frmConsults.ActiveEditOf(AnIEN) then
-    begin
-      InfoBox(TX_ORDER_LOCKED, TC_ORDER_LOCKED, MB_OK);
-      Result := False;
-      Exit;
-    end;
-    if Changes.Exist(CH_DOC, IntToStr(AnIEN)) then Exit;  // already locked
+  if frmConsults.ActiveEditOf(AnIEN) then begin
+    InfoBox(TX_ORDER_LOCKED, TC_ORDER_LOCKED, MB_OK);
+    Result := False;
+    Exit;
+  end;
+  if Changes.Exist(CH_DOC, IntToStr(AnIEN)) then Exit;  // already locked
   // try to lock the consult request first, if there is one
-  if IsConsultTitle(TitleForNote(AnIEN)) then
-  begin
+  if IsConsultTitle(TitleForNote(AnIEN)) then begin
     //original -->     x := GetPackageRefForNote(lstNotes.ItemIEN);
     x := GetPackageRefForNote(AnIEN);
     AConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
     Result := LockConsultRequest(AConsult);
   end;
   // now try to lock the note
-  if Result then
-  begin
+  if Result then begin
     LockDocument(AnIEN, LockMsg);
-    if LockMsg <> '' then
-    begin
+    if LockMsg <> '' then begin
       Result := False;
       // if can't lock the note, unlock the consult request that was just locked
-      if AConsult > 0 then
-      begin
+      if AConsult > 0 then begin
         UnlockOrderIfAble(FOrderID);
         FOrderID := '';
       end;
@@ -1372,14 +1335,7 @@ begin
 end;
 
 procedure TfrmNotes.UnlockConsultRequest(ANote: Int64; AConsult: Integer = 0);
-(* x: string;*)
 begin
-(*  if (AConsult = 0) and IsConsultTitle(TitleForNote(ANote)) then
-    begin
-      x := GetPackageRefForNote(ANote);
-      AConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
-    end;
-  if AConsult = 0 then Exit;*)
   if AConsult = 0 then AConsult := GetConsultIENForNote(ANote);
   if AConsult <= 0 then exit;
   FOrderID := GetConsultOrderIEN(AConsult);
@@ -1390,8 +1346,6 @@ end;
 function TfrmNotes.ActiveEditIEN : Int64;
 //kt added entire function
 begin
-  //kt if EditingIndex >= 0 then Result := lstNotes.GetIEN(EditingIndex)
-  //original -->   if EditingNoteActive then Result := lstNotes.GetIEN(EditingIndex)  //kt
   if EditingNoteActive then Result := NoteIENAt(EditingIndex)  //kt
   else Result := 0;
 end;
@@ -1425,9 +1379,7 @@ end;
 function TfrmNotes.ActiveEditOf(AnIEN: Int64; ARequest: integer): Boolean;
 begin
   Result := False;
-  //kt if EditingIndex < 0 then Exit;
   if not EditingNoteActive then exit; //kt
-  //original -->   if lstNotes.GetIEN(EditingIndex) = AnIEN then begin
   if NoteIENAt(EditingIndex) = AnIEN then begin
     Result := True;
     Exit;
@@ -1474,17 +1426,11 @@ begin
         TitleName := '';
       end;
 
-      //kt if uTMGOptions.ReadString('SpecialLocation','')='FPG' then begin
       if AtFPGLoc() then begin
         DateTime     := Encounter.DateTime;
       end else begin
         DateTime     := FMNow;
       end;
-      { Original Method... Changed because Intracare was having issue with
-        ADT date being used as note date. Now this change only affects FPG   //elh  10/7/11
-      //kt 9/11 DateTime     := FMNow;
-      DateTime     := Encounter.DateTime;
-      }
       //kt 9/11 -- Begin addition ------------
       if LastAuthor<>0 then begin
         Author       := LastAuthor;
@@ -1494,8 +1440,6 @@ begin
         AuthorName   := User.Name;
       end;
       //kt 9/11 -- End addition --------------
-      //kt 9/11 Author       := User.DUZ;
-      //kt 9/11 AuthorName   := User.Name;
       Location     := Encounter.Location;
       LocationName := Encounter.LocationName;
       VisitDate    := Encounter.DateTime;
@@ -1548,12 +1492,12 @@ begin
           end;
         end;
 
-        //original -->         lstNotes.Items.Insert(0, x);
         InsertNoteRecord(0, x);
         uChanging := True;
         tvNotes.Items.BeginUpdate;
         if IsIDChild then begin
-          tmpNode := tvNotes.FindPieceNode(IntToStr(AnIDParent), 1, U, tvNotes.Items.GetFirstNode);
+          //kt //codex original --> tmpNode := tvNotes.FindPieceNode(IntToStr(AnIDParent), 1, U, tvNotes.Items.GetFirstNode);
+          tmpNode := tvNotes.FindPieceNode(IntToStr(AnIDParent), 1, U, nil); //kt //codex 9/8/26
           tmpNode.ImageIndex := IMG_IDNOTE_OPEN;
           tmpNode.SelectedIndex := IMG_IDNOTE_OPEN;
           tmpNode := tvNotes.Items.AddChildObjectFirst(tmpNode, MakeNoteDisplayText(x), MakeNoteTreeObject(x));
@@ -1583,16 +1527,14 @@ begin
         FChanged := False;
         cmdChangeClick(Self); // will set captions, sign state for Changes
         if TMGForcePlainTextEditMode then begin   //kt  added block 12/27/12
-          // Set in TfrmCarePlan.InsertText
           Mode := [vmEdit] + [vmHTML_MODE[False]];   //kt 12/27/12
           TMGForcePlainTextEditMode := False;
         end else begin
-          Mode := [vmEdit] + [vmHTML_MODE[fOptionsNotes.DefaultEditHTMLMode]];   //kt 9/11
+          Mode := [vmEdit] + [vmHTML_MODE[fOptionsNotes.DefaultEditHTMLMode]];
         end;
-        SetDisplayToHTMLvsText(Mode, nil, VIEW_ACTIVATE_ONLY);                 //kt 9/11
+        SetDisplayToHTMLvsText(Mode, nil, VIEW_ACTIVATE_ONLY);
         DisplaySelectedNote;  //kt //codex 8/17/26
         if timAutoSave.Interval <> 0 then EnableAutosave := TRUE;
-        //kt 9/11 Original --> if txtSubject.Visible then txtSubject.SetFocus else memNewNote.SetFocus;
         if txtSubject.Visible then begin                          //kt 9/11
           txtSubject.SetFocus;                                    //kt 9/11
         end else begin                                            //kt 9/11
@@ -1613,7 +1555,6 @@ begin
     if assigned(TmpBoilerPlate) then begin  //will not be true if HaveRequired=false
       DocInfo := MakeXMLParamTIU(IntToStr(CreatedNote.IEN), FEditNote);
       ExecuteTemplateOrBoilerPlate(TmpBoilerPlate, FEditNote.Title, ltTitle, Self, 'Title: ' + FEditNote.TitleName, DocInfo);
-      //kt QuickCopyWith508Msg(TmpBoilerPlate, memNewNote);
       BoilerplateIsHTML := uHTMLTools.TextIsHTML(TmpBoilerPlate.Text);//kt 9/11
       FEditNote.Lines.Assign(TmpBoilerPlate);                         //kt 9/11
       if not ((vmHTML in FViewMode)) and BoilerplateIsHTML then begin //kt 9/11
@@ -1665,19 +1606,7 @@ end;
 
 procedure TfrmNotes.InsertAddendum;
 // sets up fields of pnlWrite to write an addendum for the selected note
-{
-const
-  AS_ADDENDUM = True;
-  IS_ID_CHILD = False;
-var
-  HaveRequired: Boolean;
-  CreatedNote: TCreatedDoc;
-  tmpNode: TTreeNode;
-  x: string;
-  Mode : TViewModeSet;          //kt 4/14
-}
 begin
-  //original -->   InsertChildDoc(TYP_ADDENDUM, lstNotes.Items[lstNotes.ItemIndex]);
   InsertChildDoc(TYP_ADDENDUM, SelectedNoteRecord);  //kt moved code to InsertChildDoc
 end;
 
@@ -1716,12 +1645,10 @@ begin
   with FEditNote do begin
     DocType      := DocumentType;
     IsNewNote    := False;
-    //kt original --> Title        := TitleForNote(lstNotes.ItemIEN);
     Title        := TitleForNote(ParentIEN);
-    //kt original --> TitleName    := Piece(lstNotes.Items[lstNotes.ItemIndex], U, 2);
-    TitleName    := Piece(ParentData, U, 2);  //kt
-    Subject      := DocSubject;  //kt added
-    IsComponent  := (DocumentType = TYP_COMPONENT); //kt added
+    TitleName    := Piece(ParentData, U, 2);
+    Subject      := DocSubject;
+    IsComponent  := (DocumentType = TYP_COMPONENT);  //kt
     if DocumentType = TYP_COMPONENT then TitleName := '['+DocSubject+']';  //kt added
     if Copy(TitleName,1,1) = '+' then TitleName := Copy(TitleName, 3, 199);
     DateTime     := FMNow;
@@ -1870,17 +1797,12 @@ begin
   GetNoteForEdit(FEditNote, SelectedNoteIENVal);  //kt moved. Was right below Changes.Add() before.
   ScanForSubs(FEditNote.Lines);  //8/30/21
   if FEditNote.IsComponent then ChangesMode := CH_SIGN_NA else ChangesMode := CH_SIGN_YES;  //kt added
-  //kt original --> Changes.Add(CH_DOC, lstNotes.ItemID, GetTitleText(EditingIndex), '', CH_SIGN_YES);
-  //original -->   Changes.Add(CH_DOC, lstNotes.ItemID, GetTitleText(EditingIndex), '', ChangesMode);
   Changes.Add(CH_DOC, SelectedNoteIDStr, GetTitleText(EditingIndex), '', ChangesMode);
   Mode := [vmEdit] + [vmHTML_MODE[IsHTML(FEditNote.Lines) or (vmHTML in FViewMode)]]; //kt 9/11
   SetDisplayToHTMLvsText(Mode,FEditNote.Lines);                                       //kt 9/11
-  //kt memNewNote.Lines.Assign(FEditNote.Lines);                                      //kt 9/11
   FChanged := False;
-  if FEditNote.Title = TYP_ADDENDUM then
-  begin
+  if FEditNote.Title = TYP_ADDENDUM then begin
     FEditNote.DocType := TYP_ADDENDUM;
-    //original -->     FEditNote.TitleName := Piece(lstNotes.Items[lstNotes.ItemIndex], U, 2);
     FEditNote.TitleName := Piece(SelectedNoteText, U, 2);
     if Copy(FEditNote.TitleName,1,1) = '+' then FEditNote.TitleName := Copy(FEditNote.TitleName, 3, 199);
     if CompareText(Copy(FEditNote.TitleName, 1, 8), 'Addendum') <> 0
@@ -1910,9 +1832,7 @@ begin
   tvNotes.Items.EndUpdate;
   uChanging := False;
 
-  //original -->   uPCEEdit.NoteDateTime := MakeFMDateTime(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3));
   uPCEEdit.NoteDateTime := MakeFMDateTime(Piece(SelectedNoteText, U, 3));
-  //original -->   uPCEEdit.PCEForNote(lstNotes.ItemIEN, uPCEShow);
   uPCEEdit.PCEForNote(SelectedNoteIENVal, uPCEShow);
   //If no encounter is currently selected, load the note's encounter
   if Encounter.NeedVisit then begin   //TMG added if block  5/27/22
@@ -1963,13 +1883,12 @@ begin
   end else begin
     EmptyNote := (memNewNote.GetTextLen = 0) or not ContainsVisibleChar(memNewNote.Text);
   end;
-  //kt 9/11 if (memNewNote.GetTextLen = 0) or (not ContainsVisibleChar(memNewNote.Text)) then
-  //kt 9/11  begin
   if EmptyNote then begin
     SetSelectedNoteIndex(EditingIndex);
     //original -->     x := lstNotes.ItemID;
     uChanging := True;
-    tvNotes.Selected := tvNotes.FindPieceNode(EditingNoteIDStr, 1, U, tvNotes.Items.GetFirstNode);
+    //kt //codex original --> tvNotes.Selected := tvNotes.FindPieceNode(EditingNoteIDStr, 1, U, tvNotes.Items.GetFirstNode);
+    tvNotes.Selected := tvNotes.FindPieceNode(EditingNoteIDStr, 1, U, nil); //kt //codex 9/8/26
     uChanging := False;
     ActivateSelectedTreeNode;  //kt //codex 8/17/26
     if FSilent or
@@ -1984,23 +1903,17 @@ begin
       //kt --> causes endless loop --> Saved := true; //kt added 5/15. Allow note change to continue, even if user chooses not to delete note.
     Exit;
   end;
-  //ExpandTabsFilter(memNewNote.Lines, TAB_STOP_CHARS);
-  //kt 5/15 moved to above --> if FEditNote.Lines = nil then FEditNote.Lines := TStringList.Create; //kt 9/11
-  //kt 9/11 FEditNote.Lines    := memNewNote.Lines;
 
-  //kt 5/15 if (vmHTML in FViewMode) then begin                   //kt 9/11
   if EditIsHTML then begin                                        //kt 5/15
-    SplitHTMLToArray(WrapHTML(HTMLText), FEditNote.Lines); //kt 9/11
-    InsertSubs(FEditNote.Lines);                       //kt 9/11
+    SplitHTMLToArray(WrapHTML(HTMLText), FEditNote.Lines);        //kt 9/11
+    InsertSubs(FEditNote.Lines);                                  //kt 9/11
   end else begin                                                  //kt 9/11
     FEditNote.Lines.Assign(memNewNote.Lines);                     //kt 9/11
   end;                                                            //kt 9/11
-  //FEditNote.Lines:= SetLinesTo74ForSave(memNewNote.Lines, Self);
   FEditNote.Subject  := txtSubject.Text;
   FEditNote.NeedCPT  := uPCEEdit.CPTRequired;
   timAutoSave.Enabled := False;
   try
-    //original -->     PutEditedNote(UpdatedNote, FEditNote, lstNotes.GetIEN(EditingIndex));
     PutEditedNote(UpdatedNote, FEditNote, EditingNoteIENVal);
   finally
     timAutoSave.Enabled := True;
@@ -2008,7 +1921,6 @@ begin
   // there's no unlocking here since the note is still in Changes after a save
   if UpdatedNote.IEN > 0 then begin
     if AltMode = false then begin  //kt added just this line.  4/7/23
-      //kt if lstNotes.ItemIndex = EditingIndex then begin
       if EditingNoteSelected then begin  //kt
         EditingIndex := -1;
         DisplaySelectedNote;  //kt //codex 8/17/26
@@ -2031,7 +1943,6 @@ procedure TfrmNotes.SaveCurrentNote(var Saved: Boolean; AltMode : boolean = fals
 
 begin
   Saved := false; //kt added to have a defined value if EditingIndex < 0
-  //kt if EditingIndex < 0 then Exit;
   if not EditingNoteActive then exit; //kt
   SaveEditedNote(Saved, AltMode);
 end;
@@ -2061,9 +1972,7 @@ begin
   inherited;
   CallBackProcs := TNotifyPCEEventList.Create;  //kt 5/11/23
   //kt 9/11 --- Begin Modification -------------
-  //9/28/15 frmSearchStop := TfrmSearchStop.Create(Self);  //used to be auto created.  //kt 9/25/15
   fOptionsNotes.Loaded;
-  //CacheDir := ExtractFilePath(ParamStr(0))+ 'Cache';
   CacheDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
   if not DirectoryExists(CacheDir) then CreateDir(CacheDir);
   LastAuthor :=0;
@@ -2106,7 +2015,6 @@ begin
   FNotesToHide := TStringList.Create; //kt 5/12/14
   btnHideTitle.Caption := 'Hide';
   FHideTitleBusy := false; //kt
-  //FHTMLZoomValue := 100;  //kt
   TMGForceSaveSwitchEdit := false; //kt
   TVDblClickPending := false; //kt
   TVChangePending := false; //kt
@@ -2139,8 +2047,6 @@ begin
   FDocList := TStringList.Create;
   RestoreRegHTMLFontSize;  //kt 9/11
   clTMGHighlight := TColor(StringToColor(uTMGOptions.ReadString('color for TIU highlight','$FFFFB3')));   //elh 8/4/16    //kt
-  //clTMGHospitalColor := TColor(StringToColor(uTMGOptions.ReadString('color for TIU hospital','$FFFFB3')));   //elh 8/4/16    //kt
-  //PrefetchTOC := uTMGOptions.ReadBool('Prefetch TOC',true);   //elh   2/8/24
   PrefetchTOC := true;     //elh    always set to true now   2/13/24
   AutoOpenTOC := uTMGOptions.ReadBool('AutoOpen TOC',false);    //elh  2/13/24)
   TOCLocation := TTOCLocation(uTMGOptions.Readinteger('TOC Location',0));  //elh 2/19/24
@@ -2180,15 +2086,9 @@ begin
     nvNoteSelect: begin
       ItemIEN := piece(URL,'^',2);
       Cancel := True;
-      //if pos(',',ItemIEN)>0 then begin
-        //ItemIEN := SelectNote(ItemIEN);
       ViewNotes(ItemIEN);
-        //if ItemIEN='-1' then exit;
-      //end;
-      //ChangeToNote(ItemIEN);
     end;
   end;
-  //if MsgType<>'TIUIEN' then exit;
 end;
 
 procedure TfrmNotes.RunMacro(Sender:TObject);
@@ -2200,7 +2100,6 @@ begin
   inherited;
   if not boolAutosaving then DoAutoSave;      //elh added 1/15/18
   //What call will properly save text for Processing Note????
-  //PutTextOnly(ErrMsg, memNewNote.Lines, lstNotes.GetIEN(EditingIndex));
   OriginalNote := TStringList.Create;
   if (vmHTML in FViewMode) then begin
     SplitHTMLToArray(WrapHTML(GetEditorHTMLText), OriginalNote);
@@ -2213,7 +2112,6 @@ begin
       SelText := '';
     end;
     ProcessedNote := TMGTIUResolveMacro(inttostr(TMenuItem(Sender).Tag),GetCurrentNoteIEN, OriginalNote, SelText,Selection, ErrMsg);
-    //ProcessedNote := ProcessNote(OriginalNote,GetCurrentNoteIEN);
     if ErrMsg<>'' then begin
       messagedlg('Error with macro'+#13#10+ErrMsg,mtError,[mbOk],0);
     end else begin
@@ -2223,15 +2121,12 @@ begin
         HtmlEditor.HTMLText := ProcessedNote.Text;
       GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor); //later I can embed this functionality in THtmlObj
     end;
-    //messagedlg(piece(TMenuItem(Sender).Name,'-',2),mtConfirmation,[mbok],0);
-    //OpenNewPatient(piece(TMenuItem(Sender).Name,'_',2));
-
   end;
 end;
 
 procedure TfrmNotes.HandleInsertDate(Sender: TObject);  //kt
 begin
-  HTMLEditor.InsertHTMLAtCaret(datetostr(date)+': ');
+  HTMLEditor.InsertHTMLAtCaret(datetostr(date)+': '); //kt //codex 8/30/26
 end;
 
 function TfrmNotes.InsertText(TextToInsert:string):string;    //kt
@@ -2239,7 +2134,7 @@ begin
   if not (vmEdit in FViewMode) then begin
     result := '-1^Not in edit mode.';
   end else begin
-    HTMLEditor.InsertHTMLAtCaret(TextToInsert);
+    HTMLEditor.InsertHTMLAtCaret(TextToInsert); //kt //codex 8/30/26
     result := '1^Successful';
   end;
 end;
@@ -2440,19 +2335,14 @@ begin
     StatusText('Retrieving selected progress note...');
     Screen.Cursor := crAppStart;  //kt 9/11 changed from crHourGlass;
     UpdateReminderFinish;
-    //original -->       lblTitle.Caption := Piece(Piece(Items[ItemIndex], U, 8), ';', 1) + #9 + Piece(Items[ItemIndex], U, 2) + ', ' +
-    //original -->                           Piece(Items[ItemIndex], U, 6) + ', ' + Piece(Piece(Items[ItemIndex], U, 5), ';', 2) +
-    //original -->                           '  (' + FormatFMDateTime('mmm dd,yy@hh:nn', MakeFMDateTime(Piece(Items[ItemIndex], U, 3)))
-    //original -->                           + ')';
     lblTitle.Caption := Piece(VisitInfo, ';', 1) + #9 + Piece(SelectedNoteText, U, 2) + ', ' +
                         Piece(SelectedNoteText, U, 6) + ', ' + Piece(AuthorInfo, ';', 2) +
                         '  (' + FormatFMDateTime('mmm dd,yy@hh:nn', MakeFMDateTime(Piece(SelectedNoteText, U, 3)))
                         + ')';
-    //original -->       LoadDocumentText(FViewNote, ItemIEN, IsHTML);  //kt 9/11
     LoadDocumentText(FViewNote, SelectedNoteIEN, IsHTML);  //kt 9/11
-    TMGDebugEditLines := false;                           //kt 4/16  -- can change while walking through to edit StringList;
-    if TMGDebugEditLines = true then EditSL(FViewNote);   //kt 4/16
-    Note := FViewNote;                                    //kt 9/11
+    TMGDebugEditLines := false;                            //kt 4/16  -- can change while walking through to edit StringList;
+    if TMGDebugEditLines = true then EditSL(FViewNote);    //kt 4/16
+    Note := FViewNote;                                     //kt 9/11
     memNote.SelStart := 0;
     mnuViewDetail.Enabled := True;
     mnuViewDetail.Checked := False;
@@ -2471,8 +2361,6 @@ begin
     frmReminderTree.EnableActions;
   pnlRight.Refresh;
   ProperRepaint(EditedSelected); //kt 9/11
-  //original -->     x := 'TIU^' + lstNotes.ItemID;
-  //original -->     SetPiece(x, U, 10, Piece(lstNotes.Items[lstNotes.ItemIndex], U, 11));
   SelectedNoteIENStr := 'TIU^' + SelectedNoteIDStr;
   SetPiece(SelectedNoteIENStr, U, 10, Piece(SelectedNoteText, U, 11));
   NotifyOtherApps(NAE_REPORT, SelectedNoteIENStr);
@@ -2536,42 +2424,10 @@ end;
 
 procedure TfrmNotes.cmdPCEClick(Sender: TObject);
 var
-  //kt Refresh: boolean;
-  //kt ActionSts: TActionRec;
-  //kt AnIEN: integer;
-  //PCEObj : TPCEData;
   TempSavePCEObj: TPCEData;  //kt was tmpPCEEdit
   UseNonModalEncounter : integer;  //kt
 
-  {//kt moved to separate procedure
-  procedure UpdateEncounterInfo;
-  begin
-    if not FPCEButtonStateIsEditing then begin
-      PCEObj := nil;
-      AnIEN := lstNotes.ItemIEN;
-      //kt 9/11 if (AnIEN <> 0) and (memNote.Lines.Count > 0) then
-      if (AnIEN <> 0) and EditorHasText then begin                     //kt 9/11
-        ActOnDocument(ActionSts, AnIEN, 'VIEW');
-        if ActionSts.Success then begin
-          uPCEEdit.Assign(uPCEShow); //kt uPCEShow.CopyPCEData(uPCEEdit);    //Copy uPCEShow -> uPCEEdit
-          PCEObj := uPCEEdit;
-        end;
-      end;
-      //kt Refresh := EditPCEData(PCEObj);
-      Refresh := EditPCEData(PCEObj, FDesiredPCEInitialPageEditIndex);  //kt
-      FDesiredPCEInitialPageEditIndex := 0; //kt This variable is a one-time request, reset to 0 each time.
-    end else begin
-      //kt original --> UpdatePCE(uPCEEdit);
-      UpdatePCE(uPCEEdit, True, FDesiredPCEInitialPageEditIndex);  //kt 5/16
-      Refresh := TRUE;
-    end;
-    if Refresh and (not frmFrame.Closing) then begin
-      DisplayPCE;
-    end;
-  end;
-  }
-
-begin  //cmdPCEClick();
+begin
   inherited;
 
   //kt 5/11/23
@@ -2582,15 +2438,13 @@ begin  //cmdPCEClick();
   end;
 
   cmdPCE.Enabled := FALSE;
-  //kt if lstNotes.ItemIndex <> EditingIndex then begin
   if not EditingNoteSelected then begin
     // save uPCEEdit for note being edited, before updating current note's encounter, then restore  (RV - TAM-0801-31056)
     TempSavePCEObj := TPCEData.Create;
     try
-      TempSavePCEObj.Assign(uPCEEdit); //kt  uPCEEdit.CopyPCEData(tmpPCEEdit);    //Copy uPCEEdit -> tmpPCEEdit
-      //kt UpdateEncounterInfo;
+      TempSavePCEObj.Assign(uPCEEdit);         //kt
       UpdateEncounterInfo(uPCEEdit, uPCEShow); //kt
-      uPCEEdit.Assign(TempSavePCEObj); //kt   tmpPCEEdit.CopyPCEData(uPCEEdit);    //Copy tmpPCEEdit -> uPCEEdit
+      uPCEEdit.Assign(TempSavePCEObj);         //kt
     finally
       TempSavePCEObj.Free;
     end;
@@ -2614,7 +2468,6 @@ var
 begin
   if not FPCEButtonStateIsEditing then begin
     PCEObj := nil;
-    //original -->     AnIEN := lstNotes.ItemIEN;
     AnIEN := SelectedNoteIEN;
     if (AnIEN <> 0) and EditorHasText then begin                     //kt 9/11
       ActOnDocument(ActionSts, AnIEN, 'VIEW');
@@ -2655,7 +2508,6 @@ begin
   CallBackProcs.AddObject('CALLER=UpdateEncounterInfoNonModal', @HandleEditPCEDataDone);
   if not FPCEButtonStateIsEditing then begin
     PCEObj := nil;
-    //original -->     AnIEN := lstNotes.ItemIEN;
     AnIEN := SelectedNoteIEN;
     if (AnIEN <> 0) and EditorHasText then begin                     //kt 9/11
       ActOnDocument(ActionSts, AnIEN, 'VIEW');
@@ -2740,15 +2592,13 @@ var
   procedure AssignBoilerText;
   begin
     ExecuteTemplateOrBoilerPlate(BoilerText, FEditNote.Title, ltTitle, Self, 'Title: ' + FEditNote.TitleName, DocInfo);
-    //kt 9/11 QuickCopyWith508Msg(BoilerText, memNewNote);  //kt moved into SetDisplayToHTMLvsText
-    SetDisplayToHTMLvsText([vmHTML,vmEdit],BoilerText); //kt 8/09
+    SetDisplayToHTMLvsText([vmHTML,vmEdit],BoilerText);
     UpdateNoteAuthor(DocInfo);
     FChanged := False;
   end;
 
 begin
   inherited;
-  //kt if (FEditingIndex < 0) or (lstNotes.ItemIndex <> FEditingIndex) then Exit;
   if not EditingNoteActive or not EditingNoteSelected then Exit;  //kt
   BoilerText := TStringList.Create;
   try
@@ -2759,12 +2609,11 @@ begin
     end;                                          //kt 9/11
     LoadBoilerPlate(BoilerText, FEditNote.Title);
     if (BoilerText.Text <> '') or
-       assigned(GetLinkedTemplate(IntToStr(FEditNote.Title), ltTitle)) then
-    begin
-      //original -->       DocInfo := MakeXMLParamTIU(IntToStr(lstNotes.ItemIEN), FEditNote);
+       assigned(GetLinkedTemplate(IntToStr(FEditNote.Title), ltTitle)) then begin
       DocInfo := MakeXMLParamTIU(IntToStr(ActiveEditIEN), FEditNote);
-      if NoteEmpty then AssignBoilerText else
-      begin
+      if NoteEmpty then begin
+        AssignBoilerText;
+      end else begin
         case QueryBoilerPlate(BoilerText) of
         0:  { do nothing } ;                         // ignore
         1: begin
@@ -2782,10 +2631,10 @@ begin
     end else
     begin
       if Sender = mnuActLoadBoiler
-        then InfoBox(TX_NO_BOIL, TC_NO_BOIL, MB_OK)
-        else
-        begin
-          if not NoteEmpty then
+        then begin
+          InfoBox(TX_NO_BOIL, TC_NO_BOIL, MB_OK);
+        end else begin
+          if not NoteEmpty then begin
 //            if not FChanged and (InfoBox(TX_BLR_CLEAR, TC_BLR_CLEAR, MB_YESNO) = ID_YES)
             if (InfoBox(TX_BLR_CLEAR, TC_BLR_CLEAR, MB_YESNO) = ID_YES) then begin
               if (vmHTML in FViewMode) then begin        //kt 9/11
@@ -2794,6 +2643,7 @@ begin
                 memNewNote.Lines.Clear;
               end;                                       //kt 9/11
             end;
+          end;
         end;
     end; {if BoilerText.Text <> ''}
   finally
@@ -2845,33 +2695,24 @@ begin
     then lblCosigner.Caption := 'Expected Cosigner: ' + FEditNote.CosignerName
     else lblCosigner.Caption := '';
   uPCEEdit.NoteTitle  := FEditNote.Title;
-  // modify signature requirements if author or cosigner changed
-  //kt original --> if (User.DUZ <> FEditNote.Author) and (User.DUZ <> FEditNote.Cosigner)
-  //kt original -->   then Changes.ReplaceSignState(CH_DOC, lstNotes.ItemID, CH_SIGN_NA)
-  //kt original -->   else Changes.ReplaceSignState(CH_DOC, lstNotes.ItemID, CH_SIGN_YES);
   //kt begin mod --
   if (User.DUZ <> FEditNote.Author) and (User.DUZ <> FEditNote.Cosigner) then ChangeMode := CH_SIGN_NA
   else if FEditNote.IsComponent then ChangeMode := CH_SIGN_NA
   else ChangeMode := CH_SIGN_YES;
-  //original -->   Changes.ReplaceSignState(CH_DOC, lstNotes.ItemID, ChangeMode);
   Changes.ReplaceSignState(CH_DOC, EditingNoteIDStr, ChangeMode);
   //kt end mod
-  //original -->   x := lstNotes.Items[EditingIndex];
   x := NoteRecordAt(EditingIndex);
   SetPiece(x, U, 2, lblNewTitle.Caption);
   SetPiece(x, U, 3, FloatToStr(FEditNote.DateTime));
   tvNotes.Selected.Text := MakeNoteDisplayText(x);
   TORTreeNode(tvNotes.Selected).StringData := x;
   UpdateNoteRecordAt(EditingIndex, x);
-  //original -->   Changes.ReplaceText(CH_DOC, lstNotes.ItemID, GetTitleText(EditingIndex));
   Changes.ReplaceText(CH_DOC, EditingNoteIDStr, GetTitleText(EditingIndex));
   with FEditNote do
   begin
-  if (PkgPtr = PKG_CONSULTS) and (LastConsult <> PkgIEN) then
-  begin
+  if (PkgPtr = PKG_CONSULTS) and (LastConsult <> PkgIEN) then begin
     // try to lock the new consult, reset to previous if unable
-    if (PkgIEN > 0) and not LockConsultRequest(PkgIEN) then
-    begin
+    if (PkgIEN > 0) and not LockConsultRequest(PkgIEN) then begin
       Infobox(TX_NO_ORD_CHG, TC_NO_ORD_CHG, MB_OK);
       PkgIEN := LastConsult;
     end else
@@ -2883,7 +2724,6 @@ begin
   end;
   //Link Note to PRF Action
   if PRF_IEN <> 0 then
-    //original -->     if sCallV('TIU LINK TO FLAG', [lstNotes.ItemIEN,PRF_IEN,ActionIEN,Patient.DFN]) = '0' then
     if sCallV('TIU LINK TO FLAG', [EditingNoteIENVal,PRF_IEN,ActionIEN,Patient.DFN]) = '0' then
       ShowMsg('TIU LINK TO FLAG: FAILED');
   end;
@@ -2921,10 +2761,8 @@ begin
   end else begin                                  //kt 9/11
     Changed := FChanged;                          //kt 9/11
   end;                                            //kt 9/11
-  //kt 9/11 if (EditingIndex > -1) and FChanged then
   if EditingNoteActive and Changed then begin   //kt  9/11
     StatusText('Autosaving note...');
-    //PutTextOnly(ErrMsg, memNewNote.Lines, lstNotes.GetIEN(EditingIndex));
     timAutoSave.Enabled := False;
     try
       if (vmHTML in FViewMode) then begin                                        //kt 9/11
@@ -2946,7 +2784,6 @@ begin
   boolAutosaving := False;  //elh 11/18/16
   if ErrMsg <> '' then
     InfoBox(TX_SAVE_ERROR1 + ErrMsg + TX_SAVE_ERROR2, TC_SAVE_ERROR, MB_OK or MB_ICONWARNING);
-  //Assert(ErrMsg = '', 'AutoSave: ' + ErrMsg);
 end;
 
 procedure TfrmNotes.timAutoSaveTimer(Sender: TObject);
@@ -2967,18 +2804,16 @@ var
 begin
   inherited;
   // save note at EditingIndex?
-  //kt if EditingIndex <> -1 then begin
-  if EditingNoteActive then begin  //kt 
+  if EditingNoteActive then begin  //kt
     SaveCurrentNote(Saved);
     if not Saved then Exit;
   end;
-  //original -->   FLastNoteID := lstNotes.ItemID;
   FLastNoteID := SelectedNoteID;
   mnuViewDetail.Checked := False;
   StatusText('Retrieving progress note list...');
   if Sender is TMenuItem then ViewContext := TMenuItem(Sender).Tag
-    else if FCurrentContext.Status <> '' then ViewContext := NC_CUSTOM
-    else ViewContext := NC_RECENT;
+  else if FCurrentContext.Status <> '' then ViewContext := NC_CUSTOM
+  else ViewContext := NC_RECENT;
   case ViewContext of
   NC_RECENT:     begin
                    FillChar(FCurrentContext, SizeOf(FCurrentContext), 0);
@@ -3003,8 +2838,7 @@ begin
   NC_SEARCHTEXT: begin;
                    SearchTextStopFlag := False;
                    SelectSearchText(Font.Size, FCurrentContext.SearchString, SearchCtxt, StringReplace(TMenuItem(Sender).Caption, '&', '', [rfReplaceAll]) );
-                   with SearchCtxt do if Changed then
-                   begin
+                   with SearchCtxt do if Changed then begin
                      //FCurrentContext.Status := IntToStr(ViewContext);
                      frmSearchStop.Show;
                      lblNotes.Caption := 'Search: '+ SearchString;
@@ -3012,7 +2846,7 @@ begin
                      FCurrentContext.SearchString := SearchString;
                      LoadNotes;
                    end;
-                   // Only do LoadNotes if something changed 
+                   // Only do LoadNotes if something changed
                  end;
   // Text Search CQ: HDS00002856 --------------------
   NC_UNCOSIGNED: begin
@@ -3023,8 +2857,7 @@ begin
                  end;
   NC_BY_AUTHOR:  begin
                    SelectAuthor(Font.Size, FCurrentContext, AuthCtxt);
-                   with AuthCtxt do if Changed then
-                   begin
+                   with AuthCtxt do if Changed then begin
                      FillChar(FCurrentContext, SizeOf(FCurrentContext), 0);
                      lblNotes.Caption := AuthorName + ': Signed Notes';
                      FCurrentContext.Status := IntToStr(NC_BY_AUTHOR);
@@ -3035,8 +2868,7 @@ begin
                  end;
   NC_BY_DATE:    begin
                    SelectNoteDateRange(Font.Size, FCurrentContext, DateRange);
-                   with DateRange do if Changed then
-                   begin
+                   with DateRange do if Changed then begin
                      FillChar(FCurrentContext, SizeOf(FCurrentContext), 0);
                      lblNotes.Caption := FormatFMDateTime('mmm dd,yy', FMBeginDate) + ' to ' +
                                          FormatFMDateTime('mmm dd,yy', FMEndDate) + ': Signed Notes';
@@ -3050,13 +2882,11 @@ begin
                    end;
                  end;
   NC_CUSTOM:     begin
-                   if Sender is TMenuItem then
-                     begin
-                       SelectTIUView(Font.Size, True, FCurrentContext, uTIUContext);
-                       //lblNotes.Caption := 'Custom List';
-                     end;
-                   with uTIUContext do if Changed then
-                   begin
+                   if Sender is TMenuItem then begin
+                     SelectTIUView(Font.Size, True, FCurrentContext, uTIUContext);
+                     //lblNotes.Caption := 'Custom List';
+                   end;
+                   with uTIUContext do if Changed then begin
                      //if not (Sender is TMenuItem) then lblNotes.Caption := 'Default List';
                      //if MaxDocs = 0 then MaxDocs   := ReturnMaxNotes;
                      FCurrentContext.BeginDate     := BeginDate;
@@ -3080,7 +2910,6 @@ begin
                    end;
                  end;
   end; {case}
-  //lblNotes.Caption := SetNoteTreeLabel(FCurrentContext);   //5/20/19
   // Text Search CQ: HDS00002856 --------------------
   If FCurrentContext.SearchString <> '' then
     lblNotes.Caption := lblNotes.Caption+', containing "'+FCurrentContext.SearchString+'"';
@@ -3109,79 +2938,63 @@ begin
   FStarting := False;
   Result := True;
   cmdNewNote.Enabled := False;
-  //kt if EditingIndex > -1 then begin
-  if EditingNoteActive then begin  //kt 
+  if EditingNoteActive then begin  //kt
     FStarting := True;
     case NewNoteType of
       NT_ACT_ADDENDUM:  begin
-                          //original -->                           Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(lstNotes.Items[EditingIndex]) + TX_NEW_SAVE3;
                           Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(NoteRecordAt(EditingIndex)) + TX_NEW_SAVE3;
                           CapMsg := TC_NEW_SAVE3;
                         end;
       NT_ACT_EDIT_NOTE: begin
-                          //original -->                           Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(lstNotes.Items[EditingIndex]) + TX_NEW_SAVE4;
                           Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(NoteRecordAt(EditingIndex)) + TX_NEW_SAVE4;
                           CapMsg := TC_NEW_SAVE4;
                         end;
       NT_ACT_ID_ENTRY:  begin
-                          //original -->                           Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(lstNotes.Items[EditingIndex]) + TX_NEW_SAVE5;
                           Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(NoteRecordAt(EditingIndex)) + TX_NEW_SAVE5;
                           CapMsg := TC_NEW_SAVE5;
                         end;
     else
       begin
-        //original -->         Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(lstNotes.Items[EditingIndex]) + TX_NEW_SAVE2;
         Msg := TX_NEW_SAVE1 + MakeNoteDisplayText(NoteRecordAt(EditingIndex)) + TX_NEW_SAVE2;
         CapMsg := TC_NEW_SAVE2;
       end;
     end; {case}
-    //kt original --> if InfoBox(Msg, CapMsg, MB_YESNO) = IDNO then
-    //kt begin mod --
     if TMGForceSaveSwitchEdit then begin
       DlgResult := IDYES;
     end else begin
       DlgResult := InfoBox(Msg, CapMsg, MB_YESNO);
     end;
-    if DlgResult = IDNO then
-    //kt end mod --
-    begin
+    if DlgResult = IDNO then begin
       Result := False;
       FStarting := False;
     end else begin
-        SaveCurrentNote(Saved);
-      //kt original --> if not Saved then Result := False else LoadNotes;
-      //kt -- begin mod
+      SaveCurrentNote(Saved);
       if not Saved then begin
         Result := False;
       end else begin
         if not TMGForceSaveSwitchEdit then LoadNotes;
       end;
-      //kt end mod ---
         FStarting := False;
-      end;
+    end;
   end;
-  //kt mod --
   TMGForceSaveSwitchEdit := false;
-  //kt end mod --
   cmdNewNote.Enabled := (Result = False) and (FStarting = False);
 end;
 
 procedure TfrmNotes.mnuActNewClick(Sender: TObject);
 const
   IS_ID_CHILD = False;
-{ switches to current new note or creates a new note if none is being edited already }
+// switches to current new note or creates a new note if none is being edited already
 begin
   inherited;
   if not StartNewEdit(NT_ACT_NEW_NOTE) then Exit;
   //LoadNotes;
   // make sure a visit (time & location) is available before creating the note
-  if Encounter.NeedVisitWVerification then        //TMG changed from NeedVisit  8/2/22
-  begin
+  if Encounter.NeedVisitWVerification then begin        //TMG changed from NeedVisit  8/2/22
     UpdateVisit(Font.Size, DfltTIULocation);
     frmFrame.DisplayEncounterText;
   end;
-  if Encounter.NeedVisit then
-  begin
+  if Encounter.NeedVisit then begin
     InfoBox(TX_NEED_VISIT, TX_NO_VISIT, MB_OK or MB_ICONWARNING);
     ShowPCEButtons(False);
     Exit;
@@ -3197,19 +3010,16 @@ var
 { switches to current new note or creates a new note if none is being edited already }
 begin
   inherited;
-  //original -->   AnIDParent := lstNotes.ItemIEN;
   AnIDParent := SelectedNoteIEN;
   if not StartNewEdit(NT_ACT_ID_ENTRY) then Exit;
   //LoadNotes;
-  with tvNotes do Selected := FindPieceNode(IntToStr(AnIDParent), U, Items.GetFirstNode);
+  with tvNotes do Selected := FindPieceNode(IntToStr(AnIDParent), U, nil); //kt //codex 9/8/26
   // make sure a visit (time & location) is available before creating the note
-  if Encounter.NeedVisit then
-  begin
+  if Encounter.NeedVisit then begin
     UpdateVisit(Font.Size, DfltTIULocation);
     frmFrame.DisplayEncounterText;
   end;
-  if Encounter.NeedVisit then
-  begin
+  if Encounter.NeedVisit then begin
     InfoBox(TX_NEED_VISIT, TX_NO_VISIT, MB_OK or MB_ICONWARNING);
     Exit;
   end;
@@ -3225,53 +3035,20 @@ begin
   if Subject = '' then Exit;
   //original -->   AddComponentAndSelect(lstNotes.Items[lstNotes.ItemIndex], Subject);
   AddComponentAndSelect(SelectedNoteRecord, Subject);
-  {MessageDlg('Message from fNotes.popAddcomponentclick....' + CRLF +
-             'Until fixed, you should right click and select ' + CRLF +
-             'SAVE WITHOUT SIGNATURE right away.' + CRLF +
-             'Otherwise, edits will be lost with note change...', mtWarning, [mbOK], 0);
-  }             
 end;
 
 procedure TfrmNotes.popEditEncounterElementsClick(Sender: TObject);
 //kt added entire function 5/16/16
 begin
   inherited;
-  //kt 4/5/23 -- FDesiredPCEInitialPageEditIndex := CT_HEALTHFACTORS; // Set initial tab to be health factors.
   cmdPCEClick(Sender);  //launch encounter form
 end;
 
 procedure TfrmNotes.mnuActAddendClick(Sender: TObject);
 { make an addendum to an existing note }
-//kt var
-//kt   ActionSts: TActionRec;
-//kt   ANoteID: string;
 begin
   inherited;
-  AddAddendum;  //kt added 4/19/15
-  {//kt mod -- Moved block below to AddAddendum()
-  if lstNotes.ItemIEN <= 0 then Exit;
-  ANoteID := lstNotes.ItemID;
-  if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
-  //LoadNotes;
-  with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
-  if lstNotes.ItemIndex = EditingIndex then
-  begin
-    InfoBox(TX_ADDEND_NO, TX_ADDEND_MK, MB_OK);
-    Exit;
-  end;
-  ActOnDocument(ActionSts, lstNotes.ItemIEN, 'MAKE ADDENDUM');
-  if not ActionSts.Success then
-  begin
-    InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
-    Exit;
-  end;
-  with lstNotes do if TitleForNote(lstNotes.ItemIEN) = TYP_ADDENDUM then
-  begin
-    InfoBox(TX_ADDEND_AD, TX_ADDEND_MK, MB_OK);
-    Exit;
-  end;
-  InsertAddendum;
-  }
+  AddAddendum;
 end;
 
 procedure TfrmNotes.AddAddendum;
@@ -3282,25 +3059,20 @@ var
   SelectedNoteIENVal: Int64;
 begin
   SelectedNoteIENVal := SelectedNoteIEN;
-  //original -->   if lstNotes.ItemIEN <= 0 then Exit;
   if SelectedNoteIENVal <= 0 then Exit;
-  //original -->   ANoteID := lstNotes.ItemID;
   ANoteID := SelectedNoteID;
   if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
   //LoadNotes;
-  with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
-  //kt if lstNotes.ItemIndex = EditingIndex then begin
+  with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, nil); //kt //codex 9/8/26
   if EditingNoteSelected then begin  //kt
     InfoBox(TX_ADDEND_NO, TX_ADDEND_MK, MB_OK);
     Exit;
   end;
-  //original -->   ActOnDocument(ActionSts, lstNotes.ItemIEN, 'MAKE ADDENDUM');
   ActOnDocument(ActionSts, SelectedNoteIENVal, 'MAKE ADDENDUM');
   if not ActionSts.Success then begin
     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
     Exit;
   end;
-  //original -->   with lstNotes do if TitleForNote(lstNotes.ItemIEN) = TYP_ADDENDUM then begin
   if TitleForNote(SelectedNoteIENVal) = TYP_ADDENDUM then begin
     InfoBox(TX_ADDEND_AD, TX_ADDEND_MK, MB_OK);
     Exit;
@@ -3314,15 +3086,10 @@ function TfrmNotes.AddComponent(ParentData : string; Subject : string = ''; Line
 //Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
 var
   ActionSts:           TActionRec;
-  //ANoteID:             string;
   ParentIEN :          int64;  //kt
 begin
   Result := '0';
-  //if lstNotes.ItemIEN <= 0 then Exit;
-  //ANoteID := lstNotes.ItemID;
   if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
-  //with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
-  //ActOnDocument(ActionSts, lstNotes.ItemIEN, 'MAKE COMPONENT');   //kt custom server-side action.
   ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
   ActOnDocument(ActionSts, ParentIEN, 'MAKE COMPONENT');   //kt custom server-side action.
   if not ActionSts.Success then begin
@@ -3359,11 +3126,8 @@ var
   Saved: boolean;
   SavedDocID: string;
 begin
-  //original -->   if lstNotes.ItemIEN = 0 then exit;
   if SelectedNoteIEN = 0 then exit;
-  //original -->   SavedDocID := lstNotes.ItemID;
   SavedDocID := SelectedNoteID;
-  //kt if EditingIndex <> -1 then begin
   if EditingNoteActive then begin  //kt
     SaveCurrentNote(Saved);
     if not Saved then Exit;
@@ -3382,8 +3146,7 @@ begin
       then Exit;
   DocID := DocTreeData(tvNotes.Selected)^.DocID;
   SavedDocID := DocTreeData(tvNotes.Selected.Parent)^.DocID;
-  if DetachEntryFromParent(DocID, WhyNot) then
-    begin
+  if DetachEntryFromParent(DocID, WhyNot) then begin
       LoadNotes;
       SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26
     end
@@ -3395,7 +3158,7 @@ begin
     end;
 end;
 
-procedure TfrmNotes.ExternalSign;  //: TActionRec
+procedure TfrmNotes.ExternalSign;
 //kt 9/11 added
 begin
    mnuActSignClick(nil);
@@ -3416,23 +3179,16 @@ begin
   inherited;
   SelectedNoteIENVal := SelectedNoteIEN;
   SelectedNoteIDStr := SelectedNoteID;
-  //original -->   if lstNotes.ItemIEN = 0 then Exit;
   if SelectedNoteIENVal = 0 then Exit;
   if AllowSignature = False then exit;
-  //kt if lstNotes.ItemIndex = EditingIndex then Exit;  // already in signature list
   if EditingNoteSelected then Exit;  // already in signature list
-  //original -->   if not NoteHasText(lstNotes.ItemIEN) then
-  if not NoteHasText(SelectedNoteIENVal) then
-    begin
+  if not NoteHasText(SelectedNoteIENVal) then begin
       InfoBox(TX_EMPTY_NOTE1, TC_EMPTY_NOTE, MB_OK or MB_ICONERROR);
       Exit;
     end;
-  //original -->   if not LastSaveClean(lstNotes.ItemIEN) and
   if not LastSaveClean(SelectedNoteIENVal) and
     (InfoBox(TX_ABSAVE, TC_ABSAVE, MB_YESNO or MB_DEFBUTTON2 or MB_ICONWARNING) <> IDYES) then Exit;
-  //original -->   if CosignDocument(lstNotes.ItemIEN) then
-  if CosignDocument(SelectedNoteIENVal) then
-  begin
+  if CosignDocument(SelectedNoteIENVal) then begin
     SignTitle := TX_COSIGN;
     ActionType := SIG_COSIGN;
   end else
@@ -3440,16 +3196,12 @@ begin
     SignTitle := TX_SIGN;
     ActionType := SIG_SIGN;
   end;
-  //original -->   ActOnDocument(ActionSts, lstNotes.ItemIEN, ActionType);
   ActOnDocument(ActionSts, SelectedNoteIENVal, ActionType);
-  if not ActionSts.Success then
-  begin
+  if not ActionSts.Success then begin
     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
     Exit;
   end;
-  //original -->   LockConsultRequestAndNote(lstNotes.ItemIEN);
   LockConsultRequestAndNote(SelectedNoteIENVal);
-  //original -->   with lstNotes do Changes.Add(CH_DOC, ItemID, GetTitleText(ItemIndex), '', CH_SIGN_YES);
   Changes.Add(CH_DOC, SelectedNoteIDStr, GetTitleText(SelectedNoteIndex), '', CH_SIGN_YES);
 end;
 
@@ -3470,99 +3222,10 @@ begin
 end;
 
 procedure TfrmNotes.mnuActDeleteClick(Sender: TObject);
-{ delete the selected progress note & remove from the Encounter object if necessary }
-//kt
-var
-  DeleteSts : TActionRec;
-  //ActionSts: TActionRec;
-  SaveConsult, SavedDocIEN: Integer;
-  ReasonForDelete, AVisitStr, SavedDocID, x: string;
-  //Saved: boolean;
-  ErrStr : string;  //kt add 5/16
-
+// delete the selected progress note & remove from the Encounter object if necessary
 begin
   inherited;
-  //original -->   SavedDocID := lstNotes.ItemID;
-  SavedDocID := SelectedNoteID;
-  //original -->   SavedDocIEN := lstNotes.ItemIEN;
-  SavedDocIEN := SelectedNoteIEN;
-  // suppress prompt for deletion when called from SaveEditedNote (Sender = Self)
-  //original -->   DoDeleteDocument(lstNotes.Items[lstNotes.ItemIndex], lstNotes.ItemIndex, (Sender = Self));  //kt 5/15
   DoDeleteDocument(SelectedNoteRecord, SelectedNoteIndex, (Sender = Self));  //kt 5/15
-  if not DeleteSts.Success then exit;  //kt added
-  (*  //kt 5/15 original below.  Moved to DeleteDocument()
-  if lstNotes.ItemIEN = 0 then Exit;
-  if assigned(frmRemDlg) then
-    begin
-       frmRemDlg.btnCancelClick(Self);
-       if assigned(frmRemDlg) then exit;
-    end;
-  ActOnDocument(ActionSts, lstNotes.ItemIEN, 'DELETE RECORD');
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;  //kt 9/11
-  if ShowMsgOn(not ActionSts.Success, ActionSts.Reason, TX_IN_AUTH) then Exit;
-  ReasonForDelete := SelectDeleteReason(lstNotes.ItemIEN);
-  if ReasonForDelete = DR_CANCEL then Exit;
-  // suppress prompt for deletion when called from SaveEditedNote (Sender = Self)
-  if (Sender <> Self) and (InfoBox(MakeNoteDisplayText(lstNotes.Items[lstNotes.ItemIndex]) + TX_DEL_OK,
-    TX_DEL_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES) then Exit;
-  // Delete attached images  //kt 9/11
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then frmImages.DeleteAll(idmDelete);  //kt 9/11
-  // do the appropriate locking
-  if not LockConsultRequestAndNote(lstNotes.ItemIEN) then Exit;
-  // retraction notification message
-  if JustifyDocumentDelete(lstNotes.ItemIEN) then
-     InfoBox(TX_RETRACT, TX_RETRACT_CAP, MB_OK);
-  SavedDocID := lstNotes.ItemID;
-  SavedDocIEN := lstNotes.ItemIEN;
-  if (EditingIndex > -1) and (not FConfirmed) and (lstNotes.ItemIndex <> EditingIndex) and (memNewNote.GetTextLen > 0) then
-    begin
-      SaveCurrentNote(Saved);
-      if not Saved then Exit;
-    end;
-  EditingIndex := -1;
-  FConfirmed := False;
-  (*  if Saved then
-    begin
-      EditingIndex := -1;
-      mnuViewClick(Self);
-      with tvNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
-   end;*)
-  // remove the note
-  DeleteSts.Success := True;
-  x := GetPackageRefForNote(SavedDocIEN);
-  SaveConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
-  AVisitStr := VisitStrForNote(SavedDocIEN);
-  RemovePCEFromChanges(SavedDocIEN, AVisitStr);
-  if (SavedDocIEN > 0) and (SelectedNoteIEN = SavedDocIEN) then DeleteDocument(DeleteSts, SavedDocIEN, ReasonForDelete);
-  if not Changes.Exist(CH_DOC, SavedDocID) then UnlockDocument(SavedDocIEN);
-  Changes.Remove(CH_DOC, SavedDocID);  // this will unlock the document if in Changes
-  UnlockConsultRequest(0, SaveConsult);     // note has been deleted, so 1st param = 0
-  // reset the display now that the note is gone
-  if DeleteSts.Success then
-  begin
-    DeletePCE(AVisitStr);  // removes PCE data if this was the only note pointing to it
-    DBDialogFieldValuesDelete(Patient.DFN, IntToStr(SavedDocIEN), AVisitStr, ErrStr);  //kt 5/16
-    if ErrStr <> '' then MessageDlg(ErrStr, mtError, [mbOK], 0); //kt added 5/16
-    ClearEditControls;
-    //ClearPtData;   WRONG - fixed in v15.10 - RV
-    LoadNotes;
-  end;
-(*    with tvNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
-    if tvNotes.Selected <> nil then tvNotesChange(Self, tvNotes.Selected) else
-    begin}
-    if not (vmEdit in FViewMode) then begin  //kt
-      FHTMLEditMode := emNone; //kt 9/11
-      pnlWrite.Visible := False;
-      pnlRead.Visible := True;
-      UpdateReminderFinish;
-      ShowPCEControls(False);
-      frmDrawers.DisplayDrawers(TRUE, [odTemplates], [odTemplates]); //FALSE);
-      ShowPCEButtons(FALSE);
-    //end; {if ItemIndex}
-    end; //kt
-  end {if DeleteSts}
-  else InfoBox(DeleteSts.Reason, TX_DEL_ERR, MB_OK or MB_ICONWARNING);
-  *)
 end;
 
 procedure TfrmNotes.DoDeleteDocument(DataString : string; ItemIndex : integer; NoPrompt : boolean = false);
@@ -3572,18 +3235,16 @@ var
   SaveConsult, SavedDocIEN:                     Integer;
   ReasonForDelete, AVisitStr, SavedDocID, x:    string;
   Saved:                                        boolean;
-  IEN :                                         integer;         //kt 5/15
-  IENString :                                   string;          //kt 5/15
-  i :                                           integer;         //kt 5/15
-  ANode :                                       TORTreeNode;     //kt 5/15
-  UnsignedDocsNode:                             TORTreeNode;     //kt 5/15
-  //NodeForDel :                                  TOrTreeNode;     //kt 5/15
-  NoteDisplayText, PromptText:                  string;          //kt 5/15
-  NoteIsComponent, ChildDelSuccess:             boolean;         //kt 5/15
-  ErrStr :                                      string;          //kt add 5/16
+  IEN :                                         integer;
+  IENString :                                   string;
+  i :                                           integer;
+  ANode :                                       TORTreeNode;
+  UnsignedDocsNode:                             TORTreeNode;
+  NoteDisplayText, PromptText:                  string;
+  NoteIsComponent, ChildDelSuccess:             boolean;
+  ErrStr :                                      string;
 
 begin
-  //kt 5/15 begin mod ---------
   IENString := piece(DataString, U, 1);
   IEN := PieceAsIntDef(DataString, U, 1, 0); //kt //codex 8/18/26
   if IEN <= 0 then Exit;
@@ -3605,20 +3266,15 @@ begin
       if not ChildDelSuccess then inc (i);
     end;
   end;
-  //kt 5/15 end mode ----------
   ActOnDocument(ActionSts, IEN, 'DELETE RECORD');
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;  //kt 9/11
   if ShowMsgOn(not ActionSts.Success, ActionSts.Reason, TX_IN_AUTH) then Exit;
   ReasonForDelete := SelectDeleteReason(IEN);
   if ReasonForDelete = DR_CANCEL then Exit;
-  //kt original --> if not NoPrompt and (InfoBox(MakeNoteDisplayText(DataString) + TX_DEL_OK,
-  //kt original -->   TX_DEL_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES) then Exit;
   PromptText := NoteDisplayText + IfThen(NoteIsComponent, TX_DEL2_OK, TX_DEL_OK);  //kt 5/15
   if not NoPrompt and (InfoBox(PromptText, TX_DEL_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES) then Exit;  //kt 5/15
-  // Delete attached images  //kt 9/11
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
-    //kt DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, (EditingIndex > -1)); // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
-    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
+    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt
   end;
   // do the appropriate locking
   if not LockConsultRequestAndNote(IEN) then Exit;
@@ -3628,7 +3284,6 @@ begin
   //kt SavedDocID := lstNotes.ItemID;   //kt note ItemID is a dynamic property that returns piece #1 of DataString
   SavedDocID := IENString; //kt
   SavedDocIEN := IEN;
-  //kt original --> if (EditingIndex > -1) and (not FConfirmed) and (ItemIndex <> EditingIndex) and (memNewNote.GetTextLen > 0) then begin
   if EditingNoteActive and (not FConfirmed) and (not EditingNoteSelected) and EditorHasText then begin  //kt mod
     SaveCurrentNote(Saved);
     if not Saved then Exit;
@@ -3710,8 +3365,7 @@ begin
   ReasonForDelete := SelectDeleteReason(IEN);
   if ReasonForDelete = DR_CANCEL then Exit;
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
-    //kt DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, (EditingIndex > -1)); // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
-    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt // frmImages.DeleteAll(idmDelete);  //kt 9/11,  11/29/20
+    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt
   end;
   // do the appropriate locking
   if not LockConsultRequestAndNote(IEN) then Exit;
@@ -3745,20 +3399,17 @@ var
   SelectedNoteIENVal: Int64;
 begin
   inherited;
-  //kt if lstNotes.ItemIndex = EditingIndex then Exit;
   if EditingNoteSelected then Exit;  //kt
   SelectedNoteIENVal := SelectedNoteIEN;
-  //original -->   ANoteID := lstNotes.ItemID;
   ANoteID := SelectedNoteID;
   if not StartNewEdit(NT_ACT_EDIT_NOTE) then Exit;
   //LoadNotes;
   ChangingSaved := uChanging;  uChanging := true; //kt Preventing loading for view before loading for edit (causes flicker)
-  with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+  with tvNotes do Selected := FindPieceNode(ANoteID, 1, U, nil); //kt //codex 9/8/26
   uChanging := ChangingSaved; //kt
-  //original -->   ActOnDocument(ActionSts, lstNotes.ItemIEN, 'EDIT RECORD');
   ActOnDocument(ActionSts, SelectedNoteIENVal, 'EDIT RECORD');
-  if not ActionSts.Success then
-  begin
+  if not ActionSts.Success then begin
     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
     Exit;
   end;
@@ -3766,7 +3417,6 @@ begin
   if AutoOpenTOC=True then begin
     btnOpenTOCClick(Sender);
   end;
-  //Application.ProcessMessages; //kt remove later... for debugging.
 end;
 
 procedure TfrmNotes.mnuActSaveClick(Sender: TObject);
@@ -3776,13 +3426,10 @@ var
   SavedDocID: string;
 begin
   inherited;
-  //kt if EditingIndex > -1 then begin
   if EditingNoteActive then begin
-    //original -->     SavedDocID := Piece(lstNotes.Items[EditingIndex], U, 1);
     SavedDocID := NoteIDAt(EditingIndex);
     FLastNoteID := SavedDocID;
     SaveCurrentNote(Saved);
-    //kt if Saved and (EditingIndex < 0) and (not FDeleted) then begin
     if Saved and (not EditingNoteActive) and (not FDeleted) then begin  //kt
       LoadNotes;
       SelectTreeNodeByID(SavedDocID);  //kt //codex 8/17/26
@@ -3819,44 +3466,29 @@ begin
     SetTOCButtonStatus(1);
   end;
   EditingIsChildComp := false;  //kt
-(*  if lstNotes.ItemIndex = EditingIndex then                //v22.12 - RV
-  begin                                                      //v22.12 - RV
-    SaveCurrentNote(Saved);                                  //v22.12 - RV
-    if (not Saved) or FDeleted then Exit;                    //v22.12 - RV
-  end                                                        //v22.12 - RV
-  else if EditingIndex > -1 then                             //v22.12 - RV
-    tmpItem := lstNotes.Items[EditingIndex];                 //v22.12 - RV
-  SavedDocID := lstNotes.ItemID;*)                           //v22.12 - RV
   SelectedNoteIENVal := SelectedNoteIEN;
   SelectedNoteIDStr := SelectedNoteID;
   SelectedNoteText := SelectedNoteRecord;
   SelectedNoteTitle := Piece(Piece(SelectedNoteText, U, 2), ';', 1); //kt //codex 8/18/26
-  //original -->   SavedDocID := lstNotes.ItemID;                             //v22.12 - RV
-  SavedDocID := SelectedNoteIDStr;                             //v22.12 - RV
-  FLastNoteID := SavedDocID;                                 //v22.12 - RV
-  //kt if lstNotes.ItemIndex = EditingIndex then begin       //v22.12 - RV
-  if EditingNoteSelected then begin  //kt                                //v22.12 - RV
-    SaveCurrentNote(Saved);                                  //v22.12 - RV
-    if (not Saved) or FDeleted then Exit;                    //v22.12 - RV
-  //kt end else if EditingIndex > -1 then begin                   //v22.12 - RV
-  end else if EditingNoteActive then begin   //kt            //v22.12 - RV
-    //original -->     tmpItem := lstNotes.Items[EditingIndex];                 //v22.12 - RV
-    tmpItem := NoteRecordAt(EditingIndex);                 //v22.12 - RV
-    EditingID := Piece(tmpItem, U, 1);                       //v22.12 - RV
-    ChildNode := tvNotes.FindPieceNode(EditingID, U, tvNotes.Selected);   //kt 5/15
-    EditingIsChildComp := IsComponent(TORTreeNode(ChildNode));            //kt 5/15
-  end;                                                       //v22.12 - RV
-  //original -->   if not NoteHasText(lstNotes.ItemIEN) then begin
+  SavedDocID := SelectedNoteIDStr;
+  FLastNoteID := SavedDocID;
+  if EditingNoteSelected then begin  //kt
+    SaveCurrentNote(Saved);
+    if (not Saved) or FDeleted then Exit;
+  end else if EditingNoteActive then begin   //kt
+    tmpItem := NoteRecordAt(EditingIndex);
+    EditingID := Piece(tmpItem, U, 1);
+    ChildNode := tvNotes.FindPieceNode(EditingID, U, tvNotes.Selected);
+    EditingIsChildComp := IsComponent(TORTreeNode(ChildNode));
+  end;
   if not NoteHasText(SelectedNoteIENVal) then begin
     InfoBox(TX_EMPTY_NOTE1, TC_EMPTY_NOTE, MB_OK or MB_ICONERROR);
     Exit;
   end;
-  //original -->   if not LastSaveClean(lstNotes.ItemIEN)
   if not LastSaveClean(SelectedNoteIENVal)
     and (InfoBox(TX_ABSAVE, TC_ABSAVE, MB_YESNO or MB_DEFBUTTON2 or MB_ICONWARNING) <> IDYES) then begin
     Exit;
   end;
-  //original -->   if CosignDocument(lstNotes.ItemIEN) then begin
   if CosignDocument(SelectedNoteIENVal) then begin
     SignTitle := TX_COSIGN;
     ActionType := SIG_COSIGN;
@@ -3864,14 +3496,11 @@ begin
     SignTitle := TX_SIGN;
     ActionType := SIG_SIGN;
   end;
-  //original -->   if not LockConsultRequestAndNote(lstNotes.ItemIEN) then Exit;
   if not LockConsultRequestAndNote(SelectedNoteIENVal) then Exit;
   // no exits after things are locked
   NoteUnlocked := False;
-  //original -->   ActOnDocument(ActionSts, lstNotes.ItemIEN, ActionType);
   ActOnDocument(ActionSts, SelectedNoteIENVal, ActionType);
   if ActionSts.Success then begin
-    //original -->     OK := IsOK2Sign(uPCEShow, lstNotes.ItemIEN);
     OK := IsOK2Sign(uPCEShow, SelectedNoteIENVal);
     if frmFrame.Closing then exit;
     if(uPCEShow.Updated) then begin
@@ -3879,56 +3508,43 @@ begin
       uPCEShow.Updated := FALSE;
       DisplaySelectedNote;  //kt //codex 8/17/26
     end;
-    //original -->     if not AuthorSignedDocument(lstNotes.ItemIEN) then begin
     if not AuthorSignedDocument(SelectedNoteIENVal) then begin
       if (InfoBox(TX_AUTH_SIGNED +
           GetTitleText(SelectedNoteIndex),TX_SIGN ,MB_YESNO)= ID_NO) then exit;
     end;
     if OK then begin
-      //original -->       ForceSignPrompt := uTMGOptions.ReadBool('Prompt '+Trim(piece(piece(lstNotes.Items[lstNotes.ItemIndex],'^',2),';',1)),False);
       ForceSignPrompt := uTMGOptions.ReadBool('Prompt '+Trim(SelectedNoteTitle),False);
-      //original -->       with lstNotes do SignatureForItem(Font.Size, MakeNoteDisplayText(Items[ItemIndex]), SignTitle, ESCode,piece(Items[ItemIndex],'^',16)<>'1',ForceSignPrompt);
       SignatureForItem(Font.Size, MakeNoteDisplayText(SelectedNoteText), SignTitle, ESCode, not PieceEquals(SelectedNoteText, '^', 16, '1'), ForceSignPrompt); //kt //codex 8/18/26
       if Length(ESCode) > 0 then begin
-        //original -->         SignDocument(SignSts, lstNotes.ItemIEN, ESCode);
         SignDocument(SignSts, SelectedNoteIENVal, ESCode);
-        //original -->         RemovePCEFromChanges(lstNotes.ItemIEN);
         RemovePCEFromChanges(SelectedNoteIENVal);
-        //original -->         NoteUnlocked := Changes.Exist(CH_DOC, lstNotes.ItemID);
         NoteUnlocked := Changes.Exist(CH_DOC, SelectedNoteIDStr);
-        //original -->         Changes.Remove(CH_DOC, lstNotes.ItemID);  // this will unlock if in Changes
         Changes.Remove(CH_DOC, SelectedNoteIDStr);  // this will unlock if in Changes
         if EditingIsChildComp then Changes.Remove(CH_DOC, EditingID); //kt 5/15
         if SignSts.Success then begin
-          //original -->           if fSignItem.PrintAfterSignature then PrintNote(lstNotes.ItemIEN, MakeNoteDisplayText(lstNotes.Items[lstNotes.ItemIndex]));   //TMG 7/1/21
           if fSignItem.PrintAfterSignature then PrintNote(SelectedNoteIENVal, MakeNoteDisplayText(SelectedNoteText));   //TMG 7/1/21
-          SendMessage(frmConsults.Handle, UM_NEWORDER, ORDER_SIGN, 0);      {*REV*}
+          SendMessage(frmConsults.Handle, UM_NEWORDER, ORDER_SIGN, 0);      //REV
           DisplaySelectedNote;  //kt //codex 8/17/26
-          //original -->           if DisplayCosignerDialog(lstNotes.ItemIEN) then mnuActIdentifyAddlSignersClick(Self);  //elh  1/30/14
           if DisplayCosignerDialog(SelectedNoteIENVal) then mnuActIdentifyAddlSignersClick(Self);  //elh  1/30/14
-          //original -->           if GetTMGPSCode(lstNotes.ItemIEN) = 'C' then popNoteMemoLinkToConsultClick(Self);
           if GetTMGPSCode(SelectedNoteIENVal) = 'C' then popNoteMemoLinkToConsultClick(Self);
         end else begin
           InfoBox(SignSts.Reason, TX_SIGN_ERR, MB_OK);
         end;
       end else begin  //if Length(ESCode)
-        //original -->         NoteUnlocked := Changes.Exist(CH_DOC, lstNotes.ItemID);
         NoteUnlocked := Changes.Exist(CH_DOC, SelectedNoteIDStr);
       end;
     end;
   end else begin
     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
   end;
-  //original -->   if not NoteUnlocked then UnlockDocument(lstNotes.ItemIEN);
   if not NoteUnlocked then UnlockDocument(SelectedNoteIENVal);
-  //original -->   UnlockConsultRequest(lstNotes.ItemIEN);
   UnlockConsultRequest(SelectedNoteIENVal);
   if EditingIsChildComp then begin EditingID := ''; EditingIndex := -1; end; //kt 5/15
-  //SetViewContext(FCurrentContext);  //v22.12 - RV
-  LoadNotes;                          //v22.12 - RV
-  //if EditingIndex > -1 then         //v22.12 - RV
-  if (EditingID <> '') then begin     //v22.12 - RV
-    //original -->     lstNotes.Items.Insert(0, tmpItem);
+  //kt //codex original --> LoadNotes;
+  LoadNotes(SelectedNoteIENVal, False); //kt //codex 9/8/26
+  uChanging := True; //kt //codex 9/8/26
+  try //kt //codex 9/8/26
+  if (EditingID <> '') then begin
     InsertNoteRecord(0, tmpItem);
     tmpNode := tvNotes.Items.AddObjectFirst(tvNotes.Items.GetFirstNode, 'Note being edited',
                MakeNoteTreeObject('EDIT^Note being edited^^^^^^^^^^^%^0'));
@@ -3937,14 +3553,20 @@ begin
     tmpNode := tvNotes.Items.AddChildObjectFirst(tmpNode, MakeNoteDisplayText(tmpItem), MakeNoteTreeObject(tmpItem));
     TORTreeNode(tmpNode).StringData := tmpItem;
     SetTreeNodeImagesAndFormatting(TORTreeNode(tmpNode), FCurrentContext, CT_NOTES);
-    EditingIndex := SelectNoteIDViaModel(EditingID);                 //v22.12 - RV  //kt //codex 8/14/26
+    //kt //codex original --> EditingIndex := SelectNoteIDViaModel(EditingID);
+    EditingIndex := NoteIndexOfIEN(StrToInt64Def(EditingID, -1)); //kt //codex 9/8/26
   end;
-  //with tvNotes do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);  //v22.12 - RV
-  with tvNotes do begin                                                            //v22.12 - RV
-    if not SelectAndActivateTreeNodeByID(FLastNoteID) then begin  //kt //codex 8/17/26
-      tvNotes.Selected := tvNotes.Items[0]; //first Node in treeview
-    end;
-  end;                                                                             //v22.12 - RV
+  SelectTreeNodeByID(IntToStr(SelectedNoteIENVal)); //kt //codex 9/8/26
+  if Assigned(tvNotes.Selected) then tvNotes.Selected.MakeVisible; //kt //codex 9/8/26
+  //kt //codex original --> with tvNotes do begin
+  //kt //codex original -->   if not SelectAndActivateTreeNodeByID(FLastNoteID) then begin
+  //kt //codex original -->     tvNotes.Selected := tvNotes.Items[0];
+  //kt //codex original -->   end;
+  //kt //codex original --> end;
+  finally //kt //codex 9/8/26
+    uChanging := False; //kt //codex 9/8/26
+  end; //kt //codex 9/8/26
+  ActivateSelectedTreeNode; //kt //codex 9/8/26
 end;
 
 procedure TfrmNotes.SaveSignItem(const ItemID, ESCode: string);
@@ -3963,10 +3585,8 @@ begin
   if ESCode<>'' then begin       // 4/20/23 added block
     if AllowSignature = False then exit;
   end;
-  AnIndex := -1;
   IEN := StrToIntDef(ItemID, 0);
   if IEN = 0 then Exit;
-  //kt if frmFrame.TimedOut and (EditingIndex <> -1) then FSilent := True;
   if frmFrame.TimedOut and EditingNoteActive then FSilent := True;  //kt
   AnIndex := NoteIndexOfIEN(IEN);  //kt //codex 8/17/26
   if (AnIndex > -1) and (AnIndex = EditingIndex) then begin
@@ -4009,7 +3629,7 @@ begin
       OK := IsOK2Sign(APCEObject, IEN);
       if frmFrame.Closing then exit;
       if(assigned(APCEObject)) and (uPCEShow.Updated) then begin
-        uPCEEdit.Assign(uPCEShow); //kt   uPCEShow.CopyPCEData(uPCEEdit);
+        uPCEEdit.Assign(uPCEShow); //kt
         uPCEShow.Updated := FALSE;
         DisplaySelectedNote;  //kt //codex 8/17/26
       end else begin
@@ -4021,9 +3641,7 @@ begin
         if not SignSts.Success then begin
           InfoBox(SignSts.Reason, TX_SIGN_ERR, MB_OK);
         end else begin
-          //original -->           if DisplayCosignerDialog(lstNotes.ItemIEN) then mnuActIdentifyAddlSignersClick(Self);  //elh  1/30/14
           if DisplayCosignerDialog(IEN) then mnuActIdentifyAddlSignersClick(Self);  //elh  1/30/14
-          //original -->           if GetTMGPSCode(lstNotes.ItemIEN) = 'C' then popNoteMemoLinkToConsultClick(Self);
           if GetTMGPSCode(IEN) = 'C' then popNoteMemoLinkToConsultClick(Self);
         end;
         if not SignSts.Success then InfoBox(SignSts.Reason, TX_SIGN_ERR, MB_OK);
@@ -4034,8 +3652,7 @@ begin
   UnlockConsultRequest(IEN);
   // GE 14926; added if (AnIndex> -1) to by pass LoadNotes when creating on narking Allerg Entered In error.
   if (AnIndex > -1) and (AnIndex = SelectedNoteIndex) and (not frmFrame.ContextChanging) then begin
-    LoadNotes;
-    with tvNotes do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+    LoadNotes(IEN); //kt //codex 9/8/26
   end;
 end;
 
@@ -4046,11 +3663,6 @@ var NoteIsComponent:  boolean;         //kt 5/15
     DisplayingPDF : boolean;
 begin
   inherited;
-  {
-  if PopupComponent(Sender, popNoteMemo) is TCustomEdit
-    then FEditCtrl := TCustomEdit(PopupComponent(Sender, popNoteMemo))
-    else FEditCtrl := nil;
-  }
   //kt begin mod  3/16
   PopupComp := PopupComponent(Sender, popNoteMemo);
   if PopupComp is TCustomEdit then begin
@@ -4092,10 +3704,8 @@ begin
     mnuLooseInChartDelete.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
     mnuLooseInChartMoveScanned.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
     mnuLooseInChartMoveTIU.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
-    //mnuLooseDocHandler.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose documents');
     mnuChartSetToLooseNote.Visible:= (ContainsText(tvNotes.Selected.Parent.Text,'All unsigned')or(ContainsText(tvNotes.Selected.Parent.Text,'Alert')and(ContainsText(tvNotes.Selected.Text,'Addendum')=False)));
     mnuChartSetToUnsignedNote.Visible := ContainsText(tvNotes.Selected.Parent.Text,'Loose notes');
-    //mnuMoveToLoose.Visible := (ContainsText(tvNotes.Selected.Parent.Text,'All unsigned')or(ContainsText(tvNotes.Selected.Parent.Text,'Alert')and(ContainsText(tvNotes.Selected.Text,'Addendum')=False)));
   end else begin
     mnuLooseInChartDelete.Visible := False;
     mnuLooseInChartMoveScanned.Visible := False;
@@ -4125,9 +3735,6 @@ begin
     popNoteMemoSpell.Enabled      := not pnlHTMLWrite.Visible; //kt 9/11
     popNoteMemoGrammar.Enabled    := not pnlHTMLWrite.Visible; //kt 9/11
     popNoteMemoReformat.Enabled   := not pnlHTMLWrite.Visible; //kt 9/11
-    //kkt 9/11 popNoteMemoSpell.Enabled    := True;
-    //kt 9/11 popNoteMemoGrammar.Enabled  := True;
-    //kt 9/11 popNoteMemoReformat.Enabled := True;
     popNoteMemoReplace.Enabled  := (FEditCtrl.GetTextLen > 0);
     popNoteMemoPreview.Enabled  := (frmDrawers.TheOpenDrawer = odTemplates) and Assigned(frmDrawers.tvTemplates.Selected);
     popNoteMemoInsTemplate.Enabled  := (frmDrawers.TheOpenDrawer = odTemplates) and Assigned(frmDrawers.tvTemplates.Selected);
@@ -4143,20 +3750,12 @@ begin
   end;
 end;
 
-(*//kt 9/11 NOTICE:
-  On the form, popNoteMenu was edited to add a new item as below
-  popNoteMemoHTMLFormat : TMenuItem
-  Captions: ~ Edit as Formatted Text
-  OnClick -- popNoteMemoHTMLFormatClick
-*)
-
 procedure TfrmNotes.popNoteMemoHTMLFormatClick(Sender: TObject);
 //kt 9/11 added
 begin
   inherited;
   ToggleHTMLEditMode;
 end;
-
 
 
 procedure TfrmNotes.popNoteMemoCutClick(Sender: TObject);
@@ -4174,10 +3773,8 @@ end;
 procedure TfrmNotes.popNoteMemoPasteClick(Sender: TObject);
 begin
   inherited;
-  FEditCtrl.SelText := Clipboard.AsText; {*KCM*}
-  //Sendmessage(FEditCtrl.Handle,EM_PASTESPECIAL,CF_TEXT,0);
+  FEditCtrl.SelText := Clipboard.AsText; //*KCM*
   frmNotes.pnlWriteResize(Self);
-  //FEditCtrl.PasteFromClipboard;        // use AsText to prevent formatting
 end;
 
 procedure TfrmNotes.popNoteMemoReformatClick(Sender: TObject);
@@ -4300,54 +3897,21 @@ end;
 
 procedure TfrmNotes.popNoteMemoViewHTMLSourceClick(Sender: TObject);
 //kt added 3/16.  Modified 5/18/25
-var //ktOK : boolean;
-    //HTMLText : string;
-    //frmView : TfrmMemoEdit;
-    HtmlObj : THtmlObj;
+var HtmlObj : THtmlObj;
 begin
   inherited;
-
-  //kt modification to use common view code in uHTMLTools
   HtmlObj := nil;
   if (vmHTML in FViewMode) then begin
     if      (vmEdit in FViewMode) then HtmlObj := HtmlEditor
     else if (vmView in FViewMode) then HtmlObj := HtmlViewer;
   end;
   if assigned(HtmlObj) then uHTMLTools.ViewHTMLSourceClick(HtmlObj)
-
-  {  //kt 5/18/25
-  try
-    OK := false;
-    if (vmHTML in FViewMode) then begin
-      if (vmEdit in FViewMode) then begin
-        HTMLText := HtmlEditor.GetFullHTMLText;
-        OK := true;
-      end else if (vmView in FViewMode) then begin
-        HTMLText := HtmlViewer.GetFullHTMLText;
-        OK := true;
-      end;
-    end;
-    if OK then begin
-      frmView := TfrmMemoEdit.Create(self);
-      frmView.memEdit.ReadOnly := false;
-      frmView.memEdit.ScrollBars := ssBoth;
-      frmView.memEdit.Lines.Text := HTMLText;
-      frmView.Caption := 'Note Details';
-      frmView.lblMessage.Caption := 'Source code of note.';
-      frmView.ShowModal;
-    end else begin
-      MessageDlg('Can''t get source.', mtError, [mbOK], 0);
-    end;
-  finally
-    frmView.Free;
-  end;
-  }
 end;
 
 procedure TfrmNotes.popNotePasteHTMLClick(Sender: TObject);
 begin
   inherited;
-  HTMLEditor.InsertHTMLAtCaret(Clipboard.AsText);
+  HTMLEditor.InsertHTMLAtCaret(Clipboard.AsText); //kt //codex 8/30/26
 end;
 
 procedure TfrmNotes.popNoteViewInBrowser2Click(Sender: TObject);
@@ -4371,7 +3935,6 @@ begin
    try
      NoteText := StringReplace(HtmlViewer.GetFullHTMLText,CacheDir+'\','',[rfReplaceAll, rfIgnoreCase]);
      MyHTML.add(NoteText);
-     //MyHTML.add(HtmlViewer.GetFullHTMLText);
      MyHTML.SaveToFile(TempFile);
     finally
      MyHTML.Free;
@@ -4382,19 +3945,14 @@ end;
 procedure TfrmNotes.mnuViewDetailClick(Sender: TObject);
 begin
   inherited;
-  //original -->   if lstNotes.ItemIEN <= 0 then Exit;
   if SelectedNoteIEN <= 0 then Exit;
   mnuViewDetail.Checked := not mnuViewDetail.Checked;
-  if mnuViewDetail.Checked then
-    begin
+  if mnuViewDetail.Checked then begin
       StatusText('Retrieving progress note details...');
-      Screen.Cursor := crAppStart;  //kt 9/11, was crHourGlass;
-      //kt 9/11 LoadDetailText(memNote.Lines, lstNotes.ItemIEN);
-      //original -->       LoadDetailText(FViewNote, lstNotes.ItemIEN);  //kt 9/11
+      Screen.Cursor := crAppStart;
       LoadDetailText(FViewNote, SelectedNoteIEN);  //kt 9/11
       SetDisplayToHTMLvsText(FViewMode,FViewNote);  //kt 9/11
       Screen.Cursor := crHourGlass;
-      //original -->       LoadDetailText(memNote.Lines, lstNotes.ItemIEN);
       LoadDetailText(memNote.Lines, SelectedNoteIEN);
       Screen.Cursor := crDefault;
       StatusText('');
@@ -4419,20 +3977,15 @@ var
   DeleteSts: TActionRec;
 begin
   inherited;
-  //kt if frmFrame.TimedOut and (EditingIndex <> -1) then begin
   if frmFrame.TimedOut and EditingNoteActive then begin  //kt
     FSilent := True;
-    //kt 9/11 if memNewNote.GetTextLen > 0 then SaveCurrentNote(Saved)
-    if EditorHasText then SaveCurrentNote(Saved)  //kt 9/11
-    else
-    begin
-      //original -->       IEN := lstNotes.GetIEN(EditingIndex);
+    if EditorHasText then begin
+      SaveCurrentNote(Saved);  //kt 9/11
+    end else begin
       IEN := NoteIENAt(EditingIndex);
-      if not LastSaveClean(IEN) then             // means note hasn't been committed yet
-      begin
+      if not LastSaveClean(IEN) then begin             // means note hasn't been committed yet
         LockDocument(IEN, ErrMsg);
-        if ErrMsg = '' then
-        begin
+        if ErrMsg = '' then begin
           DeleteDocument(DeleteSts, IEN, '');
           UnlockDocument(IEN);
         end; {if ErrMsg}
@@ -4453,18 +4006,14 @@ var position:integer;
     CheckForReplacement : boolean;
 begin
   ScrollPosition := HtmlEditor.GetScrollLocation;
-  //kt original --> CheckForReplacement := not (pos(TagToReplace,ReplacementText)>0);  //if the tag is found in the replacement text, then we know it will be found again after the replacement so don't check for replacement since it will always fail
   CheckForReplacement := not (PosInsensitive(TagToReplace,ReplacementText)>0); //kt 5/25  //if the tag is found in the replacement text, then we know it will be found again after the replacement so don't check for replacement since it will always fail
-  //messagedlg(inttostr(SCrollPosition),mtinformation,[mbOK],0);
   if not (vmEdit in FViewMode) then begin
     result := '-1^Not in edit mode.';
     exit;  //quit if not in edit mode
   end;
   DIVTagToReplace:='<DIV name="'+piece(piece(TagToReplace,'[',2),']',1)+'"></DIV>';    //Test for DIV first
-  //kt original --> position := Pos(DIVTagToReplace,HtmlEditor.HTMLText);
   position := PosInsensitive(DIVTagToReplace,HtmlEditor.HTMLText);  //kt 5/25
   if position<1 then begin
-    //kt original --> position := Pos(TagToReplace,HtmlEditor.HTMLText);
     position := PosInsensitive(TagToReplace,HtmlEditor.HTMLText); //kt 5/25
     if position<1 then begin
       result := '-1^Tag sent "'+TagToReplace+'" could not be found in note.';
@@ -4474,7 +4023,6 @@ begin
     TagToReplace := DIVTagToReplace;
     ReplacementText := '<br>'+ReplacementText;
   end;
-  //position := Pos(TagToReplace,HtmlEditor.HTMLText);
 
   result := '1^success';
   if ReplaceAll then  //kt 4/28/23
@@ -4504,9 +4052,7 @@ var
   SigAction: integer;
 begin
   if NoteIEN = 0 then exit;
-  //original -->   x := CanChangeCosigner(lstNotes.ItemIEN);
   x := CanChangeCosigner(NoteIEN);
-  //original -->   ActOnDocument(ActionSts, lstNotes.ItemIEN, 'IDENTIFY SIGNERS');
   ActOnDocument(ActionSts, NoteIEN, 'IDENTIFY SIGNERS');
   y := ActionSts.Success;
   if x and not y then begin
@@ -4524,25 +4070,19 @@ begin
     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
     Exit;
   end;
-  //original -->   if not LockConsultRequestAndNote(lstNotes.ItemIEN) then Exit;
   if not LockConsultRequestAndNote(NoteIEN) then Exit;
-  //original -->   Exclusions := GetCurrentSigners(lstNotes.ItemIEN);
   Exclusions := GetCurrentSigners(NoteIEN);
-  //ARefDate := StrToFloat(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3));
-  //original -->   SelectAdditionalSigners(Font.Size, lstNotes.ItemIEN, SigAction, Exclusions, SignerList, CT_NOTES, ARefDate);
   SelectAdditionalSigners(Font.Size, NoteIEN, SigAction, Exclusions, SignerList, CT_NOTES, ARefDate);
   with SignerList do begin
     case SigAction of
       SG_ADDITIONAL:  if Changed and (Signers <> nil) and (Signers.Count > 0) then
                           //original -->                           UpdateAdditionalSigners(lstNotes.ItemIEN, Signers);
                           UpdateAdditionalSigners(NoteIEN, Signers);
-      SG_COSIGNER:    if Changed then
-                          begin
+      SG_COSIGNER:    if Changed then begin
                             //original -->                             ChangeCosigner(lstNotes.ItemIEN, Cosigner);
                             ChangeCosigner(NoteIEN, Cosigner);
                           end;
-      SG_BOTH:        if Changed then
-                          begin
+      SG_BOTH:        if Changed then begin
                             if (Signers <> nil) and (Signers.Count > 0) then
                               //original -->                               UpdateAdditionalSigners(lstNotes.ItemIEN, Signers);
                               UpdateAdditionalSigners(NoteIEN, Signers);
@@ -4552,9 +4092,7 @@ begin
     end; //case
     DisplaySelectedNote;  //kt //codex 8/17/26
   end;
-  //original -->   UnlockDocument(lstNotes.ItemIEN);
   UnlockDocument(NoteIEN);
-  //original -->   UnlockConsultRequest(lstNotes.ItemIEN);
   UnlockConsultRequest(NoteIEN);
 end;
 
@@ -4570,77 +4108,16 @@ begin
   inherited;
   SelectedNoteIENVal := SelectedNoteIEN;
   SelectedNoteText := SelectedNoteRecord;
-  //original -->   if lstNotes.ItemIEN = 0 then exit;
   if SelectedNoteIENVal = 0 then exit;
-  //original -->   SavedDocID := lstNotes.ItemID;
   SavedDocID := SelectedNoteID;
-  //kt if lstNotes.ItemIndex = EditingIndex then begin
   if EditingNoteSelected then begin  //kt
     SaveCurrentNote(Saved);
     if not Saved then Exit;
     LoadNotes;
     SelectTreeNodeByID(SavedDocID);  //kt //codex 8/17/26
   end;
-  //original -->   ARefDate := StrToFloat(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3)); //kt copied from below.
   ARefDate := StrToFloat(Piece(SelectedNoteText, U, 3)); //kt copied from below.
-  //original -->   IdentifyAddlSigners(lstNotes.ItemIEN, ARefDate);
   IdentifyAddlSigners(SelectedNoteIENVal, ARefDate);
-  { //kt moved to IdentifyAddlSigners 2/22/17
-  x := CanChangeCosigner(lstNotes.ItemIEN);
-  ActOnDocument(ActionSts, lstNotes.ItemIEN, 'IDENTIFY SIGNERS');
-  y := ActionSts.Success;
-  if x and not y then
-    begin
-      if InfoBox(ActionSts.Reason + CRLF + CRLF +
-                 'Would you like to change the cosigner?',
-                 TX_IN_AUTH, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) = ID_YES then
-        SigAction := SG_COSIGNER
-      else
-        Exit;
-    end
-  else if y and not x then SigAction := SG_ADDITIONAL
-  else if x and y then SigAction := SG_BOTH
-  else
-    begin
-      InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
-      Exit;
-    end;
-
-  //original -->   if not LockConsultRequestAndNote(lstNotes.ItemIEN) then Exit;
-  if not LockConsultRequestAndNote(SelectedNoteIEN) then Exit;
-  //original -->   Exclusions := GetCurrentSigners(lstNotes.ItemIEN);
-  Exclusions := GetCurrentSigners(SelectedNoteIEN);
-  //original -->   ARefDate := StrToFloat(Piece(lstNotes.Items[lstNotes.ItemIndex], U, 3));
-  ARefDate := StrToFloat(Piece(SelectedNoteRecord, U, 3));
-  //original -->   SelectAdditionalSigners(Font.Size, lstNotes.ItemIEN, SigAction, Exclusions, SignerList, CT_NOTES, ARefDate);
-  SelectAdditionalSigners(Font.Size, SelectedNoteIEN, SigAction, Exclusions, SignerList, CT_NOTES, ARefDate);
-  with SignerList do
-    begin
-      case SigAction of
-        SG_ADDITIONAL:  if Changed and (Signers <> nil) and (Signers.Count > 0) then
-                          //original -->                           UpdateAdditionalSigners(lstNotes.ItemIEN, Signers);
-                          UpdateAdditionalSigners(SelectedNoteIEN, Signers);
-        SG_COSIGNER:    if Changed then
-                          begin
-                            //original -->                             ChangeCosigner(lstNotes.ItemIEN, Cosigner);
-                            ChangeCosigner(SelectedNoteIEN, Cosigner);
-                          end;
-        SG_BOTH:        if Changed then
-                          begin
-                            if (Signers <> nil) and (Signers.Count > 0) then
-                              //original -->                               UpdateAdditionalSigners(lstNotes.ItemIEN, Signers);
-                              UpdateAdditionalSigners(SelectedNoteIEN, Signers);
-                            //original -->                             ChangeCosigner(lstNotes.ItemIEN, Cosigner);
-                            ChangeCosigner(SelectedNoteIEN, Cosigner);
-                          end;
-      end;
-      DisplaySelectedNote;  //kt //codex 8/17/26
-    end;
-  //original -->   UnlockDocument(lstNotes.ItemIEN);
-  UnlockDocument(SelectedNoteIEN);
-  //original -->   UnlockConsultRequest(lstNotes.ItemIEN);
-  UnlockConsultRequest(SelectedNoteIEN);
-  }
   DisplaySelectedNote;  //kt //codex 8/17/26
 end;
 
@@ -4657,7 +4134,6 @@ var
   tmpNode: TTreeNode;
   AnObject: PDocTreeObject;
 begin
-  //kt if EditingIndex <> -1 then begin
   if EditingNoteActive then begin  //kt
     SaveCurrentNote(Saved);
     if not Saved then Exit;
@@ -4676,11 +4152,9 @@ begin
   end;
   uChanging := True;
   tvNotes.Items.BeginUpdate;
-  //original -->   lstNotes.Clear;
   ClearNoteRecords;
   KillDocTreeObjects(tvNotes);
   tvNotes.Items.Clear;
-  //original -->   lstNotes.Items.Add(x);
   AddNoteRecord(x);
   AnObject := MakeNoteTreeObject('ALERT^Alerted Note^^^^^^^^^^^%^0');
   tmpNode := tvNotes.Items.AddObjectFirst(tvNotes.Items.GetFirstNode, AnObject.NodeText, AnObject);
@@ -4763,13 +4237,11 @@ const
 begin
   inherited;
   if FCurrentContext.MaxDocs = 0 then
-     if InfoBox(TX_NO_MAX,'Warning', MB_YESNO or MB_ICONWARNING) = IDNO then
-       begin
+     if InfoBox(TX_NO_MAX,'Warning', MB_YESNO or MB_ICONWARNING) = IDNO then begin
          mnuViewClick(mnuViewCustom);
          Exit;
        end;
-  if InfoBox(TX_REPLACE,'Confirmation', MB_YESNO or MB_ICONQUESTION) = IDYES then
-    begin
+  if InfoBox(TX_REPLACE,'Confirmation', MB_YESNO or MB_ICONQUESTION) = IDYES then begin
       SaveCurrentTIUContext(FCurrentContext);
       FDefaultContext := FCurrentContext;
       //lblNotes.Caption := 'Default List';
@@ -4920,7 +4392,7 @@ var  IEN : string;
 begin
   IEN := IntToStr(NoteIEN);
   if IEN = GetCurrentNoteIEN then exit;
-  Node := tvNotes.FindPieceNode(IEN, U, tvNotes.Items.GetFirstNode);
+  Node := tvNotes.FindPieceNode(IEN, U, nil); //kt //codex 9/8/26
   tvNotes.Selected := node;
   if assigned(tvNotes.Selected) then begin
     tvNotesChange(self, tvNotes.Selected);  //prevents view being left in blank state (nothing shown)
@@ -4958,7 +4430,7 @@ end;
 
 procedure TfrmNotes.FormDestroy(Sender: TObject);
 begin
-  //kt 911  note: The Images tab will delete all files in .\Cache, which
+  //kt Note: The Images tab will delete all files in .\Cache, which
   //         might include HTMLfilename.  No harm if already deleted.
   FDocList.Free;
   FImageFlag.Free;
@@ -4966,7 +4438,6 @@ begin
   HtmlEditor.Free; //kt 6/7/09
   HtmlViewer.Free; //kt 6/7/09
   FNotesToHide.Free; //kt 5/12/14
-  //9/28/15 frmSearchStop.Free; //kt 9/25/15
   frmWinMessageLog.Free; //kt 8/16
   CallBackProcs.Free;  //kt 5/11/23
   inherited;
@@ -4980,8 +4451,7 @@ end;
 procedure TfrmNotes.AssignRemForm;
 begin
   //kt 9/11 ReminderDialog interaction has not yet been debugged with HTML formatted text.
-  with RemForm do
-  begin
+  with RemForm do begin
     Form := Self;
     PCEObj := uPCEEdit;
     RightPanel := pnlRight;
@@ -5002,7 +4472,8 @@ begin
 end;
 
 //===================  Added for sort/search enhancements ======================
-procedure TfrmNotes.LoadNotes;
+//kt //codex original --> procedure TfrmNotes.LoadNotes;
+procedure TfrmNotes.LoadNotes(PreferredNoteIEN: Int64; ActivateSelection: Boolean); //kt //codex 9/8/26
 const
   INVALID_ID = -1;
   INFO_ID = 1;
@@ -5016,11 +4487,6 @@ var
   HiddenCount: integer;      //tmg 5/20/19
 begin
   tmpList := TStringList.Create;
-  {if frmNotes.frmNotesLoading=nil then begin
-       frmNotesLoading := TfrmNotesLoading.create(nil);
-       frmNotesLoading.show;
-       application.processmessages;
-  end;  }
   try
     FLoadingNotes := True;  //ELH  6/9/26
 
@@ -5028,9 +4494,7 @@ begin
     FDocList.Clear;
     uChanging := True;
     RedrawSuspend(memNote.Handle);
-    //kt 4/16  RedrawSuspend(HTMLViewer.Handle); //kt 9/11  <-- removed because IE was not refreshing screen when present.
     tvNotes.Items.BeginUpdate;
-    //original -->     lstNotes.Items.Clear;
     ClearNoteRecords;
     KillDocTreeObjects(tvNotes);
     tvNotes.Items.Clear;
@@ -5168,9 +4632,13 @@ begin
       tvNotes.Items.BeginUpdate;
       RemoveParentsWithNoChildren(tvNotes, FCurrentContext);  // moved here in v15.9 (RV)
       //kt //codex original -->       NoteDataModelChanged; //kt //codex 8/14/26
-      if FLastNoteID <> '' then
+      if PreferredNoteIEN > 0 then //kt //codex 9/8/26
+        SelectTreeNodeByID(IntToStr(PreferredNoteIEN)) //kt //codex 9/8/26
+      else if FLastNoteID <> '' then //kt //codex 9/8/26
+      //kt //codex original --> if FLastNoteID <> '' then
         SelectTreeNodeByID(FLastNoteID);  //kt //codex 8/17/26
-      if Selected = nil then begin
+      //kt //codex original --> if Selected = nil then begin
+      if (Selected = nil) and (PreferredNoteIEN <= 0) then begin //kt //codex 9/8/26
         if (FCurrentContext.GroupBy <> '') or (FCurrentContext.Filtered) then begin
           ANode := TORTreeNode(Items.GetFirstNode);
           while ANode <> nil do begin
@@ -5199,9 +4667,18 @@ begin
         ColumnToSort := Pos(FCurrentContext.SortBy, 'RDSAL') - 1;
       //RemoveParentsWithNoChildren(tvNotes, FCurrentContext);  // moved FROM here in v15.9 (RV)
       tvNotes.Items.EndUpdate;
-      uChanging := False;
-      SendMessage(tvNotes.Handle, WM_VSCROLL, SB_TOP, 0);
-      ActivateSelectedTreeNode;  //kt //codex 8/17/26
+      if (PreferredNoteIEN > 0) and (Selected = nil) then begin //kt //codex 9/8/26
+        SetSelectedNoteIndex(-1); //kt //codex 9/8/26
+        SetDisplayToHTMLvsText([vmView, vmText], nil, VIEW_ACTIVATE_ONLY); //kt //codex 9/8/26
+        lblTitle.Caption := 'Note ' + IntToStr(PreferredNoteIEN) + ' is not in the current view.'; //kt //codex 9/8/26
+      end; //kt //codex 9/8/26
+      //kt //codex original --> SendMessage(tvNotes.Handle, WM_VSCROLL, SB_TOP, 0);
+      if (PreferredNoteIEN > 0) and Assigned(Selected) then //kt //codex 9/8/26
+        Selected.MakeVisible //kt //codex 9/8/26
+      else SendMessage(tvNotes.Handle, WM_VSCROLL, SB_TOP, 0); //kt //codex 9/8/26
+      uChanging := False; //kt //codex 9/8/26
+      //kt //codex original --> ActivateSelectedTreeNode;
+      if ActivateSelection then ActivateSelectedTreeNode; //kt //codex 9/8/26
     end;
   finally
     if (vmHTML in FViewMode) then begin   //kt 9/11
@@ -5213,12 +4690,16 @@ begin
     frmNotesLoading.free;
     frmNotesLoading := nil;
     FLoadingNotes := False;  //ELH  6/9/26
+    uChanging := False; //kt //codex 9/8/26
   end;
 end;
 
 procedure TfrmNotes.UpdateTreeView(DocList: TStringList; Tree: TORTreeView);
 var UnsignedDocsNode : TORTreeNode; //kt 5/15
+    WasChanging: Boolean; //kt //codex 9/8/26
 begin
+  WasChanging := uChanging; //kt //codex 9/8/26
+  try //kt //codex 9/8/26
   with Tree do begin
     uChanging := True;
     Items.BeginUpdate;
@@ -5232,8 +4713,11 @@ begin
     Items.EndUpdate;
     UnsignedDocsNode := Tree.FindPieceNode(IntToStr(NC_UNSIGNED), U);  //kt 5/15 added
     if assigned(UnsignedDocsNode) then UnsignedDocsNode.Expand(true); //kt 5/15 added to expand Unsigned Notes node
-    uChanging := False;
+    //kt //codex original --> uChanging := False;
   end;
+  finally //kt //codex 9/8/26
+    uChanging := WasChanging; //kt //codex 9/8/26
+  end; //kt //codex 9/8/26
 end;  //kt //codex 8/17/26
 
 function TfrmNotes.NoteRecordAt(AnIndex: Integer): string;
@@ -5345,7 +4829,8 @@ function TfrmNotes.SelectTreeNodeByID(const NoteID: string; ExpandSelection: Boo
 begin
   Result := nil;  //kt //codex 8/17/26
   if Trim(NoteID) = '' then Exit;  //kt //codex 8/17/26
-  Result := tvNotes.FindPieceNode(NoteID, U, tvNotes.Items.GetFirstNode);  //kt //codex 8/17/26
+  //kt //codex original --> Result := tvNotes.FindPieceNode(NoteID, U, tvNotes.Items.GetFirstNode);
+  Result := tvNotes.FindPieceNode(NoteID, 1, U, nil); //kt //codex 9/8/26
   tvNotes.Selected := Result;  //kt //codex 8/17/26
   if ExpandSelection and Assigned(tvNotes.Selected) then  //kt //codex 8/17/26
     tvNotes.Selected.Expand(False);  //kt //codex 8/17/26
@@ -5472,13 +4957,11 @@ var
   DescendentDepth:          Integer;       //kt 5/15
   //kt //codex original --> TargetNode: TORTreeNode;
 begin
-  //original -->   SetActiveListBoxForImages(frmNotes.lstNotes);  //fImages.ListBox := frmNotes.lstNotes;  //kt
   SetActiveTIUIENGetterForImages(GetCurrentNoteID);
   if uChanging then Exit;
   //This gives the change a chance to occur when keyboarding, so that WindowEyes
   //doesn't use the old value.
   //kt begin mod block 5/15/15-------
-  //kt if (lstNotes.ItemIndex <> -1) and (lstNotes.ItemIndex = EditingIndex) then begin
   if (SelectedNoteIndex <> -1) and EditingNoteSelected then begin
     DoAutoSave(0); // 5/15
   end;
@@ -5535,28 +5018,9 @@ begin
       if pos('PDF',Piece(x, U, 1))>0 then begin
         memNote.Clear;
         HTMLViewer.Clear; //kt 9/11
-
-        {TO DO: Here we want to copy the file locally. The below function corrupts the PDF for some reason.
-        Also to make this work we have to change the DownloadFile function because the pdf doesn't exist in
-        /opt/worldvista/EHR/images (which is the default location to look) yet. Something in the call to port 9080 moves it.
-        We can change the LocIEN in Download file RPC, which is variable #3. CallV('TMG DOWNLOAD FILE', [FPath,FName]);
-                                                                                                                    ^
-                                                                                                           Here  ---|
-        //Download file
-        R1 := drSuccess;  //default
-        CacheFName := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache\'+Patient.DFN+'-'+Piece(x, U, 2);
-        if not FileExists(CacheFName) then begin
-            R1 := frmImages.DownloadFile('',Piece(x, U, 17)+Piece(x, U, 2),CacheFName,1,1);
-            Application.ProcessMessages;
-        end;
-        HTMLViewer.HTMLText := '<embed src="'+CacheFName+'" width="800px" height="2100px" />';             }
-
         HTMLViewer.HTMLText := '<embed src="http://192.168.3.99:9080'+Piece(x, U, 18)+'" width="800px" height="1200px" />';
         Mode := [vmView] + [vmHTML_MODE[vmHTML in FViewMode]];
         SetDisplayToHTMLvsText(Mode,nil,VIEW_ACTIVATE_ONLY);
-
-        //lstNotes.SelectByID(Piece(x, U, 1));
-        //lstNotesClick(Self);    //<-- lots of action takes place here...
       end else if PieceAsIntDef(x, U, 1, 0) > 0 then begin //kt //codex 8/18/26
         memNote.Clear;
         HTMLViewer.Clear; //kt 9/11
@@ -5617,13 +5081,6 @@ begin
     end;
 end;
 
-procedure TfrmNotes.tvNotesCustomDraw(Sender: TCustomTreeView; const ARect: TRect; var DefaultDraw: Boolean);
-//kt added 6/15
-begin
-  inherited;
-  //tvNotes.Canvas.Brush.Color := clRed;   //kt note <-- is this doing anything??
-end;
-
 procedure TfrmNotes.tvNotesCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
 //kt added 6/15
   function LeftMatch(SubStr, Str : string) : boolean;
@@ -5636,11 +5093,9 @@ begin
   inherited;
   if not assigned(Node) then exit;
   NodeData := TORTreeNode(Node).StringData; //kt //codex 8/18/26
-  //kt if (Node = tvNotes.Selected) then exit;
   if assigned(Node.Parent) then begin
     s := TORTreeNode(Node.Parent).StringData;
     ParentTitle := piece(s, '^',2);
-    //if LeftMatch('EDIT^Note being edited', s) then begin
     if (ParentTitle= 'Note being edited')   //kt changes 11/13/16
     or (ParentTitle = 'New Note in Progress')
     or (ParentTitle = 'All unsigned notes') then begin
@@ -5649,27 +5104,26 @@ begin
     end;
     //ELH added to highlight office notes
     if PieceEquals(NodeData, '^', 16, '1') then begin //kt //codex 8/18/26
-       tvNotes.Canvas.Brush.Color := clTMGHighlight;  //server side set
+      tvNotes.Canvas.Brush.Color := clTMGHighlight;  //server side set
     end;
     //ELH added to highlight other colors
     NodeColorName := Piece(NodeData, '^', 17); //kt //codex 8/18/26
     if NodeColorName<>'' then begin
-       clTMGHospitalColor := TColor(StringToColor(NodeColorName));//TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
-       tvNotes.Canvas.Brush.Color := clTMGHospitalColor;  //server side set
+      clTMGHospitalColor := TColor(StringToColor(NodeColorName));//TColor(StringToColor(uTMGOptions.ReadString(piece(TORTreeNode(Node).StringData,'^',17),'$4E9CFF')));
+      tvNotes.Canvas.Brush.Color := clTMGHospitalColor;  //server side set
     end;
   end;
   if not assigned(tvNotes.Selected) then exit;
   NodeTitle := Piece(NodeData, '^', 2); //kt //codex 8/18/26
   if pos('Loose documents (', NodeTitle)>0 then begin
-       tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
+    tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
   end;
   if pos('Loose notes (', NodeTitle)>0 then begin
-       tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
+    tvNotes.Canvas.Brush.Color := clWebRed;  //server side set
   end;
   SelectedIEN := piece(TORTreeNode(tvNotes.Selected).StringData, '^', 1);
   ThisIEN := piece(NodeData, '^', 1);
   if (ThisIEN = SelectedIEN) and (ThisIEN <> '') then begin
-    //tvNotes.Canvas.Brush.Color := clSkyBlue;
     tvNotes.Canvas.Brush.Color := clHighlight;
     tvNotes.Canvas.Font.Color := clMenuText;
   end;
@@ -5682,8 +5136,7 @@ procedure TfrmNotes.tvNotesExpanded(Sender: TObject; Node: TTreeNode);
     { Within an ID parent node, sorts in ascending order by title
     BUT - addenda to parent document are always at the top of the sort, in date order}
     if (Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum') and
-       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then
-      begin
+       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then begin
         Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
                                 PChar(DocTreeData(Node2)^.DocFMDate));
       end
@@ -5705,8 +5158,7 @@ procedure TfrmNotes.tvNotesExpanded(Sender: TObject; Node: TTreeNode);
     { Within an ID parent node, sorts in ascending order by document date
     BUT - addenda to parent document are always at the top of the sort, in date order}
     if (Copy(DocTreeData(Node1)^.DocTitle, 1, 8) = 'Addendum') and
-       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then
-      begin
+       (Copy(DocTreeData(Node2)^.DocTitle, 1, 8) = 'Addendum') then begin
         Result :=  AnsiStrIComp(PChar(DocTreeData(Node1)^.DocFMDate),
                                 PChar(DocTreeData(Node2)^.DocFMDate));
       end
@@ -5727,8 +5179,7 @@ begin
   with Node do
     begin
       if Assigned(DocTreeData(Node)) then
-        if (Pos('<', DocTreeData(Node)^.DocHasChildren) > 0) then
-          begin
+        if (Pos('<', DocTreeData(Node)^.DocHasChildren) > 0) then begin
             if (DocTreeData(Node)^.OrderByTitle) then
               CustomSort(@SortByTitle, 0)
             else
@@ -5745,23 +5196,10 @@ procedure TfrmNotes.tvNotesChanging(Sender: TObject; Node: TTreeNode; var AllowC
 //kt added
 begin
   inherited;
-  //if assigned(frmNoteTOC) then SetTOCButtonStatus(1);
   if assigned(frmNoteTOC) then begin
     frmNoteTOC.AnimateClose := False;
     SetTOCButtonStatus(1);
   end;
-  //kt not needed --> AllowChange := not NonModalEncounterDialogActive(True);
-end;
-
-procedure TfrmNotes.tvNotesClick(Sender: TObject);
-begin
-(*  if tvNotes.Selected = nil then exit;
-  if (tvNotes.Selected.ImageIndex in [IMG_TOP_LEVEL, IMG_GROUP_OPEN, IMG_GROUP_SHUT]) then
-    begin
-      uChanging := True;
-      uChanging := False;
-      memNote.Clear;
-    end;*)
 end;
 
 procedure TfrmNotes.tvNotesDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
@@ -5791,8 +5229,7 @@ begin
 end;
 
 function TfrmNotes.tvIndexOfNode(Node : TORTreeNode) : integer;
-//kt 4/17/15
-  var IEN : string;
+var IEN : string;
 begin
   IEN := '';
   if Node <> nil then IEN := piece(Node.StringData,'^',1);
@@ -5806,12 +5243,10 @@ procedure TfrmNotes.tvNotesDblClick(Sender: TObject);
 //    this function to be called before tvNotesChange() has finished.
 begin
   inherited;
-  //kt if lstNotes.ItemIndex = EditingIndex then Exit;
   if EditingNoteSelected then Exit;
   if TMGLoadingForEdit then exit;
   if TVChangePending then begin  //Called here from a TVChange event.
     TVDblClickPending := true;
-    //AutoEditCurrent() will be called form Change event.
   end else begin
     AutoEditCurrent
   end;
@@ -5820,7 +5255,6 @@ end;
 procedure TfrmNotes.AutoEditCurrent;
 begin
   if tvNotes.Selected = nil then exit;
-  //if lstNotes.ItemIndex = EditingIndex then exit;
   TMGForceSaveSwitchEdit := true;
   EditingIndex := -1;
   mnuActEditClick(nil);
@@ -5833,8 +5267,7 @@ var
   Saved: boolean;
   ADestNode: TORTreeNode;
 begin
-  if not uIDNotesActive then
-    begin
+  if not uIDNotesActive then begin
       CancelDrag;
       exit;
     end;
@@ -5857,7 +5290,6 @@ var
   WhyNot: string;
   //Saved: boolean;
 begin
-  //kt if EditingIndex <> -1 then begin
   if EditingNoteActive then begin  //kt
     InfoBox(TX_NO_EDIT_DRAG, TX_CAP_NO_DRAG, MB_ICONERROR or MB_OK);
     CancelDrag;
@@ -5865,19 +5297,11 @@ begin
   end;
   if (tvNotes.Selected.ImageIndex in [IMG_ADDENDUM, IMG_GROUP_OPEN, IMG_GROUP_SHUT, IMG_TOP_LEVEL]) or
      (not uIDNotesActive) or
-     //original -->      (lstNotes.ItemIEN = 0) then
-     (SelectedNoteIEN = 0) then
-    begin
+     (SelectedNoteIEN = 0) then begin
       CancelDrag;
       Exit;
     end;
-(*  if EditingIndex <> -1 then
-  begin
-    SaveCurrentNote(Saved);
-    if not Saved then Exit;
-  end;*)
-  if not CanBeAttached(DocTreeData(tvNotes.Selected)^.DocID, WhyNot) then
-    begin
+  if not CanBeAttached(DocTreeData(tvNotes.Selected)^.DocID, WhyNot) then begin
       InfoBox(WhyNot, TX_CAP_NO_DRAG, MB_OK);
       CancelDrag;
     end;
@@ -5950,16 +5374,15 @@ begin
     if pos('DIV name=',TotalHTML.text)<1 then
       TotalHTML.Add('<p><DIV name="'+TargetName+'"></DIV><p>');  //5/6/21 - Adding another DIV for multiple items to target
     Result := WMReplaceHTMLText('['+TargetName+']',TotalHTML.text);
-    {    ANY ERRORS dhould be handled by the caller}
+    //    ANY ERRORS dhould be handled by the caller
     if piece(Result,'^',1)='-1' then begin
       if SendErrors<>'' then SendErrors:=SendErrors+#13#10;
       SendErrors := SendErrors + piece(Result,'^',2);
       if UnpastedHTML<>'' then UnpastedHTML := UnpastedHTML + '<p>';
       UnpastedHTML := UnpastedHTML + TotalHTML.text;
-       {  ADDING  BACK THIS CODE. I'M NOT SURE WHY IT WAS REMOVED  1/23/25  ORIGINAL CODE 11/6/23   }
        Response := messagedlg(TargetName+' tag was not found in the note'+#13#10+'Would you like to insert it at the current cursor position?'+#13#10+'Selecting "NO" will copy it to your clipboard',mtError,[mbYes,mbNo,mbCancel],0);
        if Response=mrYes then begin
-         HTMLEditor.InsertHTMLAtCaret(TotalHTML.text);
+         HTMLEditor.InsertHTMLAtCaret(TotalHTML.text); //kt //codex 8/30/26
        end else if Response = mrNo then begin
          SetClipText(TotalHTML.Text);
          ShowMsg('You can paste the text into a note.');
@@ -5982,55 +5405,11 @@ var Output : TStringList;
     }
 begin
   InsertTargetGrid(HTML_TARGET_LABS, HTMLTable, SendErrors, UnpastedHTML);
-  {
-  Output := TStringList.Create;
-  try
-    Output.Add('<table border="0" cellspacing="2" cellpadding="0" bgcolor="#d3d3d3" TMGLABS="1">');
-    for i := 0 to SL.Count - 1 do begin
-      Line := SL[i];
-      Output.Add('<tr bgcolor="#f2f2f2">');
-      Output.Add('<td>'+Line+'</td>');
-      Output.Add('</tr>')
-    end;
-    Output.Add('</table>');
-    Output.Add('<p><DIV name="'+HTML_TARGET_LABS+'"></DIV>');
-    SearchStr := '<DIV name="'+HTML_TARGET_LABS+'"></DIV>';
-    ReplaceStr := Output.Text;
-    Result := WMReplaceHTMLText(SearchStr, ReplaceStr);
-  finally
-    Output.Free;
-  end;
-  }
 end;
 
 procedure TfrmNotes.InsertMDMGrid(HTMLTable : TStringList; var SendErrors,UnpastedHTML:string);  //kt added
-{
-var
-  TotalHTML : TStringList;
-  Result : string;
-  Response : integer;
-}
 begin
   InsertTargetGrid(HTML_TARGET_MDM, HTMLTable, SendErrors, UnpastedHTML);
-  {
-  TotalHTML := TStringList.Create();
-  try
-    TotalHTML.Assign(HTMLTable);
-    TotalHTML.Add('<p><DIV name="MDM_Target"></DIV>');  //5/6/21 - Adding another DIV for multiple MDMs
-    Result := WMReplaceHTMLText('[MDM_Target]',TotalHTML.text);
-    if piece(Result,'^',1)='-1' then begin
-       Response := messagedlg('MDM_Target tag was not found in the note'+#13#10+'Would you like to insert it at the current cursor position?'+#13#10+'Selecting "NO" will copy it to your clipboard',mtError,[mbYes,mbNo,mbCancel],0);
-       if Response=mrYes then begin
-         HTMLEditor.InsertHTMLAtCaret(TotalHTML.text);
-       end else if Response = mrNo then begin
-         SetClipText(TotalHTML.Text);
-         ShowMsg('You can paste the MDM Helper text into a note.');
-       end;
-    end;
-  finally
-    TotalHTML.Free;
-  end;
-  }
 end;
 
 
@@ -6057,12 +5436,7 @@ begin
   Application.ProcessMessages;
   //if (InitialMDM) and (messagedlg('Would you like to enter another code?',mtConfirmation,[mbYes,mbNo],0)=mrYes) then begin
   if Relaunch then begin
-  
     timRunMDM.enabled := true;
-  //  mnuLaunchMDMClick(Sender);
-  //  if not assigned(frmMDMGrid) then frmMDMGrid := TfrmMDMGrid.Create(Self);
-  //  frmMDMGrid.OnCloseForm := HandleMDMClosure;  //<--- this function will FreeAndNil form.
-  //  frmMDMGrid.ShowModal;
   end;
 end;
 
@@ -6085,32 +5459,10 @@ end;
 
 procedure TfrmNotes.mnuLooseDocHandlerClick(Sender: TObject);  //kt //tmg added 6/2026
 var Modified : boolean;
-  (* tmpList: TStringList; *)
-  (* LooseDocsNode: TORtreeNode; *)
-
 begin
   inherited;
   Modified := ShowMultiLooseSign;  //Result: True if some documents were changed (i.e. refresh of documents ListView will be needed)
-  if Modified then begin
-    LoadNotes;
-    {tmpList := TStringList.Create;
-    try
-      LooseDocsNode := tvNotes.FindPieceNode(IntToStr(NC_LOOSE_DOCS), U);
-      KillDocTreeChildrenOfNode(LooseDocsNode);
-      //KillDocTreeNodeAndChildren(LooseDocsNode);
-      //Application.ProcessMessages;
-      //NOTE: The following doesn't seem to populate the tree.  I'm not sure why...  it is a copy of other code in LoadNotes that works there. 
-      with FCurrentContext do begin
-        ListNotesForTree(tmpList, NC_LOOSE_DOCS, 0, 0, 0, 0, TreeAscending);
-        if tmpList.Count > 0 then begin
-          CreateListItemsforDocumentTree(FDocList, tmpList, NC_LOOSE_DOCS, GroupBy, TreeAscending, CT_NOTES);
-          UpdateTreeView(FDocList, tvNotes);
-        end;
-      end;
-    finally
-      tmpList.Free;
-    end; }
-  end;
+  if Modified then LoadNotes;
 end;
 
 procedure TfrmNotes.mnuLooseInChartDeleteClick(Sender: TObject);
@@ -6136,25 +5488,11 @@ var
   TitleInfo: string; //kt //codex 8/18/26
 begin
   inherited;
-  //original -->   if MoveTIUToLoose(Patient.DFN,FloatTostr(lstNotes.ItemIEN),piece(piece(lstNotes.Items[lstNotes.ItemIndex],'^',2),';',1))=true then begin
   TitleInfo := Piece(SelectedNoteRecord, '^', 2); //kt //codex 8/18/26
   if MoveTIUToLoose(Patient.DFN, FloatToStr(SelectedNoteIEN), Piece(TitleInfo,';',1))=true then begin //kt //codex 8/18/26
     mnuActDeleteClick(self);
     Loadnotes;
   end;
-  {
-  if messagedlg('Are you sure you want to move this unsigned note to loose documents?',mtconfirmation,[mbYes,mbNo],0)<>mrYes then exit;
-  Title := ;
-  Title := inputbox('Move to Loose Documents','What would you like to call this file?',Title);
-  if Title='' then exit;
-  Title := StringReplace(Title,' ','_',[rfReplaceAll]);
-  RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[Patient.DFN,,Title]);
-  if piece(RPCResult,'^',1)='-1' then begin
-    messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
-  end else begin
-
-  end;
-  }
 end;
 
 function TfrmNotes.MoveTIUToLoose(DFN,TIUIEN,Title: string; AskReTitle : boolean = true) : boolean;
@@ -6167,8 +5505,6 @@ begin
   end;
   if Title='' then exit;
   Title := StringReplace(Title,' ','_',[rfReplaceAll]);
-  //Title := StringReplace(Title,'/','-',[rfReplaceAll]);
-  //Title := StringReplace(Title,'\','-',[rfReplaceAll]);
   RPCResult := sCallV('TMG TIU NOTE TO LOOSE',[DFN,TIUIEN,Title]);
   if piece(RPCResult,'^',1)='-1' then begin
     Messagedlg(piece(RPCResult,'^',2),mtError,[mbOK],0);
@@ -6259,11 +5595,8 @@ var
 begin
   inherited;
   if not uIDNotesActive then exit;
-  //original -->   if lstNotes.ItemIEN = 0 then exit;
   if SelectedNoteIEN = 0 then exit;
-  //original -->   SavedDocID := lstNotes.ItemID;
   SavedDocID := SelectedNoteID;
-  //kt if EditingIndex <> -1 then begin
   if EditingNoteActive then begin  //kt
     SaveCurrentNote(Saved);
     if not Saved then Exit;
@@ -6290,52 +5623,42 @@ begin
   ErrMsg := '';
   if not CanBeAttached(DocTreeData(AChild)^.DocID, WhyNot) then
     ErrMsg := ErrMsg + WhyNot + CRLF + CRLF;
-  if not CanReceiveAttachment(DocTreeData(AParent)^.DocID, WhyNot) then
+  if not CanReceiveAttachment(DocTreeData(AParent)^.DocID, WhyNot) then begin
     ErrMsg := ErrMsg + WhyNot;
-  if ErrMsg <> '' then
-    begin
-      InfoBox(ErrMsg, TX_ATTACH_FAILURE, MB_OK);
-      Exit;
-    end
-  else
-    begin
-      WhyNot := '';
-      if (InfoBox('ATTACH:   ' + AChild.Text + CRLF + CRLF +
-                  '    TO:   ' + AParent.Text + CRLF + CRLF +
-                  'Are you sure?', TX_ATTACH_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES)
-          then Exit;
-      SavedDocID := DocTreeData(AParent)^.DocID;
-    end;
-  if AChild.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD] then
-    begin
-      if DetachEntryFromParent(DocTreeData(AChild)^.DocID, WhyNot) then
-        begin
-          if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
-            begin
-              LoadNotes;
-              SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26
-            end
-          else
-            InfoBox(WhyNot, TX_ATTACH_FAILURE, MB_OK);
-        end
-      else
-        begin
-          WhyNot := StringReplace(WhyNot, 'ATTACH', 'DETACH', [rfIgnoreCase]);
-          WhyNot := StringReplace(WhyNot, 'to an ID', 'from an ID', [rfIgnoreCase]);
-          InfoBox(WhyNot, TX_DETACH_FAILURE, MB_OK);
-          Exit;
-        end;
-    end
-  else
-    begin
-      if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then
-        begin
-          LoadNotes;
-          SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26
-        end
-      else
+  end;
+  if ErrMsg <> '' then begin
+    InfoBox(ErrMsg, TX_ATTACH_FAILURE, MB_OK);
+    Exit;
+  end else begin
+    WhyNot := '';
+    if (InfoBox('ATTACH:   ' + AChild.Text + CRLF + CRLF +
+                '    TO:   ' + AParent.Text + CRLF + CRLF +
+                'Are you sure?', TX_ATTACH_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES)
+        then Exit;
+    SavedDocID := DocTreeData(AParent)^.DocID;
+  end;
+  if AChild.ImageIndex in [IMG_ID_CHILD, IMG_ID_CHILD_ADD] then begin
+    if DetachEntryFromParent(DocTreeData(AChild)^.DocID, WhyNot) then begin
+      if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then begin
+        LoadNotes;
+        SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26
+      end else begin
         InfoBox(WhyNot, TX_ATTACH_FAILURE, MB_OK);
-   end;
+      end;
+    end else begin
+      WhyNot := StringReplace(WhyNot, 'ATTACH', 'DETACH', [rfIgnoreCase]);
+      WhyNot := StringReplace(WhyNot, 'to an ID', 'from an ID', [rfIgnoreCase]);
+      InfoBox(WhyNot, TX_DETACH_FAILURE, MB_OK);
+      Exit;
+    end;
+  end else begin
+    if AttachEntryToParent(DocTreeData(AChild)^.DocID, DocTreeData(AParent)^.DocID, WhyNot) then begin
+      LoadNotes;
+      SelectTreeNodeByID(SavedDocID, True);  //kt //codex 8/17/26
+    end else begin
+      InfoBox(WhyNot, TX_ATTACH_FAILURE, MB_OK);
+    end;
+  end;
 end;
 
 function TfrmNotes.SetNoteTreeLabel(AContext: TTIUContext): string;
@@ -6347,44 +5670,41 @@ var
     x1: string;
   begin
     with AContext do
-      if BeginDate <> '' then
-        begin
-          x1 := ' from ' + UpperCase(BeginDate);
-          if EndDate <> '' then x1 := x1 + ' to ' + UpperCase(EndDate)
-          else x1 := x1 + ' to TODAY';
-        end;
+      if BeginDate <> '' then begin
+        x1 := ' from ' + UpperCase(BeginDate);
+        if EndDate <> '' then x1 := x1 + ' to ' + UpperCase(EndDate)
+        else x1 := x1 + ' to TODAY';
+      end;
     Result := x1;
   end;
 
 begin
-  with AContext do
-    begin
-      if MaxDocs > 0 then x := 'Last ' + IntToStr(MaxDocs) + ' ' else x := 'All ';
-      case StrToIntDef(Status, 0) of
-        NC_ALL        : x := x + 'Signed Notes';
-        NC_UNSIGNED   : begin
-                          x := x + 'Unsigned Notes for ';
-                          if Author > 0 then x := x + ExternalName(Author, 200)
-                          else x := x + User.Name;
-                          x := x + SetDateRangeText(AContext);
-                        end;
-        NC_UNCOSIGNED : begin
-                          x := x + 'Uncosigned Notes for ';
-                          if Author > 0 then x := x + ExternalName(Author, 200)
-                          else x := x + User.Name;
-                          x := x + SetDateRangeText(AContext);
-                        end;
-        NC_BY_AUTHOR  : x := x + 'Signed Notes for ' + ExternalName(Author, 200) + SetDateRangeText(AContext);
-        NC_BY_DATE    : x := x + 'Signed Notes ' + SetDateRangeText(AContext);
-      else
-        x := 'Custom List';
-      end;
-    end;
+  with AContext do begin
+    if MaxDocs > 0 then x := 'Last ' + IntToStr(MaxDocs) + ' ' else x := 'All ';
+    case StrToIntDef(Status, 0) of
+      NC_ALL        : x := x + 'Signed Notes';
+      NC_UNSIGNED   : begin
+                        x := x + 'Unsigned Notes for ';
+                        if Author > 0 then x := x + ExternalName(Author, 200)
+                        else x := x + User.Name;
+                        x := x + SetDateRangeText(AContext);
+                      end;
+      NC_UNCOSIGNED : begin
+                        x := x + 'Uncosigned Notes for ';
+                        if Author > 0 then x := x + ExternalName(Author, 200)
+                        else x := x + User.Name;
+                        x := x + SetDateRangeText(AContext);
+                      end;
+      NC_BY_AUTHOR  : x := x + 'Signed Notes for ' + ExternalName(Author, 200) + SetDateRangeText(AContext);
+      NC_BY_DATE    : x := x + 'Signed Notes ' + SetDateRangeText(AContext);
+    else
+      x := 'Custom List';
+    end; //case
+  end;
   Result := x;
 end;
 
-procedure TfrmNotes.memNewNoteKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TfrmNotes.memNewNoteKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   inherited;
   if (Key = VK_OEM_2) and (Shift = [ssCtrl]) then begin   //kt added block 10/2014
@@ -6412,23 +5732,19 @@ begin
   NewAuth := GetXMLParamReturnValueTIU(DocInfo, 'AUTHOR_IEN');
   if NewAuth = '' then Exit;
   AuthNameCheck := ExternalName(StrToInt64Def(NewAuth, 0), 200);
-  if AuthNameCheck = '' then
-  begin
+  if AuthNameCheck = '' then begin
     NewAuthName := GetXMLParamReturnValueTIU(DocInfo, 'AUTHOR_NAME');
     InfoBox(TX_INVALID_AUTHOR1 + UpperCase(NewAuthName) +  TX_INVALID_AUTHOR2 + UpperCase(FEditNote.AuthorName),
             TC_INVALID_AUTHOR, MB_OK and MB_ICONERROR);
     Exit;
   end;
-  with FEditNote do if StrToInt64Def(NewAuth, 0) <> Author then
-  begin
+  with FEditNote do if StrToInt64Def(NewAuth, 0) <> Author then begin
     Author := StrToInt64Def(NewAuth, 0);
     AuthorName := AuthNameCheck;
-    //original -->     x := lstNotes.Items[EditingIndex];
     x := NoteRecordAt(EditingIndex);
     SetPiece(x, U, 5, NewAuth + ';' + AuthNameCheck);
     UpdateNoteRecordAt(EditingIndex, x);
-    if AskCosignerForTitle(Title, Author, DateTime) then
-    begin
+    if AskCosignerForTitle(Title, Author, DateTime) then begin
       InfoBox(UpperCase(AuthNameCheck) + TX_COSIGNER_REQD, TC_COSIGNER_REQD, MB_OK);
       //Cosigner := 0;   CosignerName := '';  // not sure about this yet
       ADummySender := TObject.Create;
@@ -6471,12 +5787,10 @@ procedure TfrmNotes.popNoteMemoLinkToConsultClick(Sender: TObject);
 *)
 begin
   inherited;
-  //original -->   if lstNotes.ItemIEN = 0 then begin
   if SelectedNoteIEN = 0 then begin
     ShowMsg('No note selected');
     exit;
   end;
-  //original -->   fConsultLink.LinkConsult(lstNotes.ItemIEN);
   fConsultLink.LinkConsult(SelectedNoteIEN);
 end;
 
@@ -6550,26 +5864,6 @@ var
 begin
   Result := TMGResolveMacro(MacroName, Lines, ErrStr);
   if ErrStr <> '' then MessageDlg('Error executing macro : ' + ErrStr, mtError, [mbOK], 0);
-  (* //delete later.  moved RPC calls to rTIU
-  RPCBrokerV.remoteprocedure := 'TMG CPRS MACRO RESOLVE';
-  RPCBrokerV.Param[0].Value := '.X';  // not used
-  RPCBrokerV.param[0].ptype := list;
-  RPCBrokerV.Param[0].Mult['"NAME"'] := MacroName;
-  RPCBrokerV.Param[0].Mult['"DFN"'] := Patient.DFN;
-  for i := 0 to Lines.Count-1 do begin
-    RPCBrokerV.Param[0].Mult['"TEXT",' + IntToStr(i+1)] := Lines.Strings[i];
-  end;
-  CallBroker;
-  RPCResult := RPCBrokerV.Results[0];    //returns:  error: -1;  success=1
-  if piece(RPCResult,'^',1)='-1' then begin
-    MessageDlg('Error executing macro : ' + Piece(RPCResult,'^',2),mtError,[mbOK],0);
-    Result := '[Error with macro: '+MacroName+']';
-  end else begin
-    //success - return result
-    RPCBrokerV.Results.Delete(0);
-    Result := RPCBrokerV.Results.Text;
-  end;
-  *)
 end;
 
 {Tab Order tricks.  Need to change
@@ -6595,8 +5889,7 @@ to
 
 procedure TfrmNotes.tvNotesExit(Sender: TObject);
 begin
-  if TabIsPressed or ShiftTabIsPressed then
-  begin
+  if TabIsPressed or ShiftTabIsPressed then begin
     if (Screen.ActiveControl = frmDrawers.pnlTemplatesButton) or
         (Screen.ActiveControl = frmDrawers.pnlEncounterButton) or
         (Screen.ActiveControl = cmdNewNote) or
@@ -6608,24 +5901,22 @@ end;
 procedure TfrmNotes.pnlReadExit(Sender: TObject);
 begin
   inherited;
-  if TabIsPressed or ShiftTabIsPressed then
-  begin
-    if (Screen.ActiveControl = frmFrame.pnlPatient) then
+  if TabIsPressed or ShiftTabIsPressed then begin
+    if (Screen.ActiveControl = frmFrame.pnlPatient) then begin
       FindNextControl( tvNotes, True, True, False).SetFocus
-    else
-    if (Screen.ActiveControl = frmDrawers.pnlTemplatesButton) or
+    end else if (Screen.ActiveControl = frmDrawers.pnlTemplatesButton) or
         (Screen.ActiveControl = frmDrawers.pnlEncounterButton) or
         (Screen.ActiveControl = cmdNewNote) or
-        (Screen.ActiveControl = cmdPCE) then
+        (Screen.ActiveControl = cmdPCE) then begin
       FindNextControl( frmDrawers.pnlTemplatesButton, False, True, False).SetFocus;
+    end;
   end;
 end;
 
 procedure TfrmNotes.cmdNewNoteExit(Sender: TObject);
 begin
   inherited;
-  if TabIsPressed or ShiftTabIsPressed then
-  begin
+  if TabIsPressed or ShiftTabIsPressed then begin
     if (Screen.ActiveControl = memNote) then
       frmFrame.pnlPatient.SetFocus
     else
@@ -6637,8 +5928,7 @@ end;
 procedure TfrmNotes.frmFramePnlPatientExit(Sender: TObject);
 begin
   FOldFramePnlPatientExit(Sender);
-  if TabIsPressed or ShiftTabIsPressed then
-  begin
+  if TabIsPressed or ShiftTabIsPressed then begin
     if (Screen.ActiveControl = memNote) then
       FindNextControl(tvNotes, False, True, False).SetFocus;
     if Screen.ActiveControl = memPCEShow then
@@ -6668,28 +5958,16 @@ ControlScreenPos : TPoint;
 ControlPanelPos : TPoint;
 begin
   inherited;
-  //btnOpenTOC.left := pnlVewToolbar.width - btnOpenTOC.width-5;
-  //btnOpenTOC2.left := cmdChange.left - btnOpenTOC2.width-5;
-  //btnOpenTOC2.BringToFront;
   if assigned(frmNoteTOC) then begin
-    //if FHTMLEditMode = emHTML then
-    //  ControlScreenPos := frmNotes.pnlHTMLEdit.ClientToScreen(Point(0,0))
-    //else
     ControlScreenPos := frmNotes.ClientToScreen(Point(0,0));
     ControlPanelPos := frmNotes.pnlHTMLViewer.ClientToScreen(Point(0,0));
-    //frmNoteTOC.Left := frmNotes.Width-frmNoteTOC.width-5;
     case TOCLocation of
         toclInside:
           frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)-frmNoteTOC.width-20;
-          //frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.pnlHtmlViewer.width)-frmNoteTOC.width-20;
         toclOutside:
           frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)+20;
-          //frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.pnlHtmlViewer.width)+20;
     end;
-    //if Application.MainForm.WindowState = wsMaximized then frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)-frmNoteTOC.width-20;
-
     frmNoteTOC.Top := ControlPanelPos.Y;
-    //frmNoteTOC.Top := pnlHtmlViewer.top;
     frmNoteTOC.height := pnlHtmlViewer.height;
   end;
 end;
@@ -6708,12 +5986,8 @@ begin
   FOldDrawerEdtSearchExit := frmDrawers.edtSearch.OnExit;
   frmDrawers.edtSearch.OnExit := frmDrawerEdtSearchExit;
 
-  //kt if uTMGOptions.ReadString('SpecialLocation','')<>'FPG' then
   popNoteMemoProcess.Visible := AtFPGLoc();  //Process Notes is FPG specific
   if sptHorz.Left=0 then sptHorz.Left := pnlLeft.Left + pnlLeft.Width + 1; //kt added block 6/13/15 to fix misplaced splitter...
-  //Moved MinDocsForProgressBar := uTMGOptions.ReadInteger('Threshold For TIU ProgressBar',100);
-  //btnOpenTOC.left := pnlVewToolbar.width - btnOpenTOC.width-5;
-  //btnOpenTOC2.left := pnlVewToolbar.width - btnOpenTOC2.width-5;
   FromSingleNote := False;
 
 end;
@@ -6764,7 +6038,7 @@ begin
   SetDisplayToHTMLvsText(Mode,FEditNote.Lines);
   if not Quiet then begin
     if uTMGOptions.ReadBool(DEFAULT_HTML_EDIT_MODE,FALSE) <> HTMLEditMode then begin
-      if MessageDlg('Start new notes in '+HTML_MODE_S[HTMLEditMode]+' TEXT by default?',mtConfirmation,[mbYES,mbNO],0) = mrYES then begin
+      if MessageDlg('Start new notes in '+string(HTML_MODE_S[HTMLEditMode])+' TEXT by default?',mtConfirmation,[mbYES,mbNO],0) = mrYES then begin //kt //codex 8/30/26
         fOptionsNotes.SetDefaultEditHTMLMode(HTMLEditMode);
       end;
     end;
@@ -6968,12 +6242,8 @@ begin {SetDisplayToHTMLvsText}
 end; {SetDisplayToHTMLvsText}
 
 procedure TfrmNotes.btnBoldClick(Sender: TObject);
-//kt 9/11 added function
-//var temp1,temp2,temp3 : double;
 begin
   inherited;
-  //temp1 := 1; temp2 := 1;
-  //temp3 := temp1/temp2;
   HtmlEditor.ToggleBold;
 end;
 
@@ -7064,40 +6334,28 @@ procedure TfrmNotes.btnSortAuthorClick(Sender: TObject);
 //kt added function
 begin
   inherited;
-  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
-  if FSortBtnGroupManualChange then exit;
-  FSortBtnGroupBy := 'A';
-  SortBtnGroupClick(FSortBtnGroupBy);
+  HandleSortBy('A');
 end;
 
 procedure TfrmNotes.btnSortDateClick(Sender: TObject);
 //kt added function
 begin
   inherited;
-  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
-  if FSortBtnGroupManualChange then exit;
-  FSortBtnGroupBy := 'D';
-  SortBtnGroupClick(FSortBtnGroupBy);
+  HandleSortBy('D');
 end;
 
 procedure TfrmNotes.btnSortLocationClick(Sender: TObject);
 //kt added function
 begin
   inherited;
-  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
-  if FSortBtnGroupManualChange then exit;
-  FSortBtnGroupBy := 'L';
-  SortBtnGroupClick(FSortBtnGroupBy);
+  HandleSortBy('L');
 end;
 
 procedure TfrmNotes.btnSortNoneClick(Sender: TObject);
 //kt added function
 begin
   inherited;
-  if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
-  if FSortBtnGroupManualChange then exit;
-  FSortBtnGroupBy := '';
-  SortBtnGroupClick(FSortBtnGroupBy);
+  HandleSortBy('');
 end;
 
 procedure TfrmNotes.btnSortTitleClick(Sender: TObject);
@@ -7108,12 +6366,18 @@ begin
   PreviousMaxDocs := FCurrentContext.MaxDocs;
   if PreviousMaxDocs<1 then PreviousMaxDocs := 100;
   FCurrentContext.MaxDocs := 0;
+  HandleSortBy('T');
+  FCurrentContext.MaxDocs := PreviousMaxDocs;
+end;
+
+procedure TfrmNotes.HandleSortBy(GroupBy : string);
+begin
   if (ReminderDialogActive) and (messagedlg('Reminder dialog active. This will close the dialog.'+#13#10+#13#10+'Continue anyway?',mtconfirmation,[mbYes,mbNo],0)=mrNo) then exit;
   if FSortBtnGroupManualChange then exit;
-  FSortBtnGroupBy := 'T';
+  FSortBtnGroupBy := GroupBy;
   SortBtnGroupClick(FSortBtnGroupBy);
-  FCurrentContext.MaxDocs := PreviousMaxDocs;    
 end;
+
 
 procedure TfrmNotes.SortBtnGroupClick(GroupBy : string);
 //kt added function
@@ -7125,7 +6389,6 @@ var
   Editing: Boolean;
 begin
   inherited;
-  //kt Editing := (EditingIndex <> -1);
   Editing := EditingNoteActive; //kt
   if Editing then begin
     SaveCurrentNote(Saved);
@@ -7179,7 +6442,7 @@ var
    ImageFName : string;
 begin
   ImageFName := GetInsertImgHTMLName(FName);
-  HTMLEditor.InsertHTMLAtCaret(ImageFName+#13#10);
+  HTMLEditor.InsertHTMLAtCaret(ImageFName+#13#10); //kt //codex 8/30/26
 end;
 
 procedure TfrmNotes.mnuAddNewImageClick(Sender: TObject);
@@ -7202,7 +6465,7 @@ begin
 end;
 
 procedure TfrmNotes.AddUniversalImageClick(Sender: TObject);
-//kt 9/11 added function, finished 5/14
+//kt 9/11 added function,
 var AddResult: integer;
     frmImagesMultiUse: TfrmImagesMultiUse;
 
@@ -7233,13 +6496,13 @@ end;
 
 
 procedure TfrmNotes.mnuSelectExistingImageClick(Sender: TObject);
-//kt 9/11 added function.  Alterd 8/19/21
+//kt 9/11 added function.
 var oneImage: string;
 begin
   inherited;
   oneImage :=  SelectExistingImageClick();
   if oneImage <> '' then begin
-    HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10);
+    HTMLEditor.InsertHTMLAtCaret(oneImage+#13#10); //kt //codex 8/30/26
   end;
 end;
 
@@ -7266,26 +6529,6 @@ begin
   if piece(RPCResult,'^',1)='-1' then ShowMessage(piece(RPCResult,'^',2));
   Loadnotes;
 end;
-
-{
-function TfrmNotes.HTMLResize(ImageFName: string) : string;
-var
-  NewHeight : real;
-  Image: TImage;
-const
-  MaxWidth : integer = 640;
-begin
-  Image := TImage.Create(Self);
-  Image.Picture.LoadFromFile(ImageFName);
-  if Image.Picture.Width > MaxWidth then begin
-    NewHeight := (MaxWidth/Image.Picture.Width)*Image.Picture.Height;
-    Result := 'WIDTH=' + inttostr(MaxWidth) + ' HEIGHT=' + floattostr(NewHeight) + ' ';
-  end else begin
-    Result := '';
-  end;
-  Image.Free;
-end;
-}
 
 procedure TfrmNotes.btnCenterAlignClick(Sender: TObject);
 //kt 9/11 added function
@@ -7330,7 +6573,6 @@ begin
         btnOpenTOC2.Caption := 'Close Note TOC';
     end;
     1: begin
-        //freeandnil(frmNoteTOC);
         if frmNoteTOC.timerClose.enabled=false then frmNoteTOC.timerClose.enabled := True;
         frmNoteTOC := nil;
         btnOpenTOC.Caption := 'Open Note TOC';
@@ -7348,11 +6590,8 @@ procedure TfrmNotes.btnOpenEncClick(Sender: TObject);
         Memo.height := 45;
       end else begin
         LineHeight := Abs(Memo.Font.Height);
-
         Padding := 60;
-
         DesiredHeight := (Memo.Lines.Count * LineHeight) + Padding;
-
         Memo.Height := DesiredHeight;
       end;
    end;
@@ -7415,7 +6654,6 @@ procedure TfrmNotes.btnZoomNormalClick(Sender: TObject);
 begin
   inherited;
   HtmlViewer.ZoomReset;
-  //SetZoom(100); //100% = normal size.
 end;
 
 procedure TfrmNotes.btnEditZoomOutClick(Sender: TObject);
@@ -7425,20 +6663,10 @@ begin
 end;
 
 procedure TfrmNotes.btnZoomOutClick(Sender: TObject);
-//kt 6/26/14 added function
 begin
   inherited;
   HtmlViewer.ZoomOut;
-  //SetZoom(FHTMLZoomValue - HTML_ZOOM_STEP);
 end;
-
-{
-procedure TfrmNotes.SetZoom(Pct : integer);
-begin
-  FHTMLZoomValue := Pct;
-  HtmlViewer.Zoom := Pct;
-end;
-}
 
 procedure TfrmNotes.btnTextColorClick(Sender: TObject);
 //kt 9/11 added function
@@ -7518,7 +6746,6 @@ var
   Saved : boolean;
 begin
   if FHideTitleBusy then exit;
-  //kt if EditingIndex > -1 then SaveEditedNote(Saved);
   if EditingNoteActive then SaveEditedNote(Saved);  //kt
   FHideTitleBusy := true;
   btnAddHide.Down := true; //make + button appear to go down with Hide button
@@ -7580,7 +6807,6 @@ begin
   for i := TitlesList.Count - 1 downto 0 do begin
     NoteTitle := piece(TitlesList.Strings[i],U,2);
     if AdminTitles.IndexOf(NoteTitle)<0 then continue;
-    //if piece(TitlesList.Strings[i],'^',16)='1' then continue;
     HiddenCount := HiddenCount+1;
     TitlesList.Delete(i);
   end;
@@ -7593,7 +6819,6 @@ const
   FontSizes : array [0..6] of byte = (8,10,12,14,18,24,36);
 begin
   inherited;
-  //HtmlEditor.FontSize := StrToInt(cbFontSize.Text);
   HtmlEditor.FontSize := FontSizes[cbFontSize.ItemIndex];
 end;
 
@@ -7627,8 +6852,7 @@ procedure TfrmNotes.memNewNoteKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   inherited;
-  if FNavigatingTab then
-  begin
+  if FNavigatingTab then begin
     if ssShift in Shift then
       FindNextControl(Sender as TWinControl, False, True, False).SetFocus //previous control
     else if ssCtrl	in Shift then
@@ -7726,14 +6950,11 @@ begin
      TempFile := FetchedFileName;
   end else begin
      OriginalNote := TStringList.Create;
-//  if (vmHTML in FViewMode) then begin
-   // if (vmHTML in FViewMode) then begin
     if not (vmEdit in FViewMode) then begin
       SplitHTMLToArray(WrapHTML(HTMLViewer.HTMLText), OriginalNote);
     end else begin
       SplitHTMLToArray(WrapHTML(GetEditorHTMLText), OriginalNote);
     end;
-    //breaks image paths - should not be necessary HTMLTools.InsertSubs(OriginalNote);
     TOCNote := ViewTOC(OriginalNote);
     TOCNote.SaveToFile(TempFile);
     OriginalNote.Free;
@@ -7742,14 +6963,11 @@ begin
   frmNoteTOC := TfrmNoteTOC.create(nil);
   ControlScreenPos := frmNotes.ClientToScreen(Point(0,0));
   ControlPanelPos := frmNotes.pnlHTMLViewer.ClientToScreen(Point(0,0));
-  //frmNoteTOC.Left := frmNotes.Width-frmNoteTOC.width-5;
   case TOCLocation of
       toclInside:
         frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)-frmNoteTOC.width-20;
-        //frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.pnlHtmlViewer.width)-frmNoteTOC.width-20;
       toclOutside:
       begin
-        //Original code  -> frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)+20;
         ScreenWidth := Screen.Width;  // full screen width
 
         // your normal placement
@@ -7767,18 +6985,10 @@ begin
       end;
   end;
   if Application.MainForm.WindowState = wsMaximized then frmNoteTOC.Left := (ControlScreenPos.X+frmNotes.width)-frmNoteTOC.width-20;
-  //frmNoteTOC.Left := frmNotes.Width-frmNoteTOC.width-5;
-  //frmNoteTOC.Top := ControlScreenPos.Y;
   frmNoteTOC.Top := ControlPanelPos.Y;
   frmNoteTOC.height := pnlHtmlViewer.height;
   frmNoteTOC.FilePath := TempFile;
   frmNOteTOC.show;
-  //OpenThisTOC(TempFile,frmNoteTOC);
-  //frmNoteTOC.WebBrowser1.Navigate(TempFile);
-  //frmNoteTOC.show;
-  //OpenThisTOC(TempFile);
-  //MoveTo := fNoteTOC.LineToSearchFor;
-  //FindTextInWebBrowser(HTMLViewer,MoveTo);
 end;
 
 function TfrmNotes.RefreshTOC():string;
@@ -7786,8 +6996,6 @@ function TfrmNotes.RefreshTOC():string;
 var TOCNote : TStrings;  //pointer to other objects
     OriginalNote : TStringList;
     TempFile: string;
-    (* MoveTo:string; *)
-    (* ControlScreenPos : TPoint; *)
 begin
   inherited;
   TempFile := UniqueCacheFName(GetCurrentNoteIEN+'.html');
@@ -7827,38 +7035,16 @@ procedure TfrmNotes.JumpToText(TextToFind:string);
       // Create a text range from the body element
       Range := Body.createTextRange;
 
-      // Get the current selection
-      //Selection := Document.selection;   //4/23/24
-
-      // Only proceed if the type of selection is Text   section added 4/23/24
-      {if (Selection.type_ = 'Text') then begin
-        Range := Selection.createRange as IHTMLTxtRange;
-      end else begin
-        // If there's no current text selection, create a new range from the body
-        Range := (Document.body as IHTMLBodyElement).createTextRange;
-      end;}
-
-      // Collapse the range to the end point to start the search from there   section added 4/23/24
-      //Range.collapse(False);
-
       // Set the flags for the findText method
       Flags := 2; // 2 - matchCase flag for case-sensitive search
 
-      // Duplicate the range to use for finding text   section added 4/23/24
-      //NewRange := Range.duplicate;
-
       // Find the text    4/23/24 changed Range to NewRange
-      if Range.findText(Text, 1, Flags) then    //4/23/24 second parameter was 0
-      begin
+      if Range.findText(Text, 1, Flags) then begin    //4/23/24 second parameter was 0
         Range.select; // Select the text range if found
         Range.scrollIntoView(True); // Scroll to the text range
         result := true;
-      end
-      else
-      begin
-        //MessageBeep(MB_OK);
+      end else begin
         result := false;
-        //ShowMessage('Text not found!');
       end;
     end;
 var ActiveBrowser : TWebBrowser;
@@ -7950,7 +7136,6 @@ var   ModalResult: integer;
 begin
   inherited;
   frmPtDocSearch := TfrmPtDocSearch.Create(Self);
-  //Application.CreateForm(TfrmPtDocSearch, frmPtDocSearch);
   ModalResult := frmPtDocSearch.ShowModal;
   if ModalResult > -1 then begin
     ChangeToNote(inttostr(ModalResult));
@@ -7966,36 +7151,37 @@ end;
 
 procedure TfrmNotes.ChangeToNote(IEN : String; ADFN : String = '-1');
 //kt 9/11 added
-//Effect changing note by simulating a notification click.
 var Node: TORTreeNode;
 begin
   Node := GetNodeByIEN(tvNotes,IEN);
-  if Node <> nil then tvNotes.Selected := Node;
+  if Node <> nil then tvNotes.Selected := Node;  //<-- Effect changing note by simulating a notification click.
 end;
 
 procedure TfrmNotes.ReloadNotes;
 //kt added entire function 5/15
-var CurrentNoteIEN: integer;
+//kt //codex original --> var CurrentNoteIEN: integer;
+var CurrentNoteIEN: Int64; //kt //codex 9/8/26
     CurrentNoteIENS : string;
     Node: TORTreeNode;
     Saved : boolean;
 begin
-  //kt CurrentNote := FEditingIndex;
   CurrentNoteIEN := ActiveEditIEN;  //kt
   if (CurrentNoteIEN>0) and (FromSingleNote=True) then exit;   //Don't update if from Single Note and Current Note is being edited  10/13/23
-  
+
   CurrentNoteIENS := IntToStr(CurrentNoteIEN);
-  //kt if FEditingIndex > -1 then begin
   if EditingNoteActive then begin  //kt
     SaveEditedNote(Saved);
     if Saved = false then exit;
   end;
-  LoadNotes;  //This should reload TV etc.
-  //ChangeToNote(CurrentNoteIENS);
+  //kt //codex original --> LoadNotes;  //This should reload TV etc.
+  LoadNotes(CurrentNoteIEN, CurrentNoteIEN <= 0); //kt //codex 9/8/26
+  if CurrentNoteIEN <= 0 then Exit; //kt //codex 9/8/26
   Node := GetNodeByIEN(tvNotes,CurrentNoteIENS);
   if Node <> nil then begin
-    tvNotes.Selected := Node;
-    tvNotesDblClick(self);
+    //kt //codex original --> tvNotes.Selected := Node;
+    if SelectNoteIDViaModel(CurrentNoteIENS) < 0 then Exit; //kt //codex 9/8/26
+    //kt //codex original --> tvNotesDblClick(self);
+    AutoEditCurrent; //kt //codex 9/8/26
   end;
 end;
 
@@ -8066,7 +7252,6 @@ begin
   SaveCurrentNote(Saved, ContextChanging);  //kt added ContextChanging.  Speed up save process
   //RPCResult :=
   RPCResultStr := TStringList.create();
-  //original -->   tCallV(RPCResultStr,'TMG TIU NOTE CAN BE SIGNED',[Patient.DFN,lstNotes.ItemIEN]);
   tCallV(RPCResultStr,'TMG TIU NOTE CAN BE SIGNED',[Patient.DFN,SelectedNoteIEN]);
   RPCResult := RPCResultStr.text;
   RPCResultStr.free;
@@ -8088,12 +7273,7 @@ begin
 end;
 
 procedure TfrmNotes.CheckForLock();    //kt
-(* NoteUnlocked:boolean; *)
 begin
-  //NoteUnlocked := Changes.Exist(CH_DOC, lstNotes.ItemID);
-  //if not NoteUnlocked then
-  //if EditingIndex <> -1 then
-  //original -->   if lstNotes.ItemIEN>0 then UnlockDocument(lstNotes.ItemIEN);
   if SelectedNoteIEN > 0 then UnlockDocument(SelectedNoteIEN);
 end;
 
@@ -8115,27 +7295,16 @@ procedure TfrmNotes.RotateAllImages(TIUIEN:string;Degrees:integer;var HTML:strin
       until not FileExists(Result);
     end;
 var
-  //i,j  : integer;
-  //NumOfPieces :integer;
   Piece:integer;
   FileName : string;
   FilePathName : string;
   TempFileName : string;
-  //Rec  : TImageInfo;
-  //BrokerResults: TStringList;
   CacheDir:string;
 begin
   CacheDir := GetEnvironmentVariable('USERPROFILE')+'\.CPRS\Cache';
-  //CallV('MAG3 CPRS TIU NOTE', [TIUIEN]);
-  //BrokerResults := TStringList.Create;
-  //BrokerResults.Assign(RPCBrokerV.Results);
-  //for i:=1 to (BrokerResults.Count-1) do begin
   Piece := 2;
   FileName := piece2(piece2(HTML,'src="',Piece),'"',1);
   repeat
-    //FileName := piece(BrokerResults.Strings[i],'^',3);
-    //NumOfPieces := NumPieces(FileName,'/');
-    //FileName := piece(FileName,'/',NumOfPieces);
     FileName := stringreplace(FileName,'/','\',[rfReplaceAll,rfIgnoreCase]);
     FileName := extractfilename(FileName);
     FilePathName := CacheDir+'\'+FileName;
@@ -8148,7 +7317,6 @@ begin
     piece := piece+1;
     FileName := piece2(piece2(HTML,'src="',Piece),'"',1);
   until FileName = '';
-  //end;
   HtmlViewer.Repaint;
 end;
 
@@ -8182,22 +7350,15 @@ procedure TfrmNotes.RotateImage(FileName,NewFileName:string;Degrees: integer);  
   var
     Image : IImageFile;
     ImageProcess : IImageProcess;
-    //AProperty : IProperty;
-    //FilterID : WideString;
-    //v : OleVariant;
 
   begin
     While Degrees < 0 do Degrees := Degrees + 360;
     Image := CoImageFile.Create;
     ImageProcess := CoImageProcess.Create;
     Image.LoadFile(FileName);
-
     AddFilter(ImageProcess, 'RotateFlip');
     SetProperty(ImageProcess, 'RotationAngle', Degrees);
-
     Image := ImageProcess.Apply(Image);
-
-    //DeleteFile(FileName);
     Image.SaveFile(NewFileName);
 
 end;
@@ -8216,7 +7377,6 @@ begin
      Windows.ScreenToClient(HtmlEditor.Handle,CursorPos);
      HtmlElement := iHtmlDoc.ElementFromPoint(CursorPos.X, CursorPos.Y);
      if HtmlElement<> NIL then begin
-       //ShowMessage(HTMLElement.toString);
        MsgType := piece(piece(HTMLElement.toString,'^',1),':',2);  //trim out the about: and the command
        MsgVerb := nvNone;
        if MsgType='NoteSelect' then MsgVerb := nvNoteSelect;   //<--this needs to be changed to convert the string to a type or nvNone

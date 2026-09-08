@@ -1275,6 +1275,7 @@ begin
   Result := true; //default to success
   ErrStr := '';
   if not AppState.Parameters.TMGSaveINRIntoLabPackage then exit;
+  Patient := AppState.Patient; //kt 8/30/26
   INRValue := Trim(Flowsheet.INR);
   HgbValue := IfThen(Patient.HGBFlag, Trim(Flowsheet.HctOrHgbValue), '');
   HctValue := IfThen(not Patient.HGBFlag, Trim(Flowsheet.HctOrHgbValue), '');

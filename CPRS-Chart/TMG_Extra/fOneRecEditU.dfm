@@ -12,10 +12,8 @@ object frmOneRecEdit: TfrmOneRecEdit
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDefault
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0
@@ -80,8 +78,6 @@ object frmOneRecEdit: TfrmOneRecEdit
         Height = 25
         Anchors = [akRight, akBottom]
         Caption = '&Apply'
-        TabOrder = 0
-        OnClick = ApplyBtnClick
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           18000000000000030000120B0000120B00000000000000000000FF00FF0274AC
@@ -109,6 +105,8 @@ object frmOneRecEdit: TfrmOneRecEdit
           FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF046B0B2DB851046B0BFF00FFFF00
           FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
           00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+        TabOrder = 0
+        OnClick = ApplyBtnClick
       end
       object RevertBtn: TBitBtn
         Left = 269
@@ -117,8 +115,6 @@ object frmOneRecEdit: TfrmOneRecEdit
         Height = 25
         Anchors = [akRight, akBottom]
         Caption = '&Revert'
-        TabOrder = 1
-        OnClick = RevertBtnClick
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
           08000000000000010000C30E0000C30E00000001000000010000000000000000
@@ -162,6 +158,8 @@ object frmOneRecEdit: TfrmOneRecEdit
           0000000505050505050505050505000005050505050505050505050505050500
           0505050505050505050505050505050505050505050505050505050505050505
           0505050505050505050505050505050505050505050505050505}
+        TabOrder = 1
+        OnClick = RevertBtnClick
       end
       object DoneBtn: TBitBtn
         Left = 431
@@ -170,8 +168,6 @@ object frmOneRecEdit: TfrmOneRecEdit
         Height = 25
         Anchors = [akRight, akBottom]
         Caption = '&Done'
-        TabOrder = 2
-        OnClick = DoneBtnClick
         Glyph.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           20000000000000040000130B0000130B00000000000000000000D8E9ECFFD8E9
@@ -207,6 +203,8 @@ object frmOneRecEdit: TfrmOneRecEdit
           FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
           ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
           80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+        TabOrder = 2
+        OnClick = DoneBtnClick
       end
       object btnSpecialInfo: TBitBtn
         Left = 4
@@ -214,9 +212,6 @@ object frmOneRecEdit: TfrmOneRecEdit
         Width = 75
         Height = 25
         Caption = 'View'
-        TabOrder = 3
-        Visible = False
-        OnClick = btnSpecialInfoClick
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           18000000000000030000120B0000120B00000000000000000000FF00FFFF00FF
@@ -244,6 +239,9 @@ object frmOneRecEdit: TfrmOneRecEdit
           BD580CBD580CBD580CBD580CBD580CBD580CBD590CBF5A0DBD580BBF5A0DBB57
           0CB8570FFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+        TabOrder = 3
+        Visible = False
+        OnClick = btnSpecialInfoClick
       end
       object btnCancelIcon: TBitBtn
         Left = 190
@@ -251,8 +249,6 @@ object frmOneRecEdit: TfrmOneRecEdit
         Width = 27
         Height = 25
         Anchors = [akRight, akBottom]
-        TabOrder = 4
-        Visible = False
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           18000000000000030000120B0000120B00000000000000000000FF00FFFF00FF
@@ -280,6 +276,8 @@ object frmOneRecEdit: TfrmOneRecEdit
           FF00FF0001890F1DBF3E5BF36B87FE728CFF5E7BFE395BFB1231EB010FB50001
           84FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF000189030AA306
           11B2050FB10107A0000188FF00FFFF00FFFF00FFFF00FFFF00FF}
+        TabOrder = 4
+        Visible = False
       end
       object btnOKIcon: TBitBtn
         Left = 223
@@ -287,8 +285,6 @@ object frmOneRecEdit: TfrmOneRecEdit
         Width = 26
         Height = 25
         Anchors = [akRight, akBottom]
-        TabOrder = 5
-        Visible = False
         Glyph.Data = {
           9E050000424D9E05000000000000360400002800000012000000120000000100
           08000000000068010000130B0000130B00000001000000010000000000000000
@@ -336,6 +332,8 @@ object frmOneRecEdit: TfrmOneRecEdit
           020204F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6FA0202F60000F6F6F6F6F6F6
           F6F6F6F6F6F6F6F6F6FAF6F60000F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6
           0000}
+        TabOrder = 5
+        Visible = False
       end
     end
     object RecEditPageControl: TTabControl

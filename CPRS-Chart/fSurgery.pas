@@ -1209,7 +1209,8 @@ begin
     lstNotes.ItemIndex := EditingIndex;
     x := lstNotes.ItemID;
     uChanging := True;
-    with tvSurgery do Selected := FindPieceNode(x, 1, U, Items.GetFirstNode);
+    //kt //codex original --> with tvSurgery do Selected := FindPieceNode(x, 1, U, Items.GetFirstNode);
+    with tvSurgery do Selected := FindPieceNode(x, 1, U, nil); //kt //codex 9/8/26
     uChanging := False;
     tvSurgeryChange(Self, tvSurgery.Selected);
     if FSilent or
@@ -1520,7 +1521,8 @@ begin
   ANoteID := lstNotes.ItemID;
   if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
   //LoadNotes;
-  with tvSurgery do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvSurgery do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+  with tvSurgery do Selected := FindPieceNode(ANoteID, 1, U, nil); //kt //codex 9/8/26
   if lstNotes.ItemIndex = EditingIndex then
   begin
     InfoBox(TX_ADDEND_NO, TX_ADDEND_MK, MB_OK);
@@ -1669,7 +1671,8 @@ begin
   ANoteID := lstNotes.ItemID;
   if not StartNewEdit(NT_ACT_EDIT_NOTE) then Exit;
   //LoadNotes;
-  with tvSurgery do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+  //kt //codex original --> with tvSurgery do Selected := FindPieceNode(ANoteID, 1, U, Items.GetFirstNode);
+  with tvSurgery do Selected := FindPieceNode(ANoteID, 1, U, nil); //kt //codex 9/8/26
   ActOnDocument(ActionSts, lstNotes.ItemIEN, 'EDIT RECORD');
   if not ActionSts.Success then
   begin
@@ -1695,7 +1698,8 @@ begin
       //if Saved then
         begin
           LoadSurgeryCases;
-          with tvSurgery do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          //kt //codex original --> with tvSurgery do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+          with tvSurgery do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
        end;
     end
   else InfoBox(TX_NO_NOTE, TX_SAVE_NOTE, MB_OK or MB_ICONWARNING);
@@ -1804,7 +1808,8 @@ begin
   //with tvSurgery do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);  //v22.12 - RV
   with tvSurgery do                                                                  //v22.12 - RV
   begin                                                                              //v22.12 - RV
-    Selected := FindPieceNode(FLastNoteID, U, Items.GetFirstNode);                   //v22.12 - RV
+    //kt //codex original --> Selected := FindPieceNode(FLastNoteID, U, Items.GetFirstNode);                   //v22.12 - RV
+    Selected := FindPieceNode(FLastNoteID, U, nil);                   //v22.12 - RV //kt //codex 9/8/26
     if Selected <> nil then tvSurgeryChange(Self, Selected);                         //v22.12 - RV
   end;                                                                               //v22.12 - RV
 end;
@@ -1898,7 +1903,8 @@ begin
   if (AnIndex = lstNotes.ItemIndex) and (not frmFrame.ContextChanging) then
     begin
       LoadSurgeryCases;                    //????????????????
-      with tvSurgery do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+      //kt //codex original --> with tvSurgery do Selected := FindPieceNode(IntToStr(IEN), U, Items.GetFirstNode);
+      with tvSurgery do Selected := FindPieceNode(IntToStr(IEN), U, nil); //kt //codex 9/8/26
     end;
 end;
 
@@ -2108,7 +2114,8 @@ begin
       SaveCurrentNote(Saved);
       if not Saved then Exit;
       LoadSurgeryCases;
-      with tvSurgery do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      //kt //codex original --> with tvSurgery do Selected := FindPieceNode(SavedDocID, U, Items.GetFirstNode);
+      with tvSurgery do Selected := FindPieceNode(SavedDocID, U, nil); //kt //codex 9/8/26
     end;
   x := CanChangeCosigner(lstNotes.ItemIEN);
   ActOnDocument(ActionSts, lstNotes.ItemIEN, 'IDENTIFY SIGNERS');
@@ -2194,7 +2201,8 @@ begin
     GetSingleCaseListItemWithDocs(tmpList, StrToIntDef(Piece(x, U, 1), 0));
     with FCurrentContext do CreateListItemsForCaseTree(FCaseList, tmpList, SR_ALL, GroupBy, TreeAscending);
     UpdateTreeView(FCaseList, tvSurgery);
-    with tvSurgery do Selected := FindPieceNode(Piece(x, U, 1), 1, U, Items.GetFirstNode);
+    //kt //codex original --> with tvSurgery do Selected := FindPieceNode(Piece(x, U, 1), 1, U, Items.GetFirstNode);
+    with tvSurgery do Selected := FindPieceNode(Piece(x, U, 1), 1, U, nil); //kt //codex 9/8/26
     (*  lstNotes.Items.Add(x);
     AnObject := MakeCaseTreeObject('ALERT^Alerted Note^^^^^^^^^^^%^0');
     tmpNode := tvSurgery.Items.AddObjectFirst(tvSurgery.Items.GetFirstNode, AnObject.NodeText, AnObject);

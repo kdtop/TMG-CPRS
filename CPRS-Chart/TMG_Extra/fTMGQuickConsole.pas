@@ -243,10 +243,10 @@ const
       line, ProbIEN : string;
       Input,Results : TStringList;
   begin
+    Results := TStringList.Create();
+    Input := TStringList.Create();
     try
       if not TopicProblemLinkDownloaded then begin
-        Results := TStringList.Create();
-        Input := TStringList.Create();
         TopicProblemLink.Clear;
         for i := 0 to TopicList.Count - 1 do begin
           Input.Add('GET^'+Patient.DFN+'^TOPIC='+piece(TopicList.Strings[i],'^',1));
@@ -438,7 +438,8 @@ const
             //kt //codex original --> Tags := MidStr(Tags, Length(tempTag)+1,999);
             Tags := Copy(Tags, Length(tempTag)+1,999); //kt //codex 8/3/26
             //kt //codex original --> while (Length(Tags)>0) and (Tags[1] in [' ', ',']) do Tags := MidStr(Tags,2, 999);
-            while (Length(Tags)>0) and (Tags[1] in [' ', ',']) do Tags := Copy(Tags,2, 999); //kt //codex 8/3/26
+            //kt //codex original --> while (Length(Tags)>0) and (Tags[1] in [' ', ',']) do Tags := Copy(Tags,2, 999); //kt //codex 8/3/26
+            while (Length(Tags)>0) and (CharInSet(Tags[1], [' ', ','])) do Tags := Copy(Tags,2, 999); //kt //codex 8/3/26 //kt //codex 8/30/26
           end else begin
             tempTag := Tags;
             Tags := '';

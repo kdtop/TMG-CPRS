@@ -3019,7 +3019,8 @@ end;
 procedure TfrmTemplateEditor.edtGapKeyPress(Sender: TObject;
   var Key: Char);
 begin
-  if (not (Key in ['0', '1', '2', '3'])) then Key := #0;
+  //kt //codex original --> if (not (Key in ['0', '1', '2', '3'])) then Key := #0;
+  if (not (CharInSet(Key, ['0', '1', '2', '3']))) then Key := #0; //kt //codex 8/30/26
 end;
 
 procedure TfrmTemplateEditor.edtNameExit(Sender: TObject);
@@ -4068,7 +4069,8 @@ begin
    Result := '';
    TagPos := Pos('{FN:',SelText);
    if TagPos > 0 then begin
-     SelText := RightStr(SelText,StrLen(PChar(SelText))-TagPos+1);
+     //kt //codex original -->     SelText := RightStr(SelText,StrLen(PChar(SelText))-TagPos+1);
+     SelText := RightStr(SelText, Length(SelText) - TagPos + 1); //kt //codex 8/30/26
      TagPos := Pos('}',SelText);
      if TagPos > 0 then begin
         SelText := LeftStr(SelText,TagPos);

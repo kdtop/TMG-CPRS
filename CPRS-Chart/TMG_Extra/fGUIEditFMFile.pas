@@ -153,6 +153,7 @@ implementation
 
   function TfrmGUIEditFMFile.GridInfo(AGrid : tShowGrids) : TGridInfo;
   begin
+    Result := nil;
     case AGrid of
       tsgBasic    : Result := GetInfoObjectForGrid(sgBasic);
       tsgAdvanced : Result := GetInfoObjectForGrid(sgAdvanced);

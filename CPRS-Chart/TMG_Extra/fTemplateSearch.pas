@@ -115,6 +115,7 @@ const
     var Sibling : TTreeNode;
         Matched : boolean;
     begin
+      Matched := False; //kt default 8/30/26
       if ParentNode = nil then begin
         //There isn't a true 'root'.  Just top level children of the tvTemplates.Items property
         Sibling := Drawers.tvTemplates.Items.GetFirstNode;
@@ -274,6 +275,7 @@ const
       (* i : integer; *)
       (* OneLine:string; *)
   begin
+    LastChar := #0;  //kt default 8/30/26
     StatusBar.Panels[0].Text := '';
     Len := Length(edtTemSearchTerms.Text);
     if Len > 1 then begin   //Added because if Len 0 then program crashed

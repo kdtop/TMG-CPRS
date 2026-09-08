@@ -107,6 +107,7 @@ begin
   //Previous Line elh LoadDemographics(memPtDemo.Lines);
   //elh change begin
   MaxWidth := 350;  //tmg  moved from below
+  AHeight := 0; //kt 8/30/26 to initialize
   rtDemographics := TStringList.Create;
   HTMLDemoViewer := THtmlObj.Create(pnlTop,Application);
   //HTMLDemoViewer.Anchors := [akLeft,akTop,akRight,akBottom];
@@ -247,8 +248,6 @@ begin
   if EditResult <> mrCancel then frmFrame.mnuFileRefreshClick(Sender);
 end;
 
-
-end.
 
 end.
 

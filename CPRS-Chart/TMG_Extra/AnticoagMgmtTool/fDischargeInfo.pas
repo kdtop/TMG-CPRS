@@ -36,7 +36,8 @@ type
     procedure DataToGUI;
   public
     { Public declarations }
-    function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; overload;
+    //kt //codex original -->     function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; overload;
+    function ShowModal(AppState : TAppState; AFlowsheet : TOneFlowsheet) : integer; reintroduce; overload; //kt //codex 8/30/26
   end;
 
 //var

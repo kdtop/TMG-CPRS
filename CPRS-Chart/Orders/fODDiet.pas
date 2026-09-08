@@ -1878,7 +1878,7 @@ begin
     NewDiet := DietAttributes(cboOPDietAvail.ItemIEN);
     if Piece(NewDiet,'^',1)='0' then
     begin
-      InfoBox(Piece(NewDiet,'^',2),TC_OP_DIET_ERR, MB_OK);     
+      InfoBox(Piece(NewDiet,'^',2),TC_OP_DIET_ERR, MB_OK);
       cboOPDietAvail.ItemIndex := -1;
       Exit;
     end;
@@ -2029,7 +2029,7 @@ begin
   AWinEnd := FMDateTimeToDateTime(AEnd);
   i := AWinStart;
   repeat
-    Days := Days + FMDayLetters[DayOfTheWeek(i)];
+    Days := Days + string(FMDayLetters[DayOfTheWeek(i)]); //kt //codex 8/30/26
     i := i + 1;
   until i > AWinEnd;
   Result := Days;

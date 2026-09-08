@@ -48,7 +48,7 @@ uses
   {$IFDEF VER140}
   ,Word97;
   {$ELSE}
-  ,WordXP, VA508AccessibilityManager;
+  ,WordXP, VA508AccessibilityManager, VclTee.TeeGDIPlus;
   {$ENDIF}
 
 type
@@ -537,6 +537,7 @@ var FName : String;
     (* ImageFName : string; *)
 begin
   Result := '-1'; //default to failure
+  Bitmap := TBitmap.create;
   try
     if not assigned(frmBGGraphs) then begin
       frmBGGraphs := TfrmGraphs.Create(application);     //note: Initialization from OnShow called via UpdateDisplay below.
@@ -558,7 +559,6 @@ begin
     frmBGGraphs.pnlFooter.Hint := '63^'+Cmd;
     frmBGGraphs.UpdateDisplay;
     Application.ProcessMessages;
-    Bitmap := TBitmap.create;
     Bitmap.width := frmBGGraphs.scrlTop.Width;
     Bitmap.Height := frmBGGraphs.scrlTop.Height;
     frmBGGraphs.scrlTop.PaintTo(Bitmap.Canvas,0,0);
@@ -602,8 +602,8 @@ var  S, PreStr, PostStr, TagStr, AttrStr : string;
 
 begin
   Success := false; //default to failure.
+  Attrs := TStringList.Create;
   try
-    Attrs := TStringList.Create;
     Attrs.NameValueSeparator := '=';
     Result := Line;
     Err := '';
@@ -629,9 +629,9 @@ begin
     AttrStr := Trim(Copy(TagStr, IMG_LEN+1, Length(TagStr)-IMG_LEN-1));  //remove '<IMG'  and '>' to get just attributes //kt //codex 8/3/26
     PiecesToListNonQT(AttrStr, ' ', Attrs);  //Parse to string list.
     for i := 1 to GRAPH_ATTR_CT do begin
-      AttrData[i] := AnsiReplaceStr(Attrs.Values[GRAPH_ATTRS[i]],'"','');;
+      AttrData[i] := AnsiReplaceStr(Attrs.Values[string(GRAPH_ATTRS[i])],'"','');; //kt //codex 8/30/26
       if AttrData[i] = '' then begin
-        Err := 'Unable to find data for attribute "'+GRAPH_ATTRS[i]+'"';
+        Err := 'Unable to find data for attribute "'+string(GRAPH_ATTRS[i])+'"'; //kt //codex 8/30/26
         exit; //to finally part.
       end;
     end;
@@ -703,8 +703,8 @@ begin
                'Please start editing a note and try again.', mtError, [mbOK], 0);
     exit;
   end;
+  TempSL := TStringList.Create;
   try
-    TempSL := TStringList.Create;
     //NOTE: this only supports saving from the top graph image (i.e. not with multiple graphs)
     Cmd := '';
     for i := 0 to lvwItemsTop.Items.Count - 1 do begin
@@ -742,7 +742,7 @@ begin
       TableHeader := uTMGOptions.ReadString('Graph Header Text','AUTO REFRESHING GRAPH');
       BackgroundColor := uTMGOptions.ReadString('Graph Outline Color','#FFFFE0');
       HTML := '<table id="TMGAutoGraph" style="background-color:'+BackgroundColor+';"><th>'+TableHeader+'</th><tr><td>'+HTML+'</td></tr></table>';  //ELH added
-      CopyHTMLToClipBoard('', HTML);
+      CopyHTMLToClipBoard('', HTML); //kt //codex 8/30/26
       //MessageDlg('Updateable Graph has been added.  It can now be pasted into a note with Ctrl-V', mtInformation, [mbOK], 0);
       MessageDlg('Updateable Graph has been added.  It can now be pasted into a note by right clicking and selecting PASTE TEXT AS HTML', mtInformation, [mbOK], 0);
     end;
@@ -7867,7 +7867,7 @@ begin
   FName := UploadFromCanvas(Canvas, Rect, false);  //returns VistA name of image
   if FName <> '' then begin
     ImageFName := GetInsertImgHTMLName(FName);
-    CopyHTMLToClipBoard('', ImageFname);
+    CopyHTMLToClipBoard('', ImageFname); //kt //codex 8/30/26
     MessageDlg('Image has been added.  It can now be pasted into a note' + CRLF +
                'with Ctrl-V or inserted later via SELECT EXISTING IMAGE.', mtInformation, [mbOK], 0);
   end;

@@ -52,7 +52,7 @@ var
   if (i in [1..255]) then fHiddenColMap[i]:='1';
  end;
 begin
- old:=fHiddenColMap; {save oldmap image}
+  old:=string(fHiddenColMap); {save oldmap image} //kt //codex 8/30/26
  fHiddenCols:=Value;
  fHiddenColMap:='';  {reset the map}
  for j:=1 to 255 do
@@ -70,7 +70,7 @@ begin
     invalidate;
   end;
  if old='' then exit;
- if (old <> fHiddenColMap) and (not (csDesigning in componentState)) then
+  if (old <> string(fHiddenColMap)) and (not (csDesigning in componentState)) then //kt //codex 8/30/26
   begin
    j:=pos('1',old);
    while j > 0 do
@@ -165,4 +165,4 @@ begin
 end;
 
 end.
-
+

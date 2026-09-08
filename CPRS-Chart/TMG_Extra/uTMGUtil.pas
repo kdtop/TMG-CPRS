@@ -116,10 +116,12 @@ implementation
     repeat
       ch := S[i];
       i := i + 1;
-      if ch in ['0'..'9','.'] then begin
+      //kt //codex original --> if ch in ['0'..'9','.'] then begin
+      if CharInSet(ch, ['0'..'9','.']) then begin //kt //codex 8/30/26
         Result := Result + ch;
       end;
-    until (i > length(S)) or not  (ch in ['0'..'9','.'])
+    //kt //codex original --> until (i > length(S)) or not  (ch in ['0'..'9','.'])
+    until (i > length(S)) or not  (CharInSet(ch, ['0'..'9','.'])) //kt //codex 8/30/26
   end;
 
   function IsSubFile(FieldDef: string ; var SubFileNum : string) : boolean;
@@ -343,29 +345,30 @@ implementation
       value:integer;
       bgColor:TColor;
   begin
-      for int := 0 to pnl.ControlCount-1 do begin
-        with TProgressBarWithText(pnl.Controls[int]) do begin
-          if int>PtArray.Count-1 then begin
-            Visible := false;
-          end else begin
-            Visible := true;
-            ProgressText := piece(PtArray[int],'^',1);
-            value := round(strtofloat(piece(PtArray[int],'^',2)));
-            Position := value;
-            if value<31 then
-              bgColor:=APPT_COLOR_0_30;
-            if value>30 then
-              bgColor:=APPT_COLOR_30_60;
-            if value>60 then
-              bgColor:=APPT_COLOR_60PLUS;
-            //Brush.Color := bgColor;
-            //SendMessage(Handle,PBM_SETBKCOLOR,0,clwhite);
-            SendMessage(Handle,PBM_SETBARCOLOR, 0,bgColor);
-            Hint := piece(PtArray[int],'^',3);
-            HelpKeyword := piece(PtArray[int],'^',4);            
-          end;
+    bgColor := clWhite; //default  //kt 8/30/26
+    for int := 0 to pnl.ControlCount-1 do begin
+      with TProgressBarWithText(pnl.Controls[int]) do begin
+        if int>PtArray.Count-1 then begin
+          Visible := false;
+        end else begin
+          Visible := true;
+          ProgressText := piece(PtArray[int],'^',1);
+          value := round(strtofloat(piece(PtArray[int],'^',2)));
+          Position := value;
+          if value<31 then
+            bgColor:=APPT_COLOR_0_30;
+          if value>30 then
+            bgColor:=APPT_COLOR_30_60;
+          if value>60 then
+            bgColor:=APPT_COLOR_60PLUS;
+          //Brush.Color := bgColor;
+          //SendMessage(Handle,PBM_SETBKCOLOR,0,clwhite);
+          SendMessage(Handle,PBM_SETBARCOLOR, 0,bgColor);
+          Hint := piece(PtArray[int],'^',3);
+          HelpKeyword := piece(PtArray[int],'^',4);
         end;
       end;
+    end;
   end;
 
   function GetCurrentPatientLoad(pnl:TPanel):string;

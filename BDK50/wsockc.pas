@@ -132,16 +132,16 @@ type
     // 060919 added to support multiple brokers with both old and new type connections
     Prefix: String;
 //    NetBlockingHookVar: Function(): Bool; export;
-    function NetCall(hSocket: integer; imsg: string): PAnsiChar; //kt //codex 7/24/26
+    function NetCall(hSocket: integer; imsg: AnsiString): PAnsiChar; //kt //codex 8/30/26
     function tCall(hSocket: integer; api, apVer: String; Parameters: TParams;
              var Sec, App: PAnsiChar; TimeOut: integer): PAnsiChar; //kt //codex 7/24/26
     function cRight( z: PAnsiChar;  n: longint): PAnsiChar; //kt //codex 7/24/26
     function cLeft( z: PAnsiChar; n: longint): PAnsiChar; //kt //codex 7/24/26
-    function BuildApi ( n,p: string; f: longint): string;
+    function BuildApi ( n,p: string; f: longint): AnsiString; //kt //codex 8/30/26
     function BuildHdr ( wkid: string; winh: string; prch: string;
-             wish: string): string;
+             wish: string): AnsiString; //kt //codex 8/30/26
     function BuildPar(hSocket: integer; api, RPCVer: string;
-             const Parameters: TParams): string;
+             const Parameters: TParams): AnsiString; //kt //codex 8/30/26
     function StrPack ( n: string; p: integer): string;
     function VarPack(n: string): string;
     function NetStart(ForegroundM: boolean; Server: string; ListenerPort: integer;
@@ -163,7 +163,7 @@ type
 function NetStart1(ForegroundM: boolean; Server: string; ListenerPort: integer; 
     var hSocket: integer): Integer; virtual;
     function BuildPar1(hSocket: integer; api, RPCVer: string; const Parameters:
-        TParams): String; virtual;
+        TParams): AnsiString; virtual; //kt //codex 8/30/26
     property CountWidth: Integer read FCountWidth write FCountWidth;
     property IsBackwardsCompatible: Boolean read FIsBackwardsCompatible write 
         FIsBackwardsCompatible;
@@ -174,6 +174,12 @@ function NetStart1(ForegroundM: boolean; Server: string; ListenerPort: integer;
 function LPack(Str: String; NDigits: Integer): String;
 
 function SPack(Str: String): String;
+
+function EncodeBrokerWireText(const Value: string): AnsiString;
+function WireLPack(const Value: string; NDigits: Integer): AnsiString;
+function WireSPack(const Value: string): AnsiString;
+function WireStrPack(const Value: string; Width: Integer): AnsiString;
+function WireVarPack(const Value: string): AnsiString;
 
 function NetBlockingHook: BOOL; export;
 // 080619 function to get socket port number
@@ -219,6 +225,64 @@ Const
 implementation
 
  uses fDebugInfo; {P36} //, TRPCB;
+
+function EncodeBrokerWireText(const Value: string): AnsiString;
+//kt //codex added entire function 8/30/26
+begin
+  Result := AnsiString(Value);
+end;
+
+function DecodeBrokerWireText(const Value: PAnsiChar): string;
+//kt //codex added entire function 8/30/26
+begin
+  Result := string(AnsiString(Value));
+end;
+
+function WireLPack(const Value: string; NDigits: Integer): AnsiString;
+//kt //codex added entire function 8/30/26
+var
+  WireValue: AnsiString;
+  LengthText: AnsiString;
+begin
+  WireValue := EncodeBrokerWireText(Value);
+  LengthText := AnsiString(IntToStr(Length(WireValue)));
+  if Length(LengthText) > NDigits then
+    raise Exception.Create('In generation of message to server, call to WireLPack where byte length exceeds output length width.');
+  Result := Copy(AnsiString('000000000') + LengthText, Length(AnsiString('000000000') + LengthText) - (NDigits - 1), NDigits) + WireValue;
+end;
+
+function WireSPack(const Value: string): AnsiString;
+//kt //codex added entire function 8/30/26
+var
+  WireValue: AnsiString;
+begin
+  WireValue := EncodeBrokerWireText(Value);
+  if Length(WireValue) > 255 then
+    raise Exception.Create('In generation of message to server, call to WireSPack where byte length exceeds 255.');
+  Result := AnsiChar(Length(WireValue)) + WireValue;
+end;
+
+function WireStrPack(const Value: string; Width: Integer): AnsiString;
+//kt //codex added entire function 8/30/26
+var
+  WireValue: AnsiString;
+  LengthText: AnsiString;
+begin
+  WireValue := EncodeBrokerWireText(Value);
+  LengthText := AnsiString(IntToStr(Length(WireValue)));
+  Result := AnsiString(Copy(StringOfChar('0', Width) + string(LengthText), Length(LengthText) + 1, Width)) + WireValue;
+end;
+
+function WireVarPack(const Value: string): AnsiString;
+//kt //codex added entire function 8/30/26
+var
+  WireValue: AnsiString;
+begin
+  WireValue := EncodeBrokerWireText(Value);
+  if WireValue = '' then WireValue := '0';
+  //kt //codex original -->   Result := '|' + AnsiChar(Length(WireValue)) + WireValue;
+  Result := AnsiChar('|') + AnsiChar(Length(WireValue)) + WireValue; //kt //codex 8/30/26
+end;
 
     // 060919 removed to support multiple brokers with both old and new type connections
 //var
@@ -376,13 +440,15 @@ begin
      cLeft := z;
 end;
 
-function TXWBWinsock.BuildApi ( n,p: string; f: longint): string;
+function TXWBWinsock.BuildApi ( n,p: string; f: longint): AnsiString; //kt //codex 8/30/26
 Var
-  x,s: string;
+  x: string; //kt //codex 8/30/26
+  s: AnsiString; //kt //codex 8/30/26
 begin
-     str(f,x);
-     s := StrPack(p,5);
-     result := StrPack(x + n + '^' + s,5);
+     //kt //codex original -->      str(f,x);
+     x := IntToStr(f); //kt //codex 8/30/26
+     s := WireStrPack(p,5); //kt //codex 8/30/26
+     result := WireStrPack(x + n + '^' + string(s),5); //kt //codex 8/30/26
 end;
 
 function TXWBWinsock.NetworkConnect(ForegroundM: boolean; Server: string; 
@@ -440,20 +506,20 @@ begin
 end;
 
 function TXWBWinsock.BuildHdr ( wkid: string; winh: string; prch: string;
-         wish: string): string;
+         wish: string): AnsiString; //kt //codex 8/30/26
 Var
   t: string;
 begin
    t := wkid + ';' + winh + ';' + prch + ';' + wish + ';';
-   Result := StrPack(t,3);
+   Result := WireStrPack(t,3); //kt //codex 8/30/26
 end;
 
 function TXWBWinsock.BuildPar(hSocket: integer; api, RPCVer: string;
-         const Parameters: TParams): string;
+         const Parameters: TParams): AnsiString; //kt //codex 8/30/26
 var
   i,ParamCount: integer;
-  param: string;
-  tResult: string;
+  param: AnsiString; //kt //codex 8/30/26
+  tResult: AnsiString; //kt //codex 8/30/26
   subscript: string;
   IsSeen: Boolean;
   BrokerError: EBrokerError;
@@ -484,10 +550,10 @@ begin
 //          param:='';
 
         if PType = literal then
-          param := param + '0'+LPack(Value,CountWidth)+'f';      // 030107 new message protocol
+          param := param + '0'+WireLPack(Value,CountWidth)+'f';      //kt //codex 8/30/26
 
         if PType = reference then
-          param := param + '1'+LPack(Value,CountWidth)+'f';     // 030107 new message protocol
+          param := param + '1'+WireLPack(Value,CountWidth)+'f';     //kt //codex 8/30/26
 
         if PType = empty then
           param := param + '4f';
@@ -506,17 +572,17 @@ begin
               param := param + 't';
             if Mult[subscript] = '' then
               Mult[subscript] := #1;
-            param := param + LPack(subscript,CountWidth)+LPack(Mult[subscript],CountWidth);
+            param := param + WireLPack(subscript,CountWidth)+WireLPack(Mult[subscript],CountWidth); //kt //codex 8/30/26
             IsSeen := True;
             subscript := Mult.Order(subscript,1);
           end;  // while subscript <> ''
           if not IsSeen then         // 040922 added to take care of list/global parameters with no values
-            param := param + LPack('',CountWidth);
+            param := param + WireLPack('',CountWidth); //kt //codex 8/30/26
           param := param + 'f';
         end;
         if PType = stream then
         begin
-          param := param + '5' + LPack(Value,CountWidth) + 'f';
+          param := param + '5' + WireLPack(Value,CountWidth) + 'f'; //kt //codex 8/30/26
         end;
       end;  // with Parameters[i] do
     end;  // if Parameters[i].PType <> undefined
@@ -524,7 +590,7 @@ begin
   if param = '5' then
     param := param + '4f';
 
-  tresult := Prefix + '11' + IntToStr(CountWidth) + '0' + '2' + SPack(RPCVer) + SPack(api) + param + #4;
+  tresult := EncodeBrokerWireText(Prefix + '11' + IntToStr(CountWidth) + '0' + '2') + WireSPack(RPCVer) + WireSPack(api) + param + #4; //kt //codex 8/30/26
 
 //  Application.ProcessMessages;  // removed 040716 jli not needed and may impact some programs
 
@@ -617,14 +683,17 @@ end;
 function TXWBWinsock.StrPack(n: string; p: integer): String;
 Var
   s,l: integer;
-  t,x,zero: shortstring;
+  //kt //codex original -->   t,x,zero: shortstring;
+  t, x, zero: string; // packet-length text is Unicode until explicitly encoded on the wire //kt //codex 8/30/26
   y: string;
 begin
 
     s := Length(n);
-    fillchar(zero,p+1, '0');
-    SetLength(zero, p);
-    str(s,x);
+    //kt //codex original -->     fillchar(zero,p+1, '0');
+    //kt //codex original -->     SetLength(zero, p);
+    zero := StringOfChar('0', p); //kt //codex 8/30/26
+    //kt //codex original -->     str(s,x);
+    x := IntToStr(s); //kt //codex 8/30/26
     t := zero + x;
     l := length(x)+1;
     y := Copy(t, l , p);
@@ -661,7 +730,7 @@ begin
      if Now > (NetTimerStart + TimeOut) then WSACancelBlockingCall;
 end;
 
-function TXWBWinsock.NetCall(hSocket: integer; imsg: string): PAnsiChar; //kt //codex 7/24/26
+function TXWBWinsock.NetCall(hSocket: integer; imsg: AnsiString): PAnsiChar; //kt //codex 8/30/26
 var
 //  I: Integer;
   BufSend, BufRecv, BufPtr: PAnsiChar; //kt //codex 7/24/26
@@ -703,9 +772,9 @@ begin
   BufRecv := AllocMem(Buffer32k); //kt //codex 7/24/26
   try    // BufRecv
     if Prefix = '[XWB]' then
-      BufSend := AnsiStrings.StrNew(PAnsiChar(AnsiString({Prefix +} imsg)))  //;     //moved in P14 //kt //codex 7/24/26
+      BufSend := AnsiStrings.StrNew(PAnsiChar(imsg))  //;     //moved in P14 //kt //codex 8/30/26
     else
-      BufSend := AnsiStrings.StrNew(PAnsiChar(AnsiString({Prefix +} imsg))); //kt //codex 7/24/26
+      BufSend := AnsiStrings.StrNew(PAnsiChar(imsg)); //kt //codex 8/30/26
     try  // BufSend
       Result := PAnsiChar(''); //kt //codex 7/24/26
       while BadXfer and (TryNumber < 4) do
@@ -796,7 +865,7 @@ end;
 function TXWBWinsock.tCall(hSocket: integer; api, apVer: String; Parameters: TParams;
          var Sec , App: PAnsiChar; TimeOut: integer ): PAnsiChar; //kt //codex 7/24/26
 var
- tmp: string;
+ tmp: AnsiString; //kt //codex 8/30/26
  ChangeCursor: Boolean;
 begin
      HookTimeOut := TimeOut;
@@ -869,7 +938,8 @@ begin
     If HostBuf = nil Then
        NetError( 'gethostbyname',0);
     LocalHost.sin_addr.S_addr := longint(plongint(HostBuf^.h_addr_list^)^);
-    LocalName := inet_ntoa(LocalHost.sin_addr);
+    //kt //codex original -->     LocalName := inet_ntoa(LocalHost.sin_addr);
+    LocalName := DecodeBrokerWireText(inet_ntoa(LocalHost.sin_addr)); //kt //codex 8/30/26
     workstation := string(PAnsiChar(HostBuf.h_name)); //kt //codex 7/24/26
 
     { -- establish HostEnt and Address structure for remote machine }
@@ -893,7 +963,8 @@ begin
     else
     begin;
       DHCPHost.sin_addr.S_addr := longint(plongint(DHCPBuf^.h_addr_list^)^);
-      pDHCPName := inet_ntoa(DHCPHost.sin_addr);
+      //kt //codex original -->       pDHCPName := inet_ntoa(DHCPHost.sin_addr);
+      pDHCPName := DecodeBrokerWireText(inet_ntoa(DHCPHost.sin_addr)); //kt //codex 8/30/26
     end;
     DHCPHost.sin_family := PF_INET;                 { -- internet address type}
     DHCPHost.sin_port := htons(ListenerPort);        { -- port to connect to}
@@ -915,7 +986,8 @@ begin
     SocketError := getsockname(hSocket, LocalHost, AddrLen);
     if SocketError = SOCKET_ERROR then
        NetError ('getsockname',0);
-    LocalName := inet_ntoa(LocalHost.sin_addr);
+    //kt //codex original -->     LocalName := inet_ntoa(LocalHost.sin_addr);
+    LocalName := DecodeBrokerWireText(inet_ntoa(LocalHost.sin_addr)); //kt //codex 8/30/26
 
 //   -- set up listening socket for DHCP return connect
     hSocketListen := socket(PF_INET, SOCK_STREAM, IPPROTO_TCP); // --  new socket
@@ -979,8 +1051,9 @@ begin
     end;
 }  // remove debug mode from client
 
-    tmpPChar := NetCall(hSocket, y);                {eg 11-1-96} //kt //codex 7/24/26
-    tmp := tmpPchar;
+    tmpPChar := NetCall(hSocket, EncodeBrokerWireText(y));                //kt //codex 8/30/26
+    //kt //codex original -->     tmp := tmpPchar;
+    tmp := DecodeBrokerWireText(tmpPchar); //kt //codex 8/30/26
     AnsiStrings.StrDispose(tmpPchar); //kt //codex 7/24/26
     if CompareStr(tmp, rlost) = 0 then
        begin
@@ -1093,7 +1166,8 @@ begin
     If HostBuf = nil Then
        NetError( 'gethostbyname',0);
     LocalHost.sin_addr.S_addr := longint(plongint(HostBuf^.h_addr_list^)^);
-    LocalName := inet_ntoa(LocalHost.sin_addr);
+    //kt //codex original -->     LocalName := inet_ntoa(LocalHost.sin_addr);
+    LocalName := DecodeBrokerWireText(inet_ntoa(LocalHost.sin_addr)); //kt //codex 8/30/26
     workstation := string(PAnsiChar(HostBuf.h_name)); //kt //codex 7/24/26
 
     { -- establish HostEnt and Address structure for remote machine }
@@ -1117,7 +1191,8 @@ begin
     else
     begin;
       DHCPHost.sin_addr.S_addr := longint(plongint(DHCPBuf^.h_addr_list^)^);
-      pDHCPName := inet_ntoa(DHCPHost.sin_addr);
+      //kt //codex original -->       pDHCPName := inet_ntoa(DHCPHost.sin_addr);
+      pDHCPName := DecodeBrokerWireText(inet_ntoa(DHCPHost.sin_addr)); //kt //codex 8/30/26
     end;
     DHCPHost.sin_family := PF_INET;                 { -- internet address type}
     DHCPHost.sin_port := htons(ListenerPort);        { -- port to connect to}
@@ -1136,7 +1211,8 @@ begin
     SocketError := getsockname(hSocket, LocalHost, AddrLen);
     if SocketError = SOCKET_ERROR then
        NetError ('getsockname',0);
-    LocalName := inet_ntoa(LocalHost.sin_addr);
+    //kt //codex original -->     LocalName := inet_ntoa(LocalHost.sin_addr);
+    LocalName := DecodeBrokerWireText(inet_ntoa(LocalHost.sin_addr)); //kt //codex 8/30/26
 
 //    { -- set up listening socket for DHCP return connect }
     hSocketListen := socket(PF_INET, SOCK_STREAM, IPPROTO_TCP); // --  new socket
@@ -1200,8 +1276,9 @@ begin
     end;
   // remove debug mode from client
 
-    tmpPChar := NetCall(hSocket, y);                {eg 11-1-96} //kt //codex 7/24/26
-    tmp := tmpPchar;
+    tmpPChar := NetCall(hSocket, EncodeBrokerWireText(y));                //kt //codex 8/30/26
+    //kt //codex original -->     tmp := tmpPchar;
+    tmp := DecodeBrokerWireText(tmpPchar); //kt //codex 8/30/26
     AnsiStrings.StrDispose(tmpPchar); //kt //codex 7/24/26
     if CompareStr(tmp, rlost) = 0 then
        begin
@@ -1298,9 +1375,10 @@ begin
       Str := Prefix + x;
     If hSocket <> INVALID_SOCKET Then
     begin
-      tmpPChar := NetCall(hSocket,Str);
+      tmpPChar := NetCall(hSocket, EncodeBrokerWireText(Str)); //kt //codex 8/30/26
 //   	  tmpPChar := NetCall(hSocket, x);
- 	  tmp := tmpPChar;
+	  //kt //codex original --> 	  tmp := tmpPChar;
+	  tmp := DecodeBrokerWireText(tmpPChar); //kt //codex 8/30/26
       AnsiStrings.StrDispose(tmpPChar); //kt //codex 7/24/26
         lin.l_onoff := 1;                    { -- shut down the M handler};
         lin.l_linger := 0;
@@ -1486,14 +1564,14 @@ begin
 end;
 
 function TXWBWinsock.BuildPar1(hSocket: integer; api, RPCVer: string; const
-    Parameters: TParams): String;
+    Parameters: TParams): AnsiString; //kt //codex 8/30/26
 var
   i,ParamCount: integer;
   num: integer;
   tsize: longint;
   arr: LongInt;
-  param,x,hdr,strout: string;
-  tout,psize,tResult,RPCVersion: string;
+  param,x,hdr,strout: AnsiString; //kt //codex 8/30/26
+  tout,psize,tResult,RPCVersion: AnsiString; //kt //codex 8/30/26
   sin: TStringList;
   subscript: string;
 begin
@@ -1512,21 +1590,22 @@ begin
           param:='';}
 
         if PType = literal then
-          param := param + strpack('0' + Value,3);
+          param := param + WireStrPack('0' + Value,3); //kt //codex 8/30/26
 
         if PType = reference then
-          param := param + strpack('1' + Value,3);
+          param := param + WireStrPack('1' + Value,3); //kt //codex 8/30/26
 
         if (PType = list) {or (PType = wordproc)} then begin
           Value := '.x';
-          param := param + strpack('2' + Value,3);
+          param := param + WireStrPack('2' + Value,3); //kt //codex 8/30/26
           if Pos('.',Value) >0 then
-            x := Copy(Value,2,length(Value));
+            //kt //codex original -->             x := Copy(Value,2,length(Value));
+            x := EncodeBrokerWireText(Copy(Value, 2, Length(Value))); //kt //codex 8/30/26
             {if PType = wordproc then dec(last);}
             subscript := Mult.First;
             while subscript <> '' do begin
               if Mult[subscript] = '' then Mult[subscript] := #1;
-              sin.Add(StrPack(subscript,3) + StrPack(Mult[subscript],3));
+              sin.Add(string(WireStrPack(subscript,3) + WireStrPack(Mult[subscript],3))); //kt //codex 8/30/26
               subscript := Mult.Order(subscript,1);
             end{while};
             sin.Add('000');
@@ -1542,11 +1621,11 @@ begin
   tout := '';
 
   hdr := BuildHdr('XWB','','','');
-  strout := strpack(hdr + BuildApi(api,param,arr),5);
+  strout := WireStrPack(string(hdr + BuildApi(api,string(param),arr)),5); //kt //codex 8/30/26
 //  num :=0;   //  JLI 040608 to correct handling of empty arrays
 
   RPCVersion := '';
-  RPCVersion := VarPack(RPCVer);
+  RPCVersion := WireVarPack(RPCVer); //kt //codex 8/30/26
 
   {if sin.Count-1 > 0 then} num := sin.Count-1;   //  JLI 040608 to correct handling of empty arrays
 //  if sin.Count-1 > 0 then num := sin.Count-1;
@@ -1556,32 +1635,34 @@ begin
 //  if num > 0 then
   begin
         for i := 0 to num do
-          tsize := tsize + length(sin.strings[i]);
-        x := '00000' + IntToStr(tsize + length(strout)+ length(RPCVersion));
+          tsize := tsize + Length(EncodeBrokerWireText(sin.strings[i])); //kt //codex 8/30/26
+        //kt //codex original -->         x := '00000' + IntToStr(tsize + length(strout)+ length(RPCVersion));
+        x := EncodeBrokerWireText('00000' + IntToStr(tsize + Length(strout) + Length(RPCVersion))); //kt //codex 8/30/26
   end;
   if {num} sin.Count = 0 then   //  JLI 040608 to correct handling of empty arrays
 //   if num = 0 then
    begin
-        x := '00000' + IntToStr(length(strout)+ length(RPCVersion));
+        //kt //codex original -->         x := '00000' + IntToStr(length(strout)+ length(RPCVersion));
+        x := EncodeBrokerWireText('00000' + IntToStr(Length(strout) + Length(RPCVersion))); //kt //codex 8/30/26
    end;
 
   psize := x;
   psize := Copy(psize,length(psize)-5,5);
   tResult := psize;
-  tResult := ConCat(tResult, RPCVersion);
+  tResult := tResult + RPCVersion; //kt //codex 8/30/26
   tout := strout;
-  tResult := ConCat(tResult, tout);
+  tResult := tResult + tout; //kt //codex 8/30/26
 
   if {num} sin.Count > 0 then   //  JLI 040608 to correct handling of empty arrays
 //   if num > 0 then
    begin
         for i := 0 to num do
-            tResult := ConCat(tResult, sin.strings[i]);
+            tResult := tResult + EncodeBrokerWireText(sin.strings[i]); //kt //codex 8/30/26
    end;
 
   sin.free;
 
-  Result := Prefix + tResult;  {return result}
+  Result := EncodeBrokerWireText(Prefix) + tResult; //kt //codex 8/30/26
 
 end;
 
@@ -1629,7 +1710,8 @@ begin
     If HostBuf = nil Then
        NetError( 'gethostbyname',0);
     LocalHost.sin_addr.S_addr := longint(plongint(HostBuf^.h_addr_list^)^);
-    LocalName := inet_ntoa(LocalHost.sin_addr);
+    //kt //codex original -->     LocalName := inet_ntoa(LocalHost.sin_addr);
+    LocalName := DecodeBrokerWireText(inet_ntoa(LocalHost.sin_addr)); //kt //codex 8/30/26
     workstation := string(PAnsiChar(HostBuf.h_name)); //kt //codex 7/24/26
 
     { -- make connection to DHCP }
@@ -1672,7 +1754,7 @@ begin
     end;
   // remove debug mode from client
 
-    tmpPChar := NetCall(hSocket, PChar(y));                {eg 11-1-96}
+    tmpPChar := NetCall(hSocket, EncodeBrokerWireText(y)); //kt //codex 8/30/26
 {    tmp := tmpPchar;
     StrDispose(tmpPchar);
     if CompareStr(tmp, rlost) = 0 then

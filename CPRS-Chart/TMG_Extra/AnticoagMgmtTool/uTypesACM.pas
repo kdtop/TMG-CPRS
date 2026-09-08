@@ -363,7 +363,7 @@ type
     procedure Clear;
     procedure Assign(Source : TNoteInfo);
     constructor Create;
-    Destructor Destroy;
+    Destructor Destroy; override; //kt //codex 8/30/26
   end;
 
 

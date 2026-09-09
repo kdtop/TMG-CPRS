@@ -2745,8 +2745,8 @@ begin
       end;
       }
 
-      // call DATA2PCE (in background)
-      SavePCEData(PCEList, FileNoteIEN, FEncLocation);
+      // Call DATA2PCE; reminder processing can require foreground completion. //kt //codex 9/8/26
+      SavePCEData(PCEList, FileNoteIEN, FEncLocation, ForceForegroundSave); //kt //codex 9/8/26
       //kt moved to fEncounterLabs.SendData -->  TMGLabOrderAutoPopulateIfActive; //kt added
 
       // turn off 'Send' flags and remove items that were deleted

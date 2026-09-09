@@ -2,6 +2,13 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-08 — Health factors available before note signature
+
+- Traced reminder-dialog health-factor persistence through `TPCEData.Save` and `ORWPCE SAVE`.
+- The reminder dialog already requested `ForceForegroundSave = true`, and the RPC wrapper already accepted and transmitted it, but `TPCEData.Save` discarded the parameter when calling the wrapper.
+- Forwarded the parameter to `SavePCEData`, allowing reminder PCE data—including health factors—to complete server-side before the Encounter dialog reloads the note encounter.
+- User verified the fix works before signature.
+
 ## 2026-09-08 — Removed experimental note components
 
 - Removed the unused note-component creation workflow, its menus/buttons, template parser, quick-console `ADD COMPONENT` command, component tree behavior, and its project units/forms.

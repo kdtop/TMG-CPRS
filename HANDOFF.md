@@ -17,10 +17,11 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 
 ## Current Focus
 
-- Keep CPRSChart working under Delphi 12. Active work is `fNotes` cleanup and note-selection/reload behavior. Read the live source before editing; the user frequently reformats and revises it.
+- Keep CPRSChart working under Delphi 12. Read live `fNotes` source before editing; the user frequently reformats and revises it.
 - `FNoteData: TRecStrList` is the live note-list model; the hidden `lstNotes` control has been removed. Use the existing model helpers.
 - `LoadNotes` accepts a preferred IEN and optional activation. Preserve IEN-based restoration and avoid intermediate document activation when resuming editing.
 - `FindPieceNode` searches after `AfterNode`, exclusively; pass `nil` for the whole tree. Reminder iteration depends on the exclusive behavior. The search is not limited to descendants.
+- Reminder PCE saves can request foreground completion. `TPCEData.Save` must forward `ForceForegroundSave` to `SavePCEData`; this keeps health factors visible in the Encounter dialog before signature.
 - Note-tree performance work reached an accepted stopping point. Measure remaining bottlenecks before further speculative optimization.
 - Reports imaging has mixed RAD/TIU rows and TIU document rendering support. Multi-select HTML aggregation remains unfinished; consult the changelog and current source before resuming that work.
 - Optional tabs may not be created. Preserve guards around tab-form references and missing page IDs.
@@ -30,7 +31,7 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - Compilation must run in the licensed Windows Delphi IDE. The installed edition reports: `This version of the product does not support command line compiling.`
 - For a new compile failure, the user saves fresh IDE output to `CPRS-Chart\build_errors.txt`; inspect it and fix the reported blockers incrementally. Do not treat an older log as an active failure.
 - If compiler output disagrees with disk contents, suspect stale Delphi editor buffers and have the IDE reload them.
-- User confirmed the recent selection/search work runs well. The final `ReloadNotes` direct-edit adjustment was reviewed and accepted, but a separate compile/runtime result has not been recorded.
+- User confirmed the note-selection/reload and pre-signature health-factor fixes work at runtime. A fresh Delphi build result for the health-factor change has not been recorded.
 
 ## Important Constraints
 
@@ -75,7 +76,7 @@ Important Git workflow:
 
 1. Read the current source and inspect Git status before editing.
 2. Follow the user's current request; use [changelog.md](changelog.md) for relevant history rather than treating old next-step recommendations as active tasks.
-3. If testing `ReloadNotes`, check return to editing after template component creation, the no-active-edit refresh, and a note absent from the current view.
+3. If testing `ReloadNotes`, check return to editing after template insertion, the no-active-edit refresh, and a note absent from the current view.
 4. For runtime/designer problems, inspect the active unit/DFM pair. For compile problems, use fresh IDE output.
 5. For further HTML-stack cleanup, read the current files and the orientation documents below before removing dependencies.
 

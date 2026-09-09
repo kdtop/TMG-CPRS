@@ -435,7 +435,6 @@ inherited frmDrawers: TfrmDrawers
     ShowHint = True
     StateImages = dmodShared.imgReminders
     TabOrder = 12
-    OnDblClick = tvProblemsDblClick
     OnMouseMove = tvProblemsMouseMove
     Caption = 'Problems'
     NodePiece = 0

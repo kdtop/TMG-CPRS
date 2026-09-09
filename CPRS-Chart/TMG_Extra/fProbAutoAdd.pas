@@ -146,8 +146,24 @@ implementation
 {$R *.dfm}
 
 uses
-  rTIU, uTemplates, rCore, uCore, uNoteComponents, uxtheme, uProbs, fProbLex, fProbs;
+//kt //codex original -->   rTIU, uTemplates, rCore, uCore, uNoteComponents, uxtheme, uProbs, fProbLex, fProbs;
+  rTIU, uTemplates, rCore, uCore, uxtheme, uProbs, fProbLex, fProbs; //kt //codex 9/8/26
 
+
+function FindTopicProblemPiece(SL: TStringList; const Value, Delim: string;
+  PieceNum: Integer; StartIdx: Integer = 0): Integer;
+//kt //codex added entire function 9/8/26
+var
+  i: Integer;
+begin
+  Result := -1;
+  if not Assigned(SL) then Exit;
+  for i := StartIdx to SL.Count - 1 do begin
+    if Piece2(SL[i], Delim, PieceNum) <> Value then Continue;
+    Result := i;
+    Break;
+  end;
+end;
 
 procedure TfrmProbAutoAdd.FormCreate(Sender: TObject);
 begin
@@ -378,7 +394,8 @@ begin
     if IntSelectedProblemIEN > 0 then begin
       i := 0;
       while (i >= 0) and (i < TopicProblemLinkCache.Count) do begin
-        i := IndexOfPiece(TopicProblemLinkCache, SelectedProblemIEN, '^', 2, i);
+//kt //codex original -->         i := IndexOfPiece(TopicProblemLinkCache, SelectedProblemIEN, '^', 2, i);
+        i := FindTopicProblemPiece(TopicProblemLinkCache, SelectedProblemIEN, '^', 2, i); //kt //codex 9/8/26
         if i > -1 then begin
           LinkedTopics.Add(piece(TopicProblemLinkCache.Strings[i],'^',2));
           inc(i);
@@ -877,7 +894,8 @@ begin
     for i := 0 to lbTopics.Items.Count-1 do begin
       ATopic := lbTopics.Items.Strings[i];
       if lbTopics.Selected[i] then inc(SelectedTopicsCount);
-      idx := IndexOfPiece(TopicProblemLinkCache, ATopic, '^', 1);
+//kt //codex original -->       idx := IndexOfPiece(TopicProblemLinkCache, ATopic, '^', 1);
+      idx := FindTopicProblemPiece(TopicProblemLinkCache, ATopic, '^', 1); //kt //codex 9/8/26
       if idx > -1 then begin
         AnIEN := Piece(TopicProblemLinkCache.Strings[idx], '^', 2);
         if (AnIEN <> '-1') and (LinkedProbs.IndexOf(AnIEN) < 0) then begin

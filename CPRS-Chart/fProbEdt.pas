@@ -98,7 +98,7 @@ type
     Label6: TLabel;
     pnlLinkedNotes: TPanel;       //kt 4/21/15
     Splitter1: TSplitter;         //kt 4/21/15
-    bbAddToNote: TBitBtn;         //kt 4/21/15
+//kt //codex original -->     bbAddToNote: TBitBtn;         //kt 4/21/15
     edICDCode: TCaptionEdit;      //kt 5/15
     pnlLinkedProbs: TPanel;       //kt 5/15
     sgLinkedDocs: TStringGrid;    //kt 5/15
@@ -121,7 +121,7 @@ type
     procedure sgLinkedDocsSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);    //kt 5/15
     procedure pnlLinkedProbsResize(Sender: TObject);  //kt 5/15
     procedure FormDestroy(Sender: TObject);           //kt 5/15
-    procedure bbAddToNoteClick(Sender: TObject);      //kt 4/21/15
+//kt //codex original -->     procedure bbAddToNoteClick(Sender: TObject);      //kt 4/21/15
     procedure edProbChange(Sender: TObject);          //kt 4/21/15
     procedure bbQuitClick(Sender: TObject);
     procedure bbAddComClick(Sender: TObject);
@@ -224,9 +224,9 @@ implementation
 
 uses ORFn, uProbs, fProbs, rProbs, fCover, rCover, rCore, fProbCmt, fProbLex, rPCE, uInit  ,
      StrUtils, fNotes, uTIU, uDocTree, rTIU,  //kt added
-     fNoteCompParentPick, //kt 5/15
+//kt //codex original -->      fNoteCompParentPick, //kt 5/15
      fComponentView,      //kt 5/15
-     uNoteComponents,     //kt 5/15
+//kt //codex original -->      uNoteComponents,     //kt 5/15
      fPCELex,             //kt 10/15
      rOrders,  //unsure why this didn't get included
      VA508AccessibilityRouter;
@@ -304,26 +304,26 @@ begin
     end ;
 end;
 
-procedure TfrmdlgProb.bbAddToNoteClick(Sender: TObject);
-//kt added 5/15
-var DocSelRec : TDocSelRec;
-    ProbICD : string;
-    HTML : Boolean;
-begin
-  inherited;
-  if problemIFN = '' then begin
-    MessageDlg('Please complete creation of problem first.', mtError, [mbOK], 0);
-    exit;
-  end;
-  //NOTE: this only inserts into NOTES.  If insertion into Consults is desired, this will need to be reworked.
-  DocSelRec.TreeView := frmNotes.tvNotes;
-  DocSelRec.TreeType := edseNotes;
-  DocSelRec.Drawers := frmNotes.Drawers;
-  ProbICD := edICDCode.Text;
-  HTML := (frmNotes.HTMLEditMode = emHTML);
-  if not AddComponentForProblem(ProblemIFN, ProbRec.Narrative.extern, ProbICD, HTML, DocSelRec) then exit;
-  LoadLinkedNotes;
-end;
+//kt //codex original --> procedure TfrmdlgProb.bbAddToNoteClick(Sender: TObject);
+//kt //codex original --> //kt added 5/15
+//kt //codex original --> var DocSelRec : TDocSelRec;
+//kt //codex original -->     ProbICD : string;
+//kt //codex original -->     HTML : Boolean;
+//kt //codex original --> begin
+//kt //codex original -->   inherited;
+//kt //codex original -->   if problemIFN = '' then begin
+//kt //codex original -->     MessageDlg('Please complete creation of problem first.', mtError, [mbOK], 0);
+//kt //codex original -->     exit;
+//kt //codex original -->   end;
+//kt //codex original -->   //NOTE: this only inserts into NOTES.  If insertion into Consults is desired, this will need to be reworked.
+//kt //codex original -->   DocSelRec.TreeView := frmNotes.tvNotes;
+//kt //codex original -->   DocSelRec.TreeType := edseNotes;
+//kt //codex original -->   DocSelRec.Drawers := frmNotes.Drawers;
+//kt //codex original -->   ProbICD := edICDCode.Text;
+//kt //codex original -->   HTML := (frmNotes.HTMLEditMode = emHTML);
+//kt //codex original -->   if not AddComponentForProblem(ProblemIFN, ProbRec.Narrative.extern, ProbICD, HTML, DocSelRec) then exit;
+//kt //codex original -->   LoadLinkedNotes;
+//kt //codex original --> end;
 procedure TfrmdlgProb.bbEditClick(Sender: TObject);
 var
   cmt: string    ;

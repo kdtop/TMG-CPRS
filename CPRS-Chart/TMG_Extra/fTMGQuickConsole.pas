@@ -78,28 +78,28 @@ type
     CaseSensitiveStr : string;  //should be "0" or "1"
     IgnoreEditInputChanges : boolean;
     lbOptionsData : TStringList;    // this will be a datastring to match 1:1 with lbOptions.Items
-    SavedProblemList : TStringList;
-    ProblemListDownloaded : boolean;
-    SavedTopicList : TStringList;
-    TopicListDownloaded : boolean;
-    SavedTagList : TStringList;
-    TagListPrepaired : boolean;
-    TopicProblemLink : TStringList;
-    TopicProblemLinkDownloaded : boolean;
+//kt //codex original -->     SavedProblemList : TStringList;
+//kt //codex original -->     ProblemListDownloaded : boolean;
+//kt //codex original -->     SavedTopicList : TStringList;
+//kt //codex original -->     TopicListDownloaded : boolean;
+//kt //codex original -->     SavedTagList : TStringList;
+//kt //codex original -->     TagListPrepaired : boolean;
+//kt //codex original -->     TopicProblemLink : TStringList;
+//kt //codex original -->     TopicProblemLinkDownloaded : boolean;
     //IsFPGSite : boolean;
-    procedure GetProblemList(OutSL : TStringList);
-    procedure GetTopicList(OutSL : TStringList);
-    procedure GetTagList(OutSL : TStringList);
-    procedure GetTopicProblemLink(TopicList, OutSL : TStringList);
+//kt //codex original -->     procedure GetProblemList(OutSL : TStringList);
+//kt //codex original -->     procedure GetTopicList(OutSL : TStringList);
+//kt //codex original -->     procedure GetTagList(OutSL : TStringList);
+//kt //codex original -->     procedure GetTopicProblemLink(TopicList, OutSL : TStringList);
     procedure UpdateEditBox;
     procedure ProcessAction;
     procedure ProcessHelp(Params : string; TargetSL : TStrings; DataSL : TStringList);
     procedure ProcessTemplate(Params : string; TargetSL : TStrings; DataSL : TStringList);
-    procedure ProcessAdd(Params : string; TargetSL : TStrings; DataSL : TStringList);
-    procedure ProcessAddComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
-    procedure ProcessAddProblemComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
-    procedure ProcessAddTopicComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
-    procedure ProcessAddTagComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
+//kt //codex original -->     procedure ProcessAdd(Params : string; TargetSL : TStrings; DataSL : TStringList);
+//kt //codex original -->     procedure ProcessAddComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
+//kt //codex original -->     procedure ProcessAddProblemComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
+//kt //codex original -->     procedure ProcessAddTopicComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
+//kt //codex original -->     procedure ProcessAddTagComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
     procedure ShowOptionPanel;
     procedure HideOptionPanel;
     procedure SetDateGroupVisability(Visible : boolean);
@@ -121,33 +121,36 @@ implementation
 uses
   ORNet,   ORFn,
   //fFrame,
-  fNotes,
-  uTemplates, rTIU, rProbs, uTMGUtil,
-  uTMGOptions, uNoteComponents,
+  rTIU,
+//kt //codex original -->   uTMGOptions, uNoteComponents,
   uCore, rCore;
 
 const
   TIMER_DELAY       = 200; //500 ms = 0.5 seconds
-  COMPONENT         = 'COMPONENT';
-  COMP_PROBLEM      = 'PROBLEM';
-  COMP_TOPIC        = 'TOPIC';
-  COMP_TAG          = 'TAG';
+//kt //codex original -->   COMPONENT         = 'COMPONENT';
+//kt //codex original -->   COMP_PROBLEM      = 'PROBLEM';
+//kt //codex original -->   COMP_TOPIC        = 'TOPIC';
+//kt //codex original -->   COMP_TAG          = 'TAG';
   HINT_TAG          = 'HINT';
-  TAG_DATA_TAG      = 'TAG_DATA';
   TEMPLATE_DATA_TAG = 'TEMPLATE_DATA';
-  PROBLEM_DATA_TAG  = 'PROBLEM_DATA';
-  TOPIC_DATA_TAG    = 'TOPIC_DATA';
+//kt //codex original -->   TAG_DATA_TAG      = 'TAG_DATA';
+//kt //codex original -->   PROBLEM_DATA_TAG  = 'PROBLEM_DATA';
+//kt //codex original -->   TOPIC_DATA_TAG    = 'TOPIC_DATA';
 
 type
-  eCmd = (cmdHelp=0,
-          cmdTemplate=1,
-          cmdAdd);
-const
-  cmdLASTCMD = cmdAdd;
-  COMMANDS : array[cmdHelp .. cmdLASTCMD] of string = ('HELP',
-                                                       'TEMPLATE',
-                                                       'ADD'
-                                                      );
+//kt //codex original -->   eCmd = (cmdHelp=0,
+//kt //codex original -->           cmdTemplate=1,
+//kt //codex original -->           cmdAdd);
+//kt //codex original --> const
+//kt //codex original -->   cmdLASTCMD = cmdAdd;
+//kt //codex original -->   COMMANDS : array[cmdHelp .. cmdLASTCMD] of string = ('HELP',
+//kt //codex original -->                                                        'TEMPLATE',
+//kt //codex original -->                                                        'ADD'
+//kt //codex original -->                                                       );
+  eCmd = (cmdHelp=0, cmdTemplate=1); //kt //codex 9/8/26
+const //kt //codex 9/8/26
+  cmdLASTCMD = cmdTemplate; //kt //codex 9/8/26
+  COMMANDS: array[cmdHelp .. cmdLASTCMD] of string = ('HELP', 'TEMPLATE'); //kt //codex 9/8/26
  // --------------------------------------------------------------------------------------------------
   {//moved to ORFn
   function LeftMatch(SubStr, Str : string) : boolean;
@@ -156,26 +159,27 @@ const
   end;
   }
 
-  procedure AddComp(DataStr : string; Drawers : TfrmDrawers);
-  var DataType : string;
-      ProbName, ProbIEN, ProbICD : string;
-      HTML : boolean;
-      AddOK : boolean;
-  begin
-    //MessageDlg('Here I can add component. ' + #10#13 + 'Data=' + DataStr, mtInformation, [mbOK], 0);
-    DataType := piece(DataStr, '^', 1);
-    if DataType = PROBLEM_DATA_TAG then begin
-      ProbName := piece(DataStr,'^', 4);
-      ProbICD := piece(DataStr,'^', 5);
-      ProbIEN := piece(DataStr,'^', 2);
-      HTML := (frmNotes.HTMLEditMode = emHTML);
-      AddOK := AddComponentForProblem(ProbIEN, ProbName, ProbICD, HTML, Drawers.DocSelRec);
-    end;
-  end;
+//kt //codex original -->   procedure AddComp(DataStr : string; Drawers : TfrmDrawers);
+//kt //codex original -->   var DataType : string;
+//kt //codex original -->       ProbName, ProbIEN, ProbICD : string;
+//kt //codex original -->       HTML : boolean;
+//kt //codex original -->       AddOK : boolean;
+//kt //codex original -->   begin
+//kt //codex original -->     //MessageDlg('Here I can add component. ' + #10#13 + 'Data=' + DataStr, mtInformation, [mbOK], 0);
+//kt //codex original -->     DataType := piece(DataStr, '^', 1);
+//kt //codex original -->     if DataType = PROBLEM_DATA_TAG then begin
+//kt //codex original -->       ProbName := piece(DataStr,'^', 4);
+//kt //codex original -->       ProbICD := piece(DataStr,'^', 5);
+//kt //codex original -->       ProbIEN := piece(DataStr,'^', 2);
+//kt //codex original -->       HTML := (frmNotes.HTMLEditMode = emHTML);
+//kt //codex original -->       AddOK := AddComponentForProblem(ProbIEN, ProbName, ProbICD, HTML, Drawers.DocSelRec);
+//kt //codex original -->     end;
+//kt //codex original -->   end;
 
   procedure InsertTemplate(DataStr : string; Drawers : TfrmDrawers);
   begin
-    MessageDlg('Here I can insert component. ' + #10#13 + 'Data=' + DataStr, mtInformation, [mbOK], 0);
+//kt //codex original -->     MessageDlg('Here I can insert component. ' + #10#13 + 'Data=' + DataStr, mtInformation, [mbOK], 0);
+    MessageDlg('Here I can insert template. ' + #10#13 + 'Data=' + DataStr, mtInformation, [mbOK], 0); //kt //codex 9/8/26
   end;
 
   procedure LaunchQuickConsole(Drawers : TfrmDrawers);
@@ -191,9 +195,10 @@ const
     if ModalResult <> mrOK then exit;
     //finish here later...
     //MessageDlg('Action=' + ActionStr +  #13#10 + 'Data=' + ActionDataStr, mtInformation, [mbOK], 0);
-    if LeftMatch(COMMANDS[cmdAdd] + ' ' + COMPONENT, ActionStr) then begin
-      AddComp(ActionDataStr, Drawers);
-    end else if LeftMatch(COMMANDS[cmdTemplate], ActionStr) then begin
+//kt //codex original -->     if LeftMatch(COMMANDS[cmdAdd] + ' ' + COMPONENT, ActionStr) then begin
+//kt //codex original -->       AddComp(ActionDataStr, Drawers);
+//kt //codex original -->     end else if LeftMatch(COMMANDS[cmdTemplate], ActionStr) then begin
+    if LeftMatch(COMMANDS[cmdTemplate], ActionStr) then begin //kt //codex 9/8/26
       InsertTemplate(ActionStr, Drawers);
     end;
   end;
@@ -204,14 +209,14 @@ const
   var Pos : TPoint;
   begin
     lbOptionsData := TStringList.Create;
-    SavedProblemList := TStringList.Create;
-    ProblemListDownloaded := false;
-    SavedTopicList := TStringList.Create;
-    TopicListDownloaded := false;
-    SavedTagList := TStringList.Create;
-    TagListPrepaired := false;
-    TopicProblemLink := TStringList.Create;
-    TopicProblemLinkDownloaded := false;
+//kt //codex original -->     SavedProblemList := TStringList.Create;
+//kt //codex original -->     ProblemListDownloaded := false;
+//kt //codex original -->     SavedTopicList := TStringList.Create;
+//kt //codex original -->     TopicListDownloaded := false;
+//kt //codex original -->     SavedTagList := TStringList.Create;
+//kt //codex original -->     TagListPrepaired := false;
+//kt //codex original -->     TopicProblemLink := TStringList.Create;
+//kt //codex original -->     TopicProblemLinkDownloaded := false;
     CaseSensitiveStr := '0';  //later hook into checkbox.
     ProcessAction();  //fill box initially with ALL templates
     Pos := Mouse.CursorPos;
@@ -225,10 +230,10 @@ const
   procedure TfrmTMGQuickConsole.FormDestroy(Sender: TObject);
   begin
     lbOptionsData.Free;
-    SavedProblemList.Free;
-    SavedTopicList.Free;
-    SavedTagList.Free;
-    TopicProblemLink.Free;
+//kt //codex original -->     SavedProblemList.Free;
+//kt //codex original -->     SavedTopicList.Free;
+//kt //codex original -->     SavedTagList.Free;
+//kt //codex original -->     TopicProblemLink.Free;
   end;
 
   procedure TfrmTMGQuickConsole.FormShow(Sender: TObject);
@@ -238,7 +243,8 @@ const
     HideOptionPanel;
   end;
 
-  procedure TfrmTMGQuickConsole.GetTopicProblemLink(TopicList, OutSL : TStringList);
+(*
+//kt //codex original -->   procedure TfrmTMGQuickConsole.GetTopicProblemLink(TopicList, OutSL : TStringList);
   var i: integer;
       line, ProbIEN : string;
       Input,Results : TStringList;
@@ -268,7 +274,8 @@ const
       Results.Free;
       Input.Free;
     end;
-  end;
+//kt //codex original -->   end;
+*)
 
   procedure TfrmTMGQuickConsole.edtActionChange(Sender: TObject);
   var LastChar : Char;
@@ -371,7 +378,7 @@ const
 
   procedure TfrmTMGQuickConsole.ORDateBoxChange(Sender: TObject);
   begin
-    TopicListDownloaded := false;
+//kt //codex original -->     TopicListDownloaded := false;
     //FINISH... trigger refresh...
   end;
 
@@ -397,7 +404,8 @@ const
     end;
   end;
 
-  procedure TfrmTMGQuickConsole.GetTopicList(OutSL : TStringList);
+(*
+//kt //codex original -->   procedure TfrmTMGQuickConsole.GetTopicList(OutSL : TStringList);
   var  //RPCSuccess : string;
        SDT, EDT : string;
   begin
@@ -414,9 +422,11 @@ const
       end;
     end;
     OutSL.Assign(SavedTopicList);
-  end;
+//kt //codex original -->   end;
+*)
 
-  procedure TfrmTMGQuickConsole.GetTagList(OutSL : TStringList);
+(*
+//kt //codex original -->   procedure TfrmTMGQuickConsole.GetTagList(OutSL : TStringList);
   //Output format: 'TagName^ProblemName^ICD^ProblemIEN'
   var i : integer;
       ProbName,ICD,IEN,Tags, tempTag : string;
@@ -451,9 +461,11 @@ const
       TagListPrepaired := true;
     end;
     OutSL.Assign(SavedTagList);
-  end;
+//kt //codex original -->   end;
+*)
 
-  procedure TfrmTMGQuickConsole.GetProblemList(OutSL : TStringList);
+(*
+//kt //codex original -->   procedure TfrmTMGQuickConsole.GetProblemList(OutSL : TStringList);
   var i : integer;
   begin
     if not ProblemListDownloaded then begin
@@ -464,7 +476,8 @@ const
       end;
     end;
     if assigned(OutSL) then OutSL.Assign(SavedProblemList);
-  end;
+//kt //codex original -->   end;
+*)
 
 
   procedure TfrmTMGQuickConsole.ProcessAction;
@@ -503,9 +516,9 @@ const
                       ProcessTemplate(s, lbOptions.Items, lbOptionsData);
                       HideOptionPanel;
                     end;
-      cmdAdd      : begin
-                      ProcessAdd(s, lbOptions.Items, lbOptionsData);
-                    end;
+//kt //codex original -->       cmdAdd      : begin
+//kt //codex original -->                       ProcessAdd(s, lbOptions.Items, lbOptionsData);
+//kt //codex original -->                     end;
     end; {case}
     UpdateEditBox;
     if lbOptions.Items.Count = 1 then begin
@@ -535,7 +548,6 @@ const
   begin
     SavedResults := TStringList.Create;
     try
-      GetTopicList(SavedResults);  //<-- check this.  Is this needed?
       RPCSuccess := TMGSearchTemplates(SavedResults, Params, User.DUZ, CaseSensitiveStr);
       if piece(RPCSuccess,'^',1) <> '1' then exit;
       for i := 0 to SavedResults.Count - 1 do begin
@@ -551,203 +563,203 @@ const
     end;
   end;
 
-  procedure TfrmTMGQuickConsole.ProcessAdd(Params : string; TargetSL : TStrings; DataSL : TStringList);
-  var
-    temp, s : string;
-
-  begin
-    s := piece(Params, ' ' , 1);
-    InputSuggestion := COMMANDS[cmdAdd];
-    if LeftMatch(s, COMPONENT) then begin
-      Params := Trim(pieces(Params, ' ', 2, 99));
-      ProcessAddComp(Params, TargetSL, DataSL);
-    end else begin
-      temp := COMMANDS[cmdAdd] + ' ' + COMPONENT;
-      TargetSL.Add(temp);
-      DataSL.Add(HINT_TAG + '^' + temp);
-      InputSuggestion := temp;
-      HideOptionPanel;
-    end;
-  end;
-
-  procedure TfrmTMGQuickConsole.ProcessAddComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
-  var
-    temp, s : string;
-  begin
-    InputSuggestion := COMMANDS[cmdAdd] + ' ' + COMPONENT;
-    s := piece(Params, ' ' , 1);
-    Params := Trim(pieces(Params, ' ', 2, 99));
-    if LeftMatch(s, COMP_PROBLEM) then begin
-      ProcessAddProblemComp(Params, TargetSL, DataSL);
-    end;
-    if AtFPGLoc() and LeftMatch(s, COMP_TOPIC) then begin
-      ProcessAddTopicComp(Params, TargetSL, DataSL, (UpperCase(s) = COMP_TOPIC));
-    end;
-    if LeftMatch(s, COMP_TAG) then begin
-      ProcessAddTagComp(Params, TargetSL, DataSL, (UpperCase(s) = COMP_TAG));
-    end;
-    if TargetSL.Count = 0 then begin
-      temp := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_PROBLEM;
-      TargetSL.Add(temp);
-      DataSL.Add(HINT_TAG + '^' + temp);
-      if AtFPGLoc() then begin
-        temp := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TOPIC;
-        TargetSL.Add(temp);
-        DataSL.Add(HINT_TAG + '^' + temp);
-      end;
-      temp := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TAG;
-      DataSL.Add(HINT_TAG + '^' + temp);
-      TargetSL.Add(temp);
-      HideOptionPanel;
-    end;
-  end;
-
-  procedure TfrmTMGQuickConsole.ProcessAddProblemComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
-  var
-    //RPCSuccess : string;
-    i : integer;
-    //OneLine : string;
-    slProblems : TStringList;
-    ProblemName, ProblemICD, Entry, s : string;
-    ADD_COMPONENT_PROBLEM : string;
-  begin
-    ADD_COMPONENT_PROBLEM := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_PROBLEM;
-    s := piece(Params, ' ' , 1);
-    InputSuggestion := ADD_COMPONENT_PROBLEM;
-    slProblems := TStringList.Create;
-    try
-      GetProblemList(slProblems);
-      for i := 0 to slProblems.Count - 1 do begin
-        ProblemName := piece(slProblems.Strings[i], '^',3);
-        if (s <> '') and (LeftMatch(s, UpperCase(ProblemName)) = false) then continue;
-        Entry := Trim(ProblemName);
-        ProblemICD := Trim(piece(slProblems.Strings[i], '^',4));
-        if ProblemICD <> '' then Entry := Entry + ' ('+ProblemICD+')';
-        Entry := Trim(Entry);
-        if Entry = '' then continue;
-        Entry := ADD_COMPONENT_PROBLEM + ' ' + Entry;
-        TargetSL.Add(Entry);
-        DataSL.Add(PROBLEM_DATA_TAG + '^'+slProblems.Strings[i]);
-      end;
-      HideOptionPanel;
-
-    finally
-      slProblems.Free;
-    end;
-  end;
-
-  procedure TfrmTMGQuickConsole.ProcessAddTopicComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
-  var
-    //RPCSuccess : string;
-    i, Added : integer;
-    //OneLine : string;
-    ProbIEN, ProbName, ProbData : string;
-    ProbIndex : integer;
-    slTopics : TStringList;
-    slTopicProbLink : TStringList;
-    slProbData : TStringList;
-    ATopic, s : string;
-    //SDT, EDT : string;
-    AddStr, AddData : string;
-    ADD_COMPONENT_TOPIC : string;
-
-  begin
-    ADD_COMPONENT_TOPIC := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TOPIC;
-    slTopics := TStringList.Create;
-    slTopicProbLink := TStringList.Create;
-    slProbData := TStringList.Create;
-    try
-      s := piece(Params, ' ' , 1);
-      InputSuggestion := ADD_COMPONENT_TOPIC;
-      GetProblemList(slProbData);
-      GetTopicList(slTopics);
-      GetTopicProblemLink(slTopics, slTopicProbLink);
-      Added := 0;
-      for i := 0 to slTopics.Count - 1 do begin
-        ProbName := ''; ProbData := '';
-        ATopic := piece(slTopics.Strings[i], '^',1);
-        if not ForceShow and (s = '') then continue;
-        if (s <> '') and (LeftMatch(s, UpperCase(ATopic)) = false) then continue;
-        ProbIndex := FindPiece(slTopicProbLink,'^', 1, ATopic);  //FindPiecesNodes(slTopicProbLink,'^', ATopic);
-        if ProbIndex > -1 then begin
-          ProbIEN := Piece(slTopicProbLink[ProbIndex],'^',4);
-          if ProbIEN <> '' then begin
-            ProbIndex := FindPiece(slProbData, '^', 1, ProbIEN);
-            //ProbIndex := FindPiecesNodes(slProbData, '^', ProbIEN);
-            if ProbIndex>-1 then begin
-              ProbData := slProbData.Strings[ProbIndex];
-              ProbName := Piece(ProbData,'^',3);
-            end;
-          end;
-        end;
-        if ProbName <> '' then begin
-          AddStr := ADD_COMPONENT_TOPIC + ' ' + ATopic + ' <--> Problem: ' + ProbName;
-          AddData := PROBLEM_DATA_TAG + '^' + ProbData;
-        end else begin
-          AddStr := ADD_COMPONENT_TOPIC + ' ' + ATopic;
-          AddData := TOPIC_DATA_TAG + '^' + slTopics.Strings[i];
-        end;
-        if TargetSL.IndexOf(AddStr) > -1 then continue;
-        TargetSL.Add(AddStr);
-        DataSL.Add(AddData);
-        Inc(Added);
-      end;
-      if Added = 0 then begin
-        TargetSL.Add(ADD_COMPONENT_TOPIC);
-        DataSL.Add(HINT_TAG + '^' +ADD_COMPONENT_TOPIC);
-      end;
-      ShowOptionPanel;
-    finally
-      slTopics.Free;
-      slTopicProbLink.Free;
-      slProbData.Free
-    end;
-  end;
-
-  procedure TfrmTMGQuickConsole.ProcessAddTagComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
-  var
-    i, Added : integer;
-    slTags, TagsShown : TStringList;
-    ATag, ProbName, ICD, temp: string;
-    var
-    (* s: string; *)
-    ADD_COMPONENT_TAG : string;
-
-  begin
-    ADD_COMPONENT_TAG := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TAG;
-    slTags := TStringList.Create;
-    TagsShown := TStringList.Create;
-    try
-      //s := piece(Params, ' ' , 1);
-      InputSuggestion := ADD_COMPONENT_TAG;
-      GetTagList(slTags);  //format: 'TagName^ProblemName^ICD^ProblemIEN';
-      Added := 0;
-      for i := 0 to slTags.Count - 1 do begin
-        ATag := UpperCase(piece(slTags.Strings[i], '^',1));
-        ProbName := piece(slTags.Strings[i], '^',2);
-        ICD := piece(slTags.Strings[i], '^',3);
-        temp := ATag + ' -- ' + ProbName;
-        if ICD <> '' then temp := temp + ' (' + ICD + ')';
-        if not ForceShow and (Params = '') then continue;
-        if (Params <> '') and (LeftMatch(Params, UpperCase(temp)) = false) then continue;
-        TargetSL.Add(ADD_COMPONENT_TAG + ' ' + temp);
-        DataSL.Add(TAG_DATA_TAG + '^'+slTags.Strings[i]);
-        if TagsShown.IndexOf(ATag) = -1 then TagsShown.Add(ATag);
-        Inc(Added);
-      end;
-      if TagsShown.Count = 1 then begin
-        InputSuggestion := ADD_COMPONENT_TAG + ' ' + TagsShown.Strings[0] + ' --';
-      end;
-      if Added = 0 then begin
-        TargetSL.Add(ADD_COMPONENT_TAG);
-        DataSL.Add(HINT_TAG + '^' +ADD_COMPONENT_TAG);
-      end;
-      HideOptionPanel;
-    finally
-      slTags.Free;
-      TagsShown.Free;
-    end;
-  end;
+//kt //codex original -->   procedure TfrmTMGQuickConsole.ProcessAdd(Params : string; TargetSL : TStrings; DataSL : TStringList);
+//kt //codex original -->   var
+//kt //codex original -->     temp, s : string;
+//kt //codex original -->
+//kt //codex original -->   begin
+//kt //codex original -->     s := piece(Params, ' ' , 1);
+//kt //codex original -->     InputSuggestion := COMMANDS[cmdAdd];
+//kt //codex original -->     if LeftMatch(s, COMPONENT) then begin
+//kt //codex original -->       Params := Trim(pieces(Params, ' ', 2, 99));
+//kt //codex original -->       ProcessAddComp(Params, TargetSL, DataSL);
+//kt //codex original -->     end else begin
+//kt //codex original -->       temp := COMMANDS[cmdAdd] + ' ' + COMPONENT;
+//kt //codex original -->       TargetSL.Add(temp);
+//kt //codex original -->       DataSL.Add(HINT_TAG + '^' + temp);
+//kt //codex original -->       InputSuggestion := temp;
+//kt //codex original -->       HideOptionPanel;
+//kt //codex original -->     end;
+//kt //codex original -->   end;
+//kt //codex original -->
+//kt //codex original -->   procedure TfrmTMGQuickConsole.ProcessAddComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
+//kt //codex original -->   var
+//kt //codex original -->     temp, s : string;
+//kt //codex original -->   begin
+//kt //codex original -->     InputSuggestion := COMMANDS[cmdAdd] + ' ' + COMPONENT;
+//kt //codex original -->     s := piece(Params, ' ' , 1);
+//kt //codex original -->     Params := Trim(pieces(Params, ' ', 2, 99));
+//kt //codex original -->     if LeftMatch(s, COMP_PROBLEM) then begin
+//kt //codex original -->       ProcessAddProblemComp(Params, TargetSL, DataSL);
+//kt //codex original -->     end;
+//kt //codex original -->     if AtFPGLoc() and LeftMatch(s, COMP_TOPIC) then begin
+//kt //codex original -->       ProcessAddTopicComp(Params, TargetSL, DataSL, (UpperCase(s) = COMP_TOPIC));
+//kt //codex original -->     end;
+//kt //codex original -->     if LeftMatch(s, COMP_TAG) then begin
+//kt //codex original -->       ProcessAddTagComp(Params, TargetSL, DataSL, (UpperCase(s) = COMP_TAG));
+//kt //codex original -->     end;
+//kt //codex original -->     if TargetSL.Count = 0 then begin
+//kt //codex original -->       temp := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_PROBLEM;
+//kt //codex original -->       TargetSL.Add(temp);
+//kt //codex original -->       DataSL.Add(HINT_TAG + '^' + temp);
+//kt //codex original -->       if AtFPGLoc() then begin
+//kt //codex original -->         temp := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TOPIC;
+//kt //codex original -->         TargetSL.Add(temp);
+//kt //codex original -->         DataSL.Add(HINT_TAG + '^' + temp);
+//kt //codex original -->       end;
+//kt //codex original -->       temp := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TAG;
+//kt //codex original -->       DataSL.Add(HINT_TAG + '^' + temp);
+//kt //codex original -->       TargetSL.Add(temp);
+//kt //codex original -->       HideOptionPanel;
+//kt //codex original -->     end;
+//kt //codex original -->   end;
+//kt //codex original -->
+//kt //codex original -->   procedure TfrmTMGQuickConsole.ProcessAddProblemComp(Params : string; TargetSL : TStrings; DataSL : TStringList);
+//kt //codex original -->   var
+//kt //codex original -->     //RPCSuccess : string;
+//kt //codex original -->     i : integer;
+//kt //codex original -->     //OneLine : string;
+//kt //codex original -->     slProblems : TStringList;
+//kt //codex original -->     ProblemName, ProblemICD, Entry, s : string;
+//kt //codex original -->     ADD_COMPONENT_PROBLEM : string;
+//kt //codex original -->   begin
+//kt //codex original -->     ADD_COMPONENT_PROBLEM := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_PROBLEM;
+//kt //codex original -->     s := piece(Params, ' ' , 1);
+//kt //codex original -->     InputSuggestion := ADD_COMPONENT_PROBLEM;
+//kt //codex original -->     slProblems := TStringList.Create;
+//kt //codex original -->     try
+//kt //codex original -->       GetProblemList(slProblems);
+//kt //codex original -->       for i := 0 to slProblems.Count - 1 do begin
+//kt //codex original -->         ProblemName := piece(slProblems.Strings[i], '^',3);
+//kt //codex original -->         if (s <> '') and (LeftMatch(s, UpperCase(ProblemName)) = false) then continue;
+//kt //codex original -->         Entry := Trim(ProblemName);
+//kt //codex original -->         ProblemICD := Trim(piece(slProblems.Strings[i], '^',4));
+//kt //codex original -->         if ProblemICD <> '' then Entry := Entry + ' ('+ProblemICD+')';
+//kt //codex original -->         Entry := Trim(Entry);
+//kt //codex original -->         if Entry = '' then continue;
+//kt //codex original -->         Entry := ADD_COMPONENT_PROBLEM + ' ' + Entry;
+//kt //codex original -->         TargetSL.Add(Entry);
+//kt //codex original -->         DataSL.Add(PROBLEM_DATA_TAG + '^'+slProblems.Strings[i]);
+//kt //codex original -->       end;
+//kt //codex original -->       HideOptionPanel;
+//kt //codex original -->
+//kt //codex original -->     finally
+//kt //codex original -->       slProblems.Free;
+//kt //codex original -->     end;
+//kt //codex original -->   end;
+//kt //codex original -->
+//kt //codex original -->   procedure TfrmTMGQuickConsole.ProcessAddTopicComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
+//kt //codex original -->   var
+//kt //codex original -->     //RPCSuccess : string;
+//kt //codex original -->     i, Added : integer;
+//kt //codex original -->     //OneLine : string;
+//kt //codex original -->     ProbIEN, ProbName, ProbData : string;
+//kt //codex original -->     ProbIndex : integer;
+//kt //codex original -->     slTopics : TStringList;
+//kt //codex original -->     slTopicProbLink : TStringList;
+//kt //codex original -->     slProbData : TStringList;
+//kt //codex original -->     ATopic, s : string;
+//kt //codex original -->     //SDT, EDT : string;
+//kt //codex original -->     AddStr, AddData : string;
+//kt //codex original -->     ADD_COMPONENT_TOPIC : string;
+//kt //codex original -->
+//kt //codex original -->   begin
+//kt //codex original -->     ADD_COMPONENT_TOPIC := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TOPIC;
+//kt //codex original -->     slTopics := TStringList.Create;
+//kt //codex original -->     slTopicProbLink := TStringList.Create;
+//kt //codex original -->     slProbData := TStringList.Create;
+//kt //codex original -->     try
+//kt //codex original -->       s := piece(Params, ' ' , 1);
+//kt //codex original -->       InputSuggestion := ADD_COMPONENT_TOPIC;
+//kt //codex original -->       GetProblemList(slProbData);
+//kt //codex original -->       GetTopicList(slTopics);
+//kt //codex original -->       GetTopicProblemLink(slTopics, slTopicProbLink);
+//kt //codex original -->       Added := 0;
+//kt //codex original -->       for i := 0 to slTopics.Count - 1 do begin
+//kt //codex original -->         ProbName := ''; ProbData := '';
+//kt //codex original -->         ATopic := piece(slTopics.Strings[i], '^',1);
+//kt //codex original -->         if not ForceShow and (s = '') then continue;
+//kt //codex original -->         if (s <> '') and (LeftMatch(s, UpperCase(ATopic)) = false) then continue;
+//kt //codex original -->         ProbIndex := FindPiece(slTopicProbLink,'^', 1, ATopic);  //FindPiecesNodes(slTopicProbLink,'^', ATopic);
+//kt //codex original -->         if ProbIndex > -1 then begin
+//kt //codex original -->           ProbIEN := Piece(slTopicProbLink[ProbIndex],'^',4);
+//kt //codex original -->           if ProbIEN <> '' then begin
+//kt //codex original -->             ProbIndex := FindPiece(slProbData, '^', 1, ProbIEN);
+//kt //codex original -->             //ProbIndex := FindPiecesNodes(slProbData, '^', ProbIEN);
+//kt //codex original -->             if ProbIndex>-1 then begin
+//kt //codex original -->               ProbData := slProbData.Strings[ProbIndex];
+//kt //codex original -->               ProbName := Piece(ProbData,'^',3);
+//kt //codex original -->             end;
+//kt //codex original -->           end;
+//kt //codex original -->         end;
+//kt //codex original -->         if ProbName <> '' then begin
+//kt //codex original -->           AddStr := ADD_COMPONENT_TOPIC + ' ' + ATopic + ' <--> Problem: ' + ProbName;
+//kt //codex original -->           AddData := PROBLEM_DATA_TAG + '^' + ProbData;
+//kt //codex original -->         end else begin
+//kt //codex original -->           AddStr := ADD_COMPONENT_TOPIC + ' ' + ATopic;
+//kt //codex original -->           AddData := TOPIC_DATA_TAG + '^' + slTopics.Strings[i];
+//kt //codex original -->         end;
+//kt //codex original -->         if TargetSL.IndexOf(AddStr) > -1 then continue;
+//kt //codex original -->         TargetSL.Add(AddStr);
+//kt //codex original -->         DataSL.Add(AddData);
+//kt //codex original -->         Inc(Added);
+//kt //codex original -->       end;
+//kt //codex original -->       if Added = 0 then begin
+//kt //codex original -->         TargetSL.Add(ADD_COMPONENT_TOPIC);
+//kt //codex original -->         DataSL.Add(HINT_TAG + '^' +ADD_COMPONENT_TOPIC);
+//kt //codex original -->       end;
+//kt //codex original -->       ShowOptionPanel;
+//kt //codex original -->     finally
+//kt //codex original -->       slTopics.Free;
+//kt //codex original -->       slTopicProbLink.Free;
+//kt //codex original -->       slProbData.Free
+//kt //codex original -->     end;
+//kt //codex original -->   end;
+//kt //codex original -->
+//kt //codex original -->   procedure TfrmTMGQuickConsole.ProcessAddTagComp(Params : string; TargetSL : TStrings; DataSL : TStringList; ForceShow : boolean);
+//kt //codex original -->   var
+//kt //codex original -->     i, Added : integer;
+//kt //codex original -->     slTags, TagsShown : TStringList;
+//kt //codex original -->     ATag, ProbName, ICD, temp: string;
+//kt //codex original -->     var
+//kt //codex original -->     (* s: string; *)
+//kt //codex original -->     ADD_COMPONENT_TAG : string;
+//kt //codex original -->
+//kt //codex original -->   begin
+//kt //codex original -->     ADD_COMPONENT_TAG := COMMANDS[cmdAdd] + ' ' + COMPONENT + ' ' + COMP_TAG;
+//kt //codex original -->     slTags := TStringList.Create;
+//kt //codex original -->     TagsShown := TStringList.Create;
+//kt //codex original -->     try
+//kt //codex original -->       //s := piece(Params, ' ' , 1);
+//kt //codex original -->       InputSuggestion := ADD_COMPONENT_TAG;
+//kt //codex original -->       GetTagList(slTags);  //format: 'TagName^ProblemName^ICD^ProblemIEN';
+//kt //codex original -->       Added := 0;
+//kt //codex original -->       for i := 0 to slTags.Count - 1 do begin
+//kt //codex original -->         ATag := UpperCase(piece(slTags.Strings[i], '^',1));
+//kt //codex original -->         ProbName := piece(slTags.Strings[i], '^',2);
+//kt //codex original -->         ICD := piece(slTags.Strings[i], '^',3);
+//kt //codex original -->         temp := ATag + ' -- ' + ProbName;
+//kt //codex original -->         if ICD <> '' then temp := temp + ' (' + ICD + ')';
+//kt //codex original -->         if not ForceShow and (Params = '') then continue;
+//kt //codex original -->         if (Params <> '') and (LeftMatch(Params, UpperCase(temp)) = false) then continue;
+//kt //codex original -->         TargetSL.Add(ADD_COMPONENT_TAG + ' ' + temp);
+//kt //codex original -->         DataSL.Add(TAG_DATA_TAG + '^'+slTags.Strings[i]);
+//kt //codex original -->         if TagsShown.IndexOf(ATag) = -1 then TagsShown.Add(ATag);
+//kt //codex original -->         Inc(Added);
+//kt //codex original -->       end;
+//kt //codex original -->       if TagsShown.Count = 1 then begin
+//kt //codex original -->         InputSuggestion := ADD_COMPONENT_TAG + ' ' + TagsShown.Strings[0] + ' --';
+//kt //codex original -->       end;
+//kt //codex original -->       if Added = 0 then begin
+//kt //codex original -->         TargetSL.Add(ADD_COMPONENT_TAG);
+//kt //codex original -->         DataSL.Add(HINT_TAG + '^' +ADD_COMPONENT_TAG);
+//kt //codex original -->       end;
+//kt //codex original -->       HideOptionPanel;
+//kt //codex original -->     finally
+//kt //codex original -->       slTags.Free;
+//kt //codex original -->       TagsShown.Free;
+//kt //codex original -->     end;
+//kt //codex original -->   end;
 
   procedure TfrmTMGQuickConsole.lbOptionsChange(Sender: TObject);
   begin
@@ -816,4 +828,3 @@ procedure TfrmTMGQuickConsole.lbOptionsClick(Sender: TObject);
   end;
 
 end.
-

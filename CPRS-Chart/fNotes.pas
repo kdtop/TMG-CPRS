@@ -48,7 +48,7 @@ uses
   buttons,                                            //kt 9/11
   TMGHTML2,Trpcb,                                     //kt 9/11
   WinMsgLog,                                          //kt 8/16
-  uNoteComponents,                                    //kt 4/15
+//kt //codex original -->   uNoteComponents,                                    //kt 4/15
   uTRecStrList,                                       //kt //codex 8/14/26
   pngimage,                                           //kt 12/28/21
   rFileTransferU, uImages,ShellApi,                   //kt 10/27/20
@@ -234,7 +234,7 @@ type
     mnuQuickSearchTemplates: TMenuItem;
     N9: TMenuItem;
     mnuHideTitle: TMenuItem;
-    popAddComponent: TMenuItem;
+//kt //codex original -->     popAddComponent: TMenuItem;
     pnlHtmlViewer: TPanel;                           //kt 9/11
     pnlTextWrite: TPanel;                            //kt 9/11
     popNoteMemoHTMLFormat: TMenuItem;                //kt 9/11
@@ -349,7 +349,7 @@ type
     procedure btnEditZoomNormalClick(Sender: TObject);
     procedure btnEditZoomInClick(Sender: TObject);
     procedure tvNotesCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);  //kt 6/15
-    procedure popAddComponentClick(Sender: TObject);
+//kt //codex original -->     procedure popAddComponentClick(Sender: TObject);
     procedure mnuHideTitleClick(Sender: TObject);
     procedure mnuQuickSearchTemplatesClick(Sender: TObject);
     procedure btnZoomInClick(Sender: TObject);
@@ -593,18 +593,18 @@ type
     function  ChildDepth(AParent, Node : TORTreeNode) : integer;                        //kt 5/15
     function IsNonSelectableGroupNode(Node: TTreeNode): Boolean;                        //kt //codex 8/14/26
     function GetFirstSelectableNoteNode(StartNode: TTreeNode): TORTreeNode;             //kt //codex 8/14/26
-    function IsChildOfUnsigned(Node : TORTreeNode;                                      //kt 5/15
-                      UnsignedDocsNode: TORTreeNode = nil) : boolean; overload;         //kt 5/15
-    function IsChildOfUnsigned(IEN: int64;                                              //kt 5/15
-                      UnsignedDocsNode: TORTreeNode = nil) : boolean; overload;         //kt 5/15
-    function HasComponents(Node : TORTreeNode) : boolean; overload;                     //kt 5/15
-    function HasComponents(IEN: int64) : boolean; overload;                             //kt 5/15
+//kt //codex original -->     function IsChildOfUnsigned(Node : TORTreeNode;                                      //kt 5/15
+//kt //codex original -->                       UnsignedDocsNode: TORTreeNode = nil) : boolean; overload;         //kt 5/15
+//kt //codex original -->     function IsChildOfUnsigned(IEN: int64;                                              //kt 5/15
+//kt //codex original -->                       UnsignedDocsNode: TORTreeNode = nil) : boolean; overload;         //kt 5/15
+//kt //codex original -->     function HasComponents(Node : TORTreeNode) : boolean; overload;                     //kt 5/15
+//kt //codex original -->     function HasComponents(IEN: int64) : boolean; overload;                             //kt 5/15
     procedure TVNotesChangeForEdit(Node : TTreeNode);                                   //kt 5/15
-    function InsertComponent(ParentData : string; Subject : string;
-                             Lines : TStrings = nil) : string;                          //kt 5/15
-    function InsertChildDoc(DocumentType : integer;
-                            ParentData : string; DocSubject : string =  '';
-                            Lines : TStrings = nil) : string;                           //kt 5/15
+//kt //codex original -->     function InsertComponent(ParentData : string; Subject : string;
+//kt //codex original -->                              Lines : TStrings = nil) : string;                          //kt 5/15
+//kt //codex original -->     function InsertChildDoc(DocumentType : integer;
+//kt //codex original -->                             ParentData : string; DocSubject : string =  '';
+//kt //codex original -->                             Lines : TStrings = nil) : string;                           //kt 5/15
     function GetEditorHTMLText : string;
     procedure RunMacro(Sender:TObject);                                                 //kt 3/16
     procedure HandleLooseDocument(LooseDocHandler:THandleLooseDoc);                     //kt 1/21
@@ -612,7 +612,7 @@ type
     procedure HtmlEditorClick(Sender: TObject);                                         //kt 5/22
     procedure HandleMDMClosure(Sender: TObject);                                        //kt 1/21
     procedure DoDeleteDocument(DataString : string; ItemIndex : integer; NoPrompt : boolean = false);  //kt 5/15
-    function DeleteNodeAndDocAndComps(ANode : TORTreeNode) : boolean;                   //kt 5/15
+//kt //codex original -->     function DeleteNodeAndDocAndComps(ANode : TORTreeNode) : boolean;                   //kt 5/15
     property EditingIndex: Integer read FEditingIndex write SetEditingIndex;
     procedure UpdateEncounterInfo(AEditPCEObj, AShowPCEObj : TPCEData);                 //kt 5/11/23
     procedure UpdateEncounterInfoNonModal(AEditPCEObj, AShowPCEObj : TPCEData;
@@ -671,10 +671,10 @@ type
     function  ResolveMacro(MacroName: string; Lines : TStrings): string;                //kt 10/14
     function  GetNodeByIEN(ATree : TORTreeView; IEN:String): TORTreeNode;               //kt 5/15
     procedure AddAddendum;                                                              //kt 4/15
-    function  AddComponent(ParentData : string; Subject : string = '';
-                          Lines : TStrings = nil) : string;                             //kt 4/15
-    function AddComponentAndSelect(ParentData : string; Subject : string = '';
-                                   Lines : TStrings = nil) : string;                    //kt 5/15
+//kt //codex original -->     function  AddComponent(ParentData : string; Subject : string = '';
+//kt //codex original -->                           Lines : TStrings = nil) : string;                             //kt 4/15
+//kt //codex original -->     function AddComponentAndSelect(ParentData : string; Subject : string = '';
+//kt //codex original -->                                    Lines : TStrings = nil) : string;                    //kt 5/15
     procedure ContextChangeCancelled; override;                                         //kt 4/15
     function tvIndexOfIEN(IEN : string) : integer;                                      //kt 4/15
     function tvIndexOfNode(Node : TORTreeNode) : integer;                               //kt 4/15
@@ -1057,7 +1057,7 @@ begin
     PkgRef       := '';
     NeedCPT      := False;
     Addend       := 0;
-    IsComponent  := false;  //kt added
+//kt //codex original -->     IsComponent  := false;  //kt added
     {LastCosigner & LastCosignerName aren't cleared because they're used as default for next note.}
     if Assigned (Lines) then Lines.Clear;
     PRF_IEN := 0;
@@ -1596,183 +1596,273 @@ begin
   end;
 end;
 
-function TfrmNotes.InsertComponent(ParentData : string; Subject : string; Lines : TStrings = nil) : string;
-//kt added
-//ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
-//Result: returns datastring (IEN is piece#1) of added component.  //kt added
-begin
-  Result := InsertChildDoc(TYP_COMPONENT, ParentData, Subject, Lines);
-end;
-
+//kt //codex original --> function TfrmNotes.InsertComponent(ParentData : string; Subject : string; Lines : TStrings = nil) : string;
+//kt //codex original --> //kt added
+//kt //codex original --> //ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
+//kt //codex original --> //Result: returns datastring (IEN is piece#1) of added component.  //kt added
+//kt //codex original --> begin
+//kt //codex original -->   Result := InsertChildDoc(TYP_COMPONENT, ParentData, Subject, Lines);
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> procedure TfrmNotes.InsertAddendum;
+//kt //codex original --> // sets up fields of pnlWrite to write an addendum for the selected note
+//kt //codex original --> begin
+//kt //codex original -->   InsertChildDoc(TYP_ADDENDUM, SelectedNoteRecord);  //kt moved code to InsertChildDoc
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> function TfrmNotes.InsertChildDoc(DocumentType : integer;
+//kt //codex original -->                                   ParentData : string;
+//kt //codex original -->                                   DocSubject : string =  '';
+//kt //codex original -->                                   Lines : TStrings = nil) : string;
+//kt //codex original --> //kt added function, starting from InsertAddendum() code, to allow calling in from both
+//kt //codex original --> //   InsertAddendum and new InsertComponent
+//kt //codex original --> //Input: DocumentType: should be TYP_ADDENDUM or TYP_COMPONENT
+//kt //codex original --> //       ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
+//kt //codex original --> //       DocSubject: Only used when DocumentType = TYP_COMPONENT.  This is subject name for component.
+//kt //codex original --> //Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
+//kt //codex original --> { sets up fields of pnlWrite to write an addendum for the selected note }
+//kt //codex original --> const
+//kt //codex original -->   AS_ADDENDUM = True;
+//kt //codex original -->   IS_ID_CHILD = False;
+//kt //codex original --> var
+//kt //codex original -->   HaveRequired:     Boolean;
+//kt //codex original -->   CreatedNote:      TCreatedDoc;
+//kt //codex original -->   tmpNode:          TTreeNode;
+//kt //codex original -->   x:                string;
+//kt //codex original -->   Mode :            TViewModeSet;          //kt 4/14
+//kt //codex original -->   Name, UpName:     string;                //kt 4/15
+//kt //codex original -->   ChangesMode:      integer;               //kt 4/15
+//kt //codex original -->   LinkedLines:      boolean;               //kt 5/15
+//kt //codex original -->   ParentIEN :       int64;                 //kt 5/15
+//kt //codex original -->   ParentNode:       TORtreeNode;           //kt
+//kt //codex original -->   UnsignedDocsNode: TORtreeNode;           //kt
+//kt //codex original --> begin
+//kt //codex original -->   Result := '';  //kt added
+//kt //codex original -->   if not (DocumentType in [TYP_ADDENDUM, TYP_COMPONENT]) then exit;  //kt
+//kt //codex original -->   ClearEditControls;
+//kt //codex original -->   txtSubject.Text := DocSubject;  //kt added
+//kt //codex original -->   ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
+//kt //codex original -->   with FEditNote do begin
+//kt //codex original -->     DocType      := DocumentType;
+//kt //codex original -->     IsNewNote    := False;
+//kt //codex original -->     Title        := TitleForNote(ParentIEN);
+//kt //codex original -->     TitleName    := Piece(ParentData, U, 2);
+//kt //codex original -->     Subject      := DocSubject;
+//kt //codex original -->     IsComponent  := (DocumentType = TYP_COMPONENT);  //kt
+//kt //codex original -->     if DocumentType = TYP_COMPONENT then TitleName := '['+DocSubject+']';  //kt added
+//kt //codex original -->     if Copy(TitleName,1,1) = '+' then TitleName := Copy(TitleName, 3, 199);
+//kt //codex original -->     DateTime     := FMNow;
+//kt //codex original -->     Author       := User.DUZ;
+//kt //codex original -->     AuthorName   := User.Name;
+//kt //codex original -->     //kt x            := GetPackageRefForNote(lstNotes.ItemIEN);
+//kt //codex original -->     x            := GetPackageRefForNote(ParentIEN);     //kt
+//kt //codex original -->     if not PieceEquals(x, U, 1, '-1') then begin //kt //codex 8/18/26
+//kt //codex original -->       //kt PkgRef   := GetPackageRefForNote(lstNotes.ItemIEN);
+//kt //codex original -->       PkgRef   := GetPackageRefForNote(ParentIEN);  //kt
+//kt //codex original -->       PkgIEN   := PieceAsIntDef(PkgRef, ';', 1, 0); //kt //codex 8/18/26
+//kt //codex original -->       PkgPtr   := Piece(PkgRef, ';', 2);
+//kt //codex original -->     end;
+//kt //codex original -->     //kt original --> Addend := lstNotes.ItemIEN;
+//kt //codex original -->     Addend := ParentIEN;  //kt 5/15
+//kt //codex original -->     //Lines        := memNewNote.Lines;
+//kt //codex original -->     // Cosigner, if needed, will be set by fNoteProps
+//kt //codex original -->     // Location info will be set after the encounter is loaded
+//kt //codex original -->   end;
+//kt //codex original -->   //kt Add block  5/15
+//kt //codex original -->   LinkedLines := false;
+//kt //codex original -->   if assigned(Lines) then begin
+//kt //codex original -->     if assigned (FEditNote.Lines) then begin
+//kt //codex original -->       FEditNote.Lines.Assign(Lines);
+//kt //codex original -->     end else begin
+//kt //codex original -->       LinkedLines := true;
+//kt //codex original -->       FEditNote.Lines := Lines;    //will be unlinked to passed Lines below
+//kt //codex original -->     end;
+//kt //codex original -->   end;
+//kt //codex original -->   //kt end block.
+//kt //codex original -->   // check to see if interaction necessary to get required fields
+//kt //codex original -->   if LacksRequiredForCreate then begin
+//kt //codex original -->     HaveRequired := ExecuteNoteProperties(FEditNote, CT_NOTES, IS_ID_CHILD, False, '', 0)
+//kt //codex original -->   end else HaveRequired := True;
+//kt //codex original -->   // lock the consult request if there is a consult
+//kt //codex original -->   if HaveRequired then with FEditNote do begin
+//kt //codex original -->     if (PkgIEN > 0) and (PkgPtr = PKG_CONSULTS) then HaveRequired := LockConsultRequest(PkgIEN);
+//kt //codex original -->   end;
+//kt //codex original -->   if HaveRequired then begin
+//kt //codex original -->     uPCEEdit.NoteDateTime := FEditNote.DateTime;
+//kt //codex original -->     uPCEEdit.PCEForNote(FEditNote.Addend, uPCEShow);
+//kt //codex original -->     FEditNote.Location     := uPCEEdit.Location;
+//kt //codex original -->     FEditNote.LocationName := ExternalName(uPCEEdit.Location, 44);
+//kt //codex original -->     FEditNote.VisitDate    := uPCEEdit.DateTime;
+//kt //codex original -->     if DocumentType = TYP_ADDENDUM then begin
+//kt //codex original -->       PutAddendum(CreatedNote, FEditNote, FEditNote.Addend);
+//kt //codex original -->     end else begin
+//kt //codex original -->       PutComponent(CreatedNote, FEditNote, FEditNote.Addend);
+//kt //codex original -->     end;
+//kt //codex original -->     Result := IntToStr(CreatedNote.IEN); //kt added
+//kt //codex original -->     uPCEEdit.NoteIEN := CreatedNote.IEN;
+//kt //codex original -->     if CreatedNote.IEN > 0 then LockDocument(CreatedNote.IEN, CreatedNote.ErrorText);
+//kt //codex original -->     if CreatedNote.ErrorText = '' then begin
+//kt //codex original -->       with FEditNote do begin
+//kt //codex original -->         //kt original below.
+//kt //codex original -->         //kt x := IntToStr(CreatedNote.IEN) + U + 'Addendum to ' + TitleName + U + FloatToStr(DateTime) + U +
+//kt //codex original -->         //kt      Patient.Name + U + IntToStr(Author) + ';' + AuthorName + U + LocationName + U + 'new' + U +
+//kt //codex original -->         //kt      U + U + U + U + U + U + U;
+//kt //codex original -->         //kt begin mod --
+//kt //codex original -->         if (DocumentType = TYP_COMPONENT) then begin
+//kt //codex original -->           x := '['+DocSubject+']';
+//kt //codex original -->         end else begin
+//kt //codex original -->           x := 'Addendum to ' + TitleName;
+//kt //codex original -->         end;
+//kt //codex original -->         x := IntToStr(CreatedNote.IEN) + U + x + U + FloatToStr(DateTime) + U +
+//kt //codex original -->               Patient.Name + U + IntToStr(Author) + ';' + AuthorName + U + LocationName + U + 'new' + U +
+//kt //codex original -->               U + U + U + U + U + U + U;
+//kt //codex original -->         //kt end mod --
+//kt //codex original -->       end;
+//kt //codex original -->       SetPiece(x, U, 10, DocSubject);  //kt
+//kt //codex original -->       //original -->       lstNotes.Items.Insert(0, x);
+//kt //codex original -->       InsertNoteRecord(0, x);
+//kt //codex original -->       Result := x; //kt added
+//kt //codex original -->       uChanging := True;
+//kt //codex original -->       tvNotes.Items.BeginUpdate;
+//kt //codex original -->       if DocumentType = TYP_ADDENDUM then begin  //kt added this if line, but block below was original (with some additions)
+//kt //codex original -->         if (DocumentType = TYP_COMPONENT) then Name := 'Component' else Name := 'Addendum';  //kt
+//kt //codex original -->         UpName := UpperCase(Name);  //kt
+//kt //codex original -->         tmpNode := tvNotes.Items.AddObjectFirst(tvNotes.Items.GetFirstNode, 'New '+Name+' in Progress',
+//kt //codex original -->                                                 MakeNoteTreeObject(UpName+'^New '+Name+' in Progress^^^^^^^^^^^%^0'));  //kt
+//kt //codex original -->         TORTreeNode(tmpNode).StringData := UpName+'^New '+Name+' in Progress^^^^^^^^^^^%^0';  //kt
+//kt //codex original -->         tmpNode.ImageIndex := IMG_TOP_LEVEL;
+//kt //codex original -->         tmpNode := tvNotes.Items.AddChildObjectFirst(tmpNode, MakeNoteDisplayText(x), MakeNoteTreeObject(x));
+//kt //codex original -->         TORTreeNode(tmpNode).StringData := x;
+//kt //codex original -->         tmpNode.ImageIndex := IMG_ADDENDUM;
+//kt //codex original -->         tmpNode.SelectedIndex := IMG_ADDENDUM;
+//kt //codex original -->       end else begin  //kt added this block
+//kt //codex original -->         UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
+//kt //codex original -->         ParentNode := tvNotes.FindPieceNode(Piece(ParentData, U,1), 1, U, UnsignedDocsNode);
+//kt //codex original -->         tmpNode := frmNotes.tvNotes.Items.AddChildObjectFirst(ParentNode, MakeNoteDisplayText(x), MakeNoteTreeObject(x));
+//kt //codex original -->         TORTreeNode(tmpNode).StringData := x;
+//kt //codex original -->         tmpNode.ImageIndex := IMG_SINGLE;
+//kt //codex original -->         tmpNode.SelectedIndex := IMG_ADDENDUM;
+//kt //codex original -->         tmpNode.StateIndex := IMG_NO_IMAGES
+//kt //codex original -->       end;
+//kt //codex original -->       tvNotes.Selected := tmpNode;
+//kt //codex original -->       tvNotes.Items.EndUpdate;
+//kt //codex original -->       uChanging := False;
+//kt //codex original -->       if (DocumentType = TYP_COMPONENT) then ChangesMode := CH_SIGN_NA else ChangesMode := CH_SIGN_YES;  //kt added
+//kt //codex original -->       //kt original --> Changes.Add(CH_DOC, IntToStr(CreatedNote.IEN), GetTitleText(0), '', CH_SIGN_YES);
+//kt //codex original -->       Changes.Add(CH_DOC, IntToStr(CreatedNote.IEN), GetTitleText(0), '', ChangesMode);
+//kt //codex original -->       SetSelectedNoteIndex(0);
+//kt //codex original -->       EditingIndex := 0;
+//kt //codex original -->       SetSubjectVisible(AskSubjectForNotes);
+//kt //codex original -->       cmdChangeClick(Self); // will set captions, sign state for Changes
+//kt //codex original -->       if TMGForcePlainTextEditMode then begin   //kt  added block 12/27/12
+//kt //codex original -->         // Set in TfrmCarePlan.InsertText
+//kt //codex original -->         Mode := [vmEdit] + [vmHTML_MODE[False]];   //kt 4/14
+//kt //codex original -->         TMGForcePlainTextEditMode := False;
+//kt //codex original -->       end else begin
+//kt //codex original -->         Mode := [vmEdit] + [vmHTML_MODE[fOptionsNotes.DefaultEditHTMLMode]];   //kt 4/14
+//kt //codex original -->       end;
+//kt //codex original -->       SetDisplayToHTMLvsText(Mode, Lines, false);                 //kt 4/14, 5/15  (changed nil to Lines; VIEW_ACTIVATE_ONLY to false)
+//kt //codex original -->       DisplaySelectedNote;  //kt //codex 8/17/26
+//kt //codex original -->       if timAutoSave.Interval <> 0 then timAutoSave.Enabled := True;
+//kt //codex original -->       SetEditorFocus;  //kt memNewNote.SetFocus;  //kt 9/11
+//kt //codex original -->     end else begin
+//kt //codex original -->       // if note creation failed or failed to get note lock (both unlikely), unlock consult
+//kt //codex original -->       with FEditNote do if (PkgIEN > 0) and (PkgPtr = PKG_CONSULTS)  then UnlockConsultRequest(0, PkgIEN);
+//kt //codex original -->       InfoBox(CreatedNote.ErrorText, TX_CREATE_ERR, MB_OK);
+//kt //codex original -->       HaveRequired := False;
+//kt //codex original -->     end; {if CreatedNote.IEN}
+//kt //codex original -->   end; {if HaveRequired}
+//kt //codex original -->   if LinkedLines then FEditNote.Lines := nil;  //kt 5/15
+//kt //codex original -->   if not HaveRequired then ClearEditControls;
+//kt //codex original --> end;
 procedure TfrmNotes.InsertAddendum;
-// sets up fields of pnlWrite to write an addendum for the selected note
-begin
-  InsertChildDoc(TYP_ADDENDUM, SelectedNoteRecord);  //kt moved code to InsertChildDoc
-end;
-
-function TfrmNotes.InsertChildDoc(DocumentType : integer;
-                                  ParentData : string;
-                                  DocSubject : string =  '';
-                                  Lines : TStrings = nil) : string;
-//kt added function, starting from InsertAddendum() code, to allow calling in from both
-//   InsertAddendum and new InsertComponent
-//Input: DocumentType: should be TYP_ADDENDUM or TYP_COMPONENT
-//       ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
-//       DocSubject: Only used when DocumentType = TYP_COMPONENT.  This is subject name for component.
-//Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
-{ sets up fields of pnlWrite to write an addendum for the selected note }
+//kt //codex added entire procedure 9/8/26
 const
-  AS_ADDENDUM = True;
   IS_ID_CHILD = False;
 var
-  HaveRequired:     Boolean;
-  CreatedNote:      TCreatedDoc;
-  tmpNode:          TTreeNode;
-  x:                string;
-  Mode :            TViewModeSet;          //kt 4/14
-  Name, UpName:     string;                //kt 4/15
-  ChangesMode:      integer;               //kt 4/15
-  LinkedLines:      boolean;               //kt 5/15
-  ParentIEN :       int64;                 //kt 5/15
-  ParentNode:       TORtreeNode;           //kt
-  UnsignedDocsNode: TORtreeNode;           //kt
+  HaveRequired: Boolean;
+  CreatedNote: TCreatedDoc;
+  tmpNode: TTreeNode;
+  ParentData, x: string;
+  ParentIEN: Int64;
+  Mode: TViewModeSet;
 begin
-  Result := '';  //kt added
-  if not (DocumentType in [TYP_ADDENDUM, TYP_COMPONENT]) then exit;  //kt
+  ParentData := SelectedNoteRecord;
+  ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0);
   ClearEditControls;
-  txtSubject.Text := DocSubject;  //kt added
-  ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
+  txtSubject.Text := '';
   with FEditNote do begin
-    DocType      := DocumentType;
-    IsNewNote    := False;
-    Title        := TitleForNote(ParentIEN);
-    TitleName    := Piece(ParentData, U, 2);
-    Subject      := DocSubject;
-    IsComponent  := (DocumentType = TYP_COMPONENT);  //kt
-    if DocumentType = TYP_COMPONENT then TitleName := '['+DocSubject+']';  //kt added
-    if Copy(TitleName,1,1) = '+' then TitleName := Copy(TitleName, 3, 199);
-    DateTime     := FMNow;
-    Author       := User.DUZ;
-    AuthorName   := User.Name;
-    //kt x            := GetPackageRefForNote(lstNotes.ItemIEN);
-    x            := GetPackageRefForNote(ParentIEN);     //kt
-    if not PieceEquals(x, U, 1, '-1') then begin //kt //codex 8/18/26
-      //kt PkgRef   := GetPackageRefForNote(lstNotes.ItemIEN);
-      PkgRef   := GetPackageRefForNote(ParentIEN);  //kt
-      PkgIEN   := PieceAsIntDef(PkgRef, ';', 1, 0); //kt //codex 8/18/26
-      PkgPtr   := Piece(PkgRef, ';', 2);
+    DocType := TYP_ADDENDUM;
+    IsNewNote := False;
+    Title := TitleForNote(ParentIEN);
+    TitleName := Piece(ParentData, U, 2);
+    Subject := '';
+    if Copy(TitleName, 1, 1) = '+' then TitleName := Copy(TitleName, 3, 199);
+    DateTime := FMNow;
+    Author := User.DUZ;
+    AuthorName := User.Name;
+    x := GetPackageRefForNote(ParentIEN);
+    if not PieceEquals(x, U, 1, '-1') then begin
+      PkgRef := x;
+      PkgIEN := PieceAsIntDef(PkgRef, ';', 1, 0);
+      PkgPtr := Piece(PkgRef, ';', 2);
     end;
-    //kt original --> Addend := lstNotes.ItemIEN;
-    Addend := ParentIEN;  //kt 5/15
-    //Lines        := memNewNote.Lines;
-    // Cosigner, if needed, will be set by fNoteProps
-    // Location info will be set after the encounter is loaded
+    Addend := ParentIEN;
   end;
-  //kt Add block  5/15
-  LinkedLines := false;
-  if assigned(Lines) then begin
-    if assigned (FEditNote.Lines) then begin
-      FEditNote.Lines.Assign(Lines);
-    end else begin
-      LinkedLines := true;
-      FEditNote.Lines := Lines;    //will be unlinked to passed Lines below
-    end;
-  end;
-  //kt end block.
-  // check to see if interaction necessary to get required fields
   if LacksRequiredForCreate then begin
-    HaveRequired := ExecuteNoteProperties(FEditNote, CT_NOTES, IS_ID_CHILD, False, '', 0)
+    HaveRequired := ExecuteNoteProperties(FEditNote, CT_NOTES, IS_ID_CHILD, False, '', 0);
   end else HaveRequired := True;
-  // lock the consult request if there is a consult
   if HaveRequired then with FEditNote do begin
     if (PkgIEN > 0) and (PkgPtr = PKG_CONSULTS) then HaveRequired := LockConsultRequest(PkgIEN);
   end;
   if HaveRequired then begin
     uPCEEdit.NoteDateTime := FEditNote.DateTime;
     uPCEEdit.PCEForNote(FEditNote.Addend, uPCEShow);
-    FEditNote.Location     := uPCEEdit.Location;
+    FEditNote.Location := uPCEEdit.Location;
     FEditNote.LocationName := ExternalName(uPCEEdit.Location, 44);
-    FEditNote.VisitDate    := uPCEEdit.DateTime;
-    if DocumentType = TYP_ADDENDUM then begin
-      PutAddendum(CreatedNote, FEditNote, FEditNote.Addend);
-    end else begin
-      PutComponent(CreatedNote, FEditNote, FEditNote.Addend);
-    end;
-    Result := IntToStr(CreatedNote.IEN); //kt added
+    FEditNote.VisitDate := uPCEEdit.DateTime;
+    PutAddendum(CreatedNote, FEditNote, FEditNote.Addend);
     uPCEEdit.NoteIEN := CreatedNote.IEN;
     if CreatedNote.IEN > 0 then LockDocument(CreatedNote.IEN, CreatedNote.ErrorText);
     if CreatedNote.ErrorText = '' then begin
       with FEditNote do begin
-        //kt original below.
-        //kt x := IntToStr(CreatedNote.IEN) + U + 'Addendum to ' + TitleName + U + FloatToStr(DateTime) + U +
-        //kt      Patient.Name + U + IntToStr(Author) + ';' + AuthorName + U + LocationName + U + 'new' + U +
-        //kt      U + U + U + U + U + U + U;
-        //kt begin mod --
-        if (DocumentType = TYP_COMPONENT) then begin
-          x := '['+DocSubject+']';
-        end else begin
-          x := 'Addendum to ' + TitleName;
-        end;
-        x := IntToStr(CreatedNote.IEN) + U + x + U + FloatToStr(DateTime) + U +
-              Patient.Name + U + IntToStr(Author) + ';' + AuthorName + U + LocationName + U + 'new' + U +
-              U + U + U + U + U + U + U;
-        //kt end mod --
+        x := IntToStr(CreatedNote.IEN) + U + 'Addendum to ' + TitleName + U + FloatToStr(DateTime) + U +
+             Patient.Name + U + IntToStr(Author) + ';' + AuthorName + U + LocationName + U + 'new' + U +
+             U + U + U + U + U + U + U;
       end;
-      SetPiece(x, U, 10, DocSubject);  //kt
-      //original -->       lstNotes.Items.Insert(0, x);
       InsertNoteRecord(0, x);
-      Result := x; //kt added
       uChanging := True;
       tvNotes.Items.BeginUpdate;
-      if DocumentType = TYP_ADDENDUM then begin  //kt added this if line, but block below was original (with some additions)
-        if (DocumentType = TYP_COMPONENT) then Name := 'Component' else Name := 'Addendum';  //kt
-        UpName := UpperCase(Name);  //kt
-        tmpNode := tvNotes.Items.AddObjectFirst(tvNotes.Items.GetFirstNode, 'New '+Name+' in Progress',
-                                                MakeNoteTreeObject(UpName+'^New '+Name+' in Progress^^^^^^^^^^^%^0'));  //kt
-        TORTreeNode(tmpNode).StringData := UpName+'^New '+Name+' in Progress^^^^^^^^^^^%^0';  //kt
-        tmpNode.ImageIndex := IMG_TOP_LEVEL;
-        tmpNode := tvNotes.Items.AddChildObjectFirst(tmpNode, MakeNoteDisplayText(x), MakeNoteTreeObject(x));
-        TORTreeNode(tmpNode).StringData := x;
-        tmpNode.ImageIndex := IMG_ADDENDUM;
-        tmpNode.SelectedIndex := IMG_ADDENDUM;
-      end else begin  //kt added this block
-        UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
-        ParentNode := tvNotes.FindPieceNode(Piece(ParentData, U,1), 1, U, UnsignedDocsNode);
-        tmpNode := frmNotes.tvNotes.Items.AddChildObjectFirst(ParentNode, MakeNoteDisplayText(x), MakeNoteTreeObject(x));
-        TORTreeNode(tmpNode).StringData := x;
-        tmpNode.ImageIndex := IMG_SINGLE;
-        tmpNode.SelectedIndex := IMG_ADDENDUM;
-        tmpNode.StateIndex := IMG_NO_IMAGES
-      end;
+      tmpNode := tvNotes.Items.AddObjectFirst(tvNotes.Items.GetFirstNode, 'New Addendum in Progress',
+                   MakeNoteTreeObject('ADDENDUM^New Addendum in Progress^^^^^^^^^^^%^0'));
+      TORTreeNode(tmpNode).StringData := 'ADDENDUM^New Addendum in Progress^^^^^^^^^^^%^0';
+      tmpNode.ImageIndex := IMG_TOP_LEVEL;
+      tmpNode := tvNotes.Items.AddChildObjectFirst(tmpNode, MakeNoteDisplayText(x), MakeNoteTreeObject(x));
+      TORTreeNode(tmpNode).StringData := x;
+      tmpNode.ImageIndex := IMG_ADDENDUM;
+      tmpNode.SelectedIndex := IMG_ADDENDUM;
       tvNotes.Selected := tmpNode;
       tvNotes.Items.EndUpdate;
       uChanging := False;
-      if (DocumentType = TYP_COMPONENT) then ChangesMode := CH_SIGN_NA else ChangesMode := CH_SIGN_YES;  //kt added
-      //kt original --> Changes.Add(CH_DOC, IntToStr(CreatedNote.IEN), GetTitleText(0), '', CH_SIGN_YES);
-      Changes.Add(CH_DOC, IntToStr(CreatedNote.IEN), GetTitleText(0), '', ChangesMode);
+      Changes.Add(CH_DOC, IntToStr(CreatedNote.IEN), GetTitleText(0), '', CH_SIGN_YES);
       SetSelectedNoteIndex(0);
       EditingIndex := 0;
       SetSubjectVisible(AskSubjectForNotes);
-      cmdChangeClick(Self); // will set captions, sign state for Changes
-      if TMGForcePlainTextEditMode then begin   //kt  added block 12/27/12
-        // Set in TfrmCarePlan.InsertText
-        Mode := [vmEdit] + [vmHTML_MODE[False]];   //kt 4/14
+      cmdChangeClick(Self);
+      if TMGForcePlainTextEditMode then begin
+        Mode := [vmEdit] + [vmHTML_MODE[False]];
         TMGForcePlainTextEditMode := False;
-      end else begin
-        Mode := [vmEdit] + [vmHTML_MODE[fOptionsNotes.DefaultEditHTMLMode]];   //kt 4/14
-      end;
-      SetDisplayToHTMLvsText(Mode, Lines, false);                 //kt 4/14, 5/15  (changed nil to Lines; VIEW_ACTIVATE_ONLY to false)
-      DisplaySelectedNote;  //kt //codex 8/17/26
+      end else Mode := [vmEdit] + [vmHTML_MODE[fOptionsNotes.DefaultEditHTMLMode]];
+      SetDisplayToHTMLvsText(Mode, nil, False);
+      DisplaySelectedNote;
       if timAutoSave.Interval <> 0 then timAutoSave.Enabled := True;
-      SetEditorFocus;  //kt memNewNote.SetFocus;  //kt 9/11
+      SetEditorFocus;
     end else begin
-      // if note creation failed or failed to get note lock (both unlikely), unlock consult
-      with FEditNote do if (PkgIEN > 0) and (PkgPtr = PKG_CONSULTS)  then UnlockConsultRequest(0, PkgIEN);
+      with FEditNote do if (PkgIEN > 0) and (PkgPtr = PKG_CONSULTS) then UnlockConsultRequest(0, PkgIEN);
       InfoBox(CreatedNote.ErrorText, TX_CREATE_ERR, MB_OK);
       HaveRequired := False;
-    end; {if CreatedNote.IEN}
-  end; {if HaveRequired}
-  if LinkedLines then FEditNote.Lines := nil;  //kt 5/15
+    end;
+  end;
   if not HaveRequired then ClearEditControls;
 end;
 
@@ -1796,7 +1886,8 @@ begin
   //original -->   GetNoteForEdit(FEditNote, lstNotes.ItemIEN);  //kt moved. Was right below Changes.Add() before.
   GetNoteForEdit(FEditNote, SelectedNoteIENVal);  //kt moved. Was right below Changes.Add() before.
   ScanForSubs(FEditNote.Lines);  //8/30/21
-  if FEditNote.IsComponent then ChangesMode := CH_SIGN_NA else ChangesMode := CH_SIGN_YES;  //kt added
+//kt //codex original -->   if FEditNote.IsComponent then ChangesMode := CH_SIGN_NA else ChangesMode := CH_SIGN_YES;  //kt added
+  ChangesMode := CH_SIGN_YES; //kt //codex 9/8/26
   Changes.Add(CH_DOC, SelectedNoteIDStr, GetTitleText(EditingIndex), '', ChangesMode);
   Mode := [vmEdit] + [vmHTML_MODE[IsHTML(FEditNote.Lines) or (vmHTML in FViewMode)]]; //kt 9/11
   SetDisplayToHTMLvsText(Mode,FEditNote.Lines);                                       //kt 9/11
@@ -2580,7 +2671,7 @@ procedure TfrmNotes.mnuActClick(Sender: TObject);
 begin
   inherited;
   //kt mnuLaunchMDM.Enabled := (FEditingIndex>-1);
-  mnuLaunchMDM.Enabled := EditingNoteActive;  //kt 
+  mnuLaunchMDM.Enabled := EditingNoteActive;  //kt
 end;
 
 procedure TfrmNotes.mnuActLoadBoilerClick(Sender: TObject);
@@ -2697,7 +2788,7 @@ begin
   uPCEEdit.NoteTitle  := FEditNote.Title;
   //kt begin mod --
   if (User.DUZ <> FEditNote.Author) and (User.DUZ <> FEditNote.Cosigner) then ChangeMode := CH_SIGN_NA
-  else if FEditNote.IsComponent then ChangeMode := CH_SIGN_NA
+//kt //codex original -->   else if FEditNote.IsComponent then ChangeMode := CH_SIGN_NA
   else ChangeMode := CH_SIGN_YES;
   Changes.ReplaceSignState(CH_DOC, EditingNoteIDStr, ChangeMode);
   //kt end mod
@@ -3026,21 +3117,21 @@ begin
   InsertNewNote(IS_ID_CHILD, AnIDParent);
 end;
 
-procedure TfrmNotes.popAddComponentClick(Sender: TObject);
-//kt added -- remove later.
-var  Subject : string;
-begin
-  inherited;
-  Subject := InputBox('Add Component', 'Enter Title', '');
-  if Subject = '' then Exit;
-  //original -->   AddComponentAndSelect(lstNotes.Items[lstNotes.ItemIndex], Subject);
-  AddComponentAndSelect(SelectedNoteRecord, Subject);
-end;
+//kt //codex original --> procedure TfrmNotes.popAddComponentClick(Sender: TObject);
+//kt //codex original --> //kt added -- remove later.
+//kt //codex original --> var  Subject : string;
+//kt //codex original --> begin
+//kt //codex original -->   inherited;
+//kt //codex original -->   Subject := InputBox('Add Component', 'Enter Title', '');
+//kt //codex original -->   if Subject = '' then Exit;
+//kt //codex original -->   //original -->   AddComponentAndSelect(lstNotes.Items[lstNotes.ItemIndex], Subject);
+//kt //codex original -->   AddComponentAndSelect(SelectedNoteRecord, Subject);
+//kt //codex original --> end;
 
 procedure TfrmNotes.popEditEncounterElementsClick(Sender: TObject);
 //kt added entire function 5/16/16
 begin
-  inherited;
+inherited;
   cmdPCEClick(Sender);  //launch encounter form
 end;
 
@@ -3080,45 +3171,45 @@ begin
   InsertAddendum;
 end;
 
-function TfrmNotes.AddComponent(ParentData : string; Subject : string = ''; Lines : TStrings = nil) : string;
-//kt added entire function, patterned after AddAdendum.
-//ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
-//Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
-var
-  ActionSts:           TActionRec;
-  ParentIEN :          int64;  //kt
-begin
-  Result := '0';
-  if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
-  ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
-  ActOnDocument(ActionSts, ParentIEN, 'MAKE COMPONENT');   //kt custom server-side action.
-  if not ActionSts.Success then begin
-    InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
-    Exit;
-  end;
-  Result := InsertComponent(ParentData, Subject, Lines);
-end;
-
-function TfrmNotes.AddComponentAndSelect(ParentData : string; Subject : string = ''; Lines : TStrings = nil) : string;
-//kt added entire function, patterned after AddAdendum.
-//ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
-//Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
-var
-  AddedData :          string;
-  AddedIENString :     string;
-  UnsignedDocsNode :   TORTreeNode;
-  AddedNode :          TORTreeNode;
-begin
-  AddedData := AddComponent(ParentData, Subject, Lines);
-  AddedIENString := piece(AddedData, U, 1);
-  UnsignedDocsNode := frmNotes.tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
-  AddedNode := tvNotes.FindPieceNode(AddedIENString, 1, U, UnsignedDocsNode);
-  if assigned(AddedNode) then begin
-    tvNotes.Selected := AddedNode;  //switch to added component.
-    tvNotesChange(self, AddedNode);
-  end;
-  Result := AddedData;
-end;
+//kt //codex original --> function TfrmNotes.AddComponent(ParentData : string; Subject : string = ''; Lines : TStrings = nil) : string;
+//kt //codex original --> //kt added entire function, patterned after AddAdendum.
+//kt //codex original --> //ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
+//kt //codex original --> //Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
+//kt //codex original --> var
+//kt //codex original -->   ActionSts:           TActionRec;
+//kt //codex original -->   ParentIEN :          int64;  //kt
+//kt //codex original --> begin
+//kt //codex original -->   Result := '0';
+//kt //codex original -->   if not StartNewEdit(NT_ACT_ADDENDUM) then Exit;
+//kt //codex original -->   ParentIEN := PieceAsInt64Def(ParentData, U, 1, 0); //kt //codex 8/18/26
+//kt //codex original -->   ActOnDocument(ActionSts, ParentIEN, 'MAKE COMPONENT');   //kt custom server-side action.
+//kt //codex original -->   if not ActionSts.Success then begin
+//kt //codex original -->     InfoBox(ActionSts.Reason, TX_IN_AUTH, MB_OK);
+//kt //codex original -->     Exit;
+//kt //codex original -->   end;
+//kt //codex original -->   Result := InsertComponent(ParentData, Subject, Lines);
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> function TfrmNotes.AddComponentAndSelect(ParentData : string; Subject : string = ''; Lines : TStrings = nil) : string;
+//kt //codex original --> //kt added entire function, patterned after AddAdendum.
+//kt //codex original --> //ParentData: ParentIEN8925^ParentTitle^.... (only first 2 pieces are used)
+//kt //codex original --> //Result: returns datastring (IEN is piece#1) of added Addendum or component.  //kt added
+//kt //codex original --> var
+//kt //codex original -->   AddedData :          string;
+//kt //codex original -->   AddedIENString :     string;
+//kt //codex original -->   UnsignedDocsNode :   TORTreeNode;
+//kt //codex original -->   AddedNode :          TORTreeNode;
+//kt //codex original --> begin
+//kt //codex original -->   AddedData := AddComponent(ParentData, Subject, Lines);
+//kt //codex original -->   AddedIENString := piece(AddedData, U, 1);
+//kt //codex original -->   UnsignedDocsNode := frmNotes.tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
+//kt //codex original -->   AddedNode := tvNotes.FindPieceNode(AddedIENString, 1, U, UnsignedDocsNode);
+//kt //codex original -->   if assigned(AddedNode) then begin
+//kt //codex original -->     tvNotes.Selected := AddedNode;  //switch to added component.
+//kt //codex original -->     tvNotesChange(self, AddedNode);
+//kt //codex original -->   end;
+//kt //codex original -->   Result := AddedData;
+//kt //codex original --> end;
 
 procedure TfrmNotes.mnuActDetachFromIDParentClick(Sender: TObject);
 var
@@ -3237,41 +3328,39 @@ var
   Saved:                                        boolean;
   IEN :                                         integer;
   IENString :                                   string;
-  i :                                           integer;
-  ANode :                                       TORTreeNode;
-  UnsignedDocsNode:                             TORTreeNode;
   NoteDisplayText, PromptText:                  string;
-  NoteIsComponent, ChildDelSuccess:             boolean;
+//kt //codex original -->   NoteIsComponent, ChildDelSuccess:             boolean;
   ErrStr :                                      string;
 
 begin
   IENString := piece(DataString, U, 1);
   IEN := PieceAsIntDef(DataString, U, 1, 0); //kt //codex 8/18/26
   if IEN <= 0 then Exit;
-  NoteIsComponent := IsComponent(IEN, tvNotes);
+//kt //codex original -->   NoteIsComponent := IsComponent(IEN, tvNotes);
   NoteDisplayText := MakeNoteDisplayText(DataString);
-  UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
-  if IsChildOfUnsigned(IEN, UnsignedDocsNode) then begin
-    ANode := tvNotes.FindPieceNode(IntToStr(IEN), U, UnsignedDocsNode);
-    //ChildDelSuccess := true;
-    i := 0;
-    while i < ANode.Count do begin
-      //ask about deleting with children
-      if not NoPrompt then begin
-        if InfoBox(NoteDisplayText + TX_DEL_AND_COMPS_OK, TX_DEL_CNF,
-                   MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES then Exit;
-        NoPrompt := true; //at this point, user has been prompted.
-      end;
-      ChildDelSuccess := DeleteNodeAndDocAndComps(TORTreeNode(ANode.Item[i]));
-      if not ChildDelSuccess then inc (i);
-    end;
-  end;
+//kt //codex original -->   UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
+//kt //codex original -->   if IsChildOfUnsigned(IEN, UnsignedDocsNode) then begin
+//kt //codex original -->     ANode := tvNotes.FindPieceNode(IntToStr(IEN), U, UnsignedDocsNode);
+//kt //codex original -->     //ChildDelSuccess := true;
+//kt //codex original -->     i := 0;
+//kt //codex original -->     while i < ANode.Count do begin
+//kt //codex original -->       //ask about deleting with children
+//kt //codex original -->       if not NoPrompt then begin
+//kt //codex original -->         if InfoBox(NoteDisplayText + TX_DEL_AND_COMPS_OK, TX_DEL_CNF,
+//kt //codex original -->                    MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES then Exit;
+//kt //codex original -->         NoPrompt := true; //at this point, user has been prompted.
+//kt //codex original -->       end;
+//kt //codex original -->       ChildDelSuccess := DeleteNodeAndDocAndComps(TORTreeNode(ANode.Item[i]));
+//kt //codex original -->       if not ChildDelSuccess then inc (i);
+//kt //codex original -->     end;
+//kt //codex original -->   end;
   ActOnDocument(ActionSts, IEN, 'DELETE RECORD');
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;  //kt 9/11
   if ShowMsgOn(not ActionSts.Success, ActionSts.Reason, TX_IN_AUTH) then Exit;
   ReasonForDelete := SelectDeleteReason(IEN);
   if ReasonForDelete = DR_CANCEL then Exit;
-  PromptText := NoteDisplayText + IfThen(NoteIsComponent, TX_DEL2_OK, TX_DEL_OK);  //kt 5/15
+//kt //codex original -->   PromptText := NoteDisplayText + IfThen(NoteIsComponent, TX_DEL2_OK, TX_DEL_OK);  //kt 5/15
+  PromptText := NoteDisplayText + TX_DEL_OK; //kt //codex 9/8/26
   if not NoPrompt and (InfoBox(PromptText, TX_DEL_CNF, MB_YESNO or MB_DEFBUTTON2 or MB_ICONQUESTION) <> IDYES) then Exit;  //kt 5/15
   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
     DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt
@@ -3322,73 +3411,73 @@ begin
   end;
 end;
 
-function TfrmNotes.DeleteNodeAndDocAndComps(ANode : TORTreeNode) : boolean;
-//kt added function 5/15 , copying and trimming from DoDeleteDocument()
-//Delete all children that are note components, and then delete node and it's
-//  accompanying note on server (provided no remaining children)
-//Result: True if deleted, or False if unable to delete, or problem encountered.
-//NOTE: It is assumed that user has already given consent, as no prompts are asked
-//    during deletion.  ALSO, it is expected that passed ANode doesn't represent
-//    node currently being edited.  No update to display takes place.
-var
-  DataString :                  string;
-  DeleteSts, ActionSts:         TActionRec;
-  SaveConsult:                  Integer;
-  AVisitStr, x:                 string;
-  //Saved:                        boolean;
-  ReasonForDelete :             string;
-  IEN :                         integer;
-  IENString :                   string;
-  i :                           integer;
-  ChildDelSuccess :             boolean;
-begin
-  Result := True;
-  DataString := ANode.StringData;
-  IENString := piece(DataString, U, 1);
-  IEN := PieceAsIntDef(DataString, U, 1, 0); //kt //codex 8/18/26
-  i := 0;
-  while i < ANode.Count do begin
-    ChildDelSuccess := false;
-    if IsComponent(TORTreeNode(ANode.Item[i])) then begin
-      ChildDelSuccess := DeleteNodeAndDocAndComps(TORTreeNode(ANode.Item[i]));
-    end;
-    Result := Result and ChildDelSuccess;
-    if not ChildDelSuccess then inc (i);
-  end;
-  if ANode.HasChildren then Result := false; //all children were not deleted.
-  if ShowMsgOn(Result = false, TX_DEL2_ERR, TX_IN_AUTH) then Exit;
-  Result := false; //change default to failure;
-  if ShowMsgOn(IEN <= 0, TX_BAD_IEN, TX_DEL_ERR) then Exit;
-  ActOnDocument(ActionSts, IEN, 'DELETE RECORD');
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;
-  if ShowMsgOn(not ActionSts.Success, ActionSts.Reason, TX_IN_AUTH) then Exit;
-  ReasonForDelete := SelectDeleteReason(IEN);
-  if ReasonForDelete = DR_CANCEL then Exit;
-  if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
-    DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt
-  end;
-  // do the appropriate locking
-  if not LockConsultRequestAndNote(IEN) then Exit;
-  // retraction notification message
-  if JustifyDocumentDelete(IEN) then
-     InfoBox(TX_RETRACT, TX_RETRACT_CAP, MB_OK);
-  FConfirmed := False;
-  DeleteSts.Success := True;
-  x := GetPackageRefForNote(IEN);
-  SaveConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
-  AVisitStr := VisitStrForNote(IEN);
-  RemovePCEFromChanges(IEN, AVisitStr);
-  DeleteDocument(DeleteSts, IEN, ReasonForDelete);
-  if not Changes.Exist(CH_DOC, IENString) then UnlockDocument(IEN);
-  Changes.Remove(CH_DOC, IENString);  // this will unlock the document if in Changes
-  UnlockConsultRequest(0, SaveConsult);     // note has been deleted, so 1st param = 0
-  if DeleteSts.Success then begin
-    Result := true;
-    KillDocTreeNode(ANode);
-  end else begin
-    InfoBox(DeleteSts.Reason, TX_DEL_ERR, MB_OK or MB_ICONWARNING);
-  end;
-end;
+//kt //codex original --> function TfrmNotes.DeleteNodeAndDocAndComps(ANode : TORTreeNode) : boolean;
+//kt //codex original --> //kt added function 5/15 , copying and trimming from DoDeleteDocument()
+//kt //codex original --> //Delete all children that are note components, and then delete node and it's
+//kt //codex original --> //  accompanying note on server (provided no remaining children)
+//kt //codex original --> //Result: True if deleted, or False if unable to delete, or problem encountered.
+//kt //codex original --> //NOTE: It is assumed that user has already given consent, as no prompts are asked
+//kt //codex original --> //    during deletion.  ALSO, it is expected that passed ANode doesn't represent
+//kt //codex original --> //    node currently being edited.  No update to display takes place.
+//kt //codex original --> var
+//kt //codex original -->   DataString :                  string;
+//kt //codex original -->   DeleteSts, ActionSts:         TActionRec;
+//kt //codex original -->   SaveConsult:                  Integer;
+//kt //codex original -->   AVisitStr, x:                 string;
+//kt //codex original -->   //Saved:                        boolean;
+//kt //codex original -->   ReasonForDelete :             string;
+//kt //codex original -->   IEN :                         integer;
+//kt //codex original -->   IENString :                   string;
+//kt //codex original -->   i :                           integer;
+//kt //codex original -->   ChildDelSuccess :             boolean;
+//kt //codex original --> begin
+//kt //codex original -->   Result := True;
+//kt //codex original -->   DataString := ANode.StringData;
+//kt //codex original -->   IENString := piece(DataString, U, 1);
+//kt //codex original -->   IEN := PieceAsIntDef(DataString, U, 1, 0); //kt //codex 8/18/26
+//kt //codex original -->   i := 0;
+//kt //codex original -->   while i < ANode.Count do begin
+//kt //codex original -->     ChildDelSuccess := false;
+//kt //codex original -->     if IsComponent(TORTreeNode(ANode.Item[i])) then begin
+//kt //codex original -->       ChildDelSuccess := DeleteNodeAndDocAndComps(TORTreeNode(ANode.Item[i]));
+//kt //codex original -->     end;
+//kt //codex original -->     Result := Result and ChildDelSuccess;
+//kt //codex original -->     if not ChildDelSuccess then inc (i);
+//kt //codex original -->   end;
+//kt //codex original -->   if ANode.HasChildren then Result := false; //all children were not deleted.
+//kt //codex original -->   if ShowMsgOn(Result = false, TX_DEL2_ERR, TX_IN_AUTH) then Exit;
+//kt //codex original -->   Result := false; //change default to failure;
+//kt //codex original -->   if ShowMsgOn(IEN <= 0, TX_BAD_IEN, TX_DEL_ERR) then Exit;
+//kt //codex original -->   ActOnDocument(ActionSts, IEN, 'DELETE RECORD');
+//kt //codex original -->   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then ActionSts.Success := true;
+//kt //codex original -->   if ShowMsgOn(not ActionSts.Success, ActionSts.Reason, TX_IN_AUTH) then Exit;
+//kt //codex original -->   ReasonForDelete := SelectDeleteReason(IEN);
+//kt //codex original -->   if ReasonForDelete = DR_CANCEL then Exit;
+//kt //codex original -->   if Pos(TX_ATTACHED_IMAGES_SERVER_REPLY, ActionSts.Reason) > 0 then begin
+//kt //codex original -->     DeleteAllAttachedImages(IENString, idmDelete, HtmlEditor, EditingNoteActive); //kt
+//kt //codex original -->   end;
+//kt //codex original -->   // do the appropriate locking
+//kt //codex original -->   if not LockConsultRequestAndNote(IEN) then Exit;
+//kt //codex original -->   // retraction notification message
+//kt //codex original -->   if JustifyDocumentDelete(IEN) then
+//kt //codex original -->      InfoBox(TX_RETRACT, TX_RETRACT_CAP, MB_OK);
+//kt //codex original -->   FConfirmed := False;
+//kt //codex original -->   DeleteSts.Success := True;
+//kt //codex original -->   x := GetPackageRefForNote(IEN);
+//kt //codex original -->   SaveConsult := PieceAsIntDef(x, ';', 1, 0); //kt //codex 8/18/26
+//kt //codex original -->   AVisitStr := VisitStrForNote(IEN);
+//kt //codex original -->   RemovePCEFromChanges(IEN, AVisitStr);
+//kt //codex original -->   DeleteDocument(DeleteSts, IEN, ReasonForDelete);
+//kt //codex original -->   if not Changes.Exist(CH_DOC, IENString) then UnlockDocument(IEN);
+//kt //codex original -->   Changes.Remove(CH_DOC, IENString);  // this will unlock the document if in Changes
+//kt //codex original -->   UnlockConsultRequest(0, SaveConsult);     // note has been deleted, so 1st param = 0
+//kt //codex original -->   if DeleteSts.Success then begin
+//kt //codex original -->     Result := true;
+//kt //codex original -->     KillDocTreeNode(ANode);
+//kt //codex original -->   end else begin
+//kt //codex original -->     InfoBox(DeleteSts.Reason, TX_DEL_ERR, MB_OK or MB_ICONWARNING);
+//kt //codex original -->   end;
+//kt //codex original --> end;
 
 procedure TfrmNotes.mnuActEditClick(Sender: TObject);
 { load the selected progress note for editing }
@@ -3453,8 +3542,8 @@ var
   SavedDocID, tmpItem, SelectedNoteText, SelectedNoteTitle: string;
   EditingID: string;                                         //v22.12 - RV
   tmpNode: TTreeNode;
-  ChildNode : TTreeNode; //kt 5/15
-  EditingIsChildComp : boolean;   //kt 5/15  Default is FALSE
+//kt //codex original -->   ChildNode : TTreeNode; //kt 5/15
+//kt //codex original -->   EditingIsChildComp : boolean;   //kt 5/15  Default is FALSE
   ForceSignPrompt : boolean;  //TMG 4/1/22
   SelectedNoteIENVal: Int64;
   SelectedNoteIDStr: string;
@@ -3465,7 +3554,7 @@ begin
     frmNoteTOC.AnimateClose := False;
     SetTOCButtonStatus(1);
   end;
-  EditingIsChildComp := false;  //kt
+//kt //codex original -->   EditingIsChildComp := false;  //kt
   SelectedNoteIENVal := SelectedNoteIEN;
   SelectedNoteIDStr := SelectedNoteID;
   SelectedNoteText := SelectedNoteRecord;
@@ -3478,8 +3567,8 @@ begin
   end else if EditingNoteActive then begin   //kt
     tmpItem := NoteRecordAt(EditingIndex);
     EditingID := Piece(tmpItem, U, 1);
-    ChildNode := tvNotes.FindPieceNode(EditingID, U, tvNotes.Selected);
-    EditingIsChildComp := IsComponent(TORTreeNode(ChildNode));
+//kt //codex original -->     ChildNode := tvNotes.FindPieceNode(EditingID, U, tvNotes.Selected);
+//kt //codex original -->     EditingIsChildComp := IsComponent(TORTreeNode(ChildNode));
   end;
   if not NoteHasText(SelectedNoteIENVal) then begin
     InfoBox(TX_EMPTY_NOTE1, TC_EMPTY_NOTE, MB_OK or MB_ICONERROR);
@@ -3520,7 +3609,7 @@ begin
         RemovePCEFromChanges(SelectedNoteIENVal);
         NoteUnlocked := Changes.Exist(CH_DOC, SelectedNoteIDStr);
         Changes.Remove(CH_DOC, SelectedNoteIDStr);  // this will unlock if in Changes
-        if EditingIsChildComp then Changes.Remove(CH_DOC, EditingID); //kt 5/15
+//kt //codex original -->         if EditingIsChildComp then Changes.Remove(CH_DOC, EditingID); //kt 5/15
         if SignSts.Success then begin
           if fSignItem.PrintAfterSignature then PrintNote(SelectedNoteIENVal, MakeNoteDisplayText(SelectedNoteText));   //TMG 7/1/21
           SendMessage(frmConsults.Handle, UM_NEWORDER, ORDER_SIGN, 0);      //REV
@@ -3539,7 +3628,7 @@ begin
   end;
   if not NoteUnlocked then UnlockDocument(SelectedNoteIENVal);
   UnlockConsultRequest(SelectedNoteIENVal);
-  if EditingIsChildComp then begin EditingID := ''; EditingIndex := -1; end; //kt 5/15
+//kt //codex original -->   if EditingIsChildComp then begin EditingID := ''; EditingIndex := -1; end; //kt 5/15
   //kt //codex original --> LoadNotes;
   LoadNotes(SelectedNoteIENVal, False); //kt //codex 9/8/26
   uChanging := True; //kt //codex 9/8/26
@@ -3581,7 +3670,7 @@ var
   APCEObject: TPCEData;
   OK: boolean;
   ActionType, SignTitle: string;
-begin                                                  
+begin
   if ESCode<>'' then begin       // 4/20/23 added block
     if AllowSignature = False then exit;
   end;
@@ -3658,7 +3747,8 @@ end;
 
 procedure TfrmNotes.popNoteMemoPopup(Sender: TObject);
 const FORMAT_MODE : array[false..true] of string = ('Formatted Text','Plain Text');  //kt 8/09
-var NoteIsComponent:  boolean;         //kt 5/15
+//kt //codex original --> var NoteIsComponent:  boolean;         //kt 5/15
+var //kt //codex 9/8/26
     PopupComp : TObject;               //kt 3/16
     DisplayingPDF : boolean;
 begin
@@ -3691,8 +3781,8 @@ begin
     popNoteMemoPaste.Enabled      := False;
     popNoteMemoTemplate.Enabled   := False;
   end;
-  NoteIsComponent := IsComponent(TORTreeNode(tvNotes.Selected)); //kt 5/15
-  popNoteMemoSign.Enabled := not NoteIsComponent;       //kt 5/15
+//kt //codex original -->   NoteIsComponent := IsComponent(TORTreeNode(tvNotes.Selected)); //kt 5/15
+//kt //codex original -->   popNoteMemoSign.Enabled := not NoteIsComponent;       //kt 5/15
   popNoteMemoHTMLFormat.Caption := 'Change Edit Mode To ' + FORMAT_MODE[(vmHTML in FViewMode)];  //kt 9/11
   popNoteMemoHTMLFormat.Enabled := pnlWrite.Visible;                                             //kt 9/11
   popNoteMemoProcess.Enabled := pnlWrite.Visible;
@@ -3719,10 +3809,10 @@ begin
   popNoteMemoDelete.enabled := not DisplayingPDF;
   popNoteMemoEdit.enabled := not DisplayingPDF;
   popNoteMemoAddend.enabled := not DisplayingPDF;
-  popAddComponent.enabled := not DisplayingPDF;
+//kt //codex original -->   popAddComponent.enabled := not DisplayingPDF;
   popNoteMemoSave.enabled := not DisplayingPDF;
   popNoteMemoSign.enabled := not DisplayingPDF;
-  if popNoteMemoSign.Enabled then   //second test  
+  if popNoteMemoSign.Enabled then   //second test
     popNoteMemoSign.Enabled := ContainsText(tvNotes.Selected.Parent.Text,'Loose notes')=False;
   popNoteMemoAddlSign.enabled := not DisplayingPDF;
   popNoteMemoLinkToConsult.enabled := not DisplayingPDF;
@@ -4282,7 +4372,7 @@ begin
     mnuViewThisScanInBrowser.Visible := False;
     mnuSetToLooseNote.Visible := False;
     mnuSetToUnsignedNote.Visible := False;
-  end;  
+  end;
 end;
 
 procedure TfrmNotes.popNoteListExpandAllClick(Sender: TObject);
@@ -4908,44 +4998,44 @@ begin
    LoadNotes;
 end;
 
-function TfrmNotes.IsChildOfUnsigned(Node : TORTreeNode; UnsignedDocsNode: TORTreeNode = nil) : boolean;
-//kt added 5/15
-var DescendentDepth:          integer;
-begin
-  Result := false;
-  if not assigned(Node) then exit;
-  if not assigned(UnsignedDocsNode) then begin
-    UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
-    if not assigned(UnsignedDocsNode) then exit;
-  end;
-  DescendentDepth := ChildDepth(UnsignedDocsNode, Node);
-  Result := (DescendentDepth > 0);
-end;
+//kt //codex original --> function TfrmNotes.IsChildOfUnsigned(Node : TORTreeNode; UnsignedDocsNode: TORTreeNode = nil) : boolean;
+//kt //codex original --> //kt added 5/15
+//kt //codex original --> var DescendentDepth: integer;
+//kt //codex original --> begin
+//kt //codex original -->   Result := false;
+//kt //codex original -->   if not assigned(Node) then exit;
+//kt //codex original -->   if not assigned(UnsignedDocsNode) then begin
+//kt //codex original -->     UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
+//kt //codex original -->     if not assigned(UnsignedDocsNode) then exit;
+//kt //codex original -->   end;
+//kt //codex original -->   DescendentDepth := ChildDepth(UnsignedDocsNode, Node);
+//kt //codex original -->   Result := (DescendentDepth > 0);
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> function TfrmNotes.IsChildOfUnsigned(IEN: int64; UnsignedDocsNode: TORTreeNode = nil) : boolean;
+//kt //codex original --> //kt added 5/15
+//kt //codex original --> var Node: TORTreeNode;
+//kt //codex original --> begin
+//kt //codex original -->   Result := false;
+//kt //codex original -->   if not assigned(UnsignedDocsNode) then begin
+//kt //codex original -->     UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
+//kt //codex original -->     if not assigned(UnsignedDocsNode) then exit;
+//kt //codex original -->   end;
+//kt //codex original -->   Node := tvNotes.FindPieceNode(IntToStr(IEN), U, UnsignedDocsNode);
+//kt //codex original -->   Result := IsChildOfUnsigned(Node, UnsignedDocsNode);
+//kt //codex original --> end;
 
-function TfrmNotes.IsChildOfUnsigned(IEN: int64; UnsignedDocsNode: TORTreeNode = nil) : boolean;
-//kt added 5/15
-var Node: TORTreeNode;
-begin
-  Result := false;
-  if not assigned(UnsignedDocsNode) then begin
-    UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U);
-    if not assigned(UnsignedDocsNode) then exit;
-  end;
-  Node := tvNotes.FindPieceNode(IntToStr(IEN), U, UnsignedDocsNode);
-  Result := IsChildOfUnsigned(Node, UnsignedDocsNode);
-end;
-
-function TfrmNotes.HasComponents(Node : TORTreeNode) : boolean;
-//kt added 5/15/15
-begin
-  Result := False;
-end;
-
-function TfrmNotes.HasComponents(IEN : int64) : boolean;
-//kt added 5/15/15
-begin
-  Result  := False;
-end;
+//kt //codex original --> function TfrmNotes.HasComponents(Node : TORTreeNode) : boolean;
+//kt //codex original --> //kt added 5/15/15
+//kt //codex original --> begin
+//kt //codex original -->   Result := False;
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> function TfrmNotes.HasComponents(IEN : int64) : boolean;
+//kt //codex original --> //kt added 5/15/15
+//kt //codex original --> begin
+//kt //codex original -->   Result  := False;
+//kt //codex original --> end;
 
 procedure TfrmNotes.tvNotesChange(Sender: TObject; Node: TTreeNode);
 var
@@ -6261,7 +6351,7 @@ begin
   HtmlEditor.Outdent;
 end;
 
-procedure TfrmNotes.btnLineFeedClick(Sender: TObject);      
+procedure TfrmNotes.btnLineFeedClick(Sender: TObject);
 begin
   inherited;
   HTMLEditor.SendKeys(VK_RETURN, [ssShift], False);
@@ -6576,7 +6666,7 @@ begin
         if frmNoteTOC.timerClose.enabled=false then frmNoteTOC.timerClose.enabled := True;
         frmNoteTOC := nil;
         btnOpenTOC.Caption := 'Open Note TOC';
-        btnOpenTOC2.Caption := 'Open Note TOC';        
+        btnOpenTOC2.Caption := 'Open Note TOC';
     end;
   end;
 end;
@@ -7389,7 +7479,7 @@ begin
               if ItemIEN='-1' then exit;
            end else begin
               ChangeToNote(ItemIEN);
-           end;    
+           end;
          end;
        end;
     end;

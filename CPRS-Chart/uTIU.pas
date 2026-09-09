@@ -69,7 +69,7 @@ type
     Lines: TStrings;
     PRF_IEN: integer;
     ActionIEN: string;
-    IsComponent : boolean;  //kt added
+//kt //codex original -->     IsComponent : boolean;  //kt added
   end;
 
   TNoteRec = TEditNoteRec;

@@ -115,8 +115,8 @@ function GetTMGPSCode(IEN: Int64): string;  //kt //elh  5/13/14
 function TMGSearchTemplates(OutSL : TStringList; SearchTerm : string; DUZ : Int64; CaseSensitiveStr : string = '0') : string;  //kt 5/15
 procedure PutNewNote(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec);
 procedure PutAddendum(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Integer);
-procedure PutComponent(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64); //kt added
-procedure PutChildDoc(RPCName: string; var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64; Suppress : boolean);  //kt added
+//kt //codex original --> procedure PutComponent(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64); //kt added
+//kt //codex original --> procedure PutChildDoc(RPCName: string; var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64; Suppress : boolean);  //kt added
 procedure PutEditedNote(var UpdatedDoc: TCreatedDoc; const NoteRec: TNoteRec; NoteIEN: Int64);
 procedure PutTextOnly(var ErrMsg: string; NoteText: TStrings; NoteIEN: Int64);
 procedure SetText(var ErrMsg: string; NoteText: TStrings; NoteIEN: Int64; Suppress: Integer);
@@ -227,7 +227,7 @@ function IsPRFTitle(TitleIEN: Integer): Boolean;
 begin
   Result := False;
   if TitleIEN <= 0 then Exit;
-  Result := sCallV('TIU ISPRF', [TitleIEN]) = '1'; 
+  Result := sCallV('TIU ISPRF', [TitleIEN]) = '1';
 end;
 
 function IsClinProcTitle(TitleIEN: Integer): Boolean;
@@ -404,7 +404,7 @@ end;
 
 function AuthorSignedDocument(IEN: Integer): boolean;
 begin
-  Result := SCallV('TIU HAS AUTHOR SIGNED?', [IEN, User.DUZ]) = '1'; 
+  Result := SCallV('TIU HAS AUTHOR SIGNED?', [IEN, User.DUZ]) = '1';
 end;
 
 function CosignDocument(IEN: Integer): Boolean;
@@ -532,10 +532,10 @@ end;
 procedure LoadDocumentText(Dest: TStrings; IEN: Integer; var VIsHTML : boolean);
 { returns the text of a document (progress note, discharge summary, etc.) }
 begin
-  //kt original --> CallV('TIU GET RECORD TEXT', [IEN]);  //kt <-- 2nd parameter defaults to 'VIEW' on server
-  //kt overloading 2nd parameter to pass new, custom 'A' param.  Param is optional.
-  //kt 'A' means get note and child components and grandchild etc components. Without 'A', granchild components are ignored.
-  CallV('TIU GET RECORD TEXT', [IEN, 'VIEW;A']);
+//kt //codex original -->   //kt overloading 2nd parameter to pass new, custom 'A' param.  Param is optional.
+//kt //codex original -->   //kt 'A' means get note and child components and grandchild etc components. Without 'A', granchild components are ignored.
+//kt //codex original -->   CallV('TIU GET RECORD TEXT', [IEN, 'VIEW;A']);
+  CallV('TIU GET RECORD TEXT', [IEN]); //kt //codex 9/8/26
   FastAssign(RPCBrokerV.Results, Dest);
   VIsHTML := IsHTML(Dest);
   if VIsHTML then ScanForSubs(Dest);
@@ -641,7 +641,7 @@ begin
     PkgRef       := FindVal('1405');
     PkgIEN       := StrToIntDef(Piece(PkgRef, ';', 1), 0);
     PkgPtr       := Piece(PkgRef, ';', 2);
-    IsComponent  := (Pos('['+Subject+']',TitleName)=1); //kt added 
+//kt //codex original -->     IsComponent  := (Pos('['+Subject+']',TitleName)=1); //kt added
     if Title = TYP_ADDENDUM then Addend := FindInt('.06');
     with RPCBrokerV do
     begin
@@ -723,7 +723,7 @@ begin
   begin
     ClearParameters := True;
     RemoteProcedure := 'TIU UPDATE RECORD';
-    Param[0].PType := literal;                     
+    Param[0].PType := literal;
     Param[0].Value := IntToStr(IEN);
     Param[1].PType := list;
     with Param[1] do Mult['.11']  := '0';          //  **** block removed in v19.1  {RV} ****
@@ -755,7 +755,7 @@ begin
   begin
     ClearParameters := True;
     RemoteProcedure := 'TIU UPDATE RECORD';
-    Param[0].PType := literal;                           
+    Param[0].PType := literal;
     Param[0].Value := IntToStr(IEN);
     Param[1].PType := list;
     with Param[1] do Mult['.11']  := '0';                 //  **** block removed in v19.1  {RV} ****
@@ -1019,13 +1019,9 @@ end;
 procedure PutAddendum(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Integer);
 { create a new addendum for note identified in AddendumTo, returns IEN of new document
   load broker directly since there isn't a good way to set up mutilple subscript arrays }
-(*var
-  i: Integer;*)
-//var
-//  ErrMsg: string;
+var
+  ErrMsg: string;
 begin
-  PutChildDoc('TIU CREATE ADDENDUM RECORD', CreatedDoc, NoteRec, AddendumTo, true);
-  { //kt moved below to PutChildDoc
   with RPCBrokerV do
   begin
     ClearParameters := True;
@@ -1041,10 +1037,6 @@ begin
 (*      if NoteRec.Lines <> nil then
         for i := 0 to NoteRec.Lines.Count - 1 do
           Mult['"TEXT",' + IntToStr(i+1) + ',0'] := FilteredString(NoteRec.Lines[i]);*)
-      if NoteRec.Subject <> '' then Mult['1701'] := NoteRec.Subject;  //kt added
-      //kt NOTE RE LINE ABOVE: On the server, in MAKEADD^TIUSRVP2, the passing of '1701' triggers
-      //kt   new document to be created as a note component rather than as standard addendum.
-      //kt   Thus 'Subject' has meaning of title of a component block.  Otherwise, it is not used in CPRS.
     end;
     Param[2].PType := literal;
     Param[2].Value := '1';  // suppress commit logic
@@ -1061,52 +1053,16 @@ begin
       CreatedDoc.ErrorText := ErrMsg;
     end;
   end;
-  }
 end;
 
-procedure PutComponent(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64);
-begin
-  PutChildDoc('TMG CPRS CREATE COMPONENT REC', CreatedDoc, NoteRec, AddendumTo, false);
-end;
+//kt //codex original --> procedure PutComponent(var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64);
+//kt //codex original --> begin
+//kt //codex original -->   PutChildDoc('TMG CPRS CREATE COMPONENT REC', CreatedDoc, NoteRec, AddendumTo, false);
+//kt //codex original --> end;
 
-procedure PutChildDoc(RPCName: string; var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64; Suppress : boolean);
-//kt added, patterned after (split out from) PutAddendum
-{ Create a new component for note identified in AddendumTo, returns IEN of new document
-  load broker directly since there isn't a good way to set up mutilple subscript arrays
-  If Suppress=true, then SetText puts lines into TEMP node in note rather than commiting
-  changes for perminent storage.
-}
-var
-  ErrMsg: string;
-  SuccessInt : integer;  //kt
-begin
-  with RPCBrokerV do begin
-    ClearParameters := True;
-    RemoteProcedure := RPCName;
-    Param[0].PType := literal;
-    Param[0].Value := IntToStr(AddendumTo);
-    Param[1].PType := list;
-    with Param[1] do begin
-      Mult['1202'] := IntToStr(NoteRec.Author);
-      Mult['1301'] := FloatToStr(NoteRec.DateTime);
-      if NoteRec.Cosigner > 0 then Mult['1208'] := IntToStr(NoteRec.Cosigner);
-      if NoteRec.Subject <> '' then Mult['1701'] := NoteRec.Subject;  //kt added, esp used for NOTE COMPONENTs
-    end;
-    Param[2].PType := literal;
-    Param[2].Value := '1';  // suppress commit logic
-    CallBroker;
-    CreatedDoc.IEN := StrToInt64Def(Piece(Results[0], U, 1), 0);
-    CreatedDoc.ErrorText := Piece(Results[0], U, 2);
-  end;
-  if ( NoteRec.Lines <> nil ) and ( CreatedDoc.IEN <> 0 ) then begin
-    if Suppress then SuccessInt := 1 else SuccessInt := 0;
-    SetText(ErrMsg, NoteRec.Lines, CreatedDoc.IEN, SuccessInt); //kt changed constant to SuccessInt var
-    if ErrMsg <> '' then begin
-      CreatedDoc.IEN := 0;
-      CreatedDoc.ErrorText := ErrMsg;
-    end;
-  end;
-end;
+//kt //codex original --> procedure PutChildDoc(RPCName: string; var CreatedDoc: TCreatedDoc; const NoteRec: TNoteRec; AddendumTo: Int64; Suppress : boolean);
+//kt //codex original --> //kt added, patterned after (split out from) PutAddendum
+//kt //codex original --> { Create a new component for note identified in AddendumTo, returns IEN of new document }
 
 procedure PutEditedNote(var UpdatedDoc: TCreatedDoc; const NoteRec: TNoteRec; NoteIEN: Int64);
 { update the fields and content of the note identified in NoteIEN, returns 1 if successful
@@ -1150,7 +1106,7 @@ begin
   //if UpdatedDoc.ErrorText <> '' then    //v22.5 - RV
     begin
       UpdatedDoc.ErrorText := UpdatedDoc.ErrorText + #13#10 + #13#10 + 'Document #:  ' + IntToStr(NoteIEN);
-      exit;  
+      exit;
     end;
 
   // next, if no error, file document body

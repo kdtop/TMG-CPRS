@@ -252,7 +252,7 @@ begin
     PkgRef       := '';
     NeedCPT      := False;
     Addend       := 0;
-    IsComponent  := false;
+//kt //codex original -->     IsComponent  := false;
     if Assigned (Lines) then Lines.Clear;
     PRF_IEN      := 0;
     ActionIEN    := '';

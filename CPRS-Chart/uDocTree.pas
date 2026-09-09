@@ -76,10 +76,10 @@ type
   end; //kt //codex 8/18/26
 
 // Procedures for document treeviews/listviews
-function IsComponent(Title, Subject : string) : boolean;       overload; //kt 5/15
-function IsComponent(Node : TORTreeNode) : boolean;            overload; //kt 5/15
-function IsComponent(IEN : int64; TV : TORTreeview;
-                  StartingNode : TORTreeNode = nil) : boolean; overload; //kt 5/15
+//kt //codex original --> function IsComponent(Title, Subject : string) : boolean;       overload; //kt 5/15
+//kt //codex original --> function IsComponent(Node : TORTreeNode) : boolean;            overload; //kt 5/15
+//kt //codex original --> function IsComponent(IEN : int64; TV : TORTreeview;
+//kt //codex original -->                   StartingNode : TORTreeNode = nil) : boolean; overload; //kt 5/15
 procedure CreateListItemsForDocumentTree(Dest, Source: TStrings; Context: integer; GroupBy: string;
           Ascending: boolean; TabIndex: integer);
 procedure BuildDocumentTree(DocList: TStrings; const Parent: string; Tree: TORTreeView; Node: TORTreeNode;
@@ -392,33 +392,33 @@ the following string '^' pieces:
       15 - Order children of ID Note by title rather than date
 ===============================================================}
 
-function IsComponent(Title, Subject : string) : boolean;
-//kt 5/15
-begin
-  //kt //codex original --> Result := (MidStr(Trim(Title),1,length(Subject)+2) = '['+Subject+']');
-  Result := (Copy(Trim(Title),1,length(Subject)+2) = '['+Subject+']'); //kt //codex 8/3/26
-end;
-
-function IsComponent(Node : TORTreeNode) : boolean;
-//kt added 5/15
-var  AnObject: PDocTreeObject;
-     Subject : string;
-begin
-  Result := false;
-  if not assigned(Node) then exit;
-  AnObject := DocTreeData(Node); if not assigned(AnObject) then exit; //kt //codex 8/18/26
-  Subject := AnObject^.Subject;
-  if (Subject = '') and (AnObject^.Status = 'new') then Subject := AnObject^.PkgRef;  //node position changes in different states...
-  Result := IsComponent(AnObject^.DocTitle, Subject);
-end;
-
-function IsComponent(IEN : int64; TV : TORTreeview; StartingNode : TORTreeNode = nil) : boolean;
-//kt added 5/15
-var ANode : TORTreeNode;
-begin
-  ANode := TV.FindPieceNode(IntToStr(IEN), U, StartingNode);
-  Result := IsComponent(ANode);
-end;
+//kt //codex original --> function IsComponent(Title, Subject : string) : boolean;
+//kt //codex original --> //kt 5/15
+//kt //codex original --> begin
+//kt //codex original -->   //kt //codex original --> Result := (MidStr(Trim(Title),1,length(Subject)+2) = '['+Subject+']');
+//kt //codex original -->   Result := (Copy(Trim(Title),1,length(Subject)+2) = '['+Subject+']'); //kt //codex 8/3/26
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> function IsComponent(Node : TORTreeNode) : boolean;
+//kt //codex original --> //kt added 5/15
+//kt //codex original --> var  AnObject: PDocTreeObject;
+//kt //codex original -->      Subject : string;
+//kt //codex original --> begin
+//kt //codex original -->   Result := false;
+//kt //codex original -->   if not assigned(Node) then exit;
+//kt //codex original -->   AnObject := DocTreeData(Node); if not assigned(AnObject) then exit; //kt //codex 8/18/26
+//kt //codex original -->   Subject := AnObject^.Subject;
+//kt //codex original -->   if (Subject = '') and (AnObject^.Status = 'new') then Subject := AnObject^.PkgRef;  //node position changes in different states...
+//kt //codex original -->   Result := IsComponent(AnObject^.DocTitle, Subject);
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> function IsComponent(IEN : int64; TV : TORTreeview; StartingNode : TORTreeNode = nil) : boolean;
+//kt //codex original --> //kt added 5/15
+//kt //codex original --> var ANode : TORTreeNode;
+//kt //codex original --> begin
+//kt //codex original -->   ANode := TV.FindPieceNode(IntToStr(IEN), U, StartingNode);
+//kt //codex original -->   Result := IsComponent(ANode);
+//kt //codex original --> end;
 
 procedure CreateListItemsForDocumentTree(Dest, Source: TStrings; Context: integer; GroupBy: string;
           Ascending: Boolean; TabIndex: integer);
@@ -463,7 +463,7 @@ begin
           SetPiece(x, U, 6, MyLocation);
         end;
         MySubject  := SpanText(x, Spans[12]); //kt //codex 8/18/26
-        if IsComponent(MyTitle, MySubject) then Ascending := true; //kt 5/15 Force order of display of components in tree to match sequence order in note.
+//kt //codex original -->         if IsComponent(MyTitle, MySubject) then Ascending := true; //kt 5/15 Force order of display of components in tree to match sequence order in note.
 (*      case TIUContext.SearchField[1] of
           'T': if ((TextFound(MyTitle)) then continue;
           'S': if (not TextFound(MySubject)) then continue;

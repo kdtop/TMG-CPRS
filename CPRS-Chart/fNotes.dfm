@@ -2305,10 +2305,6 @@ inherited frmNotes: TfrmNotes
       Caption = '&Make Addendum...'
       OnClick = mnuActAddendClick
     end
-    object popAddComponent: TMenuItem
-      Caption = 'Add Note &Component...'
-      OnClick = popAddComponentClick
-    end
     object popNoteMemoSave: TMenuItem
       Caption = 'S&ave without Signature'
       OnClick = mnuActSaveClick

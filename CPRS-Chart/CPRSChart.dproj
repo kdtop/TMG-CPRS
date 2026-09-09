@@ -900,7 +900,6 @@
         <DCCReference Include="Careplan-Letters\uCarePlan.pas"/>
         <DCCReference Include="TMG_Extra\HTMLEdit\TMGHTML2.pas"/>
         <DCCReference Include="TMG_Extra\uHTMLTools.pas"/>
-        <DCCReference Include="TMG_Extra\uNoteComponents.pas"/>
         <DCCReference Include="Careplan-Letters\fCarePlan.pas">
             <Form>frmCarePlan</Form>
         </DCCReference>
@@ -997,9 +996,6 @@
             <Form>FMErrorForm</Form>
         </DCCReference>
         <DCCReference Include="TMG_Extra\fMultiRecEditU.pas"/>
-        <DCCReference Include="TMG_Extra\fNoteCompParentPick.pas">
-            <Form>frmNoteCompParentPick</Form>
-        </DCCReference>
         <DCCReference Include="TMG_Extra\fOneRecEditU.pas"/>
         <DCCReference Include="TMG_Extra\fProbAutoAdd.pas">
             <Form>frmProbAutoAdd</Form>

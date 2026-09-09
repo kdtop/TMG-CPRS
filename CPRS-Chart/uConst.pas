@@ -308,7 +308,7 @@ const
   TYP_PROGRESS_NOTE =   3;
   TYP_ADDENDUM      =  81;
   TYP_DC_SUMM       = 244;  //kt documentation.  <-- This seems to be hard coded IEN for server!
-  TYP_COMPONENT     = 115;  //kt added.  Does this have to match IEN on server? ?
+//kt //codex original -->   TYP_COMPONENT     = 115;  //kt added.  Does this have to match IEN on server? ?
 
   { TIU National Document Class Names }
   DCL_CONSULTS = 'CONSULTS';

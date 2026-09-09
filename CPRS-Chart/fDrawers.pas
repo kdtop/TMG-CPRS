@@ -48,7 +48,8 @@ uses
 
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, Buttons, ORCtrls, ComCtrls, ImgList, uTemplates,
-  TMGHTML2, uHTMLTools, StrUtils, uTIU, uNoteComponents, //kt added uses on this line. 9/11
+//kt //codex original -->   TMGHTML2, uHTMLTools, StrUtils, uTIU, uNoteComponents, //kt added uses on this line. 9/11
+  TMGHTML2, uHTMLTools, StrUtils, uTIU, //kt //codex 9/8/26
   Menus, ORClasses, ORFn, fBase508Form, VA508AccessibilityManager,
   VA508ImageListLabeler;
 
@@ -121,7 +122,7 @@ type
     procedure mnuCopyProbNameClick(Sender: TObject);                                    //kt added 6/15
     procedure tvProblemsMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);  //kt added 5/15
     procedure popProblemsPopup(Sender: TObject);                                        //kt added 6/15
-    procedure tvProblemsDblClick(Sender: TObject);                                      //kt added 6/15
+//kt //codex original -->     procedure tvProblemsDblClick(Sender: TObject);                                      //kt added 6/15
     procedure sbProblemsClick(Sender: TObject);                                         //kt added 6/15
     procedure mnuNewProblemClick(Sender: TObject);                                      //kt added 6/15
     procedure mnuEditProblemClick(Sender: TObject);                                     //kt added 6/15
@@ -189,7 +190,7 @@ type
     FHtmlModeSwitcher : THTMLModeSwitcher;     //kt 9/11
     FActiveEditIENGetter: TGetActiveEditIEN;   //kt added 5/15
     FReloadNotes : TReloadNotes;               //kt added 5/15
-    FTemplateComponentClusterRoot: TCompNode;  //kt added 5/15
+//kt //codex original -->     FTemplateComponentClusterRoot: TCompNode;  //kt added 5/15
     FProblemNodesLoaded : boolean;             //kt added 6/15
     LastHintNode : TTreeNode;                  //kt added 6/15
     FOpenToNode: string;
@@ -228,7 +229,7 @@ type
     procedure SetAlign(const Value: TAlign);
     function MinDrawerControlHeight: integer;
     procedure DisableArrowKeyMove(Sender: TObject);
-    procedure HandleProblemDblClick(Node : TORtreeNode);     //kt 5/15
+//kt //codex original -->     procedure HandleProblemDblClick(Node : TORtreeNode);     //kt 5/15
     function NodeHint(ANode: TTreeNode): string;             //kt 6/15
     function GetTemplateText(Template : TTemplate) : string; //kt added 5/16
   protected
@@ -259,8 +260,8 @@ type
                              var Accept: Boolean);                         //kt 9/11
     procedure InsertText;
     procedure PutTemplateTextIntoEditControl(txt : string; PrintName : string);  //kt added 6/15
-    procedure CheckParseComponentCluster(var txt : string; PrintName : string);  //kt added 6/15
-    procedure CheckFinishComponentCluster;                                       //kt added 6/15
+//kt //codex original -->     procedure CheckParseComponentCluster(var txt : string; PrintName : string);  //kt added 6/15
+//kt //codex original -->     procedure CheckFinishComponentCluster;                                       //kt added 6/15
     procedure SetSplitter(const Value: TSplitter);
     procedure SplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure SetSplitterActive(Active: boolean);
@@ -595,7 +596,7 @@ begin
     DocSelRec.TreeView := nil;
     DocSelRec.TreeType := edseNone;
     DocSelRec.Drawers := self;
-    FTemplateComponentClusterRoot := TCompNode.Create(nil, '');
+//kt //codex original -->     FTemplateComponentClusterRoot := TCompNode.Create(nil, '');
     FProblemNodesLoaded := false;
     //kt end mod 6/15/15
     FButtonHeights := -1;
@@ -846,23 +847,23 @@ begin
 end;
   //vw mod for template callup. Checks in test
 
-procedure TfrmDrawers.HandleProblemDblClick(Node : TORtreeNode);
-//kt added 5/15
-var DataStr, ProbIEN, ProbName, ProbICD : string;
-begin
-  DataStr := Node.StringData;
-  DataStr := Pieces2(DataStr, U, 4, 999);
-  ProbIEN := piece(DataStr, U, 1);
-  ProbName := piece(DataStr, U, 3);
-  ProbICD := piece(DataStr, U, 4);
-  if AddComponentForProblem(ProbIEN, ProbName, ProbICD, HTMLEditActive, Self.DocSelRec) then begin
-    //Perhaps here tell problem tab, prob edit dialog to reload linked titles ... or not.
-  end;
-   //Application.MessageBox(PChar('Node='+IntToStr(Node.Index)+' tvtemplates.VertScrollPos='+IntToStr(tvTemplates.VertScrollPos)),PChar(Application.Title),MB_ICONINFORMATION);
-   //sbTemplates.Caption := 'Templates '+ 'Node='+IntToStr(Node.Index)+' VertScrollPos='+IntToStr(tvTemplates.VertScrollPos) ;
-  //end vw mod
-  Node.SelectedIndex := dmodShared.ImgIdx(Node);
-end;
+//kt //codex original --> procedure TfrmDrawers.HandleProblemDblClick(Node : TORtreeNode);
+//kt //codex original --> //kt added 5/15
+//kt //codex original --> var DataStr, ProbIEN, ProbName, ProbICD : string;
+//kt //codex original --> begin
+//kt //codex original -->   DataStr := Node.StringData;
+//kt //codex original -->   DataStr := Pieces2(DataStr, U, 4, 999);
+//kt //codex original -->   ProbIEN := piece(DataStr, U, 1);
+//kt //codex original -->   ProbName := piece(DataStr, U, 3);
+//kt //codex original -->   ProbICD := piece(DataStr, U, 4);
+//kt //codex original -->   if AddComponentForProblem(ProbIEN, ProbName, ProbICD, HTMLEditActive, Self.DocSelRec) then begin
+//kt //codex original -->     //Perhaps here tell problem tab, prob edit dialog to reload linked titles ... or not.
+//kt //codex original -->   end;
+//kt //codex original -->    //Application.MessageBox(PChar('Node='+IntToStr(Node.Index)+' tvtemplates.VertScrollPos='+IntToStr(tvTemplates.VertScrollPos)),PChar(Application.Title),MB_ICONINFORMATION);
+//kt //codex original -->    //sbTemplates.Caption := 'Templates '+ 'Node='+IntToStr(Node.Index)+' VertScrollPos='+IntToStr(tvTemplates.VertScrollPos) ;
+//kt //codex original -->   //end vw mod
+//kt //codex original -->   Node.SelectedIndex := dmodShared.ImgIdx(Node);
+//kt //codex original --> end;
 
 procedure TfrmDrawers.tvTemplatesExpanding(Sender: TObject;
   Node: TTreeNode; var AllowExpansion: Boolean);
@@ -1203,14 +1204,14 @@ begin
   if not dmodShared.TemplateOK(Template) then exit;
   txt := GetTemplateTextForInsertion(Template);
   if txt = AWAIT_DLG_FOR_TEXT then exit;  //kt 4/8/21
-  CheckParseComponentCluster(txt, Template.PrintName);  //kt added 2015
+//kt //codex original -->   CheckParseComponentCluster(txt, Template.PrintName);  //kt added 2015
   TransformInsertionText(txt, Template.PrintName);
   PutTemplateTextIntoEditControl(txt, Template.PrintName);
 
   HandleTemplateIfCarePlan(Template);
   uCarePlan.CurrentDialogIsCarePlan := false;
 
-  CheckFinishComponentCluster;
+//kt //codex original -->   CheckFinishComponentCluster;
 end;
 
 function TfrmDrawers.InsertTemplatebyName(TemplateName : string) : boolean;
@@ -1304,21 +1305,21 @@ begin
 end;
 
 
-procedure TfrmDrawers.CheckParseComponentCluster(var txt : string; PrintName : string);
-//kt added 6/15
-begin
-  if uNoteComponents.TemplateHasComponents(txt) then begin  //kt added block
-    FTemplateComponentClusterRoot.Clear;
-    FTemplateComponentClusterRoot.Name := PrintName;
-    uNoteComponents.ParseTemplate(txt, FTemplateComponentClusterRoot, TransformInsertionText, HTMLEditActive);
-    txt := FTemplateComponentClusterRoot.TextSL.Text;
-    if assigned(ActiveEditIEN) then begin
-      FTemplateComponentClusterRoot.NoteIEN := self.ActiveEditIEN;
-    end else begin
-      FTemplateComponentClusterRoot.NoteIEN := -1;
-    end;
-  end;
-end;
+//kt //codex original --> procedure TfrmDrawers.CheckParseComponentCluster(var txt : string; PrintName : string);
+//kt //codex original --> //kt added 6/15
+//kt //codex original --> begin
+//kt //codex original -->   if uNoteComponents.TemplateHasComponents(txt) then begin  //kt added block
+//kt //codex original -->     FTemplateComponentClusterRoot.Clear;
+//kt //codex original -->     FTemplateComponentClusterRoot.Name := PrintName;
+//kt //codex original -->     uNoteComponents.ParseTemplate(txt, FTemplateComponentClusterRoot, TransformInsertionText, HTMLEditActive);
+//kt //codex original -->     txt := FTemplateComponentClusterRoot.TextSL.Text;
+//kt //codex original -->     if assigned(ActiveEditIEN) then begin
+//kt //codex original -->       FTemplateComponentClusterRoot.NoteIEN := self.ActiveEditIEN;
+//kt //codex original -->     end else begin
+//kt //codex original -->       FTemplateComponentClusterRoot.NoteIEN := -1;
+//kt //codex original -->     end;
+//kt //codex original -->   end;
+//kt //codex original --> end;
 
 
 procedure TfrmDrawers.PutTemplateTextIntoEditControl(txt : string; PrintName : string);
@@ -1382,16 +1383,16 @@ begin
   end;
 end;
 
-procedure TfrmDrawers.CheckFinishComponentCluster;
-begin
-  if not FTemplateComponentClusterRoot.HasChildren then exit;
-  //Here I will call to create the template cluster,
-  //At this point, each node in cluster contains the insertion text to be put into that node
-  //   and that text has aleady been put through template transformation engine.
-  uNoteComponents.HiddenCreateComponentCluster(FTemplateComponentClusterRoot); //adds notes just server-side.
-  if assigned(ReloadNotes) then ReloadNotes;
-  FTemplateComponentClusterRoot.Clear;
-end;
+//kt //codex original --> procedure TfrmDrawers.CheckFinishComponentCluster;
+//kt //codex original --> begin
+//kt //codex original -->   if not FTemplateComponentClusterRoot.HasChildren then exit;
+//kt //codex original -->   //Here I will call to create the template cluster,
+//kt //codex original -->   //At this point, each node in cluster contains the insertion text to be put into that node
+//kt //codex original -->   //   and that text has aleady been put through template transformation engine.
+//kt //codex original -->   uNoteComponents.HiddenCreateComponentCluster(FTemplateComponentClusterRoot); //adds notes just server-side.
+//kt //codex original -->   if assigned(ReloadNotes) then ReloadNotes;
+//kt //codex original -->   FTemplateComponentClusterRoot.Clear;
+//kt //codex original --> end;
 
 
 
@@ -1500,7 +1501,7 @@ end;
 
 procedure TfrmDrawers.FormDestroy(Sender: TObject);
 begin
-  FTemplateComponentClusterRoot.Free; //kt 6/15
+//kt //codex original -->   FTemplateComponentClusterRoot.Free; //kt 6/15
   dmodShared.RemoveDrawerTree(Self);
   KillObj(@FRemNotifyList);
 end;
@@ -2065,16 +2066,16 @@ begin
     tvReminders.Selected := nil;
 end;
 
-procedure TfrmDrawers.tvProblemsDblClick(Sender: TObject);
-//kt added 6/15
-var Node : TTreeNode;
-begin
-  inherited;
-  Node := tvProblems.Selected;
-  if IsProblemListNode(Node) then begin
-    HandleProblemDblClick(TORtreeNode(Node));
-  end;
-end;
+//kt //codex original --> procedure TfrmDrawers.tvProblemsDblClick(Sender: TObject);
+//kt //codex original --> //kt added 6/15
+//kt //codex original --> var Node : TTreeNode;
+//kt //codex original --> begin
+//kt //codex original -->   inherited;
+//kt //codex original -->   Node := tvProblems.Selected;
+//kt //codex original -->   if IsProblemListNode(Node) then begin
+//kt //codex original -->     HandleProblemDblClick(TORtreeNode(Node));
+//kt //codex original -->   end;
+//kt //codex original --> end;
 
 function TfrmDrawers.NodeHint(ANode: TTreeNode): string;
 //kt added 6/15

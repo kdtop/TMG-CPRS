@@ -717,8 +717,8 @@ inherited frmFrame: TfrmFrame
           object lblVistaWeb: TLabel
             Left = 2
             Top = 2
-            Width = 65
-            Height = 14
+            Width = 46
+            Height = 13
             Cursor = crHandPoint
             Align = alClient
             Alignment = taCenter
@@ -732,8 +732,6 @@ inherited frmFrame: TfrmFrame
             Transparent = False
             Layout = tlCenter
             OnClick = pnlVistaWebClick
-            ExplicitWidth = 46
-            ExplicitHeight = 13
           end
         end
         object pnlCIRN: TKeyClickPanel
@@ -761,7 +759,7 @@ inherited frmFrame: TfrmFrame
           object lblCIRN: TLabel
             Left = 2
             Top = 2
-            Width = 65
+            Width = 63
             Height = 13
             Align = alClient
             Alignment = taCenter
@@ -777,12 +775,11 @@ inherited frmFrame: TfrmFrame
             Layout = tlCenter
             Visible = False
             OnClick = pnlCIRNClick
-            ExplicitWidth = 63
           end
           object lblLoadSequelPat: TLabel
             Left = 2
             Top = 2
-            Width = 65
+            Width = 52
             Height = 13
             Hint = 'Load patient who is selected in SequelMed'
             Align = alClient
@@ -797,7 +794,6 @@ inherited frmFrame: TfrmFrame
             Transparent = False
             Layout = tlCenter
             OnClick = lblLoadSequelPatClick
-            ExplicitWidth = 52
           end
         end
       end
@@ -843,7 +839,7 @@ inherited frmFrame: TfrmFrame
           object lblFlag: TLabel
             Left = 2
             Top = 22
-            Width = 85
+            Width = 25
             Height = 13
             Cursor = crHandPoint
             Align = alBottom
@@ -861,7 +857,6 @@ inherited frmFrame: TfrmFrame
             OnClick = pnlFlagClick
             OnMouseDown = pnlFlagMouseDown
             OnMouseUp = pnlFlagMouseUp
-            ExplicitWidth = 25
           end
         end
       end

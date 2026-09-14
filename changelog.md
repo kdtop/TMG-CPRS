@@ -2,6 +2,55 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-10 — Wine modal-dialog investigation and remote-debugger experiment
+
+### Confirmed Modal Behavior
+
+- The standalone Delphi 12 test project is `CPRS-Chart\TMG_Extra\killlater\Project1.dproj`. Its launcher is `/home/kdt0p/Desktop/CPRS KillLater Test.desktop`, which starts `Win32\Debug\Project1.exe` in `WINEPREFIX=/home/kdt0p/.wine-cprs-ie8`.
+- The test program creates `TForm2` from `TForm1` and calls `ShowModal`; it behaves normally under the same Wine prefix. This rules out a general Wine/Delphi 12 VCL `ShowModal` failure.
+- X11 inspection of the working demo showed `Form2` transient for the visible `Form1` client window.
+- CPRS dialogs differ: both the visible CPRS main window and modal-looking dialogs are transient for Wine's hidden 1x1 group-leader window titled `CPRS - Patient Chart`, rather than the visible main CPRS window. The X11 window IDs are ephemeral; re-query every run.
+- In the dev2006 CPRS instance, a hidden `Confirm?` timer dialog was active and viewable but behind the main CPRS window. `xdotool windowactivate <Confirm-window-id>` brought it forward. This confirms a real Wine/X11 stacking/ownership issue.
+- In the Delphi 12 instance, after selecting a patient and pressing OK, X11 still reported `Patient Selection` as `IsViewable`, focused, and `_NET_ACTIVE_WINDOW`. The main CPRS window was not active. `Image Transfer Progress` was `IsUnMapped` at that moment. Therefore the selector had not completed its normal native hide/close path; it was not merely hidden behind the main form in that snapshot.
+
+### Interpretation and Source Status
+
+- `ModalResult := mrOK` is a VCL-level signal that should end `ShowModal`; Windows/Wine/X11 implement the native hide/activation resulting from that VCL path. X11 cannot reveal the Delphi `ModalResult` value.
+- Do not conflate Delphi component ownership (`TForm.Create(AOwner)`), control parenting, and native top-level window ownership/transience. `Create(AOwner)` establishes `TComponent.Owner`; it does not directly establish a visual parent.
+- A possible, untested, narrow source experiment is to override `TfrmPtSel.CreateParams` and set `Params.WndParent` to the intended visible form handle. For a top-level Win32 form this establishes the native owner even though the field is named `WndParent`. Do not apply this broadly or assume it fixes the failure without retesting X11 properties.
+- No Confirm Timer ownership/source change was made in this session. `TMG_Extra\fConfirmTimer.pas` currently creates its dialog with `TfrmConfirmTimer.Create(nil)`; that observation is not proof that component ownership alone caused the X11 relationship.
+
+### Existing Temporary Runtime Diagnostics
+
+- `CPRS-Chart\TMG_Extra\uDebugTools.pas` was added as a nonvisual diagnostic helper. `DebugMsg(Msg)` appends to `cprs_debug.log`; `DebugMsg(LogFileName, Msg)` appends to the named log in Wine's temp directory.
+- `fPtSel.pas` sends its temporary selector diagnostics through `uDebugTools` to `cprs_ptsel_diag.log`; `BA\UBACore.pas` writes BA diagnostics to `cprs_ba_diag.log`.
+- Wine log paths:
+  - `/home/kdt0p/.wine-cprs-ie8/drive_c/users/kdt0p/Temp/cprs_ptsel_diag.log`
+  - `/home/kdt0p/.wine-cprs-ie8/drive_c/users/kdt0p/Temp/cprs_ba_diag.log`
+  - `/home/kdt0p/.wine-cprs-ie8/drive_c/users/kdt0p/Temp/cprs_debug.log`
+- Earlier removal of three `Application.ProcessMessages` calls in `TfrmFrame.SetBADxList` eliminated a BA re-entrancy path. The explicit `ModalResult := mrOK` / `mrCancel` changes in `fPtSel.pas` were compiled but did not make patient selection complete normally under Wine.
+
+### Delphi Remote Debugger Under Wine
+
+- The Delphi 12 PAServer directory was copied to `/mnt/WinPublic/vista/temp/PAServer`.
+- Installed the minimal Win32 remote-debugger files in the CPRS Wine prefix at `C:\CPRSRemoteDebug`: `rmtdbg290.exe`, `bordbk290.dll`, `dcc32290.dll`, `comp32x.dll`, and `bcc.msg`. `bordbk290.dll` was registered successfully with Wine `regsvr32`.
+- Start the server only with the console-preserving command:
+
+  ```bash
+  DISPLAY=:1 WINEPREFIX=/home/kdt0p/.wine-cprs-ie8 \
+    wine start /unix '/home/kdt0p/.wine-cprs-ie8/drive_c/CPRSRemoteDebug/rmtdbg290.exe'
+  ```
+
+  The black Wine console is expected and must remain open. The server listens on `192.168.3.57:64447`.
+- Delphi 12's `Attach to Process` reached the server: it spawned a per-connection `rmtdbg290.exe -socket ...` process and loaded the `BORDBK290` bridge. However, the Delphi remote-connection dialog became unresponsive and the server sometimes exited. This is beyond a firewall, port, or basic registration failure and likely reflects an unsupported Wine/Embarcadero remote-debugger interaction.
+- Do not keep collecting guessed DLLs or run `setup_paserver.exe` inside the CPRS Wine prefix. The copied PAServer installation already lacked `DCCIL290.dll`; its string reference in `bordbk290.dll` is dynamic/possibly optional, not proof of the observed hang.
+- Treat source-level remote debugging from the Windows Delphi IDE into Wine as currently nonviable. Prefer targeted Delphi logging plus `xwininfo`/`xprop`/`xdotool` evidence, or debug the same executable in real Windows/VM when full stepping is needed.
+
+### Related Environment Fix
+
+- `/home/kdt0p/.local/share/applications/cprs-wine.desktop` launches the dev2006 CPRS shortcut `TMGCPRS v30A - GOOD\CPRS-Chart\CPRSChart.exe - Shortcut.lnk`.
+- Its stored UTF-16LE argument was corrected from `s=192.168.3.18 p=9260` to `s=192.168.3.99 p=9260`. Original retained as the adjacent `.lnk.bak`. User confirmed the launcher works.
+
 ## 2026-09-08 — Health factors available before note signature
 
 - Traced reminder-dialog health-factor persistence through `TPCEData.Save` and `ORWPCE SAVE`.

@@ -58,6 +58,7 @@ uses
   VA508AccessibilityManager, RichEdit, rWVEHR, XUDsigS, SHDocVw, ImgList,
   System.UITypes,
   System.Contnrs,  //kt 7/30/26
+  uDebugTools,  //kt 9/9/26
   System.ImageList;
 
 type
@@ -1148,6 +1149,7 @@ var
   ClientVer, ServerVer, ServerReq, SAN: string;
   ASide : TTabPageSide;           //kt-tabs 11/26/22
 begin
+  DebugMsg('--------  Starting up frmFrame ------------');
   frmCover := nil;  //kt //codex 8/25/26
   frmProblems := nil;  //kt //codex 8/25/26
   frmMeds := nil;  //kt //codex 8/25/26
@@ -2782,20 +2784,20 @@ begin
   if not Assigned(UBAGlobals.tempDxList) then begin
     UBAGlobals.tempDxList := TList.Create;
     UBAGlobals.tempDxList.Count := 0;
-    Application.ProcessMessages;
+    //kt //codex 9/9/26 original --> Application.ProcessMessages;
   end else begin
     //Kill the old Dx list
     for i := 0 to pred(UBAGlobals.tempDxList.Count) do
       TObject(UBAGlobals.tempDxList[i]).Free;
 
     UBAGlobals.tempDxList.Clear;
-    Application.ProcessMessages;
+    //kt //codex 9/9/26 original --> Application.ProcessMessages;
 
     //Create new Dx list for newly selected patient
     if not Assigned(UBAGlobals.tempDxList) then begin
       UBAGlobals.tempDxList := TList.Create;
       UBAGlobals.tempDxList.Count := 0;
-      Application.ProcessMessages;
+      //kt //codex 9/9/26 original --> Application.ProcessMessages;
     end;
   end;
 end;
@@ -2884,6 +2886,7 @@ begin
           imgCCOW.Picture.BitMap.LoadFromResourceName(hInstance, FCCOWIconName);
         end;
         if (Patient.DFN = '') or (Sender = mnuFileOpen) or (Sender = mnuFileNext) or (Sender = mnuViewDemo) then
+          DebugMsg('In fFrame, starting PatientSelection()');
           SelectPatient(SHOW_NOTIFICATIONS, Font.Size, PtSelCancelled);
         //kt original --> if PtSelCancelled then exit;
         if PtSelCancelled then begin

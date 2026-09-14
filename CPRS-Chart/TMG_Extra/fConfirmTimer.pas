@@ -28,19 +28,27 @@ implementation
 
 {$R *.dfm}
 
+  uses
+    fFrame;
+
   function ConfirmTimerStart(var SaveAnswer:integer) : boolean;
   var frmConfirmTimer : TfrmConfirmTimer;
       ModalResult : integer;
   begin
-    frmConfirmTimer := TfrmConfirmTimer.Create(nil);
-    ModalResult := frmConfirmTimer.ShowModal;
-    if frmConfirmTimer.chkRemember.Checked then begin
-      if ModalResult=mrYes then SaveAnswer := 1
-      else SaveAnswer := -1;
-    end else begin
-      SaveAnswer := 0;
+    Result := false;
+    frmConfirmTimer := TfrmConfirmTimer.Create(frmFrame);
+    try
+      ModalResult := frmConfirmTimer.ShowModal;
+      if frmConfirmTimer.chkRemember.Checked then begin
+        if ModalResult=mrYes then SaveAnswer := 1
+        else SaveAnswer := -1;
+      end else begin
+        SaveAnswer := 0;
+      end;
+      result := (ModalResult=mrYes);
+    finally
+      frmConfirmTimer.Free;
     end;
-    result := (ModalResult=mrYes);
   end;
 
 end.

@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-09-08
+Last updated: 2026-09-10
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -17,6 +17,9 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 
 ## Current Focus
 
+- Delphi 12 CPRS under Wine has an unresolved Patient Selection modal-close failure. Read the 2026-09-10 entry in `changelog.md` before editing or repeating diagnostics.
+- The standalone `TMG_Extra\killlater` Delphi 12 modal test works under the same Wine prefix. Do not frame this as a general Delphi 12/Wine `ShowModal` incompatibility.
+- The Windows Delphi remote-debugger experiment reaches Wine's server but hangs after the remote connection is accepted. Do not rely on it for the next debugging step; use local instrumentation and X11 inspection, or real Windows/VM source debugging.
 - Keep CPRSChart working under Delphi 12. Read live `fNotes` source before editing; the user frequently reformats and revises it.
 - `FNoteData: TRecStrList` is the live note-list model; the hidden `lstNotes` control has been removed. Use the existing model helpers.
 - `LoadNotes` accepts a preferred IEN and optional activation. Preserve IEN-based restoration and avoid intermediate document activation when resuming editing.
@@ -75,10 +78,12 @@ Important Git workflow:
 ## Next Session Start
 
 1. Read the current source and inspect Git status before editing.
-2. Follow the user's current request; use [changelog.md](changelog.md) for relevant history rather than treating old next-step recommendations as active tasks.
-3. If testing `ReloadNotes`, check return to editing after template insertion, the no-active-edit refresh, and a note absent from the current view.
-4. For runtime/designer problems, inspect the active unit/DFM pair. For compile problems, use fresh IDE output.
-5. For further HTML-stack cleanup, read the current files and the orientation documents below before removing dependencies.
+2. For the Wine patient-selection issue, first reproduce the post-OK state and capture `xwininfo -root -tree`, `xprop -root _NET_ACTIVE_WINDOW`, and detailed `xprop`/`xwininfo` data for Patient Selection, visible CPRS main, and the hidden `CPRS - Patient Chart` group-leader window.
+3. Use the existing `uDebugTools` selector log to determine whether `ModalResult` remains nonzero and whether `FormClose`/`FormHide` actually fire. Do not infer those Delphi states from X11 alone.
+4. Follow the user's current request; use [changelog.md](changelog.md) for relevant history rather than treating old next-step recommendations as active tasks.
+5. If testing `ReloadNotes`, check return to editing after template insertion, the no-active-edit refresh, and a note absent from the current view.
+6. For runtime/designer problems, inspect the active unit/DFM pair. For compile problems, use fresh IDE output.
+7. For further HTML-stack cleanup, read the current files and the orientation documents below before removing dependencies.
 
 ## HTMLEdit Streamlining Idea
 

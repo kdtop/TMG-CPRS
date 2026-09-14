@@ -180,6 +180,7 @@ type
     procedure AdjustNotificationButtons;
     procedure SetupDemographicsForm;
     procedure ShowDisabledButtonTexts;
+    procedure TEMPClose;  //delete later
 
   public
     procedure Loaded; override;
@@ -207,7 +208,7 @@ uses rCore, uCore, fDupPts, fPtSens, fPtSelDemog, fPtSelOptns, fPatientFlagMulti
      uOrPtf, fAlertForward, rMisc, fFrame, fRptBox, VA508AccessibilityRouter,
      fPtAdd, fPtQuery, fLetterWriter, uTMGOptions, uTMGUtil, fMultiTIUSign,
      uTMGEvent,    //TMG
-     VAUtils;
+     VAUtils, uDebugTools; //kt //codex 9/9/26
 
 resourcestring
   StrFPtSel_lstvAlerts_Co = 'C'+U+'fPtSel.lstvAlerts.Cols';
@@ -217,6 +218,7 @@ var
 const
   AliasString = ' -- ALIAS';
   THUMBNAIL_IMAGE_SIZE = 35; //kt 4/15/14
+
 
    //VWPT ENAHANCED PATIENT LOOKUP
 function TfrmPtSel.IsOther(itemindex:Integer):Boolean;
@@ -233,7 +235,9 @@ var
   frmPtSel: TfrmPtSel;
   ResetTimer:boolean;
 begin
+  DebugMsg('SelectPatient ENTER'); //kt //codex 9/9/26
   frmPtSel := TfrmPtSel.Create(Application);
+  DebugMsg('SelectPatient after TfrmPtSel.Create'); //kt //codex 9/9/26
   RPLProblem := false;
   try
     with frmPtSel do
@@ -260,15 +264,19 @@ begin
       //ELH allow user to over ride this reset 5/14/20
       ResetTimer := uTMGOptions.ReadBool('CPRS Reset Timer On New Chart',True);
       if ResetTimer then frmFrame.btnTimerResetClick(nil);  //kt
+      DebugMsg('SelectPatient before frmPtSel.ShowModal'); //kt //codex 9/9/26
       ShowModal;
+      DebugMsg('SelectPatient after frmPtSel.ShowModal'); //kt //codex 9/9/26
       UserCancelled := FUserCancelled;
       if not UserCancelled then begin
         //Is this needed??
       end;
     end;
   finally
+    DebugMsgFormReport('SelectPatient finally before frmPtSel.Release'); //kt //codex 9/9/26
     frmPtSel.Release;
   end;
+  DebugMsgFormReport('SelectPatient EXIT'); //kt //codex 9/9/26
 end;
 
 procedure TfrmPtSel.AdjustFormSize(ShowNotif: Boolean; FontSize: Integer);
@@ -684,6 +692,30 @@ end;
 
 { Command Button events: }
 
+procedure TFrmPtSel.TEMPClose;     //kt delete later...
+var
+  CloseAction: TCloseAction;
+begin
+  if fsModal in FFormState then begin
+    DebugMsg('TEMPClose: setting modal result to mrCancel'); //kt //codex 9/9/26
+    ModalResult := mrCancel;
+  end else if CloseQuery then begin
+    DebugMsg('TEMPClose: in closeQuery'); //kt //codex 9/9/26
+    if FormStyle = fsMDIChild then
+      if biMinimize in BorderIcons then
+        CloseAction := caMinimize else
+        CloseAction := caNone
+    else
+      CloseAction := caHide;
+    DoClose(CloseAction);
+    if CloseAction <> caNone then
+      if Application.MainForm = Self then Application.Terminate
+      else if CloseAction = caHide then Hide
+      else if CloseAction = caMinimize then WindowState := wsMinimized
+      else Release;
+  end;
+end;
+
 procedure TfrmPtSel.cmdOKClick(Sender: TObject);
 { Checks for restrictions on the selected patient and sets up the Patient object. }
 const
@@ -693,6 +725,7 @@ var
   DateDied: TFMDateTime;
   AccessStatus: integer;
 begin
+  DebugMsg('cmdOKClick ENTER ItemIDLen=' + IntToStr(Length(cboPatient.ItemID)) + ' ItemIndex=' + IntToStr(cboPatient.ItemIndex)); //kt //codex 9/9/26
 // vwpt enhanced   on click or double clck set mode back to normal to a.) not allow change event
 //erroniously checked with false lookup, and b.0 immedicately put back into normal mode
 //without separate step needed.
@@ -710,34 +743,32 @@ begin
   end;
   NewDFN := cboPatient.ItemID;  //*DFN*
   LastSelectedOption := frmPtSelOptns.SrcType;
-  if FLastPt <> cboPatient.ItemID then
-  begin
+  if FLastPt <> cboPatient.ItemID then begin
     HasActiveFlg(FlagList, HasFlag, cboPatient.ItemID);
     flastpt := cboPatient.ItemID;
   end;
 
-  //kt added 4/8/15
-  //if uTMGOptions.ReadString('SpecialLocation','')='INTRACARE' then begin
-  //if AtIntracareLoc() then begin
-  //  RPCResult := sCallV('VEFA PT HAS SIGNED CONSENT',[NewDFN,'0']);
-  //  if piece(RPCResult,'^',1)='-1' then
-  //      messagedlg(piece(RPCResult,'^',2),mtWarning,[mbOK],0);
-  //  RPCResult := sCallV('VEFA PT MISSING ADDRESS',[NewDFN]);
-  //  if piece(RPCResult,'^',1)='-1' then
-  //      messagedlg(piece(RPCResult,'^',2),mtWarning,[mbOK],0);
-  //end;
-  //kt end mod
-
-  If DupLastSSN(NewDFN) then    // Check for, deal with duplicate patient data.
-    if (DupDFN = 'Cancel') then
+  If DupLastSSN(NewDFN) then begin   // Check for, deal with duplicate patient data.
+    if (DupDFN = 'Cancel') then begin
       Exit
-    else
+    end else begin
       NewDFN := DupDFN;
-  if not AllowAccessToSensitivePatient(NewDFN, AccessStatus) then exit;
+    end;
+  end;
+
+
+  if not AllowAccessToSensitivePatient(NewDFN, AccessStatus) then begin //kt //codex 9/9/26
+    DebugMsg('cmdOKClick AllowAccessToSensitivePatient denied AccessStatus=' + IntToStr(AccessStatus)); //kt //codex 9/9/26
+    exit; //kt //codex 9/9/26
+  end; //kt //codex 9/9/26
   DateDied := DateOfDeath(NewDFN);
   if (DateDied > 0) and (InfoBox('This patient died ' + FormatFMDateTime('mmm dd,yyyy hh:nn', DateDied) + CRLF +
      'Do you wish to continue?', 'Deceased Patient', MB_YESNO or MB_DEFBUTTON2) = ID_NO) then
+  begin //kt //codex 9/9/26
+    DebugMsg('cmdOKClick deceased patient check declined before Exit'); //kt //codex 9/9/26
     Exit;
+  end; //kt //codex 9/9/26
+  DebugMsg('cmdOKClick after deceased patient check'); //kt //codex 9/9/26
   // 9/23/2002: Code used to check for changed pt. DFN here, but since same patient could be
   //    selected twice in diff. Encounter locations, check was removed and following code runs
   //    no matter; in fFrame code then updates Encounter display if Encounter.Location has changed.
@@ -781,13 +812,19 @@ begin
   if BILLING_AWARE then
     if Assigned(UBAGLOBALS.BAOrderList) then UBAGLOBALS.BAOrderList.Clear;
   FUserCancelled := FALSE;
-  Close;
+  DebugMsg('cmdOKClick: setting modalresult := mrok'); //kt //codex 9/9/26
+  ModalResult := mrOK; //kt //codex 9/9/26
+  DebugMsg('cmdOKClick before Close'); //kt //codex 9/9/26
+  //kt original --> Close;
+  //TEMPClose;
+  DebugMsg('cmdOKClick after Close'); //kt //codex 9/9/26
 end;
 
 procedure TfrmPtSel.cmdCancelClick(Sender: TObject);
 begin
   // Leave Patient object unchanged
   FUserCancelled := TRUE;
+  ModalResult := mrCancel; //kt //codex 9/9/26
   Close;
 end;
 
@@ -1415,12 +1452,18 @@ var
   i: integer;
   frmPtDupSel: tForm;
 begin
+  DebugMsgFormReport('DupLastSSN ENTER'); //kt //codex 9/9/26
   Result := False;
 
   // Check data on server for duplicates:
+  DebugMsgFormReport('DupLastSSN before DG CHK BS5 XREF ARRAY'); //kt //codex 9/9/26
   CallV('DG CHK BS5 XREF ARRAY', [DFN]);
+  DebugMsgFormReport('DupLastSSN after DG CHK BS5 XREF ARRAY result=' + RPCBrokerV.Results[0]); //kt //codex 9/9/26
   if (RPCBrokerV.Results[0] <> '1') then // No duplicates found.
+  begin //kt //codex 9/9/26
+    DebugMsgFormReport('DupLastSSN no duplicates EXIT'); //kt //codex 9/9/26
     Exit;
+  end; //kt //codex 9/9/26
   Result := True;
   PtStrs := TStringList.Create;
   with RPCBrokerV do if Results.Count > 0 then
@@ -1436,15 +1479,21 @@ begin
 
   // Call form to get user's selection from expanded duplicate pt. list (resets DupDFN variable if applicable):
   DupDFN := DFN;
+  DebugMsgFormReport('DupLastSSN before TfrmDupPts.Create'); //kt //codex 9/9/26
   frmPtDupSel:= TfrmDupPts.Create(Application);
+  DebugMsgFormReport('DupLastSSN after TfrmDupPts.Create'); //kt //codex 9/9/26
   with frmPtDupSel do
     begin
       try
+        DebugMsgFormReport('DupLastSSN before TfrmDupPts.ShowModal'); //kt //codex 9/9/26
         ShowModal;
+        DebugMsgFormReport('DupLastSSN after TfrmDupPts.ShowModal DupDFN=' + DupDFN); //kt //codex 9/9/26
       finally
+        DebugMsgFormReport('DupLastSSN before TfrmDupPts.Release'); //kt //codex 9/9/26
         frmPtDupSel.Release;
       end;
     end;
+  DebugMsgFormReport('DupLastSSN EXIT'); //kt //codex 9/9/26
 end;
 
 procedure TfrmPtSel.ShowFlagInfo;

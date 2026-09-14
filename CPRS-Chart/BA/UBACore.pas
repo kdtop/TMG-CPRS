@@ -72,7 +72,12 @@ var
 implementation
 
 uses fBALocalDiagnoses, fOrdersSign, fReview, rOrders, uCore, rCore, rPCE,uPCE,
-     UBAConst, UBAMessages, USignItems, VAUtils;
+     UBAConst, UBAMessages, USignItems, VAUtils, uDebugTools; //kt //codex 9/9/26
+
+procedure BADiag(const Msg: string); //kt //codex 9/9/26
+begin //kt //codex 9/9/26
+  DebugMsg('cprs_ba_diag.log', Msg); //kt //codex 9/9/26
+end; //kt //codex 9/9/26
 
 
 // -----------------  MAIN CIDC DX HAS BEEN ENTERED LOGIC  ---------------------------
@@ -324,20 +329,31 @@ end;
 procedure rpcSetBillingAwareSwitch(encProvider:int64; pPatientDFN: string);
 begin
 // Is Provider -> Is Master Sw -> Is CIDC SW -> Is Patient Insured
+   BADiag('rpcSetBillingAwareSwitch ENTER provider=' + IntToStr(encProvider) + ' patient=' + pPatientDFN); //kt //codex 9/9/26
    BILLING_AWARE := FALSE;
    // verify user is a provider
+   BADiag('rpcSetBillingAwareSwitch before PersonHasKey'); //kt //codex 9/9/26
    if (encProvider <> 0) and PersonHasKey(encProvider, 'PROVIDER') then
     //  Master switch is set "ON"
+      begin //kt //codex 9/9/26
+      BADiag('rpcSetBillingAwareSwitch after PersonHasKey true before ORWDBA1 BASTATUS'); //kt //codex 9/9/26
       if  (sCallV('ORWDBA1 BASTATUS', [nil]) = '1') then
          // User is CIDC Enabled
+        begin //kt //codex 9/9/26
+        BADiag('rpcSetBillingAwareSwitch after ORWDBA1 BASTATUS true before ORWDBA4 GETBAUSR'); //kt //codex 9/9/26
         if  (sCallV('ORWDBA4 GETBAUSR', [encProvider]) = '1') then
         begin
            // Verify Patient is Insured
            // OR Switch = 2 ask questions for all patients.
+           BADiag('rpcSetBillingAwareSwitch after ORWDBA4 GETBAUSR true before rpcIsPatientInsured'); //kt //codex 9/9/26
            if  rpcIsPatientInsured(pPatientDFN)  then
               BILLING_AWARE := TRUE;
+           BADiag('rpcSetBillingAwareSwitch after rpcIsPatientInsured BILLING_AWARE=' + BoolToStr(BILLING_AWARE, True)); //kt //codex 9/9/26
         end;
+        end; //kt //codex 9/9/26
+      end else BADiag('rpcSetBillingAwareSwitch PersonHasKey false or provider zero'); //kt //codex 9/9/26
        {$ifdef debug}BILLING_AWARE := TRUE;{$endif}
+   BADiag('rpcSetBillingAwareSwitch EXIT BILLING_AWARE=' + BoolToStr(BILLING_AWARE, True)); //kt //codex 9/9/26
 end;
 
 //  verify CIDC Master Switch and Provider is CIDC Enabled.
@@ -1318,12 +1334,22 @@ begin
   // sets global switch, based in value returned from server.
   // True ->  Billing Aware Switch ON. else OFF
 
+  BADiag('GetBAStatus ENTER provider=' + IntToStr(pProvider) + ' patient=' + pPatientDFN); //kt //codex 9/9/26
+  BADiag('GetBAStatus before rpcSetBillingAwareSwitch'); //kt //codex 9/9/26
   UBACore.rpcSetBillingAwareSwitch(pProvider,pPatientDFN);
+  BADiag('GetBAStatus after rpcSetBillingAwareSwitch BILLING_AWARE=' + BoolToStr(BILLING_AWARE, True)); //kt //codex 9/9/26
 
   if Assigned(UBAGlobals.BAPCEDiagList) then UBAGlobals.BAPCEDiagList.Clear;
+  BADiag('GetBAStatus before frmFrame.SetBADxList'); //kt //codex 9/9/26
      frmFrame.SetBADxList;
+  BADiag('GetBAStatus after frmFrame.SetBADxList'); //kt //codex 9/9/26
   if not UBAGlobals.BAFactorsRec.FBAFactorActive then
+  begin //kt //codex 9/9/26
+     BADiag('GetBAStatus before BuildTFHintRec'); //kt //codex 9/9/26
      UBACore.BuildTFHintRec;
+     BADiag('GetBAStatus after BuildTFHintRec'); //kt //codex 9/9/26
+  end; //kt //codex 9/9/26
+  BADiag('GetBAStatus EXIT'); //kt //codex 9/9/26
 end;
 
 function IsICD9CodeActive(ACode: string; LexApp: string; ADate: TFMDateTime = 0): boolean;

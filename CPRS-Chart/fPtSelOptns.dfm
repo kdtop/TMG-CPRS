@@ -7,10 +7,10 @@ inherited frmPtSelOptns: TfrmPtSelOptns
   ClientWidth = 190
   DefaultMonitor = dmDesktop
   Position = poDesigned
+  StyleElements = [seFont, seClient, seBorder]
   OnCreate = FormCreate
   ExplicitWidth = 190
   ExplicitHeight = 269
-  PixelsPerInch = 96
   TextHeight = 13
   object orapnlMain: TORAutoPanel [0]
     Left = 0
@@ -147,6 +147,7 @@ inherited frmPtSelOptns: TfrmPtSelOptns
       Sorted = False
       SynonymChars = '<>'
       TabOrder = 1
+      Text = ''
       OnExit = cboListExit
       OnKeyPause = cboListKeyPause
       OnMouseClick = cboListMouseClick
@@ -174,6 +175,7 @@ inherited frmPtSelOptns: TfrmPtSelOptns
       Sorted = False
       SynonymChars = '<>'
       TabOrder = 2
+      Text = ''
       OnExit = cboDateRangeExit
       OnMouseClick = cboDateRangeMouseClick
       CharsNeedMatch = 1

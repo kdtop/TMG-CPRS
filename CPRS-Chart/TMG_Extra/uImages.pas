@@ -909,6 +909,7 @@ begin
       AProgressCallback := nil;
     end;
     ErrMsg := '';
+    try //kt //codex 9/9/26
     StatusText('Retrieving image...');
     //AProgressCallback := FileTransferProgressCallback;
     Result := rFileTransferU.DownloadFile(FPath,FName,LocalSaveFNamePath, ErrMsg, AProgressCallback);
@@ -921,6 +922,9 @@ begin
         //ErrMsg := '';
       end;
     end;
+    finally //kt //codex 9/9/26
+      if not HideProgress then FileTransferProgressDone(); //kt //codex 9/9/26
+    end; //kt //codex 9/9/26
   end;
   //frmFrame.timSchedule.Enabled := true;      //12/1/17 added timSchedule enabler to keep it from crashing the RPC download
 end;
@@ -1130,7 +1134,8 @@ begin  //ProcessDownloadCue
         inc(Rec.NumDownloadAttempts);
         DownloadResult := DownloadRecToCache(Rec, i, DownloadQueInfoList.Count, HideProgress); //Note: this can lead to re-entrant call of this function
         ActionPerformed := true;
-        if assigned(frmImageTransfer) and frmImageTransfer.UserCanceled then break;
+        //kt //codex original --> if assigned(frmImageTransfer) and frmImageTransfer.UserCanceled then break;
+        if (DownloadResult = drUserAborted) then break; //kt //codex 9/9/26
       end;
       inc(i);
       if (i >= DownloadQueInfoList.Count) and (ActionPerformed = true) then i := 0;  //start loop over for retries etc.

@@ -111,6 +111,7 @@
         <DCC_TYPEINFO_IMPLICITLY_ADDED>false</DCC_TYPEINFO_IMPLICITLY_ADDED>
         <DCC_INVALID_DIRECTIVE>false</DCC_INVALID_DIRECTIVE>
         <DCC_Optimize>true</DCC_Optimize>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

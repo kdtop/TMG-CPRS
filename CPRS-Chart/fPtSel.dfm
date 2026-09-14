@@ -6,6 +6,7 @@ inherited frmPtSel: TfrmPtSel
   ClientHeight = 559
   ClientWidth = 784
   Position = poMainFormCenter
+  StyleElements = [seFont, seClient, seBorder]
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy

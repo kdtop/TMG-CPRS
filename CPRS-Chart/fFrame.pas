@@ -659,6 +659,7 @@ uses
   fEncounterFrame,  //kt 4/2/23
   fDashboard,     //TMG   4/19/24
   fPopHealth,       //TMG 8/6/24
+  fTopics,          //kt //codex 9/14/26
   fChartExportHistory,   //TMG 5/14/24
   fAddSuspectConditions,     //kt 3/19/24
   fChangeLog,         //TMG  10/15/24
@@ -1035,6 +1036,7 @@ begin
   frmLabs.ClearPtData;
   frmGraphData.ClearPtData;
   frmReports.ClearPtData;
+  if Assigned(frmTopics) then frmTopics.ClearPtData;  //kt //codex 9/14/26
   for ASide := tpsLeft to tpsRight do SelectChartTab(ASide, CT_NOPAGE);  // to make sure DisplayPage gets called  //kt-tabs
   //kt-tabs end mod
   ClearReminderData;
@@ -1385,6 +1387,7 @@ begin
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
   }
   CreateTab(tpsLeft, CT_POPHEALTH,'Pop. Health');  //kt 9/11
+  CreateTab(tpsLeft, CT_TOPICS,   'Topics');  //kt //codex 9/14/26
 
   { //kt removing 8/24/26 since we don't use
   for APageID := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                   //kt 9/11
@@ -2401,6 +2404,7 @@ begin
     CT_MAILBOX:   SwitchToPage(Aside,frmMailbox);    //tmg
     CT_DASHBOARD: SwitchToPage(Aside,frmDashboard);  //tmg  4/19/24
     CT_POPHEALTH: SwitchToPage(Aside,frmPopHealth);
+    CT_TOPICS:    SwitchToPage(Aside,frmTopics);  //kt //codex 9/14/26
     //kt 8/24/26 CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
   end; {case}
   if ScreenReaderSystemActive and FCtrlTabUsed then
@@ -2580,6 +2584,7 @@ begin
     FPrevPtID := patient.DFN;
     frmCover.UpdateVAAButton; //VAA CQ7525  (moved here in v26.30 (RV))
     ProcessPatientChangeEventHook;
+    if Assigned(frmTopics) then frmTopics.RefreshTopicList;  //kt //codex 9/14/26
     if Length(SelectMsg) > 0 then ShowPatientSelectMessages(SelectMsg);
     LoadMostRecentPhotoIDThumbNail(Patient.DFN,PatientImage.Picture.Bitmap);  //kt  4/15/14
     pnlPatient.Color := DueColorCode;  //kt 10/23/14
@@ -4817,6 +4822,11 @@ begin
                     frmPopHealth.Parent := HolderPanel;                 //kt 9/11
                     FfrmPagesList.AddObject(frmPopHealth.Name, frmPopHealth);   //kt-tabs
                   end;                                                                 //kt 9/11
+    CT_TOPICS : begin                                                   //kt //codex 9/14/26
+                    frmTopics := TfrmTopics.Create(Self);              //kt //codex 9/14/26
+                    frmTopics.Parent := HolderPanel;                    //kt //codex 9/14/26
+                    FfrmPagesList.AddObject(frmTopics.Name, frmTopics); //kt //codex 9/14/26
+                  end;                                                   //kt //codex 9/14/26
     {//kt 8/24/26
     CT_WEBTAB1..CT_LAST_WEBTAB : begin                                //kt 9/11
                     TempFrmWebTab := TfrmWebTab.Create(Self);         //kt 9/11
@@ -4840,7 +4850,8 @@ begin
                                                    //CT_MEDS,
                                                    CT_ORDERS,
                                                    CT_LABS,
-                                                   CT_REPORTS
+                                                   CT_REPORTS, //kt //codex 9/14/26
+                                                   CT_TOPICS  //kt //codex 9/14/26
                                                    //CT_WEBTAB1,
                                                    //CT_WEBTAB2,
                                                    //CT_WEBTAB3]

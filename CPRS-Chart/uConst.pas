@@ -95,6 +95,7 @@ const
   CT_WEBTAB3  = 18;                             // chart tab - web browser //kt 9/11 added
   //kt 9/11 NOTE --> Option: add more CT_WEBTAB#'s here.  But set CT_LAST_WEBTAB= to last one...
   CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
+  CT_TOPICS   = 19;                             // chart tab - topics //kt //codex 9/14/26
 
 
   { Changes object item types }

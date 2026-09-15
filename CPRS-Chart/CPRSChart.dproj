@@ -160,6 +160,7 @@
             <Form>frmPtDemo</Form>
         </DCCReference>
         <DCCReference Include="rTIU.pas"/>
+        <DCCReference Include="rTopics.pas"/>
         <DCCReference Include="fxBroker.pas">
             <Form>frmBroker</Form>
         </DCCReference>
@@ -1185,6 +1186,9 @@
         </DCCReference>
         <DCCReference Include="TMG_Extra\fPopHealth.pas">
             <Form>frmPopHealth</Form>
+        </DCCReference>
+        <DCCReference Include="TMG_Extra\fTopics.pas">
+            <Form>frmTopics</Form>
         </DCCReference>
         <DCCReference Include="TMG_Extra\fChangeLog.pas">
             <Form>frmChangeLog</Form>

@@ -2,6 +2,15 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-14 — Topics tab foundation and patient-topic list
+
+- Added `CT_TOPICS` and a `Topics` chart tab. It follows the Pop. Health tab's frame lifecycle, is available on either tab side like Labs/Reports, and is owned/freed with the other frame pages.
+- Added `TMG_Extra\fTopics.pas` / `.dfm` with three columns. The left column includes `lvTopics: TCaptionListView`, automatic hover open/collapse, and a timed splitter-handle button. The center and right columns retain their initial placeholder browser controls for later topic-entry and related-data work.
+- Added `rTopics.pas`, registered it in the DPR/DPROJ, and used its `TopicList` RPC wrapper to load `lvTopics` from `TMG RPC THREAD/TOPIC CMD`.
+- `RefreshTopicList` displays Topic, Hidden, and User Data. Each list item's private data object retains the returned topic sub-IEN/property ID for later selection/edit operations.
+- `TfrmFrame.ClearPatient` clears Topics data, and `SetupPatient` calls `RefreshTopicList` after `ProcessPatientChangeEventHook`, once the selected patient context is valid. The form does not query Topics during creation.
+- User compiled and ran the completed state successfully. The local 2026-09-14 interval snapshot captures this state.
+
 ## 2026-09-10 — Wine modal-dialog investigation and remote-debugger experiment
 
 ### Confirmed Modal Behavior

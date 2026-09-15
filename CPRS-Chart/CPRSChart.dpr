@@ -22,6 +22,7 @@ uses
   fVisit in 'fVisit.pas' {frmVisit},
   fPtDemo in 'fPtDemo.pas' {frmPtDemo},
   rTIU in 'rTIU.pas',
+  rTopics in 'rTopics.pas', //kt //codex 9/14/26
   fxBroker in 'fxBroker.pas' {frmBroker},
   fNoteBA in 'fNoteBA.pas' {frmNotesByAuthor},
   fNoteBD in 'fNoteBD.pas' {frmNotesByDate},
@@ -441,6 +442,7 @@ uses
   fDashboard in 'TMG_Extra\fDashboard.pas' {frmDashboard},
   fChartExportHistory in 'TMG_Extra\fChartExportHistory.pas' {frmChartExportHistory},
   fPopHealth in 'TMG_Extra\fPopHealth.pas' {frmPopHealth},
+  fTopics in 'TMG_Extra\fTopics.pas' {frmTopics}, //kt //codex 9/14/26
   fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
   fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
   fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants},

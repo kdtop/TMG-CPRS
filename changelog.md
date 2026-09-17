@@ -2,6 +2,14 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-17 — Single-note HTML caret migration
+
+- Diagnosed the `TfrmSingleNote.Initialize` notification-text crash: `TMGHTML2.InsertTextAtCaret` still dereferenced the removed EmbeddedED `FCaret` interface. The current `THtmlObj` class is based directly on `TWebBrowser`, and no active code initializes that legacy interface.
+- Replaced `InsertTextAtCaret` with the active `IHTMLTxtRange` path: retrieve the selected range, assign its plain-text `text` property, collapse it to the end, and select it. The removed `FCaret` declarations/statements remain as `//kt //codex original --> ...` comments.
+- Replaced `MoveCaretToPos`'s legacy `IDisplayPointer`/`FCaret` path with `IHTMLTxtRange.moveToPoint(ScreenPos.X, ScreenPos.Y)` followed by `select`, preserving template drag/drop caret positioning without reviving EmbeddedED.
+- Found that generated notification text still did not appear because `CreateSingleNote` enabled `HtmlEditor.Editable` only after `Initialize` returned. Moved that enablement into `TfrmSingleNote.Initialize`, immediately after `InsertNewNote` loads the document and before caret placement/text insertion; the prior outer assignment is retained as an original-code comment.
+- No fresh Delphi IDE compile or runtime verification has been recorded for these changes. Rebuild in the licensed Windows Delphi IDE, then verify: (1) Lab and Report `NotifyOK` text appears in the new note, and (2) HTML template drag/drop inserts at the drop location.
+
 ## 2026-09-14 — Topics tab foundation and patient-topic list
 
 - Added `CT_TOPICS` and a `Topics` chart tab. It follows the Pop. Health tab's frame lifecycle, is available on either tab side like Labs/Reports, and is owned/freed with the other frame pages.

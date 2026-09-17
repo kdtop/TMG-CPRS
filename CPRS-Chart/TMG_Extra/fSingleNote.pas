@@ -1,4 +1,4 @@
-unit fSingleNote;
+﻿unit fSingleNote;
 //kt TMG Eddie  Added entire form.
 
 interface
@@ -10,7 +10,7 @@ uses
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
   OleCtrls, SHDocVw, MSHTML, ORFn, fLabs, uImages, uReminders,
   rTIU, uTIU, rCore, fDrawers, ORNet,Trpcb, WinSock, uPCE,
-  ORCtrls, ActnList, Menus, fReminderDialog, ImgList, TypInfo;
+  ORCtrls, ActnList, Menus, fReminderDialog, ImgList, TypInfo, System.Actions;
 
 type
   tSNModes = (snmNone, snmLab, snmReport, snmNurse, snmMessenger, snmRecordsRequest, snmReminder);
@@ -228,7 +228,7 @@ begin
    frmSingleNote.Show;  //<-- NOTE: the OnClose event sets close action to caFree --> all will be freed automatically
    Application.ProcessMessages;
    frmSingleNote.Initialize(Mode, InitRemIEN);
-   frmSingleNote.HtmlEditor.Editable := true;  //Sets ContentEditable=true to doc.body, so needs to be done AFTER loading document.
+   //kt //codex original --> frmSingleNote.HtmlEditor.Editable := true;  //Sets ContentEditable=true to doc.body, so needs to be done AFTER loading document.
 end;
 
 procedure ClearEditRec(EditNoteRec : TEditNoteRec);
@@ -1379,6 +1379,7 @@ begin  //Initialize()
   Application.ProcessMessages;
   if FEditIEN = 0 then InsertNewNote;
   if FEditIEN = 0 then Self.Close;
+  HTMLEditor.Editable := true;  //Sets ContentEditable=true after InsertNewNote loads the document. //kt //codex 9/17/26
   HTMLEditor.ShowCaret;
   HTMLEditor.MoveCaretToEnd;
   if self.NotifyOK then begin

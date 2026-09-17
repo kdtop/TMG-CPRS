@@ -1611,13 +1611,21 @@ end;
 
 function THtmlObj.MoveCaretToPos(ScreenPos: TPoint) : HRESULT;
 //kt added entire function
-var  OutTemp : DWORD;
+//kt //codex original --> var  OutTemp : DWORD;
+var TextRange : IHTMLTxtRange; //kt //codex 9/17/26
 begin
-  Result := 0;
-  if not assigned (FTMGDisplayPointer) then exit;
-  FTMGDisplayPointer.moveToPoint(ScreenPos, COORD_SYSTEM_GLOBAL, nil, HT_OPT_AllowAfterEOL, OutTemp);
-  Result := FCaret.MoveCaretToPointer(FTMGDisplayPointer,Integer(True),CARET_DIRECTION_INDETERMINATE);
-  FCaret.Show(Integer(True));
+  Result := E_FAIL; //kt //codex 9/17/26
+  //kt //codex original --> Result := 0;
+  if not Assigned(DOC) or not Assigned(DOC.body) then Exit; //kt //codex 9/17/26
+  //kt //codex original --> if not assigned (FTMGDisplayPointer) then exit;
+  TextRange := (DOC.body as IHTMLBodyElement).createTextRange; //kt //codex 9/17/26
+  if not Assigned(TextRange) then Exit; //kt //codex 9/17/26
+  //kt //codex original --> FTMGDisplayPointer.moveToPoint(ScreenPos, COORD_SYSTEM_GLOBAL, nil, HT_OPT_AllowAfterEOL, OutTemp);
+  TextRange.moveToPoint(ScreenPos.X, ScreenPos.Y); //kt //codex 9/17/26
+  TextRange.select; //kt //codex 9/17/26
+  Result := S_OK; //kt //codex 9/17/26
+  //kt //codex original --> Result := FCaret.MoveCaretToPointer(FTMGDisplayPointer,Integer(True),CARET_DIRECTION_INDETERMINATE);
+  //kt //codex original --> FCaret.Show(Integer(True));
 end;
 
 function THtmlObj.IsSafeToPasteHTML(const WB: TWebBrowser): Boolean;
@@ -1717,13 +1725,20 @@ end;
 
 procedure THtmlObj.InsertTextAtCaret(Text : string); //kt //codex 8/30/26
 //kt added.  Note: inserts external format (not HTML markup)
-var WText : WideString;
-    P : PWord;
+//kt //codex original --> var WText : WideString;
+//kt //codex original -->     P : PWord;
+var TextRange : IHTMLTxtRange; //kt //codex 9/17/26
 begin
-  WText := WideString(Text);
-  if WText = '' then exit;
-  P := @WText[1];
-  FCaret.InsertText(P^, Length(WText))
+  //kt //codex original --> WText := WideString(Text);
+  if Text = '' then Exit; //kt //codex 9/17/26
+  //kt //codex original --> if WText = '' then exit;
+  TextRange := GetTextRange; //kt //codex 9/17/26
+  if not Assigned(TextRange) then Exit; //kt //codex 9/17/26
+  //kt //codex original --> P := @WText[1];
+  TextRange.text := WideString(Text); //kt //codex 9/17/26
+  TextRange.collapse(False); //kt //codex 9/17/26
+  TextRange.select; //kt //codex 9/17/26
+  //kt //codex original --> FCaret.InsertText(P^, Length(WText))
 end;
 
 function THtmlObj.GetCaretLocation() : TPoint;

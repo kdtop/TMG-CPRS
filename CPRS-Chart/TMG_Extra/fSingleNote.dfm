@@ -2125,13 +2125,11 @@ object frmSingleNote: TfrmSingleNote
     0000000000000001FFFFFFFFFFFFF8000000000000000003FFFFFFFFFFFFF800
     0000000000000007FFFFFFFFFFFFF800000000000000000FFFFFFFFFFFFFF800
     000000000000001FFFFFFFFFFFFFF800000000000000003FFFFFFFFFFFFF}
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 177
@@ -2184,9 +2182,6 @@ object frmSingleNote: TfrmSingleNote
       Height = 40
       Anchors = [akLeft, akBottom]
       Caption = 'Copy Labs'
-      TabOrder = 0
-      Visible = False
-      OnClick = btnFunc1Click
       Glyph.Data = {
         42100000424D4210000000000000420000002800000020000000200000000100
         20000300000000100000130B0000130B00000000000000000000000000FF0000
@@ -2319,6 +2314,9 @@ object frmSingleNote: TfrmSingleNote
         996CFFC6976BFFC4956BFFC2956AFFC19369FFBF9168FFBD8F66FFBA8B63FFB6
         865DFFB17F57FFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF
         00FFFFFF00FF}
+      TabOrder = 0
+      Visible = False
+      OnClick = btnFunc1Click
     end
     object btnFunc2: TBitBtn
       Left = 151
@@ -2327,9 +2325,6 @@ object frmSingleNote: TfrmSingleNote
       Height = 40
       Anchors = [akLeft, akBottom]
       Caption = 'Copy Abnormal Labs'
-      TabOrder = 1
-      Visible = False
-      OnClick = btnFunc2Click
       Glyph.Data = {
         42100000424D4210000000000000420000002800000020000000200000000100
         20000300000000100000130B0000130B00000000000000000000000000FF0000
@@ -2462,6 +2457,9 @@ object frmSingleNote: TfrmSingleNote
         996CFFC6976BFFC4956BFFC2956AFFC19369FFBF9168FFBD8F66FFBA8B63FFB6
         865DFFB17F57FFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF
         00FFFFFF00FF}
+      TabOrder = 1
+      Visible = False
+      OnClick = btnFunc2Click
     end
     object btnFunc3: TBitBtn
       Left = 297
@@ -2470,9 +2468,6 @@ object frmSingleNote: TfrmSingleNote
       Height = 40
       Anchors = [akLeft, akBottom]
       Caption = 'Copy Notes'
-      TabOrder = 2
-      Visible = False
-      OnClick = btnFunc3Click
       Glyph.Data = {
         42100000424D4210000000000000420000002800000020000000200000000100
         20000300000000100000130B0000130B00000000000000000000000000FF0000
@@ -2605,6 +2600,9 @@ object frmSingleNote: TfrmSingleNote
         996CFFC6976BFFC4956BFFC2956AFFC19369FFBF9168FFBD8F66FFBA8B63FFB6
         865DFFB17F57FFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF
         00FFFFFF00FF}
+      TabOrder = 2
+      Visible = False
+      OnClick = btnFunc3Click
     end
     object btnFunc4: TBitBtn
       Left = 443
@@ -2613,9 +2611,6 @@ object frmSingleNote: TfrmSingleNote
       Height = 40
       Anchors = [akLeft, akBottom]
       Caption = 'Pick and Copy'
-      TabOrder = 3
-      Visible = False
-      OnClick = btnFunc4Click
       Glyph.Data = {
         E6040000424DE604000000000000360000002800000014000000140000000100
         180000000000B0040000130B0000130B00000000000000000000EAF1F1EAF1F1
@@ -2657,6 +2652,9 @@ object frmSingleNote: TfrmSingleNote
         F3F5EDF3F5EEF4F5F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6
         F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6F6F1F6
         F6F1F6F6F1F6F6F1F6F6}
+      TabOrder = 3
+      Visible = False
+      OnClick = btnFunc4Click
     end
     object btnFunc5: TBitBtn
       Left = 589
@@ -2816,8 +2814,7 @@ object frmSingleNote: TfrmSingleNote
       Left = 0
       Top = 0
       Width = 145
-      Height = 18
-      ItemHeight = 0
+      Height = 21
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
@@ -2829,7 +2826,6 @@ object frmSingleNote: TfrmSingleNote
       Width = 75
       Height = 21
       Hint = 'Font Size (Ctrl+(1-6))'
-      ItemHeight = 13
       ItemIndex = 2
       TabOrder = 1
       Text = '3 (12 pt)'
@@ -4099,8 +4095,6 @@ object frmSingleNote: TfrmSingleNote
       Height = 38
       Anchors = [akLeft, akBottom]
       Caption = 'Change Note Properties'
-      TabOrder = 0
-      OnClick = btnChangeTitleClick
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C0000130B0000130B00000000000000000000FF00FFFF00FF
@@ -4200,6 +4194,8 @@ object frmSingleNote: TfrmSingleNote
         FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
         FFA2A2A2777777777777767676767676A0A0A0FF00FFFF00FFFF00FFFF00FFFF
         00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      TabOrder = 0
+      OnClick = btnChangeTitleClick
     end
     object cmbUsers: TComboBox
       Left = 495
@@ -4207,7 +4203,6 @@ object frmSingleNote: TfrmSingleNote
       Width = 163
       Height = 21
       Anchors = [akRight, akBottom]
-      ItemHeight = 0
       TabOrder = 1
       Text = 'cmbUsers'
       Visible = False

@@ -2,6 +2,34 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-22 — Topics batch saving, dated-entry hiding, and multi-key sorting
+
+- Replaced the string-list change queue with typed, owning generic dictionaries: `TTopicChanges` is keyed by topic property ID, and each `TTopicChange` can own dated-entry changes keyed by raw FileMan date. This makes topic-level and dated-entry Hidden/User Data updates explicit and compiler-checked.
+- Completed `rTopics.SaveTopicChanges` / `SetTopicMult` for the `SET TOPIC MULTI` RPC. The batch serializer emits `IEN`, optional topic-level `HIDDEN`/`USER DATA`, and optional dated-entry `FMDT`, `HIDDEN`, and `USER DATA` records. The user corrected two server-side M implementation bugs, and confirmed end-to-end saving works.
+- Added per-dated-entry Hide/Show links to the IE-hosted topic HTML. A hidden entry retains its header and displays `(Hidden...)` in place of text. A toggle updates the retained raw topic-entry data, queues the dated-entry change, rebuilds the HTML, and saves it through the same debounced batch RPC path. The implementation avoids HTML5 and JavaScript for `TWebBrowser`/IE compatibility.
+- Expanded `frmTopics` ListView sorting from one key to an ordered list of keys. Normal header clicks replace the sort with one primary key and reverse a sole key on repeat; Ctrl+click adds a secondary/tertiary key or reverses an active key. Sort captions now identify both priority and direction (`1▲`, `2▼`, etc.), and all active sort columns receive the cream highlight.
+- User runtime-tested the Hide/Show behavior, RPC saving, and multi-key sort behavior successfully. A new local Git snapshot follows this documentation update.
+
+## 2026-09-21 — Topics subitem clicking and deferred-save foundation
+
+- `lvTopics` now uses a Topics-local `TopicListItemAt` helper backed by `LVM_SUBITEMHITTEST` (`ListView_SubItemHitTest`). It returns both the row and report-subitem index, including horizontally scrolled columns, without changing `TCaptionListView.GetItemAt` or shared list-view behavior.
+- The list view's existing `WindowProc` filter uses that helper before the native list view can select a row. A click in the Hidden column toggles the live `TTopicListItemData.Hidden` value between `YES` and blank. Clicks in Last Used or User Data do not select a row; Topic-column clicks retain normal topic selection/loading.
+- The first `LVM_SUBITEMHITTEST` compile attempt passed a value where Delphi 12 expected `PLVHitTestInfo`; it was corrected to pass `@HitTest`. The user rebuilt and confirmed the click behavior works as expected.
+- Added `TTopicChange` / `TTopicChanges` in `rTopics.pas`. The change list is keyed by topic property ID and records independent `HiddenChanged` and `UserDataChanged` flags plus their current values, so repeated edits coalesce into one topic change.
+- Added the form-owned `FTopicChanges` queue and `timSaveTopicChanges` (2 seconds). A Hidden edit updates the topic model, queues its change, and restarts the timer. Patient clearing or form destruction stops the timer and clears/frees queued data.
+- Added `SaveTopicChanges(Changes: TTopicChanges)` as an intentional RPC template in `rTopics.pas`. It currently returns an error saying RPC saving is not implemented, so the timer retains queued edits rather than falsely treating them as saved. The new debounce/save work has not yet received a fresh Delphi IDE build or runtime test.
+
+## 2026-09-18 — Topics panes, lazy loading, sorting cues, and PNG-button investigation
+
+- Extended `TMG_Extra\fTopics.pas` / `.dfm` to persist adjustable pane widths with `uTMGOptions.WriteInteger`: left/right open and closed widths use `frmTopics.LeftPaneOpenSize`, `LeftPaneClosedSize`, `RightPaneOpenSize`, and `RightPaneClosedSize`.
+- Added three-frame, 25 ms pane animations. The left pane opens on hover, waits 500 ms after the cursor leaves before collapsing, and collapses immediately after a click in the center or right pane. The right pane uses an explicit splitter-handle toggle only; it does not react to hover.
+- Added initialization/repositioning for the right splitter handle so it is located correctly on the first form display, as well as during resize and animated movement.
+- Deferred `RefreshTopicList` until the Topics page is first displayed rather than loading data when the form is created. Topic-list records are retained in a local `FTopicListModel` owned by the form, with the visual list referencing that model.
+- Added list sorting feedback: the selected header receives a leading Unicode up/down triangle and custom drawing marks the selected list column cream while the other columns remain white. The arrow was moved before the caption after it could be hidden by a narrow column.
+- Added hidden `TBitBtn` fallback copies for the original left/right splitter controls. Added a bottom-of-left-splitter pin control that freezes left-pane hover/click automatic behavior and displays blue pin-up when inactive or red pin-down when active.
+- Added `ImageList1` usage for the visible left/right handles and pin control, with 32x32 images and runtime 36x36 button sizing. The form was rebuilt/tested repeatedly while refining the icon setup.
+- **Deferred issue:** imported PNGs retain 32-bit alpha in the serialized image-list data, but their transparent areas paint black at runtime. The problem persisted after testing `TBitBtn`, then native `TButton` image-list rendering, and `DrawingStyle = dsTransparent`. The current visible controls are `TButton`s; the legacy bitmap `TBitBtn` fallbacks remain hidden. See `HANDOFF.md` before resuming this work; likely next approaches are `TVirtualImageList`/`TImageCollection` or a custom alpha-aware renderer.
+
 ## 2026-09-17 — Single-note HTML caret migration
 
 - Diagnosed the `TfrmSingleNote.Initialize` notification-text crash: `TMGHTML2.InsertTextAtCaret` still dereferenced the removed EmbeddedED `FCaret` interface. The current `THtmlObj` class is based directly on `TWebBrowser`, and no active code initializes that legacy interface.

@@ -2584,7 +2584,7 @@ begin
     FPrevPtID := patient.DFN;
     frmCover.UpdateVAAButton; //VAA CQ7525  (moved here in v26.30 (RV))
     ProcessPatientChangeEventHook;
-    if Assigned(frmTopics) then frmTopics.RefreshTopicList;  //kt //codex 9/14/26
+    //kt //codex original --> if Assigned(frmTopics) then frmTopics.RefreshTopicList;  //kt //codex 9/14/26
     if Length(SelectMsg) > 0 then ShowPatientSelectMessages(SelectMsg);
     LoadMostRecentPhotoIDThumbNail(Patient.DFN,PatientImage.Picture.Bitmap);  //kt  4/15/14
     pnlPatient.Color := DueColorCode;  //kt 10/23/14

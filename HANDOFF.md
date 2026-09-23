@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-09-14
+Last updated: 2026-09-22
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -18,9 +18,15 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 ## Current Focus
 
 - The Topics tab foundation is complete and compiled successfully in the Delphi 12 IDE. `CT_TOPICS` is registered in the project/frame, can be placed on either tab side, and owns `TfrmTopics`.
-- `TfrmTopics.RefreshTopicList` calls `rTopics.TopicList` after patient selection. It displays a report-style `TCaptionListView` with Topic, Hidden, and User Data columns; each item retains its topic sub-IEN/property ID in its data object.
+- `TfrmTopics.RefreshTopicList` calls `rTopics.TopicList` after patient selection. It displays a report-style `TCaptionListView` with Topic, Last Used, User Data, and Hidden columns; each item retains its topic sub-IEN/property ID in its data object.
 - Topics data is cleared in `TfrmFrame.ClearPatient` and refreshed after `ProcessPatientChangeEventHook` in `SetupPatient`. Do not move this RPC call into form creation, where no patient is selected.
-- The next Topics phase is UI behavior: column sorting, selection of a topic, loading its dated entries into the center column, and topic-related data in the right column. Preserve the completed left-column hover/splitter behavior while extending it.
+- Topics list behavior is complete through runtime-tested model/RPC saving. Topic-column clicks select/load the topic; Last Used/User Data clicks do not select; and Hidden clicks toggle the live model between `YES` and blank. `TopicListItemAt` uses `LVM_SUBITEMHITTEST` rather than `TCaptionListView.GetItemAt`, which only recognizes column zero. Preserve that custom helper/window-message filter when extending list behavior.
+- `TTopicChanges` (in `rTopics.pas`) is an owning typed dictionary keyed by topic property ID. Its `TTopicChange` objects coalesce independent topic-level Hidden/User Data changes and owning dated-entry changes keyed by raw FileMan date. `timSaveTopicChanges` waits two seconds after the latest model update before calling `rTopics.SaveTopicChanges`.
+- `rTopics.SaveTopicChanges` now serializes a batch for the `SET TOPIC MULTI` RPC. Each submitted row begins with `IEN=<topic-sub-IEN>` and can carry topic-level `HIDDEN`/`USER DATA` changes or dated-entry `FMDT`, `HIDDEN`, and `USER DATA` changes. A successful RPC result clears the queue; a failure leaves it queued for retry.
+- The center topic HTML displays a Hide/Show link on every dated-entry header. It uses the dated entry's raw FileMan date as the local link ID; toggling hides text as `(Hidden...)`, updates the local model, and queues the appropriate dated-entry RPC change. This is intentionally IE/TWebBrowser-compatible HTML without HTML5 or JavaScript.
+- `lvTopics` supports multi-key sorting. A normal header click makes that column the sole primary key (and reverses it on repeat); Ctrl+click adds a key or reverses an existing one. Captions display priority/direction (for example `1▲ Hidden`, `2▼ Last Used`) and every participating column receives the cream sort highlight. To show visible topics first and newest-used first within each group, click Hidden, Ctrl+click Last Used, then Ctrl+click Last Used again.
+- Continue later with remaining topic-entry document navigation and topic-related data in the right column. Preserve the completed left-column hover/splitter behavior while extending it.
+- Deferred Topics UI issue: `TMG_Extra\fTopics.dfm` has a 32x32 `ImageList1` populated from PNGs. Its serialized pixels retain real alpha, but the active left/right handle and left-pin controls paint transparent pixels black at runtime. This persisted after compiling and testing both `TBitBtn` and the current `TButton` image-list renderers, and after trying `DrawingStyle = dsTransparent`; do not claim the PNG transparency is fixed. The original-style hidden fallback controls remain `btnTopicsLeftHandleLegacy` and `btnTopicsRightHandleLegacy` (`TBitBtn`). When resuming, consider a `TVirtualImageList`/`TImageCollection` or custom alpha-aware button renderer; first inspect the current `.pas`/`.dfm` pair and preserve the user's loaded images. Do not change an existing image list's color depth after it is populated, because Delphi clears its contents.
 - Delphi 12 CPRS under Wine has an unresolved Patient Selection modal-close failure. Read the 2026-09-10 entry in `changelog.md` before editing or repeating diagnostics.
 - The standalone `TMG_Extra\killlater` Delphi 12 modal test works under the same Wine prefix. Do not frame this as a general Delphi 12/Wine `ShowModal` incompatibility.
 - The Windows Delphi remote-debugger experiment reaches Wine's server but hangs after the remote connection is accepted. Do not rely on it for the next debugging step; use local instrumentation and X11 inspection, or real Windows/VM source debugging.
@@ -39,6 +45,7 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - For a new compile failure, the user saves fresh IDE output to `CPRS-Chart\build_errors.txt`; inspect it and fix the reported blockers incrementally. Do not treat an older log as an active failure.
 - If compiler output disagrees with disk contents, suspect stale Delphi editor buffers and have the IDE reload them.
 - User confirmed the note-selection/reload and pre-signature health-factor fixes work at runtime. A fresh Delphi build result for the health-factor change has not been recorded.
+- The `LVM_SUBITEMHITTEST` compile error was corrected (`ListView_SubItemHitTest(..., @HitTest)`). The user confirmed Hidden-cell toggling, dated-entry Hide/Show saving, and multi-key sorting at runtime. No fresh compiler output was retained in the workspace.
 
 ## Important Constraints
 
@@ -57,7 +64,7 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 
 This is a copied Delphi 12 porting tree. Git is used for local checkpoints; the production/source tree exists elsewhere. Do not assume commits have been pushed.
 
-Latest source checkpoint: the 2026-09-14 Topics interval snapshot. Check live Git status and log rather than assuming the tree is clean. Earlier checkpoints and dated status are in [changelog.md](changelog.md).
+Latest source checkpoint: the 2026-09-22 Topics batch-save, dated-entry Hide/Show, and multi-key-sort snapshot. Check live Git status and log rather than assuming the tree is clean. Earlier checkpoints and dated status are in [changelog.md](changelog.md).
 
 Important Git workflow:
 
@@ -82,7 +89,8 @@ Important Git workflow:
 ## Next Session Start
 
 1. Read the current source and inspect Git status before editing.
-2. If continuing Topics, start in `TMG_Extra\fTopics.pas` and `rTopics.pas`. The immediate next work is list sorting and topic-selection/display behavior; do not trigger `TopicList` before a patient exists.
+2. If continuing Topics, start in `TMG_Extra\fTopics.pas` and `rTopics.pas`. The debounce/RPC path is working; retain its topic-level and dated-entry coalescing behavior. Likely next work is document navigation from dated-entry links and the right-column topic-related display. Do not trigger `TopicList` before a patient exists.
+   - If the user resumes the deferred PNG issue, read the `Deferred Topics UI issue` note above before changing `ImageList1` or the active handle classes.
 3. For the Wine patient-selection issue, first reproduce the post-OK state and capture `xwininfo -root -tree`, `xprop -root _NET_ACTIVE_WINDOW`, and detailed `xprop`/`xwininfo` data for Patient Selection, visible CPRS main, and the hidden `CPRS - Patient Chart` group-leader window.
 4. Use the existing `uDebugTools` selector log to determine whether `ModalResult` remains nonzero and whether `FormClose`/`FormHide` actually fire. Do not infer those Delphi states from X11 alone.
 5. Follow the user's current request; use [changelog.md](changelog.md) for relevant history rather than treating old next-step recommendations as active tasks.

@@ -22,7 +22,7 @@ uses
   fVisit in 'fVisit.pas' {frmVisit},
   fPtDemo in 'fPtDemo.pas' {frmPtDemo},
   rTIU in 'rTIU.pas',
-  rTopics in 'rTopics.pas', //kt //codex 9/14/26
+  rTopics in 'rTopics.pas',
   fxBroker in 'fxBroker.pas' {frmBroker},
   fNoteBA in 'fNoteBA.pas' {frmNotesByAuthor},
   fNoteBD in 'fNoteBD.pas' {frmNotesByDate},
@@ -322,14 +322,13 @@ uses
   uCarePlan in 'Careplan-Letters\uCarePlan.pas',
   TMGHTML2 in 'TMG_Extra\HTMLEdit\TMGHTML2.pas',
   uHTMLTools in 'TMG_Extra\uHTMLTools.pas',
-//kt //codex original -->   uNoteComponents in 'TMG_Extra\uNoteComponents.pas',
   fCarePlan in 'Careplan-Letters\fCarePlan.pas' {frmCarePlan},
   uCore in 'uCore.pas',
   fUploadImages in 'TMG_Extra\fUploadImages.pas' {frmImageUpload},
-  fPatientVitals in 'TMG_Extra\tmg-vitals\VitalsView\fPatientVitals.pas' {frmPatientVitals},  //kt //codex 8/26/26
-  uGMV_VitalTypes in 'TMG_Extra\tmg-vitals\VitalsCommon\uGMV_VitalTypes.pas',  //kt //codex 8/26/26
-  mGMV_GridGraph in 'TMG_Extra\tmg-vitals\VitalsView\mGMV_GridGraph.pas' {fraGMV_GridGraph: TFrame},  //kt //codex 8/26/26
-  fGMV_InputLite in 'TMG_Extra\tmg-vitals\VitalsDataEntry\fGMV_InputLite.pas' {frmGMV_InputLite},  //kt //codex 8/26/26
+  fPatientVitals in 'TMG_Extra\tmg-vitals\VitalsView\fPatientVitals.pas' {frmPatientVitals},
+  uGMV_VitalTypes in 'TMG_Extra\tmg-vitals\VitalsCommon\uGMV_VitalTypes.pas',
+  mGMV_GridGraph in 'TMG_Extra\tmg-vitals\VitalsView\mGMV_GridGraph.pas' {fraGMV_GridGraph: TFrame},
+  fGMV_InputLite in 'TMG_Extra\tmg-vitals\VitalsDataEntry\fGMV_InputLite.pas' {frmGMV_InputLite},
   uTMGVitalsBridge in 'TMG_Extra\uTMGVitalsBridge.pas',
   uTMGUtil in 'TMG_Extra\uTMGUtil.pas',
   AddOneFileEntryU in 'TMG_Extra\AddOneFileEntryU.pas',
@@ -360,7 +359,6 @@ uses
   fMemoEdit in 'TMG_Extra\fMemoEdit.pas' {frmMemoEdit},
   FMErrorU in 'TMG_Extra\FMErrorU.pas' {FMErrorForm},
   fMultiRecEditU in 'TMG_Extra\fMultiRecEditU.pas',
-//kt //codex original -->   fNoteCompParentPick in 'TMG_Extra\fNoteCompParentPick.pas' {frmNoteCompParentPick},
   fOneRecEditU in 'TMG_Extra\fOneRecEditU.pas',
   fProbAutoAdd in 'TMG_Extra\fProbAutoAdd.pas' {frmProbAutoAdd},
   fPtAdd in 'TMG_Extra\fPtAdd.pas' {frmPtAdd},
@@ -442,12 +440,14 @@ uses
   fDashboard in 'TMG_Extra\fDashboard.pas' {frmDashboard},
   fChartExportHistory in 'TMG_Extra\fChartExportHistory.pas' {frmChartExportHistory},
   fPopHealth in 'TMG_Extra\fPopHealth.pas' {frmPopHealth},
-  fTopics in 'TMG_Extra\fTopics.pas' {frmTopics}, //kt //codex 9/14/26
+  fTopics in 'TMG_Extra\fTopics.pas' {frmTopics},
   fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
   fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
   fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants},
   Vcl.Themes,
-  Vcl.Styles;
+  Vcl.Styles,
+  uTMGOptions in 'TMG_Extra\uTMGOptions.pas',
+  uPngGlyphButton in 'TMG_Extra\uPngGlyphButton.pas';
 
 {$R *.TLB}
 

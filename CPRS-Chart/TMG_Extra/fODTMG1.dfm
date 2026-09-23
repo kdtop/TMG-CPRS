@@ -1,13 +1,19 @@
 inherited frmODTMG1: TfrmODTMG1
-  Width = 1081
+  Left = 251
+  Top = 152
+  Width = 843
   Height = 700
   BorderIcons = []
   Caption = 'TMG Lab / Procedure Orders'
   Constraints.MinHeight = 700
-  Constraints.MinWidth = 520
-  ExplicitWidth = 1081
+  Constraints.MinWidth = 820
+  Position = poDesigned
+  ExplicitTop = -149
+  ExplicitWidth = 843
   ExplicitHeight = 700
-  PixelsPerInch = 96
+  DesignSize = (
+    827
+    661)
   TextHeight = 13
   inherited lblOrderSig: TLabel
     Top = 562
@@ -17,16 +23,16 @@ inherited frmODTMG1: TfrmODTMG1
   inherited memOrder: TCaptionMemo
     Left = 8
     Top = 581
-    Width = 948
+    Width = 710
     Height = 73
     Anchors = [akLeft, akRight, akBottom]
     ExplicitLeft = 8
     ExplicitTop = 581
-    ExplicitWidth = 948
+    ExplicitWidth = 710
     ExplicitHeight = 73
   end
   object btnClear: TButton [2]
-    Left = 962
+    Left = 724
     Top = 633
     Width = 95
     Height = 21
@@ -36,134 +42,94 @@ inherited frmODTMG1: TfrmODTMG1
     OnClick = btnClearClick
   end
   inherited sbxMain: TScrollBox
-    Top = -1
-    Width = 1073
-    Height = 541
+    Left = 1
+    Top = 1
+    Width = 1
+    Height = 1
     Align = alNone
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelInner = bvNone
-    ExplicitTop = -1
-    ExplicitWidth = 1073
-    ExplicitHeight = 541
-    object lblWhen: TLabel
-      Left = 878
-      Top = 161
-      Width = 32
-      Height = 13
-      Anchors = [akTop, akRight]
-      Caption = 'When:'
-      Enabled = False
-      ExplicitLeft = 618
-    end
-    object rgGetLabsTiming: TRadioGroup
-      Left = 876
-      Top = 67
-      Width = 178
-      Height = 88
-      Anchors = [akTop, akRight]
-      Caption = 'Get Labs ...'
-      Items.Strings = (
-        'Entries will go here...')
-      TabOrder = 0
-      OnClick = rgClick
-    end
-    object cklbOther: TCheckListBox
-      Left = 892
-      Top = 201
-      Width = 176
-      Height = 59
-      Anchors = [akRight, akBottom]
-      BevelEdges = []
-      BorderStyle = bsNone
-      Color = clBtnFace
-      ItemHeight = 13
-      Items.Strings = (
-        'Entries will go here...')
-      TabOrder = 1
-      OnClick = cklbCommonClick
-    end
-    object pnlFlags: TPanel
-      Left = 876
-      Top = 180
-      Width = 176
-      Height = 151
-      Anchors = [akTop, akRight, akBottom]
-      BevelInner = bvLowered
-      TabOrder = 2
-      object cklbFlags: TCheckListBox
-        Left = 5
-        Top = 5
-        Width = 124
-        Height = 41
-        BevelOuter = bvRaised
-        BorderStyle = bsNone
-        Color = clBtnFace
-        ItemHeight = 13
-        Items.Strings = (
-          'Entries will go here...')
-        TabOrder = 0
-        OnClick = cklbCommonClick
-      end
-    end
-    object rgProvider: TRadioGroup
-      Left = 876
-      Top = 5
-      Width = 176
-      Height = 56
-      Anchors = [akTop, akRight]
-      Caption = 'Set Provider...'
-      Items.Strings = (
-        'Enteries will go here...')
-      TabOrder = 3
-      OnClick = rgClick
-    end
-    object edtOtherTime: TEdit
-      Left = 913
-      Top = 157
-      Width = 138
-      Height = 21
-      Anchors = [akTop, akRight]
-      Enabled = False
-      TabOrder = 4
-      Text = '<date/time>'
-      Visible = False
-      OnChange = edtEditChange
-    end
+    ExplicitLeft = 1
+    ExplicitTop = 1
+    ExplicitWidth = 1
+    ExplicitHeight = 1
+  end
+  inherited cmdAccept: TButton
+    Left = 724
+    Top = 554
+    Width = 95
+    Anchors = [akRight, akBottom]
+    ExplicitLeft = 724
+    ExplicitTop = 554
+    ExplicitWidth = 95
+  end
+  inherited cmdQuit: TButton
+    Left = 724
+    Top = 581
+    Width = 95
+    Anchors = [akRight, akBottom]
+    ExplicitLeft = 724
+    ExplicitTop = 581
+    ExplicitWidth = 95
+  end
+  inherited pnlMessage: TPanel
+    Left = 50
+    Top = 590
+    Width = 383
+    ExplicitLeft = 50
+    ExplicitTop = 590
+    ExplicitWidth = 383
+  end
+  object pnlMain: TPanel [7]
+    Left = 4
+    Top = 4
+    Width = 819
+    Height = 541
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    BevelOuter = bvLowered
+    ParentBackground = False
+    TabOrder = 8
     object pnlOrderAreaMain: TPanel
-      Left = 7
-      Top = 5
-      Width = 863
-      Height = 526
+      Left = 1
+      Top = 1
+      Width = 601
+      Height = 539
+      Align = alLeft
       Anchors = [akLeft, akTop, akRight, akBottom]
-      TabOrder = 5
+      TabOrder = 0
+      ExplicitLeft = 7
+      ExplicitTop = 5
+      ExplicitHeight = 526
       object splitterleft: TSplitter
-        Left = 321
+        Left = 228
         Top = 1
         Width = 5
-        Height = 524
+        Height = 537
         ExplicitLeft = 481
         ExplicitHeight = 275
       end
       object pnlOrderAreaLeft: TPanel
         Left = 1
         Top = 1
-        Width = 320
-        Height = 524
+        Width = 227
+        Height = 537
         Align = alLeft
         TabOrder = 0
+        ExplicitHeight = 524
         object splitterLeftPanel: TSplitter
           Left = 1
-          Top = 491
-          Width = 318
+          Top = 504
+          Width = 225
           Height = 5
           Cursor = crVSplit
           Align = alTop
           ExplicitTop = 374
+          ExplicitWidth = 318
         end
         object btnToggleSpecialProc: TSpeedButton
           Left = 1
-          Top = 503
-          Width = 318
+          Top = 516
+          Width = 225
           Height = 20
           Align = alBottom
           Caption = 'CLOSE  Custom Lab / Procedure'
@@ -187,29 +153,29 @@ inherited frmODTMG1: TfrmODTMG1
         object pnlLeftTop: TPanel
           Left = 1
           Top = 1
-          Width = 318
-          Height = 490
+          Width = 225
+          Height = 503
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 0
+          ExplicitHeight = 490
           object gbBundles: TGroupBox
             Left = 1
             Top = 1
-            Width = 316
+            Width = 223
             Height = 46
             Align = alTop
             Caption = 'Lab / Procedure Order Bundles'
             TabOrder = 0
             DesignSize = (
-              316
+              223
               46)
             object cboBundles: TComboBox
               Left = 3
               Top = 22
-              Width = 308
+              Width = 215
               Height = 21
               Anchors = [akLeft, akTop, akRight]
-              ItemHeight = 13
               TabOrder = 0
               OnChange = cboBundlesChange
               Items.Strings = (
@@ -223,37 +189,42 @@ inherited frmODTMG1: TfrmODTMG1
           object tcProcTabs: TTabControl
             Left = 1
             Top = 47
-            Width = 316
-            Height = 442
+            Width = 223
+            Height = 455
             Align = alTop
             Anchors = [akLeft, akTop, akRight, akBottom]
             TabOrder = 1
             OnChange = tcProcTabsChange
+            ExplicitHeight = 442
             object pnlProcedures: TPanel
               Left = 4
               Top = 6
-              Width = 308
-              Height = 432
+              Width = 215
+              Height = 445
               Align = alClient
-              BevelOuter = bvSpace
+              BevelOuter = bvNone
               BorderStyle = bsSingle
               TabOrder = 0
+              ExplicitHeight = 432
               object pnlProcCaption: TPanel
-                Left = 1
-                Top = 1
-                Width = 302
+                Left = 0
+                Top = 0
+                Width = 211
                 Height = 25
                 Align = alTop
                 BevelOuter = bvNone
                 Caption = 'Lab / Procedure '
                 Color = clGradientActiveCaption
                 TabOrder = 0
+                ExplicitLeft = 1
+                ExplicitTop = 1
+                ExplicitWidth = 209
               end
               object cklbProcedures: TCheckListBox
-                Left = 1
-                Top = 26
-                Width = 302
-                Height = 401
+                Left = 0
+                Top = 25
+                Width = 211
+                Height = 416
                 Align = alClient
                 BevelInner = bvNone
                 BevelOuter = bvNone
@@ -269,21 +240,26 @@ inherited frmODTMG1: TfrmODTMG1
                   'Lab test')
                 TabOrder = 1
                 OnClick = cklbCommonClick
+                ExplicitLeft = 1
+                ExplicitTop = 26
+                ExplicitWidth = 209
+                ExplicitHeight = 401
               end
             end
           end
         end
         object pnlBottom: TPanel
           Left = 1
-          Top = 496
-          Width = 318
+          Top = 509
+          Width = 225
           Height = 0
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 1
           Visible = False
+          ExplicitTop = 496
           DesignSize = (
-            318
+            225
             0)
           object lblOtherProc: TLabel
             Left = 26
@@ -328,17 +304,19 @@ inherited frmODTMG1: TfrmODTMG1
         end
       end
       object pnlOrderAreaRight: TPanel
-        Left = 326
+        Left = 233
         Top = 1
-        Width = 536
-        Height = 524
+        Width = 367
+        Height = 537
         Align = alClient
         BevelOuter = bvLowered
         TabOrder = 1
+        OnResize = pnlOrderAreaRightResize
+        ExplicitHeight = 524
         object splitterRight: TSplitter
           Left = 1
-          Top = 370
-          Width = 534
+          Top = 383
+          Width = 365
           Height = 5
           Cursor = crVSplit
           Align = alTop
@@ -347,8 +325,8 @@ inherited frmODTMG1: TfrmODTMG1
         end
         object btnToggleSpecialDx: TSpeedButton
           Left = 1
-          Top = 503
-          Width = 534
+          Top = 516
+          Width = 365
           Height = 20
           Align = alBottom
           Caption = 'CLOSE  Custom Dx'
@@ -373,26 +351,27 @@ inherited frmODTMG1: TfrmODTMG1
         object pnlRightTop: TPanel
           Left = 1
           Top = 1
-          Width = 534
-          Height = 369
+          Width = 365
+          Height = 382
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitHeight = 369
           object pnlRightTopHeading: TPanel
             Left = 0
             Top = 0
-            Width = 534
+            Width = 365
             Height = 50
             Align = alTop
             TabOrder = 2
             DesignSize = (
-              534
+              365
               50)
             object memDxInstructions: TMemo
               Left = 5
               Top = 5
-              Width = 525
+              Width = 356
               Height = 40
               Anchors = [akLeft, akTop, akRight, akBottom]
               BevelInner = bvNone
@@ -407,7 +386,7 @@ inherited frmODTMG1: TfrmODTMG1
           object tcDxSelect: TTabControl
             Left = 0
             Top = 50
-            Width = 534
+            Width = 365
             Height = 25
             Align = alTop
             TabOrder = 0
@@ -421,41 +400,43 @@ inherited frmODTMG1: TfrmODTMG1
           object cklbDisplayedDxs: TCheckListBox
             Left = 0
             Top = 75
-            Width = 534
-            Height = 294
+            Width = 365
+            Height = 307
             Align = alClient
             BevelInner = bvNone
             BevelOuter = bvNone
             ItemHeight = 13
             TabOrder = 1
             OnClick = cklbCommonClick
+            ExplicitHeight = 294
           end
         end
         object pnlRightBottom: TPanel
           Left = 1
-          Top = 375
-          Width = 534
+          Top = 388
+          Width = 365
           Height = 128
           Align = alClient
           TabOrder = 1
+          ExplicitTop = 375
           DesignSize = (
-            534
+            365
             128)
           object pnlCustomDx: TPanel
             Left = 0
             Top = 5
-            Width = 533
+            Width = 364
             Height = 121
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 0
             DesignSize = (
-              533
+              364
               121)
             object edtDx0: TEdit
               Left = 5
               Top = 1
-              Width = 518
+              Width = 349
               Height = 21
               Anchors = [akLeft, akTop, akRight]
               TabOrder = 0
@@ -465,7 +446,7 @@ inherited frmODTMG1: TfrmODTMG1
               Tag = 1
               Left = 5
               Top = 28
-              Width = 518
+              Width = 349
               Height = 21
               Anchors = [akLeft, akTop, akRight]
               TabOrder = 1
@@ -475,7 +456,7 @@ inherited frmODTMG1: TfrmODTMG1
               Tag = 2
               Left = 5
               Top = 55
-              Width = 518
+              Width = 349
               Height = 21
               Anchors = [akLeft, akTop, akRight]
               TabOrder = 2
@@ -485,7 +466,7 @@ inherited frmODTMG1: TfrmODTMG1
               Tag = 3
               Left = 5
               Top = 82
-              Width = 518
+              Width = 349
               Height = 21
               Anchors = [akLeft, akTop, akRight]
               TabOrder = 3
@@ -496,15 +477,11 @@ inherited frmODTMG1: TfrmODTMG1
               Tag = 12
               Left = 5
               Top = 79
-              Width = 518
+              Width = 349
               Height = 38
               Hint = 'Search for Custom Diagnosis'
               Anchors = [akLeft, akRight, akBottom]
               Caption = 'Select Encounter ICD'
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 4
-              OnClick = btnSrchICDClick
               Glyph.Data = {
                 42100000424D4210000000000000420000002800000020000000200000000100
                 20000300000000100000130B0000130B000000000000000000000000FF0000FF
@@ -637,48 +614,123 @@ inherited frmODTMG1: TfrmODTMG1
                 56FFCA8456FFCA8456FFCA8456FFCA8456FFCA8556FFDC915FFFDF9360FFDF93
                 60FFDF9360FFDF9360FFDF9360FFDF9360FFDF9360FFDF9360FFDF9360FFDF93
                 60FFDF9360FF}
+              ParentShowHint = False
+              ShowHint = True
+              TabOrder = 4
+              OnClick = btnSrchICDClick
             end
           end
         end
       end
     end
-    object memProcInfo: TMemo
-      Left = 875
-      Top = 337
-      Width = 185
-      Height = 184
-      Anchors = [akTop, akRight, akBottom]
-      Color = clCream
-      ReadOnly = True
-      ScrollBars = ssVertical
-      TabOrder = 6
+    object pnlDetails: TPanel
+      Left = 602
+      Top = 1
+      Width = 216
+      Height = 539
+      Align = alClient
+      TabOrder = 1
+      ExplicitLeft = 607
+      ExplicitTop = 37
+      ExplicitWidth = 205
+      ExplicitHeight = 534
+      DesignSize = (
+        216
+        539)
+      object lblWhen: TLabel
+        Left = 5
+        Top = 161
+        Width = 32
+        Height = 13
+        Caption = 'When:'
+        Enabled = False
+      end
+      object cklbOther: TCheckListBox
+        Left = 4
+        Top = 223
+        Width = 196
+        Height = 59
+        Anchors = [akLeft, akTop, akRight]
+        BevelEdges = []
+        BorderStyle = bsNone
+        Color = clBtnFace
+        ItemHeight = 13
+        Items.Strings = (
+          'Entries will go here...')
+        TabOrder = 4
+        OnClick = cklbCommonClick
+      end
+      object rgProvider: TRadioGroup
+        Left = 5
+        Top = 5
+        Width = 204
+        Height = 56
+        Anchors = [akLeft, akTop, akRight]
+        Caption = 'Set Provider...'
+        Items.Strings = (
+          'Enteries will go here...')
+        TabOrder = 0
+        OnClick = rgClick
+      end
+      object rgGetLabsTiming: TRadioGroup
+        Left = 5
+        Top = 67
+        Width = 204
+        Height = 88
+        Anchors = [akLeft, akTop, akRight]
+        Caption = 'Get Labs ...'
+        Items.Strings = (
+          'Entries will go here...')
+        TabOrder = 1
+        OnClick = rgClick
+      end
+      object edtOtherTime: TEdit
+        Left = 43
+        Top = 160
+        Width = 166
+        Height = 21
+        Anchors = [akLeft, akTop, akRight]
+        Enabled = False
+        TabOrder = 2
+        Text = '<date/time>'
+        Visible = False
+        OnChange = edtEditChange
+      end
+      object pnlFlags: TPanel
+        Left = 5
+        Top = 187
+        Width = 204
+        Height = 147
+        Anchors = [akLeft, akTop, akRight]
+        BevelInner = bvLowered
+        TabOrder = 3
+        object cklbFlags: TCheckListBox
+          Left = 5
+          Top = 5
+          Width = 124
+          Height = 41
+          BevelOuter = bvRaised
+          BorderStyle = bsNone
+          Color = clBtnFace
+          ItemHeight = 13
+          Items.Strings = (
+            'Entries will go here...')
+          TabOrder = 0
+          OnClick = cklbCommonClick
+        end
+      end
+      object memProcInfo: TMemo
+        Left = 5
+        Top = 340
+        Width = 204
+        Height = 189
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        Color = clCream
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 5
+      end
     end
-  end
-  inherited cmdAccept: TButton
-    Left = 962
-    Top = 554
-    Width = 95
-    Anchors = [akRight, akBottom]
-    ExplicitLeft = 962
-    ExplicitTop = 554
-    ExplicitWidth = 95
-  end
-  inherited cmdQuit: TButton
-    Left = 962
-    Top = 581
-    Width = 95
-    Anchors = [akRight, akBottom]
-    ExplicitLeft = 962
-    ExplicitTop = 581
-    ExplicitWidth = 95
-  end
-  inherited pnlMessage: TPanel
-    Left = 50
-    Top = 590
-    Width = 383
-    ExplicitLeft = 50
-    ExplicitTop = 590
-    ExplicitWidth = 383
   end
   inherited chkCopyWhenAccepted: TCheckBox
     Left = 88
@@ -810,6 +862,12 @@ inherited frmODTMG1: TfrmODTMG1
         'Status = stsDefault')
       (
         'Component = memProcInfo'
+        'Status = stsDefault')
+      (
+        'Component = pnlMain'
+        'Status = stsDefault')
+      (
+        'Component = pnlDetails'
         'Status = stsDefault'))
   end
   inherited VA508CompMemOrder: TVA508ComponentAccessibility
@@ -820,7 +878,7 @@ inherited frmODTMG1: TfrmODTMG1
     Enabled = False
     Interval = 500
     OnTimer = tmrDelayProcInfoTimer
-    Left = 920
-    Top = 392
+    Left = 184
+    Top = 16
   end
 end

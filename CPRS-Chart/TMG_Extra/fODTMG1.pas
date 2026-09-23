@@ -130,6 +130,8 @@ type
     btnSrchICD: TBitBtn;
     memProcInfo: TMemo;
     tmrDelayProcInfo: TTimer;
+    pnlMain: TPanel;
+    pnlDetails: TPanel;
     procedure tmrDelayProcInfoTimer(Sender: TObject);
     procedure btnSrchICDClick(Sender: TObject);
     procedure tcDxSelectChange(Sender: TObject);
@@ -145,6 +147,8 @@ type
     procedure tcProcTabsChange(Sender: TObject);
     procedure cklbCommonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure pnlOrderAreaRightResize(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     { Private declarations }
     FTMGOrderData : TTMGDataList;  //This is the repository of ALL the lab data info, including which objects are checked/selected.
@@ -188,6 +192,7 @@ type
     procedure Items2DataList(Items : TStringList; DL : TTMGDataList);
     procedure ChangeDxSelect4Mode(ShowSpecificDx : Boolean);
     function AddOrRemovePriorDx(EditCtrl: TEdit; Checked : boolean; Str : string; DivChar : char = '^') : boolean;
+    procedure FixFormSizing();
   protected
     procedure PlaceControls; override;
     procedure ControlChange(Sender: TObject); override;
@@ -2265,6 +2270,32 @@ begin
   SetCustomProcArea(false,btnToggleSpecialDx);
 end;
 
+procedure TfrmODTMG1.pnlOrderAreaRightResize(Sender: TObject);
+begin
+  inherited;
+  //FixFormSizing;
+end;
+
+
+procedure TfrmODTMG1.FormResize(Sender: TObject);
+begin
+  inherited;
+  FixFormSizing;
+end;
+
+procedure TfrmODTMG1.FixFormSizing();
+var memOrderX : integer;
+const EDGE = 4;
+begin
+  //fixing weird display problem where I can't see the right side of the form!
+  pnlMain.Left := EDGE;
+  pnlMain.Width := ClientWidth - EDGE * 2;
+  cmdAccept.Left := ClientWidth - EDGE - cmdAccept.Width;
+  cmdQuit.Left := ClientWidth - EDGE - cmdQuit.Width;
+  btnClear.Left := ClientWidth - EDGE - btnClear.Width;
+  memOrderX := cmdAccept.Left - EDGE * 2;
+  memOrder.Width := memOrderX - memOrder.Left;
+end;
 
 procedure TfrmODTMG1.FormShow(Sender: TObject);
 var APage : TFrmPage;
@@ -2285,6 +2316,7 @@ begin
   Self.Top := ScrnPt.Y;
   Self.Left := ScrnPt.X;
   }
+  FixFormSizing;
 end;
 
 procedure TfrmODTMG1.SetCustomProcArea(Open : boolean; Sender: TSpeedButton);

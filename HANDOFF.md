@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-09-22
+Last updated: 2026-09-23
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -25,6 +25,9 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - `rTopics.SaveTopicChanges` now serializes a batch for the `SET TOPIC MULTI` RPC. Each submitted row begins with `IEN=<topic-sub-IEN>` and can carry topic-level `HIDDEN`/`USER DATA` changes or dated-entry `FMDT`, `HIDDEN`, and `USER DATA` changes. A successful RPC result clears the queue; a failure leaves it queued for retry.
 - The center topic HTML displays a Hide/Show link on every dated-entry header. It uses the dated entry's raw FileMan date as the local link ID; toggling hides text as `(Hidden...)`, updates the local model, and queues the appropriate dated-entry RPC change. This is intentionally IE/TWebBrowser-compatible HTML without HTML5 or JavaScript.
 - `lvTopics` supports multi-key sorting. A normal header click makes that column the sole primary key (and reverses it on repeat); Ctrl+click adds a key or reverses an existing one. Captions display priority/direction (for example `1▲ Hidden`, `2▼ Last Used`) and every participating column receives the cream sort highlight. To show visible topics first and newest-used first within each group, click Hidden, Ctrl+click Last Used, then Ctrl+click Last Used again.
+- Topics list preferences persist through `uTMGOptions`: Show Hidden, all ListView column widths, and ordered sort keys. `cbShowHidden` controls visibility of the Hidden column and of hidden records. The ListView supports multi-selection, User Data editing, a 200 ms debounced AND filter over space-delimited User Data words, and right-click Hide actions when hidden records are not shown. A Hidden-cell click applies its target state to all selected rows.
+- `fTopics.pas` now has an untagged compact explicit-block formatting pass. Preserve its style: every `if`, `else`, `for ... do`, and `while ... do` has a `begin`/`end`, and alternatives use `end else begin` on one line.
+- Topic merging has been added but still needs a fresh Delphi IDE build and runtime test. When more than one ListView row is selected, the context menu exposes `Merge Topics` even when Show Hidden is checked. The dialog chooses one destination and sends all other selected topic sub-IENs to `rTopics.MergeTopics`; one source uses the two-string overload and multiple sources use the `TStringList` overload. It saves any pending topic changes before merging, then refreshes the list on success. The public multi-source overload declaration in `rTopics.pas` was corrected to `MergeTopics(SrcSubIENs: TStringList; DestSubIEN: string)` to match its implementation.
 - Continue later with remaining topic-entry document navigation and topic-related data in the right column. Preserve the completed left-column hover/splitter behavior while extending it.
 - Deferred Topics UI issue: `TMG_Extra\fTopics.dfm` has a 32x32 `ImageList1` populated from PNGs. Its serialized pixels retain real alpha, but the active left/right handle and left-pin controls paint transparent pixels black at runtime. This persisted after compiling and testing both `TBitBtn` and the current `TButton` image-list renderers, and after trying `DrawingStyle = dsTransparent`; do not claim the PNG transparency is fixed. The original-style hidden fallback controls remain `btnTopicsLeftHandleLegacy` and `btnTopicsRightHandleLegacy` (`TBitBtn`). When resuming, consider a `TVirtualImageList`/`TImageCollection` or custom alpha-aware button renderer; first inspect the current `.pas`/`.dfm` pair and preserve the user's loaded images. Do not change an existing image list's color depth after it is populated, because Delphi clears its contents.
 - Delphi 12 CPRS under Wine has an unresolved Patient Selection modal-close failure. Read the 2026-09-10 entry in `changelog.md` before editing or repeating diagnostics.
@@ -46,6 +49,7 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - If compiler output disagrees with disk contents, suspect stale Delphi editor buffers and have the IDE reload them.
 - User confirmed the note-selection/reload and pre-signature health-factor fixes work at runtime. A fresh Delphi build result for the health-factor change has not been recorded.
 - The `LVM_SUBITEMHITTEST` compile error was corrected (`ListView_SubItemHitTest(..., @HitTest)`). The user confirmed Hidden-cell toggling, dated-entry Hide/Show saving, and multi-key sorting at runtime. No fresh compiler output was retained in the workspace.
+- The 2026-09-23 merge change has not yet received a fresh Delphi IDE build or runtime test. Compile it before treating the new merge workflow as verified.
 
 ## Important Constraints
 
@@ -59,6 +63,7 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - For future Delphi/Pascal source edits, append `//kt //codex <date>` at the end of every modified source line, e.g. `//kt //codex 7/30/26`.
 - If adding an entirely new Delphi/Pascal function or procedure, do not tag every line inside it. Instead, put `//kt //codex added entire function <date>` or `//kt //codex added entire procedure <date>` on the line immediately below the declaration.
 - For future Delphi/Pascal source edits, when removing a line, leave the old line in place as a comment using this pattern: `//kt //codex original --> <old code>`.
+- Use compact explicit-block Pascal formatting for all control flow. Every `if`, `else`, `for ... do`, and `while ... do` body must have `begin`/`end`, including a one-statement body. Put the opening keyword on the control-flow line, such as `if Condition then begin` and `for Index := 0 to Count - 1 do begin`. Write alternatives as `end else begin`, with all three keywords on the same line.
 
 ## Git Workflow
 
@@ -84,12 +89,13 @@ Important Git workflow:
 - Do not reintroduce Delphi `[Ref]` on public string helpers casually; it previously caused runtime instability.
 - `THtmlObj` now descends from `TWebBrowser`; the active EmbeddedED implementation has been removed. Historical references do not establish a current dependency.
 - Prefer `then begin` on one line in `fNotes.pas`. The user's tag-removal exception applied only to the completed formatting pass; normal change-marker conventions remain in effect.
+- `TMG_Extra\fTopics.pas` is also a user-designated clean, untagged source file. Do not reintroduce `//kt`/`//codex` markers there unless the user specifically requests them.
 - If an earlier Codex change lacks its marker, add it when revisiting that line.
 
 ## Next Session Start
 
 1. Read the current source and inspect Git status before editing.
-2. If continuing Topics, start in `TMG_Extra\fTopics.pas` and `rTopics.pas`. The debounce/RPC path is working; retain its topic-level and dated-entry coalescing behavior. Likely next work is document navigation from dated-entry links and the right-column topic-related display. Do not trigger `TopicList` before a patient exists.
+2. If continuing Topics, first compile and runtime-test the 2026-09-23 merge workflow in `TMG_Extra\fTopics.pas` and `rTopics.pas`: select two and then three topics, choose each possible destination, confirm the source records disappear after refresh, and test Cancel/Cancel-confirmation paths. The debounce/RPC path is working; retain its topic-level and dated-entry coalescing behavior. Likely later work is document navigation from dated-entry links and the right-column topic-related display. Do not trigger `TopicList` before a patient exists.
    - If the user resumes the deferred PNG issue, read the `Deferred Topics UI issue` note above before changing `ImageList1` or the active handle classes.
 3. For the Wine patient-selection issue, first reproduce the post-OK state and capture `xwininfo -root -tree`, `xprop -root _NET_ACTIVE_WINDOW`, and detailed `xprop`/`xwininfo` data for Patient Selection, visible CPRS main, and the hidden `CPRS - Patient Chart` group-leader window.
 4. Use the existing `uDebugTools` selector log to determine whether `ModalResult` remains nonzero and whether `FormClose`/`FormHide` actually fire. Do not infer those Delphi states from X11 alone.

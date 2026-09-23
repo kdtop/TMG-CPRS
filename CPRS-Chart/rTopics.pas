@@ -33,6 +33,8 @@ function SetTopicUserData(SubIEN : String; UserData : TTopicDataString) : string
 function SetTopicFMDTEntryHidenState(SubIEN : String; EntryFMDT : TFMDateTime; ShouldHide : boolean) : string;
 function SetTopicFMDTEntryUserData(SubIEN : String; EntryFMDT : TFMDateTime; UserData : TTopicDataString) : string;
 function SaveTopicChanges(Changes: TTopicChanges): string; //kt //codex 9/21/26
+function MergeTopics(SrcSubIEN, DestSubIEN : string) : string;  overload;
+function MergeTopics(SrcSubIENs : TStringList; DestSubIEN : string) : string; overload; //kt //codex 9/23/26
 
 
 implementation
@@ -62,6 +64,43 @@ function TopicList(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime=999999
 begin
   Result := TopicCommand(Dest, Patient.DFN, 'LIST', '', nil, SDT,EDT);
 end;
+
+function MergeTopics(SrcSubIEN, DestSubIEN : string) : string; overload;
+//note: SrcSubIEN and DESTSubIEN are really IEN22719.21
+//Result: '1^OK' or '-1^Error Message'
+var tempSL : TStringList;
+    SrcSubIENs : TStringList;
+begin
+  tempSL := TStringList.Create;
+  SrcSubIENs := TStringList.Create;
+  SrcSubIENs.Add(SrcSubIEN);
+  try
+    Result := MergeTopics(SrcSubIENs, DestSubIEN);
+  finally
+    tempSL.Free;
+    SrcSubIENs.Free;
+  end;
+end;
+
+function MergeTopics(SrcSubIENs : TStringList; DestSubIEN : String) : string;  overload;
+//note: SrcSubIENs.Strings[i] and DESTSubIEN are really IEN22719.21
+//Result: '1^OK' or '-1^Error Message'
+var tempSL : TStringList;
+    Params : string;
+    i : integer;
+begin
+  tempSL := TStringList.Create;
+  Params := DestSubIEN;
+  for i := 0 to SrcSubIENs.count-1 do begin
+    Params := Params + '^' + SrcSubIENs.Strings[i];
+  end;
+  try
+    Result := TopicCommand(tempSL, Patient.DFN, 'MERGE TOPICS', Params);
+  finally
+    tempSL.free;
+  end;
+end;
+
 
 function SetTopicHiddenState(Dest : TStrings; SubIEN : String; ShouldHide : boolean) : string;
 //note: SubIEN is really IEN22719.21

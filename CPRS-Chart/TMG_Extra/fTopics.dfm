@@ -49,7 +49,6 @@ inherited frmTopics: TfrmTopics
     Align = alLeft
     BevelOuter = bvNone
     Color = clMoneyGreen
-    ParentBackground = False
     TabOrder = 0
     OnMouseEnter = pnlTopicsLeftMouseEnter
     OnMouseLeave = pnlTopicsLeftMouseLeave
@@ -57,12 +56,83 @@ inherited frmTopics: TfrmTopics
       Left = 0
       Top = 0
       Width = 240
-      Height = 619
+      Height = 544
       Align = alClient
       Columns = <>
       TabOrder = 0
       AutoSize = False
       Caption = 'lvTopics'
+      ExplicitHeight = 565
+    end
+    object pnlLeftBot: TPanel
+      Left = 0
+      Top = 544
+      Width = 240
+      Height = 75
+      Align = alBottom
+      ParentBackground = False
+      TabOrder = 1
+      object cbShowHidden: TCheckBox
+        Left = 8
+        Top = 6
+        Width = 97
+        Height = 17
+        Caption = 'Show Hidden'
+        TabOrder = 0
+      end
+      object edtFilter: TLabeledEdit
+        Left = 8
+        Top = 40
+        Width = 121
+        Height = 21
+        EditLabel.Width = 111
+        EditLabel.Height = 13
+        EditLabel.Caption = 'User Data Filter Search'
+        TabOrder = 1
+        Text = ''
+      end
+      object btnClearFilter: TBitBtn
+        Left = 135
+        Top = 40
+        Width = 18
+        Height = 18
+        Glyph.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          20000000000000040000130B0000130B00000000000000000000D8E9ECFFD8E9
+          ECFFD8E9ECFFD8E9ECFFD8E9ECFF808080FF808080FF808080FF808080FF8080
+          80FF808080FF808080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+          ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
+          80FF000080FF808080FF808080FF808080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+          ECFF000080FF000080FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+          FFFF0000FFFF000080FF000080FF808080FF808080FFD8E9ECFFD8E9ECFF0000
+          80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+          FFFF0000FFFF0000FFFF0000FFFF000080FF808080FFD8E9ECFFD8E9ECFF0000
+          80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+          FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFF0000FFFF0000FFFF0000FFFFFFFF
+          FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF
+          FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFF0000FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
+          FFFF0000FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFF0000FFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF
+          FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FF808080FF000080FF0000
+          FFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFF0000FFFF0000FFFF0000FFFFFFFF
+          FFFFFFFFFFFF0000FFFF0000FFFF0000FFFF000080FFD8E9ECFFD8E9ECFF0000
+          80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+          FFFF0000FFFF0000FFFF0000FFFF000080FFD8E9ECFFD8E9ECFFD8E9ECFF0000
+          80FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+          FFFF0000FFFF0000FFFF0000FFFF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+          ECFF000080FF000080FF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000
+          FFFF0000FFFF000080FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9
+          ECFFD8E9ECFFD8E9ECFF000080FF000080FF000080FF000080FF000080FF0000
+          80FF000080FFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFFD8E9ECFF}
+        TabOrder = 2
+      end
     end
   end
   object pnlTopicsRight: TPanel [4]
@@ -106,9 +176,9 @@ inherited frmTopics: TfrmTopics
         240
         41)
       object Label1: TLabel
-        Left = -1
+        Left = 6
         Top = 14
-        Width = 63
+        Width = 211
         Height = 13
         Alignment = taCenter
         Anchors = [akLeft, akTop, akRight]
@@ -1042,26 +1112,6 @@ inherited frmTopics: TfrmTopics
       end
     end
   end
-  object btnTopicsLeftHandleLegacy: TBitBtn [6]
-    Left = 228
-    Top = 228
-    Width = 36
-    Height = 80
-    TabOrder = 3
-    Visible = False
-    OnClick = btnTopicsLeftHandleClick
-    OnMouseEnter = btnTopicsLeftHandleMouseEnter
-    OnMouseLeave = btnTopicsLeftHandleMouseLeave
-  end
-  object btnTopicsRightHandleLegacy: TBitBtn [7]
-    Left = 667
-    Top = 228
-    Width = 36
-    Height = 80
-    TabOrder = 4
-    Visible = False
-    OnClick = btnTopicsRightHandleClick
-  end
   inherited amgrMain: TVA508AccessibilityManager
     Data = (
       (
@@ -1117,6 +1167,18 @@ inherited frmTopics: TfrmTopics
         'Status = stsDefault')
       (
         'Component = BitBtn1'
+        'Status = stsDefault')
+      (
+        'Component = pnlLeftBot'
+        'Status = stsDefault')
+      (
+        'Component = cbShowHidden'
+        'Status = stsDefault')
+      (
+        'Component = edtFilter'
+        'Status = stsDefault')
+      (
+        'Component = btnClearFilter'
         'Status = stsDefault'))
   end
   object timHideTopicsLeftHandle: TTimer

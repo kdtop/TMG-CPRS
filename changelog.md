@@ -2,6 +2,16 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-23 — Topics list refinement and topic merging
+
+- Completed the requested `frmTopics` formatting pass: every `if`, `else`, `for ... do`, and `while ... do` now uses explicit `begin`/`end` blocks, with alternatives formatted as `end else begin`. Removed the prior `//kt`/`//codex` markers from `fTopics.pas`; treat it as an intentionally clean, untagged source file.
+- Added persistence for Show Hidden, Topic-list column widths, and ordered multi-key sort settings. Show Hidden controls both the Hidden column and whether hidden topics are displayed. Rebuilding after a change retains the active topic when still visible and clears the center browser when it is no longer visible.
+- Added multi-select support and contextual hiding. With Show Hidden off, right-clicking a topic offers Hide Topic or Hide Selected Topics. With Hidden displayed, clicking the Hidden cell applies that target state to every selected row. Hidden values are normalized to `YES` rather than the server's alternate `Y` spelling.
+- Added a 200 ms debounced User Data filter. It splits the text on spaces, performs a case-insensitive AND search over User Data words, and includes a clear button. User Data cell clicks open an editor; a multi-edit is allowed only when all selected values match. The earlier single-row save bug was corrected.
+- Improved layout/navigation: the left-pane auto-collapse now requires the mouse to travel 100 pixels right of its splitter; the center vertical splitter persists; and loading a topic scrolls the middle browser to its most recent dated entry.
+- Added a multi-select `Merge Topics` context-menu workflow. A modal dialog lists selected topics and requires the user to choose the destination; a second OK/Cancel confirmation warns that the operation cannot be undone. It saves pending topic changes, calls the two-string merge RPC for one source or the `TStringList` overload for multiple sources, and refreshes the list after success. The multi-source `rTopics.MergeTopics` declaration was corrected to match its existing implementation (`TStringList` sources followed by the destination string).
+- The user reported the preceding Topics refinements working well. The final merge implementation has not yet been compiled or runtime-tested in the Delphi IDE; begin the next session with that verification.
+
 ## 2026-09-22 — Topics batch saving, dated-entry hiding, and multi-key sorting
 
 - Replaced the string-list change queue with typed, owning generic dictionaries: `TTopicChanges` is keyed by topic property ID, and each `TTopicChange` can own dated-entry changes keyed by raw FileMan date. This makes topic-level and dated-entry Hidden/User Data updates explicit and compiler-checked.

@@ -104,6 +104,7 @@ type
     procedure cbShowHiddenClick(Sender: TObject);
     procedure HideTopicsMenuItemClick(Sender: TObject);
     procedure MergeTopicsMenuItemClick(Sender: TObject);
+    procedure RenameTopicMenuItemClick(Sender: TObject);
     procedure TopicListPopupMenuPopup(Sender: TObject);
     procedure wbDisplayPriorBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure wbDisplayPriorDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
@@ -142,6 +143,7 @@ type
     FTopicListPopupMenu: TPopupMenu;
     FHideTopicsMenuItem: TMenuItem;
     FMergeTopicsMenuItem: TMenuItem;
+    FRenameTopicMenuItem: TMenuItem;
     FPendingTopicHTML: string;
     FPendingTopicEntryID: string;
     FTopicHiddenColumnWidth: Integer;
@@ -159,6 +161,7 @@ type
     procedure EditTopicUserData(ListItem: TListItem);
     procedure InitializeTopicListColumns;
     procedure MergeSelectedTopics;
+    procedure RenameSelectedTopic;
     procedure NavigateToDocument(const DocumentIEN: string);
     procedure ScrollTopicEntryIntoView(const EntryID: string);
     function TopicListColumnAt(X: Integer): Integer;
@@ -270,6 +273,10 @@ begin
   InitializeTopicListColumns;
   FTopicListPopupMenu := TPopupMenu.Create(Self);
   FTopicListPopupMenu.OnPopup := TopicListPopupMenuPopup;
+  FRenameTopicMenuItem := TMenuItem.Create(FTopicListPopupMenu);
+  FRenameTopicMenuItem.Caption := 'Rename topic';
+  FRenameTopicMenuItem.OnClick := RenameTopicMenuItemClick;
+  FTopicListPopupMenu.Items.Add(FRenameTopicMenuItem);
   FHideTopicsMenuItem := TMenuItem.Create(FTopicListPopupMenu);
   FHideTopicsMenuItem.OnClick := HideTopicsMenuItemClick;
   FTopicListPopupMenu.Items.Add(FHideTopicsMenuItem);
@@ -755,6 +762,64 @@ begin
   MergeSelectedTopics;
 end;
 
+procedure TfrmTopics.RenameTopicMenuItemClick(Sender: TObject);
+begin
+  RenameSelectedTopic;
+end;
+
+procedure TfrmTopics.RenameSelectedTopic;
+var
+  Index: Integer;
+  ListItem: TListItem;
+  NewTopicName: string;
+  Status: string;
+  TopicData: TTopicListItemData;
+begin
+  ListItem := lvTopics.Selected;
+  if (ListItem = nil) or (ListItem.Data = nil) then begin
+    Exit;
+  end;
+  TopicData := TTopicListItemData(ListItem.Data);
+  NewTopicName := TopicData.TopicName;
+  if not InputQuery('Rename Topic', 'Topic name:', NewTopicName) then begin
+    Exit;
+  end;
+  NewTopicName := Trim(NewTopicName);
+  if NewTopicName = '' then begin
+    MessageDlg('A topic name is required.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  if Pos('^', NewTopicName) > 0 then begin
+    MessageDlg('A topic name cannot contain ^.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  if Length(NewTopicName) > 180 then begin
+    MessageDlg('A topic name is limited to 180 characters.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  if NewTopicName = TopicData.TopicName then begin
+    Exit;
+  end;
+  Status := RenameTopic(TopicData.PropertyID, NewTopicName);
+  if Piece(Status, '^', 1) <> '1' then begin
+    MessageDlg('The topic could not be renamed.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
+    Exit;
+  end;
+  TopicData.TopicName := NewTopicName;
+  ListItem.Caption := NewTopicName;
+  for Index := 0 to FTopicListModel.Count - 1 do begin
+    if FTopicListModel.Objects[Index] = TopicData then begin
+      FTopicListModel.Strings[Index] := NewTopicName;
+      Break;
+    end;
+  end;
+  if FCurrentTopicPropertyID = TopicData.PropertyID then begin
+    FCurrentTopicName := NewTopicName;
+    DisplayTopicHTML(BuildTopicHTML(FCurrentTopicEntries, FCurrentTopicName));
+  end;
+  RebuildTopicList;
+end;
+
 procedure TfrmTopics.MergeSelectedTopics;
 var
   CancelButton: TButton;
@@ -897,6 +962,8 @@ begin
   end;
   FHideTopicsMenuItem.Enabled := HasTopicToHide;
   FHideTopicsMenuItem.Visible := not cbShowHidden.Checked;
+  FRenameTopicMenuItem.Visible := SelectedCount = 1;
+  FRenameTopicMenuItem.Enabled := SelectedCount = 1;
   FMergeTopicsMenuItem.Visible := SelectedCount > 1;
   FMergeTopicsMenuItem.Enabled := SelectedCount > 1;
 end;

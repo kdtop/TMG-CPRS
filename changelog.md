@@ -2,6 +2,14 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-24 — FileMan topic merging, chronological entries, and rename support
+
+- Completed server-side MERGE2TOPICS in /opt/worldvista/EHR/p/TMGTOPIC.m. It now reads through FileMan, creates a new destination 22719.211 entry for every source dated entry (including same-FMDT entries), separately copies WP text, merges topic User Data, makes the destination visible, and deletes the source topic only after all copies succeed. The user reported this merge workflow worked at runtime.
+- Updated server GET1 to walk the DATETIME "B" cross-reference by FileMan date and then subentry IEN. Topic entries now return chronologically after merges, while duplicate FMDTs retain both entries.
+- Added the RENAME topic command (RENAME:<topic-sub-IEN>^<new-name>) in TMGTOPIC.m; it validates inputs and files 22719.21,.01 through FileMan. The M routine now uses LF line endings, as appropriate for its Linux location.
+- Added rTopics.RenameTopic and a single-topic Rename topic ListView context action in fTopics.pas. Right-clicking an unselected row first selects/focuses it; the dialog validates the name, calls the RPC, updates the retained model/list/current-topic heading, and re-sorts.
+- The new Delphi client rename code and the earlier merge UI changes still need a fresh licensed Delphi IDE build and runtime test. Test rename after both an existing selection and a direct right-click, plus a post-merge GET1 result with older FMDTs and duplicate FMDTs.
+
 ## 2026-09-23 — Topics list refinement and topic merging
 
 - Completed the requested `frmTopics` formatting pass: every `if`, `else`, `for ... do`, and `while ... do` now uses explicit `begin`/`end` blocks, with alternatives formatted as `end else begin`. Removed the prior `//kt`/`//codex` markers from `fTopics.pas`; treat it as an intentionally clean, untagged source file.

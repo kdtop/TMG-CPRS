@@ -441,6 +441,7 @@ uses
   fChartExportHistory in 'TMG_Extra\fChartExportHistory.pas' {frmChartExportHistory},
   fPopHealth in 'TMG_Extra\fPopHealth.pas' {frmPopHealth},
   fTopics in 'TMG_Extra\fTopics.pas' {frmTopics},
+  fTopicTablePicker in 'TMG_Extra\fTopicTablePicker.pas' {frmTopicTablePicker},
   fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
   fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
   fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants},

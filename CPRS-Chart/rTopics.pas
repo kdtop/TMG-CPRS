@@ -29,7 +29,14 @@ type
 
 function TopicList(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
 function Get1Topic(Dest : TStrings; SubIEN : String; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
+function ListTopicTables(Dest: TStrings): string; //kt //codex 9/28/26
+function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string; //kt //codex 9/28/26
 function RenameTopic(SubIEN, TopicName: string): string; //kt //codex 9/24/26
+function AddTopic(TopicName: string): string; //kt //codex 9/28/26
+function DeleteTopic(SubIEN: string): string; //kt //codex 9/25/26
+function Delete1TopicEntry(SubIEN: string; EntryFMDT: TFMDateTime): string; //kt //codex 9/25/26
+function Add1TopicEntry(SubIEN: string; EntryFMDT: TFMDateTime; Text: TStringList): string; //kt //codex 9/28/26
+function Set1TopicEntryText(SubIEN: string; EntryFMDT: TFMDateTime; Text: TStringList): string; //kt //codex 9/25/26
 function SetTopicUserData(SubIEN : String; UserData : TTopicDataString) : string;
 function SetTopicFMDTEntryHidenState(SubIEN : String; EntryFMDT : TFMDateTime; ShouldHide : boolean) : string;
 function SetTopicFMDTEntryUserData(SubIEN : String; EntryFMDT : TFMDateTime; UserData : TTopicDataString) : string;
@@ -39,6 +46,9 @@ function MergeTopics(SrcSubIENs : TStringList; DestSubIEN : string) : string; ov
 
 
 implementation
+
+uses
+  uHTMLTools; //kt //codex 9/25/26
 
 function TopicCommand(Dest: TStrings; DFN: String; Cmd : string; Data : string; DataSL : TStringList = nil; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string; forward;
 
@@ -66,6 +76,18 @@ begin
   Result := TopicCommand(Dest, Patient.DFN, 'LIST', '', nil, SDT,EDT);
 end;
 
+function ListTopicTables(Dest: TStrings): string;
+//kt //codex added entire function 9/28/26
+begin
+  Result := TopicCommand(Dest, Patient.DFN, 'LIST TABLES', '');
+end;
+
+function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string;
+//kt //codex added entire function 9/28/26
+begin
+  Result := TopicCommand(Dest, Patient.DFN, 'GET TABLES AS DATA', TableNames);
+end;
+
 function RenameTopic(SubIEN, TopicName: string): string;
 //kt //codex added entire function 9/24/26
 var
@@ -78,6 +100,149 @@ begin
     Result := TopicCommand(TempSL, Patient.DFN, 'RENAME', Params);
   finally
     TempSL.Free;
+  end;
+end;
+
+function AddTopic(TopicName: string): string;
+//kt //codex added entire function 9/28/26
+var
+  TempSL: TStringList;
+begin
+  TempSL := TStringList.Create;
+  try
+    Result := TopicCommand(TempSL, Patient.DFN, 'ADD TOPIC', TopicName);
+  finally
+    TempSL.Free;
+  end;
+end;
+
+function DeleteTopic(SubIEN: string): string;
+//kt //codex added entire function 9/25/26
+var
+  TempSL: TStringList;
+begin
+  TempSL := TStringList.Create;
+  try
+    Result := TopicCommand(TempSL, Patient.DFN, 'DEL TOPIC', SubIEN);
+  finally
+    TempSL.Free;
+  end;
+end;
+
+function Delete1TopicEntry(SubIEN: string; EntryFMDT: TFMDateTime): string;
+//kt //codex added entire function 9/25/26
+var
+  TempSL: TStringList;
+  Params: string;
+begin
+  TempSL := TStringList.Create;
+  Params := SubIEN + '^' + FloatToStr(EntryFMDT);
+  try
+    Result := TopicCommand(TempSL, Patient.DFN, 'DEL 1 TOPIC ENTRY', Params);
+  finally
+    TempSL.Free;
+  end;
+end;
+
+procedure NormalizeTopicEntryTextLines(Lines: TStrings);
+//kt //codex added entire procedure 9/27/26
+var
+  BreakPos: Integer;
+  Index: Integer;
+  Line: string;
+  NormalizedLines: TStringList;
+begin
+  NormalizedLines := TStringList.Create;
+  try
+    for Index := 0 to Lines.Count - 1 do begin
+      Line := StringReplace(Lines[Index], #13#10, #10, [rfReplaceAll]);
+      Line := StringReplace(Line, #10#13, #10, [rfReplaceAll]);
+      Line := StringReplace(Line, #13, #10, [rfReplaceAll]);
+      BreakPos := Pos(#10, Line);
+      while BreakPos > 0 do begin
+        NormalizedLines.Add(Copy(Line, 1, BreakPos - 1));
+        Delete(Line, 1, BreakPos);
+        BreakPos := Pos(#10, Line);
+      end;
+      NormalizedLines.Add(Line);
+    end;
+    Lines.Assign(NormalizedLines);
+  finally
+    NormalizedLines.Free;
+  end;
+end;
+
+function TopicEntryTextLinesAreClean(Lines: TStrings): Boolean;
+//kt //codex added entire function 9/27/26
+var
+  Index: Integer;
+begin
+  Result := True;
+  for Index := 0 to Lines.Count - 1 do begin
+    if (Pos(#13, Lines[Index]) > 0) or (Pos(#10, Lines[Index]) > 0) then begin
+      Result := False;
+      Exit;
+    end;
+  end;
+end;
+
+function Add1TopicEntry(SubIEN: string; EntryFMDT: TFMDateTime; Text: TStringList): string;
+//kt //codex added entire function 9/28/26
+var
+  Params: string;
+  ResultSL: TStringList;
+  WrappedText: TStringList;
+begin
+  if not Assigned(Text) then begin
+    Result := '-1^Topic entry text was not supplied.';
+    Exit;
+  end;
+  ResultSL := TStringList.Create;
+  WrappedText := TStringList.Create;
+  try
+    if Text.Count > 0 then begin
+      SplitHTMLToArray(Text.Text, WrappedText);
+    end;
+    NormalizeTopicEntryTextLines(WrappedText);
+    if not TopicEntryTextLinesAreClean(WrappedText) then begin
+      Result := '-1^Topic entry text contains an embedded line break.';
+      Exit;
+    end;
+    Params := SubIEN + '^' + FloatToStr(EntryFMDT);
+    Result := TopicCommand(ResultSL, Patient.DFN, 'ADD 1 TOPIC ENTRY', Params, WrappedText);
+  finally
+    WrappedText.Free;
+    ResultSL.Free;
+  end;
+end;
+
+function Set1TopicEntryText(SubIEN: string; EntryFMDT: TFMDateTime; Text: TStringList): string;
+//kt //codex added entire function 9/25/26
+var
+  Params: string;
+  ResultSL: TStringList;
+  WrappedText: TStringList;
+begin
+  if not Assigned(Text) then begin
+    Result := '-1^Topic entry text was not supplied.';
+    Exit;
+  end;
+  ResultSL := TStringList.Create;
+  WrappedText := TStringList.Create;
+  try
+    if Text.Count > 0 then begin
+      SplitHTMLToArray(Text.Text, WrappedText);
+    end;
+    NormalizeTopicEntryTextLines(WrappedText); //kt //codex 9/27/26
+    if not TopicEntryTextLinesAreClean(WrappedText) then begin //kt //codex 9/27/26
+      Result := '-1^Topic entry text contains an embedded line break.'; //kt //codex 9/27/26
+      Exit; //kt //codex 9/27/26
+    end; //kt //codex 9/27/26
+    Params := SubIEN + '^' + FloatToStr(EntryFMDT);
+    Result := TopicCommand(ResultSL, Patient.DFN, 'SET 1 TOPIC ENTRY TEXT', Params, WrappedText);
+  finally
+    WrappedText.Free;
+    ResultSL.Free;
   end;
 end;
 

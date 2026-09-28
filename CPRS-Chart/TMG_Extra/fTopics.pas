@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, Classes, Controls, ExtCtrls, Buttons, Graphics, fPage, VA508AccessibilityManager,
   Vcl.StdCtrls, Vcl.OleCtrls, SHDocVw, ORCtrls, Vcl.ComCtrls, Vcl.Menus, Vcl.Dialogs, MSHTML, Variants, ActiveX, SysUtils,
-  CommCtrl, rTopics,
+  CommCtrl, rTopics, ORDtTm, rCore,
   System.UITypes, Vcl.ToolWin, System.ImageList, Vcl.ImgList, Vcl.BaseImageCollection, Vcl.ImageCollection, uPngGlyphButton, System.Generics.Collections,
   Vcl.Mask, Vcl.Forms;
 
@@ -18,6 +18,13 @@ type
     TopicName: string;
     Hidden: string;
     UserData: string;
+  end;
+
+  TTopicDataTable = class
+    TableName: string;
+    Lines: TStringList;
+    constructor Create(const ATableName: string);
+    destructor Destroy; override;
   end;
 
   TTopicSortKey = record
@@ -67,9 +74,7 @@ type
     btnEditZoomIn: TSpeedButton;
     pnlBtnHolder: TPanel;
     btnSave: TBitBtn;
-    pnlRightHeader: TPanel;
     pnlRightFooter: TPanel;
-    Label1: TLabel;
     BitBtn1: TBitBtn;
     ImageList1: TImageList;
     ImageCollection1: TImageCollection;
@@ -77,6 +82,11 @@ type
     cbShowHidden: TCheckBox;
     edtFilter: TLabeledEdit;
     btnClearFilter: TBitBtn;
+    btnCancel: TBitBtn;
+    lblFMDT: TLabel;
+    btnNewFMDTEntry: TBitBtn;
+    btnNewTopic: TBitBtn;
+    procedure BitBtn1Click(Sender: TObject);
     procedure btnTopicsLeftHandleClick(Sender: TObject);
     procedure btnTopicsLeftHandleMouseEnter(Sender: TObject);
     procedure btnTopicsLeftHandleMouseLeave(Sender: TObject);
@@ -93,6 +103,10 @@ type
     procedure timTopicsRightAnimateTimer(Sender: TObject);
     procedure timSaveTopicChangesTimer(Sender: TObject);
     procedure timTopicFilterTimer(Sender: TObject);
+    procedure btnCancelClick(Sender: TObject);
+    procedure btnNewFMDTEntryClick(Sender: TObject);
+    procedure btnNewTopicClick(Sender: TObject);
+    procedure btnSaveClick(Sender: TObject);
     procedure btnTopicsRightHandleClick(Sender: TObject);
     procedure btnTopicsLeftPinClick(Sender: TObject);
     procedure pnlTopicsElsewhereMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -105,9 +119,11 @@ type
     procedure HideTopicsMenuItemClick(Sender: TObject);
     procedure MergeTopicsMenuItemClick(Sender: TObject);
     procedure RenameTopicMenuItemClick(Sender: TObject);
+    procedure DeleteTopicMenuItemClick(Sender: TObject);
     procedure TopicListPopupMenuPopup(Sender: TObject);
     procedure wbDisplayPriorBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure wbDisplayPriorDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
+    procedure wbTopicDataDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
   protected
     procedure Loaded; override;
     procedure Resize; override;
@@ -136,33 +152,47 @@ type
     FTopicListModel: TStringList;
     FTopicChanges: TTopicChanges;
     FCurrentTopicEntries: TStringList;
+    FTopicDataTables: TObjectList<TTopicDataTable>;
     FCurrentTopicName: string;
     FCurrentTopicPropertyID: string;
+    FEditingTopicEntryFMDate: string;
+    FNewTopicEntry: Boolean;
     FTopicSortKeys: TList<TTopicSortKey>;
     FTopicsListViewWindowProc: TWndMethod;
     FTopicListPopupMenu: TPopupMenu;
     FHideTopicsMenuItem: TMenuItem;
     FMergeTopicsMenuItem: TMenuItem;
     FRenameTopicMenuItem: TMenuItem;
+    FDeleteTopicMenuItem: TMenuItem;
     FPendingTopicHTML: string;
     FPendingTopicEntryID: string;
     FTopicHiddenColumnWidth: Integer;
     timTopicFilter: TTimer;
     function BuildTopicHTML(TopicData: TStrings; const DefaultTopicName: string): string;
+    function BuildTopicDataHTML: string;
     procedure ClearTopicList;
+    procedure ClearTopicEntryEditor;
     procedure CloseTopicsLeftWithoutDelay;
     procedure ConfigureTopicsElsewhereMouseDown(AParent: TWinControl);
     procedure DisplayTopicHTML(const HTML: string);
+    procedure DisplayTopicDataHTML;
     function CursorOverControl(AControl: TControl): Boolean;
     function CompareTopicListItems(Item1, Item2: TListItem; ColumnIndex: Integer): Integer;
     function FindTopicSortKey(ColumnIndex: Integer): Integer;
+    function TopicListCellBackgroundColor(ColumnIndex: Integer): TColor;
     function FindLatestTopicEntryID(TopicData: TStrings): string;
+    function FindTopicDataTable(const TableName: string): TTopicDataTable;
     function TopicMatchesUserDataFilter(const UserData: string): Boolean;
     procedure EditTopicUserData(ListItem: TListItem);
+    procedure EditCurrentTopicEntry(const EntryFMDate: string);
+    procedure DeleteCurrentTopicEntry(const EntryFMDate: string);
+    procedure DeleteSelectedTopic;
     procedure InitializeTopicListColumns;
     procedure MergeSelectedTopics;
     procedure RenameSelectedTopic;
     procedure NavigateToDocument(const DocumentIEN: string);
+    procedure NormalizeTopicsLeftPaneWidths;
+    procedure NormalizeTopicsRightPaneWidths;
     procedure ScrollTopicEntryIntoView(const EntryID: string);
     function TopicListColumnAt(X: Integer): Integer;
     function TopicListItemAt(X, Y: Integer; out ColumnIndex: Integer): TListItem;
@@ -172,6 +202,8 @@ type
     procedure RestoreTopicListLayout;
     procedure RestartTopicSaveTimer;
     procedure SaveTopicListLayout;
+    procedure SetTopicEditorFormattingEnabled(Enabled: Boolean);
+    procedure SetTopicEditorEditable(Editable: Boolean);
     procedure ToggleTopicEntryHidden(const EntryFMDate: string);
     procedure ToggleTopicHidden(ListItem: TListItem);
     procedure ToggleSelectedTopicsHidden(ListItem: TListItem);
@@ -189,7 +221,10 @@ type
     procedure UpdateTopicsLeftHandleGlyph;
     procedure UpdateTopicsLeftPinGlyph;
     procedure UpdateTopicsRightHandleGlyph;
+    procedure UpdateTopicListColors;
     procedure UpdateTopicListSortIndicators;
+    procedure UpdateTopicsRightColors;
+    procedure UpdateTopicDataModel(TableData: TStrings);
     procedure UpdateTopicListHiddenColumn;
     procedure lvTopicsWindowProc(var Message: TMessage);
     procedure WritePendingTopicHTML;
@@ -207,13 +242,15 @@ implementation
 {$R *.dfm}
 
 uses
-  fFrame, ORFn, uCore, uHTMLTools, uTMGOptions;
+  fFrame, ORFn, uCore, uHTMLTools, uTMGOptions, fTopicTablePicker;
 
 const
   TOPICS_PANE_ANIMATION_STEPS = 3;
   TOPICS_PANE_ANIMATION_TIMESLICE_MS = 25;
   TOPICS_LEFT_COLLAPSE_DELAY_MS = 500;
   TOPICS_LEFT_COLLAPSE_RIGHT_DISTANCE = 100;
+  TOPICS_LEFT_PANE_MINIMUM_WIDTH_GAP = 50;
+  TOPICS_RIGHT_PANE_MINIMUM_WIDTH_GAP = 50;
   TOPICS_LEFT_OPEN_SIZE_KEY = 'frmTopics.LeftPaneOpenSize';
   TOPICS_LEFT_CLOSED_SIZE_KEY = 'frmTopics.LeftPaneClosedSize';
   TOPICS_RIGHT_OPEN_SIZE_KEY = 'frmTopics.RightPaneOpenSize';
@@ -247,7 +284,25 @@ begin
   end;
 end;
 
+constructor TTopicDataTable.Create(const ATableName: string);
+begin
+  inherited Create;
+  TableName := ATableName;
+  Lines := TStringList.Create;
+end;
+
+destructor TTopicDataTable.Destroy;
+begin
+  Lines.Free;
+  inherited;
+end;
+
 procedure TfrmTopics.Loaded;
+var
+  SavedTopicsLeftOpenWidth: Integer;
+  SavedTopicsLeftClosedWidth: Integer;
+  SavedTopicsRightOpenWidth: Integer;
+  SavedTopicsRightClosedWidth: Integer;
 begin
   inherited;
   btnTopicsLeftHandle := TPngGlyphButton.Create(Self);
@@ -269,6 +324,7 @@ begin
   FTopicListModel.OwnsObjects := True;
   FTopicChanges := TTopicChanges.Create([doOwnsValues]);
   FCurrentTopicEntries := TStringList.Create;
+  FTopicDataTables := TObjectList<TTopicDataTable>.Create(True);
   FTopicSortKeys := TList<TTopicSortKey>.Create;
   InitializeTopicListColumns;
   FTopicListPopupMenu := TPopupMenu.Create(Self);
@@ -277,6 +333,10 @@ begin
   FRenameTopicMenuItem.Caption := 'Rename topic';
   FRenameTopicMenuItem.OnClick := RenameTopicMenuItemClick;
   FTopicListPopupMenu.Items.Add(FRenameTopicMenuItem);
+  FDeleteTopicMenuItem := TMenuItem.Create(FTopicListPopupMenu);
+  FDeleteTopicMenuItem.Caption := 'Delete topic';
+  FDeleteTopicMenuItem.OnClick := DeleteTopicMenuItemClick;
+  FTopicListPopupMenu.Items.Add(FDeleteTopicMenuItem);
   FHideTopicsMenuItem := TMenuItem.Create(FTopicListPopupMenu);
   FHideTopicsMenuItem.OnClick := HideTopicsMenuItemClick;
   FTopicListPopupMenu.Items.Add(FHideTopicsMenuItem);
@@ -295,22 +355,17 @@ begin
   lvTopics.MultiSelect := True;
   FTopicsLeftOpenWidth := uTMGOptions.ReadInteger(TOPICS_LEFT_OPEN_SIZE_KEY, pnlTopicsLeft.Width);
   FTopicsLeftClosedWidth := uTMGOptions.ReadInteger(TOPICS_LEFT_CLOSED_SIZE_KEY, splTopicsLeft.MinSize);
-  if FTopicsLeftOpenWidth < splTopicsLeft.MinSize then begin
-    FTopicsLeftOpenWidth := splTopicsLeft.MinSize;
-  end;
-  if FTopicsLeftClosedWidth < splTopicsLeft.MinSize then begin
-    FTopicsLeftClosedWidth := splTopicsLeft.MinSize;
-  end;
+  SavedTopicsLeftOpenWidth := FTopicsLeftOpenWidth;
+  SavedTopicsLeftClosedWidth := FTopicsLeftClosedWidth;
+  NormalizeTopicsLeftPaneWidths;
   FTopicsLeftOpen := False;
   pnlTopicsLeft.Width := FTopicsLeftClosedWidth;
   FTopicsRightOpenWidth := uTMGOptions.ReadInteger(TOPICS_RIGHT_OPEN_SIZE_KEY, pnlTopicsRight.Width);
   FTopicsRightClosedWidth := uTMGOptions.ReadInteger(TOPICS_RIGHT_CLOSED_SIZE_KEY, splTopicsRight.MinSize);
-  if FTopicsRightOpenWidth < splTopicsRight.MinSize then begin
-    FTopicsRightOpenWidth := splTopicsRight.MinSize;
-  end;
-  if FTopicsRightClosedWidth < splTopicsRight.MinSize then begin
-    FTopicsRightClosedWidth := splTopicsRight.MinSize;
-  end;
+  SavedTopicsRightOpenWidth := FTopicsRightOpenWidth;
+  SavedTopicsRightClosedWidth := FTopicsRightClosedWidth;
+  NormalizeTopicsRightPaneWidths;
+  pnlTopicsRight.Constraints.MinWidth := FTopicsRightClosedWidth;
   FTopicsRightOpen := True;
   pnlTopicsRight.Width := FTopicsRightOpenWidth;
   pnlCenterTop.Height := uTMGOptions.ReadInteger(TOPICS_CENTER_TOP_HEIGHT_KEY, pnlCenterTop.Height);
@@ -332,17 +387,32 @@ begin
   lvTopics.OnCompare := lvTopicsCompare;
   lvTopics.OnCustomDrawItem := lvTopicsCustomDrawItem;
   lvTopics.OnCustomDrawSubItem := lvTopicsCustomDrawSubItem;
-  lvTopics.Color := clWhite;
+  UpdateTopicListColors;
   RestoreTopicListLayout;
   UpdateTopicListSortIndicators;
   wbDisplayPrior.OnBeforeNavigate2 := wbDisplayPriorBeforeNavigate2;
   wbDisplayPrior.OnDocumentComplete := wbDisplayPriorDocumentComplete;
+  wbTopicData.OnDocumentComplete := wbTopicDataDocumentComplete;
+  WBLoadHTML(wbTopicData, '<html><body></body></html>');
   UpdateTopicsLeftHandleGlyph;
   UpdateTopicsRightHandleGlyph;
   UpdateTopicsLeftPinGlyph;
+  UpdateTopicsRightColors;
+  WBLoadHTML(wbEnterNew, '<html><body></body></html>');
+  SetTopicEditorEditable(False);
+  BitBtn1.Enabled := False;
+  btnNewTopic.Enabled := Patient.DFN <> '';
   PositionTopicsLeftHandle;
   PositionTopicsRightHandle;
   FTopicsLoaded := True;
+  if (FTopicsLeftOpenWidth <> SavedTopicsLeftOpenWidth) or (FTopicsLeftClosedWidth <> SavedTopicsLeftClosedWidth) then begin
+    uTMGOptions.WriteInteger(TOPICS_LEFT_OPEN_SIZE_KEY, FTopicsLeftOpenWidth);
+    uTMGOptions.WriteInteger(TOPICS_LEFT_CLOSED_SIZE_KEY, FTopicsLeftClosedWidth);
+  end;
+  if (FTopicsRightOpenWidth <> SavedTopicsRightOpenWidth) or (FTopicsRightClosedWidth <> SavedTopicsRightClosedWidth) then begin
+    uTMGOptions.WriteInteger(TOPICS_RIGHT_OPEN_SIZE_KEY, FTopicsRightOpenWidth);
+    uTMGOptions.WriteInteger(TOPICS_RIGHT_CLOSED_SIZE_KEY, FTopicsRightClosedWidth);
+  end;
   Resize;
 end;
 
@@ -382,6 +452,7 @@ begin
   FTopicListModel.Free;
   FTopicChanges.Free;
   FCurrentTopicEntries.Free;
+  FTopicDataTables.Free;
   FTopicSortKeys.Free;
   inherited;
 end;
@@ -394,16 +465,41 @@ begin
   FTopicListModel.Clear;
   FTopicChanges.Clear;
   FCurrentTopicEntries.Clear;
+  FTopicDataTables.Clear;
   FCurrentTopicName := '';
   FCurrentTopicPropertyID := '';
   FPendingTopicHTML := '';
   FPendingTopicEntryID := '';
+  ClearTopicEntryEditor;
+  BitBtn1.Enabled := False;
   wbDisplayPrior.Navigate('about:blank');
+  DisplayTopicDataHTML;
 end;
 
 procedure TfrmTopics.ClearTopicList;
 begin
   lvTopics.Items.Clear;
+end;
+
+procedure TfrmTopics.ClearTopicEntryEditor;
+var
+  WebDocument: IHTMLDocument2;
+begin
+  FEditingTopicEntryFMDate := '';
+  FNewTopicEntry := False;
+  lblFMDT.Caption := '';
+  btnCancel.Enabled := False;
+  btnSave.Enabled := False;
+  btnNewFMDTEntry.Enabled := FCurrentTopicPropertyID <> '';
+  btnNewTopic.Enabled := Patient.DFN <> '';
+  SetTopicEditorEditable(False);
+  if not Assigned(wbEnterNew.Document) then begin
+    Exit;
+  end;
+  WebDocument := wbEnterNew.Document as IHTMLDocument2;
+  if (WebDocument <> nil) and (WebDocument.body <> nil) then begin
+    WebDocument.body.innerHTML := '';
+  end;
 end;
 
 procedure TfrmTopics.RebuildTopicList;
@@ -459,11 +555,14 @@ begin
     end;
     if (FCurrentTopicPropertyID <> '') and (CurrentTopicItem = nil) then begin
       FCurrentTopicEntries.Clear;
+      FTopicDataTables.Clear;
       FCurrentTopicName := '';
       FCurrentTopicPropertyID := '';
       FPendingTopicHTML := '';
       FPendingTopicEntryID := '';
       wbDisplayPrior.Navigate('about:blank');
+      BitBtn1.Enabled := False;
+      DisplayTopicDataHTML;
     end;
   finally
     SelectedPropertyIDs.Free;
@@ -767,6 +866,38 @@ begin
   RenameSelectedTopic;
 end;
 
+procedure TfrmTopics.DeleteTopicMenuItemClick(Sender: TObject);
+begin
+  DeleteSelectedTopic;
+end;
+
+procedure TfrmTopics.DeleteSelectedTopic;
+var
+  ListItem: TListItem;
+  Status: string;
+  TopicData: TTopicListItemData;
+begin
+  ListItem := lvTopics.Selected;
+  if (ListItem = nil) or (ListItem.Data = nil) then begin
+    Exit;
+  end;
+  TopicData := TTopicListItemData(ListItem.Data);
+  if MessageDlg('Delete topic ''' + TopicData.TopicName + '''?' + sLineBreak + sLineBreak +
+    'This cannot be undone!', mtWarning, [mbYes, mbNo], 0) <> mrYes then begin
+    Exit;
+  end;
+  Status := DeleteTopic(TopicData.PropertyID);
+  if Piece(Status, '^', 1) <> '1' then begin
+    MessageDlg('The topic could not be deleted.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
+    Exit;
+  end;
+  FTopicChanges.Remove(TopicData.PropertyID);
+  if FTopicChanges.Count = 0 then begin
+    timSaveTopicChanges.Enabled := False;
+  end;
+  RefreshTopicList;
+end;
+
 procedure TfrmTopics.RenameSelectedTopic;
 var
   Index: Integer;
@@ -964,6 +1095,8 @@ begin
   FHideTopicsMenuItem.Visible := not cbShowHidden.Checked;
   FRenameTopicMenuItem.Visible := SelectedCount = 1;
   FRenameTopicMenuItem.Enabled := SelectedCount = 1;
+  FDeleteTopicMenuItem.Visible := SelectedCount = 1;
+  FDeleteTopicMenuItem.Enabled := SelectedCount = 1;
   FMergeTopicsMenuItem.Visible := SelectedCount > 1;
   FMergeTopicsMenuItem.Enabled := SelectedCount > 1;
 end;
@@ -997,11 +1130,15 @@ begin
   ClearTopicList;
   FTopicListModel.Clear;
   FCurrentTopicEntries.Clear;
+  FTopicDataTables.Clear;
   FCurrentTopicName := '';
   FCurrentTopicPropertyID := '';
   FPendingTopicHTML := '';
   FPendingTopicEntryID := '';
+  ClearTopicEntryEditor;
+  BitBtn1.Enabled := False;
   wbDisplayPrior.Navigate('about:blank');
+  DisplayTopicDataHTML;
   if Patient.DFN = '' then begin
     Exit;
   end;
@@ -1119,12 +1256,11 @@ end;
 procedure TfrmTopics.lvTopicsCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
 begin
   if cdsSelected in State then begin
-    Exit;
-  end;
-  if FindTopicSortKey(0) >= 0 then begin
-    Sender.Canvas.Brush.Color := clCream
+    Sender.Canvas.Brush.Color := RGB(214, 232, 246);
+    Sender.Canvas.Font.Color := clNavy;
   end else begin
-    Sender.Canvas.Brush.Color := clWhite;
+    Sender.Canvas.Brush.Color := TopicListCellBackgroundColor(0);
+    Sender.Canvas.Font.Color := clWindowText;
   end;
   Sender.Canvas.Brush.Color := Sender.Canvas.Brush.Color + 1;
   Sender.Canvas.Brush.Color := Sender.Canvas.Brush.Color - 1;
@@ -1133,15 +1269,60 @@ end;
 procedure TfrmTopics.lvTopicsCustomDrawSubItem(Sender: TCustomListView; Item: TListItem; SubItem: Integer; State: TCustomDrawState; var DefaultDraw: Boolean);
 begin
   if cdsSelected in State then begin
-    Exit;
-  end;
-  if FindTopicSortKey(SubItem) >= 0 then begin
-    Sender.Canvas.Brush.Color := clCream
+    Sender.Canvas.Brush.Color := RGB(214, 232, 246);
+    Sender.Canvas.Font.Color := clNavy;
   end else begin
-    Sender.Canvas.Brush.Color := clWhite;
+    Sender.Canvas.Brush.Color := TopicListCellBackgroundColor(SubItem);
+    Sender.Canvas.Font.Color := clWindowText;
   end;
   Sender.Canvas.Brush.Color := Sender.Canvas.Brush.Color + 1;
   Sender.Canvas.Brush.Color := Sender.Canvas.Brush.Color - 1;
+end;
+
+function TfrmTopics.TopicListCellBackgroundColor(ColumnIndex: Integer): TColor;
+begin
+  if FindTopicSortKey(ColumnIndex) >= 0 then begin
+    Result := RGB(232, 242, 252);
+  end else if FTopicsLeftOpen then begin
+    Result := clWhite;
+  end else begin
+    Result := clCream;
+  end;
+end;
+
+procedure TfrmTopics.UpdateTopicsRightColors;
+var
+  WebDocument: IHTMLDocument2;
+begin
+  if FTopicsRightOpen then begin
+    pnlTopicsRight.Color := clWhite;
+    pnlRightFooter.Color := clWhite;
+  end else begin
+    pnlTopicsRight.Color := clCream;
+    pnlRightFooter.Color := clCream;
+  end;
+  if not Assigned(wbTopicData.Document) then begin
+    Exit;
+  end;
+  WebDocument := wbTopicData.Document as IHTMLDocument2;
+  if (WebDocument = nil) or (WebDocument.body = nil) then begin
+    Exit;
+  end;
+  if FTopicsRightOpen then begin
+    WebDocument.body.style.backgroundColor := '#FFFFFF';
+  end else begin
+    WebDocument.body.style.backgroundColor := '#FFFBF0';
+  end;
+end;
+
+procedure TfrmTopics.UpdateTopicListColors;
+begin
+  if FTopicsLeftOpen then begin
+    lvTopics.Color := clWhite;
+  end else begin
+    lvTopics.Color := clCream;
+  end;
+  lvTopics.Invalidate;
 end;
 
 procedure TfrmTopics.UpdateTopicListSortIndicators;
@@ -1380,6 +1561,324 @@ begin
   end;
 end;
 
+procedure TfrmTopics.SetTopicEditorFormattingEnabled(Enabled: Boolean);
+begin
+  btnDelete.Enabled := Enabled;
+  cbFontNames.Enabled := Enabled;
+  cbFontSize.Enabled := Enabled;
+  btnFonts.Enabled := Enabled;
+  btnItalic.Enabled := Enabled;
+  btnBold.Enabled := Enabled;
+  btnUnderline.Enabled := Enabled;
+  btnBullets.Enabled := Enabled;
+  btnNumbers.Enabled := Enabled;
+  btnLeftAlign.Enabled := Enabled;
+  btnCenterAlign.Enabled := Enabled;
+  btnRightAlign.Enabled := Enabled;
+  btnMoreIndent.Enabled := Enabled;
+  btnLessIndent.Enabled := Enabled;
+  btnShiftEnter.Enabled := Enabled;
+  btnTextColor.Enabled := Enabled;
+  btnBackColor.Enabled := Enabled;
+  btnImage.Enabled := Enabled;
+end;
+
+procedure TfrmTopics.SetTopicEditorEditable(Editable: Boolean);
+var
+  WebDocument: IHTMLDocument2;
+begin
+  SetTopicEditorFormattingEnabled(Editable);
+  if not Assigned(wbEnterNew.Document) then begin
+    Exit;
+  end;
+  WebDocument := wbEnterNew.Document as IHTMLDocument2;
+  if (WebDocument = nil) or (WebDocument.body = nil) then begin
+    Exit;
+  end;
+  if Editable then begin
+    WebDocument.body.setAttribute('contentEditable', 'true', 0);
+    WebDocument.body.style.backgroundColor := '#FFFFFF';
+    WebDocument.execCommand('RespectVisibilityInDesign', False, True);
+  end else begin
+    WebDocument.body.setAttribute('contentEditable', 'false', 0);
+    WebDocument.body.style.backgroundColor := '#FFFBF0';
+  end;
+end;
+
+procedure TfrmTopics.EditCurrentTopicEntry(const EntryFMDate: string);
+var
+  EntryDate: TFMDateTime;
+  EntryStartIndex: Integer;
+  EntryText: TStringList;
+  Index: Integer;
+  temp : string;
+begin
+  if (FCurrentTopicPropertyID = '') or (EntryFMDate = '') then begin
+    Exit;
+  end;
+  EntryStartIndex := -1;
+  for Index := 0 to FCurrentTopicEntries.Count - 1 do begin
+    if (Piece(FCurrentTopicEntries[Index], '^', 1) = '1') and (Piece(FCurrentTopicEntries[Index], '^', 2) = EntryFMDate) then begin
+      EntryStartIndex := Index;
+      Break;
+    end;
+  end;
+  if EntryStartIndex < 0 then begin
+    Exit;
+  end;
+  EntryText := TStringList.Create;
+  try
+    Index := EntryStartIndex + 1;
+    while (Index < FCurrentTopicEntries.Count) and (Piece(FCurrentTopicEntries[Index], '^', 1) = '2') do begin
+      temp := FCurrentTopicEntries[Index];
+      temp  := Copy(temp, 3, MaxInt);
+      EntryText.Add(temp);
+      //EntryText.Add(Copy(FCurrentTopicEntries[Index], 3, MaxInt));
+      Inc(Index);
+    end;
+    if IsHTML(EntryText) then begin
+      WBLoadHTML(wbEnterNew, EntryText.Text);
+    end else begin
+      WBLoadHTML(wbEnterNew, Text2HTML(EntryText));
+    end;
+    SetTopicEditorEditable(True);
+    EntryDate := MakeFMDateTime(EntryFMDate);
+    if EntryDate > 0 then begin
+      lblFMDT.Caption := FormatDateTime('mmmm d, yyyy h:nn am/pm', FMDateTimeToDateTime(EntryDate));
+    end else begin
+      lblFMDT.Caption := EntryFMDate;
+    end;
+    FEditingTopicEntryFMDate := EntryFMDate;
+    FNewTopicEntry := False;
+    btnCancel.Enabled := True;
+    btnSave.Enabled := True;
+    btnNewFMDTEntry.Enabled := False;
+    btnNewTopic.Enabled := False;
+  finally
+    EntryText.Free;
+  end;
+end;
+
+procedure TfrmTopics.btnCancelClick(Sender: TObject);
+begin
+  ClearTopicEntryEditor;
+end;
+
+procedure TfrmTopics.btnNewFMDTEntryClick(Sender: TObject);
+var
+  DateDialog: TORDateTimeDlg;
+  EntryDate: TFMDateTime;
+  Index: Integer;
+begin
+  if FCurrentTopicPropertyID = '' then begin
+    Exit;
+  end;
+  if (FEditingTopicEntryFMDate <> '') and
+     (MessageDlg('Discard the current topic entry changes?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then begin
+    Exit;
+  end;
+  DateDialog := TORDateTimeDlg.Create(Self);
+  try
+    DateDialog.DateOnly := False;
+    DateDialog.RequireTime := True;
+    DateDialog.FMDateTime := FMNow;
+    if not DateDialog.Execute then begin
+      Exit;
+    end;
+    EntryDate := DateDialog.FMDateTime;
+  finally
+    DateDialog.Free;
+  end;
+  if EntryDate <= 0 then begin
+    MessageDlg('A valid date and time are required for a new topic entry.', mtError, [mbOK], 0);
+    Exit;
+  end;
+  for Index := 0 to FCurrentTopicEntries.Count - 1 do begin
+    if (Piece(FCurrentTopicEntries[Index], '^', 1) = '1') and
+       (MakeFMDateTime(Piece(FCurrentTopicEntries[Index], '^', 2)) = EntryDate) then begin
+      MessageDlg('This topic already has an entry at the selected date and time.', mtError, [mbOK], 0);
+      Exit;
+    end;
+  end;
+  ClearTopicEntryEditor;
+  WBLoadHTML(wbEnterNew, '<html><body></body></html>');
+  FEditingTopicEntryFMDate := FloatToStr(EntryDate);
+  FNewTopicEntry := True;
+  lblFMDT.Caption := FormatDateTime('mmmm d, yyyy h:nn am/pm', FMDateTimeToDateTime(EntryDate));
+  SetTopicEditorEditable(True);
+  btnCancel.Enabled := True;
+  btnSave.Enabled := True;
+  btnNewFMDTEntry.Enabled := False;
+  btnNewTopic.Enabled := False;
+end;
+
+procedure TfrmTopics.btnNewTopicClick(Sender: TObject);
+var
+  Index: Integer;
+  ListItem: TListItem;
+  NewTopicName: string;
+  NewTopicPropertyID: string;
+  Status: string;
+begin
+  if (Patient.DFN = '') or (FEditingTopicEntryFMDate <> '') then begin
+    Exit;
+  end;
+  NewTopicName := '';
+  if not InputQuery('New Topic', 'Topic name:', NewTopicName) then begin
+    Exit;
+  end;
+  NewTopicName := Trim(NewTopicName);
+  if NewTopicName = '' then begin
+    MessageDlg('A topic name is required.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  if Pos('^', NewTopicName) > 0 then begin
+    MessageDlg('A topic name cannot contain ^.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  if Length(NewTopicName) > 180 then begin
+    MessageDlg('A topic name is limited to 180 characters.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  for Index := 0 to FTopicListModel.Count - 1 do begin
+    if SameText(FTopicListModel.Strings[Index], NewTopicName) then begin
+      MessageDlg('A topic with this name already exists.', mtInformation, [mbOK], 0);
+      Exit;
+    end;
+  end;
+  Status := AddTopic(NewTopicName);
+  if Piece(Status, '^', 1) <> '1' then begin
+    MessageDlg('The topic could not be created.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
+    Exit;
+  end;
+  NewTopicPropertyID := Piece(Status, '^', 2);
+  if NewTopicPropertyID = '' then begin
+    MessageDlg('The topic was created, but its identifier was not returned.', mtError, [mbOK], 0);
+    Exit;
+  end;
+  if edtFilter.Text <> '' then begin
+    edtFilter.Text := '';
+    timTopicFilter.Enabled := False;
+  end;
+  RefreshTopicList;
+  ListItem := nil;
+  for Index := 0 to lvTopics.Items.Count - 1 do begin
+    if (lvTopics.Items[Index].Data <> nil) and
+       (TTopicListItemData(lvTopics.Items[Index].Data).PropertyID = NewTopicPropertyID) then begin
+      ListItem := lvTopics.Items[Index];
+      Break;
+    end;
+  end;
+  if ListItem = nil then begin
+    MessageDlg('The topic was created, but could not be located in the topic list.', mtError, [mbOK], 0);
+    Exit;
+  end;
+  for Index := 0 to lvTopics.Items.Count - 1 do begin
+    lvTopics.Items[Index].Selected := False;
+  end;
+  ListItem.Selected := True;
+  ListItem.Focused := True;
+  lvTopicsClick(nil);
+  if MessageDlg('Add a new entry to this topic now?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
+    btnNewFMDTEntryClick(btnNewFMDTEntry);
+  end;
+end;
+
+procedure TfrmTopics.btnSaveClick(Sender: TObject);
+var
+  EntryDate: TFMDateTime;
+  EntryText: TStringList;
+  Status: string;
+begin
+  if (FCurrentTopicPropertyID = '') or (FEditingTopicEntryFMDate = '') then begin
+    Exit;
+  end;
+  if FNewTopicEntry then begin
+    if MessageDlg('Create this new topic entry?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
+      Exit;
+    end;
+  end else if MessageDlg('Overwrite the existing topic entry text?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
+    Exit;
+  end;
+  EntryDate := MakeFMDateTime(FEditingTopicEntryFMDate);
+  if EntryDate <= 0 then begin
+    MessageDlg('The topic entry has an invalid FileMan date and cannot be saved.', mtError, [mbOK], 0);
+    Exit;
+  end;
+  EntryText := TStringList.Create;
+  try
+    EntryText.Text := GetWebBrowserHTML(wbEnterNew);
+    if FNewTopicEntry then begin
+      Status := Add1TopicEntry(FCurrentTopicPropertyID, EntryDate, EntryText);
+    end else begin
+      Status := Set1TopicEntryText(FCurrentTopicPropertyID, EntryDate, EntryText);
+    end;
+  finally
+    EntryText.Free;
+  end;
+  if Piece(Status, '^', 1) <> '1' then begin
+    MessageDlg('The topic entry could not be saved.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
+    Exit;
+  end;
+  ClearTopicEntryEditor;
+  lvTopicsClick(nil);
+end;
+
+procedure TfrmTopics.DeleteCurrentTopicEntry(const EntryFMDate: string);
+var
+  EntryDate: TFMDateTime;
+  EntryStartIndex: Integer;
+  Index: Integer;
+  Status: string;
+  TopicChange: TTopicChange;
+begin
+  if (FCurrentTopicPropertyID = '') or (EntryFMDate = '') then begin
+    Exit;
+  end;
+  EntryStartIndex := -1;
+  for Index := 0 to FCurrentTopicEntries.Count - 1 do begin
+    if (Piece(FCurrentTopicEntries[Index], '^', 1) = '1') and (Piece(FCurrentTopicEntries[Index], '^', 2) = EntryFMDate) then begin
+      EntryStartIndex := Index;
+      Break;
+    end;
+  end;
+  if EntryStartIndex < 0 then begin
+    Exit;
+  end;
+  if MessageDlg('Delete this topic entry?' + sLineBreak + sLineBreak + 'This cannot be undone!', mtWarning, [mbYes, mbNo], 0) <> mrYes then begin
+    Exit;
+  end;
+  EntryDate := MakeFMDateTime(EntryFMDate);
+  if EntryDate <= 0 then begin
+    MessageDlg('The topic entry has an invalid FileMan date and cannot be deleted.', mtError, [mbOK], 0);
+    Exit;
+  end;
+  Status := Delete1TopicEntry(FCurrentTopicPropertyID, EntryDate);
+  if Piece(Status, '^', 1) <> '1' then begin
+    MessageDlg('The topic entry could not be deleted.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
+    Exit;
+  end;
+  if FTopicChanges.TryGetValue(FCurrentTopicPropertyID, TopicChange) then begin
+    TopicChange.EntryChanges.Remove(EntryFMDate);
+    if (not TopicChange.HiddenChanged) and (not TopicChange.UserDataChanged) and (TopicChange.EntryChanges.Count = 0) then begin
+      FTopicChanges.Remove(FCurrentTopicPropertyID);
+    end;
+  end;
+  Index := EntryStartIndex + 1;
+  while (Index < FCurrentTopicEntries.Count) and (Piece(FCurrentTopicEntries[Index], '^', 1) = '2') do begin
+    FCurrentTopicEntries.Delete(Index);
+  end;
+  FCurrentTopicEntries.Delete(EntryStartIndex);
+  if FTopicChanges.Count = 0 then begin
+    timSaveTopicChanges.Enabled := False;
+  end;
+  if FEditingTopicEntryFMDate = EntryFMDate then begin
+    ClearTopicEntryEditor;
+  end;
+  FPendingTopicEntryID := '';
+  DisplayTopicHTML(BuildTopicHTML(FCurrentTopicEntries, FCurrentTopicName));
+end;
+
 procedure TfrmTopics.timSaveTopicChangesTimer(Sender: TObject);
 var
   Status: string;
@@ -1418,16 +1917,25 @@ begin
     Y := SmallInt(HiWord(Message.LParam));
     ListItem := TopicListItemAt(X, Y, ColumnIndex);
     if ListItem <> nil then begin
-      if ColumnIndex > 0 then begin
-        if ColumnIndex = TOPIC_USER_DATA_COLUMN then begin
-          EditTopicUserData(ListItem);
-        end;
-        if ColumnIndex = TOPIC_HIDDEN_COLUMN then begin
-          ToggleSelectedTopicsHidden(ListItem);
-        end;
+      if ColumnIndex = TOPIC_USER_DATA_COLUMN then begin
+        EditTopicUserData(ListItem);
+        Exit;
+      end;
+      if ColumnIndex = TOPIC_HIDDEN_COLUMN then begin
+        ToggleSelectedTopicsHidden(ListItem);
         Exit;
       end;
     end;
+    FTopicsListViewWindowProc(Message);
+    if (ListItem <> nil) and (ColumnIndex = 1) and not ListItem.Selected then begin
+      for Index := 0 to lvTopics.Items.Count - 1 do begin
+        lvTopics.Items[Index].Selected := False;
+      end;
+      ListItem.Selected := True;
+      ListItem.Focused := True;
+      lvTopicsClick(lvTopics);
+    end;
+    Exit;
   end;
   if Message.Msg = WM_RBUTTONDOWN then begin
     X := SmallInt(LoWord(Message.LParam));
@@ -1459,7 +1967,6 @@ var
   EntryCount: Integer;
   Index: Integer;
   Modified: Boolean;
-  TopicHidden: string;
   TopicName: string;
   TopicUserData: string;
   TOCDateText: string;
@@ -1467,12 +1974,10 @@ var
 begin
   TopicName := DefaultTopicName;
   EntryTextOpen := false;
-  TopicHidden := '';
   TopicUserData := '';
   for Index := 0 to TopicData.Count - 1 do begin
     if Piece(TopicData[Index], '^', 1) = '0' then begin
       TopicName := Piece(TopicData[Index], '^', 2);
-      TopicHidden := Piece(TopicData[Index], '^', 3);
       TopicUserData := Piece(TopicData[Index], '^', 4);
       Break;
     end;
@@ -1484,32 +1989,32 @@ begin
     TOCLines := TStringList.Create;
     HTMLLines.Add('<!DOCTYPE html>');
     HTMLLines.Add('<html><head><style>');
-    HTMLLines.Add('body { font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; color: #202020; background: #ffffff; }');
-    HTMLLines.Add('.topic-content { margin-left: 132px; padding: 12px; }');
-    HTMLLines.Add('.topic-toc { background: #f5f9fc; border-right: 1px solid #c9d8e6; bottom: 0; display: block; left: 0; overflow-y: auto; padding: 9px 6px; position: fixed; top: 0; width: 120px; }');
+    HTMLLines.Add('body { font-family: Segoe UI, Tahoma, Arial, sans-serif; height: 100%; margin: 0; overflow: hidden; color: #202020; background: #ffffff; }');
+    HTMLLines.Add('.topic-header { background: #ffffff; border-bottom: 1px solid #c9d8e6; height: 26px; left: 132px; overflow: hidden; padding: 8px 12px; position: absolute; right: 0; top: 0; white-space: nowrap; }');
+    HTMLLines.Add('.topic-content { bottom: 0; left: 132px; overflow: auto; padding: 12px; position: absolute; right: 0; top: 43px; }');
+    HTMLLines.Add('.topic-toc { background: #f5f9fc; border-right: 1px solid #c9d8e6; bottom: 0; display: block; left: 0; overflow-y: auto; padding: 9px 6px; position: absolute; top: 0; width: 120px; }');
     HTMLLines.Add('.toc-title { color: #1f4e79; font-size: 11px; font-weight: bold; margin: 0 3px 6px 3px; text-transform: uppercase; }');
     HTMLLines.Add('.topic-toc a { border-radius: 3px; color: #1f4e79; display: block; font-size: 12px; padding: 4px 3px; text-decoration: none; }');
     HTMLLines.Add('.topic-toc a:hover { background: #dcecf7; }');
     HTMLLines.Add('.toc-empty { color: #666666; font-size: 11px; font-style: italic; padding: 3px; }');
-    HTMLLines.Add('h1 { font-size: 18px; margin: 0 0 5px 0; color: #1f4e79; }');
+    HTMLLines.Add('h1 { color: #1f4e79; font-size: 18px; line-height: 26px; margin: 0; overflow: hidden; text-overflow: ellipsis; }');
+    HTMLLines.Add('.topic-delete { color: #a00000; float: right; font-size: 11px; font-weight: normal; line-height: 26px; margin-left: 12px; text-decoration: underline; }');
     HTMLLines.Add('.topic-meta { color: #555555; font-size: 12px; margin-bottom: 14px; }');
     HTMLLines.Add('.topic-meta span, .entry-meta span { margin-right: 14px; }');
     HTMLLines.Add('.topic-entry { border: 1px solid #c9d8e6; border-radius: 4px; margin: 0 0 10px 0; overflow: hidden; }');
     HTMLLines.Add('.entry-heading { background: #eaf3fa; padding: 7px 9px; color: #1f4e79; font-weight: bold; }');
     HTMLLines.Add('.document-link { color: #1f4e79; text-decoration: none; }');
-    HTMLLines.Add('.entry-hidden-toggle { color: #1f4e79; float: right; font-size: 11px; font-weight: normal; text-decoration: underline; }');
+    HTMLLines.Add('.entry-hidden-toggle { color: #1f4e79; float: right; font-size: 11px; font-weight: normal; margin-right: 12px; text-decoration: underline; }');
+    HTMLLines.Add('.entry-delete { color: #a00000; float: right; font-size: 11px; font-weight: normal; margin-right: 12px; text-decoration: underline; }');
+    HTMLLines.Add('.entry-edit { color: #1f4e79; float: right; font-size: 11px; font-weight: normal; text-decoration: underline; }');
     HTMLLines.Add('.entry-meta { background: #f7fafc; border-top: 1px solid #dce8f1; color: #555555; font-size: 11px; padding: 4px 9px; }');
     HTMLLines.Add('.entry-text { min-height: 1em; padding: 9px; white-space: pre-wrap; font-family: Consolas, Courier New, monospace; font-size: 12px; }');
     HTMLLines.Add('.empty { color: #666666; font-style: italic; }');
     HTMLLines.Add('.topic-bottom-spacer { height: 48px; }');
-    HTMLLines.Add('</style></head><body><div class="topic-content">');
+    HTMLLines.Add('</style></head><body><div class="topic-header"><a class="topic-delete" href="about:TopicDelete">Delete Entire Topic</a><h1>' + HTMLEncode(TopicName, Modified) + '</h1></div><div class="topic-content">');
     TOCLines.Add('<div class="topic-toc"><div class="toc-title">Entries</div>');
-    HTMLLines.Add('<h1>' + HTMLEncode(TopicName, Modified) + '</h1>');
-    if (TopicHidden <> '') or (TopicUserData <> '') then begin
+    if TopicUserData <> '' then begin
       HTMLLines.Add('<div class="topic-meta">');
-      if TopicHidden <> '' then begin
-        HTMLLines.Add('<span>Hidden: ' + HTMLEncode(TopicHidden, Modified) + '</span>');
-      end;
       if TopicUserData <> '' then begin
         HTMLLines.Add('<span>User data: ' + HTMLEncode(TopicUserData, Modified) + '</span>');
       end;
@@ -1555,6 +2060,8 @@ begin
         end else begin
           EntryToggleText := 'Hide';
         end;
+        HTMLLines.Add('<a class="entry-edit" href="about:TopicEntryEdit^' + HTMLEncode(EntryFMDate, Modified) + '">Edit</a>');
+        HTMLLines.Add('<a class="entry-delete" href="about:TopicEntryDelete^' + HTMLEncode(EntryFMDate, Modified) + '">Delete</a>');
         HTMLLines.Add('<a class="entry-hidden-toggle" href="about:TopicEntryHidden^' + HTMLEncode(EntryFMDate, Modified) + '">' + EntryToggleText + '</a>');
         HTMLLines.Add('</div>');
         if (EntryHidden <> '') or (EntryUserData <> '') then begin
@@ -1574,7 +2081,7 @@ begin
         EntryOpen := True;
       end else begin
         if (Piece(TopicData[Index], '^', 1) = '2') and EntryTextOpen then begin
-          HTMLLines.Add(HTMLEncode(Copy(TopicData[Index], 3, MaxInt), Modified));
+          HTMLLines.Add(Copy(TopicData[Index], 3, MaxInt));
         end;
       end;
     end;
@@ -1606,6 +2113,171 @@ procedure TfrmTopics.DisplayTopicHTML(const HTML: string);
 begin
   FPendingTopicHTML := HTML;
   WritePendingTopicHTML;
+end;
+
+function TfrmTopics.BuildTopicDataHTML: string;
+var
+  HTMLLines: TStringList;
+  Index: Integer;
+  LineIndex: Integer;
+  Modified: Boolean;
+  TableData: TTopicDataTable;
+begin
+  HTMLLines := TStringList.Create;
+  try
+    HTMLLines.Add('<!DOCTYPE html>');
+    HTMLLines.Add('<html><head><style>');
+    HTMLLines.Add('body { color: #202020; font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px; }');
+    HTMLLines.Add('.related-data-table { border: 1px solid #9fbad0; border-collapse: separate; border-radius: 4px; border-spacing: 0; margin: 0 0 8px 0; overflow: hidden; width: 100%; }');
+    HTMLLines.Add('.related-data-table th { background: #2f75b5; color: #ffffff; font-size: 12px; line-height: 1.15; padding: 5px 8px; text-align: left; }');
+    HTMLLines.Add('.related-data-table td { font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 1.1; padding: 1px 8px; white-space: pre-wrap; word-break: break-word; }');
+    HTMLLines.Add('.no-data { color: #666666; font-family: Segoe UI, Tahoma, Arial, sans-serif !important; font-style: italic; }');
+    HTMLLines.Add('.empty { color: #666666; font-style: italic; margin: 4px; }');
+    HTMLLines.Add('</style></head><body>');
+    if FTopicDataTables.Count = 0 then begin
+      HTMLLines.Add('<p class="empty">No related data tables have been added.</p>');
+    end else begin
+      for Index := 0 to FTopicDataTables.Count - 1 do begin
+        TableData := FTopicDataTables[Index];
+        HTMLLines.Add('<table class="related-data-table"><thead><tr><th>' +
+          HTMLEncode(TableData.TableName, Modified) + '</th></tr></thead><tbody>');
+        if TableData.Lines.Count = 0 then begin
+          HTMLLines.Add('<tr><td class="no-data">No data found for this table.</td></tr>');
+        end else begin
+          for LineIndex := 0 to TableData.Lines.Count - 1 do begin
+            HTMLLines.Add('<tr><td>' + TableData.Lines[LineIndex] + '</td></tr>');
+          end;
+        end;
+        HTMLLines.Add('</tbody></table>');
+      end;
+    end;
+    HTMLLines.Add('</body></html>');
+    Result := HTMLLines.Text;
+  finally
+    HTMLLines.Free;
+  end;
+end;
+
+procedure TfrmTopics.DisplayTopicDataHTML;
+begin
+  WBLoadHTML(wbTopicData, BuildTopicDataHTML);
+end;
+
+function TfrmTopics.FindTopicDataTable(const TableName: string): TTopicDataTable;
+var
+  Index: Integer;
+begin
+  Result := nil;
+  for Index := 0 to FTopicDataTables.Count - 1 do begin
+    if SameText(FTopicDataTables[Index].TableName, TableName) then begin
+      Result := FTopicDataTables[Index];
+      Exit;
+    end;
+  end;
+end;
+
+procedure TfrmTopics.UpdateTopicDataModel(TableData: TStrings);
+var
+  CurrentTable: TTopicDataTable;
+  Index: Integer;
+  RowType: string;
+  TableName: string;
+begin
+  CurrentTable := nil;
+  for Index := 0 to TableData.Count - 1 do begin
+    RowType := Piece(TableData[Index], '^', 1);
+    if RowType = '1' then begin
+      TableName := Copy(TableData[Index], 3, MaxInt);
+      CurrentTable := FindTopicDataTable(TableName);
+      if CurrentTable = nil then begin
+        CurrentTable := TTopicDataTable.Create(TableName);
+        FTopicDataTables.Add(CurrentTable);
+      end else begin
+        CurrentTable.Lines.Clear;
+      end;
+    end else if (RowType = '2') and Assigned(CurrentTable) then begin
+      CurrentTable.Lines.Add(Copy(TableData[Index], 3, MaxInt));
+    end;
+  end;
+end;
+
+procedure TfrmTopics.BitBtn1Click(Sender: TObject);
+var
+  AvailableTables: TStringList;
+  ErrorText: string;
+  Index: Integer;
+  Picker: TfrmTopicTablePicker;
+  SelectedTable: string;
+  Status: string;
+  TableData: TStringList;
+  TableName: string;
+begin
+  if (Patient.DFN = '') or (FCurrentTopicPropertyID = '') then begin
+    Exit;
+  end;
+
+  AvailableTables := TStringList.Create;
+  try
+    Status := ListTopicTables(AvailableTables);
+    if Piece(Status, '^', 1) <> '1' then begin
+      ErrorText := Piece(Status, '^', 2);
+      if ErrorText = '' then begin
+        ErrorText := 'The available tables could not be retrieved.';
+      end;
+      MessageDlg(ErrorText, mtError, [mbOK], 0);
+      Exit;
+    end;
+
+    AvailableTables.Sorted := False;
+    AvailableTables.CaseSensitive := False;
+    for Index := AvailableTables.Count - 1 downto 0 do begin
+      TableName := Piece(AvailableTables[Index], '^', 1);
+      if TableName = '' then begin
+        AvailableTables.Delete(Index)
+      end else begin
+        AvailableTables[Index] := TableName;
+      end;
+    end;
+    AvailableTables.Duplicates := dupIgnore;
+    AvailableTables.Sorted := True;
+    if AvailableTables.Count = 0 then begin
+      MessageDlg('No related-data tables are available.', mtInformation, [mbOK], 0);
+      Exit;
+    end;
+
+    Picker := TfrmTopicTablePicker.Create(Self, AvailableTables);
+    try
+      SelectedTable := '';
+      if Picker.ShowModal = mrOk then begin
+        SelectedTable := Picker.SelectedTable;
+      end;
+    finally
+      Picker.Free;
+    end;
+
+    if SelectedTable = '' then begin
+      Exit;
+    end;
+
+    TableData := TStringList.Create;
+    try
+      Status := GetTopicTablesAsData(TableData, SelectedTable);
+      if Piece(Status, '^', 1) <> '1' then begin
+        ErrorText := Piece(Status, '^', 2);
+        if ErrorText = '' then begin
+          ErrorText := 'The selected table could not be retrieved.';
+        end;
+        MessageDlg(ErrorText, mtError, [mbOK], 0);
+        Exit;
+      end;
+      UpdateTopicDataModel(TableData);
+      DisplayTopicDataHTML;
+    finally
+      TableData.Free;
+    end;
+  finally
+    AvailableTables.Free;
+  end;
 end;
 
 function TfrmTopics.FindLatestTopicEntryID(TopicData: TStrings): string;
@@ -1669,17 +2341,35 @@ begin
   end;
   ListItem := lvTopics.Selected;
   if (ListItem = nil) or (ListItem.Data = nil) then begin
+    FCurrentTopicEntries.Clear;
+    FTopicDataTables.Clear;
+    FCurrentTopicName := '';
+    FCurrentTopicPropertyID := '';
+    FPendingTopicEntryID := '';
+    ClearTopicEntryEditor;
+    BitBtn1.Enabled := False;
+    wbDisplayPrior.Navigate('about:blank');
+    DisplayTopicDataHTML;
     Exit;
   end;
+  ClearTopicEntryEditor;
   TopicData := TTopicListItemData(ListItem.Data);
+  if TopicData.PropertyID <> FCurrentTopicPropertyID then begin
+    FTopicDataTables.Clear;
+    DisplayTopicDataHTML;
+  end;
   FCurrentTopicEntries.Clear;
   FCurrentTopicName := '';
   FCurrentTopicPropertyID := '';
   FPendingTopicEntryID := '';
+  btnNewFMDTEntry.Enabled := False;
+  BitBtn1.Enabled := False;
   Status := Get1Topic(FCurrentTopicEntries, TopicData.PropertyID);
   if Piece(Status, '^', 1) = '1' then begin
     FCurrentTopicName := TopicData.TopicName;
     FCurrentTopicPropertyID := TopicData.PropertyID;
+    btnNewFMDTEntry.Enabled := True;
+    BitBtn1.Enabled := True;
     FPendingTopicEntryID := FindLatestTopicEntryID(FCurrentTopicEntries);
     DisplayTopicHTML(BuildTopicHTML(FCurrentTopicEntries, FCurrentTopicName));
   end else begin
@@ -1697,19 +2387,44 @@ begin
   WritePendingTopicHTML;
 end;
 
-procedure TfrmTopics.wbDisplayPriorBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+procedure TfrmTopics.wbTopicDataDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
 begin
-  if Piece(Piece(URL, '^', 1), ':', 2) = 'TopicDocument' then begin
+  UpdateTopicsRightColors;
+end;
+
+procedure TfrmTopics.wbDisplayPriorBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+var
+  ActionName: string;
+  ActionParam: string;
+  ActionURL: string;
+begin
+  ActionURL := URL;
+  ActionURL := StringReplace(ActionURL, '%5E', '^', [rfReplaceAll, rfIgnoreCase]);
+  ActionName := Piece(Piece(ActionURL, '^', 1), ':', 2);
+  ActionParam := Piece(ActionURL, '^', 2);
+  if ActionName = 'TopicDocument' then begin
     Cancel := True;
-    NavigateToDocument(Piece(URL, '^', 2));
+    NavigateToDocument(ActionParam);
   end;
-  if Piece(Piece(URL, '^', 1), ':', 2) = 'TopicEntry' then begin
+  if ActionName = 'TopicEntry' then begin
     Cancel := True;
-    ScrollTopicEntryIntoView(Piece(URL, '^', 2));
+    ScrollTopicEntryIntoView(ActionParam);
   end;
-  if Piece(Piece(URL, '^', 1), ':', 2) = 'TopicEntryHidden' then begin
+  if ActionName = 'TopicEntryHidden' then begin
     Cancel := True;
-    ToggleTopicEntryHidden(Piece(URL, '^', 2));
+    ToggleTopicEntryHidden(ActionParam);
+  end;
+  if ActionName = 'TopicEntryEdit' then begin
+    Cancel := True;
+    EditCurrentTopicEntry(ActionParam);
+  end;
+  if ActionName = 'TopicEntryDelete' then begin
+    Cancel := True;
+    DeleteCurrentTopicEntry(ActionParam);
+  end;
+  if ActionName = 'TopicDelete' then begin
+    Cancel := True;
+    DeleteSelectedTopic;
   end;
 end;
 
@@ -1808,6 +2523,32 @@ begin
   timTopicsLeftCollapse.Enabled := True;
 end;
 
+procedure TfrmTopics.NormalizeTopicsLeftPaneWidths;
+begin
+  if FTopicsLeftOpenWidth < splTopicsLeft.MinSize + TOPICS_LEFT_PANE_MINIMUM_WIDTH_GAP then begin
+    FTopicsLeftOpenWidth := splTopicsLeft.MinSize + TOPICS_LEFT_PANE_MINIMUM_WIDTH_GAP;
+  end;
+  if FTopicsLeftClosedWidth < splTopicsLeft.MinSize then begin
+    FTopicsLeftClosedWidth := splTopicsLeft.MinSize;
+  end;
+  if FTopicsLeftClosedWidth > FTopicsLeftOpenWidth - TOPICS_LEFT_PANE_MINIMUM_WIDTH_GAP then begin
+    FTopicsLeftClosedWidth := FTopicsLeftOpenWidth - TOPICS_LEFT_PANE_MINIMUM_WIDTH_GAP;
+  end;
+end;
+
+procedure TfrmTopics.NormalizeTopicsRightPaneWidths;
+begin
+  if FTopicsRightOpenWidth < splTopicsRight.MinSize + TOPICS_RIGHT_PANE_MINIMUM_WIDTH_GAP then begin
+    FTopicsRightOpenWidth := splTopicsRight.MinSize + TOPICS_RIGHT_PANE_MINIMUM_WIDTH_GAP;
+  end;
+  if FTopicsRightClosedWidth < splTopicsRight.MinSize then begin
+    FTopicsRightClosedWidth := splTopicsRight.MinSize;
+  end;
+  if FTopicsRightClosedWidth > FTopicsRightOpenWidth - TOPICS_RIGHT_PANE_MINIMUM_WIDTH_GAP then begin
+    FTopicsRightClosedWidth := FTopicsRightOpenWidth - TOPICS_RIGHT_PANE_MINIMUM_WIDTH_GAP;
+  end;
+end;
+
 procedure TfrmTopics.QueueHideTopicsLeftHandle;
 begin
   if FTopicsLeftPinned then begin
@@ -1823,6 +2564,7 @@ begin
     Exit;
   end;
   FTopicsLeftOpen := Value;
+  UpdateTopicListColors;
   FTopicsLeftAnimationStartWidth := pnlTopicsLeft.Width;
   if FTopicsLeftOpen then begin
     FTopicsLeftAnimationTargetWidth := FTopicsLeftOpenWidth;
@@ -1841,7 +2583,10 @@ begin
   if FTopicsRightOpen = Value then begin
     Exit;
   end;
+  NormalizeTopicsRightPaneWidths;
+  pnlTopicsRight.Constraints.MinWidth := FTopicsRightClosedWidth;
   FTopicsRightOpen := Value;
+  UpdateTopicsRightColors;
   FTopicsRightAnimationStartWidth := pnlTopicsRight.Width;
   if FTopicsRightOpen then begin
     FTopicsRightAnimationTargetWidth := FTopicsRightOpenWidth;
@@ -1874,12 +2619,13 @@ begin
   end else begin
     FTopicsLeftClosedWidth := pnlTopicsLeft.Width;
   end;
+  NormalizeTopicsLeftPaneWidths;
+  if FTopicsLeftOpen and (pnlTopicsLeft.Width <> FTopicsLeftOpenWidth) then begin
+    pnlTopicsLeft.Width := FTopicsLeftOpenWidth;
+  end;
   if FTopicsLoaded then begin
-    if FTopicsLeftOpen then begin
-      uTMGOptions.WriteInteger(TOPICS_LEFT_OPEN_SIZE_KEY, FTopicsLeftOpenWidth);
-    end else begin
-      uTMGOptions.WriteInteger(TOPICS_LEFT_CLOSED_SIZE_KEY, FTopicsLeftClosedWidth);
-    end;
+    uTMGOptions.WriteInteger(TOPICS_LEFT_OPEN_SIZE_KEY, FTopicsLeftOpenWidth);
+    uTMGOptions.WriteInteger(TOPICS_LEFT_CLOSED_SIZE_KEY, FTopicsLeftClosedWidth);
   end;
   PositionTopicsLeftHandle;
 end;
@@ -1894,12 +2640,20 @@ begin
   end else begin
     FTopicsRightClosedWidth := pnlTopicsRight.Width;
   end;
-  if FTopicsLoaded then begin
-    if FTopicsRightOpen then begin
-      uTMGOptions.WriteInteger(TOPICS_RIGHT_OPEN_SIZE_KEY, FTopicsRightOpenWidth);
-    end else begin
-      uTMGOptions.WriteInteger(TOPICS_RIGHT_CLOSED_SIZE_KEY, FTopicsRightClosedWidth);
+  NormalizeTopicsRightPaneWidths;
+  pnlTopicsRight.Constraints.MinWidth := FTopicsRightClosedWidth;
+  if FTopicsRightOpen then begin
+    if pnlTopicsRight.Width <> FTopicsRightOpenWidth then begin
+      pnlTopicsRight.Width := FTopicsRightOpenWidth;
     end;
+  end else begin
+    if pnlTopicsRight.Width <> FTopicsRightClosedWidth then begin
+      pnlTopicsRight.Width := FTopicsRightClosedWidth;
+    end;
+  end;
+  if FTopicsLoaded then begin
+    uTMGOptions.WriteInteger(TOPICS_RIGHT_OPEN_SIZE_KEY, FTopicsRightOpenWidth);
+    uTMGOptions.WriteInteger(TOPICS_RIGHT_CLOSED_SIZE_KEY, FTopicsRightClosedWidth);
   end;
   PositionTopicsRightHandle;
 end;

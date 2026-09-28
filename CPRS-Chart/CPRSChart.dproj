@@ -1189,6 +1189,9 @@
         <DCCReference Include="TMG_Extra\fTopics.pas">
             <Form>frmTopics</Form>
         </DCCReference>
+        <DCCReference Include="TMG_Extra\fTopicTablePicker.pas">
+            <Form>frmTopicTablePicker</Form>
+        </DCCReference>
         <DCCReference Include="TMG_Extra\fChangeLog.pas">
             <Form>frmChangeLog</Form>
         </DCCReference>

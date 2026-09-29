@@ -972,6 +972,7 @@ begin
   if Result then if Assigned(frmReports) then Result := frmReports.AllowContextChange(Reason);  //kt //codex 8/25/26
   //kt //codex original --> if Result then Result := frmGraphData.AllowContextChange(Reason);
   if Result then if Assigned(frmGraphData) then Result := frmGraphData.AllowContextChange(Reason);  //kt //codex 8/25/26
+  if Result then if Assigned(frmTopics) then Result := frmTopics.AllowContextChange(Reason);  //kt //codex 9/29/26
   if (not User.IsReportsOnly) then begin
     if Result and Changes.RequireReview then begin //Result := ReviewChanges(TimedOut);
       case BOOLCHAR[FCCOWContextChanging] of

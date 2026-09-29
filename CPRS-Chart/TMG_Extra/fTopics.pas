@@ -188,6 +188,7 @@ type
     procedure DeleteCurrentTopicEntry(const EntryFMDate: string);
     procedure DeleteSelectedTopic;
     procedure InitializeTopicListColumns;
+    procedure LoadTopicDataTables(TopicEntries: TStrings);
     procedure MergeSelectedTopics;
     procedure RenameSelectedTopic;
     procedure NavigateToDocument(const DocumentIEN: string);
@@ -229,6 +230,7 @@ type
     procedure lvTopicsWindowProc(var Message: TMessage);
     procedure WritePendingTopicHTML;
   public
+    function AllowContextChange(var WhyNot: string): Boolean; override;
     procedure ClearPtData; override;
     procedure DisplayPage; override;
     procedure RefreshTopicList;
@@ -455,6 +457,21 @@ begin
   FTopicDataTables.Free;
   FTopicSortKeys.Free;
   inherited;
+end;
+
+function TfrmTopics.AllowContextChange(var WhyNot: string): Boolean;
+begin
+  Result := inherited AllowContextChange(WhyNot);
+  if not Result then begin
+    Exit;
+  end;
+  if (FEditingTopicEntryFMDate <> '') or FNewTopicEntry then begin
+    Result := MessageDlg('A topic entry is being edited.' + sLineBreak + sLineBreak +
+      'Discard its changes and change patients?', mtConfirmation, [mbYes, mbNo], 0) = mrYes;
+    if not Result then begin
+      WhyNot := 'A topic entry is being edited.';
+    end;
+  end;
 end;
 
 procedure TfrmTopics.ClearPtData;
@@ -2201,6 +2218,59 @@ begin
   end;
 end;
 
+procedure TfrmTopics.LoadTopicDataTables(TopicEntries: TStrings);
+var
+  Index: Integer;
+  Params: string;
+  Status: string;
+  TableData: TStringList;
+  TableIndex: Integer;
+  TableInfo: string;
+  TableName: string;
+  TableNames: TStringList;
+begin
+  FTopicDataTables.Clear;
+  if not Assigned(TopicEntries) then begin
+    DisplayTopicDataHTML;
+    Exit;
+  end;
+  TableNames := TStringList.Create;
+  TableData := TStringList.Create;
+  try
+    TableNames.CaseSensitive := False;
+    TableNames.Duplicates := dupIgnore;
+    TableNames.Sorted := True;
+    for Index := 0 to TopicEntries.Count - 1 do begin
+      if Piece(TopicEntries[Index], '^', 1) = '0.5' then begin
+        for TableIndex := 2 to NumPieces(TopicEntries[Index], '^') do begin
+          TableInfo := Piece(TopicEntries[Index], '^', TableIndex);
+          TableName := Piece(TableInfo, ';', 2);
+          if (StrToIntDef(Piece(TableInfo, ';', 1), 0) > 0) and (TableName <> '') then begin
+            TableNames.Add(TableName);
+          end;
+        end;
+      end;
+    end;
+    Params := '';
+    for Index := 0 to TableNames.Count - 1 do begin
+      if Params <> '' then begin
+        Params := Params + '^';
+      end;
+      Params := Params + TableNames[Index];
+    end;
+    if Params <> '' then begin
+      Status := GetTopicTablesAsData(TableData, Params);
+      if Piece(Status, '^', 1) = '1' then begin
+        UpdateTopicDataModel(TableData);
+      end;
+    end;
+  finally
+    TableData.Free;
+    TableNames.Free;
+  end;
+  DisplayTopicDataHTML;
+end;
+
 procedure TfrmTopics.BitBtn1Click(Sender: TObject);
 var
   AvailableTables: TStringList;
@@ -2208,8 +2278,10 @@ var
   Index: Integer;
   Picker: TfrmTopicTablePicker;
   SelectedTable: string;
+  SelectedTableIEN: string;
   Status: string;
   TableData: TStringList;
+  TableIENs: TStringList;
   TableName: string;
 begin
   if (Patient.DFN = '') or (FCurrentTopicPropertyID = '') then begin
@@ -2217,6 +2289,7 @@ begin
   end;
 
   AvailableTables := TStringList.Create;
+  TableIENs := TStringList.Create;
   try
     Status := ListTopicTables(AvailableTables);
     if Piece(Status, '^', 1) <> '1' then begin
@@ -2232,9 +2305,11 @@ begin
     AvailableTables.CaseSensitive := False;
     for Index := AvailableTables.Count - 1 downto 0 do begin
       TableName := Piece(AvailableTables[Index], '^', 1);
-      if TableName = '' then begin
+      SelectedTableIEN := Piece(AvailableTables[Index], '^', 2);
+      if (TableName = '') or (SelectedTableIEN = '') then begin
         AvailableTables.Delete(Index)
       end else begin
+        TableIENs.Add(AvailableTables[Index]);
         AvailableTables[Index] := TableName;
       end;
     end;
@@ -2258,6 +2333,26 @@ begin
     if SelectedTable = '' then begin
       Exit;
     end;
+    SelectedTableIEN := '';
+    for Index := 0 to TableIENs.Count - 1 do begin
+      if SameText(Piece(TableIENs[Index], '^', 1), SelectedTable) then begin
+        SelectedTableIEN := Piece(TableIENs[Index], '^', 2);
+        Break;
+      end;
+    end;
+    if SelectedTableIEN = '' then begin
+      MessageDlg('The selected table has no file 22708 identifier.', mtError, [mbOK], 0);
+      Exit;
+    end;
+    Status := SetTopicLinkedTables(FCurrentTopicPropertyID, SelectedTableIEN);
+    if Piece(Status, '^', 1) <> '1' then begin
+      ErrorText := Piece(Status, '^', 2);
+      if ErrorText = '' then begin
+        ErrorText := 'The selected table could not be associated with this topic.';
+      end;
+      MessageDlg(ErrorText, mtError, [mbOK], 0);
+      Exit;
+    end;
 
     TableData := TStringList.Create;
     try
@@ -2276,6 +2371,7 @@ begin
       TableData.Free;
     end;
   finally
+    TableIENs.Free;
     AvailableTables.Free;
   end;
 end;
@@ -2370,6 +2466,7 @@ begin
     FCurrentTopicPropertyID := TopicData.PropertyID;
     btnNewFMDTEntry.Enabled := True;
     BitBtn1.Enabled := True;
+    LoadTopicDataTables(FCurrentTopicEntries);
     FPendingTopicEntryID := FindLatestTopicEntryID(FCurrentTopicEntries);
     DisplayTopicHTML(BuildTopicHTML(FCurrentTopicEntries, FCurrentTopicName));
   end else begin

@@ -31,6 +31,7 @@ function TopicList(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime=999999
 function Get1Topic(Dest : TStrings; SubIEN : String; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
 function ListTopicTables(Dest: TStrings): string; //kt //codex 9/28/26
 function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string; //kt //codex 9/28/26
+function SetTopicLinkedTables(SubIEN: string; const TableIENs: string): string; //kt //codex 9/29/26
 function RenameTopic(SubIEN, TopicName: string): string; //kt //codex 9/24/26
 function AddTopic(TopicName: string): string; //kt //codex 9/28/26
 function DeleteTopic(SubIEN: string): string; //kt //codex 9/25/26
@@ -86,6 +87,21 @@ function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string;
 //kt //codex added entire function 9/28/26
 begin
   Result := TopicCommand(Dest, Patient.DFN, 'GET TABLES AS DATA', TableNames);
+end;
+
+function SetTopicLinkedTables(SubIEN: string; const TableIENs: string): string;
+//kt //codex added entire function 9/29/26
+var
+  ResultSL: TStringList;
+  Params: string;
+begin
+  ResultSL := TStringList.Create;
+  Params := SubIEN + '^' + TableIENs;
+  try
+    Result := TopicCommand(ResultSL, Patient.DFN, 'SET TOPIC LINKED TABLES', Params);
+  finally
+    ResultSL.Free;
+  end;
 end;
 
 function RenameTopic(SubIEN, TopicName: string): string;

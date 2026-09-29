@@ -2,6 +2,15 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-09-29 — Topics persisted related-data tables and context-change safeguard
+
+- The user added the `ASSOCIATED TABLES` multiple (subfile `22719.212`, pointer field `.01` to file `22708`) under each topic. Added server command `SET TOPIC LINKED TABLES`, accepting a topic sub-IEN followed by file 22708 IENs; an `@<IEN>` removes an association. The command uses FileMan, is idempotent for additions, and removes duplicate matching child entries if present.
+- `LIST TABLES` now returns `<table name>^<IEN22708>`. `GET TABLES AS DATA` deliberately continues to accept table names, e.g. `GET TABLES AS DATA:CHF`, because its existing table-generation implementation is name-based.
+- `GET1` now emits saved associated tables directly after its topic `0^...` record as `0.5^<IEN22708>;<table name>` records. The client supports both one table per record and packed `0.5` records containing multiple caret-separated table references.
+- Added `rTopics.SetTopicLinkedTables`. The Topics picker retains the file 22708 IEN only to persist the association, then continues to retrieve the display data by its selected table name. After a topic is selected, `fTopics` reloads all `0.5` table references through the existing line-oriented table RPC and renders them through `FTopicDataTables`; table-link deletion remains deferred.
+- The user compiled the updated `TMGTOPIC` routine and rebuilt/tested CPRS. Adding CHF, navigating to another topic, and returning to CHF correctly reloads its related table.
+- Topics now participates in the normal pre-patient-change `AllowContextChangeAll` poll. Its `AllowContextChange` override asks whether to discard an active Topic entry edit before changing patients; declining blocks the change. The existing `ClearPatient` / `TfrmTopics.ClearPtData` cleanup path remains in place. The user runtime-tested this prompt successfully.
+
 ## 2026-09-28 — Topics related-data tables and picker
 
 - Reviewed the new `GET TABLES AS DATA` command in `/opt/worldvista/EHR/p/TMGTOPIC.m`. It returns each requested table as a `1^<table>` group followed by separate `2^<line>` records, avoiding the long embedded-linefeed text returned by the TIU boilerplate RPC. The user corrected the `GETTABLX` call and confirmed table data is available in numeric array nodes; an empty group is the intended no-data result.

@@ -112,6 +112,11 @@ type
     mnuViewInBrowser: TMenuItem;
     mnuViewHL7: TMenuItem;
     mnuDeleteOneStudy: TMenuItem;
+    pnlWebHolder: TPanel;
+    pnlWebTop: TPanel;
+    btnWBZoomOut: TSpeedButton;
+    btnWBNormalZoom: TSpeedButton;
+    btnWBZoomIn: TSpeedButton;
     procedure mnuDeleteOneStudyClick(Sender: TObject);
     procedure mnuViewHL7Click(Sender: TObject);
     procedure mnuViewInBrowserClick(Sender: TObject);
@@ -173,15 +178,21 @@ type
     procedure chkMaxFreqClick(Sender: TObject);
     procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
       Headers: OleVariant; var Cancel: WordBool);
+    procedure btnWBZoomInClick(Sender: TObject); //kt //codex 10/1/26
+    procedure btnWBZoomOutClick(Sender: TObject); //kt //codex 10/1/26
+    procedure btnWBNormalZoomClick(Sender: TObject); //kt //codex 10/1/26
 
   private
     FReportDisplayMode: TReportDisplayMode; //kt //codex 8/21/26
+    FWebBrowserZoom: Integer; //kt //codex 10/1/26
     SortIdx1, SortIdx2, SortIdx3: Integer;
     procedure ProcessNotifications;
     procedure ShowTabControl;
     procedure Graph(reportien: integer);
     procedure GraphPanel(active: boolean);
     procedure BlankWeb;
+    procedure SetWebBrowserZoom(Zoom: Integer); //kt //codex 10/1/26
+    //kt //codex added entire procedure 10/1/26
     procedure SetDisplayToHTMLvsText(Mode: TReportDisplayMode; Lines: TStrings; ActivateOnly: boolean=False; Append: boolean=False); //kt //codex 8/21/26
     function TVNodeIsQual(Node: TTreeNode; QualType: integer): boolean; //kt added 3/20/17
     function TVImagingSelected(): boolean; //kt added 3/20/17
@@ -260,6 +271,11 @@ const
   BlankWebPage = 'about:blank';
   TMG_LAST_REPORT_KEY = 'Last Report Viewed';
   TMG_LAST_REPORT_ID_KEY = 'Last Report Viewed ID'; //kt  //codex 8/18/26
+  OLECMDID_OPTICAL_ZOOM = $0000003F; //kt //codex 10/1/26
+  MIN_WEB_BROWSER_ZOOM = 10; //kt //codex 10/1/26
+  MAX_WEB_BROWSER_ZOOM = 1000; //kt //codex 10/1/26
+  WEB_BROWSER_ZOOM_STEP = 20; //kt //codex 10/1/26
+  DEFAULT_WEB_BROWSER_ZOOM = 100; //kt //codex 10/1/26
 
 var
   uRemoteCount: Integer;
@@ -447,6 +463,43 @@ begin
   end;
 end;
 
+procedure TfrmReports.SetWebBrowserZoom(Zoom: Integer);
+//kt //codex added entire procedure 10/1/26
+var
+  ZoomIn, ZoomOut: OleVariant;
+begin
+  if Zoom < MIN_WEB_BROWSER_ZOOM then begin
+    Zoom := MIN_WEB_BROWSER_ZOOM;
+  end else if Zoom > MAX_WEB_BROWSER_ZOOM then begin
+    Zoom := MAX_WEB_BROWSER_ZOOM;
+  end;
+  FWebBrowserZoom := Zoom;
+  ZoomIn := FWebBrowserZoom;
+  ZoomOut := Null;
+  WebBrowser1.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, ZoomIn, ZoomOut);
+end;
+
+procedure TfrmReports.btnWBZoomInClick(Sender: TObject);
+//kt //codex added entire procedure 10/1/26
+begin
+  inherited;
+  SetWebBrowserZoom(FWebBrowserZoom + WEB_BROWSER_ZOOM_STEP);
+end;
+
+procedure TfrmReports.btnWBZoomOutClick(Sender: TObject);
+//kt //codex added entire procedure 10/1/26
+begin
+  inherited;
+  SetWebBrowserZoom(FWebBrowserZoom - WEB_BROWSER_ZOOM_STEP);
+end;
+
+procedure TfrmReports.btnWBNormalZoomClick(Sender: TObject);
+//kt //codex added entire procedure 10/1/26
+begin
+  inherited;
+  SetWebBrowserZoom(DEFAULT_WEB_BROWSER_ZOOM);
+end;
+
 procedure TfrmReports.SetDisplayToHTMLvsText(Mode: TReportDisplayMode; Lines: TStrings; ActivateOnly: boolean=False; Append: boolean=False); //kt //codex 8/21/26
 //kt //codex added entire procedure 8/21/26
 var
@@ -459,6 +512,7 @@ begin
     Memo1.Text := '';
     memText.Visible := false;
     memText.TabStop := false;
+    pnlWebHolder.Visible := true; //kt //codex 10/1/26
     WebBrowser1.Visible := true;
     WebBrowser1.TabStop := true;
     if ActivateOnly = false then begin
@@ -475,12 +529,13 @@ begin
       end;
       BlankWeb;
     end;
-    WebBrowser1.BringToFront;
+    pnlWebHolder.BringToFront; //kt //codex 10/1/26
   end else begin
     uHTMLDoc := '';
     BlankWeb;
     WebBrowser1.Visible := false;
     WebBrowser1.TabStop := false;
+    pnlWebHolder.Visible := false; //kt //codex 10/1/26
     memText.Visible := true;
     memText.TabStop := true;
     if (ActivateOnly = false) and (Lines <> nil) then begin //kt //codex 8/21/26
@@ -1376,6 +1431,7 @@ procedure TfrmReports.FormCreate(Sender: TObject);
 begin
   inherited;
   PageID := CT_REPORTS;
+  FWebBrowserZoom := DEFAULT_WEB_BROWSER_ZOOM; //kt //codex 10/1/26
   uFrozen := False;
   FReportDisplayMode := rdmText; //kt //codex 8/21/26
   uHSComponents := TStringList.Create;

@@ -429,12 +429,13 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 367
+            Width = 939
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
+            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162
@@ -923,6 +924,7 @@ inherited frmLabs: TfrmLabs
         PopupMenu = popTMGGridPopup
         TabOrder = 1
         Visible = False
+        StyleElements = [seFont, seBorder]
         OnClick = grdLabClick
         OnDrawCell = grdLabDrawCell
         OnMouseDown = grdLabMouseDown

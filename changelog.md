@@ -2,6 +2,27 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-10-01 — Reports browser zoom holder
+
+- Moved the Reports `WebBrowser1` behind form-owned `pnlWebHolder` / `pnlWebTop` controls with Zoom In, Normal, and Zoom Out buttons. `SetDisplayToHTMLvsText` now owns the holder visibility and z-order: HTML mode shows and raises the holder, while text mode hides it. The browser's own visibility remains the existing HTML-mode guard.
+- Added `TWebBrowser` optical zoom through `ExecWB(OLECMDID_OPTICAL_ZOOM, ...)`, with Notes-consistent 20% increments, 10–1000% bounds, and a 100% normal-zoom reset.
+- The user compiled and runtime-confirmed the Reports browser holder and zoom toolbar work.
+
+## 2026-10-01 — Topic post-signature parsing and complete data rebuild
+
+- Extended `PARSESCT2^TMGTIUP1` so each parsed thread carries its associated related-data tables as `ARRAY(TIUIEN,"THREAD",topicIndex,"TABLE",tableIndex)=<table name>^<IEN22708>`. The file 22708 lookup correctly uses the `TMG TABLE - ` prefix.
+- Updated `FILE1B^TMGTIUT5` to synchronize each topic's table links with the current parsed list: new links are added, links absent from the current note are removed, and unchanged links are retained. `OPTION("REMOVE OLD")=1` additionally removes a dated topic entry for the current TIU document when that topic is no longer represented in the parsed array.
+- Reworked current-visit thread extraction in `TMGTIUP2`/`TMGTIUP3`. It is provider-aware for KT/DT conventions, treats an event-date separator as the last valid note-date separator (including DT's legacy no-colon form only in valid separator positions), and does not turn carried-forward DT text into a current-visit entry. The prior `EXTRACTHREAD0` remains as the fallback.
+- Added `REBUILD1PT`, `TEST1REBUILD`, and resumable `REBUILDALL` in `TMGTOPIC`. The all-patient run records each completed patient in `^TMG("TMP","REBUILDALL^TMGTOPIC",DFN)`, skips prior completions, and shows one progress line per patient. `REBUILD1PT` uses the TIU date cross-reference to set its note-progress maximum and updates every tenth note.
+- Corrected a malformed-HTML hang encountered during rebuilding. `PROCESS^TMGHTM2` only escapes raw `<--` as `&lt;--` after its existing HTML detection succeeds, and `parseElement^TMGEWD02` now stops and reports an unterminated tag at end of input instead of looping forever. The affected note rebuilt successfully.
+- Corrected `REBUILDALL`'s `??` elapsed/estimated-time display: reverse `$ORDER` on the `^DPT` root can return a string cross-reference and therefore yielded a numeric maximum of zero. The maximum now comes from `^DPT("@")`; the requested `USRABORT` handling was removed.
+- The user confirmed `REBUILD1PT` progress works and the complete all-patient topic rebuild finished successfully. Temporary M compilation checks passed for the final `TMGTOPIC` update; prior routine changes were also compiled by the user.
+
+## 2026-09-30 — Topics verification closed
+
+- The user reports that Topics has been working well. Marked the remaining historical client-verification notes complete: GET1/Edit reload and save normalization, direct Last Used selection, multi-select merge, chronological GET1 ordering, and rename.
+- Added a client-side deletion flow for persisted related-data tables. Each right-column table header now has a Delete link; it confirms removal, calls `SET TOPIC LINKED TABLES` with `@<IEN22708>`, removes the successful deletion from `FTopicDataTables`, and refreshes the column. The user compiled and runtime-confirmed the flow works.
+
 ## 2026-09-29 — Topics persisted related-data tables and context-change safeguard
 
 - The user added the `ASSOCIATED TABLES` multiple (subfile `22719.212`, pointer field `.01` to file `22708`) under each topic. Added server command `SET TOPIC LINKED TABLES`, accepting a topic sub-IEN followed by file 22708 IENs; an `@<IEN>` removes an association. The command uses FileMan, is idempotent for additions, and removes duplicate matching child entries if present.
@@ -10,6 +31,7 @@ Dated status updates, milestones, compile history, and local checkpoints belong 
 - Added `rTopics.SetTopicLinkedTables`. The Topics picker retains the file 22708 IEN only to persist the association, then continues to retrieve the display data by its selected table name. After a topic is selected, `fTopics` reloads all `0.5` table references through the existing line-oriented table RPC and renders them through `FTopicDataTables`; table-link deletion remains deferred.
 - The user compiled the updated `TMGTOPIC` routine and rebuilt/tested CPRS. Adding CHF, navigating to another topic, and returning to CHF correctly reloads its related table.
 - Topics now participates in the normal pre-patient-change `AllowContextChangeAll` poll. Its `AllowContextChange` override asks whether to discard an active Topic entry edit before changing patients; declining blocks the change. The existing `ClearPatient` / `TfrmTopics.ClearPtData` cleanup path remains in place. The user runtime-tested this prompt successfully.
+- TMG does not use CPRS Billing Aware/CIDC functionality. `UBACore.rpcSetBillingAwareSwitch` now unconditionally forces `BILLING_AWARE` off after its normal and Debug-mode checks, suppressing the Service Connection/Related Disabilities panel and related treatment-factor grid in Review/Sign Changes.
 
 ## 2026-09-28 — Topics related-data tables and picker
 

@@ -21,9 +21,10 @@ type
   end;
 
   TTopicDataTable = class
+    TableIEN: string;
     TableName: string;
     Lines: TStringList;
-    constructor Create(const ATableName: string);
+    constructor Create(const ATableName: string; const ATableIEN: string = '');
     destructor Destroy; override;
   end;
 
@@ -123,6 +124,7 @@ type
     procedure TopicListPopupMenuPopup(Sender: TObject);
     procedure wbDisplayPriorBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure wbDisplayPriorDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
+    procedure wbTopicDataBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
     procedure wbTopicDataDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
   protected
     procedure Loaded; override;
@@ -187,6 +189,7 @@ type
     procedure EditCurrentTopicEntry(const EntryFMDate: string);
     procedure DeleteCurrentTopicEntry(const EntryFMDate: string);
     procedure DeleteSelectedTopic;
+    procedure DeleteTopicDataTable(const TableIEN: string);
     procedure InitializeTopicListColumns;
     procedure LoadTopicDataTables(TopicEntries: TStrings);
     procedure MergeSelectedTopics;
@@ -286,9 +289,10 @@ begin
   end;
 end;
 
-constructor TTopicDataTable.Create(const ATableName: string);
+constructor TTopicDataTable.Create(const ATableName: string; const ATableIEN: string);
 begin
   inherited Create;
+  TableIEN := ATableIEN;
   TableName := ATableName;
   Lines := TStringList.Create;
 end;
@@ -394,6 +398,7 @@ begin
   UpdateTopicListSortIndicators;
   wbDisplayPrior.OnBeforeNavigate2 := wbDisplayPriorBeforeNavigate2;
   wbDisplayPrior.OnDocumentComplete := wbDisplayPriorDocumentComplete;
+  wbTopicData.OnBeforeNavigate2 := wbTopicDataBeforeNavigate2;
   wbTopicData.OnDocumentComplete := wbTopicDataDocumentComplete;
   WBLoadHTML(wbTopicData, '<html><body></body></html>');
   UpdateTopicsLeftHandleGlyph;
@@ -2147,6 +2152,7 @@ begin
     HTMLLines.Add('body { color: #202020; font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px; }');
     HTMLLines.Add('.related-data-table { border: 1px solid #9fbad0; border-collapse: separate; border-radius: 4px; border-spacing: 0; margin: 0 0 8px 0; overflow: hidden; width: 100%; }');
     HTMLLines.Add('.related-data-table th { background: #2f75b5; color: #ffffff; font-size: 12px; line-height: 1.15; padding: 5px 8px; text-align: left; }');
+    HTMLLines.Add('.table-delete { color: #ffffff; float: right; font-size: 11px; font-weight: normal; text-decoration: underline; }');
     HTMLLines.Add('.related-data-table td { font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 1.1; padding: 1px 8px; white-space: pre-wrap; word-break: break-word; }');
     HTMLLines.Add('.no-data { color: #666666; font-family: Segoe UI, Tahoma, Arial, sans-serif !important; font-style: italic; }');
     HTMLLines.Add('.empty { color: #666666; font-style: italic; margin: 4px; }');
@@ -2156,8 +2162,11 @@ begin
     end else begin
       for Index := 0 to FTopicDataTables.Count - 1 do begin
         TableData := FTopicDataTables[Index];
-        HTMLLines.Add('<table class="related-data-table"><thead><tr><th>' +
-          HTMLEncode(TableData.TableName, Modified) + '</th></tr></thead><tbody>');
+        HTMLLines.Add('<table class="related-data-table"><thead><tr><th>');
+        if TableData.TableIEN <> '' then begin
+          HTMLLines.Add('<a class="table-delete" href="about:TopicTableDelete^' + HTMLEncode(TableData.TableIEN, Modified) + '">Delete</a>');
+        end;
+        HTMLLines.Add(HTMLEncode(TableData.TableName, Modified) + '</th></tr></thead><tbody>');
         if TableData.Lines.Count = 0 then begin
           HTMLLines.Add('<tr><td class="no-data">No data found for this table.</td></tr>');
         end else begin
@@ -2218,13 +2227,45 @@ begin
   end;
 end;
 
+procedure TfrmTopics.DeleteTopicDataTable(const TableIEN: string);
+var
+  ErrorText: string;
+  Index: Integer;
+  Status: string;
+begin
+  if (FCurrentTopicPropertyID = '') or (TableIEN = '') then begin
+    Exit;
+  end;
+  if MessageDlg('Remove associated table from this topic?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
+    Exit;
+  end;
+  Status := SetTopicLinkedTables(FCurrentTopicPropertyID, '@' + TableIEN);
+  if Piece(Status, '^', 1) <> '1' then begin
+    ErrorText := Piece(Status, '^', 2);
+    if ErrorText = '' then begin
+      ErrorText := 'The associated table could not be removed from this topic.';
+    end;
+    MessageDlg(ErrorText, mtError, [mbOK], 0);
+    Exit;
+  end;
+  for Index := FTopicDataTables.Count - 1 downto 0 do begin
+    if FTopicDataTables[Index].TableIEN = TableIEN then begin
+      FTopicDataTables.Delete(Index);
+      Break;
+    end;
+  end;
+  DisplayTopicDataHTML;
+end;
+
 procedure TfrmTopics.LoadTopicDataTables(TopicEntries: TStrings);
 var
   Index: Integer;
   Params: string;
   Status: string;
   TableData: TStringList;
+  TopicTable: TTopicDataTable;
   TableIndex: Integer;
+  TableIEN: string;
   TableInfo: string;
   TableName: string;
   TableNames: TStringList;
@@ -2244,9 +2285,10 @@ begin
       if Piece(TopicEntries[Index], '^', 1) = '0.5' then begin
         for TableIndex := 2 to NumPieces(TopicEntries[Index], '^') do begin
           TableInfo := Piece(TopicEntries[Index], '^', TableIndex);
+          TableIEN := Piece(TableInfo, ';', 1);
           TableName := Piece(TableInfo, ';', 2);
-          if (StrToIntDef(Piece(TableInfo, ';', 1), 0) > 0) and (TableName <> '') then begin
-            TableNames.Add(TableName);
+          if (StrToIntDef(TableIEN, 0) > 0) and (TableName <> '') then begin
+            TableNames.Add(TableIEN + '^' + TableName);
           end;
         end;
       end;
@@ -2256,12 +2298,18 @@ begin
       if Params <> '' then begin
         Params := Params + '^';
       end;
-      Params := Params + TableNames[Index];
+      Params := Params + Piece(TableNames[Index], '^', 2);
     end;
     if Params <> '' then begin
       Status := GetTopicTablesAsData(TableData, Params);
       if Piece(Status, '^', 1) = '1' then begin
         UpdateTopicDataModel(TableData);
+        for Index := 0 to TableNames.Count - 1 do begin
+          TopicTable := FindTopicDataTable(Piece(TableNames[Index], '^', 2));
+          if Assigned(TopicTable) then begin
+            TopicTable.TableIEN := Piece(TableNames[Index], '^', 1);
+          end;
+        end;
       end;
     end;
   finally
@@ -2281,6 +2329,7 @@ var
   SelectedTableIEN: string;
   Status: string;
   TableData: TStringList;
+  TopicTable: TTopicDataTable;
   TableIENs: TStringList;
   TableName: string;
 begin
@@ -2366,6 +2415,10 @@ begin
         Exit;
       end;
       UpdateTopicDataModel(TableData);
+      TopicTable := FindTopicDataTable(SelectedTable);
+      if Assigned(TopicTable) then begin
+        TopicTable.TableIEN := SelectedTableIEN;
+      end;
       DisplayTopicDataHTML;
     finally
       TableData.Free;
@@ -2487,6 +2540,22 @@ end;
 procedure TfrmTopics.wbTopicDataDocumentComplete(Sender: TObject; const pDisp: IDispatch; const URL: OleVariant);
 begin
   UpdateTopicsRightColors;
+end;
+
+procedure TfrmTopics.wbTopicDataBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+var
+  ActionName: string;
+  ActionParam: string;
+  ActionURL: string;
+begin
+  ActionURL := URL;
+  ActionURL := StringReplace(ActionURL, '%5E', '^', [rfReplaceAll, rfIgnoreCase]);
+  ActionName := Piece(Piece(ActionURL, '^', 1), ':', 2);
+  ActionParam := Piece(ActionURL, '^', 2);
+  if ActionName = 'TopicTableDelete' then begin
+    Cancel := True;
+    DeleteTopicDataTable(ActionParam);
+  end;
 end;
 
 procedure TfrmTopics.wbDisplayPriorBeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);

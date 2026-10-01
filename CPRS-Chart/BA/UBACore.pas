@@ -353,6 +353,8 @@ begin
         end; //kt //codex 9/9/26
       end else BADiag('rpcSetBillingAwareSwitch PersonHasKey false or provider zero'); //kt //codex 9/9/26
        {$ifdef debug}BILLING_AWARE := TRUE;{$endif}
+   //kt TMG never uses this, so will force off
+   BILLING_AWARE := FALSE; //kt //codex 9/29/26
    BADiag('rpcSetBillingAwareSwitch EXIT BILLING_AWARE=' + BoolToStr(BILLING_AWARE, True)); //kt //codex 9/9/26
 end;
 

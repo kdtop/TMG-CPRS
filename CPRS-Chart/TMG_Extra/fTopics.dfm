@@ -361,12 +361,13 @@ inherited frmTopics: TfrmTopics
       Height = 334
       Align = alClient
       BevelInner = bvLowered
+      Constraints.MinHeight = 200
       TabOrder = 1
       object wbEnterNew: TWebBrowser
         Left = 2
         Top = 23
         Width = 430
-        Height = 257
+        Height = 256
         Align = alClient
         TabOrder = 0
         ExplicitLeft = 71
@@ -374,7 +375,7 @@ inherited frmTopics: TfrmTopics
         ExplicitWidth = 218
         ExplicitHeight = 153
         ControlData = {
-          4C000000712C0000901A00000000000000000000000000000000000000000000
+          4C000000712C0000751A00000000000000000000000000000000000000000000
           000000004C000000000000000000000001000000E0D057007335CF11AE690800
           2B2E126208000000000000004C0000000114020000000000C000000000000046
           8000000000000000000000000000000000000000000000000000000000000000
@@ -1027,7 +1028,7 @@ inherited frmTopics: TfrmTopics
       end
       object pnlBtnHolder: TPanel
         Left = 2
-        Top = 280
+        Top = 279
         Width = 430
         Height = 52
         Align = alBottom
@@ -1035,6 +1036,7 @@ inherited frmTopics: TfrmTopics
         UseDockManager = False
         ParentBackground = False
         TabOrder = 2
+        ExplicitTop = 280
         DesignSize = (
           430
           52)

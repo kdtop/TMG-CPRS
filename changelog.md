@@ -2,6 +2,20 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-10-04 — Topic metadata migration and handoff consolidation
+
+- Added the metadata-only topic migration path. `PARSESCT2^TMGTIUP1` emits `TOPIC META` for every parsed topic, regardless of whether it has current-visit thread text; it scans all numeric parsed text nodes, so tables are not assumed to occupy node 3. Group values and every table name are included in that metadata.
+- `FILE1B^TMGTIUT5` synchronizes metadata without creating a thread-file entry when current-visit text is absent. Group metadata is stored in topic User Data as `GROUP=A,B,...`; a new value replaces only an existing `GROUP=` token, retaining other space-delimited User Data. Table links continue to reflect the newest parsed note.
+- `FIXALL(OPTION)` now supports option flags, and `FIXALL2` invokes it with thread writes disabled. `FIXALL` itself maintains the resumable per-patient store `^TMG("TMP","FIXALL^TMGTOPIC",DFN)`. Its shared note scan uses `SUMNOTE^TMGTIUP1`, not a direct parser call.
+- The user found and corrected the metadata-run error display for a `QUIET(TIUIEN)` node that has descendants but no scalar value: use `ZWR QUIET(TIUIEN,*)` after `$DATA(...)`, rather than reading `QUIET(TIUIEN)` directly. The user reports `FIXALL2` is now working correctly; the long-running migration is still in progress.
+- Updated the parser documentation for `SUMNOTE`/`PARSESCT2`, reviewed redundant `TMGTOPIC` maintenance code, and marked retained compatibility entry points explicitly as legacy. The duplicate-thread repair was also corrected to use the topic-name piece rather than the Last Used piece.
+- Reviewed the Notes macro path for future Topic-to-note insertion. `TMG CPRS GET MACRO LIST` supplies the context-menu list; `TMG CPRS MACRO RESOLVE` sends the active note text to the selected macro and returns replacement editor text.
+- Consolidated `HANDOFF.md`: completed Topics history, the completed PNG transparency repair, Reports multi-select HTML aggregation, and note-performance work are no longer presented as active work.
+
+## Deferred work
+
+- **Wine Patient Selection modal close:** moved to the back burner. If it is resumed, read the 2026-09-10 investigation below. The outstanding issue is specific to CPRS under Wine; the standalone `TMG_Extra\killlater` modal test works. Do not assume the Windows Delphi remote debugger is usable under Wine.
+
 ## 2026-10-01 — Reports browser zoom holder
 
 - Moved the Reports `WebBrowser1` behind form-owned `pnlWebHolder` / `pnlWebTop` controls with Zoom In, Normal, and Zoom Out buttons. `SetDisplayToHTMLvsText` now owns the holder visibility and z-order: HTML mode shows and raises the holder, while text mode hides it. The browser's own visibility remains the existing HTML-mode guard.

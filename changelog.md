@@ -2,6 +2,38 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-10-11 — Independent Topic-table cache saving and client-side note-push plan
+
+- Added `SET TABLE DATA` to `TMGTOPIC` and the `rTopics.SetTopicTableData` wrapper. A completed Topics table edit now persists a full replacement table-data record in file 22729 without requiring a TIU document: it finds/updates the patient-table cache record, clears its `.03` TIU DOCUMENT pointer, sets `.05` DATE WITHOUT DOCUMENT to `NOW`, and replaces the field `1` word-processing text. FileMan external (`E`) writes correctly prefix pointer IENs with a backtick.
+- Updated `GETLASTTEXT^TMGTIUO5` so an unlinked cache record obtains its date from `.05`; linked records retain their TIU document date/provenance behavior. The existing AS-OF path continues to bypass the cache and falls back to the most recent qualifying signed TIU note.
+- The user compiled both M routines and runtime-tested the completed persistence path: editing a table, restarting CPRS, and reloading the Topics view showed the saved edit.
+- `TTopicDataTable.Changed` is now set only after a successful table-data save, preserving pending changed-table state in the Topics model for a later note push.
+- Reviewed both sanitized active-editor fixtures. `killthis.txt` uses table text near `<LI>` boundaries, while Dr. Dee's `killthis_DT.txt` uses `<P>` topic boundaries. Replaced the deferred macro/carry-forward-block proposal with [plans.md](plans.md): an explicit CPRS-only batch push scans exact canonical table headers, updates every valid duplicate occurrence, and respects blank-line, LI, and P boundaries. It leaves unmatched or malformed occurrences pending and requires no new server macro/RPC.
+
+## 2026-10-11 — Direct YottaDB inspection interface and Dr. Dee thread rebuild repair
+
+- Added the project-root `codex_direct_ydb` wrapper for authorized YottaDB direct-mode calls. It establishes the VistA environment and submits quoted M commands directly to YottaDB; this replaces use of `runAV` for Codex’s read-only inspection tasks. The standing authorized FileMan user context is `DUZ=168` (Kevin).
+- The user added `TMGAI001` direct-mode entry points and compiled them successfully. The interface supports record dumps (`DUMPREC`), noninteractive FileMan candidate lists (`LIST`), VPE-format data-dictionary displays (`DDFLDS`), and raw-global displays (`ZWR`). `DDFLDS` accepts either a FileMan number or name, resolving names through the FILE file (#1). A `fileman` skill now documents the read-only workflow, including the warning that a top-level global `ZWR` can be very large and slow.
+- Traced repeated FMDT topic entries to Dr. Dee’s carried-forward text. `EXTRACTHREAD^TMGTIUP3` correctly found no current-document-date separator for a representative repeat, but `HASPREDT` failed to find the existing long topic name because a FileMan B-index key is limited to 30 characters.
+- Updated `HASPREDT^TMGTIUP3` to use the first 30 characters for the B-index search when necessary, then verify the full topic name against field `.01`. This retains the intended provider distinction: Dr. Dee (`PROVIEN=83`) rejects undated carried-forward text when the topic has a prior thread; Kevin (`PROVIEN=168`) retains an undated paragraph for a legitimately new topic.
+- The user compiled `TMGTIUP3`, rebuilt every Dr. Dee-provider note, and reports spot checks now look correct.
+
+## 2026-10-09 — Topics related-table editor and deferred TIU-push design
+
+- Added a local-only related-table editor to the Topics right column. Each displayed table header now supplies **Edit** and **Remove** links. Edit is intercepted by the browser host and opens the new `TfrmTopicTableEdit` modal form, which uses a `TMemo` with bottom-panel `bkOK` / `bkCancel` bit buttons. An accepted edit updates only the in-memory `FTopicDataTables` model and redraws the right column; it does not call the server or alter a TIU note.
+- Registered `fTopicTableEdit.pas` / `.dfm` in the project. The new editor decodes source table HTML entities for readable editing, then encodes each edited line before returning it to the local model. This keeps display/editing of characters such as `<` and apostrophes correct without changing the cached source format.
+- Corrected `uHTMLTools.HTMLDecode` to recognize `&apos;` and valid hexadecimal numeric entities (`&#x...;`) in addition to decimal numeric entities. This resolved the malformed display of apostrophes from `&apos;` and broadens entity round-trip coverage.
+- Reviewed `TABLDATA^TMGTIUT5`, `GETLASTTEXT^TMGTIUO5`, and the post-signature table path. Decided not to make cache records independently writable and not to relax `GETLASTTEXT`'s required TIU-note linkage: doing so would break source/provenance assumptions and let direct cache values influence broad table consumers.
+- Agreed on a future design, recorded in `plans.md`: stage Topics drafts, explicitly push them into one managed `[CARRY FORWARD TOPICS]` note block through the existing Notes macro round trip, then rely on normal signing/post-signature parsing. The Push operation, pending-payload RPC/macro, and conversion of direct topic-text persistence remain deferred pending a defined payload grammar and historical-edit/delete policy.
+- The user compiled and runtime-tested the new editor/entity changes in the licensed Windows Delphi IDE and reports the behavior works as intended.
+
+## 2026-10-05 — HTML Lab Report date navigation
+
+- Enhanced `GETRPTDT^TMGRPCL1`, behind `TMG CPRS LAB HTML DATE REPORT`, with a descending left-side Lab Dates index. The report retains standard fragment links for compatibility with legacy production CPRS.
+- Added the development `fLabs` handler that intercepts only `#lab-date-...` navigation for a document carrying the private `tmg-lab-html-date-report` marker. It uses `IHTMLElement.scrollIntoView`, allowing the index and the right-side report pane to behave like Topics without affecting other Lab browser reports.
+- Runtime comparison with the working Topics HTML found the actual layout failure: `CAPTION^TMGRPCL1` emitted an unmatched `</DIV>` even though its opening `DIV` was commented out. That prematurely closed `.lab-content`, which caused the dates pane to cover results and disappear after navigation. Removed the unmatched close; the report now works correctly.
+- Normalized the affected emitted Lab HTML tags to lowercase. `TMGRPCL1.o` was recompiled successfully after the final server change. The user rebuilt development CPRS and verified the completed behavior. Legacy production CPRS displays the report correctly; its date clicks remain inert by design until that client receives the scoped handler.
+
 ## 2026-10-04 — Topic metadata migration and handoff consolidation
 
 - Added the metadata-only topic migration path. `PARSESCT2^TMGTIUP1` emits `TOPIC META` for every parsed topic, regardless of whether it has current-visit thread text; it scans all numeric parsed text nodes, so tables are not assumed to occupy node 3. Group values and every table name are included in that metadata.

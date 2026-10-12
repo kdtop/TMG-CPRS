@@ -21,6 +21,7 @@ type
   end;
 
   TTopicDataTable = class
+    Changed: Boolean;
     TableIEN: string;
     TableName: string;
     Lines: TStringList;
@@ -184,12 +185,14 @@ type
     function TopicListCellBackgroundColor(ColumnIndex: Integer): TColor;
     function FindLatestTopicEntryID(TopicData: TStrings): string;
     function FindTopicDataTable(const TableName: string): TTopicDataTable;
+    function FindTopicDataTableByIEN(const TableIEN: string): TTopicDataTable;
     function TopicMatchesUserDataFilter(const UserData: string): Boolean;
     procedure EditTopicUserData(ListItem: TListItem);
     procedure EditCurrentTopicEntry(const EntryFMDate: string);
     procedure DeleteCurrentTopicEntry(const EntryFMDate: string);
     procedure DeleteSelectedTopic;
     procedure DeleteTopicDataTable(const TableIEN: string);
+    procedure EditTopicDataTable(const TableIEN: string);
     procedure InitializeTopicListColumns;
     procedure LoadTopicDataTables(TopicEntries: TStrings);
     procedure MergeSelectedTopics;
@@ -247,7 +250,7 @@ implementation
 {$R *.dfm}
 
 uses
-  fFrame, ORFn, uCore, uHTMLTools, uTMGOptions, fTopicTablePicker;
+  fFrame, ORFn, uCore, uHTMLTools, uTMGOptions, fTopicTablePicker, fTopicTableEdit;
 
 const
   TOPICS_PANE_ANIMATION_STEPS = 3;
@@ -292,6 +295,7 @@ end;
 constructor TTopicDataTable.Create(const ATableName: string; const ATableIEN: string);
 begin
   inherited Create;
+  Changed := False;
   TableIEN := ATableIEN;
   TableName := ATableName;
   Lines := TStringList.Create;
@@ -2153,6 +2157,7 @@ begin
     HTMLLines.Add('.related-data-table { border: 1px solid #9fbad0; border-collapse: separate; border-radius: 4px; border-spacing: 0; margin: 0 0 8px 0; overflow: hidden; width: 100%; }');
     HTMLLines.Add('.related-data-table th { background: #2f75b5; color: #ffffff; font-size: 12px; line-height: 1.15; padding: 5px 8px; text-align: left; }');
     HTMLLines.Add('.table-delete { color: #ffffff; float: right; font-size: 11px; font-weight: normal; text-decoration: underline; }');
+    HTMLLines.Add('.table-edit { color: #ffffff; float: right; font-size: 11px; font-weight: normal; margin-right: 12px; text-decoration: underline; }');
     HTMLLines.Add('.related-data-table td { font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 1.1; padding: 1px 8px; white-space: pre-wrap; word-break: break-word; }');
     HTMLLines.Add('.no-data { color: #666666; font-family: Segoe UI, Tahoma, Arial, sans-serif !important; font-style: italic; }');
     HTMLLines.Add('.empty { color: #666666; font-style: italic; margin: 4px; }');
@@ -2164,7 +2169,8 @@ begin
         TableData := FTopicDataTables[Index];
         HTMLLines.Add('<table class="related-data-table"><thead><tr><th>');
         if TableData.TableIEN <> '' then begin
-          HTMLLines.Add('<a class="table-delete" href="about:TopicTableDelete^' + HTMLEncode(TableData.TableIEN, Modified) + '">Delete</a>');
+          HTMLLines.Add('<a class="table-delete" href="about:TopicTableDelete^' + HTMLEncode(TableData.TableIEN, Modified) + '">Remove</a>');
+          HTMLLines.Add('<a class="table-edit" href="about:TopicTableEdit^' + HTMLEncode(TableData.TableIEN, Modified) + '">Edit</a>');
         end;
         HTMLLines.Add(HTMLEncode(TableData.TableName, Modified) + '</th></tr></thead><tbody>');
         if TableData.Lines.Count = 0 then begin
@@ -2196,6 +2202,19 @@ begin
   Result := nil;
   for Index := 0 to FTopicDataTables.Count - 1 do begin
     if SameText(FTopicDataTables[Index].TableName, TableName) then begin
+      Result := FTopicDataTables[Index];
+      Exit;
+    end;
+  end;
+end;
+
+function TfrmTopics.FindTopicDataTableByIEN(const TableIEN: string): TTopicDataTable;
+var
+  Index: Integer;
+begin
+  Result := nil;
+  for Index := 0 to FTopicDataTables.Count - 1 do begin
+    if FTopicDataTables[Index].TableIEN = TableIEN then begin
       Result := FTopicDataTables[Index];
       Exit;
     end;
@@ -2255,6 +2274,42 @@ begin
     end;
   end;
   DisplayTopicDataHTML;
+end;
+
+procedure TfrmTopics.EditTopicDataTable(const TableIEN: string);
+var
+  EditedLines: TStringList;
+  Editor: TfrmTopicTableEdit;
+  ErrorText: string;
+  Status: string;
+  TopicTable: TTopicDataTable;
+begin
+  TopicTable := FindTopicDataTableByIEN(TableIEN);
+  if not Assigned(TopicTable) then begin
+    Exit;
+  end;
+  Editor := TfrmTopicTableEdit.Create(Self, TopicTable.TableName, TopicTable.Lines);
+  EditedLines := TStringList.Create;
+  try
+    if Editor.ShowModal = mrOk then begin
+      Editor.CopyEditedLines(EditedLines);
+      Status := SetTopicTableData(TableIEN, EditedLines);
+      if Piece(Status, '^', 1) = '1' then begin
+        TopicTable.Lines.Assign(EditedLines);
+        TopicTable.Changed := True;
+        DisplayTopicDataHTML;
+      end else begin
+        ErrorText := Piece(Status, '^', 2);
+        if ErrorText = '' then begin
+          ErrorText := 'The edited table could not be saved.';
+        end;
+        MessageDlg(ErrorText, mtError, [mbOK], 0);
+      end;
+    end;
+  finally
+    EditedLines.Free;
+    Editor.Free;
+  end;
 end;
 
 procedure TfrmTopics.LoadTopicDataTables(TopicEntries: TStrings);
@@ -2555,6 +2610,10 @@ begin
   if ActionName = 'TopicTableDelete' then begin
     Cancel := True;
     DeleteTopicDataTable(ActionParam);
+  end;
+  if ActionName = 'TopicTableEdit' then begin
+    Cancel := True;
+    EditTopicDataTable(ActionParam);
   end;
 end;
 

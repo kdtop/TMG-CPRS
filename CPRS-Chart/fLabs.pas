@@ -47,7 +47,7 @@ uses
   uConst, ORDtTmRng, OleCtrls, SHDocVw, Variants, StrUtils, fBase508Form,
   ORNet,ShellAPI,    //tmg
   fImagePickPDF,rFileTransferU,Trpcb,       //tmg
-  VA508AccessibilityManager, rWVEHR, VclTee.TeeGDIPlus;
+  VA508AccessibilityManager, rWVEHR, VclTee.TeeGDIPlus, MSHTML; //kt //codex 10/5/26
 
 type
   TGrdLab508Manager = class(TVA508ComponentManager)
@@ -255,6 +255,7 @@ type
     procedure TabControl1Change(Sender: TObject);
     procedure WebBrowser1DocumentComplete(Sender: TObject;
       const pDisp: IDispatch; const URL: OleVariant);
+    procedure WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool); //kt //codex 10/5/26
     procedure Memo1KeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure UpdateRemoteStatus(aSiteID, aStatus: string);
@@ -324,6 +325,7 @@ type
     procedure ChkBrowser;
     procedure CommonComponentVisible(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12: Boolean);
     procedure BlankWeb;
+    function ScrollLabDateIntoView(const EntryID: string): Boolean; //kt //codex 10/5/26
     procedure CheckForHiddenRows();   //tmg  3/12/19
     function GridVisibleHeight(aGrid : TStringGrid) : integer;  //TMG 10/25/21
     function SelectUserDefaultReport() : boolean;   //TMG 11/9/23
@@ -384,7 +386,7 @@ var
 implementation
 
 uses uCore, rLabs, rCore, rCover, rOrders, fLabPrint, fFrame, fRptBox, Printers, fReportsPrint,
-     clipbrd, rReports, rGraphs, activex, mshtml, VA508AccessibilityRouter, uReports, fLabEntry,
+     clipbrd, rReports, rGraphs, activex, VA508AccessibilityRouter, uReports, fLabEntry,
      uTMGOptions, uTMGUtil, fSingleNote, fAlertSender, fLabPicker, uHTMLTools,
      fLabSelector, fViewLabPDF,fNoteSelector,fChartExportHistory,//kt
      VAUtils;
@@ -555,6 +557,7 @@ begin
   memo1.Visible := false;
   FLabData := TStringList.Create;   //kt added 2/17
   FNotes := TStringList.Create;     //kt added 2/17
+  WebBrowser1.OnBeforeNavigate2 := WebBrowser1BeforeNavigate2; //kt //codex 10/5/26
 end;
 
 function TfrmLabs.SelectUserDefaultReport() : boolean;
@@ -5071,6 +5074,47 @@ begin
   WebDoc.write(PSafeArray(TVarData(v).VArray));
   WebDoc.close;
   //uHTMLDoc := '';
+end;
+
+function TfrmLabs.ScrollLabDateIntoView(const EntryID: string): Boolean;
+//kt //codex added entire function 10/5/26
+var
+  Document: IHTMLDocument3;
+  EntryElement: IHTMLElement;
+begin
+  Result := False;
+  if not Assigned(WebBrowser1.Document) then begin
+    Exit;
+  end;
+  Document := WebBrowser1.Document as IHTMLDocument3;
+  if not Assigned(Document) then begin
+    Exit;
+  end;
+  if not Assigned(Document.getElementById('tmg-lab-html-date-report')) then begin
+    Exit;
+  end;
+  EntryElement := Document.getElementById(EntryID);
+  if Assigned(EntryElement) then begin
+    EntryElement.scrollIntoView(True);
+    Result := True;
+  end;
+end;
+
+procedure TfrmLabs.WebBrowser1BeforeNavigate2(ASender: TObject; const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData, Headers: OleVariant; var Cancel: WordBool);
+//kt //codex added entire procedure 10/5/26
+var
+  DateAnchorPos: Integer;
+  EntryID: string;
+  NavigationURL: string;
+begin
+  NavigationURL := URL;
+  DateAnchorPos := Pos('#lab-date-', NavigationURL);
+  if DateAnchorPos > 0 then begin
+    EntryID := Copy(NavigationURL, DateAnchorPos + 1, MaxInt);
+    if ScrollLabDateIntoView(EntryID) then begin
+      Cancel := True;
+    end;
+  end;
 end;
 
 procedure TfrmLabs.ChkBrowser;

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Run one or more supplied M commands in YottaDB direct mode using the local
+# VistA environment. Each shell argument is submitted as one direct-mode line.
+
+set -o pipefail
+
+if [ "$#" -eq 0 ]; then
+  printf 'Usage: %s "M direct-mode command" ["additional command"]\n' "$0" >&2
+  exit 64
+fi
+
+. /opt/worldvista/EHR/bin/setup_env
+export EDITOR="$(command -v joe)"
+
+{
+  for CODEX_M_COMMAND in "$@"; do
+    printf '%s\n' "$CODEX_M_COMMAND"
+  done
+  printf 'HALT\n'
+} | "$gtm_dist/mumps" -direct

@@ -31,6 +31,7 @@ function TopicList(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime=999999
 function Get1Topic(Dest : TStrings; SubIEN : String; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
 function ListTopicTables(Dest: TStrings): string; //kt //codex 9/28/26
 function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string; //kt //codex 9/28/26
+function SetTopicTableData(const TableIEN: string; Text: TStrings): string; //kt //codex 10/11/26
 function SetTopicLinkedTables(SubIEN: string; const TableIENs: string): string; //kt //codex 9/29/26
 function RenameTopic(SubIEN, TopicName: string): string; //kt //codex 9/24/26
 function AddTopic(TopicName: string): string; //kt //codex 9/28/26
@@ -199,6 +200,32 @@ begin
       Result := False;
       Exit;
     end;
+  end;
+end;
+
+function SetTopicTableData(const TableIEN: string; Text: TStrings): string;
+//kt //codex added entire function 10/11/26
+var
+  ResultSL: TStringList;
+  TableText: TStringList;
+begin
+  if not Assigned(Text) then begin
+    Result := '-1^Table text was not supplied.';
+    Exit;
+  end;
+  ResultSL := TStringList.Create;
+  TableText := TStringList.Create;
+  try
+    TableText.Assign(Text);
+    NormalizeTopicEntryTextLines(TableText);
+    if not TopicEntryTextLinesAreClean(TableText) then begin
+      Result := '-1^Table text contains an embedded line break.';
+      Exit;
+    end;
+    Result := TopicCommand(ResultSL, Patient.DFN, 'SET TABLE DATA', TableIEN, TableText);
+  finally
+    TableText.Free;
+    ResultSL.Free;
   end;
 end;
 

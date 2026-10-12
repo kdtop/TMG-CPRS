@@ -1638,10 +1638,16 @@ const
                  Cp := Sp;
                  Inc(Sp);
                  case Sp^ of
-                   'a': if AnsiStrPos(Sp, 'amp;') = Sp then  { do not localize }
-                        begin
-                          Inc(Sp, 3);
-                          Rp^ := '&';
+                   'a': begin //kt //codex 10/9/26
+                          if AnsiStrPos(Sp, 'amp;') = Sp then begin  { do not localize } //kt //codex 10/9/26
+                            Inc(Sp, 3); //kt //codex 10/9/26
+                            Rp^ := '&'; //kt //codex 10/9/26
+                          end else if AnsiStrPos(Sp, 'apos;') = Sp then begin //kt //codex 10/9/26
+                            Inc(Sp, 4); //kt //codex 10/9/26
+                            Rp^ := ''''; //kt //codex 10/9/26
+                          end else begin //kt //codex 10/9/26
+                            Exit; //kt //codex 10/9/26
+                          end; //kt //codex 10/9/26
                         end;
                    'l',
                    'g': if (AnsiStrPos(Sp, 'lt;') = Sp) or (AnsiStrPos(Sp, 'gt;') = Sp) then { do not localize }
@@ -1665,14 +1671,28 @@ const
                           Inc(Sp,4);
                           Rp^ := '"';
                         end;
-                   '#': begin
-                          Tp := Sp;
-                          Inc(Tp);
-                          while (Sp^ <> ';') and (Sp^ <> #0) do
-                            Inc(Sp);
-                          SetString(S, Tp, Sp - Tp);
-                          Val(S, I, Code);
-                          Rp^ := Chr((I));
+                   '#': begin //kt //codex 10/9/26
+                          Tp := Sp; //kt //codex 10/9/26
+                          Inc(Tp); //kt //codex 10/9/26
+                          while (Sp^ <> ';') and (Sp^ <> #0) do begin //kt //codex 10/9/26
+                            Inc(Sp); //kt //codex 10/9/26
+                          end; //kt //codex 10/9/26
+                          SetString(S, Tp, Sp - Tp); //kt //codex 10/9/26
+                          if (Length(S) > 1) and CharInSet(S[1], ['x', 'X']) then begin //kt //codex 10/9/26
+                            if not TryStrToInt('$' + Copy(S, 2, MaxInt), I) then begin //kt //codex 10/9/26
+                              I := Ord('?'); //kt //codex 10/9/26
+                            end; //kt //codex 10/9/26
+                          end else begin //kt //codex 10/9/26
+                            Val(S, I, Code); //kt //codex 10/9/26
+                            if Code <> 0 then begin //kt //codex 10/9/26
+                              I := Ord('?'); //kt //codex 10/9/26
+                            end; //kt //codex 10/9/26
+                          end; //kt //codex 10/9/26
+                          if (I >= 0) and (I <= $FFFF) then begin //kt //codex 10/9/26
+                            Rp^ := Chr(I); //kt //codex 10/9/26
+                          end else begin //kt //codex 10/9/26
+                            Rp^ := '?'; //kt //codex 10/9/26
+                          end; //kt //codex 10/9/26
                         end;
                    else Exit;
                  end;//case

@@ -429,13 +429,12 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 939
+            Width = 367
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
-            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162

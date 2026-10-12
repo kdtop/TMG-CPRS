@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-10-04
+Last updated: 2026-10-11
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -14,12 +14,17 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - In the Windows Server/Delphi session, the project is normally opened from `P:\vista\TMGCPRS_v30A_Delphi12`.
 - From this Codex/Linux workspace, the same tree is mounted at `/mnt/WinPublic/vista/TMGCPRS_v30A_Delphi12`.
 - Delphi logs may also refer to `F:\Shares\Public\vista\TMGCPRS_v30A_Delphi12`; treat that as the same source tree unless the user says otherwise.
+- For authorized YottaDB/FileMan direct-mode work, use the user's approved FileMan context IEN: `DUZ=168`.
+- Use the executable project-root wrapper `./codex_direct_ydb` for authorized direct-mode YottaDB work; it establishes the VistA environment and accepts quoted M commands. Do not use `runAV` for this work.
+- `TMGAI001` is the user-maintained direct-mode interface. Its compiled entry points include `DUMPREC`, `LIST`, `DDFLDS`, and `ZWR`; the `fileman` skill documents their read-only use. `DDFLDS` accepts a FileMan file number or name and emits the VPE-style field layout. `ZWR` displays a requested raw global node/subtree; confirm before a top-level global because output can be extensive.
 
 ## Current Focus
 
 - Topic metadata migration is in progress. `PARSESCT2^TMGTIUP1` emits `TOPIC META` for every parsed topic, including a group list and all table names; `FILE1B^TMGTIUT5` synchronizes the metadata without creating a thread entry when there is no current-visit text. `GROUP=A,B,...` replaces only the existing `GROUP=` token in topic User Data; other space-delimited tokens remain intact. `FIXALL2^TMGTOPIC` invokes metadata-only `FIXALL`, which resumes from `^TMG("TMP","FIXALL^TMGTOPIC",DFN)`.
+- Dr. Dee thread parsing repair is complete and spot-checked after rebuilding all notes whose provider is Dr. Dee (`PROVIEN=83`). `HASPREDT^TMGTIUP3` now handles topic names longer than 30 characters by seeking the truncated FileMan B-index key and confirming the full name in the topic `.01` field. This lets `EXTRACTHREAD` reject a Dee carried-forward paragraph with no current-note date rather than filing it as a thread. Preserve Kevin (`PROVIEN=168`) behavior: an undated paragraph remains valid for a genuinely new topic.
 - `FIXALL2` is running correctly but is not yet complete. It is safe to resume because `FIXALL` skips patients already recorded in its resume store. Preserve the user's correction for child-only `QUIET(TIUIEN)` entries: test `$DATA(QUIET(TIUIEN))`, then display it with `ZWR QUIET(TIUIEN,*)` rather than reading a possibly undefined scalar value. Recompile changed M routines before resuming because YottaDB executes their `.o` objects.
-- Future design direction: add a Topics-to-active-note macro. The Notes context menu gets its macro list through `TMG CPRS GET MACRO LIST`; selected macros run through `TMG CPRS MACRO RESOLVE`, replacing the returned note/editor text. See `fNotes.pas`, `rTIU.pas`, and `TMGRPC1I.m` before implementing.
+- Current Topics table work: `SET TABLE DATA` persists an independently edited table in file 22729 (using `.05` DATE WITHOUT DOCUMENT); `GETLASTTEXT^TMGTIUO5` can return that cache when there is no linked TIU document. The user compiled both changed M routines and runtime-confirmed that an edited table remains present after restarting CPRS. The FileMan `E`-flag rule for pointer values (leading backtick) is essential here.
+- Next Topics design direction: client-side push of pending edited tables into the active HTML note, without a server MACRO action/RPC. It will identify each table by its full `-- [name] -----` header and replace every matching table body through its nearest blank-line, list, or paragraph boundary. See [plans.md](plans.md) and the sanitized `killthis.txt` / `killthis_DT.txt` fixtures before implementation. Do not use the previous managed carry-forward-block/macro proposal.
 - Completed Topics/UI milestones, the historical thread rebuild, report aggregation, note-performance work, and the PNG transparency repair are recorded in [changelog.md](changelog.md), not here.
 
 ## Build and Verification
@@ -33,7 +38,10 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - Do not edit files under `D:\Embarcadero\...`. Those paths are installed Delphi/package sources and should only be read for comparison or copied from intentionally.
 - Keep edits in this workspace: `P:\vista\TMGCPRS_v30A_Delphi12`.
 - The active topic server routine is /opt/worldvista/EHR/p/TMGTOPIC.m. Edit it only when the user explicitly requests server work; keep it LF-terminated because it is a Linux M source file.
+- After any M-routine source edit, ask the user to compile the routine; do not attempt M compilation from Codex. YottaDB executes the routine's `.o` object, so do not call a newly added or changed entry point until the user confirms compilation.
+- For FileMan FDA writes made with the external-input `E` flag, pass pointer IENs in external form with a leading backtick (for example, `` `74592 ``); do not pass a bare internal IEN. Non-pointer external values such as `NOW` remain appropriate.
 - Native VistA M routines under `/opt/worldvista/EHR/r/` are read-only: they may be inspected for behavior and RPC contracts, but must not be modified. The user may explicitly authorize an edit there under special circumstances.
+- Never run `MUPIP RUNDOWN` or any database-maintenance, repair, or manipulation command. Do not invoke live M routines/RPCs for testing when they could write or otherwise mutate database globals; keep database work read-only unless the user explicitly directs a specific database operation.
 - The RPCBroker talks to a server expecting single-byte character strings. Be careful around Broker/RPC payload paths; do not casually convert wire data to Unicode/multibyte behavior.
 - Windows filesystem/API path fixes may use `string`/`PChar`; byte-oriented RPC/file-transfer payloads should stay `AnsiString`/`AnsiChar` unless deliberately changed.
 - Leave Delphi `__recovery` folders alone and ignore them unless the user explicitly asks to clean them.
@@ -75,7 +83,7 @@ Important Git workflow:
 
 1. Read the current source and inspect Git status before editing.
 2. Let the current metadata migration finish. If it must be restarted, re-read live `TMGTIUP1.m`, `TMGTIUT5.m`, and `TMGTOPIC.m`; compile their `.o` files; then use the `FIXALL` resume store to continue and validate groups/tables on representative KST and MDT notes.
-3. If implementing Topics-to-note insertion, begin with the existing macro RPC contracts and decide whether the macro inserts all selected Topics data or a user-chosen subset.
+3. If implementing Topics-to-note insertion, follow [plans.md](plans.md): provide an explicit batch push of changed tables, use the header/boundary scanner for both LI and P note formats, update every valid duplicate table occurrence, and leave unmatched tables pending. Do not add a server macro action.
 4. Follow the user's current request; consult [changelog.md](changelog.md) for completed history and deferred work rather than treating it as an active plan.
 
 ## HTMLEdit Streamlining Idea

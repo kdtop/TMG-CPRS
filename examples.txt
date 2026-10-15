@@ -1,0 +1,161 @@
+TMumpsDataObject examples
+=========================
+
+Basic value
+-----------
+
+var
+  Data: TMumpsDataObject;
+begin
+  Data := TMumpsDataObject.Create;
+  try
+    Data[['patient', 'name']] := 'SMITH,JOHN';
+    Memo1.Lines.Text := Data.ToJSON;
+  finally
+    Data.Free;
+  end;
+end;
+
+Produces:
+
+{"patient":{"name":"SMITH,JOHN"}}
+
+
+Uniform path syntax
+-------------------
+
+Data[['name']] := 'SMITH,JOHN';
+Data[['patient', 'name', 'length']] := '10';
+PatientName := Data[['patient', 'name']];
+
+Produces:
+
+{"name":"SMITH,JOHN","patient":{"name":{"length":"10"}}}
+
+
+Node with both a value and descendants
+--------------------------------------
+
+Data[['patient', 'name']] := 'SMITH,JOHN';
+Data[['patient', 'name', 'length']] := '10';
+
+Produces:
+
+{"patient":{"name":{"$value":"SMITH,JOHN","length":"10"}}}
+
+
+Branch without its own value
+----------------------------
+
+Data[['patient', 'address', 'city']] := 'Nashville';
+Data[['patient', 'address', 'state']] := 'TN';
+
+Produces:
+
+{"patient":{"address":{"city":"Nashville","state":"TN"}}}
+
+
+Read a node value
+-----------------
+
+PatientName := Data[['patient', 'name']];
+
+
+Distinguish an undefined node from an empty value
+--------------------------------------------------
+
+if Data.TryGetMumpsValue(['patient', 'name'], PatientName) then begin
+  // The node is defined.  PatientName may still be an empty string.
+end;
+
+
+MUMPS variable with its own value and child nodes
+-------------------------------------------------
+
+Data[[]] := 'root value';
+Data[['status']] := 'active';
+
+Produces:
+
+{"$value":"root value","status":"active"}
+
+
+Notes
+-----
+
+* Use Data[['subscript']] for a one-level path and Data[['a', 'b', 'c']] for a
+  deeper path.  The outer brackets access the default property; the inner
+  brackets are Delphi's open-array constructor.
+* $value is reserved for this representation and cannot be used as a normal
+  MUMPS subscript through SetMumpsValue.
+* MUMPS values are stored as JSON strings.
+
+
+Order child subscripts in MUMPS collation order
+------------------------------------------------
+
+Data[['patient', 'name']] := 'SMITH,JOHN';
+Data[['patient', 'name', 'length']] := '10';
+Data[['patient', 'name', 'source']] := 'imported';
+
+Current := Data.Order(['patient', 'name'], '');
+while Current <> '' do begin
+  // Current is 'length', then 'source'.
+  Current := Data.Order(['patient', 'name'], Current);
+end;
+
+Order returns an empty string when no next subscript exists. Empty subscripts
+are not supported by TMumpsDataObject.
+
+
+Check whether a node has a value, descendants, or both
+--------------------------------------------------------
+
+Status := Data.DataStatus(['patient', 'name']);
+
+// Status is compatible with MUMPS $DATA:
+//   0  = node is undefined
+//   1  = node has a value only
+//  10  = node has descendants only
+//  11  = node has both a value and descendants
+
+
+Delete a node and all of its descendants
+-----------------------------------------
+
+Data[['patient', 'address', 'city']] := 'Nashville';
+Data[['patient', 'address', 'state']] := 'TN';
+Data.Kill(['patient', 'address']);
+
+// The address node and both descendants are gone.
+// Data.Kill([]) clears the entire TMumpsDataObject.
+
+
+Merge a source branch into a destination branch
+------------------------------------------------
+
+Source := TMumpsDataObject.Create;
+Destination := TMumpsDataObject.Create;
+try
+  Source[['name']] := 'SMITH,JOHN';
+  Source[['contact', 'phone']] := '555-0100';
+
+  Destination[['patient', 'id']] := '123';
+  Destination.Merge(['patient'], Source.Node([]));
+
+  // Existing destination descendants are retained.  Produces:
+  // {"patient":{"id":"123","name":"SMITH,JOHN",
+  //              "contact":{"phone":"555-0100"}}}
+finally
+  Destination.Free;
+  Source.Free;
+end;
+
+Merge overlays values and descendants from the source, while retaining
+destination descendants that are not present in the source.  Node([]) means
+the root node.  To merge only a source branch, use for example:
+
+Destination.Merge(['patient', 'contact'], Source.Node(['contact']));
+
+The source is read before the merge begins, so a source and destination may be
+different branches of the same TMumpsDataObject.

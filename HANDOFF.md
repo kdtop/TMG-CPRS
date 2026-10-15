@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-10-11
+Last updated: 2026-10-15
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -25,6 +25,8 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - `FIXALL2` is running correctly but is not yet complete. It is safe to resume because `FIXALL` skips patients already recorded in its resume store. Preserve the user's correction for child-only `QUIET(TIUIEN)` entries: test `$DATA(QUIET(TIUIEN))`, then display it with `ZWR QUIET(TIUIEN,*)` rather than reading a possibly undefined scalar value. Recompile changed M routines before resuming because YottaDB executes their `.o` objects.
 - Current Topics table work: `SET TABLE DATA` persists an independently edited table in file 22729 (using `.05` DATE WITHOUT DOCUMENT); `GETLASTTEXT^TMGTIUO5` can return that cache when there is no linked TIU document. The user compiled both changed M routines and runtime-confirmed that an edited table remains present after restarting CPRS. The FileMan `E`-flag rule for pointer values (leading backtick) is essential here.
 - Next Topics design direction: client-side push of pending edited tables into the active HTML note, without a server MACRO action/RPC. It will identify each table by its full `-- [name] -----` header and replace every matching table body through its nearest blank-line, list, or paragraph boundary. See [plans.md](plans.md) and the sanitized `killthis.txt` / `killthis_DT.txt` fixtures before implementation. Do not use the previous managed carry-forward-block/macro proposal.
+- The note-push design is under reconsideration. Avoid creating a second Delphi copy of the `TMGTIUP*` topic parser merely to calculate insertion locations. A likely compromise is for the server parser to return a checked edit plan (source hash plus targeted replacement/insertion offsets) while CPRS applies those patches to its original editor source. No implementation decision has been made. If pursued, define offsets against the exact HTML/source string—not rendered DOM text—and test `&nbsp;`, literal NBSP, and supplementary Unicode characters before relying on cross-runtime positions.
+- `CPRS-Chart\TMG_Extra\uMumpsData.pas` is a newly added JSON-backed MUMPS-tree wrapper; `TJSONObject` cannot be inherited because Delphi 12 seals it. It uses reserved `$value` keys for nodes having both a value and descendants. Public operations now include default value access (`Data[['a', 'b']]`), `Order`, `DataStatus` (M `$DATA` values), `Kill`, `Node`, and deep `Merge`, e.g. `Destination.Merge(['patient'], Source.Node(['contact']))`. See project-root [examples.txt](examples.txt). This new unit is exempt from the normal `//kt` / `//codex` source-marker convention per the user's instruction. It has not yet been compiled in the Windows IDE after the latest changes.
 - Completed Topics/UI milestones, the historical thread rebuild, report aggregation, note-performance work, and the PNG transparency repair are recorded in [changelog.md](changelog.md), not here.
 
 ## Build and Verification
@@ -84,7 +86,8 @@ Important Git workflow:
 1. Read the current source and inspect Git status before editing.
 2. Let the current metadata migration finish. If it must be restarted, re-read live `TMGTIUP1.m`, `TMGTIUT5.m`, and `TMGTOPIC.m`; compile their `.o` files; then use the `FIXALL` resume store to continue and validate groups/tables on representative KST and MDT notes.
 3. If implementing Topics-to-note insertion, follow [plans.md](plans.md): provide an explicit batch push of changed tables, use the header/boundary scanner for both LI and P note formats, update every valid duplicate table occurrence, and leave unmatched tables pending. Do not add a server macro action.
-4. Follow the user's current request; consult [changelog.md](changelog.md) for completed history and deferred work rather than treating it as an active plan.
+4. Before expanding `TMumpsDataObject`, build CPRS in the Windows Delphi IDE and save any fresh compiler output to `CPRS-Chart\build_errors.txt`. The new `Node`-based merge syntax and open-array default property have only had source-level review.
+5. Follow the user's current request; consult [changelog.md](changelog.md) for completed history and deferred work rather than treating it as an active plan.
 
 ## HTMLEdit Streamlining Idea
 

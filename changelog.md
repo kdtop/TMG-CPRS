@@ -2,6 +2,14 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-10-15 — MUMPS data-tree wrapper and Topics note-push design review
+
+- Added `TMG_Extra\uMumpsData.pas` and registered it in the Delphi project. `TMumpsDataObject` is a wrapper around `TJSONObject`, rather than a subclass, because Delphi 12 seals `TJSONObject`. It models the MUMPS ability for a node to have both a value and descendants by using the reserved JSON key `$value`.
+- Added uniform default-property value access such as `Data[['patient', 'name']] := 'SMITH,JOHN'`; root values use `Data[[]]`. Empty subscripts remain intentionally unsupported for this disk-oriented use. The companion project-root [examples.txt](examples.txt) documents value access and JSON output.
+- Added M-style tree operations: `Order` with numeric-before-string collation, `DataStatus` returning `$DATA`-compatible `0`, `1`, `10`, or `11`, `Kill` for a node and descendants, and deep `Merge`. The merge source is now expressed as a node reference, e.g. `Destination.Merge(['patient'], Source.Node(['contact']))`, rather than passing a separate source path. `Node([])` selects a source object's root. This unit is explicitly exempt from normal Delphi source markers for its initial creation.
+- Reviewed `TESTSUM^TMGTIUP1` and its parse path. The text/HTML parsing portions of `TMGTIUP2`/`TMGTIUP3` are portable in principle, but direct VistA/FileMan/global lookups, table refresh, and thread-history logic are not. Decided not to fork that parser yet. The current Topics note-push design needs further consideration: a possible server-authoritative parser/edit-plan RPC would return a source hash and narrow patch operations for CPRS to apply locally, preventing an unsafe whole-document replacement. Any offset contract must be tested against raw HTML source representation, including `&nbsp;`, literal NBSP, and Unicode outside the BMP.
+- No Delphi build was run here; the user must compile in the licensed Windows IDE and save fresh output to `CPRS-Chart\build_errors.txt` if errors occur.
+
 ## 2026-10-11 — Independent Topic-table cache saving and client-side note-push plan
 
 - Added `SET TABLE DATA` to `TMGTOPIC` and the `rTopics.SetTopicTableData` wrapper. A completed Topics table edit now persists a full replacement table-data record in file 22729 without requiring a TIU document: it finds/updates the patient-table cache record, clears its `.03` TIU DOCUMENT pointer, sets `.05` DATE WITHOUT DOCUMENT to `NOW`, and replaces the field `1` word-processing text. FileMan external (`E`) writes correctly prefix pointer IENs with a backtick.

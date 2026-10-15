@@ -1206,6 +1206,7 @@
         </DCCReference>
         <DCCReference Include="TMG_Extra\uTMGOptions.pas"/>
         <DCCReference Include="TMG_Extra\uPngGlyphButton.pas"/>
+        <DCCReference Include="TMG_Extra\uMumpsData.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

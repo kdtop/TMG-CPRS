@@ -2814,7 +2814,7 @@ object frmSingleNote: TfrmSingleNote
       Left = 0
       Top = 0
       Width = 145
-      Height = 21
+      Height = 18
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0

@@ -577,11 +577,13 @@ const
    HTML_TAG_DIV       = 'div';         HTML_TAG_DIV_OPEN       = '<' + HTML_TAG_DIV;        HTML_TAG_DIV_CLOSE       = '</' + HTML_TAG_DIV + '>';
    HTML_TAG_SELECT    = 'select';      HTML_TAG_SELECT_OPEN    = '<' + HTML_TAG_SELECT;     HTML_TAG_SELECT_CLOSE    = '</' + HTML_TAG_SELECT + '>';
    HTML_TAG_OPTION    = 'option';      HTML_TAG_OPTION_OPEN    = '<' + HTML_TAG_OPTION;     HTML_TAG_OPTION_CLOSE    = '</' + HTML_TAG_OPTION + '>';
-
-
    //kt end addition
 
+   //kt added
+   TAG_CARRY_FORWARD_START = '[CARRY FORWARD TOPICS]';
+   TAG_CARRY_FORWARD_END   = '[END OF CARRY FORWARD TOPICS]';
 
+   //kt end addition
 var
   ScrollBarWidth: integer = 0;
 

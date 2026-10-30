@@ -182,6 +182,7 @@ type
     procedure AssignRemForm;
     function CanFinishReminder: boolean;
     procedure DisplayPCE;
+    function InsertCarryForwardTopics(const ATopicsHTML: string): Boolean;
   published
     property Drawers: TFrmDrawers read GetDrawers; // Keep Drawers published
   end;
@@ -194,7 +195,7 @@ procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; 
 
 implementation
 
-uses fImages, fSignItem, uConst, rSurgery, uTMGUtil, uCore,
+uses System.StrUtils, fImages, fSignItem, uConst, rSurgery, uTMGUtil, uCore,
      fNoteProps, uHTMLTools, uTemplates, fFrame, fNoteDR,
      fAddlSigners, Clipbrd,fNotes, uTMGOptions, fEncnt, fLabPicker,
      fNetworkMessengerClient,
@@ -221,6 +222,13 @@ var
 
 procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = '');
 begin
+   if Assigned(frmSingleNote) then begin  //kt //codex 10/20/26
+     MessageDlg('A Single Note window is already open.' + #13#10 +  //kt //codex 10/20/26
+       'Please close the other Single Note window before opening another.',  //kt //codex 10/20/26
+       mtWarning, [mbOK], 0);  //kt //codex 10/20/26
+     frmSingleNote.BringToFront;  //kt //codex 10/20/26
+     Exit;  //kt //codex 10/20/26
+   end;  //kt //codex 10/20/26
    frmSingleNote := TfrmSingleNote.Create(Application);
    frmSingleNote.NotifyOK := NotifyOK;
    frmSingleNote.InitializeBrowser;  //kt 5/21/25
@@ -1052,9 +1060,46 @@ begin inherited; HTMLEditor.ToggleUnderline; end;
 procedure TfrmSingleNote.btnCarryFwdClick(Sender: TObject);
 var HTML:string;
 begin
-  HTML := '[CARRY FORWARD TOPICS]<br><br><br><br>[END OF CARRY FORWARD TOPICS]';
+  HTML := TAG_CARRY_FORWARD_START+'<br><br><br><br>'+TAG_CARRY_FORWARD_END;
   HTMLEditor.InsertHTMLAtCaret(HTML); //kt //codex 8/30/26
   HTMLEditor.SetFocus;
+end;
+
+function TfrmSingleNote.InsertCarryForwardTopics(const ATopicsHTML: string): Boolean;
+var
+  CarryForwardEnd: Integer;
+  CarryForwardStart: Integer;
+  HTML: string;
+  NextStart: Integer;
+begin
+  Result := False;
+  if ATopicsHTML = '' then begin
+    Exit;
+  end;
+  btnCarryFwdClick(nil);
+  HTML := HTMLEditor.HTMLText;
+  CarryForwardStart := Pos(TAG_CARRY_FORWARD_START, HTML);
+  while CarryForwardStart > 0 do begin
+    NextStart := PosEx(TAG_CARRY_FORWARD_START, HTML,
+      CarryForwardStart + Length(TAG_CARRY_FORWARD_START));
+    if NextStart = 0 then begin
+      Break;
+    end;
+    CarryForwardStart := NextStart;
+  end;
+  if CarryForwardStart = 0 then begin
+    Exit;
+  end;
+  CarryForwardEnd := PosEx(TAG_CARRY_FORWARD_END, HTML,
+    CarryForwardStart + Length(TAG_CARRY_FORWARD_START));
+  if CarryForwardEnd = 0 then begin
+    Exit;
+  end;
+  HTML := Copy(HTML, 1, CarryForwardStart + Length(TAG_CARRY_FORWARD_START) - 1) +
+    '<BR>' + ATopicsHTML + '<BR>' + Copy(HTML, CarryForwardEnd, MaxInt);
+  HTMLEditor.HTMLText := HTML;
+  HTMLEditor.SetFocus;
+  Result := True;
 end;
 
 procedure TfrmSingleNote.btnCenterAlignClick(Sender: TObject);

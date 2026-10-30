@@ -660,6 +660,11 @@ type
     function  ActiveEditIEN : Int64;                                                    //kt 9/11
     function  GetCurrentNoteIEN : string;                                               //kt 6/16   //This is IEN for note that has been selected in the TreeView
     function  GetSelectedNoteFMDateTime : TFMDateTime;                                  //kt 4/3
+    function GetActiveEditorHTML(out HTML, ErrorText: string): Boolean;
+    //kt //codex added entire function 10/27/26
+    function InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments: TStrings; out ErrorText: string): Boolean;
+    //kt //codex added entire function 10/27/26
+    function ActiveEditDateTime: TFMDateTime;                                           //kt //codex added entire function 10/27/26
     procedure SetDisplayToHTMLvsText(Mode :TViewModeSet; Lines : TStrings; ActivateOnly : boolean=False); //kt 9/11
     constructor Create(AOwner: TComponent); override;                                   //kt 9/11
     destructor Destroy; override;                                                       //kt 9/11
@@ -2047,6 +2052,296 @@ begin
   end else begin
     Result := HtmlEditor.HTMLText;
   end;
+end;
+
+function TfrmNotes.GetActiveEditorHTML(out HTML, ErrorText: string): Boolean;
+//kt //codex added entire function 10/27/26
+begin
+  HTML := '';
+  ErrorText := '';
+  Result := False;
+  if not InEditMode then begin
+    ErrorText := 'Open the target note in edit mode before syncing topics.';
+    Exit;
+  end;
+  if FHTMLEditMode <> emHTML then begin
+    ErrorText := 'The target note is not in formatted HTML edit mode.' +
+      sLineBreak + 'Switch the note to formatted editing before syncing topics.';
+    Exit;
+  end;
+  if not Assigned(HtmlEditor) then begin
+    ErrorText := 'The HTML note editor is not available.';
+    Exit;
+  end;
+  HTML := GetEditorHTMLText;
+  if HTML = '' then begin
+    ErrorText := 'The HTML note editor did not return its source.';
+    Exit;
+  end;
+  Result := True;
+end;
+
+function TfrmNotes.InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments: TStrings;
+  out ErrorText: string): Boolean;
+//kt //codex added entire function 10/27/26; HPI target matching reworked 10/28/26
+var
+  Body: IHTMLBodyElement;
+  ExistingHTML: string;
+  HPIEndRange: IHTMLTxtRange;
+  HPIStartRange: IHTMLTxtRange;
+  InsertionRange: IHTMLTxtRange;
+  InsertionRanges: TInterfaceList;
+  InsertionContainers: TInterfaceList;
+  RangeIndex: Integer;
+  SavedRange: IHTMLTxtRange;
+  SavedScroll: Integer;
+  TopicElement: IHTMLElement;
+  TopicElements: TInterfaceList;
+  TerminalBreaks: TInterfaceList;
+
+  function CanonicalTopicName(const TopicName: string): string;
+  var
+    CharacterIndex: Integer;
+  begin
+    Result := '';
+    for CharacterIndex := 1 to Length(TopicName) do begin
+      case TopicName[CharacterIndex] of
+        ' ', #9, #10, #13, #160, #$200B, #$FEFF: begin
+          // Ignore visible and invisible spacing characters.
+        end;
+        '-', #$2010, #$2011, #$2012, #$2013, #$2014, #$2212: begin
+          Result := Result + '-';
+        end;
+      else
+        Result := Result + UpperCase(TopicName[CharacterIndex]);
+      end;
+    end;
+  end;
+
+  function FindHPIRegion: Boolean;
+  begin
+    Result := False;
+    HPIStartRange := Body.createTextRange;
+    if not HPIStartRange.findText('HISTORY OF PRESENT ILLNESS (HPI):', 0, 0) then begin
+      Exit;
+    end;
+    HPIStartRange.collapse(False);
+    HPIEndRange := HPIStartRange.duplicate;
+    if HPIEndRange.findText('PAST MEDICAL HISTORY (PMH)', 0, 0) then begin
+      HPIEndRange.collapse(True);
+    end else begin
+      HPIEndRange := Body.createTextRange;
+      HPIEndRange.collapse(False);
+    end;
+    Result := True;
+  end;
+
+  function IsInHPI(const Element: IHTMLElement): Boolean;
+  var
+    ElementRange: IHTMLTxtRange;
+  begin
+    Result := False;
+    ElementRange := Body.createTextRange;
+    ElementRange.moveToElementText(Element);
+    if ElementRange.compareEndPoints('StartToStart', HPIStartRange) < 0 then begin
+      Exit;
+    end;
+    Result := ElementRange.compareEndPoints('StartToStart', HPIEndRange) < 0;
+  end;
+
+  function IsDeeTopicParagraph(const TopicElement, TopicContainer: IHTMLElement): Boolean;
+  var
+    CharacterIndex: Integer;
+    PrefixText: string;
+    TopicText: string;
+    TopicTextPosition: Integer;
+  begin
+    Result := False;
+    TopicText := TopicElement.innerText;
+    if TopicText = '' then begin
+      Exit;
+    end;
+    PrefixText := TopicContainer.innerText;
+    TopicTextPosition := Pos(TopicText, PrefixText);
+    if TopicTextPosition = 0 then begin
+      Exit;
+    end;
+    PrefixText := Copy(PrefixText, 1, TopicTextPosition - 1);
+    for CharacterIndex := Length(PrefixText) downto 1 do begin
+      case PrefixText[CharacterIndex] of
+        ' ', #9, #10, #13, #160: begin
+          Delete(PrefixText, CharacterIndex, 1);
+        end;
+      end;
+    end;
+    Result := PrefixText = '*';
+  end;
+
+  function TopicContainerTerminalBreak(const TopicContainer: IHTMLElement): IHTMLElement;
+  var
+    TerminalNode: IHTMLDOMNode;
+  begin
+    Result := nil;
+    TerminalNode := (TopicContainer as IHTMLDOMNode).lastChild;
+    if Assigned(TerminalNode) and Supports(TerminalNode, IHTMLElement, Result) and
+       SameText(Result.tagName, 'BR') then begin
+      Exit;
+    end;
+    Result := nil;
+  end;
+
+  procedure AppendHTMLToTopicContainer(const TopicContainer: IHTMLElement;
+    const HTML: string);
+  var
+    Placeholder: IHTMLElement;
+  begin
+    Placeholder := HtmlEditor.DOC.createElement('SPAN') as IHTMLElement;
+    (TopicContainer as IHTMLDOMNode).appendChild(Placeholder as IHTMLDOMNode);
+    Placeholder.outerHTML := HTML;
+  end;
+
+  function FindTopicInsertionRange(const TopicName: string;
+    out TargetRange: IHTMLTxtRange): Boolean;
+  var
+    CandidateRange: IHTMLTxtRange;
+    TerminalBreak: IHTMLElement;
+    TopicIndex: Integer;
+    TopicContainer: IHTMLElement;
+  begin
+    Result := False;
+    TargetRange := nil;
+    TerminalBreak := nil;
+    for TopicIndex := 0 to TopicElements.Count - 1 do begin
+      TopicElement := IHTMLElement(TopicElements[TopicIndex]);
+      if CanonicalTopicName(TopicElement.innerText) <>
+         CanonicalTopicName(TopicName) then begin
+        Continue;
+      end;
+      TopicContainer := TopicElement.parentElement;
+      while Assigned(TopicContainer) do begin
+        if SameText(TopicContainer.tagName, 'LI') or
+           SameText(TopicContainer.tagName, 'P') then begin
+          Break;
+        end;
+        TopicContainer := TopicContainer.parentElement;
+      end;
+      if not Assigned(TopicContainer) then begin
+        Continue;
+      end;
+      if SameText(TopicContainer.tagName, 'P') and
+         not IsDeeTopicParagraph(TopicElement, TopicContainer) then begin
+        Continue;
+      end;
+      if not IsInHPI(TopicElement) then begin
+        Continue;
+      end;
+      TargetRange := Body.createTextRange;
+      TargetRange.moveToElementText(TopicContainer);
+      CandidateRange := TargetRange.duplicate;
+      if CandidateRange.findText('-- [', 0, 0) then begin
+        CandidateRange.collapse(True);
+        TargetRange := CandidateRange;
+      end else begin
+        TargetRange := nil;
+        TerminalBreak := TopicContainerTerminalBreak(TopicContainer);
+      end;
+      InsertionContainers.Add(TopicContainer);
+      TerminalBreaks.Add(TerminalBreak);
+      Result := True;
+      Exit;
+    end;
+  end;
+
+begin
+  ErrorText := '';
+  Result := False;
+  if not GetActiveEditorHTML(ExistingHTML, ErrorText) then begin
+    Exit;
+  end;
+  if (not Assigned(TopicNames)) or (not Assigned(HTMLFragments)) or
+     (TopicNames.Count <> HTMLFragments.Count) or (TopicNames.Count = 0) then begin
+    ErrorText := 'The topic names and HTML fragments must be matching, non-empty lists.';
+    Exit;
+  end;
+  if not Assigned(HtmlEditor.DOC) or not Assigned(HtmlEditor.DOC.body) then begin
+    ErrorText := 'The HTML note document is not available.';
+    Exit;
+  end;
+
+  Body := HtmlEditor.DOC.body as IHTMLBodyElement;
+  TopicElements := TInterfaceList.Create;
+  InsertionRanges := TInterfaceList.Create;
+  InsertionContainers := TInterfaceList.Create;
+  TerminalBreaks := TInterfaceList.Create;
+  try
+    if not FindHPIRegion then begin
+      ErrorText := 'The current note document does not contain an HPI section.';
+      Exit;
+    end;
+    HtmlEditor.GetElementsArrayByTagName('U', TopicElements);
+    for RangeIndex := 0 to TopicNames.Count - 1 do begin
+      if Trim(TopicNames[RangeIndex]) = '' then begin
+        ErrorText := 'A topic name is empty.';
+        Exit;
+      end;
+      if Trim(HTMLFragments[RangeIndex]) = '' then begin
+        ErrorText := 'The pending text for topic "' + TopicNames[RangeIndex] + '" is empty.';
+        Exit;
+      end;
+      if not FindTopicInsertionRange(TopicNames[RangeIndex], InsertionRange) then begin
+        ErrorText := 'The topic "' + TopicNames[RangeIndex] +
+          '" was not found in the current note document.';
+        Exit;
+      end;
+      InsertionRanges.Add(InsertionRange);
+    end;
+
+    SavedScroll := HtmlEditor.GetScrollLocation;
+    SavedRange := HtmlEditor.GetTextRange;
+    if Assigned(SavedRange) then begin
+      SavedRange := SavedRange.duplicate;
+    end;
+    try
+      for RangeIndex := 0 to InsertionRanges.Count - 1 do begin
+        if Assigned(TerminalBreaks[RangeIndex]) then begin
+          IHTMLElement(TerminalBreaks[RangeIndex]).outerHTML := HTMLFragments[RangeIndex];
+        end else if Assigned(InsertionRanges[RangeIndex]) then begin
+          IHTMLTxtRange(InsertionRanges[RangeIndex]).PasteHTML(HTMLFragments[RangeIndex]);
+        end else begin
+          AppendHTMLToTopicContainer(IHTMLElement(InsertionContainers[RangeIndex]),
+            HTMLFragments[RangeIndex]);
+        end;
+      end;
+      HtmlEditor.KeyStruck := True;
+      FChanged := True;
+      GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor);
+      Result := True;
+    except
+      on E: Exception do begin
+        ErrorText := 'Unable to insert all pending topic text. The current note may contain ' +
+          'a partial insertion: ' + E.Message;
+      end;
+    end;
+    if Assigned(SavedRange) then begin
+      try
+        SavedRange.select;
+      except
+        // The editor remains usable even when MSHTML cannot restore its prior range.
+      end;
+    end;
+    (HtmlEditor.DOC.body as IHTMLElement2).ScrollTop := SavedScroll;
+  finally
+    InsertionContainers.Free;
+    TerminalBreaks.Free;
+    InsertionRanges.Free;
+    TopicElements.Free;
+  end;
+end;
+
+function TfrmNotes.ActiveEditDateTime: TFMDateTime;
+//kt //codex added entire function 10/27/26
+begin
+  Result := FEditNote.DateTime;
 end;
 
 { Form events ------------------------------------------------------------------------------ }

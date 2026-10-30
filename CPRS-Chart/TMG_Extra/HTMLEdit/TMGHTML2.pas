@@ -2346,7 +2346,7 @@ begin
   //see if element has class matching MSG, if so, add to OutList.
   if UpperCase(Elem.tagName) = Msg then begin
     TInterfaceList(Obj).Add(Elem);
-    Stop := true; //this will cause search to stop after first match found.
+    //kt //codex original --> Stop := true; //this will cause search to stop after first match found.
   end;
 end;
 

@@ -859,8 +859,6 @@ inherited frmNotes: TfrmNotes
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitLeft = -74
-          ExplicitTop = 90
         end
         object ToolBar: TToolBar
           Left = 0

@@ -2,6 +2,44 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-10-29 — Topics active-note sync completed baseline
+
+- Completed and runtime-tested the initial Kevin-style active-note Topic sync. The Topics page initializes its first topic selection only on first display, avoiding the topic-loading work when the tab is never opened.
+- Corrected DOM topic discovery in `TMGHTML2`: `GetElementsArrayByTagName` now returns every matching element rather than stopping at the first `<U>`. `fNotes.InsertHTMLAtTopicEnds` scopes matches to HPI, supports Kevin list items and Dee's `* ` paragraphs, and inserts directly into the live MSHTML document without reassigning the complete note HTML.
+- Sync uses the active note's date while it is being edited, rather than the selected encounter/visit date. New entries and modified existing entries are appended only when their entry date falls on that same calendar date. Modified text is intentionally appended as a new dated segment, not used to replace historical text.
+- Corrected terminal-break placement: a topic's existing final `<BR>` is replaced by the entry fragment, so it cannot create a leading newline. When no final `<BR>` exists, the fragment is appended inside the topic container. The fragment itself ends with `<BR><BR>`.
+- Resolved the Delphi 12 compile issue caused by attempting to call `insertAdjacentHTML`, which is not declared by the project's imported MSHTML interfaces. The supported `outerHTML` and DOM-child operations implement the same insertion behavior.
+- Active-note table synchronization and curated-history carry-forward remain deferred; see `plans.md`.
+
+## 2026-10-27 — Topics current-note DOM sync and visit-date alignment
+
+- Added client-side pending-note indicators: a Unicode bullet prefixes each Topic name with a pending new-entry, existing-entry, or table change. New-entry saves no longer ask the redundant creation confirmation; overwriting an existing entry still asks for confirmation.
+- Added `uHTMLNoteAnalysis.pas` to parse HPI topics and canonical table ranges from the exact HTML source. Its `TJSONObject.ToJSON` result is useful for debugging; the captured failing note recognized both `DM-2` and `HTN`, including valid insertion offsets.
+- Replaced the first current-note strategy, which rebuilt and reassigned the whole HTML document, with `TfrmNotes.InsertHTMLAtTopicEnds`. It preflights target topics, uses MSHTML `IHTMLTxtRange.PasteHTML` to insert before the topic's first table or at its end, then restores selection and scroll position. This preserves the live DOM and avoids discarding the document-wide undo history. `SyncFromHTMLDocument` is now only post-insertion embedded-dialog bookkeeping.
+- Current-note sync currently inserts only pending **new** entries. An edited existing entry correctly receives the bullet but is stored in `FModifiedTopicEntries`, while the sync implementation reads only `FPendingTopicEntries`; clicking Sync therefore reports that there are no new entries. Existing-entry/date-segment replacement and table replacement remain deferred.
+- Changed New Topic Entry to follow the same encounter behavior as starting a note: `Encounter.NeedVisitWVerification` opens the standard CPRS Visit selector when needed, then each new topic entry uses the shared `Encounter.DateTime`. A second entry for the same topic/visit date-time remains correctly disallowed. The source change needs Windows Delphi runtime verification.
+- The compiler reports encountered during this work were fixed incrementally (nested `for` loop variable in `fNotes`; Topics cannot access Notes-private `DfltTIULocation`).
+- **Open runtime blocker:** despite JSON proving `DM-2` and `HTN` are parsed, `FindTopic` returned nil in testing, followed by a separate DOM “topic was not found in the current note document” failure. The latest source canonicalizes spacing and dash variants for analyzer and DOM topic-name comparisons, but has not yet been rebuilt/retested. If it remains broken, debug the raw model name, JSON name, and DOM `<U>.innerText` at the two lookup sites rather than changing the parser blindly.
+
+## 2026-10-25 — Topics curated display and related-table usability
+
+- Added client support for the server `GET CURATED` Topic command.  The Topics
+  center column displays the cached composite topic text in `wbShowCurated`,
+  with an underlined topic-name prefix and source-progress-note provenance at
+  the bottom.  The curated pane can be opened/collapsed with its glyph button;
+  its state persists as `frmTopics.CenterMiddleOpen`.
+- The Topics User Data filter now clears when the patient changes, preventing
+  a previous patient's filter from silently hiding the new patient's topics.
+- The right-column linked-table browser now places every table in an
+  independent horizontal-scroll container.  Long monospace data lines no
+  longer wrap; each table includes a bottom spacer row to keep its final data
+  line clear of the horizontal scrollbar, and suppresses the unnecessary
+  container vertical scrollbar.
+- Moved related-table `Edit` and `Remove` links inline beside the left-aligned
+  table name, where they remain visible without horizontal scrolling.
+- The user rebuilt/runtime-tested the curated pane, linked-table scrolling,
+  final-row spacer, and inline table actions successfully.
+
 ## 2026-10-15 — MUMPS data-tree wrapper and Topics note-push design review
 
 - Added `TMG_Extra\uMumpsData.pas` and registered it in the Delphi project. `TMumpsDataObject` is a wrapper around `TJSONObject`, rather than a subclass, because Delphi 12 seals `TJSONObject`. It models the MUMPS ability for a node to have both a value and descendants by using the reserved JSON key `$value`.

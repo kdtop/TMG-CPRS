@@ -29,6 +29,7 @@ type
 
 function TopicList(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
 function Get1Topic(Dest : TStrings; SubIEN : String; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
+function GetCuratedTopic(Dest: TStrings; SubIEN: string): string; //kt //codex 10/25/26
 function ListTopicTables(Dest: TStrings): string; //kt //codex 9/28/26
 function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string; //kt //codex 9/28/26
 function SetTopicTableData(const TableIEN: string; Text: TStrings): string; //kt //codex 10/11/26
@@ -349,6 +350,11 @@ begin
   Result := TopicCommand(Dest, Patient.DFN, 'GET1', SubIEN, nil, SDT,EDT);
 end;
 
+function GetCuratedTopic(Dest: TStrings; SubIEN: string): string;
+//kt //codex added entire function 10/25/26
+begin
+  Result := TopicCommand(Dest, Patient.DFN, 'GET CURATED', SubIEN);
+end;
 
 function SetTopicUserData(SubIEN : String; UserData : TTopicDataString) : string;
 //note: SubIEN is really IEN22719.21
@@ -463,15 +469,25 @@ function TopicCommand(Dest: TStrings;   //Output object
                       SDT: TFMDateTime = 0;       //Start and end dates, for command.
                       EDT: TFMDateTime = 9999999  //Start and end dates, for command.
                      ) : string;
-var Params : string;
+  var Params : string;
+      //kt //codex original --> EmptyDataSL: TStringList;
 begin
   Result := '-1^Unknown Error';
   if not Assigned(Dest) then exit;
   Params := Cmd + ':' + Data;
   if assigned(DataSL) then begin
-    Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, Params, SDT, EDT, DataSL]);
+    //kt //codex original --> Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, Params, SDT, EDT, DataSL]);
+    //kt //codex original --> Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, Params, SDT, EDT, DataSL, User.DUZ]);
+    Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, User.DUZ, Params, SDT, EDT, DataSL]); //kt //codex 10/25/26
   end else begin
-    Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, Params, SDT, EDT]);
+    //kt //codex original --> EmptyDataSL := TStringList.Create;
+    //kt //codex original --> try
+    //kt //codex original --> Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, Params, SDT, EDT, EmptyDataSL, User.DUZ]);
+    //kt //codex original --> finally
+    //kt //codex original --> EmptyDataSL.Free;
+    //kt //codex original --> end;
+    //kt //codex original --> Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, Params, SDT, EDT]);
+    Result := sCallV('TMG RPC THREAD/TOPIC CMD', [DFN, User.DUZ, Params, SDT, EDT]); //kt //codex 10/25/26
   end;
   if Result = '1^OK' then begin
     if RPCBrokerV.Results.Count > 0 then RPCBrokerV.Results.Delete(0);

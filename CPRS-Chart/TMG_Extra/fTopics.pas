@@ -5,12 +5,15 @@ interface
 uses
   Windows, Messages, Classes, Controls, ExtCtrls, Buttons, Graphics, fPage, VA508AccessibilityManager,
   Vcl.StdCtrls, Vcl.OleCtrls, SHDocVw, ORCtrls, Vcl.ComCtrls, Vcl.Menus, Vcl.Dialogs, MSHTML, Variants, ActiveX, SysUtils,
-  CommCtrl, rTopics, ORDtTm, rCore,
+  CommCtrl, rTopics, ORDtTm, rCore, ORFn,
   System.UITypes, Vcl.ToolWin, System.ImageList, Vcl.ImgList, Vcl.BaseImageCollection, Vcl.ImageCollection, uPngGlyphButton, System.Generics.Collections,
   Vcl.Mask, Vcl.Forms;
 
 type
   TControlCracker = class(TControl);
+
+  TPendingTopicNoteChange = (ptncNewEntry, ptncExistingEntry, ptncTable);
+  TPendingTopicNoteChanges = set of TPendingTopicNoteChange;
 
   TTopicListItemData = class
     PropertyID: string;
@@ -18,6 +21,7 @@ type
     TopicName: string;
     Hidden: string;
     UserData: string;
+    PendingNoteChanges: TPendingTopicNoteChanges;
   end;
 
   TTopicDataTable = class
@@ -28,6 +32,25 @@ type
     constructor Create(const ATableName: string; const ATableIEN: string = '');
     destructor Destroy; override;
   end;
+
+  TTopicEntryPushData = class
+    PropertyID: string;
+    TopicName: string;
+    EntryFMDate: string;
+    HTMLText: string;
+    Sequence: Integer;
+  end;
+
+  TTopicNotePatch = class
+    PropertyID: string;
+    TopicName: string;
+    HTML: string;
+    InsertedDates: TStringList;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+  TPushSyncMode = (psmNewNote, psmCurrentNote);
 
   TTopicSortKey = record
     ColumnIndex: Integer;
@@ -77,7 +100,7 @@ type
     pnlBtnHolder: TPanel;
     btnSave: TBitBtn;
     pnlRightFooter: TPanel;
-    BitBtn1: TBitBtn;
+    btnAddAssocTable: TBitBtn;
     ImageList1: TImageList;
     ImageCollection1: TImageCollection;
     pnlLeftBot: TPanel;
@@ -88,7 +111,15 @@ type
     lblFMDT: TLabel;
     btnNewFMDTEntry: TBitBtn;
     btnNewTopic: TBitBtn;
-    procedure BitBtn1Click(Sender: TObject);
+    btnPushSync: TBitBtn;
+    pnlCenterMiddle: TPanel;
+    Splitter2: TSplitter;
+    wbShowCurated: TWebBrowser;
+    pnlCenterMiddleBanner: TPanel;
+    lblLastCuratedTopic: TLabel;
+    btnOpenCloseCurated: TBitBtn;
+    procedure btnAddAssocTableClick(Sender: TObject);
+    procedure btnPushSyncClick(Sender: TObject);
     procedure btnTopicsLeftHandleClick(Sender: TObject);
     procedure btnTopicsLeftHandleMouseEnter(Sender: TObject);
     procedure btnTopicsLeftHandleMouseLeave(Sender: TObject);
@@ -97,6 +128,10 @@ type
     procedure splTopicsLeftMoved(Sender: TObject);
     procedure splTopicsRightMoved(Sender: TObject);
     procedure Splitter1Moved(Sender: TObject);
+    procedure Splitter2Moved(Sender: TObject);
+    procedure btnOpenCloseCuratedClick(Sender: TObject);
+    procedure btnOpenCloseCuratedMouseEnter(Sender: TObject);
+    procedure btnOpenCloseCuratedMouseLeave(Sender: TObject);
     procedure btnClearFilterClick(Sender: TObject);
     procedure edtFilterChange(Sender: TObject);
     procedure timTopicsLeftCollapseTimer(Sender: TObject);
@@ -156,6 +191,12 @@ type
     FTopicChanges: TTopicChanges;
     FCurrentTopicEntries: TStringList;
     FTopicDataTables: TObjectList<TTopicDataTable>;
+    FPendingTopicTables: TObjectDictionary<string, TTopicDataTable>;
+    FPendingTopicEntries: TObjectDictionary<string, TTopicEntryPushData>;
+    FModifiedTopicEntries: TObjectDictionary<string, TTopicEntryPushData>;
+    FPendingTopicNoteChanges: TDictionary<string, TPendingTopicNoteChanges>;
+    FNextPendingTopicEntrySequence: Integer;
+    FPushSyncMode: TPushSyncMode;
     FCurrentTopicName: string;
     FCurrentTopicPropertyID: string;
     FEditingTopicEntryFMDate: string;
@@ -170,7 +211,11 @@ type
     FPendingTopicHTML: string;
     FPendingTopicEntryID: string;
     FTopicHiddenColumnWidth: Integer;
+    FCuratedPaneOpen: Boolean;
+    FCuratedPaneTopHeight: Integer;
+    FCuratedPaneButtonHovered: Boolean;
     timTopicFilter: TTimer;
+    function BuildCuratedTopicHTML(CuratedData: TStrings; const DefaultTopicName: string): string;
     function BuildTopicHTML(TopicData: TStrings; const DefaultTopicName: string): string;
     function BuildTopicDataHTML: string;
     procedure ClearTopicList;
@@ -178,14 +223,22 @@ type
     procedure CloseTopicsLeftWithoutDelay;
     procedure ConfigureTopicsElsewhereMouseDown(AParent: TWinControl);
     procedure DisplayTopicHTML(const HTML: string);
+    procedure DisplayCuratedTopic;
     procedure DisplayTopicDataHTML;
     function CursorOverControl(AControl: TControl): Boolean;
     function CompareTopicListItems(Item1, Item2: TListItem; ColumnIndex: Integer): Integer;
     function FindTopicSortKey(ColumnIndex: Integer): Integer;
     function TopicListCellBackgroundColor(ColumnIndex: Integer): TColor;
     function FindLatestTopicEntryID(TopicData: TStrings): string;
+    function FindTopicListItemData(const PropertyID: string): TTopicListItemData;
     function FindTopicDataTable(const TableName: string): TTopicDataTable;
     function FindTopicDataTableByIEN(const TableIEN: string): TTopicDataTable;
+    function HasPendingPushSync: Boolean;
+    function BuildPendingTopicEntryHTML: string;
+    function SyncPendingTopicEntriesToCurrentNote(out ErrorText: string): Boolean;
+    function CurrentPushSyncMode: TPushSyncMode;
+    function TopicEntryPushKey(const PropertyID, EntryFMDate: string): string;
+    function TopicTablePushKey(const TopicTable: TTopicDataTable): string;
     function TopicMatchesUserDataFilter(const UserData: string): Boolean;
     procedure EditTopicUserData(ListItem: TListItem);
     procedure EditCurrentTopicEntry(const EntryFMDate: string);
@@ -205,6 +258,9 @@ type
     function TopicListItemAt(X, Y: Integer; out ColumnIndex: Integer): TListItem;
     procedure QueueTopicChange(TopicData: TTopicListItemData; HiddenChanged, UserDataChanged: Boolean);
     procedure QueueTopicEntryChange(const PropertyID, EntryFMDate, Hidden, UserData: string; HiddenChanged, UserDataChanged: Boolean);
+    procedure MarkTopicForNoteSync(const PropertyID: string; Change: TPendingTopicNoteChange);
+    procedure ClearTopicNoteSyncChanges(Changes: TPendingTopicNoteChanges);
+    procedure UpdateTopicPendingNoteChanges(const PropertyID: string);
     procedure RebuildTopicList;
     procedure RestoreTopicListLayout;
     procedure RestartTopicSaveTimer;
@@ -212,8 +268,20 @@ type
     procedure SetTopicEditorFormattingEnabled(Enabled: Boolean);
     procedure SetTopicEditorEditable(Editable: Boolean);
     procedure ToggleTopicEntryHidden(const EntryFMDate: string);
+    procedure TrackAddedTopicEntry(const PropertyID, TopicName, EntryFMDate, HTMLText: string);
+    procedure TrackModifiedTopicEntry(const PropertyID, TopicName, EntryFMDate, HTMLText: string);
+    procedure TrackTopicTableChange(TopicTable: TTopicDataTable);
+    procedure RemoveAddedTopicEntry(const PropertyID, EntryFMDate: string);
+    procedure RemoveTopicTableChange(const TableIEN: string);
+    procedure ClearPushedModifiedTopicEntries(const NoteDate: TFMDateTime);
+    procedure ResetPushSyncState;
+    procedure ResetPushedTopicEntries;
+    procedure UpdatePushSyncButton;
     procedure ToggleTopicHidden(ListItem: TListItem);
     procedure ToggleSelectedTopicsHidden(ListItem: TListItem);
+    procedure UpdateCenterPanelConstraints;
+    procedure SetCuratedPaneOpen(ShouldOpen: Boolean);
+    procedure UpdateOpenCloseCuratedGlyph;
     procedure HideTopicsLeftHandle;
     procedure PositionTopicsLeftHandle;
     procedure PositionTopicsLeftPin;
@@ -239,6 +307,7 @@ type
     function AllowContextChange(var WhyNot: string): Boolean; override;
     procedure ClearPtData; override;
     procedure DisplayPage; override;
+    procedure HandlePushSync;
     procedure RefreshTopicList;
   end;
 
@@ -250,7 +319,8 @@ implementation
 {$R *.dfm}
 
 uses
-  fFrame, ORFn, uCore, uHTMLTools, uTMGOptions, fTopicTablePicker, fTopicTableEdit;
+  fFrame, fNotes, fSingleNote, fEncnt, uConst, uCore, uHTMLTools, uPCE,
+  uTMGOptions, fTopicTablePicker, fTopicTableEdit, uHTMLNoteAnalysis, System.JSON;
 
 const
   TOPICS_PANE_ANIMATION_STEPS = 3;
@@ -264,6 +334,9 @@ const
   TOPICS_RIGHT_OPEN_SIZE_KEY = 'frmTopics.RightPaneOpenSize';
   TOPICS_RIGHT_CLOSED_SIZE_KEY = 'frmTopics.RightPaneClosedSize';
   TOPICS_CENTER_TOP_HEIGHT_KEY = 'frmTopics.CenterTopHeight';
+  TOPICS_CENTER_MIDDLE_OPEN_KEY = 'frmTopics.CenterMiddleOpen';
+  TOPICS_CENTER_MIDDLE_MINIMUM_HEIGHT = 100;
+  TOPICS_CENTER_MIDDLE_COLLAPSED_BROWSER_HEIGHT = 5;
   TOPICS_SHOW_HIDDEN_KEY = 'frmTopics.ShowHidden';
   TOPICS_LIST_COLUMN_WIDTH_KEY_PREFIX = 'frmTopics.ListColumnWidth';
   TOPICS_LIST_SORT_KEY = 'frmTopics.ListSort';
@@ -274,6 +347,7 @@ const
   TOPICS_IMAGE_PIN_DOWN_RED = 4;
   TOPIC_SORT_ASCENDING_GLYPH = #9650;
   TOPIC_SORT_DESCENDING_GLYPH = #9660;
+  TOPIC_PENDING_SYNC_GLYPH = #$2022;
   TOPIC_HIDDEN_COLUMN = 3;
   TOPIC_HIDDEN_SUBITEM = 2;
   TOPIC_USER_DATA_COLUMN = 2;
@@ -307,6 +381,702 @@ begin
   inherited;
 end;
 
+constructor TTopicNotePatch.Create;
+begin
+  inherited Create;
+  InsertedDates := TStringList.Create;
+  InsertedDates.CaseSensitive := False;
+  InsertedDates.Duplicates := dupIgnore;
+  InsertedDates.Sorted := True;
+end;
+
+destructor TTopicNotePatch.Destroy;
+begin
+  InsertedDates.Free;
+  inherited;
+end;
+
+function TfrmTopics.TopicEntryPushKey(const PropertyID, EntryFMDate: string): string;
+begin
+  Result := PropertyID + '^' + EntryFMDate;
+end;
+
+function TfrmTopics.TopicTablePushKey(const TopicTable: TTopicDataTable): string;
+begin
+  if TopicTable.TableIEN <> '' then begin
+    Result := 'IEN:' + TopicTable.TableIEN;
+  end else begin
+    Result := 'NAME:' + UpperCase(TopicTable.TableName);
+  end;
+end;
+
+function TfrmTopics.FindTopicListItemData(const PropertyID: string): TTopicListItemData;
+var
+  Index: Integer;
+begin
+  Result := nil;
+  for Index := 0 to FTopicListModel.Count - 1 do begin
+    if TTopicListItemData(FTopicListModel.Objects[Index]).PropertyID = PropertyID then begin
+      Result := TTopicListItemData(FTopicListModel.Objects[Index]);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TfrmTopics.MarkTopicForNoteSync(const PropertyID: string; Change: TPendingTopicNoteChange);
+var
+  Changes: TPendingTopicNoteChanges;
+  TopicData: TTopicListItemData;
+begin
+  if PropertyID = '' then begin
+    Exit;
+  end;
+  FPendingTopicNoteChanges.TryGetValue(PropertyID, Changes);
+  Include(Changes, Change);
+  FPendingTopicNoteChanges.AddOrSetValue(PropertyID, Changes);
+  TopicData := FindTopicListItemData(PropertyID);
+  if Assigned(TopicData) then begin
+    TopicData.PendingNoteChanges := Changes;
+  end;
+  RebuildTopicList;
+end;
+
+procedure TfrmTopics.ClearTopicNoteSyncChanges(Changes: TPendingTopicNoteChanges);
+var
+  Index: Integer;
+  KeyList: TStringList;
+  PendingChanges: TPendingTopicNoteChanges;
+  Pair: TPair<string, TPendingTopicNoteChanges>;
+  TopicData: TTopicListItemData;
+begin
+  KeyList := TStringList.Create;
+  try
+    for Pair in FPendingTopicNoteChanges do begin
+      KeyList.Add(Pair.Key);
+    end;
+    for Index := 0 to KeyList.Count - 1 do begin
+      PendingChanges := FPendingTopicNoteChanges[KeyList[Index]] - Changes;
+      if PendingChanges = [] then begin
+        FPendingTopicNoteChanges.Remove(KeyList[Index]);
+      end else begin
+        FPendingTopicNoteChanges[KeyList[Index]] := PendingChanges;
+      end;
+    end;
+  finally
+    KeyList.Free;
+  end;
+  for Index := 0 to FTopicListModel.Count - 1 do begin
+    TopicData := TTopicListItemData(FTopicListModel.Objects[Index]);
+    if not FPendingTopicNoteChanges.TryGetValue(TopicData.PropertyID, TopicData.PendingNoteChanges) then begin
+      TopicData.PendingNoteChanges := [];
+    end;
+  end;
+  RebuildTopicList;
+end;
+
+procedure TfrmTopics.UpdateTopicPendingNoteChanges(const PropertyID: string);
+var
+  Changes: TPendingTopicNoteChanges;
+  TopicData: TTopicListItemData;
+begin
+  TopicData := FindTopicListItemData(PropertyID);
+  if not Assigned(TopicData) then begin
+    Exit;
+  end;
+  if FPendingTopicNoteChanges.TryGetValue(PropertyID, Changes) then begin
+    TopicData.PendingNoteChanges := Changes;
+  end else begin
+    TopicData.PendingNoteChanges := [];
+  end;
+end;
+
+function TfrmTopics.CurrentPushSyncMode: TPushSyncMode;
+begin
+  if Assigned(frmNotes) and frmNotes.InEditMode and
+     (frmNotes.HTMLEditMode = emHTML) then begin
+    Result := psmCurrentNote;
+  end else begin
+    Result := psmNewNote;
+  end;
+end;
+
+function TfrmTopics.BuildPendingTopicEntryHTML: string;
+var
+  EntryDate: TFMDateTime;
+  EntryDateText: string;
+  EntryIndex: Integer;
+  EntryList: TList<TTopicEntryPushData>;
+  HTMLLines: TStringList;
+  Modified: Boolean;
+  NextIndex: Integer;
+  Pair: TPair<string, TTopicEntryPushData>;
+  TempEntry: TTopicEntryPushData;
+  UseAsteriskStyle: Boolean;
+begin
+  Result := '';
+  if FPendingTopicEntries.Count = 0 then begin
+    Exit;
+  end;
+  EntryList := TList<TTopicEntryPushData>.Create;
+  HTMLLines := TStringList.Create;
+  try
+    for Pair in FPendingTopicEntries do begin
+      EntryList.Add(Pair.Value);
+    end;
+    for EntryIndex := 0 to EntryList.Count - 2 do begin
+      for NextIndex := EntryIndex + 1 to EntryList.Count - 1 do begin
+        if EntryList[NextIndex].Sequence < EntryList[EntryIndex].Sequence then begin
+          TempEntry := EntryList[EntryIndex];
+          EntryList[EntryIndex] := EntryList[NextIndex];
+          EntryList[NextIndex] := TempEntry;
+        end;
+      end;
+    end;
+    UseAsteriskStyle := Pos('MARCIA', UpperCase(User.Name)) > 0;
+    if not UseAsteriskStyle then begin
+      HTMLLines.Add('<UL>');
+    end;
+    for EntryIndex := 0 to EntryList.Count - 1 do begin
+      EntryDate := MakeFMDateTime(EntryList[EntryIndex].EntryFMDate);
+      if EntryDate > 0 then begin
+        EntryDateText := FormatDateTime('m/d/yy', FMDateTimeToDateTime(EntryDate));
+      end else begin
+        EntryDateText := EntryList[EntryIndex].EntryFMDate;
+      end;
+      Modified := False;
+      if UseAsteriskStyle then begin
+        HTMLLines.Add('<P>&nbsp;&nbsp;&nbsp;&nbsp;* <U>' +
+          HTMLEncode(EntryList[EntryIndex].TopicName, Modified) + '</U>: ' +
+          EntryDateText + ': ' + EntryList[EntryIndex].HTMLText + '<BR>');
+      end else begin
+        HTMLLines.Add('<LI><U>' +
+          HTMLEncode(EntryList[EntryIndex].TopicName, Modified) + '</U>: ' +
+          EntryDateText + ': ' + EntryList[EntryIndex].HTMLText + '<BR></LI>');
+      end;
+    end;
+    if not UseAsteriskStyle then begin
+      HTMLLines.Add('</UL>');
+    end;
+    Result := HTMLLines.Text;
+  finally
+    HTMLLines.Free;
+    EntryList.Free;
+  end;
+end;
+
+function TfrmTopics.SyncPendingTopicEntriesToCurrentNote(out ErrorText: string): Boolean;
+var
+  Analysis: TJSONObject;
+  DateAnalysis: TJSONObject;
+  EntryDate: TFMDateTime;
+  EntryDateText: string;
+  EntryIndex: Integer;
+  EntryList: TList<TTopicEntryPushData>;
+  OneEntry: TTopicEntryPushData;
+  HTMLFragments: TStringList;
+  HPI: TJSONObject;
+  Index: Integer;
+  NextIndex: Integer;
+  NoteDate: TFMDateTime;
+  NoteHTML: string;
+  Patch: TTopicNotePatch;
+  PatchList: TObjectList<TTopicNotePatch>;
+  Pair: TPair<string, TTopicEntryPushData>;
+  RequiresDate: Boolean;
+  TempEntry: TTopicEntryPushData;
+  Topic: TJSONObject;
+  Topics: TJSONArray;
+  TopicNames: TStringList;
+
+  function JSONText(AObject: TJSONObject; const Name: string): string;
+  var
+    Value: TJSONValue;
+  begin
+    Result := '';
+    if not Assigned(AObject) then begin
+      Exit;
+    end;
+    Value := AObject.GetValue(Name);
+    if Assigned(Value) then begin
+      Result := Value.Value;
+    end;
+  end;
+
+  function CanonicalTopicName(const TopicName: string): string;
+  var
+    CharacterIndex: Integer;
+  begin
+    Result := '';
+    for CharacterIndex := 1 to Length(TopicName) do begin
+      case TopicName[CharacterIndex] of
+        ' ', #9, #10, #13, #160, #$200B, #$FEFF: begin
+          // Ignore visible and invisible spacing characters.
+        end;
+        '-', #$2010, #$2011, #$2012, #$2013, #$2014, #$2212: begin
+          Result := Result + '-';
+        end;
+      else
+        Result := Result + UpperCase(TopicName[CharacterIndex]);
+      end;
+    end;
+  end;
+
+  function FindTopic(AAnalysis: TJSONObject; const TopicName: string): TJSONObject;
+  var
+    Topics: TJSONArray;
+    TopicIndex: Integer;
+    AnalyzedTopicName: string;
+  begin
+    Result := nil;
+    if not Assigned(AAnalysis) then begin
+      Exit;
+    end;
+    Topics := AAnalysis.GetValue('topics') as TJSONArray;
+    if not Assigned(Topics) then begin
+      Exit;
+    end;
+    for TopicIndex := 0 to Topics.Count - 1 do begin
+      AnalyzedTopicName := CanonicalTopicName(JSONText(
+        Topics.Items[TopicIndex] as TJSONObject, 'name'));
+      if AnalyzedTopicName = CanonicalTopicName(TopicName) then begin
+        Result := Topics.Items[TopicIndex] as TJSONObject;
+        Exit;
+      end;
+    end;
+  end;
+
+  function FindPatch(const PropertyID: string): TTopicNotePatch;
+  var
+    ExistingPatchIndex: Integer;
+  begin
+    Result := nil;
+    for ExistingPatchIndex := 0 to PatchList.Count - 1 do begin
+      if PatchList[ExistingPatchIndex].PropertyID = PropertyID then begin
+        Result := PatchList[ExistingPatchIndex];
+        Exit;
+      end;
+    end;
+  end;
+
+  procedure AddOrReplaceEntry(Entry: TTopicEntryPushData);
+  var
+    ExistingEntryIndex: Integer;
+  begin
+    for ExistingEntryIndex := 0 to EntryList.Count - 1 do begin
+      if (EntryList[ExistingEntryIndex].PropertyID = Entry.PropertyID) and
+         (EntryList[ExistingEntryIndex].EntryFMDate = Entry.EntryFMDate) then begin
+        EntryList[ExistingEntryIndex] := Entry;
+        Exit;
+      end;
+    end;
+    EntryList.Add(Entry);
+  end;
+
+  function RecognizedTopicNames(AAnalysis: TJSONObject): string;
+  var
+    RecognizedTopics: TJSONArray;
+    TopicIndex: Integer;
+  begin
+    Result := '';
+    if not Assigned(AAnalysis) then begin
+      Exit;
+    end;
+    RecognizedTopics := AAnalysis.GetValue('topics') as TJSONArray;
+    if not Assigned(RecognizedTopics) then begin
+      Exit;
+    end;
+    for TopicIndex := 0 to RecognizedTopics.Count - 1 do begin
+      if Result <> '' then begin
+        Result := Result + ', ';
+      end;
+      Result := Result + JSONText(RecognizedTopics.Items[TopicIndex] as TJSONObject,
+        'name');
+    end;
+    if Result = '' then begin
+      Result := '(none)';
+    end;
+  end;
+
+begin
+  Result := False;
+  ErrorText := '';
+  if (FPendingTopicEntries.Count = 0) and (FModifiedTopicEntries.Count = 0) then begin
+    ErrorText := 'There are no new or edited topic entries to sync to the current note.';
+    Exit;
+  end;
+  if not Assigned(frmNotes) then begin
+    ErrorText := 'The Notes window is not available.';
+    Exit;
+  end;
+  NoteDate := frmNotes.ActiveEditDateTime;
+  if NoteDate <= 0 then begin
+    ErrorText := 'The active note does not have a valid date and time.';
+    Exit;
+  end;
+  if not frmNotes.GetActiveEditorHTML(NoteHTML, ErrorText) then begin
+    Exit;
+  end;
+
+  Analysis := AnalyzeHTMLNote(NoteHTML, FMDateTimeToDateTime(frmNotes.ActiveEditDateTime));
+  EntryList := TList<TTopicEntryPushData>.Create;
+  PatchList := TObjectList<TTopicNotePatch>.Create(True);
+  try
+    HPI := Analysis.GetValue('hpi') as TJSONObject;
+    if not SameText(JSONText(HPI, 'found'), 'true') then begin
+      ErrorText := 'The current note does not contain an HPI topic insertion target.' +
+        sLineBreak + 'Add or load the HPI topic list before syncing.';
+      Exit;
+    end;
+    Topics := Analysis.GetValue('topics') as TJSONArray;
+    if (not Assigned(Topics)) or (Topics.Count = 0) then begin
+      ErrorText := 'The current note contains no HPI topic insertion targets.' +
+        sLineBreak + 'Add or load the HPI topic list before syncing.';
+      Exit;
+    end;
+    for Pair in FPendingTopicEntries do begin
+      AddOrReplaceEntry(Pair.Value);
+    end;
+    for Pair in FModifiedTopicEntries do begin
+      EntryDate := MakeFMDateTime(Pair.Value.EntryFMDate);
+      if (EntryDate > 0) and (Trunc(FMDateTimeToDateTime(EntryDate)) =
+        Trunc(FMDateTimeToDateTime(NoteDate))) then begin
+        AddOrReplaceEntry(Pair.Value);
+      end;
+    end;
+    if EntryList.Count = 0 then begin
+      ErrorText := 'There are no new topic entries or edited entries dated the same as the current note to sync.';
+      Exit;
+    end;
+    for EntryIndex := 0 to EntryList.Count - 2 do begin
+      for NextIndex := EntryIndex + 1 to EntryList.Count - 1 do begin
+        if EntryList[NextIndex].Sequence < EntryList[EntryIndex].Sequence then begin
+          TempEntry := EntryList[EntryIndex];
+          EntryList[EntryIndex] := EntryList[NextIndex];
+          EntryList[NextIndex] := TempEntry;
+        end;
+      end;
+    end;
+    for EntryIndex := 0 to EntryList.Count - 1 do begin
+      OneEntry := EntryList[EntryIndex];  //for easier view during debugging.
+      if Trim(EntryList[EntryIndex].HTMLText) = '' then begin
+        ErrorText := 'A pending topic entry has no text to insert.';
+        Exit;
+      end;
+      EntryDate := MakeFMDateTime(EntryList[EntryIndex].EntryFMDate);
+      if EntryDate <= 0 then begin
+        ErrorText := 'A pending topic entry has an invalid FileMan date.';
+        Exit;
+      end;
+      Patch := FindPatch(EntryList[EntryIndex].PropertyID);
+      if not Assigned(Patch) then begin
+        Topic := FindTopic(Analysis, EntryList[EntryIndex].TopicName);
+        if not Assigned(Topic) then begin
+          ErrorText := 'The topic "' + EntryList[EntryIndex].TopicName +
+            '" was not recognized in the HPI of the current note.' + sLineBreak +
+            'Recognized HPI topics: ' + RecognizedTopicNames(Analysis);
+          Exit;
+        end;
+        Patch := TTopicNotePatch.Create;
+        Patch.PropertyID := EntryList[EntryIndex].PropertyID;
+        Patch.TopicName := EntryList[EntryIndex].TopicName;
+        if StrToIntDef(JSONText(Topic, 'insertionOffset'), -1) < 0 then begin
+          Patch.Free;
+          ErrorText := 'The insertion point for topic "' + EntryList[EntryIndex].TopicName +
+            '" could not be determined.';
+          Exit;
+        end;
+        PatchList.Add(Patch);
+      end;
+      DateAnalysis := AnalyzeHTMLNote(NoteHTML, FMDateTimeToDateTime(EntryDate));
+      try
+        Topic := FindTopic(DateAnalysis, EntryList[EntryIndex].TopicName);
+        if not Assigned(Topic) then begin
+          ErrorText := 'The dated insertion point for topic "' + EntryList[EntryIndex].TopicName +
+            '" could not be determined.';
+          Exit;
+        end;
+        RequiresDate := SameText(JSONText(Topic, 'requiresAsOfDate'), 'true');
+      finally
+        DateAnalysis.Free;
+      end;
+      EntryDateText := FormatDateTime('m/d/yy', FMDateTimeToDateTime(EntryDate));
+      if RequiresDate and (Patch.InsertedDates.IndexOf(EntryDateText) < 0) then begin
+        Patch.HTML := Patch.HTML + EntryDateText + ': ';
+        Patch.InsertedDates.Add(EntryDateText);
+      end;
+      Patch.HTML := Patch.HTML + EntryList[EntryIndex].HTMLText + '<BR><BR>';
+    end;
+    TopicNames := TStringList.Create;
+    HTMLFragments := TStringList.Create;
+    try
+      for Index := 0 to PatchList.Count - 1 do begin
+        TopicNames.Add(PatchList[Index].TopicName);
+        HTMLFragments.Add(PatchList[Index].HTML);
+      end;
+      if not frmNotes.InsertHTMLAtTopicEnds(TopicNames, HTMLFragments, ErrorText) then begin
+        Exit;
+      end;
+      ResetPushedTopicEntries;
+      ClearPushedModifiedTopicEntries(NoteDate);
+      Result := True;
+    finally
+      HTMLFragments.Free;
+      TopicNames.Free;
+    end;
+  finally
+    PatchList.Free;
+    EntryList.Free;
+    Analysis.Free;
+  end;
+end;
+
+function TfrmTopics.HasPendingPushSync: Boolean;
+begin
+  Result := FPendingTopicNoteChanges.Count > 0;
+end;
+
+procedure TfrmTopics.UpdatePushSyncButton;
+begin
+  FPushSyncMode := CurrentPushSyncMode;
+  case FPushSyncMode of
+    psmNewNote: btnPushSync.Caption := 'Push to New Note';
+    psmCurrentNote: btnPushSync.Caption := 'Sync to Current Note';
+  end;
+  btnPushSync.Enabled := HasPendingPushSync;
+end;
+
+procedure TfrmTopics.TrackTopicTableChange(TopicTable: TTopicDataTable);
+var
+  PendingTable: TTopicDataTable;
+  PushKey: string;
+begin
+  if not Assigned(TopicTable) then begin
+    Exit;
+  end;
+  PushKey := TopicTablePushKey(TopicTable);
+  if not FPendingTopicTables.TryGetValue(PushKey, PendingTable) then begin
+    PendingTable := TTopicDataTable.Create(TopicTable.TableName, TopicTable.TableIEN);
+    FPendingTopicTables.Add(PushKey, PendingTable);
+  end;
+  PendingTable.TableName := TopicTable.TableName;
+  PendingTable.TableIEN := TopicTable.TableIEN;
+  PendingTable.Lines.Assign(TopicTable.Lines);
+  PendingTable.Changed := True;
+  TopicTable.Changed := True;
+  MarkTopicForNoteSync(FCurrentTopicPropertyID, ptncTable);
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.TrackAddedTopicEntry(const PropertyID, TopicName, EntryFMDate,
+  HTMLText: string);
+var
+  PendingEntry: TTopicEntryPushData;
+  PushKey: string;
+begin
+  PushKey := TopicEntryPushKey(PropertyID, EntryFMDate);
+  if not FPendingTopicEntries.TryGetValue(PushKey, PendingEntry) then begin
+    PendingEntry := TTopicEntryPushData.Create;
+    PendingEntry.Sequence := FNextPendingTopicEntrySequence;
+    Inc(FNextPendingTopicEntrySequence);
+    FPendingTopicEntries.Add(PushKey, PendingEntry);
+  end;
+  PendingEntry.PropertyID := PropertyID;
+  PendingEntry.TopicName := TopicName;
+  PendingEntry.EntryFMDate := EntryFMDate;
+  PendingEntry.HTMLText := HTMLText;
+  MarkTopicForNoteSync(PropertyID, ptncNewEntry);
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.TrackModifiedTopicEntry(const PropertyID, TopicName, EntryFMDate,
+  HTMLText: string);
+var
+  PendingEntry: TTopicEntryPushData;
+  PushKey: string;
+begin
+  PushKey := TopicEntryPushKey(PropertyID, EntryFMDate);
+  if not FModifiedTopicEntries.TryGetValue(PushKey, PendingEntry) then begin
+    PendingEntry := TTopicEntryPushData.Create;
+    PendingEntry.Sequence := FNextPendingTopicEntrySequence;
+    Inc(FNextPendingTopicEntrySequence);
+    FModifiedTopicEntries.Add(PushKey, PendingEntry);
+  end;
+  PendingEntry.PropertyID := PropertyID;
+  PendingEntry.TopicName := TopicName;
+  PendingEntry.EntryFMDate := EntryFMDate;
+  PendingEntry.HTMLText := HTMLText;
+  MarkTopicForNoteSync(PropertyID, ptncExistingEntry);
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.RemoveTopicTableChange(const TableIEN: string);
+var
+  PendingTable: TTopicDataTable;
+  PushKey: string;
+begin
+  PushKey := 'IEN:' + TableIEN;
+  if FPendingTopicTables.TryGetValue(PushKey, PendingTable) then begin
+    FPendingTopicTables.Remove(PushKey);
+  end;
+  MarkTopicForNoteSync(FCurrentTopicPropertyID, ptncTable);
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.RemoveAddedTopicEntry(const PropertyID, EntryFMDate: string);
+var
+  HasAnotherPendingEntry: Boolean;
+  PendingChanges: TPendingTopicNoteChanges;
+  Pair: TPair<string, TTopicEntryPushData>;
+  PushKey: string;
+begin
+  PushKey := TopicEntryPushKey(PropertyID, EntryFMDate);
+  FPendingTopicEntries.Remove(PushKey);
+  HasAnotherPendingEntry := False;
+  for Pair in FPendingTopicEntries do begin
+    if Pair.Value.PropertyID = PropertyID then begin
+      HasAnotherPendingEntry := True;
+      Break;
+    end;
+  end;
+  if not HasAnotherPendingEntry then begin
+    if FPendingTopicNoteChanges.TryGetValue(PropertyID, PendingChanges) then begin
+      Exclude(PendingChanges, ptncNewEntry);
+      if PendingChanges = [] then begin
+        FPendingTopicNoteChanges.Remove(PropertyID);
+      end else begin
+        FPendingTopicNoteChanges[PropertyID] := PendingChanges;
+      end;
+      UpdateTopicPendingNoteChanges(PropertyID);
+      RebuildTopicList;
+    end;
+  end;
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.ClearPushedModifiedTopicEntries(const NoteDate: TFMDateTime);
+var
+  AffectedPropertyIDs: TStringList;
+  EntryDate: TFMDateTime;
+  HasRemainingModifiedEntry: Boolean;
+  Index: Integer;
+  Pair: TPair<string, TTopicEntryPushData>;
+  PendingChanges: TPendingTopicNoteChanges;
+  PushedKeys: TStringList;
+begin
+  PushedKeys := TStringList.Create;
+  AffectedPropertyIDs := TStringList.Create;
+  try
+    AffectedPropertyIDs.Sorted := True;
+    AffectedPropertyIDs.Duplicates := dupIgnore;
+    for Pair in FModifiedTopicEntries do begin
+      EntryDate := MakeFMDateTime(Pair.Value.EntryFMDate);
+      if (EntryDate > 0) and (Trunc(FMDateTimeToDateTime(EntryDate)) =
+        Trunc(FMDateTimeToDateTime(NoteDate))) then begin
+        PushedKeys.Add(Pair.Key);
+        AffectedPropertyIDs.Add(Pair.Value.PropertyID);
+      end;
+    end;
+    for Index := 0 to PushedKeys.Count - 1 do begin
+      FModifiedTopicEntries.Remove(PushedKeys[Index]);
+    end;
+    for Index := 0 to AffectedPropertyIDs.Count - 1 do begin
+      HasRemainingModifiedEntry := False;
+      for Pair in FModifiedTopicEntries do begin
+        if Pair.Value.PropertyID = AffectedPropertyIDs[Index] then begin
+          HasRemainingModifiedEntry := True;
+          Break;
+        end;
+      end;
+      if not HasRemainingModifiedEntry and
+         FPendingTopicNoteChanges.TryGetValue(AffectedPropertyIDs[Index], PendingChanges) then begin
+        Exclude(PendingChanges, ptncExistingEntry);
+        if PendingChanges = [] then begin
+          FPendingTopicNoteChanges.Remove(AffectedPropertyIDs[Index]);
+        end else begin
+          FPendingTopicNoteChanges[AffectedPropertyIDs[Index]] := PendingChanges;
+        end;
+        UpdateTopicPendingNoteChanges(AffectedPropertyIDs[Index]);
+      end;
+    end;
+    if PushedKeys.Count > 0 then begin
+      RebuildTopicList;
+    end;
+  finally
+    AffectedPropertyIDs.Free;
+    PushedKeys.Free;
+  end;
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.ResetPushSyncState;
+var
+  Index: Integer;
+begin
+  FPendingTopicTables.Clear;
+  FPendingTopicEntries.Clear;
+  FModifiedTopicEntries.Clear;
+  ClearTopicNoteSyncChanges([ptncNewEntry, ptncExistingEntry, ptncTable]);
+  for Index := 0 to FTopicDataTables.Count - 1 do begin
+    FTopicDataTables[Index].Changed := False;
+  end;
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.ResetPushedTopicEntries;
+begin
+  FPendingTopicEntries.Clear;
+  ClearTopicNoteSyncChanges([ptncNewEntry]);
+  UpdatePushSyncButton;
+end;
+
+procedure TfrmTopics.btnPushSyncClick(Sender: TObject);
+begin
+  HandlePushSync;
+end;
+
+procedure TfrmTopics.HandlePushSync;
+var
+  ErrorText: string;
+  TopicHTML: string;
+begin
+  UpdatePushSyncButton;
+  case FPushSyncMode of
+    psmNewNote: begin
+      TopicHTML := BuildPendingTopicEntryHTML;
+      if TopicHTML = '' then begin
+        MessageDlg('There are no new topic entries to push to a new note.',
+          mtInformation, [mbOK], 0);
+        Exit;
+      end;
+      if Assigned(frmSingleNote) then begin
+        MessageDlg('A Single Note window is already open.' + sLineBreak +
+          'Close it before pushing topics to a new note.', mtWarning, [mbOK], 0);
+        frmSingleNote.BringToFront;
+        Exit;
+      end;
+      CreateSingleNote(snmNurse);
+      if not Assigned(frmSingleNote) then begin
+        Exit;
+      end;
+      if frmSingleNote.InsertCarryForwardTopics(TopicHTML) then begin
+        ResetPushedTopicEntries;
+      end else begin
+        MessageDlg('The Carry Forward area could not be created in the new note.',
+          mtError, [mbOK], 0);
+      end;
+    end;
+    psmCurrentNote: begin
+      if not SyncPendingTopicEntriesToCurrentNote(ErrorText) then begin
+        MessageDlg(ErrorText, mtError, [mbOK], 0);
+      end else if (FModifiedTopicEntries.Count > 0) or (FPendingTopicTables.Count > 0) then begin
+        MessageDlg('New topic entries were inserted into the current note.' + sLineBreak + sLineBreak +
+          'Existing-entry and table changes remain pending for a later sync.',
+          mtInformation, [mbOK], 0);
+      end;
+    end;
+  end;
+end;
+
 procedure TfrmTopics.Loaded;
 var
   SavedTopicsLeftOpenWidth: Integer;
@@ -335,6 +1105,12 @@ begin
   FTopicChanges := TTopicChanges.Create([doOwnsValues]);
   FCurrentTopicEntries := TStringList.Create;
   FTopicDataTables := TObjectList<TTopicDataTable>.Create(True);
+  FPendingTopicTables := TObjectDictionary<string, TTopicDataTable>.Create([doOwnsValues]);
+  FPendingTopicEntries := TObjectDictionary<string, TTopicEntryPushData>.Create([doOwnsValues]);
+  FModifiedTopicEntries := TObjectDictionary<string, TTopicEntryPushData>.Create([doOwnsValues]);
+  FPendingTopicNoteChanges := TDictionary<string, TPendingTopicNoteChanges>.Create;
+  FNextPendingTopicEntrySequence := 0;
+  FPushSyncMode := psmNewNote;
   FTopicSortKeys := TList<TTopicSortKey>.Create;
   InitializeTopicListColumns;
   FTopicListPopupMenu := TPopupMenu.Create(Self);
@@ -378,8 +1154,20 @@ begin
   pnlTopicsRight.Constraints.MinWidth := FTopicsRightClosedWidth;
   FTopicsRightOpen := True;
   pnlTopicsRight.Width := FTopicsRightOpenWidth;
+  FCuratedPaneOpen := True;
+  FCuratedPaneButtonHovered := False;
+  UpdateCenterPanelConstraints;
   pnlCenterTop.Height := uTMGOptions.ReadInteger(TOPICS_CENTER_TOP_HEIGHT_KEY, pnlCenterTop.Height);
+  UpdateCenterPanelConstraints;
+  FCuratedPaneTopHeight := pnlCenterTop.Height;
+  FCuratedPaneOpen := uTMGOptions.ReadBool(TOPICS_CENTER_MIDDLE_OPEN_KEY, True);
+  UpdateCenterPanelConstraints;
   Splitter1.OnMoved := Splitter1Moved;
+  Splitter2.OnMoved := Splitter2Moved;
+  btnOpenCloseCurated.OnClick := btnOpenCloseCuratedClick;
+  btnOpenCloseCurated.OnMouseEnter := btnOpenCloseCuratedMouseEnter;
+  btnOpenCloseCurated.OnMouseLeave := btnOpenCloseCuratedMouseLeave;
+  UpdateOpenCloseCuratedGlyph;
   timTopicsLeftCollapse.Interval := TOPICS_LEFT_COLLAPSE_DELAY_MS;
   timTopicsLeftAnimate.Interval := TOPICS_PANE_ANIMATION_TIMESLICE_MS;
   timTopicsRightAnimate.Interval := TOPICS_PANE_ANIMATION_TIMESLICE_MS;
@@ -404,6 +1192,7 @@ begin
   wbDisplayPrior.OnDocumentComplete := wbDisplayPriorDocumentComplete;
   wbTopicData.OnBeforeNavigate2 := wbTopicDataBeforeNavigate2;
   wbTopicData.OnDocumentComplete := wbTopicDataDocumentComplete;
+  WBLoadHTML(wbShowCurated, '<html><body></body></html>');
   WBLoadHTML(wbTopicData, '<html><body></body></html>');
   UpdateTopicsLeftHandleGlyph;
   UpdateTopicsRightHandleGlyph;
@@ -411,7 +1200,8 @@ begin
   UpdateTopicsRightColors;
   WBLoadHTML(wbEnterNew, '<html><body></body></html>');
   SetTopicEditorEditable(False);
-  BitBtn1.Enabled := False;
+  UpdatePushSyncButton;
+  btnAddAssocTable.Enabled := False;
   btnNewTopic.Enabled := Patient.DFN <> '';
   PositionTopicsLeftHandle;
   PositionTopicsRightHandle;
@@ -433,6 +1223,7 @@ begin
   if (not FTopicsLoaded) or (csDestroying in ComponentState) then begin
     Exit;
   end;
+  UpdateCenterPanelConstraints;
   PositionTopicsLeftHandle;
   PositionTopicsRightHandle;
   PositionTopicsLeftPin;
@@ -464,6 +1255,10 @@ begin
   FTopicChanges.Free;
   FCurrentTopicEntries.Free;
   FTopicDataTables.Free;
+  FPendingTopicTables.Free;
+  FPendingTopicEntries.Free;
+  FModifiedTopicEntries.Free;
+  FPendingTopicNoteChanges.Free;
   FTopicSortKeys.Free;
   inherited;
 end;
@@ -487,19 +1282,31 @@ procedure TfrmTopics.ClearPtData;
 begin
   inherited;
   timSaveTopicChanges.Enabled := False;
+  if Assigned(timTopicFilter) then begin
+    timTopicFilter.Enabled := False;
+  end;
+  edtFilter.Text := '';
+  btnClearFilter.Enabled := False;
   ClearTopicList;
   FTopicListModel.Clear;
   FTopicChanges.Clear;
   FCurrentTopicEntries.Clear;
   FTopicDataTables.Clear;
+  FPendingTopicTables.Clear;
+  FPendingTopicEntries.Clear;
+  FModifiedTopicEntries.Clear;
+  FPendingTopicNoteChanges.Clear;
+  FNextPendingTopicEntrySequence := 0;
   FCurrentTopicName := '';
   FCurrentTopicPropertyID := '';
   FPendingTopicHTML := '';
   FPendingTopicEntryID := '';
   ClearTopicEntryEditor;
-  BitBtn1.Enabled := False;
+  btnAddAssocTable.Enabled := False;
   wbDisplayPrior.Navigate('about:blank');
+  wbShowCurated.Navigate('about:blank');
   DisplayTopicDataHTML;
+  UpdatePushSyncButton;
 end;
 
 procedure TfrmTopics.ClearTopicList;
@@ -558,7 +1365,11 @@ begin
         end;
         ListItem := lvTopics.Items.Add;
         ListItem.Data := TopicData;
-        ListItem.Caption := TopicData.TopicName;
+        if TopicData.PendingNoteChanges <> [] then begin
+          ListItem.Caption := TOPIC_PENDING_SYNC_GLYPH + ' ' + TopicData.TopicName;
+        end else begin
+          ListItem.Caption := TopicData.TopicName;
+        end;
         if TopicData.LastUsedFMDate > 0 then begin
           ListItem.SubItems.Add(FormatFMDateTime('mm/dd/yy', TopicData.LastUsedFMDate))
         end else begin
@@ -587,7 +1398,8 @@ begin
       FPendingTopicHTML := '';
       FPendingTopicEntryID := '';
       wbDisplayPrior.Navigate('about:blank');
-      BitBtn1.Enabled := False;
+      wbShowCurated.Navigate('about:blank');
+      btnAddAssocTable.Enabled := False;
       DisplayTopicDataHTML;
     end;
   finally
@@ -701,6 +1513,7 @@ end;
 procedure TfrmTopics.DisplayPage;
 begin
   inherited DisplayPage;
+  UpdatePushSyncButton;
   if InitPatient then begin
     RefreshTopicList;
   end;
@@ -1162,8 +1975,9 @@ begin
   FPendingTopicHTML := '';
   FPendingTopicEntryID := '';
   ClearTopicEntryEditor;
-  BitBtn1.Enabled := False;
+  btnAddAssocTable.Enabled := False;
   wbDisplayPrior.Navigate('about:blank');
+  wbShowCurated.Navigate('about:blank');
   DisplayTopicDataHTML;
   if Patient.DFN = '' then begin
     Exit;
@@ -1185,10 +1999,17 @@ begin
         TopicData.TopicName := Piece(TopicListData[Index], '^', 3);
         TopicData.Hidden := NormalizeTopicHidden(Piece(TopicListData[Index], '^', 4));
         TopicData.UserData := Piece(TopicListData[Index], '^', 5);
+        if not FPendingTopicNoteChanges.TryGetValue(TopicData.PropertyID, TopicData.PendingNoteChanges) then begin
+          TopicData.PendingNoteChanges := [];
+        end;
         FTopicListModel.AddObject(TopicData.TopicName, TopicData);
         ListItem := lvTopics.Items.Add;
         ListItem.Data := TopicData;
-        ListItem.Caption := TopicData.TopicName;
+        if TopicData.PendingNoteChanges <> [] then begin
+          ListItem.Caption := TOPIC_PENDING_SYNC_GLYPH + ' ' + TopicData.TopicName;
+        end else begin
+          ListItem.Caption := TopicData.TopicName;
+        end;
         if TopicData.LastUsedFMDate > 0 then begin
           ListItem.SubItems.Add(FormatFMDateTime('mm/dd/yy', TopicData.LastUsedFMDate))
         end else begin
@@ -1202,6 +2023,11 @@ begin
     end;
     lvTopics.CustomSort(nil, 0);
     RebuildTopicList;
+    if lvTopics.Items.Count > 0 then begin
+      lvTopics.Items[0].Selected := True;
+      lvTopics.Items[0].Focused := True;
+      lvTopicsClick(lvTopics);
+    end;
   finally
     TopicListData.Free;
   end;
@@ -1226,7 +2052,9 @@ var
   TopicData2: TTopicListItemData;
 begin
   if ColumnIndex = 0 then begin
-    Result := CompareText(Item1.Caption, Item2.Caption);
+    TopicData1 := TTopicListItemData(Item1.Data);
+    TopicData2 := TTopicListItemData(Item2.Data);
+    Result := CompareText(TopicData1.TopicName, TopicData2.TopicName);
   end else begin
     if ColumnIndex = 1 then begin
       TopicData1 := TTopicListItemData(Item1.Data);
@@ -1692,7 +2520,6 @@ end;
 
 procedure TfrmTopics.btnNewFMDTEntryClick(Sender: TObject);
 var
-  DateDialog: TORDateTimeDlg;
   EntryDate: TFMDateTime;
   Index: Integer;
 begin
@@ -1703,21 +2530,26 @@ begin
      (MessageDlg('Discard the current topic entry changes?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then begin
     Exit;
   end;
-  DateDialog := TORDateTimeDlg.Create(Self);
-  try
-    DateDialog.DateOnly := False;
-    DateDialog.RequireTime := True;
-    DateDialog.FMDateTime := FMNow;
-    if not DateDialog.Execute then begin
+  if Assigned(frmNotes) and frmNotes.InEditMode then begin
+    EntryDate := frmNotes.ActiveEditDateTime;
+    if EntryDate <= 0 then begin
+      MessageDlg('The active note does not have a valid date and time.', mtError, [mbOK], 0);
       Exit;
     end;
-    EntryDate := DateDialog.FMDateTime;
-  finally
-    DateDialog.Free;
-  end;
-  if EntryDate <= 0 then begin
-    MessageDlg('A valid date and time are required for a new topic entry.', mtError, [mbOK], 0);
-    Exit;
+  end else begin
+    if Encounter.NeedVisitWVerification then begin
+      UpdateVisit(Font.Size);
+      frmFrame.DisplayEncounterText;
+    end;
+    if Encounter.NeedVisit then begin
+      InfoBox(TX_NEED_VISIT, TX_NO_VISIT, MB_OK or MB_ICONWARNING);
+      Exit;
+    end;
+    EntryDate := Encounter.DateTime;
+    if EntryDate <= 0 then begin
+      MessageDlg('The current visit does not have a valid date and time.', mtError, [mbOK], 0);
+      Exit;
+    end;
   end;
   for Index := 0 to FCurrentTopicEntries.Count - 1 do begin
     if (Piece(FCurrentTopicEntries[Index], '^', 1) = '1') and
@@ -1813,17 +2645,16 @@ end;
 procedure TfrmTopics.btnSaveClick(Sender: TObject);
 var
   EntryDate: TFMDateTime;
+  EntryHTML: string;
   EntryText: TStringList;
   Status: string;
+  WasNewEntry: Boolean;
 begin
   if (FCurrentTopicPropertyID = '') or (FEditingTopicEntryFMDate = '') then begin
     Exit;
   end;
-  if FNewTopicEntry then begin
-    if MessageDlg('Create this new topic entry?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
-      Exit;
-    end;
-  end else if MessageDlg('Overwrite the existing topic entry text?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
+  if (not FNewTopicEntry) and
+     (MessageDlg('Overwrite the existing topic entry text?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then begin
     Exit;
   end;
   EntryDate := MakeFMDateTime(FEditingTopicEntryFMDate);
@@ -1831,10 +2662,13 @@ begin
     MessageDlg('The topic entry has an invalid FileMan date and cannot be saved.', mtError, [mbOK], 0);
     Exit;
   end;
+  WasNewEntry := FNewTopicEntry;
+  EntryHTML := '';
   EntryText := TStringList.Create;
   try
     EntryText.Text := GetWebBrowserHTML(wbEnterNew);
-    if FNewTopicEntry then begin
+    EntryHTML := EntryText.Text;
+    if WasNewEntry then begin
       Status := Add1TopicEntry(FCurrentTopicPropertyID, EntryDate, EntryText);
     end else begin
       Status := Set1TopicEntryText(FCurrentTopicPropertyID, EntryDate, EntryText);
@@ -1845,6 +2679,13 @@ begin
   if Piece(Status, '^', 1) <> '1' then begin
     MessageDlg('The topic entry could not be saved.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
     Exit;
+  end;
+  if WasNewEntry then begin
+    TrackAddedTopicEntry(FCurrentTopicPropertyID, FCurrentTopicName,
+      FEditingTopicEntryFMDate, EntryHTML);
+  end else begin
+    TrackModifiedTopicEntry(FCurrentTopicPropertyID, FCurrentTopicName,
+      FEditingTopicEntryFMDate, EntryHTML);
   end;
   ClearTopicEntryEditor;
   lvTopicsClick(nil);
@@ -1857,6 +2698,7 @@ var
   Index: Integer;
   Status: string;
   TopicChange: TTopicChange;
+  WasPendingNewEntry: Boolean;
 begin
   if (FCurrentTopicPropertyID = '') or (EntryFMDate = '') then begin
     Exit;
@@ -1879,10 +2721,17 @@ begin
     MessageDlg('The topic entry has an invalid FileMan date and cannot be deleted.', mtError, [mbOK], 0);
     Exit;
   end;
+  WasPendingNewEntry := FPendingTopicEntries.ContainsKey(TopicEntryPushKey(FCurrentTopicPropertyID, EntryFMDate));
   Status := Delete1TopicEntry(FCurrentTopicPropertyID, EntryDate);
   if Piece(Status, '^', 1) <> '1' then begin
     MessageDlg('The topic entry could not be deleted.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
     Exit;
+  end;
+  RemoveAddedTopicEntry(FCurrentTopicPropertyID, EntryFMDate);
+  FModifiedTopicEntries.Remove(TopicEntryPushKey(FCurrentTopicPropertyID, EntryFMDate));
+  if not WasPendingNewEntry then begin
+    MarkTopicForNoteSync(FCurrentTopicPropertyID, ptncExistingEntry);
+    UpdatePushSyncButton;
   end;
   if FTopicChanges.TryGetValue(FCurrentTopicPropertyID, TopicChange) then begin
     TopicChange.EntryChanges.Remove(EntryFMDate);
@@ -2135,10 +2984,88 @@ begin
   end;
 end;
 
+function TfrmTopics.BuildCuratedTopicHTML(CuratedData: TStrings; const DefaultTopicName: string): string;
+var
+  CuratedDate: TFMDateTime;
+  CuratedDateText: string;
+  HTMLLines: TStringList;
+  FirstText: Boolean;
+  Index: Integer;
+  Modified: Boolean;
+  TopicName: string;
+  HasText: Boolean;
+begin
+  TopicName := DefaultTopicName;
+  CuratedDateText := '';
+  HasText := False;
+  for Index := 0 to CuratedData.Count - 1 do begin
+    if Piece(CuratedData[Index], '^', 1) = '0' then begin
+      TopicName := Piece(CuratedData[Index], '^', 2);
+      CuratedDate := MakeFMDateTime(Piece(CuratedData[Index], '^', 4));
+      if CuratedDate > 0 then begin
+        CuratedDateText := FormatDateTime('mmmm d, yyyy h:nn am/pm', FMDateTimeToDateTime(CuratedDate));
+      end;
+    end else if Piece(CuratedData[Index], '^', 1) = '2' then begin
+      HasText := True;
+    end;
+  end;
+  HTMLLines := TStringList.Create;
+  try
+    HTMLLines.Add('<!DOCTYPE html>');
+    HTMLLines.Add('<html><head><style>');
+    HTMLLines.Add('body { color: #202020; font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px; }');
+    HTMLLines.Add('.curated-meta { color: #555555; font-size: 12px; margin: 16px 0 0 0; }');
+    HTMLLines.Add('.curated-text { font-family: Segoe UI, Tahoma, Arial, sans-serif; font-size: 12px; white-space: pre-wrap; word-break: break-word; }');
+    HTMLLines.Add('.empty { color: #666666; font-style: italic; margin: 4px 0; }');
+    HTMLLines.Add('</style></head><body>');
+    if HasText then begin
+      HTMLLines.Add('<div class="curated-text">');
+      FirstText := True;
+      for Index := 0 to CuratedData.Count - 1 do begin
+        if Piece(CuratedData[Index], '^', 1) = '2' then begin
+          if FirstText then begin
+            HTMLLines.Add('<b><u>' + HTMLEncode(TopicName, Modified) + '</u></b>:&nbsp;' + Copy(CuratedData[Index], 3, MaxInt));
+            FirstText := False;
+          end else begin
+            HTMLLines.Add(Copy(CuratedData[Index], 3, MaxInt));
+          end;
+        end;
+      end;
+      HTMLLines.Add('</div>');
+    end else begin
+      HTMLLines.Add('<p class="empty">No curated text is cached yet for ' + HTMLEncode(TopicName, Modified) + '.</p>');
+    end;
+    if CuratedDateText <> '' then begin
+      HTMLLines.Add('<div class="curated-meta">Curated from the progress note dated ' + HTMLEncode(CuratedDateText, Modified) + '.</div>');
+    end;
+    HTMLLines.Add('</body></html>');
+    Result := HTMLLines.Text;
+  finally
+    HTMLLines.Free;
+  end;
+end;
+
 procedure TfrmTopics.DisplayTopicHTML(const HTML: string);
 begin
   FPendingTopicHTML := HTML;
   WritePendingTopicHTML;
+end;
+
+procedure TfrmTopics.DisplayCuratedTopic;
+var
+  CuratedData: TStringList;
+  Status: string;
+begin
+  CuratedData := TStringList.Create;
+  try
+    Status := GetCuratedTopic(CuratedData, FCurrentTopicPropertyID);
+    if Piece(Status, '^', 1) <> '1' then begin
+      CuratedData.Clear;
+    end;
+    WBLoadHTML(wbShowCurated, BuildCuratedTopicHTML(CuratedData, FCurrentTopicName));
+  finally
+    CuratedData.Free;
+  end;
 end;
 
 function TfrmTopics.BuildTopicDataHTML: string;
@@ -2154,11 +3081,13 @@ begin
     HTMLLines.Add('<!DOCTYPE html>');
     HTMLLines.Add('<html><head><style>');
     HTMLLines.Add('body { color: #202020; font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px; }');
-    HTMLLines.Add('.related-data-table { border: 1px solid #9fbad0; border-collapse: separate; border-radius: 4px; border-spacing: 0; margin: 0 0 8px 0; overflow: hidden; width: 100%; }');
+    HTMLLines.Add('.related-data-table-container { margin: 0 0 8px 0; overflow-x: auto; overflow-y: hidden; }');
+    HTMLLines.Add('.related-data-table { border: 1px solid #9fbad0; border-collapse: separate; border-radius: 4px; border-spacing: 0; margin: 0; min-width: 100%; }');
     HTMLLines.Add('.related-data-table th { background: #2f75b5; color: #ffffff; font-size: 12px; line-height: 1.15; padding: 5px 8px; text-align: left; }');
-    HTMLLines.Add('.table-delete { color: #ffffff; float: right; font-size: 11px; font-weight: normal; text-decoration: underline; }');
-    HTMLLines.Add('.table-edit { color: #ffffff; float: right; font-size: 11px; font-weight: normal; margin-right: 12px; text-decoration: underline; }');
-    HTMLLines.Add('.related-data-table td { font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 1.1; padding: 1px 8px; white-space: pre-wrap; word-break: break-word; }');
+    HTMLLines.Add('.table-delete { color: #ffffff; font-size: 11px; font-weight: normal; margin-left: 12px; text-decoration: underline; }');
+    HTMLLines.Add('.table-edit { color: #ffffff; font-size: 11px; font-weight: normal; margin-left: 12px; text-decoration: underline; }');
+    HTMLLines.Add('.related-data-table td { font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 1.1; padding: 1px 8px; white-space: pre; word-break: normal; }');
+    HTMLLines.Add('.table-bottom-spacer td { height: 14px; padding: 0; }');
     HTMLLines.Add('.no-data { color: #666666; font-family: Segoe UI, Tahoma, Arial, sans-serif !important; font-style: italic; }');
     HTMLLines.Add('.empty { color: #666666; font-style: italic; margin: 4px; }');
     HTMLLines.Add('</style></head><body>');
@@ -2167,12 +3096,13 @@ begin
     end else begin
       for Index := 0 to FTopicDataTables.Count - 1 do begin
         TableData := FTopicDataTables[Index];
-        HTMLLines.Add('<table class="related-data-table"><thead><tr><th>');
+        HTMLLines.Add('<div class="related-data-table-container"><table class="related-data-table"><thead><tr><th>');
+        HTMLLines.Add(HTMLEncode(TableData.TableName, Modified));
         if TableData.TableIEN <> '' then begin
-          HTMLLines.Add('<a class="table-delete" href="about:TopicTableDelete^' + HTMLEncode(TableData.TableIEN, Modified) + '">Remove</a>');
           HTMLLines.Add('<a class="table-edit" href="about:TopicTableEdit^' + HTMLEncode(TableData.TableIEN, Modified) + '">Edit</a>');
+          HTMLLines.Add('<a class="table-delete" href="about:TopicTableDelete^' + HTMLEncode(TableData.TableIEN, Modified) + '">Remove</a>');
         end;
-        HTMLLines.Add(HTMLEncode(TableData.TableName, Modified) + '</th></tr></thead><tbody>');
+        HTMLLines.Add('</th></tr></thead><tbody>');
         if TableData.Lines.Count = 0 then begin
           HTMLLines.Add('<tr><td class="no-data">No data found for this table.</td></tr>');
         end else begin
@@ -2180,7 +3110,8 @@ begin
             HTMLLines.Add('<tr><td>' + TableData.Lines[LineIndex] + '</td></tr>');
           end;
         end;
-        HTMLLines.Add('</tbody></table>');
+        HTMLLines.Add('<tr class="table-bottom-spacer"><td>&nbsp;</td></tr>');
+        HTMLLines.Add('</tbody></table></div>');
       end;
     end;
     HTMLLines.Add('</body></html>');
@@ -2273,6 +3204,7 @@ begin
       Break;
     end;
   end;
+  RemoveTopicTableChange(TableIEN);
   DisplayTopicDataHTML;
 end;
 
@@ -2296,7 +3228,7 @@ begin
       Status := SetTopicTableData(TableIEN, EditedLines);
       if Piece(Status, '^', 1) = '1' then begin
         TopicTable.Lines.Assign(EditedLines);
-        TopicTable.Changed := True;
+        TrackTopicTableChange(TopicTable);
         DisplayTopicDataHTML;
       end else begin
         ErrorText := Piece(Status, '^', 2);
@@ -2374,7 +3306,7 @@ begin
   DisplayTopicDataHTML;
 end;
 
-procedure TfrmTopics.BitBtn1Click(Sender: TObject);
+procedure TfrmTopics.btnAddAssocTableClick(Sender: TObject);
 var
   AvailableTables: TStringList;
   ErrorText: string;
@@ -2474,6 +3406,8 @@ begin
       if Assigned(TopicTable) then begin
         TopicTable.TableIEN := SelectedTableIEN;
       end;
+      MarkTopicForNoteSync(FCurrentTopicPropertyID, ptncTable);
+      UpdatePushSyncButton;
       DisplayTopicDataHTML;
     finally
       TableData.Free;
@@ -2551,8 +3485,9 @@ begin
     FCurrentTopicPropertyID := '';
     FPendingTopicEntryID := '';
     ClearTopicEntryEditor;
-    BitBtn1.Enabled := False;
+    btnAddAssocTable.Enabled := False;
     wbDisplayPrior.Navigate('about:blank');
+    wbShowCurated.Navigate('about:blank');
     DisplayTopicDataHTML;
     Exit;
   end;
@@ -2567,16 +3502,17 @@ begin
   FCurrentTopicPropertyID := '';
   FPendingTopicEntryID := '';
   btnNewFMDTEntry.Enabled := False;
-  BitBtn1.Enabled := False;
+  btnAddAssocTable.Enabled := False;
   Status := Get1Topic(FCurrentTopicEntries, TopicData.PropertyID);
   if Piece(Status, '^', 1) = '1' then begin
     FCurrentTopicName := TopicData.TopicName;
     FCurrentTopicPropertyID := TopicData.PropertyID;
     btnNewFMDTEntry.Enabled := True;
-    BitBtn1.Enabled := True;
+    btnAddAssocTable.Enabled := True;
     LoadTopicDataTables(FCurrentTopicEntries);
     FPendingTopicEntryID := FindLatestTopicEntryID(FCurrentTopicEntries);
     DisplayTopicHTML(BuildTopicHTML(FCurrentTopicEntries, FCurrentTopicName));
+    DisplayCuratedTopic;
   end else begin
     ErrorText := Piece(Status, '^', 2);
     if ErrorText = '' then begin
@@ -2584,6 +3520,7 @@ begin
     end;
     DisplayTopicHTML('<html><body><h1>' + HTMLEncode(ListItem.Caption, Modified) + '</h1><p>' +
       HTMLEncode(ErrorText, Modified) + '</p></body></html>');
+    wbShowCurated.Navigate('about:blank');
   end;
 end;
 
@@ -2885,10 +3822,101 @@ end;
 
 procedure TfrmTopics.Splitter1Moved(Sender: TObject);
 begin
-  if not FTopicsLoaded then begin
+  UpdateCenterPanelConstraints;
+  if (not FTopicsLoaded) or (not FCuratedPaneOpen) then begin
     Exit;
   end;
   uTMGOptions.WriteInteger(TOPICS_CENTER_TOP_HEIGHT_KEY, pnlCenterTop.Height);
+end;
+
+procedure TfrmTopics.Splitter2Moved(Sender: TObject);
+begin
+  UpdateCenterPanelConstraints;
+end;
+
+procedure TfrmTopics.UpdateCenterPanelConstraints;
+var
+  MaximumBottomHeight: Integer;
+  MaximumTopHeight: Integer;
+  MinimumMiddleHeight: Integer;
+begin
+  if FCuratedPaneOpen then begin
+    MinimumMiddleHeight := TOPICS_CENTER_MIDDLE_MINIMUM_HEIGHT;
+  end else begin
+    MinimumMiddleHeight := pnlCenterMiddleBanner.Height + TOPICS_CENTER_MIDDLE_COLLAPSED_BROWSER_HEIGHT;
+  end;
+  pnlCenterMiddle.Constraints.MinHeight := MinimumMiddleHeight;
+  MaximumTopHeight := pnlTopicsCenter.ClientHeight - pnlCenterBottom.Height -
+    Splitter1.Height - Splitter2.Height - MinimumMiddleHeight;
+  if MaximumTopHeight < 1 then begin
+    MaximumTopHeight := 1;
+  end;
+  if not FCuratedPaneOpen then begin
+    pnlCenterTop.Height := MaximumTopHeight;
+  end else if pnlCenterTop.Height > MaximumTopHeight then begin
+    pnlCenterTop.Height := MaximumTopHeight;
+  end;
+  MaximumBottomHeight := pnlTopicsCenter.ClientHeight - pnlCenterTop.Height -
+    Splitter1.Height - Splitter2.Height - MinimumMiddleHeight;
+  if MaximumBottomHeight < 1 then begin
+    MaximumBottomHeight := 1;
+  end;
+  if pnlCenterBottom.Height > MaximumBottomHeight then begin
+    pnlCenterBottom.Height := MaximumBottomHeight;
+  end;
+end;
+
+procedure TfrmTopics.SetCuratedPaneOpen(ShouldOpen: Boolean);
+begin
+  if FCuratedPaneOpen = ShouldOpen then begin
+    Exit;
+  end;
+  if not ShouldOpen then begin
+    FCuratedPaneTopHeight := pnlCenterTop.Height;
+  end;
+  FCuratedPaneOpen := ShouldOpen;
+  if FCuratedPaneOpen then begin
+    pnlCenterTop.Height := FCuratedPaneTopHeight;
+  end;
+  UpdateCenterPanelConstraints;
+  UpdateOpenCloseCuratedGlyph;
+  if FTopicsLoaded then begin
+    uTMGOptions.WriteBool(TOPICS_CENTER_MIDDLE_OPEN_KEY, FCuratedPaneOpen);
+  end;
+end;
+
+procedure TfrmTopics.UpdateOpenCloseCuratedGlyph;
+begin
+  if FCuratedPaneOpen then begin
+    if FCuratedPaneButtonHovered then begin
+      btnOpenCloseCurated.ImageIndex := 1;
+    end else begin
+      btnOpenCloseCurated.ImageIndex := 0;
+    end;
+  end else begin
+    if FCuratedPaneButtonHovered then begin
+      btnOpenCloseCurated.ImageIndex := 3;
+    end else begin
+      btnOpenCloseCurated.ImageIndex := 2;
+    end;
+  end;
+end;
+
+procedure TfrmTopics.btnOpenCloseCuratedClick(Sender: TObject);
+begin
+  SetCuratedPaneOpen(not FCuratedPaneOpen);
+end;
+
+procedure TfrmTopics.btnOpenCloseCuratedMouseEnter(Sender: TObject);
+begin
+  FCuratedPaneButtonHovered := True;
+  UpdateOpenCloseCuratedGlyph;
+end;
+
+procedure TfrmTopics.btnOpenCloseCuratedMouseLeave(Sender: TObject);
+begin
+  FCuratedPaneButtonHovered := False;
+  UpdateOpenCloseCuratedGlyph;
 end;
 
 procedure TfrmTopics.pnlTopicsLeftMouseEnter(Sender: TObject);

@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-10-15
+Last updated: 2026-10-29
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -20,12 +20,22 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 
 ## Current Focus
 
-- Topic metadata migration is in progress. `PARSESCT2^TMGTIUP1` emits `TOPIC META` for every parsed topic, including a group list and all table names; `FILE1B^TMGTIUT5` synchronizes the metadata without creating a thread entry when there is no current-visit text. `GROUP=A,B,...` replaces only the existing `GROUP=` token in topic User Data; other space-delimited tokens remain intact. `FIXALL2^TMGTOPIC` invokes metadata-only `FIXALL`, which resumes from `^TMG("TMP","FIXALL^TMGTOPIC",DFN)`.
+- Current curated Topic display and related-table ergonomics are complete and
+  user runtime-tested.  `rTopics.GetCuratedTopic` obtains the cached composite
+  text for `fTopics.wbShowCurated`; the pane state persists under
+  `frmTopics.CenterMiddleOpen`.  The right-browser linked tables use separate
+  horizontal-scroll containers, no per-table vertical scrollbar, a bottom
+  spacer row, and inline left-aligned Edit/Remove links.  Preserve this IE
+  compatible HTML structure when revisiting `BuildTopicDataHTML`.
+- Topic metadata migration is in progress. `PARSESCT2^TMGTIUP1` emits `TOPIC META` for every parsed topic, including a group list and all table names; `FILE1B^TMGTIUT5` synchronizes groups without creating a thread entry when there is no current-visit text.  Curated-cache acceptance separately controls ASSOCIATED TABLES synchronization, so an older note cannot replace a newer curated source's table links. `GROUP=A,B,...` replaces only the existing `GROUP=` token in topic User Data; other space-delimited tokens remain intact. `FIXALL2^TMGTOPIC` invokes metadata-only `FIXALL`, which resumes from `^TMG("TMP","FIXALL^TMGTOPIC",DFN)`.
 - Dr. Dee thread parsing repair is complete and spot-checked after rebuilding all notes whose provider is Dr. Dee (`PROVIEN=83`). `HASPREDT^TMGTIUP3` now handles topic names longer than 30 characters by seeking the truncated FileMan B-index key and confirming the full name in the topic `.01` field. This lets `EXTRACTHREAD` reject a Dee carried-forward paragraph with no current-note date rather than filing it as a thread. Preserve Kevin (`PROVIEN=168`) behavior: an undated paragraph remains valid for a genuinely new topic.
 - `FIXALL2` is running correctly but is not yet complete. It is safe to resume because `FIXALL` skips patients already recorded in its resume store. Preserve the user's correction for child-only `QUIET(TIUIEN)` entries: test `$DATA(QUIET(TIUIEN))`, then display it with `ZWR QUIET(TIUIEN,*)` rather than reading a possibly undefined scalar value. Recompile changed M routines before resuming because YottaDB executes their `.o` objects.
 - Current Topics table work: `SET TABLE DATA` persists an independently edited table in file 22729 (using `.05` DATE WITHOUT DOCUMENT); `GETLASTTEXT^TMGTIUO5` can return that cache when there is no linked TIU document. The user compiled both changed M routines and runtime-confirmed that an edited table remains present after restarting CPRS. The FileMan `E`-flag rule for pointer values (leading backtick) is essential here.
-- Next Topics design direction: client-side push of pending edited tables into the active HTML note, without a server MACRO action/RPC. It will identify each table by its full `-- [name] -----` header and replace every matching table body through its nearest blank-line, list, or paragraph boundary. See [plans.md](plans.md) and the sanitized `killthis.txt` / `killthis_DT.txt` fixtures before implementation. Do not use the previous managed carry-forward-block/macro proposal.
-- The note-push design is under reconsideration. Avoid creating a second Delphi copy of the `TMGTIUP*` topic parser merely to calculate insertion locations. A likely compromise is for the server parser to return a checked edit plan (source hash plus targeted replacement/insertion offsets) while CPRS applies those patches to its original editor source. No implementation decision has been made. If pursued, define offsets against the exact HTML/source string—not rendered DOM text—and test `&nbsp;`, literal NBSP, and supplementary Unicode characters before relying on cross-runtime positions.
+- Topics push/carry-forward remains only partially wired. `fTopics` tracks pending new FMDT topic entries and edited tables, and labels its action **Push to New Note** without an edited note or **Sync to Current Note** with one. The new-note branch currently carries only the newly created entry; do not expand that temporary builder. The next carry-forward step is to reuse/expose PastHPI server data so the generated note contains the curated threaded history. See [plans.md](plans.md).
+- Current-note Topic sync is implemented and runtime-tested for Kevin-style `<LI>` topics. `uHTMLNoteAnalysis` recognizes topic styles and `fNotes.InsertHTMLAtTopicEnds` modifies only the live MSHTML DOM, preserving selection, scroll position, and the document-wide undo history. It finds all `<U>` elements (not only the first), limits matches to HPI, and supports Dee's `P` paragraph beginning `* `.
+- New and edited topic entries are appended as date-aware fragments only when their entry date matches the active note's date. The active note date—not the selected visit—is used while editing a note. Existing edits are deliberately appended like new text rather than replacing historical text. Table changes are not yet synchronized to the active note.
+- The insertion routine replaces a terminal topic `<BR>` with the new fragment, avoiding a leading visual newline, and appends inside the topic container when no terminal `<BR>` exists. New fragments end in `<BR><BR>`. This was runtime-tested for terminal-break list topics; test Dee's paragraph style and a no-terminal-break topic when convenient.
+- `GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument` remains only post-insertion embedded-dialog bookkeeping. The modified-entry bullet is cleared only after a matching-date insertion succeeds.
 - `CPRS-Chart\TMG_Extra\uMumpsData.pas` is a newly added JSON-backed MUMPS-tree wrapper; `TJSONObject` cannot be inherited because Delphi 12 seals it. It uses reserved `$value` keys for nodes having both a value and descendants. Public operations now include default value access (`Data[['a', 'b']]`), `Order`, `DataStatus` (M `$DATA` values), `Kill`, `Node`, and deep `Merge`, e.g. `Destination.Merge(['patient'], Source.Node(['contact']))`. See project-root [examples.txt](examples.txt). This new unit is exempt from the normal `//kt` / `//codex` source-marker convention per the user's instruction. It has not yet been compiled in the Windows IDE after the latest changes.
 - Completed Topics/UI milestones, the historical thread rebuild, report aggregation, note-performance work, and the PNG transparency repair are recorded in [changelog.md](changelog.md), not here.
 
@@ -84,10 +94,11 @@ Important Git workflow:
 ## Next Session Start
 
 1. Read the current source and inspect Git status before editing.
-2. Let the current metadata migration finish. If it must be restarted, re-read live `TMGTIUP1.m`, `TMGTIUT5.m`, and `TMGTOPIC.m`; compile their `.o` files; then use the `FIXALL` resume store to continue and validate groups/tables on representative KST and MDT notes.
-3. If implementing Topics-to-note insertion, follow [plans.md](plans.md): provide an explicit batch push of changed tables, use the header/boundary scanner for both LI and P note formats, update every valid duplicate table occurrence, and leave unmatched tables pending. Do not add a server macro action.
-4. Before expanding `TMumpsDataObject`, build CPRS in the Windows Delphi IDE and save any fresh compiler output to `CPRS-Chart\build_errors.txt`. The new `Node`-based merge syntax and open-array default property have only had source-level review.
-5. Follow the user's current request; consult [changelog.md](changelog.md) for completed history and deferred work rather than treating it as an active plan.
+2. The current-note Topic sync is a good baseline. If revisiting it, first test Dee's `* ` paragraph style and a topic without a terminal `<BR>`. Keep edits as appends only when their entry date matches the active note date; do not restore replacement behavior without explicit direction.
+3. Let the current metadata migration finish. If it must be restarted, re-read live `TMGTIUP1.m`, `TMGTIUT5.m`, and `TMGTOPIC.m`; compile their `.o` files; then use the `FIXALL` resume store to continue and validate groups/tables on representative KST and MDT notes.
+4. If resuming Topics carry-forward work, begin with [plans.md](plans.md)'s PastHPI research/integration for carry-forward notes. Do not extend the temporary single-entry payload. Preserve pending state on failures and do not add a server macro action.
+5. Before expanding `TMumpsDataObject`, build CPRS in the Windows Delphi IDE and save any fresh compiler output to `CPRS-Chart\build_errors.txt`. The new `Node`-based merge syntax and open-array default property have only had source-level review.
+6. Follow the user's current request; consult [changelog.md](changelog.md) for completed history and deferred work rather than treating it as an active plan.
 
 ## HTMLEdit Streamlining Idea
 

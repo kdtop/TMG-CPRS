@@ -450,7 +450,8 @@ uses
   Vcl.Styles,
   uTMGOptions in 'TMG_Extra\uTMGOptions.pas',
   uPngGlyphButton in 'TMG_Extra\uPngGlyphButton.pas',
-  uMumpsData in 'TMG_Extra\uMumpsData.pas';
+  uMumpsData in 'TMG_Extra\uMumpsData.pas',
+  uHTMLNoteAnalysis in 'TMG_Extra\uHTMLNoteAnalysis.pas';
 
 {$R *.TLB}
 

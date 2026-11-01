@@ -2344,7 +2344,11 @@ begin
   end;
   SmallTime := aChart.BottomAxis.Minimum;
   BigTime := aChart.BottomAxis.Maximum;
-  if BigTime < SmallTime then BigTime := SmallTime;   // avoid min>max error
+  //kt //codex original --> if BigTime < SmallTime then BigTime := SmallTime;   // avoid min>max error
+  if BigTime <= SmallTime then begin //kt //codex 11/1/26
+    AdjustTimeframe; //kt //codex 11/1/26
+    exit; //kt //codex 11/1/26
+  end; //kt //codex 11/1/26
   for i := 0 to scrlTop.ControlCount - 1 do
   begin
     ChildControl := scrlTop.Controls[i];

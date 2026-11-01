@@ -2,6 +2,11 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-01 — Lab graph date-axis repair
+
+- Fixed lab graph points appearing in a vertical line in the Delphi 12 build. During graph startup, TeeChart's `ZoomPercent` invoked `ChartOnZoom` with a zero-width date range, which CPRS propagated to the graphs despite having calculated the correct dates.
+- `ChartOnZoom` now restores the calculated timeframe and exits when a zoom reports an invalid or zero-width horizontal range. The user rebuilt CPRS and confirmed that the lab graph works after the change.
+
 ## 2026-10-29 — Topics active-note sync completed baseline
 
 - Completed and runtime-tested the initial Kevin-style active-note Topic sync. The Topics page initializes its first topic selection only on first display, avoiding the topic-loading work when the tab is never opened.

@@ -1,6 +1,6 @@
 # CPRSChart Delphi Build Handoff
 
-Last updated: 2026-10-29
+Last updated: 2026-11-01
 Workspace: `P:\vista\TMGCPRS_v30A_Delphi12`
 Project: `CPRS-Chart\CPRSChart.dproj`
 
@@ -32,10 +32,10 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 - `FIXALL2` is running correctly but is not yet complete. It is safe to resume because `FIXALL` skips patients already recorded in its resume store. Preserve the user's correction for child-only `QUIET(TIUIEN)` entries: test `$DATA(QUIET(TIUIEN))`, then display it with `ZWR QUIET(TIUIEN,*)` rather than reading a possibly undefined scalar value. Recompile changed M routines before resuming because YottaDB executes their `.o` objects.
 - Current Topics table work: `SET TABLE DATA` persists an independently edited table in file 22729 (using `.05` DATE WITHOUT DOCUMENT); `GETLASTTEXT^TMGTIUO5` can return that cache when there is no linked TIU document. The user compiled both changed M routines and runtime-confirmed that an edited table remains present after restarting CPRS. The FileMan `E`-flag rule for pointer values (leading backtick) is essential here.
 - Topics push/carry-forward remains only partially wired. `fTopics` tracks pending new FMDT topic entries and edited tables, and labels its action **Push to New Note** without an edited note or **Sync to Current Note** with one. The new-note branch currently carries only the newly created entry; do not expand that temporary builder. The next carry-forward step is to reuse/expose PastHPI server data so the generated note contains the curated threaded history. See [plans.md](plans.md).
-- Current-note Topic sync is implemented and runtime-tested for Kevin-style `<LI>` topics. `uHTMLNoteAnalysis` recognizes topic styles and `fNotes.InsertHTMLAtTopicEnds` modifies only the live MSHTML DOM, preserving selection, scroll position, and the document-wide undo history. It finds all `<U>` elements (not only the first), limits matches to HPI, and supports Dee's `P` paragraph beginning `* `.
-- New and edited topic entries are appended as date-aware fragments only when their entry date matches the active note's date. The active note date—not the selected visit—is used while editing a note. Existing edits are deliberately appended like new text rather than replacing historical text. Table changes are not yet synchronized to the active note.
-- The insertion routine replaces a terminal topic `<BR>` with the new fragment, avoiding a leading visual newline, and appends inside the topic container when no terminal `<BR>` exists. New fragments end in `<BR><BR>`. This was runtime-tested for terminal-break list topics; test Dee's paragraph style and a no-terminal-break topic when convenient.
-- `GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument` remains only post-insertion embedded-dialog bookkeeping. The modified-entry bullet is cleared only after a matching-date insertion succeeds.
+- Current-note Topic sync is implemented and runtime-tested for Kevin-style `<LI>` topics, including insertion before the blank-line separator ahead of a table. `uHTMLNoteAnalysis` recognizes topic styles and `fNotes.InsertHTMLAtTopicEnds` modifies the live MSHTML DOM and attempts to preserve selection and scroll position. It finds all `<U>` elements, limits matches to HPI, and recognizes Dee's `* ` paragraph style; Dee-style runtime verification remains useful.
+- New topic entries created while editing a note use the active note date rather than the selected visit; modified entries are selected for sync when their entry date matches the active note date. Pending new entries are collected without an additional same-date filter. Existing edits are appended as text, not used to replace historical text. Table changes are not yet synchronized to the active note.
+- The DOM insertion routine searches for the end of the visible topic narrative before its table or terminal breaks, preserving existing separator breaks rather than adding a second pair. It falls back to the earlier topic-end behavior when the text anchor cannot be found. Date-prefix detection examines visible text, including dates split by HTML markup. The user confirmed the result works for Kevin-style notes; verify Dee-style and edge cases when convenient.
+- `GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument` remains post-insertion embedded-dialog bookkeeping. Pending topics have a blue text bullet; successfully pushed entries have a session-only green bullet, unless another change remains pending. Deleting a topic entry removes its own pending/pushed status. The right pane open/closed state is saved, New/Edit focus the editor, successful current-note sync displays confirmation, and Prev/Next navigate visible topics. The user confirmed the temporary **Show only selected** topic sublist works; **Show all** restores the list, and patient changes clear the sublist. `lblFMDT` was removed after that verification and still needs a fresh build/runtime check.
 - `CPRS-Chart\TMG_Extra\uMumpsData.pas` is a newly added JSON-backed MUMPS-tree wrapper; `TJSONObject` cannot be inherited because Delphi 12 seals it. It uses reserved `$value` keys for nodes having both a value and descendants. Public operations now include default value access (`Data[['a', 'b']]`), `Order`, `DataStatus` (M `$DATA` values), `Kill`, `Node`, and deep `Merge`, e.g. `Destination.Merge(['patient'], Source.Node(['contact']))`. See project-root [examples.txt](examples.txt). This new unit is exempt from the normal `//kt` / `//codex` source-marker convention per the user's instruction. It has not yet been compiled in the Windows IDE after the latest changes.
 - Completed Topics/UI milestones, the historical thread rebuild, report aggregation, note-performance work, and the PNG transparency repair are recorded in [changelog.md](changelog.md), not here.
 
@@ -68,7 +68,7 @@ Status updates and historical milestones belong in [changelog.md](changelog.md).
 
 This is a copied Delphi 12 porting tree. The production/source tree exists elsewhere. Its GitHub remote is `git@github.com:kdtop/TMG-CPRS.git`; this port uses the `delphi12` branch, which tracks `origin/delphi12`. The older compiler version remains on GitHub `master`; do not move `master` as part of Delphi 12 checkpoint work.
 
-Latest source checkpoint: `1b4a643` (Reports browser zoom and current Topics work), published to `origin/delphi12`. Check live Git status and log rather than assuming the tree is clean. Earlier checkpoints and dated status are in [changelog.md](changelog.md).
+Check live Git status and log for the latest checkpoint rather than assuming the tree is clean. Earlier checkpoints and dated status are in [changelog.md](changelog.md).
 
 Important Git workflow:
 
@@ -94,11 +94,11 @@ Important Git workflow:
 ## Next Session Start
 
 1. Read the current source and inspect Git status before editing.
-2. The current-note Topic sync is a good baseline. If revisiting it, first test Dee's `* ` paragraph style and a topic without a terminal `<BR>`. Keep edits as appends only when their entry date matches the active note date; do not restore replacement behavior without explicit direction.
+2. The current-note Topic sync is a good baseline. If revisiting it, test Dee's `* ` paragraph style, a topic without a terminal `<BR>`, and date/separator handling. Existing edits are appended rather than replaced; inspect the separate handling of new and edited entry dates before changing it.
 3. Let the current metadata migration finish. If it must be restarted, re-read live `TMGTIUP1.m`, `TMGTIUT5.m`, and `TMGTOPIC.m`; compile their `.o` files; then use the `FIXALL` resume store to continue and validate groups/tables on representative KST and MDT notes.
 4. If resuming Topics carry-forward work, begin with [plans.md](plans.md)'s PastHPI research/integration for carry-forward notes. Do not extend the temporary single-entry payload. Preserve pending state on failures and do not add a server macro action.
 5. Before expanding `TMumpsDataObject`, build CPRS in the Windows Delphi IDE and save any fresh compiler output to `CPRS-Chart\build_errors.txt`. The new `Node`-based merge syntax and open-array default property have only had source-level review.
-6. Follow the user's current request; consult [changelog.md](changelog.md) for completed history and deferred work rather than treating it as an active plan.
+6. Reversible topic linking is deferred by the user; the motivation, design considerations, and rebuild concerns are in [plans.md](plans.md). Follow the user's current request and consult [changelog.md](changelog.md) for completed history.
 
 ## HTMLEdit Streamlining Idea
 

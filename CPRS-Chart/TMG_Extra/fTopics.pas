@@ -108,7 +108,6 @@ type
     edtFilter: TLabeledEdit;
     btnClearFilter: TBitBtn;
     btnCancel: TBitBtn;
-    lblFMDT: TLabel;
     btnNewFMDTEntry: TBitBtn;
     btnNewTopic: TBitBtn;
     btnPushSync: TBitBtn;
@@ -118,6 +117,8 @@ type
     pnlCenterMiddleBanner: TPanel;
     lblLastCuratedTopic: TLabel;
     btnOpenCloseCurated: TBitBtn;
+    btnPrev: TBitBtn;
+    btnNext: TBitBtn;
     procedure btnAddAssocTableClick(Sender: TObject);
     procedure btnPushSyncClick(Sender: TObject);
     procedure btnTopicsLeftHandleClick(Sender: TObject);
@@ -148,9 +149,11 @@ type
     procedure btnTopicsLeftPinClick(Sender: TObject);
     procedure pnlTopicsElsewhereMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure lvTopicsClick(Sender: TObject);
+    procedure TopicNavigationClick(Sender: TObject);
     procedure lvTopicsColumnClick(Sender: TObject; Column: TListColumn);
     procedure lvTopicsCompare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
     procedure lvTopicsCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure lvTopicsAdvancedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
     procedure lvTopicsCustomDrawSubItem(Sender: TCustomListView; Item: TListItem; SubItem: Integer; State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure cbShowHiddenClick(Sender: TObject);
     procedure HideTopicsMenuItemClick(Sender: TObject);
@@ -188,6 +191,9 @@ type
     FTopicsRightAnimationStep: Integer;
     FTopicsLoaded: Boolean;
     FTopicListModel: TStringList;
+    FTopicSubsetIDs: TStringList;
+    FTopicSubsetActive: Boolean;
+    btnShowAllTopics: TButton;
     FTopicChanges: TTopicChanges;
     FCurrentTopicEntries: TStringList;
     FTopicDataTables: TObjectList<TTopicDataTable>;
@@ -195,6 +201,7 @@ type
     FPendingTopicEntries: TObjectDictionary<string, TTopicEntryPushData>;
     FModifiedTopicEntries: TObjectDictionary<string, TTopicEntryPushData>;
     FPendingTopicNoteChanges: TDictionary<string, TPendingTopicNoteChanges>;
+    FPushedTopicEntries: TDictionary<string, string>;
     FNextPendingTopicEntrySequence: Integer;
     FPushSyncMode: TPushSyncMode;
     FCurrentTopicName: string;
@@ -204,6 +211,7 @@ type
     FTopicSortKeys: TList<TTopicSortKey>;
     FTopicsListViewWindowProc: TWndMethod;
     FTopicListPopupMenu: TPopupMenu;
+    FShowOnlySelectedMenuItem: TMenuItem;
     FHideTopicsMenuItem: TMenuItem;
     FMergeTopicsMenuItem: TMenuItem;
     FRenameTopicMenuItem: TMenuItem;
@@ -261,7 +269,11 @@ type
     procedure MarkTopicForNoteSync(const PropertyID: string; Change: TPendingTopicNoteChange);
     procedure ClearTopicNoteSyncChanges(Changes: TPendingTopicNoteChanges);
     procedure UpdateTopicPendingNoteChanges(const PropertyID: string);
+    function TopicListCaption(TopicData: TTopicListItemData): string;
+    function HasPushedTopicEntries(const PropertyID: string): Boolean;
     procedure RebuildTopicList;
+    procedure ShowOnlySelectedTopics(Sender: TObject);
+    procedure ShowAllTopics(Sender: TObject);
     procedure RestoreTopicListLayout;
     procedure RestartTopicSaveTimer;
     procedure SaveTopicListLayout;
@@ -333,6 +345,7 @@ const
   TOPICS_LEFT_CLOSED_SIZE_KEY = 'frmTopics.LeftPaneClosedSize';
   TOPICS_RIGHT_OPEN_SIZE_KEY = 'frmTopics.RightPaneOpenSize';
   TOPICS_RIGHT_CLOSED_SIZE_KEY = 'frmTopics.RightPaneClosedSize';
+  TOPICS_RIGHT_OPEN_KEY = 'frmTopics.RightPaneOpen';
   TOPICS_CENTER_TOP_HEIGHT_KEY = 'frmTopics.CenterTopHeight';
   TOPICS_CENTER_MIDDLE_OPEN_KEY = 'frmTopics.CenterMiddleOpen';
   TOPICS_CENTER_MIDDLE_MINIMUM_HEIGHT = 100;
@@ -800,6 +813,9 @@ begin
         DateAnalysis.Free;
       end;
       EntryDateText := FormatDateTime('m/d/yy', FMDateTimeToDateTime(EntryDate));
+      if Patch.HTML = '' then begin
+        Patch.HTML := '&nbsp;';
+      end;
       if RequiresDate and (Patch.InsertedDates.IndexOf(EntryDateText) < 0) then begin
         Patch.HTML := Patch.HTML + EntryDateText + ': ';
         Patch.InsertedDates.Add(EntryDateText);
@@ -815,6 +831,10 @@ begin
       end;
       if not frmNotes.InsertHTMLAtTopicEnds(TopicNames, HTMLFragments, ErrorText) then begin
         Exit;
+      end;
+      for Index := 0 to EntryList.Count - 1 do begin
+        FPushedTopicEntries.AddOrSetValue(TopicEntryPushKey(EntryList[Index].PropertyID,
+          EntryList[Index].EntryFMDate), EntryList[Index].PropertyID);
       end;
       ResetPushedTopicEntries;
       ClearPushedModifiedTopicEntries(NoteDate);
@@ -1037,6 +1057,7 @@ end;
 procedure TfrmTopics.HandlePushSync;
 var
   ErrorText: string;
+  Pair: TPair<string, TTopicEntryPushData>;
   TopicHTML: string;
 begin
   UpdatePushSyncButton;
@@ -1059,6 +1080,9 @@ begin
         Exit;
       end;
       if frmSingleNote.InsertCarryForwardTopics(TopicHTML) then begin
+        for Pair in FPendingTopicEntries do begin
+          FPushedTopicEntries.AddOrSetValue(Pair.Key, Pair.Value.PropertyID);
+        end;
         ResetPushedTopicEntries;
       end else begin
         MessageDlg('The Carry Forward area could not be created in the new note.',
@@ -1069,8 +1093,11 @@ begin
       if not SyncPendingTopicEntriesToCurrentNote(ErrorText) then begin
         MessageDlg(ErrorText, mtError, [mbOK], 0);
       end else if (FModifiedTopicEntries.Count > 0) or (FPendingTopicTables.Count > 0) then begin
-        MessageDlg('New topic entries were inserted into the current note.' + sLineBreak + sLineBreak +
-          'Existing-entry and table changes remain pending for a later sync.',
+        MessageDlg('Topic text was inserted into the current note.' + sLineBreak + sLineBreak +
+          'Other topic entry or table changes remain pending for a later sync.',
+          mtInformation, [mbOK], 0);
+      end else begin
+        MessageDlg('Topic text was inserted into the current note.',
           mtInformation, [mbOK], 0);
       end;
     end;
@@ -1102,6 +1129,16 @@ begin
   btnTopicsLeftPin.OnClick := btnTopicsLeftPinClick;
   FTopicListModel := TStringList.Create;
   FTopicListModel.OwnsObjects := True;
+  FTopicSubsetIDs := TStringList.Create;
+  FTopicSubsetIDs.Sorted := True;
+  FTopicSubsetIDs.Duplicates := dupIgnore;
+  FTopicSubsetActive := False;
+  btnShowAllTopics := TButton.Create(Self);
+  btnShowAllTopics.Parent := pnlLeftBot;
+  btnShowAllTopics.SetBounds(160, 40, 75, 23);
+  btnShowAllTopics.Caption := 'Show all';
+  btnShowAllTopics.Visible := False;
+  btnShowAllTopics.OnClick := ShowAllTopics;
   FTopicChanges := TTopicChanges.Create([doOwnsValues]);
   FCurrentTopicEntries := TStringList.Create;
   FTopicDataTables := TObjectList<TTopicDataTable>.Create(True);
@@ -1109,12 +1146,17 @@ begin
   FPendingTopicEntries := TObjectDictionary<string, TTopicEntryPushData>.Create([doOwnsValues]);
   FModifiedTopicEntries := TObjectDictionary<string, TTopicEntryPushData>.Create([doOwnsValues]);
   FPendingTopicNoteChanges := TDictionary<string, TPendingTopicNoteChanges>.Create;
+  FPushedTopicEntries := TDictionary<string, string>.Create;
   FNextPendingTopicEntrySequence := 0;
   FPushSyncMode := psmNewNote;
   FTopicSortKeys := TList<TTopicSortKey>.Create;
   InitializeTopicListColumns;
   FTopicListPopupMenu := TPopupMenu.Create(Self);
   FTopicListPopupMenu.OnPopup := TopicListPopupMenuPopup;
+  FShowOnlySelectedMenuItem := TMenuItem.Create(FTopicListPopupMenu);
+  FShowOnlySelectedMenuItem.Caption := 'Show only selected';
+  FShowOnlySelectedMenuItem.OnClick := ShowOnlySelectedTopics;
+  FTopicListPopupMenu.Items.Add(FShowOnlySelectedMenuItem);
   FRenameTopicMenuItem := TMenuItem.Create(FTopicListPopupMenu);
   FRenameTopicMenuItem.Caption := 'Rename topic';
   FRenameTopicMenuItem.OnClick := RenameTopicMenuItemClick;
@@ -1152,8 +1194,12 @@ begin
   SavedTopicsRightClosedWidth := FTopicsRightClosedWidth;
   NormalizeTopicsRightPaneWidths;
   pnlTopicsRight.Constraints.MinWidth := FTopicsRightClosedWidth;
-  FTopicsRightOpen := True;
-  pnlTopicsRight.Width := FTopicsRightOpenWidth;
+  FTopicsRightOpen := uTMGOptions.ReadBool(TOPICS_RIGHT_OPEN_KEY, True);
+  if FTopicsRightOpen then begin
+    pnlTopicsRight.Width := FTopicsRightOpenWidth;
+  end else begin
+    pnlTopicsRight.Width := FTopicsRightClosedWidth;
+  end;
   FCuratedPaneOpen := True;
   FCuratedPaneButtonHovered := False;
   UpdateCenterPanelConstraints;
@@ -1179,11 +1225,14 @@ begin
   ConfigureTopicsElsewhereMouseDown(pnlTopicsCenter);
   ConfigureTopicsElsewhereMouseDown(pnlTopicsRight);
   lvTopics.OnClick := lvTopicsClick;
+  btnPrev.OnClick := TopicNavigationClick;
+  btnNext.OnClick := TopicNavigationClick;
   FTopicsListViewWindowProc := lvTopics.WindowProc;
   lvTopics.WindowProc := lvTopicsWindowProc;
   lvTopics.OnColumnClick := lvTopicsColumnClick;
   lvTopics.OnCompare := lvTopicsCompare;
   lvTopics.OnCustomDrawItem := lvTopicsCustomDrawItem;
+  lvTopics.OnAdvancedCustomDrawItem := lvTopicsAdvancedCustomDrawItem;
   lvTopics.OnCustomDrawSubItem := lvTopicsCustomDrawSubItem;
   UpdateTopicListColors;
   RestoreTopicListLayout;
@@ -1252,6 +1301,7 @@ begin
     timSaveTopicChanges.Enabled := False;
   end;
   FTopicListModel.Free;
+  FTopicSubsetIDs.Free;
   FTopicChanges.Free;
   FCurrentTopicEntries.Free;
   FTopicDataTables.Free;
@@ -1259,6 +1309,7 @@ begin
   FPendingTopicEntries.Free;
   FModifiedTopicEntries.Free;
   FPendingTopicNoteChanges.Free;
+  FPushedTopicEntries.Free;
   FTopicSortKeys.Free;
   inherited;
 end;
@@ -1289,6 +1340,9 @@ begin
   btnClearFilter.Enabled := False;
   ClearTopicList;
   FTopicListModel.Clear;
+  FTopicSubsetIDs.Clear;
+  FTopicSubsetActive := False;
+  btnShowAllTopics.Visible := False;
   FTopicChanges.Clear;
   FCurrentTopicEntries.Clear;
   FTopicDataTables.Clear;
@@ -1296,6 +1350,7 @@ begin
   FPendingTopicEntries.Clear;
   FModifiedTopicEntries.Clear;
   FPendingTopicNoteChanges.Clear;
+  FPushedTopicEntries.Clear;
   FNextPendingTopicEntrySequence := 0;
   FCurrentTopicName := '';
   FCurrentTopicPropertyID := '';
@@ -1320,7 +1375,6 @@ var
 begin
   FEditingTopicEntryFMDate := '';
   FNewTopicEntry := False;
-  lblFMDT.Caption := '';
   btnCancel.Enabled := False;
   btnSave.Enabled := False;
   btnNewFMDTEntry.Enabled := FCurrentTopicPropertyID <> '';
@@ -1356,6 +1410,9 @@ begin
       ClearTopicList;
       for Index := 0 to FTopicListModel.Count - 1 do begin
         TopicData := TTopicListItemData(FTopicListModel.Objects[Index]);
+        if FTopicSubsetActive and (FTopicSubsetIDs.IndexOf(TopicData.PropertyID) < 0) then begin
+          Continue;
+        end;
         TopicData.Hidden := NormalizeTopicHidden(TopicData.Hidden);
         if (not cbShowHidden.Checked) and (TopicData.Hidden = 'YES') then begin
           Continue;
@@ -1365,11 +1422,7 @@ begin
         end;
         ListItem := lvTopics.Items.Add;
         ListItem.Data := TopicData;
-        if TopicData.PendingNoteChanges <> [] then begin
-          ListItem.Caption := TOPIC_PENDING_SYNC_GLYPH + ' ' + TopicData.TopicName;
-        end else begin
-          ListItem.Caption := TopicData.TopicName;
-        end;
+        ListItem.Caption := TopicListCaption(TopicData);
         if TopicData.LastUsedFMDate > 0 then begin
           ListItem.SubItems.Add(FormatFMDateTime('mm/dd/yy', TopicData.LastUsedFMDate))
         end else begin
@@ -1405,6 +1458,59 @@ begin
   finally
     SelectedPropertyIDs.Free;
   end;
+end;
+
+procedure TfrmTopics.ShowOnlySelectedTopics(Sender: TObject);
+var
+  Index: Integer;
+  SelectedIDs: TStringList;
+  TopicData: TTopicListItemData;
+begin
+  SelectedIDs := TStringList.Create;
+  try
+    SelectedIDs.Sorted := True;
+    SelectedIDs.Duplicates := dupIgnore;
+    for Index := 0 to lvTopics.Items.Count - 1 do begin
+      if lvTopics.Items[Index].Selected and (lvTopics.Items[Index].Data <> nil) then begin
+        TopicData := TTopicListItemData(lvTopics.Items[Index].Data);
+        SelectedIDs.Add(TopicData.PropertyID);
+      end;
+    end;
+    if SelectedIDs.Count = 0 then begin
+      Exit;
+    end;
+    if (FCurrentTopicPropertyID <> '') and
+       (SelectedIDs.IndexOf(FCurrentTopicPropertyID) < 0) and
+       (FEditingTopicEntryFMDate <> '') then begin
+      if MessageDlg('Discard the current topic entry changes?', mtConfirmation,
+        [mbYes, mbNo], 0) <> mrYes then begin
+        Exit;
+      end;
+      ClearTopicEntryEditor;
+    end;
+    FTopicSubsetIDs.Assign(SelectedIDs);
+    FTopicSubsetActive := True;
+    btnShowAllTopics.Visible := True;
+    RebuildTopicList;
+    if (FCurrentTopicPropertyID = '') and (lvTopics.Items.Count > 0) then begin
+      for Index := 0 to lvTopics.Items.Count - 1 do begin
+        lvTopics.Items[Index].Selected := False;
+      end;
+      lvTopics.Items[0].Selected := True;
+      lvTopics.Items[0].Focused := True;
+      lvTopicsClick(lvTopics);
+    end;
+  finally
+    SelectedIDs.Free;
+  end;
+end;
+
+procedure TfrmTopics.ShowAllTopics(Sender: TObject);
+begin
+  FTopicSubsetActive := False;
+  FTopicSubsetIDs.Clear;
+  btnShowAllTopics.Visible := False;
+  RebuildTopicList;
 end;
 
 procedure TfrmTopics.RestoreTopicListLayout;
@@ -1516,6 +1622,27 @@ begin
   UpdatePushSyncButton;
   if InitPatient then begin
     RefreshTopicList;
+  end;
+end;
+
+function TfrmTopics.HasPushedTopicEntries(const PropertyID: string): Boolean;
+var
+  Pair: TPair<string, string>;
+begin
+  Result := False;
+  for Pair in FPushedTopicEntries do begin
+    if Pair.Value = PropertyID then begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+function TfrmTopics.TopicListCaption(TopicData: TTopicListItemData): string;
+begin
+  Result := TopicData.TopicName;
+  if (TopicData.PendingNoteChanges <> []) or HasPushedTopicEntries(TopicData.PropertyID) then begin
+    Result := TOPIC_PENDING_SYNC_GLYPH + ' ' + Result;
   end;
 end;
 
@@ -1925,6 +2052,7 @@ begin
       end;
     end;
   end;
+  FShowOnlySelectedMenuItem.Enabled := SelectedCount > 0;
   if SelectedCount = 1 then begin
     FHideTopicsMenuItem.Caption := 'Hide topic'
   end else begin
@@ -2005,11 +2133,7 @@ begin
         FTopicListModel.AddObject(TopicData.TopicName, TopicData);
         ListItem := lvTopics.Items.Add;
         ListItem.Data := TopicData;
-        if TopicData.PendingNoteChanges <> [] then begin
-          ListItem.Caption := TOPIC_PENDING_SYNC_GLYPH + ' ' + TopicData.TopicName;
-        end else begin
-          ListItem.Caption := TopicData.TopicName;
-        end;
+        ListItem.Caption := TopicListCaption(TopicData);
         if TopicData.LastUsedFMDate > 0 then begin
           ListItem.SubItems.Add(FormatFMDateTime('mm/dd/yy', TopicData.LastUsedFMDate))
         end else begin
@@ -2118,6 +2242,49 @@ begin
   end;
   Sender.Canvas.Brush.Color := Sender.Canvas.Brush.Color + 1;
   Sender.Canvas.Brush.Color := Sender.Canvas.Brush.Color - 1;
+end;
+
+procedure TfrmTopics.lvTopicsAdvancedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
+var
+  TopicData: TTopicListItemData;
+  BulletRect: TRect;
+  SavedDC: Integer;
+  BulletText: string;
+begin
+  if (Stage <> cdPostPaint) or (Item.Data = nil) then begin
+    Exit;
+  end;
+  TopicData := TTopicListItemData(Item.Data);
+  if (TopicData.PendingNoteChanges = []) and not HasPushedTopicEntries(TopicData.PropertyID) then begin
+    Exit;
+  end;
+  BulletRect := Item.DisplayRect(drLabel);
+  if (BulletRect.Right <= BulletRect.Left) or (BulletRect.Bottom <= BulletRect.Top) then begin
+    Exit;
+  end;
+  SavedDC := SaveDC(Sender.Canvas.Handle);
+  try
+    Sender.Canvas.Font.Assign(lvTopics.Font);
+    if cdsSelected in State then begin
+      Sender.Canvas.Brush.Color := RGB(214, 232, 246);
+    end else begin
+      Sender.Canvas.Brush.Color := TopicListCellBackgroundColor(0);
+    end;
+    if TopicData.PendingNoteChanges <> [] then begin
+      Sender.Canvas.Font.Color := RGB(35, 100, 190);
+    end else begin
+      Sender.Canvas.Font.Color := RGB(30, 140, 65);
+    end;
+    Inc(BulletRect.Left, 2);
+    BulletRect.Right := BulletRect.Left + Sender.Canvas.TextWidth(TOPIC_PENDING_SYNC_GLYPH) + 1;
+    Sender.Canvas.FillRect(BulletRect);
+    SetBkMode(Sender.Canvas.Handle, TRANSPARENT);
+    BulletText := TOPIC_PENDING_SYNC_GLYPH;
+    DrawTextW(Sender.Canvas.Handle, PWideChar(BulletText), Length(BulletText), BulletRect,
+      DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+  finally
+    RestoreDC(Sender.Canvas.Handle, SavedDC);
+  end;
 end;
 
 procedure TfrmTopics.lvTopicsCustomDrawSubItem(Sender: TCustomListView; Item: TListItem; SubItem: Integer; State: TCustomDrawState; var DefaultDraw: Boolean);
@@ -2461,7 +2628,6 @@ end;
 
 procedure TfrmTopics.EditCurrentTopicEntry(const EntryFMDate: string);
 var
-  EntryDate: TFMDateTime;
   EntryStartIndex: Integer;
   EntryText: TStringList;
   Index: Integer;
@@ -2496,18 +2662,17 @@ begin
       WBLoadHTML(wbEnterNew, Text2HTML(EntryText));
     end;
     SetTopicEditorEditable(True);
-    EntryDate := MakeFMDateTime(EntryFMDate);
-    if EntryDate > 0 then begin
-      lblFMDT.Caption := FormatDateTime('mmmm d, yyyy h:nn am/pm', FMDateTimeToDateTime(EntryDate));
-    end else begin
-      lblFMDT.Caption := EntryFMDate;
-    end;
     FEditingTopicEntryFMDate := EntryFMDate;
     FNewTopicEntry := False;
     btnCancel.Enabled := True;
     btnSave.Enabled := True;
     btnNewFMDTEntry.Enabled := False;
     btnNewTopic.Enabled := False;
+    wbEnterNew.SetFocus;
+    if Assigned(wbEnterNew.Document) and
+       Assigned((wbEnterNew.Document as IHTMLDocument2).body) then begin
+      ((wbEnterNew.Document as IHTMLDocument2).body as IHTMLElement2).focus;
+    end;
   finally
     EntryText.Free;
   end;
@@ -2562,12 +2727,16 @@ begin
   WBLoadHTML(wbEnterNew, '<html><body></body></html>');
   FEditingTopicEntryFMDate := FloatToStr(EntryDate);
   FNewTopicEntry := True;
-  lblFMDT.Caption := FormatDateTime('mmmm d, yyyy h:nn am/pm', FMDateTimeToDateTime(EntryDate));
   SetTopicEditorEditable(True);
   btnCancel.Enabled := True;
   btnSave.Enabled := True;
   btnNewFMDTEntry.Enabled := False;
   btnNewTopic.Enabled := False;
+  wbEnterNew.SetFocus;
+  if Assigned(wbEnterNew.Document) and
+     Assigned((wbEnterNew.Document as IHTMLDocument2).body) then begin
+    ((wbEnterNew.Document as IHTMLDocument2).body as IHTMLElement2).focus;
+  end;
 end;
 
 procedure TfrmTopics.btnNewTopicClick(Sender: TObject);
@@ -2617,6 +2786,9 @@ begin
   if edtFilter.Text <> '' then begin
     edtFilter.Text := '';
     timTopicFilter.Enabled := False;
+  end;
+  if FTopicSubsetActive then begin
+    FTopicSubsetIDs.Add(NewTopicPropertyID);
   end;
   RefreshTopicList;
   ListItem := nil;
@@ -2698,7 +2870,9 @@ var
   Index: Integer;
   Status: string;
   TopicChange: TTopicChange;
-  WasPendingNewEntry: Boolean;
+  Pair: TPair<string, TTopicEntryPushData>;
+  PendingChanges: TPendingTopicNoteChanges;
+  HasRemainingModifiedEntry: Boolean;
 begin
   if (FCurrentTopicPropertyID = '') or (EntryFMDate = '') then begin
     Exit;
@@ -2721,7 +2895,6 @@ begin
     MessageDlg('The topic entry has an invalid FileMan date and cannot be deleted.', mtError, [mbOK], 0);
     Exit;
   end;
-  WasPendingNewEntry := FPendingTopicEntries.ContainsKey(TopicEntryPushKey(FCurrentTopicPropertyID, EntryFMDate));
   Status := Delete1TopicEntry(FCurrentTopicPropertyID, EntryDate);
   if Piece(Status, '^', 1) <> '1' then begin
     MessageDlg('The topic entry could not be deleted.' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
@@ -2729,10 +2902,26 @@ begin
   end;
   RemoveAddedTopicEntry(FCurrentTopicPropertyID, EntryFMDate);
   FModifiedTopicEntries.Remove(TopicEntryPushKey(FCurrentTopicPropertyID, EntryFMDate));
-  if not WasPendingNewEntry then begin
-    MarkTopicForNoteSync(FCurrentTopicPropertyID, ptncExistingEntry);
-    UpdatePushSyncButton;
+  FPushedTopicEntries.Remove(TopicEntryPushKey(FCurrentTopicPropertyID, EntryFMDate));
+  HasRemainingModifiedEntry := False;
+  for Pair in FModifiedTopicEntries do begin
+    if Pair.Value.PropertyID = FCurrentTopicPropertyID then begin
+      HasRemainingModifiedEntry := True;
+      Break;
+    end;
   end;
+  if not HasRemainingModifiedEntry and
+     FPendingTopicNoteChanges.TryGetValue(FCurrentTopicPropertyID, PendingChanges) then begin
+    Exclude(PendingChanges, ptncExistingEntry);
+    if PendingChanges = [] then begin
+      FPendingTopicNoteChanges.Remove(FCurrentTopicPropertyID);
+    end else begin
+      FPendingTopicNoteChanges[FCurrentTopicPropertyID] := PendingChanges;
+    end;
+    UpdateTopicPendingNoteChanges(FCurrentTopicPropertyID);
+  end;
+  RebuildTopicList;
+  UpdatePushSyncButton;
   if FTopicChanges.TryGetValue(FCurrentTopicPropertyID, TopicChange) then begin
     TopicChange.EntryChanges.Remove(EntryFMDate);
     if (not TopicChange.HiddenChanged) and (not TopicChange.UserDataChanged) and (TopicChange.EntryChanges.Count = 0) then begin
@@ -3466,6 +3655,56 @@ begin
   end;
 end;
 
+procedure TfrmTopics.TopicNavigationClick(Sender: TObject);
+var
+  CurrentIndex: Integer;
+  Index: Integer;
+  TargetIndex: Integer;
+  TargetItem: TListItem;
+begin
+  if (Patient.DFN = '') or (lvTopics.Items.Count = 0) then begin
+    Exit;
+  end;
+  CurrentIndex := -1;
+  for Index := 0 to lvTopics.Items.Count - 1 do begin
+    if (lvTopics.Items[Index].Data <> nil) and
+       (TTopicListItemData(lvTopics.Items[Index].Data).PropertyID = FCurrentTopicPropertyID) then begin
+      CurrentIndex := Index;
+      Break;
+    end;
+  end;
+  if Sender = btnPrev then begin
+    if CurrentIndex < 0 then begin
+      TargetIndex := lvTopics.Items.Count - 1;
+    end else begin
+      TargetIndex := CurrentIndex - 1;
+    end;
+  end else if Sender = btnNext then begin
+    if CurrentIndex < 0 then begin
+      TargetIndex := 0;
+    end else begin
+      TargetIndex := CurrentIndex + 1;
+    end;
+  end else begin
+    Exit;
+  end;
+  if (TargetIndex < 0) or (TargetIndex >= lvTopics.Items.Count) then begin
+    Exit;
+  end;
+  if (FEditingTopicEntryFMDate <> '') and
+     (MessageDlg('Discard the current topic entry changes?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then begin
+    Exit;
+  end;
+  TargetItem := lvTopics.Items[TargetIndex];
+  for Index := 0 to lvTopics.Items.Count - 1 do begin
+    lvTopics.Items[Index].Selected := False;
+  end;
+  TargetItem.Selected := True;
+  TargetItem.Focused := True;
+  TargetItem.MakeVisible(False);
+  lvTopicsClick(lvTopics);
+end;
+
 procedure TfrmTopics.lvTopicsClick(Sender: TObject);
 var
   ErrorText: string;
@@ -3748,6 +3987,9 @@ begin
   NormalizeTopicsRightPaneWidths;
   pnlTopicsRight.Constraints.MinWidth := FTopicsRightClosedWidth;
   FTopicsRightOpen := Value;
+  if FTopicsLoaded then begin
+    uTMGOptions.WriteBool(TOPICS_RIGHT_OPEN_KEY, FTopicsRightOpen);
+  end;
   UpdateTopicsRightColors;
   FTopicsRightAnimationStartWidth := pnlTopicsRight.Width;
   if FTopicsRightOpen then begin

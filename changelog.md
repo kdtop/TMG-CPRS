@@ -2,6 +2,13 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-01 — Topics navigation and current-note refinements
+
+- Current-note sync now finds the end of the topic narrative before existing breaks and following tables, and conditionally adds a date label. The user confirmed insertion works in Kevin-style notes.
+- Added editor focus for New and Edit, a success confirmation, saved right-pane state, Prev/Next navigation, and session-only blue/green pending/pushed topic indicators. Deleting an entry clears that entry's pending and pushed status.
+- Added a temporary **Show only selected** topic sublist and **Show all** button. The user confirmed the sublist works. Removed the overlapping `lblFMDT` afterward; that last change still needs a fresh build/runtime check.
+- Documented the deferred reversible topic-linking proposal in `plans.md`. Original topic records and names should be preserved, and the relationship must survive supported rebuilds.
+
 ## 2026-11-01 — Lab graph date-axis repair
 
 - Fixed lab graph points appearing in a vertical line in the Delphi 12 build. During graph startup, TeeChart's `ZoomPercent` invoked `ChartOnZoom` with a zero-width date range, which CPRS propagated to the graphs despite having calculated the correct dates.

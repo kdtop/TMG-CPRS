@@ -496,6 +496,84 @@ begin
   end;
 end;
 
+function FindVisibleAsOfDate(const AHTML: string; const AStartOffset,
+  AEndOffset: Integer; const AsOfDate: TDateTime): Integer;
+//kt //codex added entire function 11/1/26
+var
+  VisibleText: string;
+  SourceOffsets: array of Integer;
+  Position: Integer;
+  TagEnd: Integer;
+  EntityEnd: Integer;
+  Candidate: Integer;
+  AfterDate: Integer;
+  VariantIndex: Integer;
+  VisibleLength: Integer;
+  Variants: array[0..7] of string;
+  Token: string;
+  Value: Char;
+begin
+  Result := -1;
+  SetLength(VisibleText, Length(AHTML));
+  SetLength(SourceOffsets, Length(AHTML));
+  VisibleLength := 0;
+  Position := AStartOffset + 1;
+  while (Position <= AEndOffset) and (Position <= Length(AHTML)) do begin
+    if AHTML[Position] = '<' then begin
+      TagEnd := PosEx('>', AHTML, Position + 1);
+      if (TagEnd = 0) or (TagEnd > AEndOffset) then begin
+        Break;
+      end;
+      Position := TagEnd + 1;
+      Continue;
+    end;
+    Value := AHTML[Position];
+    if Value = '&' then begin
+      EntityEnd := PosEx(';', AHTML, Position + 1);
+      if (EntityEnd > 0) and (EntityEnd <= AEndOffset) and
+         (EntityEnd - Position <= 10) then begin
+        Token := Copy(AHTML, Position, EntityEnd - Position + 1);
+        if SameText(Token, '&nbsp;') or SameText(Token, '&#160;') or
+           SameText(Token, '&#xA0;') then begin
+          Value := ' ';
+        end else begin
+          Value := #1;
+        end;
+        Inc(VisibleLength);
+        SourceOffsets[VisibleLength - 1] := Position - 1;
+        VisibleText[VisibleLength] := Value;
+        Position := EntityEnd + 1;
+        Continue;
+      end;
+    end;
+    Inc(VisibleLength);
+    SourceOffsets[VisibleLength - 1] := Position - 1;
+    VisibleText[VisibleLength] := Value;
+    Inc(Position);
+  end;
+  SetLength(VisibleText, VisibleLength);
+  Variants[0] := FormatDateTime('m/d/yy', AsOfDate);
+  Variants[1] := FormatDateTime('mm/d/yy', AsOfDate);
+  Variants[2] := FormatDateTime('m/dd/yy', AsOfDate);
+  Variants[3] := FormatDateTime('mm/dd/yy', AsOfDate);
+  Variants[4] := FormatDateTime('m/d/yyyy', AsOfDate);
+  Variants[5] := FormatDateTime('mm/d/yyyy', AsOfDate);
+  Variants[6] := FormatDateTime('m/dd/yyyy', AsOfDate);
+  Variants[7] := FormatDateTime('mm/dd/yyyy', AsOfDate);
+  for VariantIndex := Low(Variants) to High(Variants) do begin
+    Candidate := PosEx(Variants[VariantIndex], VisibleText, 1);
+    while Candidate > 0 do begin
+      AfterDate := Candidate + Length(Variants[VariantIndex]);
+      if ((Candidate = 1) or not CharInSet(VisibleText[Candidate - 1], ['0'..'9', '/'])) and
+         (AfterDate <= Length(VisibleText)) and (VisibleText[AfterDate] = ':') then begin
+        Result := SourceOffsets[Candidate - 1];
+        Exit;
+      end;
+      Candidate := PosEx(Variants[VariantIndex], VisibleText, Candidate + 1);
+    end;
+  end;
+end;
+
 procedure CompleteTopicRanges(const AHTML, AUpperHTML: string; const AsOfDate: TDateTime; const ATables: THTMLTableRanges; var ATopics: THTMLTopicRanges);
 var
   TopicIndex: Integer;
@@ -513,7 +591,8 @@ begin
     end;
     ATopics[TopicIndex].InsertionOffset :=
       ATopics[TopicIndex].TextEndOffset;
-    ATopics[TopicIndex].AsOfDateOffset := FindAsOfDate(AHTML, AUpperHTML,
+    //kt //codex original --> ATopics[TopicIndex].AsOfDateOffset := FindAsOfDate(AHTML, AUpperHTML,
+    ATopics[TopicIndex].AsOfDateOffset := FindVisibleAsOfDate(AHTML, //kt //codex 11/1/26
       ATopics[TopicIndex].NarrativeStartOffset,
       ATopics[TopicIndex].TextEndOffset, AsOfDate);
   end;

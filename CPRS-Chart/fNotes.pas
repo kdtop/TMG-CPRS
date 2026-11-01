@@ -2092,12 +2092,15 @@ var
   InsertionRange: IHTMLTxtRange;
   InsertionRanges: TInterfaceList;
   InsertionContainers: TInterfaceList;
+  PreserveSeparators: TStringList; //kt //codex 11/1/26
+  InsertionHTML: string; //kt //codex 11/1/26
   RangeIndex: Integer;
   SavedRange: IHTMLTxtRange;
   SavedScroll: Integer;
   TopicElement: IHTMLElement;
   TopicElements: TInterfaceList;
   TerminalBreaks: TInterfaceList;
+  HasBreak: Boolean; //kt //codex 11/1/26
 
   function CanonicalTopicName(const TopicName: string): string;
   var
@@ -2200,16 +2203,76 @@ var
     Placeholder.outerHTML := HTML;
   end;
 
+  function FindNarrativeEnd(const TopicRange, TableRange: IHTMLTxtRange;
+    out EndRange: IHTMLTxtRange; out HasBreak: Boolean): Boolean;
+  //kt //codex added entire function 11/1/26
+  var
+    NarrativeRange: IHTMLTxtRange;
+    SearchRange: IHTMLTxtRange;
+    MatchRange: IHTMLTxtRange;
+    SeparatorRange: IHTMLTxtRange;
+    NarrativeText: string;
+    SearchText: string;
+    LastIndex: Integer;
+    FirstIndex: Integer;
+  begin
+    Result := False;
+    HasBreak := False;
+    EndRange := nil;
+    NarrativeRange := TopicRange.duplicate;
+    NarrativeRange.setEndPoint('EndToStart', TableRange);
+    NarrativeText := NarrativeRange.text;
+    LastIndex := Length(NarrativeText);
+    while (LastIndex > 0) and
+      CharInSet(NarrativeText[LastIndex], [' ', #9, #10, #13, #160]) do begin
+      Dec(LastIndex);
+    end;
+    if LastIndex = 0 then begin
+      Exit;
+    end;
+    FirstIndex := LastIndex;
+    while (FirstIndex > 1) and
+      not CharInSet(NarrativeText[FirstIndex - 1], [' ', #9, #10, #13, #160]) do begin
+      Dec(FirstIndex);
+    end;
+    SearchText := Copy(NarrativeText, FirstIndex, LastIndex - FirstIndex + 1);
+    SearchRange := NarrativeRange.duplicate;
+    MatchRange := nil;
+    while SearchRange.findText(SearchText, 0, 0) do begin
+      if Assigned(MatchRange) and
+         (SearchRange.compareEndPoints('StartToEnd', MatchRange) < 0) then begin
+        Break;
+      end;
+      if SearchRange.compareEndPoints('EndToStart', TableRange) > 0 then begin
+        Break;
+      end;
+      MatchRange := SearchRange.duplicate;
+      SearchRange.collapse(False);
+    end;
+    if not Assigned(MatchRange) then begin
+      Exit;
+    end;
+    MatchRange.collapse(False);
+    SeparatorRange := MatchRange.duplicate;
+    SeparatorRange.setEndPoint('EndToStart', TableRange);
+    HasBreak := Pos('<BR', UpperCase(SeparatorRange.htmlText)) > 0;
+    EndRange := MatchRange;
+    Result := True;
+  end;
+
   function FindTopicInsertionRange(const TopicName: string;
-    out TargetRange: IHTMLTxtRange): Boolean;
+    //kt //codex original --> out TargetRange: IHTMLTxtRange): Boolean;
+    out TargetRange: IHTMLTxtRange; out HasBreak: Boolean): Boolean; //kt //codex 11/1/26
   var
     CandidateRange: IHTMLTxtRange;
+    NarrativeEndRange: IHTMLTxtRange; //kt //codex 11/1/26
     TerminalBreak: IHTMLElement;
     TopicIndex: Integer;
     TopicContainer: IHTMLElement;
   begin
     Result := False;
     TargetRange := nil;
+    HasBreak := False; //kt //codex 11/1/26
     TerminalBreak := nil;
     for TopicIndex := 0 to TopicElements.Count - 1 do begin
       TopicElement := IHTMLElement(TopicElements[TopicIndex]);
@@ -2238,12 +2301,25 @@ var
       TargetRange := Body.createTextRange;
       TargetRange.moveToElementText(TopicContainer);
       CandidateRange := TargetRange.duplicate;
-      if CandidateRange.findText('-- [', 0, 0) then begin
+      //kt //codex original --> if CandidateRange.findText('-- [', 0, 0) then begin
+      if CandidateRange.findText('-- [', 0, 0) and //kt //codex 11/1/26
+         (CandidateRange.compareEndPoints('EndToEnd', TargetRange) <= 0) then begin //kt //codex 11/1/26
         CandidateRange.collapse(True);
-        TargetRange := CandidateRange;
+        //kt //codex original --> TargetRange := CandidateRange;
+        if FindNarrativeEnd(TargetRange, CandidateRange, NarrativeEndRange, HasBreak) then begin //kt //codex 11/1/26
+          TargetRange := NarrativeEndRange; //kt //codex 11/1/26
+        end else begin //kt //codex 11/1/26
+          TargetRange := CandidateRange; //kt //codex 11/1/26
+        end; //kt //codex 11/1/26
       end else begin
-        TargetRange := nil;
-        TerminalBreak := TopicContainerTerminalBreak(TopicContainer);
+        CandidateRange := TargetRange.duplicate; //kt //codex 11/1/26
+        CandidateRange.collapse(False); //kt //codex 11/1/26
+        if FindNarrativeEnd(TargetRange, CandidateRange, NarrativeEndRange, HasBreak) and HasBreak then begin //kt //codex 11/1/26
+          TargetRange := NarrativeEndRange; //kt //codex 11/1/26
+        end else begin //kt //codex 11/1/26
+          TargetRange := nil;
+          TerminalBreak := TopicContainerTerminalBreak(TopicContainer);
+        end; //kt //codex 11/1/26
       end;
       InsertionContainers.Add(TopicContainer);
       TerminalBreaks.Add(TerminalBreak);
@@ -2273,6 +2349,7 @@ begin
   InsertionRanges := TInterfaceList.Create;
   InsertionContainers := TInterfaceList.Create;
   TerminalBreaks := TInterfaceList.Create;
+  PreserveSeparators := TStringList.Create; //kt //codex 11/1/26
   try
     if not FindHPIRegion then begin
       ErrorText := 'The current note document does not contain an HPI section.';
@@ -2288,12 +2365,14 @@ begin
         ErrorText := 'The pending text for topic "' + TopicNames[RangeIndex] + '" is empty.';
         Exit;
       end;
-      if not FindTopicInsertionRange(TopicNames[RangeIndex], InsertionRange) then begin
+      //kt //codex original --> if not FindTopicInsertionRange(TopicNames[RangeIndex], InsertionRange) then begin
+      if not FindTopicInsertionRange(TopicNames[RangeIndex], InsertionRange, HasBreak) then begin //kt //codex 11/1/26
         ErrorText := 'The topic "' + TopicNames[RangeIndex] +
           '" was not found in the current note document.';
         Exit;
       end;
       InsertionRanges.Add(InsertionRange);
+      PreserveSeparators.Add(BoolToStr(HasBreak, True)); //kt //codex 11/1/26
     end;
 
     SavedScroll := HtmlEditor.GetScrollLocation;
@@ -2303,13 +2382,21 @@ begin
     end;
     try
       for RangeIndex := 0 to InsertionRanges.Count - 1 do begin
+        InsertionHTML := HTMLFragments[RangeIndex]; //kt //codex 11/1/26
+        if SameText(PreserveSeparators[RangeIndex], 'True') and //kt //codex 11/1/26
+           SameText(Copy(InsertionHTML, Length(InsertionHTML) - 7, 8), '<BR><BR>') then begin //kt //codex 11/1/26
+          Delete(InsertionHTML, Length(InsertionHTML) - 7, 8); //kt //codex 11/1/26
+        end; //kt //codex 11/1/26
         if Assigned(TerminalBreaks[RangeIndex]) then begin
-          IHTMLElement(TerminalBreaks[RangeIndex]).outerHTML := HTMLFragments[RangeIndex];
+          //kt //codex original --> IHTMLElement(TerminalBreaks[RangeIndex]).outerHTML := HTMLFragments[RangeIndex];
+          IHTMLElement(TerminalBreaks[RangeIndex]).outerHTML := InsertionHTML; //kt //codex 11/1/26
         end else if Assigned(InsertionRanges[RangeIndex]) then begin
-          IHTMLTxtRange(InsertionRanges[RangeIndex]).PasteHTML(HTMLFragments[RangeIndex]);
+          //kt //codex original --> IHTMLTxtRange(InsertionRanges[RangeIndex]).PasteHTML(HTMLFragments[RangeIndex]);
+          IHTMLTxtRange(InsertionRanges[RangeIndex]).PasteHTML(InsertionHTML); //kt //codex 11/1/26
         end else begin
           AppendHTMLToTopicContainer(IHTMLElement(InsertionContainers[RangeIndex]),
-            HTMLFragments[RangeIndex]);
+            //kt //codex original --> HTMLFragments[RangeIndex]);
+            InsertionHTML); //kt //codex 11/1/26
         end;
       end;
       HtmlEditor.KeyStruck := True;
@@ -2331,6 +2418,7 @@ begin
     end;
     (HtmlEditor.DOC.body as IHTMLElement2).ScrollTop := SavedScroll;
   finally
+    PreserveSeparators.Free; //kt //codex 11/1/26
     InsertionContainers.Free;
     TerminalBreaks.Free;
     InsertionRanges.Free;

@@ -660,6 +660,7 @@ uses
   fDashboard,     //TMG   4/19/24
   fPopHealth,       //TMG 8/6/24
   fTopics,          //kt //codex 9/14/26
+  fRxHistory,       //kt //codex 11/2/26
   fChartExportHistory,   //TMG 5/14/24
   fAddSuspectConditions,     //kt 3/19/24
   fChangeLog,         //TMG  10/15/24
@@ -949,30 +950,20 @@ begin
     Reason := 'COM_OBJECT_ACTIVE';
     Result:= False;
   end;
-  //kt //codex original --> if Result then Result := frmCover.AllowContextChange(Reason);
-  if Result then if Assigned(frmCover) then Result := frmCover.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmProblems.AllowContextChange(Reason);
-  if Result then if Assigned(frmProblems) then Result := frmProblems.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmMeds.AllowContextChange(Reason);
-  if Result then if Assigned(frmMeds) then Result := frmMeds.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmOrders.AllowContextChange(Reason);
-  if Result then if Assigned(frmOrders) then Result := frmOrders.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmNotes.AllowContextChange(Reason);
-  if Result then if Assigned(frmNotes) then Result := frmNotes.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmConsults.AllowContextChange(Reason);
-  if Result then if Assigned(frmConsults) then Result := frmConsults.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmDCSumm.AllowContextChange(Reason);
-  if Result then if Assigned(frmDCSumm) then Result := frmDCSumm.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmImages.AllowContextChange(Reason);  //kt 9/11 added
-  if Result then if Assigned(frmImages) then Result := frmImages.AllowContextChange(Reason);  //kt 9/11 added //kt //codex 8/25/26
+  if Result then if Assigned(frmCover) then Result := frmCover.AllowContextChange(Reason);          //kt //codex 8/25/26
+  if Result then if Assigned(frmProblems) then Result := frmProblems.AllowContextChange(Reason);    //kt //codex 8/25/26
+  if Result then if Assigned(frmMeds) then Result := frmMeds.AllowContextChange(Reason);            //kt //codex 8/25/26
+  if Result then if Assigned(frmOrders) then Result := frmOrders.AllowContextChange(Reason);        //kt //codex 8/25/26
+  if Result then if Assigned(frmNotes) then Result := frmNotes.AllowContextChange(Reason);          //kt //codex 8/25/26
+  if Result then if Assigned(frmConsults) then Result := frmConsults.AllowContextChange(Reason);    //kt //codex 8/25/26
+  if Result then if Assigned(frmDCSumm) then Result := frmDCSumm.AllowContextChange(Reason);        //kt //codex 8/25/26
+  if Result then if Assigned(frmImages) then Result := frmImages.AllowContextChange(Reason);        //kt 9/11 added //kt //codex 8/25/26
   if Result then if Assigned(frmSurgery) then Result := frmSurgery.AllowContextChange(Reason);;
-  //kt //codex original --> if Result then Result := frmLabs.AllowContextChange(Reason);;
-  if Result then if Assigned(frmLabs) then Result := frmLabs.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmReports.AllowContextChange(Reason);
-  if Result then if Assigned(frmReports) then Result := frmReports.AllowContextChange(Reason);  //kt //codex 8/25/26
-  //kt //codex original --> if Result then Result := frmGraphData.AllowContextChange(Reason);
+  if Result then if Assigned(frmLabs) then Result := frmLabs.AllowContextChange(Reason);            //kt //codex 8/25/26
+  if Result then if Assigned(frmReports) then Result := frmReports.AllowContextChange(Reason);      //kt //codex 8/25/26
   if Result then if Assigned(frmGraphData) then Result := frmGraphData.AllowContextChange(Reason);  //kt //codex 8/25/26
-  if Result then if Assigned(frmTopics) then Result := frmTopics.AllowContextChange(Reason);  //kt //codex 9/29/26
+  if Result then if Assigned(frmTopics) then Result := frmTopics.AllowContextChange(Reason);        //kt //codex 9/29/26
+  if Result then if Assigned(frmRxHistory) then Result := frmRxHistory.AllowContextChange(Reason);  //kt //codex 11/2/26
   if (not User.IsReportsOnly) then begin
     if Result and Changes.RequireReview then begin //Result := ReviewChanges(TimedOut);
       case BOOLCHAR[FCCOWContextChanging] of
@@ -1038,6 +1029,7 @@ begin
   frmGraphData.ClearPtData;
   frmReports.ClearPtData;
   if Assigned(frmTopics) then frmTopics.ClearPtData;  //kt //codex 9/14/26
+  if Assigned(frmRxHistory) then frmRxHistory.ClearPtData;  //kt //codex 11/2/26
   for ASide := tpsLeft to tpsRight do SelectChartTab(ASide, CT_NOPAGE);  // to make sure DisplayPage gets called  //kt-tabs
   //kt-tabs end mod
   ClearReminderData;
@@ -1153,18 +1145,18 @@ var
   ASide : TTabPageSide;           //kt-tabs 11/26/22
 begin
   DebugMsg('--------  Starting up frmFrame ------------');
-  frmCover := nil;  //kt //codex 8/25/26
-  frmProblems := nil;  //kt //codex 8/25/26
-  frmMeds := nil;  //kt //codex 8/25/26
-  frmOrders := nil;  //kt //codex 8/25/26
-  frmNotes := nil;  //kt //codex 8/25/26
-  frmConsults := nil;  //kt //codex 8/25/26
-  frmDCSumm := nil;  //kt //codex 8/25/26
-  frmSurgery := nil;  //kt //codex 8/25/26
-  frmLabs := nil;  //kt //codex 8/25/26
-  frmReports := nil;  //kt //codex 8/25/26
-  frmImages := nil;  //kt //codex 8/25/26
-  frmGraphData := nil;  //kt //codex 8/25/26
+  frmCover := nil;                //kt //codex 8/25/26
+  frmProblems := nil;             //kt //codex 8/25/26
+  frmMeds := nil;                 //kt //codex 8/25/26
+  frmOrders := nil;               //kt //codex 8/25/26
+  frmNotes := nil;                //kt //codex 8/25/26
+  frmConsults := nil;             //kt //codex 8/25/26
+  frmDCSumm := nil;               //kt //codex 8/25/26
+  frmSurgery := nil;              //kt //codex 8/25/26
+  frmLabs := nil;                 //kt //codex 8/25/26
+  frmReports := nil;              //kt //codex 8/25/26
+  frmImages := nil;               //kt //codex 8/25/26
+  frmGraphData := nil;            //kt //codex 8/25/26
   FJustEnteredApp := false;
   SizeHolder := TSizeHolder.Create;
   FOldActiveFormChange := Screen.OnActiveFormChange;
@@ -1388,7 +1380,8 @@ begin
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
   }
   CreateTab(tpsLeft, CT_POPHEALTH,'Pop. Health');  //kt 9/11
-  CreateTab(tpsLeft, CT_TOPICS,   'Topics');  //kt //codex 9/14/26
+  CreateTab(tpsLeft, CT_TOPICS,   'Topics');       //kt //codex 9/14/26
+  CreateTab(tpsLeft, CT_RXHISTORY, 'Rx History');  //kt //codex 11/2/26
 
   { //kt removing 8/24/26 since we don't use
   for APageID := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                   //kt 9/11
@@ -2406,6 +2399,7 @@ begin
     CT_DASHBOARD: SwitchToPage(Aside,frmDashboard);  //tmg  4/19/24
     CT_POPHEALTH: SwitchToPage(Aside,frmPopHealth);
     CT_TOPICS:    SwitchToPage(Aside,frmTopics);  //kt //codex 9/14/26
+    CT_RXHISTORY: SwitchToPage(Aside,frmRxHistory);  //kt //codex 11/2/26
     //kt 8/24/26 CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
   end; {case}
   if ScreenReaderSystemActive and FCtrlTabUsed then
@@ -4828,6 +4822,11 @@ begin
                     frmTopics.Parent := HolderPanel;                    //kt //codex 9/14/26
                     FfrmPagesList.AddObject(frmTopics.Name, frmTopics); //kt //codex 9/14/26
                   end;                                                   //kt //codex 9/14/26
+    CT_RXHISTORY : begin  //kt //codex 11/2/26
+                    frmRxHistory := TfrmRxHistory.Create(Self);  //kt //codex 11/2/26
+                    frmRxHistory.Parent := HolderPanel;  //kt //codex 11/2/26
+                    FfrmPagesList.AddObject(frmRxHistory.Name, frmRxHistory);  //kt //codex 11/2/26
+                  end;  //kt //codex 11/2/26
     {//kt 8/24/26
     CT_WEBTAB1..CT_LAST_WEBTAB : begin                                //kt 9/11
                     TempFrmWebTab := TfrmWebTab.Create(Self);         //kt 9/11
@@ -4851,8 +4850,9 @@ begin
                                                    //CT_MEDS,
                                                    CT_ORDERS,
                                                    CT_LABS,
-                                                   CT_REPORTS, //kt //codex 9/14/26
-                                                   CT_TOPICS  //kt //codex 9/14/26
+                                                   CT_REPORTS,   //kt //codex 9/14/26
+                                                   CT_TOPICS,    //kt //codex 9/14/26
+                                                   CT_RXHISTORY  //kt //codex 11/2/26
                                                    //CT_WEBTAB1,
                                                    //CT_WEBTAB2,
                                                    //CT_WEBTAB3]

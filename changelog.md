@@ -2,6 +2,13 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-02 — Medication history client foundation
+
+- Added the Rx History chart tab and `fRxHistory` form, with Topics-style resizable, animated side panes and independent saved pane settings. The left pane includes By Name and By Date tabs, a medication tree, and a parsed-text setting; the center and right panes are placeholders for future work.
+- Added `rRxHistory` wrappers for the `TMG RPC RXHX CMD` LIST ALL, LIST SUMMARY, and LIST TIU commands. The summary is loaded for the current patient into a local model, refreshed when the parsed-text setting changes, and cleared on patient changes.
+- Medication names and UNMATCHED entries appear as tree parents. Their child entries show the medication text and first/last observation dates; observations do not establish continuous medication use. Entries are sorted by first observation date, dates display as `mm/dd/yyyy`, and tree connector lines are hidden. The By Date tab remains a placeholder.
+- The user inspected medication summaries during the session. The latest date sorting, date formatting, and connector-line changes still need a fresh Windows Delphi build/runtime check.
+
 ## 2026-11-01 — Topics navigation and current-note refinements
 
 - Current-note sync now finds the end of the topic narrative before existing breaks and following tables, and conditionally adds a date label. The user confirmed insertion works in Kevin-style notes.

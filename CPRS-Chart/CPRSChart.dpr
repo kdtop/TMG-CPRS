@@ -23,6 +23,7 @@ uses
   fPtDemo in 'fPtDemo.pas' {frmPtDemo},
   rTIU in 'rTIU.pas',
   rTopics in 'rTopics.pas',
+  rRxHistory in 'rRxHistory.pas',  //kt //codex 11/2/26
   fxBroker in 'fxBroker.pas' {frmBroker},
   fNoteBA in 'fNoteBA.pas' {frmNotesByAuthor},
   fNoteBD in 'fNoteBD.pas' {frmNotesByDate},
@@ -451,7 +452,10 @@ uses
   uTMGOptions in 'TMG_Extra\uTMGOptions.pas',
   uPngGlyphButton in 'TMG_Extra\uPngGlyphButton.pas',
   uMumpsData in 'TMG_Extra\uMumpsData.pas',
-  uHTMLNoteAnalysis in 'TMG_Extra\uHTMLNoteAnalysis.pas';
+  uHTMLNoteAnalysis in 'TMG_Extra\uHTMLNoteAnalysis.pas',
+  fRxHistory in 'TMG_Extra\fRxHistory.pas' {frmRxHistory},
+  fMessageDemo in 'TMG_Extra\fMessageDemo.pas' {frmMessageDemo},
+  MSHTMLEvents in 'TMG_Extra\HTMLEdit\MSHTMLEvents.pas';
 
 {$R *.TLB}
 
@@ -487,6 +491,8 @@ begin
   Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
+  //kt //codex original --> Application.CreateForm(TfrmRxHistory, frmRxHistory);
+  Application.CreateForm(TfrmMessageDemo, frmMessageDemo);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen
     Application.Run;
   end;

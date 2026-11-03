@@ -160,6 +160,7 @@
         </DCCReference>
         <DCCReference Include="rTIU.pas"/>
         <DCCReference Include="rTopics.pas"/>
+        <DCCReference Include="rRxHistory.pas"/>
         <DCCReference Include="fxBroker.pas">
             <Form>frmBroker</Form>
         </DCCReference>
@@ -1208,6 +1209,15 @@
         <DCCReference Include="TMG_Extra\uPngGlyphButton.pas"/>
         <DCCReference Include="TMG_Extra\uMumpsData.pas"/>
         <DCCReference Include="TMG_Extra\uHTMLNoteAnalysis.pas"/>
+        <DCCReference Include="TMG_Extra\fRxHistory.pas">
+            <Form>frmRxHistory</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="TMG_Extra\fMessageDemo.pas">
+            <Form>frmMessageDemo</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="TMG_Extra\HTMLEdit\MSHTMLEvents.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

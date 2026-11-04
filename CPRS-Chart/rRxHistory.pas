@@ -7,6 +7,7 @@ uses
   System.Classes, uCore, ORFn, ORNet;
 
 function ListRxHistory(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime = 9999999): string;
+function ListRxHistoryForNote(Dest: TStrings; const TIUIEN: string): string; //kt //codex 11/3/26
 function ListRxHistorySummary(Dest: TStrings; UseParsedText: Boolean = False; SDT: TFMDateTime = 0; EDT: TFMDateTime = 9999999): string;
 function ListRxHistoryNotes(Dest: TStrings; const MedicationIEN: string; SDT: TFMDateTime = 0; EDT: TFMDateTime = 9999999): string;
 
@@ -43,6 +44,13 @@ begin
   Result := RxHistoryCommand(Dest, 'LIST ALL', SDT, EDT);
 end;
 
+function ListRxHistoryForNote(Dest: TStrings; const TIUIEN: string): string;
+//kt //codex added entire function 11/3/26
+// Returns LIST ALL format for one note belonging to the current patient.
+begin
+  Result := RxHistoryCommand(Dest, 'LIST 1 TIU:' + TIUIEN, 0, 9999999);
+end;
+
 function ListRxHistorySummary(Dest: TStrings; UseParsedText: Boolean; SDT, EDT: TFMDateTime): string;
 //Get grouped info, by drug name, summarized over potentially many notes.
 //If UserParseText=TRUE, then a parse version of text is returned.  If FALSE, then raw text as found in note returned.
@@ -50,8 +58,11 @@ function ListRxHistorySummary(Dest: TStrings; UseParsedText: Boolean; SDT, EDT: 
 
  // TMGRESULT(#)="0^<medication name>" <-- heading; blank for unmatched lines.
  // TMGRESULT(#)="1^<medication text>^<first FMDT>^<last FMDT>".
+ //kt //codex original --> TMGRESULT(#)="1.5^<TIU IEN>^<note title>^<note FMDT>" (one line per note).
+ // TMGRESULT(#)="1.5^<TIU IEN>^<note title>^<note FMDT>^<author name>" (one per note). //kt //codex 11/3/26
  // TMGRESULT(#)="2^<medication IEN>^<name>^<strength>^<units>".
- // Type 2 lines apply to the preceding type 1 line and may be repeated.
+ //kt //codex original --> Type 2 lines apply to the preceding type 1 line and may be repeated.
+ // Types 1.5 and 2 apply to the preceding type 1 line and may be repeated. //kt //codex 11/3/26
  // Incoming and final observations are combined; dates are first and last
 
 var

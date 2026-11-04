@@ -105,6 +105,7 @@ type
     procedure btnEditZoomOutClick(Sender: TObject);
     procedure btnSignAllClick(Sender: TObject);
     procedure lbSelectedClick(Sender: TObject);
+    procedure lbSelectedDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState); //kt //codex 11/3/26
     procedure btnRemoveClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnPrevClick(Sender: TObject);
@@ -770,6 +771,61 @@ begin
   if assigned(SignerList.Signers) then Success := (SignerList.Signers.Count > 0) else Success := false;
   ItemInfo.ProcessDeferredAdditonalSigners := Success;
 
+end;
+
+procedure TfrmMultiTIUSign.lbSelectedDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+//kt //codex added entire procedure 11/3/26
+var
+  DataIndex: Integer;
+  ItemInfo: TItemInfo;
+  ListBox: TListBox;
+  IsDeletion: Boolean;
+  Marker: string;
+  TextLeft: Integer;
+begin
+  ListBox := TListBox(Control);
+  ListBox.Canvas.Font.Assign(ListBox.Font);
+  if odSelected in State then begin
+    ListBox.Canvas.Font.Color := clHighlightText;
+    ListBox.Canvas.Brush.Color := clHighlight;
+  end else begin
+    ListBox.Canvas.Brush.Color := ListBox.Color;
+  end;
+  if (Index >= 0) and (Index < ListBox.Items.Count) then begin
+    IsDeletion := False;
+    DataIndex := Integer(ListBox.Items.Objects[Index]);
+    if Assigned(ItemInfoList) and (DataIndex >= 0) and (DataIndex < ItemInfoList.Count) then begin
+      ItemInfo := TItemInfo(ItemInfoList[DataIndex]);
+      if Assigned(ItemInfo) then begin
+        IsDeletion := ItemInfo.DeferredToDelete;
+      end;
+    end;
+    ListBox.Canvas.Brush.Style := bsSolid;
+    ListBox.Canvas.FillRect(Rect);
+    ListBox.Canvas.Brush.Style := bsClear;
+    ListBox.Canvas.Font.Name := 'Segoe UI Symbol';
+    ListBox.Canvas.Font.Style := [];
+    if IsDeletion then begin
+      Marker := 'X';
+      ListBox.Canvas.Font.Color := clRed;
+    end else begin
+      Marker := #$2713;
+      ListBox.Canvas.Font.Color := clGreen;
+    end;
+    TextLeft := Rect.Left + ListBox.Canvas.TextWidth('W') + 6;
+    ListBox.Canvas.TextRect(Rect, Rect.Left + 2, Rect.Top, Marker);
+    ListBox.Canvas.Font.Assign(ListBox.Font);
+    if odSelected in State then begin
+      ListBox.Canvas.Font.Color := clHighlightText;
+    end;
+    if IsDeletion then begin
+      ListBox.Canvas.Font.Style := ListBox.Canvas.Font.Style + [fsStrikeOut];
+    end;
+    ListBox.Canvas.TextRect(Rect, TextLeft, Rect.Top, ListBox.Items[Index]);
+    if odFocused in State then begin
+      ListBox.Canvas.DrawFocusRect(Rect);
+    end;
+  end;
 end;
 
 procedure TfrmMultiTIUSign.btnRemoveClick(Sender: TObject);

@@ -18,6 +18,8 @@ type
     pnlRxHxSettings: TPanel;
     cbRxHxParsed: TCheckBox;
     pnlRxHxCenter: TPanel;
+    pnlRxHxNoteBar: TPanel; //kt //codex 11/3/26
+    btnRxHxZoomOut, btnRxHxZoomNormal, btnRxHxZoomIn: TSpeedButton; //kt //codex 11/3/26
     pnlRxHxRight: TPanel;
     wbRxHxData: TWebBrowser;
     pnlRightFooter: TPanel;
@@ -28,6 +30,7 @@ type
     timRxHxRightAnimate: TTimer;
     ImageList1: TImageList;
     ImageCollection1: TImageCollection;
+    procedure RxHxZoomClick(Sender: TObject); //kt //codex 11/3/26
     procedure cbRxHxParsedClick(Sender: TObject);
     function CursorOverControl(AControl: TControl): Boolean;
     procedure ConfigureRxHxElsewhereMouseDown(AParent: TWinControl);
@@ -65,6 +68,10 @@ type
   private
     FRxHxSummary: TStringList;
     FRxHxSummaryLoaded: Boolean;
+    //kt //codex original --> FRxHxNoteBar: TPanel;
+    FRxHxNoteBrowser: TWebBrowser; //kt //codex 11/3/26
+    FRxHxSelectionSerial: Integer; //kt //codex 11/3/26
+    FRxHxZoom: Integer; //kt //codex 11/3/26
     btnRxHxLeftHandle, btnRxHxRightHandle, btnRxHxLeftPin: TPngGlyphButton;
     FRxHxLeftOpen, FRxHxLeftPinned, FRxHxLeftAnimating: Boolean;
     FRxHxRightOpen, FRxHxRightAnimating, FRxHxLoaded: Boolean;
@@ -72,6 +79,10 @@ type
     FRxHxLeftAnimationStartWidth, FRxHxLeftAnimationTargetWidth, FRxHxLeftAnimationStep: Integer;
     FRxHxRightOpenWidth, FRxHxRightClosedWidth: Integer;
     FRxHxRightAnimationStartWidth, FRxHxRightAnimationTargetWidth, FRxHxRightAnimationStep: Integer;
+    procedure RxHxTreeChange(Sender: TObject; Node: TTreeNode); //kt //codex 11/3/26
+    procedure RxHxViewChange(Sender: TObject); //kt //codex 11/3/26
+    procedure RebuildRxHxDateTree; //kt //codex 11/3/26
+    procedure RxHxTreeMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); //kt //codex 11/3/26
     procedure LoadRxHxSummary;
     procedure RebuildRxHxTree;
   protected
@@ -90,7 +101,8 @@ implementation
 
 //kt //codex original --> uses uTMGOptions;
 //kt //codex original --> uses uTMGOptions, uCore, rRxHistory, Dialogs, ORFn;
-uses uTMGOptions, uCore, rRxHistory, Dialogs, ORFn, SysUtils;
+//kt //codex original --> uses uTMGOptions, uCore, rRxHistory, Dialogs, ORFn, SysUtils;
+uses uTMGOptions, uCore, rRxHistory, Dialogs, ORFn, SysUtils, rTIU, uHTMLTools; //kt //codex 11/3/26
 
 {$R *.dfm}
 
@@ -116,6 +128,18 @@ procedure TfrmRxHistory.Loaded;
 begin
   inherited;
   FRxHxSummary := TStringList.Create;
+  //kt //codex original --> FRxHxNoteBar := TPanel.Create(Self);
+  //kt //codex original --> FRxHxNoteBar.Parent := pnlRxHxCenter;
+  //kt //codex original --> FRxHxNoteBar.Align := alTop;
+  //kt //codex original --> FRxHxNoteBar.Height := 15;
+  FRxHxZoom := 100; //kt //codex 11/3/26
+  FRxHxNoteBrowser := TWebBrowser.Create(Self); //kt //codex 11/3/26
+  //kt //codex original --> FRxHxNoteBrowser.Parent := pnlRxHxCenter;
+  TWinControl(FRxHxNoteBrowser).Parent := pnlRxHxCenter; //kt //codex 11/3/26
+  FRxHxNoteBrowser.Align := alClient; //kt //codex 11/3/26
+  tvRxHx.OnChange := RxHxTreeChange; //kt //codex 11/3/26
+  tcRxHxView.OnChange := RxHxViewChange; //kt //codex 11/3/26
+  tvRxHx.OnMouseDown := RxHxTreeMouseDown; //kt //codex 11/3/26
   btnRxHxLeftHandle := TPngGlyphButton.Create(Self);
   btnRxHxLeftHandle.Name := 'btnRxHxLeftHandle';
   btnRxHxLeftHandle.Parent := Self;
@@ -182,10 +206,13 @@ procedure TfrmRxHistory.ClearPtData;
 begin
   inherited;
   FRxHxSummaryLoaded := False;
+  Inc(FRxHxSelectionSerial); //kt //codex 11/3/26
   if Assigned(FRxHxSummary) then begin
     FRxHxSummary.Clear;
   end;
   tvRxHx.Items.Clear;
+  FRxHxNoteBrowser.Navigate('about:blank'); //kt //codex 11/3/26
+  wbRxHxData.Navigate('about:blank'); //kt //codex 11/3/26
 end;
 
 procedure TfrmRxHistory.DisplayPage;
@@ -205,14 +232,26 @@ begin
   end;
 end;
 
+procedure TfrmRxHistory.RxHxViewChange(Sender: TObject);
+//kt //codex added entire procedure 11/3/26
+begin
+  if FRxHxLoaded and FRxHxSummaryLoaded then begin
+    Inc(FRxHxSelectionSerial);
+    RebuildRxHxTree;
+  end;
+end;
+
 procedure TfrmRxHistory.LoadRxHxSummary;
 //kt //codex added entire procedure 11/2/26
 var
   Status: string;
 begin
   FRxHxSummaryLoaded := False;
+  Inc(FRxHxSelectionSerial); //kt //codex 11/3/26
   FRxHxSummary.Clear;
   tvRxHx.Items.Clear;
+  FRxHxNoteBrowser.Navigate('about:blank'); //kt //codex 11/3/26
+  wbRxHxData.Navigate('about:blank'); //kt //codex 11/3/26
   if Patient.DFN = '' then begin
     Exit;
   end;
@@ -242,6 +281,73 @@ begin
     RxHxExternalDateTime(Piece(Entry, '^', 4));
 end;
 
+function RxHxNoteLabel(const NoteLine: string): string;
+//kt //codex added entire function 11/3/26
+var
+  NoteTitle: string;
+begin
+  NoteTitle := Piece(NoteLine, '^', 3);
+  if NoteTitle = '' then begin
+    NoteTitle := 'Untitled note';
+  end;
+  Result := FormatFMDateTimeStr('yyyy/mm/dd', Piece(NoteLine, '^', 4)) +
+    '  ' + NoteTitle + ' -- ' + Piece(NoteLine, '^', 5);
+end;
+
+procedure TfrmRxHistory.RebuildRxHxDateTree;
+//kt //codex added entire procedure 11/3/26
+var
+  Seen, SortedNotes: TStringList;
+  Index, I, NoteIndex: Integer;
+  Line, TIUIEN, NoteDate, YearText, CurrentYear: string;
+  YearNode: TTreeNode;
+begin
+  Seen := TStringList.Create;
+  SortedNotes := TStringList.Create;
+  try
+    Seen.Sorted := True;
+    SortedNotes.Sorted := True;
+    for Index := 0 to FRxHxSummary.Count - 1 do begin
+      Line := FRxHxSummary[Index];
+      if Piece(Line, '^', 1) <> '1.5' then begin
+        Continue;
+      end;
+      TIUIEN := Piece(Line, '^', 2);
+      if (TIUIEN = '') or (Seen.IndexOf(TIUIEN) >= 0) then begin
+        Continue;
+      end;
+      Seen.Add(TIUIEN);
+      NoteDate := Piece(Line, '^', 4);
+      SortedNotes.Add(Copy(Piece(NoteDate, '.', 1) + '0000000', 1, 7) + '.' +
+        Copy(Piece(NoteDate, '.', 2) + '000000', 1, 6) + '^' + Format('%.10d', [Index]));
+    end;
+    CurrentYear := '';
+    YearNode := nil;
+    tvRxHx.Items.BeginUpdate;
+    try
+      tvRxHx.Items.Clear;
+      for I := SortedNotes.Count - 1 downto 0 do begin
+        NoteIndex := StrToInt(Piece(SortedNotes[I], '^', 2));
+        Line := FRxHxSummary[NoteIndex];
+        YearText := FormatFMDateTimeStr('yyyy', Piece(Line, '^', 4));
+        if YearText = '' then begin
+          YearText := 'Unknown year';
+        end;
+        if (not Assigned(YearNode)) or (YearText <> CurrentYear) then begin
+          CurrentYear := YearText;
+          YearNode := tvRxHx.Items.Add(nil, YearText);
+        end;
+        tvRxHx.Items.AddChildObject(YearNode, RxHxNoteLabel(Line), Pointer(NativeInt(NoteIndex + 1)));
+      end;
+    finally
+      tvRxHx.Items.EndUpdate;
+    end;
+  finally
+    SortedNotes.Free;
+    Seen.Free;
+  end;
+end;
+
 procedure TfrmRxHistory.RebuildRxHxTree;
 //kt //codex added entire procedure 11/2/26
 var
@@ -253,18 +359,49 @@ var
   procedure AddSortedEntries;
   //kt //codex added entire procedure 11/2/26
   var
-    EntryIndex, I: Integer;
+    //kt //codex original --> EntryIndex, I: Integer;
+    EntryIndex, I, NoteIndex: Integer; //kt //codex 11/3/26
+    EntryNode: TTreeNode; //kt //codex 11/3/26
+    //kt //codex original --> NoteLine, NoteType, NoteTitle: string;
+    NoteLine, NoteType: string; //kt //codex 11/3/26
   begin
     if Assigned(GroupNode) then begin
       for I := 0 to SortedEntries.Count - 1 do begin
         EntryIndex := StrToInt(Piece(SortedEntries[I], '^', 2));
-        tvRxHx.Items.AddChild(GroupNode, RxHxEntryText(FRxHxSummary, EntryIndex));
+        //kt //codex original --> tvRxHx.Items.AddChild(GroupNode, RxHxEntryText(FRxHxSummary, EntryIndex));
+        EntryNode := tvRxHx.Items.AddChild(GroupNode, RxHxEntryText(FRxHxSummary, EntryIndex)); //kt //codex 11/3/26
+        NoteIndex := EntryIndex + 1; //kt //codex 11/3/26
+        while NoteIndex < FRxHxSummary.Count do begin //kt //codex 11/3/26
+          NoteLine := FRxHxSummary[NoteIndex]; //kt //codex 11/3/26
+          NoteType := Piece(NoteLine, '^', 1); //kt //codex 11/3/26
+          if (NoteType = '0') or (NoteType = '1') then begin //kt //codex 11/3/26
+            Break; //kt //codex 11/3/26
+          end; //kt //codex 11/3/26
+          if NoteType = '1.5' then begin //kt //codex 11/3/26
+            //kt //codex original --> NoteTitle := Piece(NoteLine, '^', 3);
+            //kt //codex original --> if NoteTitle = '' then begin
+            //kt //codex original -->   NoteTitle := 'Untitled note';
+            //kt //codex original --> end;
+            //kt //codex original --> tvRxHx.Items.AddChildObject(EntryNode, NoteTitle + ' (' +
+            //kt //codex original -->   RxHxExternalDateTime(Piece(NoteLine, '^', 4)) + ', TIU IEN: ' +
+            //kt //codex original -->   Piece(NoteLine, '^', 2) + ')', Pointer(NativeInt(NoteIndex + 1)));
+            //kt //codex original --> tvRxHx.Items.AddChildObject(EntryNode, FormatFMDateTimeStr('yyyy/mm/dd', Piece(NoteLine, '^', 4)) +
+            //kt //codex original -->   '  ' + NoteTitle + ' ' + Piece(NoteLine, '^', 5), Pointer(NativeInt(NoteIndex + 1)));
+            //kt //codex original -->   '  ' + NoteTitle + ' -- ' + Piece(NoteLine, '^', 5), Pointer(NativeInt(NoteIndex + 1)));
+            tvRxHx.Items.AddChildObject(EntryNode, RxHxNoteLabel(NoteLine), Pointer(NativeInt(NoteIndex + 1))); //kt //codex 11/3/26
+          end; //kt //codex 11/3/26
+          Inc(NoteIndex); //kt //codex 11/3/26
+        end; //kt //codex 11/3/26
       end;
     end;
     SortedEntries.Clear;
   end;
 
 begin
+  if tcRxHxView.TabIndex = 1 then begin //kt //codex 11/3/26
+    RebuildRxHxDateTree; //kt //codex 11/3/26
+    Exit; //kt //codex 11/3/26
+  end; //kt //codex 11/3/26
   GroupNode := nil;
   //kt //codex original --> Info1Node := nil;
   //kt //codex original --> Info2Node := nil;
@@ -310,6 +447,166 @@ begin
   finally
     tvRxHx.Items.EndUpdate;
     SortedEntries.Free;  //kt //codex 11/2/26
+  end;
+end;
+
+function RxHxTableHTML(Lines: TStrings): string;
+//kt //codex added entire function 11/3/26
+var
+  HTML: TStringList;
+  TableType, LineType, LineText: string;
+  I, Kind, Count: Integer;
+  Modified: Boolean;
+begin
+  HTML := TStringList.Create;
+  try
+    HTML.Add('<!DOCTYPE html><html><head><style>');
+    HTML.Add('body {font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px;}');
+    HTML.Add('.container {margin: 0 0 8px 0; overflow-x: auto; overflow-y: hidden;}');
+    HTML.Add('table {border: 1px solid #9fbad0; border-collapse: separate; border-spacing: 0; min-width: 100%;}');
+    HTML.Add('th {background: #2f75b5; color: white; text-align: left; padding: 5px 8px;}');
+    HTML.Add('td {font-family: Consolas, Courier New, monospace; white-space: pre; padding: 1px 8px;}');
+    HTML.Add('.empty {color: #666; font-style: italic;} .spacer td {height: 14px; padding: 0;}');
+    HTML.Add('</style></head><body>');
+    for Kind := 1 to 2 do begin
+      TableType := IntToStr(Kind);
+      if Kind = 1 then begin
+        LineText := 'Incoming medications';
+      end else begin
+        LineText := 'Final medications';
+      end;
+      HTML.Add('<div class="container"><table><thead><tr><th>' + LineText + '</th></tr></thead><tbody>');
+      Count := 0;
+      for I := 0 to Lines.Count - 1 do begin
+        LineType := Piece(Lines[I], '^', 1);
+        if LineType = TableType then begin
+          LineText := Piece(Lines[I], '^', 2);
+          HTML.Add('<tr><td>' + HTMLEncode(LineText, Modified) + '</td></tr>');
+          Inc(Count);
+        end;
+      end;
+      if Count = 0 then begin
+        HTML.Add('<tr><td class="empty">No medication entries found.</td></tr>');
+      end;
+      HTML.Add('<tr class="spacer"><td>&nbsp;</td></tr></tbody></table></div>');
+    end;
+    HTML.Add('</body></html>');
+    Result := HTML.Text;
+  finally
+    HTML.Free;
+  end;
+end;
+
+procedure TfrmRxHistory.RxHxTreeMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+//kt //codex added entire procedure 11/3/26
+var
+  Node: TTreeNode;
+  Hit: THitTests;
+begin
+  if (Button <> mbLeft) or (ssDouble in Shift) then begin
+    Exit;
+  end;
+  Hit := tvRxHx.GetHitTestInfoAt(X, Y);
+  if not (htOnLabel in Hit) then begin
+    Exit;
+  end;
+  Node := tvRxHx.GetNodeAt(X, Y);
+  //kt //codex original --> if Assigned(Node) and (Node.Level = 1) and Node.HasChildren then begin
+  if Assigned(Node) and not Assigned(Node.Data) and Node.HasChildren then begin //kt //codex 11/3/26
+    if Node.Expanded then begin
+      Node.Collapse(False);
+    end else begin
+      Node.Expand(False);
+    end;
+  end;
+end;
+
+procedure TfrmRxHistory.RxHxZoomClick(Sender: TObject);
+//kt //codex added entire procedure 11/3/26
+const
+  OLECMDID_OPTICAL_ZOOM = $0000003F;
+var
+  NewZoom: Integer;
+  ZoomIn, ZoomOut: OleVariant;
+begin
+  NewZoom := FRxHxZoom;
+  if Sender = btnRxHxZoomOut then begin
+    NewZoom := NewZoom - 20;
+  end else if Sender = btnRxHxZoomIn then begin
+    NewZoom := NewZoom + 20;
+  end else begin
+    NewZoom := 100;
+  end;
+  if NewZoom < 10 then begin
+    NewZoom := 10;
+  end else if NewZoom > 1000 then begin
+    NewZoom := 1000;
+  end;
+  ZoomIn := NewZoom;
+  ZoomOut := 0;
+  try
+    FRxHxNoteBrowser.ControlInterface.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, ZoomIn, ZoomOut);
+    FRxHxZoom := NewZoom;
+  except
+    on E: Exception do begin
+      ShowMessage('Could not change note zoom: ' + E.Message);
+    end;
+  end;
+end;
+
+procedure TfrmRxHistory.RxHxTreeChange(Sender: TObject; Node: TTreeNode);
+//kt //codex added entire procedure 11/3/26
+var
+  NoteIndex, TIUIEN, SelectionSerial: Integer;
+  IsHTML: Boolean;
+  NoteLines, TableLines: TStringList;
+  Status, HTML: string;
+begin
+  Inc(FRxHxSelectionSerial);
+  SelectionSerial := FRxHxSelectionSerial;
+  if not Assigned(Node) or not Assigned(Node.Data) then begin
+    Exit;
+  end;
+  NoteIndex := NativeInt(Node.Data) - 1;
+  if (NoteIndex < 0) or (NoteIndex >= FRxHxSummary.Count) then begin
+    Exit;
+  end;
+  if Piece(FRxHxSummary[NoteIndex], '^', 1) <> '1.5' then begin
+    Exit;
+  end;
+  TIUIEN := StrToIntDef(Piece(FRxHxSummary[NoteIndex], '^', 2), 0);
+  if TIUIEN <= 0 then begin
+    Exit;
+  end;
+  NoteLines := TStringList.Create;
+  TableLines := TStringList.Create;
+  try
+    FRxHxNoteBrowser.Navigate('about:blank');
+    wbRxHxData.Navigate('about:blank');
+    LoadDocumentText(NoteLines, TIUIEN, IsHTML);
+    Status := ListRxHistoryForNote(TableLines, IntToStr(TIUIEN));
+    if IsHTML then begin
+      FixHTML(NoteLines);
+      HTML := NoteLines.Text;
+    end else begin
+      HTMLEncode(NoteLines);
+      HTML := Text2HTML(NoteLines);
+    end;
+    if SelectionSerial <> FRxHxSelectionSerial then begin
+      Exit;
+    end;
+    WBLoadHTML(FRxHxNoteBrowser, HTML);
+    if SelectionSerial <> FRxHxSelectionSerial then begin
+      Exit;
+    end;
+    if Status <> '1^OK' then begin
+      ShowMessage('Could not load medication tables: ' + Status);
+      Exit;
+    end;
+    WBLoadHTML(wbRxHxData, RxHxTableHTML(TableLines));
+  finally
+    TableLines.Free;
+    NoteLines.Free;
   end;
 end;
 

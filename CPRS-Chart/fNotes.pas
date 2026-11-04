@@ -662,8 +662,10 @@ type
     function  GetSelectedNoteFMDateTime : TFMDateTime;                                  //kt 4/3
     function GetActiveEditorHTML(out HTML, ErrorText: string): Boolean;
     //kt //codex added entire function 10/27/26
-    function InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments: TStrings; out ErrorText: string): Boolean;
+    //kt //codex original --> function InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments: TStrings; out ErrorText: string): Boolean;
+    function InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments, ReplaceFlags: TStrings; out ErrorText: string): Boolean; //kt //codex 11/3/26
     //kt //codex added entire function 10/27/26
+    function SyncTopicTables(const TopicNames, TableNames, TableHTML: TStrings; out ErrorText: string): Boolean; //kt //codex 11/3/26
     function ActiveEditDateTime: TFMDateTime;                                           //kt //codex added entire function 10/27/26
     procedure SetDisplayToHTMLvsText(Mode :TViewModeSet; Lines : TStrings; ActivateOnly : boolean=False); //kt 9/11
     constructor Create(AOwner: TComponent); override;                                   //kt 9/11
@@ -735,7 +737,8 @@ uses fFrame, fVisit, fEncnt, rCore, uCore, fNoteBA, fNoteBD, fSignItem, fEncount
      fNoteSelector,   //tmg  5/22/22
      MDMHelper,       //kt 12/21/20
      fMultiTIUSign,    //6/5/26
-     VAUtils;
+//kt //codex original -->      VAUtils;
+     VAUtils, uHTMLNoteAnalysis, System.JSON; //kt //codex 11/3/26
 
 const
 
@@ -2081,8 +2084,10 @@ begin
   Result := True;
 end;
 
-function TfrmNotes.InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments: TStrings;
-  out ErrorText: string): Boolean;
+//kt //codex original --> function TfrmNotes.InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments: TStrings;
+//kt //codex original -->   out ErrorText: string): Boolean;
+function TfrmNotes.InsertHTMLAtTopicEnds(const TopicNames, HTMLFragments, ReplaceFlags: TStrings; //kt //codex 11/3/26
+  out ErrorText: string): Boolean; //kt //codex 11/3/26
 //kt //codex added entire function 10/27/26; HPI target matching reworked 10/28/26
 var
   Body: IHTMLBodyElement;
@@ -2098,6 +2103,7 @@ var
   SavedRange: IHTMLTxtRange;
   SavedScroll: Integer;
   TopicElement: IHTMLElement;
+  MatchedTitle: IHTMLElement; //kt //codex 11/3/26
   TopicElements: TInterfaceList;
   TerminalBreaks: TInterfaceList;
   HasBreak: Boolean; //kt //codex 11/1/26
@@ -2328,14 +2334,179 @@ var
     end;
   end;
 
+  function CountMatchingTopics(const TopicName: string): Integer;
+  //kt //codex added entire function 11/3/26
+  var
+    Index: Integer;
+    Candidate, TopicContainer: IHTMLElement;
+  begin
+    Result := 0;
+    for Index := 0 to TopicElements.Count - 1 do begin
+      Candidate := IHTMLElement(TopicElements[Index]);
+      if CanonicalTopicName(Candidate.innerText) <> CanonicalTopicName(TopicName) then begin
+        Continue;
+      end;
+      if not IsInHPI(Candidate) then begin
+        Continue;
+      end;
+      TopicContainer := Candidate.parentElement;
+      while Assigned(TopicContainer) and not SameText(TopicContainer.tagName, 'LI') and
+            not SameText(TopicContainer.tagName, 'P') do begin
+        TopicContainer := TopicContainer.parentElement;
+      end;
+      if not Assigned(TopicContainer) then begin
+        Continue;
+      end;
+      if SameText(TopicContainer.tagName, 'P') and
+         not IsDeeTopicParagraph(Candidate, TopicContainer) then begin
+        Continue;
+      end;
+      Inc(Result);
+    end;
+  end;
+
+  function FindReplacementRange(const Title, TopicContainer: IHTMLElement;
+    out ReplaceRange: IHTMLTxtRange; out HasSeparator: Boolean): Boolean;
+  //kt //codex added entire function 11/3/26
+  var
+    TopicRange, StartRange, EndRange, SearchRange, TableRange, TailRange: IHTMLTxtRange;
+    PrefixText, HeaderText: string;
+    Position, ClosingBracket, DashCount: Integer;
+    TableIndex, FirstTableOffset, TableStart, TableEnd, ParsedTableCount: Integer;
+    HasTable: Boolean;
+    RawHTML, TailHTML: string;
+    TableAnalysis, TableInfo: TJSONObject;
+    TableItems: TJSONArray;
+  begin
+    Result := False;
+    ReplaceRange := nil;
+    HasSeparator := False;
+    RawHTML := string(TopicContainer.innerHTML);
+    if Pos('<TABLE', UpperCase(RawHTML)) > 0 then begin
+      Exit;
+    end;
+    RawHTML := StringReplace(RawHTML, '--&nbsp;[', '-- [', [rfReplaceAll, rfIgnoreCase]);
+    TableAnalysis := AnalyzeHTMLNote(RawHTML);
+    try
+      TableItems := TableAnalysis.GetValue('tables') as TJSONArray;
+      ParsedTableCount := TableItems.Count;
+      if TableItems.Count > 0 then begin
+        TableInfo := TableItems.Items[0] as TJSONObject;
+        FirstTableOffset := StrToIntDef(TableInfo.GetValue('startOffset').Value, -1);
+        if (FirstTableOffset < 0) or (FirstTableOffset >= Length(RawHTML)) then begin
+          Exit;
+        end;
+        TailHTML := Copy(RawHTML, FirstTableOffset + 1, MaxInt);
+        for TableIndex := TableItems.Count - 1 downto 0 do begin
+          TableInfo := TableItems.Items[TableIndex] as TJSONObject;
+          TableStart := StrToIntDef(TableInfo.GetValue('startOffset').Value, -1);
+          TableEnd := StrToIntDef(TableInfo.GetValue('endOffset').Value, -1);
+          if (TableStart < FirstTableOffset) or (TableEnd <= TableStart) or (TableEnd > Length(RawHTML)) then begin
+            Exit;
+          end;
+          Delete(TailHTML, TableStart - FirstTableOffset + 1, TableEnd - TableStart);
+        end;
+        if (TailHTML <> '') and (Trim(StripHTMLTags(TailHTML)) <> '') then begin
+          Exit;
+        end;
+      end;
+    finally
+      TableAnalysis.Free;
+    end;
+    TopicRange := Body.createTextRange;
+    TopicRange.moveToElementText(TopicContainer);
+    StartRange := Body.createTextRange;
+    StartRange.moveToElementText(Title);
+    StartRange.collapse(False);
+    StartRange.setEndPoint('EndToEnd', TopicRange);
+    PrefixText := StartRange.text;
+    Position := 1;
+    while (Position <= Length(PrefixText)) and CharInSet(PrefixText[Position], [' ', #9, #160]) do begin
+      Inc(Position);
+    end;
+    if (Position <= Length(PrefixText)) and (PrefixText[Position] = ':') then begin
+      Inc(Position);
+    end;
+    while (Position <= Length(PrefixText)) and CharInSet(PrefixText[Position], [' ', #9, #160]) do begin
+      Inc(Position);
+    end;
+    while SameText(Copy(PrefixText, Position, 6), '[GROUP') do begin
+      ClosingBracket := PosEx(']', PrefixText, Position + 6);
+      if ClosingBracket = 0 then begin
+        Exit;
+      end;
+      Position := ClosingBracket + 1;
+      while (Position <= Length(PrefixText)) and CharInSet(PrefixText[Position], [' ', #9, #160]) do begin
+        Inc(Position);
+      end;
+    end;
+    StartRange.moveStart('character', Position - 1);
+    StartRange.collapse(True);
+    SearchRange := StartRange.duplicate;
+    SearchRange.setEndPoint('EndToEnd', TopicRange);
+    HasTable := False;
+    while SearchRange.findText('-- [', 0, 0) do begin
+      if SearchRange.compareEndPoints('EndToEnd', TopicRange) > 0 then begin
+        Break;
+      end;
+      TailRange := SearchRange.duplicate;
+      TailRange.setEndPoint('EndToEnd', TopicRange);
+      HeaderText := TailRange.text;
+      ClosingBracket := Pos(']', HeaderText);
+      if ClosingBracket > 4 then begin
+        Position := ClosingBracket + 1;
+        while (Position <= Length(HeaderText)) and CharInSet(HeaderText[Position], [' ', #9, #160]) do begin
+          Inc(Position);
+        end;
+        DashCount := 0;
+        while (Position <= Length(HeaderText)) and (HeaderText[Position] = '-') do begin
+          Inc(DashCount);
+          Inc(Position);
+        end;
+        if DashCount >= 5 then begin
+          TableRange := SearchRange.duplicate;
+          TableRange.collapse(True);
+          HasTable := True;
+          Break;
+        end;
+      end;
+      SearchRange.collapse(False);
+      SearchRange.setEndPoint('EndToEnd', TopicRange);
+    end;
+    if (ParsedTableCount > 0) <> HasTable then begin
+      Exit;
+    end;
+    if not HasTable and (Pos('-- [', string(TopicContainer.innerText)) > 0) then begin
+      Exit;
+    end;
+    if not HasTable then begin
+      TableRange := TopicRange.duplicate;
+      TableRange.collapse(False);
+    end;
+    if not FindNarrativeEnd(TopicRange, TableRange, EndRange, HasSeparator) then begin
+      EndRange := StartRange.duplicate;
+    end;
+    if EndRange.compareEndPoints('StartToStart', StartRange) < 0 then begin
+      EndRange := StartRange.duplicate;
+    end;
+    if HasTable and (StartRange.compareEndPoints('StartToStart', TableRange) > 0) then begin
+      Exit;
+    end;
+    ReplaceRange := StartRange.duplicate;
+    ReplaceRange.setEndPoint('EndToStart', EndRange);
+    Result := True;
+  end;
+
 begin
   ErrorText := '';
   Result := False;
   if not GetActiveEditorHTML(ExistingHTML, ErrorText) then begin
     Exit;
   end;
-  if (not Assigned(TopicNames)) or (not Assigned(HTMLFragments)) or
-     (TopicNames.Count <> HTMLFragments.Count) or (TopicNames.Count = 0) then begin
+  //kt //codex original --> if (not Assigned(TopicNames)) or (not Assigned(HTMLFragments)) or
+  //kt //codex original -->    (TopicNames.Count <> HTMLFragments.Count) or (TopicNames.Count = 0) then begin
+  if (not Assigned(TopicNames)) or (not Assigned(HTMLFragments)) or (not Assigned(ReplaceFlags)) or //kt //codex 11/3/26
+     (TopicNames.Count <> HTMLFragments.Count) or (TopicNames.Count <> ReplaceFlags.Count) or (TopicNames.Count = 0) then begin //kt //codex 11/3/26
     ErrorText := 'The topic names and HTML fragments must be matching, non-empty lists.';
     Exit;
   end;
@@ -2371,6 +2542,21 @@ begin
           '" was not found in the current note document.';
         Exit;
       end;
+      if SameText(ReplaceFlags[RangeIndex], 'True') then begin //kt //codex 11/3/26
+        if CountMatchingTopics(TopicNames[RangeIndex]) <> 1 then begin //kt //codex 11/3/26
+          ErrorText := 'The topic must occur exactly once in the current HPI before its text can be replaced.'; //kt //codex 11/3/26
+          Exit; //kt //codex 11/3/26
+        end; //kt //codex 11/3/26
+        MatchedTitle := TopicElement; //kt //codex 11/3/26
+        if not Supports(InsertionContainers[RangeIndex], IHTMLElement, TopicElement) then begin //kt //codex 11/3/26
+          ErrorText := 'The topic container is unavailable.'; //kt //codex 11/3/26
+          Exit; //kt //codex 11/3/26
+        end; //kt //codex 11/3/26
+        if not FindReplacementRange(MatchedTitle, TopicElement, InsertionRange, HasBreak) then begin //kt //codex 11/3/26
+          ErrorText := 'The topic replacement range could not be determined.'; //kt //codex 11/3/26
+          Exit; //kt //codex 11/3/26
+        end; //kt //codex 11/3/26
+      end; //kt //codex 11/3/26
       InsertionRanges.Add(InsertionRange);
       PreserveSeparators.Add(BoolToStr(HasBreak, True)); //kt //codex 11/1/26
     end;
@@ -2387,7 +2573,9 @@ begin
            SameText(Copy(InsertionHTML, Length(InsertionHTML) - 7, 8), '<BR><BR>') then begin //kt //codex 11/1/26
           Delete(InsertionHTML, Length(InsertionHTML) - 7, 8); //kt //codex 11/1/26
         end; //kt //codex 11/1/26
-        if Assigned(TerminalBreaks[RangeIndex]) then begin
+        if SameText(ReplaceFlags[RangeIndex], 'True') then begin //kt //codex 11/3/26
+          IHTMLTxtRange(InsertionRanges[RangeIndex]).PasteHTML(InsertionHTML); //kt //codex 11/3/26
+        end else if Assigned(TerminalBreaks[RangeIndex]) then begin //kt //codex 11/3/26
           //kt //codex original --> IHTMLElement(TerminalBreaks[RangeIndex]).outerHTML := HTMLFragments[RangeIndex];
           IHTMLElement(TerminalBreaks[RangeIndex]).outerHTML := InsertionHTML; //kt //codex 11/1/26
         end else if Assigned(InsertionRanges[RangeIndex]) then begin
@@ -2423,6 +2611,332 @@ begin
     TerminalBreaks.Free;
     InsertionRanges.Free;
     TopicElements.Free;
+  end;
+end;
+
+function TfrmNotes.SyncTopicTables(const TopicNames, TableNames, TableHTML: TStrings;
+  out ErrorText: string): Boolean;
+//kt //codex added entire function 11/3/26
+var
+  Body: IHTMLBodyElement;
+  HPIStart, HPIEnd, ElementRange, SavedRange: IHTMLTxtRange;
+  Elements, Containers: TInterfaceList;
+  OriginalHTML, UpdatedHTML: TStringList;
+  Element, Container, FoundContainer: IHTMLElement;
+  Analysis: TJSONObject;
+  Tables: TJSONArray;
+  TableInfo: TJSONObject;
+  Index, J, ContainerIndex, MatchCount, StartOffset, EndOffset, SavedScroll: Integer;
+  HTML, Name, Prefix: string;
+  RollbackOK: Boolean;
+
+  function CanonicalName(const Value: string): string;
+  var
+    K: Integer;
+  begin
+    Result := '';
+    for K := 1 to Length(Value) do begin
+      case Value[K] of
+        ' ', #9, #10, #13, #160, #$200B, #$FEFF: begin
+        end;
+        '-', #$2010, #$2011, #$2012, #$2013, #$2014, #$2212: begin
+          Result := Result + '-';
+        end;
+      else
+        Result := Result + UpperCase(Value[K]);
+      end;
+    end;
+  end;
+
+  function StartsWithTableBreak(const Tail: string): Boolean;
+  //kt //codex added entire function 11/3/26
+  var
+    Position, TagEnd: Integer;
+    Tag: string;
+  begin
+    Result := False;
+    Position := 1;
+    while Position <= Length(Tail) do begin
+      if CharInSet(Tail[Position], [' ', #9, #10, #13, #160]) then begin
+        Inc(Position);
+      end else if SameText(Copy(Tail, Position, 6), '&nbsp;') then begin
+        Inc(Position, 6);
+      end else if Copy(Tail, Position, 2) = '</' then begin
+        TagEnd := PosEx('>', Tail, Position + 2);
+        if TagEnd = 0 then begin
+          Exit;
+        end;
+        Tag := UpperCase(Copy(Tail, Position, TagEnd - Position + 1));
+        if (Tag <> '</I>') and (Tag <> '</B>') and (Tag <> '</U>') and
+           (Tag <> '</EM>') and (Tag <> '</STRONG>') and (Tag <> '</SPAN>') and
+           (Tag <> '</FONT>') and (Tag <> '</A>') then begin
+          Exit;
+        end;
+        Position := TagEnd + 1;
+      end else begin
+        if SameText(Copy(Tail, Position, 3), '<BR') and (Position + 3 <= Length(Tail)) then begin
+          Result := CharInSet(Tail[Position + 3], ['>', '/', ' ', #9, #10, #13]);
+        end;
+        Exit;
+      end;
+    end;
+  end;
+
+  function IsSelfContainedHTML(const Fragment: string): Boolean;
+  var
+    Tags: TStringList;
+    Position, TagEnd, NameEnd: Integer;
+    Tag, TagName: string;
+    Closing: Boolean;
+    Quote: Char;
+  begin
+    Result := False;
+    Tags := TStringList.Create;
+    try
+      Position := 1;
+      while Position <= Length(Fragment) do begin
+        if Fragment[Position] <> '<' then begin
+          Inc(Position);
+          Continue;
+        end;
+        TagEnd := Position + 1;
+        Quote := #0;
+        while TagEnd <= Length(Fragment) do begin
+          if Quote <> #0 then begin
+            if Fragment[TagEnd] = Quote then begin
+              Quote := #0;
+            end;
+          end else if (Fragment[TagEnd] = #39) or (Fragment[TagEnd] = '"') then begin
+            Quote := Fragment[TagEnd];
+          end else if Fragment[TagEnd] = '>' then begin
+            Break;
+          end;
+          Inc(TagEnd);
+        end;
+        if TagEnd > Length(Fragment) then begin
+          Exit;
+        end;
+        Tag := Trim(Copy(Fragment, Position + 1, TagEnd - Position - 1));
+        Position := TagEnd + 1;
+        if Tag = '' then begin
+          Exit;
+        end;
+        if (Tag[1] = '!') or (Tag[1] = '?') then begin
+          Continue;
+        end;
+        Closing := Tag[1] = '/';
+        if Closing then begin
+          Delete(Tag, 1, 1);
+          Tag := Trim(Tag);
+        end;
+        NameEnd := 1;
+        while (NameEnd <= Length(Tag)) and not CharInSet(Tag[NameEnd], [' ', #9, #10, #13, '/']) do begin
+          Inc(NameEnd);
+        end;
+        TagName := UpperCase(Copy(Tag, 1, NameEnd - 1));
+        if TagName = '' then begin
+          Exit;
+        end;
+        if Pos(' ' + TagName + ' ', ' AREA BASE BR COL EMBED HR IMG INPUT LINK META PARAM SOURCE TRACK WBR ') > 0 then begin
+          Continue;
+        end;
+        if Closing then begin
+          if (Tags.Count = 0) or not SameText(Tags[Tags.Count - 1], TagName) then begin
+            Exit;
+          end;
+          Tags.Delete(Tags.Count - 1);
+        end else if Tag[Length(Tag)] <> '/' then begin
+          Tags.Add(TagName);
+        end;
+      end;
+      Result := Tags.Count = 0;
+    finally
+      Tags.Free;
+    end;
+  end;
+
+begin
+  Result := False;
+  ErrorText := '';
+  if not Assigned(TopicNames) or not Assigned(TableNames) or not Assigned(TableHTML) or
+     (TopicNames.Count <> TableNames.Count) or (TopicNames.Count <> TableHTML.Count) or
+     (TopicNames.Count = 0) then begin
+    ErrorText := 'The table changes are incomplete.';
+    Exit;
+  end;
+  if not Assigned(HtmlEditor) or not Assigned(HtmlEditor.DOC) or
+     not Assigned(HtmlEditor.DOC.body) then begin
+    ErrorText := 'The current note editor is not available.';
+    Exit;
+  end;
+  Body := HtmlEditor.DOC.body as IHTMLBodyElement;
+  HPIStart := Body.createTextRange;
+  if not HPIStart.findText('HISTORY OF PRESENT ILLNESS (HPI):', 0, 0) then begin
+    ErrorText := 'The current note does not contain an HPI section.';
+    Exit;
+  end;
+  HPIStart.collapse(False);
+  HPIEnd := HPIStart.duplicate;
+  if HPIEnd.findText('PAST MEDICAL HISTORY (PMH)', 0, 0) then begin
+    HPIEnd.collapse(True);
+  end else begin
+    HPIEnd := Body.createTextRange;
+    HPIEnd.collapse(False);
+  end;
+  Elements := TInterfaceList.Create;
+  Containers := TInterfaceList.Create;
+  OriginalHTML := TStringList.Create;
+  UpdatedHTML := TStringList.Create;
+  try
+    HtmlEditor.GetElementsArrayByTagName('U', Elements);
+    for Index := 0 to TopicNames.Count - 1 do begin
+      FoundContainer := nil;
+      MatchCount := 0;
+      for J := 0 to Elements.Count - 1 do begin
+        Element := IHTMLElement(Elements[J]);
+        if CanonicalName(Element.innerText) <> CanonicalName(TopicNames[Index]) then begin
+          Continue;
+        end;
+        ElementRange := Body.createTextRange;
+        ElementRange.moveToElementText(Element);
+        if (ElementRange.compareEndPoints('StartToStart', HPIStart) < 0) or
+           (ElementRange.compareEndPoints('StartToStart', HPIEnd) >= 0) then begin
+          Continue;
+        end;
+        Container := Element.parentElement;
+        while Assigned(Container) and not SameText(Container.tagName, 'LI') and
+              not SameText(Container.tagName, 'P') do begin
+          Container := Container.parentElement;
+        end;
+        if not Assigned(Container) then begin
+          Continue;
+        end;
+        if SameText(Container.tagName, 'P') then begin
+          Prefix := Container.innerText;
+          Prefix := Copy(Prefix, 1, Pos(string(Element.innerText), Prefix) - 1);
+          Prefix := StringReplace(Prefix, #160, '', [rfReplaceAll]);
+          if Trim(Prefix) <> '*' then begin
+            Container := nil;
+            Continue;
+          end;
+        end;
+        Inc(MatchCount);
+        if MatchCount = 1 then begin
+          FoundContainer := Container;
+        end;
+      end;
+      if (MatchCount <> 1) or not Assigned(FoundContainer) then begin
+        ErrorText := 'Cannot uniquely find topic "' + TopicNames[Index] + '" in the current HPI.';
+        Exit;
+      end;
+      Container := FoundContainer;
+      ContainerIndex := Containers.IndexOf(Container as IUnknown);
+      if ContainerIndex < 0 then begin
+        ContainerIndex := Containers.Add(Container as IUnknown);
+        OriginalHTML.Add(Container.innerHTML);
+        UpdatedHTML.Add(Container.innerHTML);
+      end;
+      HTML := StringReplace(UpdatedHTML[ContainerIndex], '--&nbsp;[', '-- [', [rfReplaceAll, rfIgnoreCase]);
+      Analysis := AnalyzeHTMLNote(HTML);
+      try
+        Tables := Analysis.GetValue('tables') as TJSONArray;
+        MatchCount := 0;
+        StartOffset := -1;
+        EndOffset := -1;
+        for J := 0 to Tables.Count - 1 do begin
+          TableInfo := Tables.Items[J] as TJSONObject;
+          Name := TableInfo.GetValue('name').Value;
+          if CanonicalName(Name) = CanonicalName(TableNames[Index]) then begin
+            Inc(MatchCount);
+            StartOffset := StrToIntDef(TableInfo.GetValue('startOffset').Value, -1);
+            EndOffset := StrToIntDef(TableInfo.GetValue('endOffset').Value, -1);
+          end;
+        end;
+        if MatchCount > 1 then begin
+          ErrorText := 'More than one "' + TableNames[Index] + '" table occurs in topic "' + TopicNames[Index] + '".';
+          Exit;
+        end;
+        if MatchCount = 1 then begin
+          if (StartOffset < 0) or (EndOffset <= StartOffset) or (EndOffset > Length(HTML)) then begin
+            ErrorText := 'The existing table boundaries could not be determined.';
+            Exit;
+          end;
+          if not IsSelfContainedHTML(Copy(HTML, StartOffset + 1, EndOffset - StartOffset)) then begin
+            ErrorText := 'The existing "' + TableNames[Index] + '" table shares formatting with surrounding text and cannot be safely replaced automatically.';
+            Exit;
+          end;
+          if Copy(HTML, EndOffset + 1, 4) = '-- [' then begin
+            Insert('<BR><BR>', HTML, EndOffset + 1);
+          end;
+          if not StartsWithTableBreak(Copy(HTML, EndOffset + 1, MaxInt)) then begin //kt //codex 11/3/26
+            Insert('<BR>', HTML, EndOffset + 1); //kt //codex 11/3/26
+          end; //kt //codex 11/3/26
+          Delete(HTML, StartOffset + 1, EndOffset - StartOffset);
+          Insert(TableHTML[Index], HTML, StartOffset + 1);
+        end else begin
+          if Pos('-- [' + UpperCase(TableNames[Index]) + ']', UpperCase(StripHTMLTags(HTML))) > 0 then begin
+            ErrorText := 'The existing "' + TableNames[Index] + '" table could not be safely identified.';
+            Exit;
+          end;
+          HTML := HTML + '<BR><BR>' + TableHTML[Index] + '<BR>';
+        end;
+        UpdatedHTML[ContainerIndex] := HTML;
+      finally
+        Analysis.Free;
+      end;
+    end;
+    SavedScroll := HtmlEditor.GetScrollLocation;
+    SavedRange := HtmlEditor.GetTextRange;
+    if Assigned(SavedRange) then begin
+      SavedRange := SavedRange.duplicate;
+    end;
+    try
+      for Index := 0 to Containers.Count - 1 do begin
+        if not Supports(Containers[Index], IHTMLElement, Container) then begin
+          raise Exception.Create('The topic element is no longer available.');
+        end;
+        Container.innerHTML := UpdatedHTML[Index];
+      end;
+      HtmlEditor.KeyStruck := True;
+      FChanged := True;
+      GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor);
+      Result := True;
+    except
+      on E: Exception do begin
+        RollbackOK := True;
+        for Index := 0 to Containers.Count - 1 do begin
+          try
+            if not Supports(Containers[Index], IHTMLElement, Container) then begin
+              raise Exception.Create('The topic element is no longer available.');
+            end;
+            Container.innerHTML := OriginalHTML[Index];
+          except
+            RollbackOK := False;
+          end;
+        end;
+        try
+          GLOBAL_HTMLTemplateDialogsMgr.SyncFromHTMLDocument(HtmlEditor);
+        except
+          RollbackOK := False;
+        end;
+        ErrorText := 'Unable to update the tables in the current note: ' + E.Message;
+        if not RollbackOK then begin
+          ErrorText := ErrorText + sLineBreak + 'The note may contain partial changes; review it before saving.';
+        end;
+      end;
+    end;
+    if Assigned(SavedRange) then begin
+      try
+        SavedRange.select;
+      except
+      end;
+    end;
+    (HtmlEditor.DOC.body as IHTMLElement2).ScrollTop := SavedScroll;
+  finally
+    UpdatedHTML.Free;
+    OriginalHTML.Free;
+    Containers.Free;
+    Elements.Free;
   end;
 end;
 

@@ -444,6 +444,7 @@ uses
   fTopics in 'TMG_Extra\fTopics.pas' {frmTopics},
   fTopicTablePicker in 'TMG_Extra\fTopicTablePicker.pas' {frmTopicTablePicker},
   fTopicTableEdit in 'TMG_Extra\fTopicTableEdit.pas' {frmTopicTableEdit},
+  fTopicSyncReview in 'TMG_Extra\fTopicSyncReview.pas', //kt //codex 11/3/26
   fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
   fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
   fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants},

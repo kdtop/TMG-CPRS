@@ -2,6 +2,23 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-03 — Topics curated editing and note sync
+
+- The curated pane omits the topic-name prefix and embedded tables, displays prior text in italics, and provides an Edit link using the shared topic editor. Saved curated edits are held for the CPRS session, including across patient switches; the source-note date is hidden after editing. The user confirmed curated editing works.
+- Sync now asks to save an active editor before proceeding and offers a checked-by-default review of pending entries, curated edits, and tables. Unchecked changes remain pending. Editing a still-pending new entry updates its pending text.
+- For a current note, selected curated text replaces the existing topic narrative while preserving the topic title, group metadata, and supported table boundaries. Selected new or edited entries are combined with the replacement; their dates and text remain normal while curated text is italic. A pending curated edit retains an entry pushed separately so a later replacement does not erase it. Curated edits and selected entries/tables can also be pushed to a new note using the existing temporary carry-forward builder.
+- Added current-note table replacement and insertion, with checks for duplicate or ambiguous targets and retained pending state on failure. Fixed a COM interface cast that caused an MSHTML runtime crash. The user confirmed the combined curated, entry, and table push worked.
+- Adjusted the combined payload so the entry follows curated text on the same line, and added a missing trailing break after a replaced table while preserving existing breaks. These final spacing changes still need a fresh Delphi build and runtime check.
+
+## 2026-11-03 — RxHistory note navigation and multisign queue
+
+- Multisign queue items now show a green check for signing and a red X with struck-through text for deletion. The user confirmed the change works.
+- Extended `LIST SUMMARY^TMGRX011` to return a `1.5^<TIU IEN>^<note title>^<note FMDT>^<author name>` line for each note supporting a summarized medication entry, deduplicated per note and entry. Updated the `rRxHistory` contract documentation. Medication observations remain first/last appearances, not proof of uninterrupted use.
+- Added `LIST 1 TIU:<TIU IEN>` and `ListRxHistoryForNote` to obtain a selected note's incoming and final medication table entries. The server restricts the lookup to the current patient and uses the existing SOURCE DOCUMENT `B` index in file 22733.51; no new index was needed.
+- The RxHistory center pane displays the selected note using `LoadDocumentText`; the right pane displays the incoming and final medication lists. Added a standard-color header with the Notes-style zoom buttons. Note labels use `YYYY/MM/DD <title> -- <author>` while retaining the TIU IEN in the tree model.
+- By Name groups entries by medication; single clicks toggle medication names and summary entries. By Date reuses the loaded summary, deduplicates notes by TIU IEN, and sorts them newest-first beneath expandable year nodes. Clicking a note in either view loads its text and tables. The user reported the result looks great.
+- The date view includes notes represented by summary medication entries. A note whose medication tables contain no summarized entries is not included. The reported Delphi `TWebBrowser.Parent` build error was fixed by assigning through `TWinControl`, and the user rebuilt CPRS.
+
 ## 2026-11-02 — Medication history client foundation
 
 - Added the Rx History chart tab and `fRxHistory` form, with Topics-style resizable, animated side panes and independent saved pane settings. The left pane includes By Name and By Date tabs, a medication tree, and a parsed-text setting; the center and right panes are placeholders for future work.

@@ -284,11 +284,12 @@ begin
     if CloseBracket = 0 then begin
       Break;
     end;
-    Cursor := CloseBracket + 1;
-    while (Cursor <= Length(AHTML)) and
-          CharInSet(AHTML[Cursor], [' ', #9, #10, #13]) do begin
-      Inc(Cursor);
-    end;
+    //kt //codex original --> Cursor := CloseBracket + 1;
+    //kt //codex original --> while (Cursor <= Length(AHTML)) and
+    //kt //codex original -->       CharInSet(AHTML[Cursor], [' ', #9, #10, #13]) do begin
+    //kt //codex original -->   Inc(Cursor);
+    //kt //codex original --> end;
+    Cursor := SkipVisualWhitespace(AHTML, AUpperHTML, CloseBracket + 1, Length(AHTML)); //kt //codex 11/3/26
     DashCount := 0;
     while (Cursor <= Length(AHTML)) and (AHTML[Cursor] = '-') do begin
       Inc(DashCount);

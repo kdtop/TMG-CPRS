@@ -1963,9 +1963,11 @@ object frmMultiTIUSign: TfrmMultiTIUSign
           Width = 162
           Height = 403
           Align = alClient
+          Style = lbOwnerDrawFixed
           ItemHeight = 13
           TabOrder = 0
           OnClick = lbSelectedClick
+          OnDrawItem = lbSelectedDrawItem
         end
       end
       object pnlRightBottom: TPanel

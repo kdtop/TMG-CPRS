@@ -266,6 +266,7 @@ procedure FindTables(const AHTML, AUpperHTML: string;
 var
   SearchPosition: Integer;
   HeaderStart: Integer;
+  OpenBracket: Integer; //kt //codex 11/4/26
   CloseBracket: Integer;
   Cursor: Integer;
   DashCount: Integer;
@@ -276,11 +277,19 @@ begin
   SetLength(ATables, 0);
   SearchPosition := 1;
   while SearchPosition <= Length(AHTML) do begin
-    HeaderStart := PosEx('-- [', AUpperHTML, SearchPosition);
+    //kt //codex original --> HeaderStart := PosEx('-- [', AUpperHTML, SearchPosition);
+    HeaderStart := PosEx('--', AUpperHTML, SearchPosition); //kt //codex 11/4/26
     if HeaderStart = 0 then begin
       Break;
     end;
-    CloseBracket := PosEx(']', AHTML, HeaderStart + 4);
+    OpenBracket := SkipVisualWhitespace(AHTML, AUpperHTML, HeaderStart + 2, Length(AHTML)); //kt //codex 11/4/26
+    if (OpenBracket = HeaderStart + 2) or (OpenBracket > Length(AHTML)) or //kt //codex 11/4/26
+       (AHTML[OpenBracket] <> '[') then begin //kt //codex 11/4/26
+      SearchPosition := HeaderStart + 2; //kt //codex 11/4/26
+      Continue; //kt //codex 11/4/26
+    end; //kt //codex 11/4/26
+    //kt //codex original --> CloseBracket := PosEx(']', AHTML, HeaderStart + 4);
+    CloseBracket := PosEx(']', AHTML, OpenBracket + 1); //kt //codex 11/4/26
     if CloseBracket = 0 then begin
       Break;
     end;
@@ -297,11 +306,14 @@ begin
     end;
     if DashCount >= 5 then begin
       AddTableRange(ATables,
-        DecodeBasicHTMLEntities(Copy(AHTML, HeaderStart + 4,
-          CloseBracket - HeaderStart - 4)), HeaderStart - 1, Cursor - 1);
+        //kt //codex original --> DecodeBasicHTMLEntities(Copy(AHTML, HeaderStart + 4,
+        //kt //codex original -->   CloseBracket - HeaderStart - 4)), HeaderStart - 1, Cursor - 1);
+        DecodeBasicHTMLEntities(Copy(AHTML, OpenBracket + 1, //kt //codex 11/4/26
+          CloseBracket - OpenBracket - 1)), HeaderStart - 1, Cursor - 1); //kt //codex 11/4/26
       SearchPosition := Cursor;
     end else begin
-      SearchPosition := HeaderStart + 4;
+      //kt //codex original --> SearchPosition := HeaderStart + 4;
+      SearchPosition := OpenBracket + 1; //kt //codex 11/4/26
     end;
   end;
 

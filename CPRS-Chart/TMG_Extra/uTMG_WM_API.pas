@@ -111,10 +111,12 @@ implementation
   procedure TTMGWMAPI.ReplyToMessage(StringToSend: string; DestinationHandle: THandle);
   var
     copyDataStruct : TCopyDataStruct;
+    AnsiToSend: AnsiString;
   begin
+    AnsiToSend := AnsiString(StringToSend);
     copyDataStruct.dwData := 0; //use it to identify the message contents
-    copyDataStruct.cbData := 1 + Length(StringToSend) ;
-    copyDataStruct.lpData := PChar(StringToSend) ;
+    copyDataStruct.cbData := Length(AnsiToSend) + 1;
+    copyDataStruct.lpData := PAnsiChar(AnsiToSend);
     SendMessage(DestinationHandle, WM_COPYDATA, FFrameHandle, Integer(@copyDataStruct)) ;
   end;
 

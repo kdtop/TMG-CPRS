@@ -2,6 +2,21 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-05 — Windows messages and curated topic investigation
+
+- Fixed outgoing `WM_COPYDATA` replies to use an ANSI buffer and byte count for compatibility with the existing messenger. The user forced a Delphi rebuild and confirmed it works.
+- Investigated missing curated topic text. The historical reprocessing populated many caches, including the patient originally reported; a fresh scan still found 267 empty topics, with nine associated candidate documents. Eight processed without reported errors and one was skipped as incomplete; no further topics were populated. Some remaining records may have no eligible source or may be artifacts.
+- Moved the reusable `CHKCURAT` and `RECURAT` tools to `TMGTOPIC`. Scans store numbered runs under `^TMG("TMP","CHKCURAT^TMGTOPIC",...)`; reprocessing includes current source notes and dated-entry notes, shows progress, and removes populated topics from the candidate list. Reprocessing may update curated text and associated tables.
+- Investigated a deceased patient whose nested bullets produced shortened topic records and text fragments. The user removed two shortened records; this case does not establish the cause of other empty topics.
+- Follow-up: verify a normal newly signed note reaches the curated-cache path and updates its source and text. The historical cache gap and any remaining empty topics have not been fully explained.
+
+## 2026-11-04–05 — Topics editing by date
+
+- Fixed curated-table removal when a cached table header contains multiple spaces between `--` and the table name. The user rebuilt CPRS and confirmed that the HYPERTENSION table no longer appears in the curated text.
+- Added a modal **Edit By Dates** dialog for curated text. It splits plain text at numeric dates without requiring a colon, retains undated text, and displays each section in an editable memo with a checked-by-default checkbox. OK combines the checked sections into a pending curated edit and hides the source-note date; Cancel leaves the text unchanged.
+- Disabled both curated edit links while the existing curated editor is active, preventing repeated clicks from replacing an unfinished edit. The user confirmed the editing behavior works.
+- Sized each memo using its wrapped line count and font height, with a maximum height and scrolling for longer entries. The user rebuilt CPRS and confirmed the tighter sizing works.
+
 ## 2026-11-03 — Topics curated editing and note sync
 
 - The curated pane omits the topic-name prefix and embedded tables, displays prior text in italics, and provides an Edit link using the shared topic editor. Saved curated edits are held for the CPRS session, including across patient switches; the source-note date is hidden after editing. The user confirmed curated editing works.

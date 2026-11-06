@@ -217,6 +217,7 @@ type
     FPendingCuratedEdits: TDictionary<string, string>;
     FCuratedCurrentHTML: string;
     lblEditCurated: TLabel;
+    lblEditCuratedByDates: TLabel;
     FNewTopicEntry: Boolean;
     FTopicSortKeys: TList<TTopicSortKey>;
     FTopicsListViewWindowProc: TWndMethod;
@@ -244,6 +245,7 @@ type
     procedure DisplayTopicHTML(const HTML: string);
     procedure DisplayCuratedTopic;
     procedure EditCuratedClick(Sender: TObject);
+    procedure EditCuratedByDatesClick(Sender: TObject);
     function TopicEditorActive: Boolean;
     procedure DisplayTopicDataHTML;
     function CursorOverControl(AControl: TControl): Boolean;
@@ -1771,17 +1773,27 @@ begin
   UpdateCenterPanelConstraints;
   Splitter1.OnMoved := Splitter1Moved;
   Splitter2.OnMoved := Splitter2Moved;
-  lblLastCuratedTopic.Width := pnlCenterMiddleBanner.ClientWidth - 120;
+  lblLastCuratedTopic.Width := pnlCenterMiddleBanner.ClientWidth - 200;
   lblEditCurated := TLabel.Create(Self);
   lblEditCurated.Parent := pnlCenterMiddleBanner;
   lblEditCurated.Caption := 'Edit';
   lblEditCurated.Font.Color := clBlue;
   lblEditCurated.Font.Style := [fsUnderline];
   lblEditCurated.Cursor := crHandPoint;
-  lblEditCurated.Left := pnlCenterMiddleBanner.ClientWidth - 80;
+  lblEditCurated.Left := pnlCenterMiddleBanner.ClientWidth - 160;
   lblEditCurated.Top := 6;
   lblEditCurated.Anchors := [akTop, akRight];
   lblEditCurated.OnClick := EditCuratedClick;
+  lblEditCuratedByDates := TLabel.Create(Self);
+  lblEditCuratedByDates.Parent := pnlCenterMiddleBanner;
+  lblEditCuratedByDates.Caption := 'Edit By Dates';
+  lblEditCuratedByDates.Font.Color := clBlue;
+  lblEditCuratedByDates.Font.Style := [fsUnderline];
+  lblEditCuratedByDates.Cursor := crHandPoint;
+  lblEditCuratedByDates.Left := pnlCenterMiddleBanner.ClientWidth - 125;
+  lblEditCuratedByDates.Top := 6;
+  lblEditCuratedByDates.Anchors := [akTop, akRight];
+  lblEditCuratedByDates.OnClick := EditCuratedByDatesClick;
   btnOpenCloseCurated.OnClick := btnOpenCloseCuratedClick;
   btnOpenCloseCurated.OnMouseEnter := btnOpenCloseCuratedMouseEnter;
   btnOpenCloseCurated.OnMouseLeave := btnOpenCloseCuratedMouseLeave;
@@ -1951,6 +1963,8 @@ var
 begin
   FEditingTopicEntryFMDate := '';
   FEditingCurated := False;
+  lblEditCurated.Enabled := True;
+  lblEditCuratedByDates.Enabled := True;
   FNewTopicEntry := False;
   btnCancel.Enabled := False;
   btnSave.Enabled := False;
@@ -3893,7 +3907,7 @@ procedure TfrmTopics.EditCuratedClick(Sender: TObject);
 var
   WebDocument: IHTMLDocument2;
 begin
-  if FCurrentTopicPropertyID = '' then begin
+  if (FCurrentTopicPropertyID = '') or FEditingCurated then begin
     Exit;
   end;
   if TopicEditorActive then begin
@@ -3904,6 +3918,8 @@ begin
   ClearTopicEntryEditor;
   WBLoadHTML(wbEnterNew, '<html><body>' + FCuratedCurrentHTML + '</body></html>');
   FEditingCurated := True;
+  lblEditCurated.Enabled := False;
+  lblEditCuratedByDates.Enabled := False;
   SetTopicEditorEditable(True);
   btnCancel.Enabled := True;
   btnSave.Enabled := True;
@@ -3914,6 +3930,205 @@ begin
   if Supports(wbEnterNew.Document, IHTMLDocument2, WebDocument) and Assigned(WebDocument.body) then begin
     (WebDocument.body as IHTMLElement2).focus;
   end;
+end;
+
+function CuratedDateAt(const Text: string; StartPos: Integer): Boolean;
+var
+  Posn, Part, Digits, MaxDigits: Integer;
+begin
+  Result := False;
+  if (StartPos > 1) and CharInSet(Text[StartPos - 1], ['0'..'9', '/']) then begin
+    Exit;
+  end;
+  Posn := StartPos;
+  for Part := 1 to 3 do begin
+    MaxDigits := 2;
+    if Part = 3 then begin
+      MaxDigits := 4;
+    end;
+    Digits := 0;
+    while (Posn <= Length(Text)) and CharInSet(Text[Posn], ['0'..'9']) do begin
+      Inc(Digits);
+      Inc(Posn);
+    end;
+    if (Digits = 0) or (Digits > MaxDigits) then begin
+      Exit;
+    end;
+    if Part < 3 then begin
+      if (Posn > Length(Text)) or (Text[Posn] <> '/') then begin
+        Exit;
+      end;
+      Inc(Posn);
+    end;
+  end;
+  if (Posn <= Length(Text)) and CharInSet(Text[Posn], ['0'..'9', '/']) then begin
+    Exit;
+  end;
+  Result := True;
+end;
+
+function EditCuratedDatesDialog(AOwner: TComponent; const TopicName, PlainText: string;
+  out EditedHTML: string): Boolean;
+var
+  Dialog: TForm;
+  Scroll: TScrollBox;
+  Footer, Row: TPanel;
+  CheckBox: TCheckBox;
+  Memo: TMemo;
+  Button: TButton;
+  Sections: TStringList;
+  Checks: TList<TCheckBox>;
+  Memos: TList<TMemo>;
+  Index, StartPos, MatchPos, RowTop, RowHeight, LineCount: Integer;
+  Segment, Encoded: string;
+  Modified: Boolean;
+begin
+  Result := False;
+  EditedHTML := '';
+  Sections := TStringList.Create;
+  Checks := TList<TCheckBox>.Create;
+  Memos := TList<TMemo>.Create;
+  Dialog := TForm.CreateNew(AOwner);
+  try
+    StartPos := 1;
+    for MatchPos := 1 to Length(PlainText) do begin
+      if CharInSet(PlainText[MatchPos], ['0'..'9']) and CuratedDateAt(PlainText, MatchPos) then begin
+        Segment := Trim(Copy(PlainText, StartPos, MatchPos - StartPos));
+        if Segment <> '' then begin
+          Sections.Add(Segment);
+        end;
+        StartPos := MatchPos;
+      end;
+    end;
+    Segment := Trim(Copy(PlainText, StartPos, MaxInt));
+    if Segment <> '' then begin
+      Sections.Add(Segment);
+    end;
+    if Sections.Count = 0 then begin
+      Sections.Add('');
+    end;
+
+    Dialog.Caption := 'Edit ' + TopicName + ' By Dates';
+    Dialog.Position := poScreenCenter;
+    Dialog.Width := 760;
+    Dialog.Height := 600;
+    Dialog.Constraints.MinWidth := 400;
+    Dialog.Constraints.MinHeight := 300;
+    Footer := TPanel.Create(Dialog);
+    Footer.Parent := Dialog;
+    Footer.Align := alBottom;
+    Footer.Height := 50;
+    Footer.BevelOuter := bvNone;
+    Button := TButton.Create(Dialog);
+    Button.Parent := Footer;
+    Button.Caption := 'OK';
+    Button.ModalResult := mrOK;
+    Button.Default := True;
+    Button.SetBounds(Footer.ClientWidth - 180, 10, 75, 28);
+    Button.Anchors := [akTop, akRight];
+    Button := TButton.Create(Dialog);
+    Button.Parent := Footer;
+    Button.Caption := 'Cancel';
+    Button.ModalResult := mrCancel;
+    Button.Cancel := True;
+    Button.SetBounds(Footer.ClientWidth - 95, 10, 75, 28);
+    Button.Anchors := [akTop, akRight];
+    Scroll := TScrollBox.Create(Dialog);
+    Scroll.Parent := Dialog;
+    Scroll.Align := alClient;
+    Scroll.HorzScrollBar.Visible := False;
+    Scroll.AutoScroll := True;
+    RowTop := 8;
+    for Index := 0 to Sections.Count - 1 do begin
+      RowHeight := 34;
+      Row := TPanel.Create(Dialog);
+      Row.Parent := Scroll;
+      Row.BevelOuter := bvNone;
+      Row.SetBounds(8, RowTop, Scroll.ClientWidth - 30, RowHeight);
+      Row.Anchors := [akLeft, akTop, akRight];
+      CheckBox := TCheckBox.Create(Dialog);
+      CheckBox.Parent := Row;
+      CheckBox.SetBounds(4, 8, 20, 20);
+      CheckBox.Checked := True;
+      Checks.Add(CheckBox);
+      Memo := TMemo.Create(Dialog);
+      Memo.Parent := Row;
+      Memo.SetBounds(28, 2, Row.ClientWidth - 32, RowHeight - 8);
+      Memo.ScrollBars := ssVertical;
+      Memo.WordWrap := True;
+      Memo.Text := Sections[Index];
+      LineCount := SendMessage(Memo.Handle, EM_GETLINECOUNT, 0, 0);
+      Dialog.Canvas.Font.Assign(Memo.Font);
+      RowHeight := LineCount * Dialog.Canvas.TextHeight('Wg') + 18;
+      if RowHeight < 34 then begin
+        RowHeight := 34;
+      end;
+      if RowHeight > 220 then begin
+        RowHeight := 220;
+      end;
+      Row.Height := RowHeight;
+      Memo.Height := RowHeight - 8;
+      Memo.Anchors := [akLeft, akTop, akRight, akBottom];
+      Memos.Add(Memo);
+      Inc(RowTop, RowHeight);
+    end;
+    if Dialog.ShowModal <> mrOK then begin
+      Exit;
+    end;
+    for Index := 0 to Memos.Count - 1 do begin
+      if Checks[Index].Checked then begin
+        Segment := Trim(Memos[Index].Text);
+        if Segment <> '' then begin
+          Encoded := HTMLEncode(Segment, Modified);
+          Encoded := StringReplace(Encoded, #13#10, '<br>', [rfReplaceAll]);
+          Encoded := StringReplace(Encoded, #13, '<br>', [rfReplaceAll]);
+          Encoded := StringReplace(Encoded, #10, '<br>', [rfReplaceAll]);
+          if EditedHTML <> '' then begin
+            EditedHTML := EditedHTML + ' ';
+          end;
+          EditedHTML := EditedHTML + Encoded;
+        end;
+      end;
+    end;
+    Result := True;
+  finally
+    Dialog.Free;
+    Memos.Free;
+    Checks.Free;
+    Sections.Free;
+  end;
+end;
+
+procedure TfrmTopics.EditCuratedByDatesClick(Sender: TObject);
+var
+  WebDocument: IHTMLDocument2;
+  CuratedElement: IHTMLElement;
+  EditedHTML, CacheKey: string;
+begin
+  if (FCurrentTopicPropertyID = '') or FEditingCurated then begin
+    Exit;
+  end;
+  if not Supports(wbShowCurated.Document, IHTMLDocument2, WebDocument) then begin
+    Exit;
+  end;
+  CuratedElement := (WebDocument as IHTMLDocument3).getElementById('curated-content');
+  if not Assigned(CuratedElement) then begin
+    Exit;
+  end;
+  if not EditCuratedDatesDialog(Self, FCurrentTopicName, CuratedElement.innerText, EditedHTML) then begin
+    Exit;
+  end;
+  if TopicEditorActive then begin
+    if MessageDlg('Discard the current editor changes?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
+      Exit;
+    end;
+    ClearTopicEntryEditor;
+  end;
+  CacheKey := Patient.DFN + '^' + FCurrentTopicPropertyID;
+  FCuratedEdits.AddOrSetValue(CacheKey, EditedHTML);
+  FPendingCuratedEdits.AddOrSetValue(CacheKey, FCurrentTopicName);
+  MarkTopicForNoteSync(FCurrentTopicPropertyID, ptncCurated);
+  DisplayCuratedTopic;
 end;
 
 procedure TfrmTopics.DisplayCuratedTopic;

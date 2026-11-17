@@ -6,7 +6,8 @@ uses
   System.Types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, Grids, ORCtrls, ORfn, Buttons, fAutoSz,
-  VA508AccessibilityManager;
+  //kt //codex original --> VA508AccessibilityManager;
+  VA508AccessibilityManager, fReports; //kt //codex 11/17/26
 
 type
   TfrmReportsAdhocComponent1 = class(TfrmAutoSz)
@@ -87,6 +88,14 @@ type
     { Private declarations }
     GoingUp: Boolean;
     OKPressed: Boolean;
+    FSource: TfrmReports; //kt //codex 11/17/26
+    function GetHSComponents: TStringList; //kt //codex 11/17/26
+    function GetLocalReportData: TStringList; //kt //codex 11/17/26
+    function GetListState: Integer; //kt //codex 11/17/26
+    procedure SetListState(Value: Integer); //kt //codex 11/17/26
+    property uHSComponents: TStringList read GetHSComponents; //kt //codex 11/17/26
+    property uLocalReportData: TStringList read GetLocalReportData; //kt //codex 11/17/26
+    property uListState: Integer read GetListState write SetListState; //kt //codex 11/17/26
   public
     { Public declarations }
   end;
@@ -104,11 +113,13 @@ var
   uLimit: Integer;             //HS Component Subitem Selection limit
   uLimitCount: Integer;        //Count of current Subitem Selections
 
-  function ExecuteAdhoc1: Boolean;
+  //kt //codex original --> function ExecuteAdhoc1: Boolean;
+function ExecuteAdhoc1(ASource: TfrmReports): Boolean; //kt //codex 11/17/26
 
 implementation
 
-uses fReportsAdhocSubItem1, fReports, uCore, rReports;
+//kt //codex original --> uses fReportsAdhocSubItem1, fReports, uCore, rReports;
+uses fReportsAdhocSubItem1, uCore, rReports; //kt //codex 11/17/26
 
 {$R *.DFM}
 type
@@ -127,11 +138,13 @@ THSCompRec = object
 
 end;
 
-function ExecuteAdhoc1: Boolean;
+//kt //codex original --> function ExecuteAdhoc1: Boolean;
+function ExecuteAdhoc1(ASource: TfrmReports): Boolean; //kt //codex 11/17/26
 begin
   Result := False;
   frmReportsAdhocComponent1 := TfrmReportsAdhocComponent1.Create(Application);
   try
+    frmReportsAdhocComponent1.FSource := ASource; //kt //codex 11/17/26
     ResizeFormToFont(TForm(frmReportsAdhocComponent1));
     frmReportsAdhocComponent1.ShowModal;
     if frmReportsAdhocComponent1.OKPressed then
@@ -139,6 +152,30 @@ begin
   finally
     frmReportsAdhocComponent1.Release;
   end;
+end;
+
+function TfrmReportsAdhocComponent1.GetHSComponents: TStringList;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uHSComponents;
+end;
+
+function TfrmReportsAdhocComponent1.GetLocalReportData: TStringList;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uLocalReportData;
+end;
+
+function TfrmReportsAdhocComponent1.GetListState: Integer;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uListState;
+end;
+
+procedure TfrmReportsAdhocComponent1.SetListState(Value: Integer);
+//kt //codex added entire procedure 11/17/26
+begin
+  FSource.uListState := Value;
 end;
 
 procedure TfrmReportsAdhocComponent1.FormCreate(Sender: TObject);

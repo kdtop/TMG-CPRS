@@ -97,6 +97,7 @@ const
   CT_LAST_WEBTAB = CT_WEBTAB3;                  // Last web chart tab //kt 9/11 added
   CT_TOPICS    = 19;                            // chart tab - topics //kt //codex 9/14/26
   CT_RXHISTORY = 20;                            // chart tab - Medication history  //kt added.  11/2/26
+  CT_IMAGING = 21; //kt //codex 11/17/26
 
 
   { Changes object item types }

@@ -458,7 +458,7 @@ inherited frmReports: TfrmReports
           Height = 18
           Align = alTop
           BevelOuter = bvNone
-          TabOrder = 4
+          TabOrder = 1
           ExplicitWidth = 551
           object btnWBZoomOut: TSpeedButton
             Left = 40

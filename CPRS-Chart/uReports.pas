@@ -91,7 +91,7 @@ type
 end;
 
 var
-  RowObjects: TRowObject;
+  //kt //codex original --> RowObjects: TRowObject;
   LabRowObjects: TLabRowObject;
 
 //procedures & functions for Report Tree & ListView objects

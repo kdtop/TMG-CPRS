@@ -10,7 +10,8 @@ uses
   Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, TMGHTML2,
   OleCtrls, SHDocVw, MSHTML, ORFn, fLabs, uImages, uReminders,
   rTIU, uTIU, rCore, fDrawers, ORNet,Trpcb, WinSock, uPCE,
-  ORCtrls, ActnList, Menus, fReminderDialog, ImgList, TypInfo, System.Actions;
+  //kt //codex original --> ORCtrls, ActnList, Menus, fReminderDialog, ImgList, TypInfo, System.Actions;
+  ORCtrls, ActnList, Menus, fReminderDialog, ImgList, TypInfo, System.Actions, fReports; //kt //codex 11/17/26
 
 type
   tSNModes = (snmNone, snmLab, snmReport, snmNurse, snmMessenger, snmRecordsRequest, snmReminder);
@@ -124,6 +125,7 @@ type
     FEditNote: TEditNoteRec;
     FVerifyNoteTitle: Integer;
     FMode: tSNModes;
+    FReportSource: TfrmReports; //kt //codex 11/17/26
     //FSilent : boolean;
     boolAutosaving : Boolean;
     FLabData : TStringList;
@@ -191,16 +193,18 @@ var
   frmSingleNote: TfrmSingleNote;  //<--Not autocreated
 
 
-procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = '');
+//kt //codex original --> procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = '');
+procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = ''; ReportSource: TfrmReports = nil); //kt //codex 11/17/26
 
 implementation
 
 uses System.StrUtils, fImages, fSignItem, uConst, rSurgery, uTMGUtil, uCore,
      fNoteProps, uHTMLTools, uTemplates, fFrame, fNoteDR,
      fAddlSigners, Clipbrd,fNotes, uTMGOptions, fEncnt, fLabPicker,
-     fNetworkMessengerClient,
-     fReports
-     ;
+     //kt //codex original --> fNetworkMessengerClient,
+     //kt //codex original --> fReports
+     //kt //codex original --> ;
+     fNetworkMessengerClient; //kt //codex 11/17/26
 
 {$R *.dfm}
 
@@ -220,7 +224,8 @@ var
   frmDrawers: TfrmDrawers;
 //====================================================================
 
-procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = '');
+//kt //codex original --> procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = '');
+procedure CreateSingleNote(Mode : tSNModes = snmNone; NotifyOK:boolean = false; InitRemIEN:string = ''; ReportSource: TfrmReports = nil); //kt //codex 11/17/26
 begin
    if Assigned(frmSingleNote) then begin  //kt //codex 10/20/26
      MessageDlg('A Single Note window is already open.' + #13#10 +  //kt //codex 10/20/26
@@ -231,6 +236,10 @@ begin
    end;  //kt //codex 10/20/26
    frmSingleNote := TfrmSingleNote.Create(Application);
    frmSingleNote.NotifyOK := NotifyOK;
+   frmSingleNote.FReportSource := ReportSource; //kt //codex 11/17/26
+   if frmSingleNote.FReportSource = nil then begin //kt //codex 11/17/26
+     frmSingleNote.FReportSource := frmReports; //kt //codex 11/17/26
+   end; //kt //codex 11/17/26
    frmSingleNote.InitializeBrowser;  //kt 5/21/25
    frmSingleNote.FormStyle := fsStayOnTop;
    frmSingleNote.Show;  //<-- NOTE: the OnClose event sets close action to caFree --> all will be freed automatically
@@ -1431,7 +1440,8 @@ begin  //Initialize()
     if FMode = snmLab then begin
       HTMLEditor.InsertTextAtCaret('For labs obtained on: '+frmLabs.GetCurrentDate+', please notify that they are OK.'); //kt //codex 8/30/26
     end else if FMode= snmReport then begin
-      HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.'); //kt //codex 8/30/26
+      //kt //codex original --> HTMLEditor.InsertTextAtCaret('For '+frmReports.GetCurrentReportString+', please notify that it is OK.'); //kt //codex 8/30/26
+      HTMLEditor.InsertTextAtCaret('For '+FReportSource.GetCurrentReportString+', please notify that it is OK.'); //kt //codex 8/30/26 //kt //codex 11/17/26
     end;
   end;
   if FMode=snmLab then UpdateButtons;
@@ -1478,7 +1488,8 @@ begin
     end;
     snmReport: begin
       //for Reports: copy current report.
-      TableHTML := '<font face="Consolas">'+frmReports.GetCurrentReportHTMLTable+'</font>';
+      //kt //codex original --> TableHTML := '<font face="Consolas">'+frmReports.GetCurrentReportHTMLTable+'</font>';
+      TableHTML := '<font face="Consolas">'+FReportSource.GetCurrentReportHTMLTable+'</font>'; //kt //codex 11/17/26
       TableHTML := StringReplace(TableHTML, #$D#$A,'<BR>', [rfReplaceAll]);
       TableHTML := StringReplace(TableHTML, '<pre>','', [rfReplaceAll]);
       TableHTML := StringReplace(TableHTML, '</pre>','', [rfReplaceAll]);

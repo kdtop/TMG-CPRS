@@ -975,6 +975,9 @@ begin
   if Result then if Assigned(frmSurgery) then Result := frmSurgery.AllowContextChange(Reason);;
   if Result then if Assigned(frmLabs) then Result := frmLabs.AllowContextChange(Reason);            //kt //codex 8/25/26
   if Result then if Assigned(frmReports) then Result := frmReports.AllowContextChange(Reason);      //kt //codex 8/25/26
+  if Result and Assigned(frmImagingReports) then begin //kt //codex 11/17/26
+    Result := frmImagingReports.AllowContextChange(Reason); //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   if Result then if Assigned(frmGraphData) then Result := frmGraphData.AllowContextChange(Reason);  //kt //codex 8/25/26
   if Result then if Assigned(frmTopics) then Result := frmTopics.AllowContextChange(Reason);        //kt //codex 9/29/26
   if Result then if Assigned(frmRxHistory) then Result := frmRxHistory.AllowContextChange(Reason);  //kt //codex 11/2/26
@@ -1180,6 +1183,9 @@ begin
     //kt //codex original --> frmReports.ClearPtDataForClose;
     frmReports.ClearPtData;
   end;
+  if Assigned(frmImagingReports) then begin //kt //codex 11/17/26
+    frmImagingReports.ClearPtData; //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   if Assigned(frmTopics) then begin
     frmTopics.ClearPtData;
   end;
@@ -1200,7 +1206,7 @@ begin
   end;
   for ASide := tpsLeft to tpsRight do begin
     FTabPages[ASide].TabIndex := -1;
-    LastTabPageID[ASide] := CT_NOPAGE;
+    //kt //codex original --> LastTabPageID[ASide] := CT_NOPAGE;
     SwitchToPage(ASide, nil);
   end;
   ClearReminderData;
@@ -1387,6 +1393,7 @@ begin
   frmSurgery := nil;              //kt //codex 8/25/26
   frmLabs := nil;                 //kt //codex 8/25/26
   frmReports := nil;              //kt //codex 8/25/26
+  frmImagingReports := nil; //kt //codex 11/17/26
   frmImages := nil;               //kt //codex 8/25/26
   frmGraphData := nil;            //kt //codex 8/25/26
   FJustEnteredApp := false;
@@ -1606,7 +1613,10 @@ begin
   CreateTab(tpsLeft, CT_DCSUMM,   'D/C Summ');
   }
   CreateTab(tpsLeft, CT_LABS,     'Labs');
-  CreateTab(tpsLeft, CT_REPORTS,  'Reports');
+  //kt //codex original --> CreateTab(tpsLeft, CT_REPORTS,  'Reports');
+  //kt //codex original --> CreateTab(tpsLeft, CT_IMAGING, 'Imaging'); //kt //codex 11/17/26
+  CreateTab(tpsLeft, CT_IMAGING, 'Imaging'); //kt //codex 11/17/26
+  CreateTab(tpsLeft, CT_REPORTS,  'Reports'); //kt //codex 11/17/26
   CreateTab(tpsLeft, CT_IMAGES,   'Pics', ImagesEnabled);  //kt 9/11  //kt changed 'Images' -> 'Pics' 8/24/26
   { //kt removing 8/26/26 since we don't use
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
@@ -2204,6 +2214,10 @@ begin
     if Assigned(frmSurgery) then frmSurgery.Close;    //frmSurgery.Release;
     frmLabs.Close;       //frmLabs.Release;
     frmReports.Close;    //frmReports.Release;
+    if Assigned(frmImagingReports) then begin //kt //codex 11/17/26
+      frmImagingReports.Close; //kt //codex 11/17/26
+      frmImagingReports := nil; //kt //codex 11/17/26
+    end; //kt //codex 11/17/26
     frmGraphData.Close;  //frmGraphData.Release;
   end;
 //  with mnuTools do for i := Count - 1 downto 0 do
@@ -2478,6 +2492,9 @@ end;
 
 procedure TfrmFrame.SetLastTabs(Index : TTabPageSide; value : integer);  //kt-tabs 11/26/22
 begin
+  if value = CT_DASHBOARD then begin //kt //codex 11/17/26
+    Exit; //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   case index of
     tpsLeft  : FLastTabL := value;
     tpsRight : FLastTabR := value;
@@ -2626,6 +2643,7 @@ begin
     CT_SURGERY:   SwitchToPage(Aside,frmSurgery);
     CT_LABS:      SwitchToPage(Aside,frmLabs);
     CT_REPORTS:   SwitchToPage(Aside,frmReports);
+    CT_IMAGING:   SwitchToPage(Aside,frmImagingReports); //kt //codex 11/17/26
     CT_IMAGES:    SwitchToPage(Aside,frmImages);     //kt 9/11
     CT_MAILBOX:   SwitchToPage(Aside,frmMailbox);    //tmg
     CT_DASHBOARD: SwitchToPage(Aside,frmDashboard);  //tmg  4/19/24
@@ -3356,7 +3374,9 @@ end;
 procedure TfrmFrame.DetermineNextTab(ASide: TTabPageSide);  //kt-tabs 11/26/22
 begin
   if (FRefreshing or User.UseLastTab) and (not FFirstLoad) then begin
-    if (FTabPages[ASide].TabIndex < 0) then begin
+    //kt //codex original --> if (FTabPages[ASide].TabIndex < 0) then begin
+    if (FTabPages[ASide].TabIndex < 0) or //kt //codex 11/17/26
+       (TabIndexToPageID(ASide, FTabPages[ASide].TabIndex) = CT_DASHBOARD) then begin //kt //codex 11/17/26
       NextTabs[ASide] := LastTabPageID[ASide];
     end else begin
       NextTabs[ASide] := TabIndexToPageID(ASide, FTabPages[ASide].TabIndex);
@@ -3364,7 +3384,10 @@ begin
   end else begin
     NextTabs[ASide] := User.InitialTab;
   end;
-  if NextTabs[ASide] = CT_NOPAGE then NextTabs[ASide] := User.InitialTab;
+  //kt //codex original --> if NextTabs[ASide] = CT_NOPAGE then NextTabs[ASide] := User.InitialTab;
+  if (NextTabs[ASide] = CT_NOPAGE) or (NextTabs[ASide] = CT_UNKNOWN) then begin //kt //codex 11/17/26
+    NextTabs[ASide] := User.InitialTab; //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   if User.IsReportsOnly then // Reports Only tab.
     NextTabs[ASide] := CT_REPORTS; // Only one tab should exist by this point in "REPORTS ONLY" mode.
   if not TabExists(NextTabs[ASide]) then NextTabs[ASide] := CT_COVER;
@@ -3966,6 +3989,7 @@ begin
   DoMove(frmSurgery);
   DoMove(frmLabs);
   DoMove(frmReports);
+  DoMove(frmImagingReports); //kt //codex 11/17/26
   DoMove(frmMailbox);
 
   {//kt 8/24/26 removing, we don't use.
@@ -4205,6 +4229,9 @@ begin
   if Assigned(frmSurgery) then frmSurgery.SetFontSize(NewFontSize);
   frmLabs.SetFontSize(NewFontSize);
   frmReports.SetFontSize(NewFontSize);
+  if Assigned(frmImagingReports) then begin //kt //codex 11/17/26
+    frmImagingReports.SetFontSize(NewFontSize); //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   TfrmIconLegend.SetFontSize(NewFontSize);
   uOrders.SetFontSize(NewFontSize);
   if Assigned(frmRemDlg) then frmRemDlg.SetFontSize;
@@ -4433,6 +4460,7 @@ begin
   CT_CONSULTS: frmConsults.RequestPrint;
   //kt 8/24/26 CT_DCSUMM:   frmDCSumm.RequestPrint;
   CT_REPORTS:  frmReports.RequestPrint;
+  CT_IMAGING:  frmImagingReports.RequestPrint; //kt //codex 11/17/26
   CT_LABS:     frmLabs.RequestPrint;
   CT_ORDERS:   frmOrders.RequestPrint;
   CT_PROBLEMS: frmProblems.RequestPrint;
@@ -4658,7 +4686,8 @@ begin
     end;
   end; //with
 
-  uReportInstruction := '';
+  //kt //codex original --> uReportInstruction := '';
+  frmReports.uReportInstruction := ''; //kt //codex 11/17/26
   frmReports.TabControl1.Tabs.Clear;
   frmLabs.TabControl1.Tabs.Clear;
   frmReports.TabControl1.Tabs.AddObject('Local',nil);
@@ -4827,9 +4856,12 @@ begin
     end;
   end;
   //uReportID, uLabRepID = Report ID's set when report is selected (from file 101.24)
-  if not(Piece(uReportID,':',1) = 'OR_VWAL')
-    and not(Piece(uReportID,':',1) = 'OR_VWRX')
-    and not(Piece(uReportID,':',1) = 'OR_VWVS')
+  //kt //codex original --> if not(Piece(uReportID,':',1) = 'OR_VWAL')
+  if not(Piece(frmReports.uReportID,':',1) = 'OR_VWAL') //kt //codex 11/17/26
+    //kt //codex original --> and not(Piece(uReportID,':',1) = 'OR_VWRX')
+    and not(Piece(frmReports.uReportID,':',1) = 'OR_VWRX') //kt //codex 11/17/26
+    //kt //codex original --> and not(Piece(uReportID,':',1) = 'OR_VWVS')
+    and not(Piece(frmReports.uReportID,':',1) = 'OR_VWVS') //kt //codex 11/17/26
     and (frmReports.tvReports.SelectionCount > 0) then frmReports.tvReportsClick(self);
   if not(uLabRepID = '6:GRAPH') and not(uLabRepID = '5:WORKSHEET')
     and not(uLabRepID = '4:SELECTED TESTS BY DATE')
@@ -5129,6 +5161,13 @@ begin
                     frmReports.Parent := HolderPanel;
                     FfrmPagesList.AddObject(frmReports.Name, frmReports);  //kt-tabs
                   end;
+    CT_IMAGING  : begin //kt //codex 11/17/26
+                    frmImagingReports := TfrmReports.Create(nil); //kt //codex 11/17/26
+                    frmImagingReports.Name := 'frmImagingReports'; //kt //codex 11/17/26
+                    frmImagingReports.ConfigureImagingMode; //kt //codex 11/17/26
+                    frmImagingReports.Parent := HolderPanel; //kt //codex 11/17/26
+                    FfrmPagesList.AddObject(frmImagingReports.Name, frmImagingReports); //kt //codex 11/17/26
+                  end; //kt //codex 11/17/26
     CT_SURGERY  : begin
                     frmSurgery := TfrmSurgery.Create(Self);
                     frmSurgery.Parent := HolderPanel;
@@ -5193,6 +5232,7 @@ begin
                                                    CT_ORDERS,
                                                    CT_LABS,
                                                    CT_REPORTS,   //kt //codex 9/14/26
+                                                   CT_IMAGING,   //kt //codex 11/17/26
                                                    CT_TOPICS,    //kt //codex 9/14/26
                                                    CT_RXHISTORY  //kt //codex 11/2/26
                                                    //CT_WEBTAB1,

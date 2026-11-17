@@ -1809,9 +1809,14 @@ var
 
 begin
   FAddToEncounterForm := false;  //may be changed by call back handler
-  if not (Sender is TButton) then exit;
+  Result := ''; //kt //codex 11/17/26
+  //kt //codex original --> if not (Sender is TButton) then exit;
+  if not (Sender is TButtonControl) then begin //kt //codex 11/17/26
+    Exit; //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
 
-  SrchCode := (Sender as TButton).Tag;
+  //kt //codex original --> SrchCode := (Sender as TButton).Tag;
+  SrchCode := (Sender as TButtonControl).Tag; //kt //codex 11/17/26
   if(SrchCode <= LX_Threshold) then begin
     if (Sender = btnAddDx) then begin
       //NOTE: I won't use LexLookupFormTweaker which gives user option for adding to encounter.

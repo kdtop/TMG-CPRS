@@ -46,7 +46,9 @@ uses
   fNoteSelector, //kt 9/20/22
   ShellAPI, //kt 12/21/21
   ORNet,
-  VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR;
+  //kt //codex original --> VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR;
+  //kt //codex original --> VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR, uReports; //kt //codex 11/17/26
+  VA508AccessibilityManager, VA508ImageListLabeler, rWVEHR, uReports, fGraphs; //kt //codex 11/17/26
 
 type
   TNoteVerbs = (nvNone,nvNoteSelect);  //kt 9/20/22
@@ -183,10 +185,39 @@ type
     procedure btnWBNormalZoomClick(Sender: TObject); //kt //codex 10/1/26
 
   private
+    FImagingMode: Boolean; //kt //codex 11/17/26
+    GraphForm: TfrmGraphs; //kt //codex 11/17/26
+    GraphFormActive: boolean; //kt //codex 11/17/26
+    uHSAll: TStringList; //kt //codex 11/17/26
+    uNewColumn: TListColumn; //kt //codex 11/17/26
+    uListItem: TListItem; //kt //codex 11/17/26
+    uMaxOcc: string; //kt //codex 11/17/26
+    uSortOrder: string; //kt //codex 11/17/26
+    uFirstSort: Integer; //kt //codex 11/17/26
+    uSecondSort: Integer; //kt //codex 11/17/26
+    uThirdSort: Integer; //kt //codex 11/17/26
+    uColChange: string; //kt //codex 11/17/26
+    ulvSelectOn: boolean; //kt //codex 11/17/26
+    UpdatingLvReports: Boolean; //kt //codex 11/17/26
+    UpdatingTvProcedures: Boolean; //kt //codex 11/17/26
+    uEmptyImageList: TImageList; //kt //codex 11/17/26
+    uRemoteReportData: TStringList; //kt //codex 11/17/26
+    uTreeStrings: TStrings; //kt //codex 11/17/26
+    uRemoteCount: Integer; //kt //codex 11/17/26
+    uFrozen: Boolean; //kt //codex 11/17/26
+    uHTMLDoc: string; //kt //codex 11/17/26
+    uLastHTMLDoc : string; //kt //codex 11/17/26
+    uReportRPC: string; //kt //codex 11/17/26
+    uHTMLPatient: string; //kt //codex 11/17/26
+    uRptID: String; //kt //codex 11/17/26
+    uDirect: String; //kt //codex 11/17/26
+    ColumnToSort: Integer; //kt //codex 11/17/26
+    ColumnSortForward: Boolean; //kt //codex 11/17/26
     //kt //codex original --> FClearingForPatientClose: Boolean; //kt //codex 11/16/26
     FReportDisplayMode: TReportDisplayMode; //kt //codex 8/21/26
     FWebBrowserZoom: Integer; //kt //codex 10/1/26
     SortIdx1, SortIdx2, SortIdx3: Integer;
+    function SelectImagingReport: Boolean; //kt //codex 11/17/26
     procedure ProcessNotifications;
     procedure ShowTabControl;
     procedure Graph(reportien: integer);
@@ -202,6 +233,20 @@ type
     procedure CheckForHiddenRows();  //elh  3/15/21
     function SelectUserDefaultReport: boolean; //kt added 3/17/21
   public
+    uRemoteType: string; //kt //codex 11/17/26
+    uReportID: string; //kt //codex 11/17/26
+    uHSComponents: TStringList; //kt //codex 11/17/26
+    uLocalReportData: TStringList; //kt //codex 11/17/26
+    uReportInstruction: String; //kt //codex 11/17/26
+    uListState: Integer; //kt //codex 11/17/26
+    uUpdateStat: boolean; //kt //codex 11/17/26
+    uColumns: TStringList; //kt //codex 11/17/26
+    uHState: string; //kt //codex 11/17/26
+    uQualifier: string; //kt //codex 11/17/26
+    uReportType: string; //kt //codex 11/17/26
+    uQualifierType: Integer; //kt //codex 11/17/26
+    RowObjects: TRowObject; //kt //codex 11/17/26
+    procedure ConfigureImagingMode; //kt //codex 11/17/26
     procedure ClearPtData; override;
     procedure ClearPtDataForClose; //kt //codex 11/16/26
     function AllowContextChange(var WhyNot: string): Boolean; override;
@@ -215,43 +260,49 @@ type
 
 var
   frmReports: TfrmReports;
-  uHSComponents: TStringList;  //components selected
+  frmImagingReports: TfrmReports; //kt //codex 11/17/26
+  //kt //codex original --> uHSComponents: TStringList;  //components selected
                                //segment^OccuranceLimit^TimeLimit^Header...
                                //^(value of uComponents...)
-  uHSAll: TStringList;  //List of all displayable Health Summaries
-  uLocalReportData: TStringList;  //Storage for Local report data
-  uRemoteReportData: TStringList; //Storage for status of Remote data
-  uReportInstruction: String;     //User Instructions
-  uNewColumn: TListColumn;
-  uListItem: TListItem;
-  uColumns: TStringList;
-  uTreeStrings: TStrings;
-  uMaxOcc: string;
-  uHState: string;
-  uQualifier: string;
-  uReportType: string;
-  uSortOrder: string;
-  uQualifierType: Integer;
-  uFirstSort: Integer;
-  uSecondSort: Integer;
-  uThirdSort: Integer;
-  uColChange: string;               //determines when column widths have changed
-  uUpdateStat: boolean;             //flag turned on when remote status is being updated
-  ulvSelectOn: boolean;             //flag turned on when multiple items in lvReports control have been selected
-  uListState: Integer;              //Checked state of list of Adhoc components Checked: Abbreviation, UnChecked: Name
+  //kt //codex original --> uHSAll: TStringList;  //List of all displayable Health Summaries
+  //kt //codex original --> uLocalReportData: TStringList;  //Storage for Local report data
+  //kt //codex original --> uRemoteReportData: TStringList; //Storage for status of Remote data
+  //kt //codex original --> uReportInstruction: String;     //User Instructions
+  //kt //codex original --> uNewColumn: TListColumn;
+  //kt //codex original --> uListItem: TListItem;
+  //kt //codex original --> uColumns: TStringList;
+  //kt //codex original --> uTreeStrings: TStrings;
+  //kt //codex original --> uMaxOcc: string;
+  //kt //codex original --> uHState: string;
+  //kt //codex original --> uQualifier: string;
+  //kt //codex original --> uReportType: string;
+  //kt //codex original --> uSortOrder: string;
+  //kt //codex original --> uQualifierType: Integer;
+  //kt //codex original --> uFirstSort: Integer;
+  //kt //codex original --> uSecondSort: Integer;
+  //kt //codex original --> uThirdSort: Integer;
+  //kt //codex original --> uColChange: string;               //determines when column widths have changed
+  //kt //codex original --> uUpdateStat: boolean;             //flag turned on when remote status is being updated
+  //kt //codex original --> ulvSelectOn: boolean;             //flag turned on when multiple items in lvReports control have been selected
+  //kt //codex original --> uListState: Integer;              //Checked state of list of Adhoc components Checked: Abbreviation, UnChecked: Name
   uECSReport: TECSReport;           //Event Capture Report, initiated in fFrame when Click Event Capture under Tools
-  UpdatingLvReports: Boolean;       //Currently updating lvReports
-  UpdatingTvProcedures: Boolean;    //Currently updating tvProcedures
+  //kt //codex original --> UpdatingLvReports: Boolean;       //Currently updating lvReports
+  //kt //codex original --> UpdatingTvProcedures: Boolean;    //Currently updating tvProcedures
 
 implementation
 
 {$R *.DFM}
 
-uses ORFn, rCore, rReports, rTIU, fFrame, uCore, uReports, fReportsPrint,  //kt //codex 8/24/26
-     fReportsAdhocComponent1, activex, mshtml, dShared, fGraphs, fGraphData, rGraphs,
+//kt //codex original --> uses ORFn, rCore, rReports, rTIU, fFrame, uCore, uReports, fReportsPrint,  //kt //codex 8/24/26
+uses ORFn, rCore, rReports, rTIU, fFrame, uCore, fReportsPrint, //kt //codex 11/17/26
+     //kt //codex original --> fReportsAdhocComponent1, activex, mshtml, dShared, fGraphs, fGraphData, rGraphs,
+     fReportsAdhocComponent1, activex, mshtml, dShared, fGraphData, rGraphs, //kt //codex 11/17/26
      fSingleNote, fAlertSender, uHTMLTools, fViewLabPDF,   //kt
      fTaskEvents, //kt
      VA508AccessibilityRouter, VAUtils;
+
+type //kt //codex 11/17/26
+  PReportTreeObject = uReports.PReportTreeObject; //kt //codex 11/17/26
 
 const
   CT_REPORTS    =10;        // ID for REPORTS tab used by frmFrame
@@ -279,26 +330,55 @@ const
   WEB_BROWSER_ZOOM_STEP = 20; //kt //codex 10/1/26
   DEFAULT_WEB_BROWSER_ZOOM = 100; //kt //codex 10/1/26
 
-var
-  uRemoteCount: Integer;
-  uFrozen: Boolean;
-  uHTMLDoc: string;
-  uLastHTMLDoc : string; //kt added
-  uReportRPC: string;
-  uHTMLPatient: string; //kt //codex 8/30/26
-  uRptID: String;
-  uDirect: String;
-  uEmptyImageList: TImageList;
-  ColumnToSort: Integer;
-  ColumnSortForward: Boolean;
-  GraphForm: TfrmGraphs;
-  GraphFormActive: boolean;
+// var <-- //kt //codex original
+  //kt //codex original --> uRemoteCount: Integer;
+  //kt //codex original --> uFrozen: Boolean;
+  //kt //codex original --> uHTMLDoc: string;
+  //kt //codex original --> uLastHTMLDoc : string; //kt added
+  //kt //codex original --> uReportRPC: string;
+  //kt //codex original --> uHTMLPatient: string; //kt //codex 8/30/26
+  //kt //codex original --> uRptID: String;
+  //kt //codex original --> uDirect: String;
+  //kt //codex original --> uEmptyImageList: TImageList;
+  //kt //codex original --> ColumnToSort: Integer;
+  //kt //codex original --> ColumnSortForward: Boolean;
+  //kt //codex original --> GraphForm: TfrmGraphs;
+  //kt //codex original --> GraphFormActive: boolean;
 
 function ReportNodeID(Node: TTreeNode): string;
 begin
   Result := '';
   if (Node = nil) or (Node.Data = nil) then Exit; //kt  //codex 8/18/26
   Result := PReportTreeObject(Node.Data)^.ID;
+end;
+
+procedure TfrmReports.ConfigureImagingMode;
+//kt //codex added entire procedure 11/17/26
+begin
+  FImagingMode := True;
+  PageID := CT_IMAGING;
+  Caption := 'Imaging Page';
+  pnlLeft.Visible := False;
+  sptHorz.Visible := False;
+end;
+
+function TfrmReports.SelectImagingReport: Boolean;
+//kt //codex added entire function 11/17/26
+var
+  I: Integer;
+  Node: TTreeNode;
+begin
+  Result := False;
+  tvReports.Selected := nil;
+  for I := 0 to tvReports.Items.Count - 1 do begin
+    Node := tvReports.Items[I];
+    if SameText(ReportNodeID(Node), 'OR_R18:IMAGING') or
+       ((ReportNodeID(Node) <> '') and SameText(Node.Text, 'Imaging (local only)')) then begin
+      tvReports.Selected := Node;
+      Result := True;
+      Exit;
+    end;
+  end;
 end;
 
 procedure TfrmReports.ClearPtData;
@@ -648,10 +728,12 @@ begin
     if lstQualifier.ItemIndex < 0 then begin
       InfoBox('Please select from one of the Date Range items before printing', 'Incomplete Information', MB_OK);
     end else begin
-      PrintReports(uRptID, piece(uRemoteType,'^',4));
+      //kt //codex original --> PrintReports(uRptID, piece(uRemoteType,'^',4));
+      PrintReports(uRptID, piece(uRemoteType,'^',4), Self); //kt //codex 11/17/26
     end;
   end else begin
-    PrintReports(uRptID, piece(uRemoteType,'^',4));
+    //kt //codex original --> PrintReports(uRptID, piece(uRemoteType,'^',4));
+    PrintReports(uRptID, piece(uRemoteType,'^',4), Self); //kt //codex 11/17/26
   end;
 end;
 
@@ -663,7 +745,8 @@ var
   OrigReportCat, OrigProcedure: TTreeNode; }
 begin
   inherited DisplayPage;
-  frmFrame.mnuFilePrint.Tag := CT_REPORTS;
+  //kt //codex original --> frmFrame.mnuFilePrint.Tag := CT_REPORTS;
+  frmFrame.mnuFilePrint.Tag := PageID; //kt //codex 11/17/26
   frmFrame.mnuFilePrint.Enabled := True;
   frmFrame.mnuFilePrintSetup.Enabled := True;
   uUpdateStat := false;
@@ -714,8 +797,14 @@ begin
       TRemoteSite(RemoteSites.SiteList.Items[i]).ReportClear;
     pnlRightTop.Height := lblTitle.Height + TabControl1.Height;
     StatusText('');
-    SelectUserDefaultReport;  //kt  //codex 8/18/26 Restores selection only; click/load is done once below.
-    if tvReports.Selected = nil then begin
+    //kt //codex original --> SelectUserDefaultReport;  //kt  //codex 8/18/26 Restores selection only; click/load is done once below.
+    if FImagingMode then begin //kt //codex 11/17/26
+      SelectImagingReport; //kt //codex 11/17/26
+    end else begin //kt //codex 11/17/26
+      SelectUserDefaultReport; //kt //codex 11/17/26
+    end; //kt //codex 11/17/26
+    //kt //codex original --> if tvReports.Selected = nil then begin
+    if (not FImagingMode) and (tvReports.Selected = nil) then begin //kt //codex 11/17/26
       with tvReports do begin
         if Items.Count > 0 then begin
           tvReports.Selected := tvReports.Items.GetFirstNode; //kt  //codex 8/18/26
@@ -737,12 +826,20 @@ begin
                         lvReports.Items.Clear;
                         Splitter1.Visible := false;
                         pnlLeftBottom.Visible := false;
-                        with tvReports do begin
-                          if Items.Count > 0 then begin
-                            tvReports.Selected := tvReports.Items.GetFirstNode;
-                            tvReportsClick(self);
-                          end;
-                        end;
+                        //kt //codex original --> with tvReports do begin
+                        //kt //codex original -->   if Items.Count > 0 then begin
+                        //kt //codex original -->     tvReports.Selected := tvReports.Items.GetFirstNode;
+                        //kt //codex original -->     tvReportsClick(self);
+                        //kt //codex original -->   end;
+                        //kt //codex original --> end;
+                        if FImagingMode then begin //kt //codex 11/17/26
+                          if SelectImagingReport then begin //kt //codex 11/17/26
+                            tvReportsClick(Self); //kt //codex 11/17/26
+                          end; //kt //codex 11/17/26
+                        end else if tvReports.Items.Count > 0 then begin //kt //codex 11/17/26
+                          tvReports.Selected := tvReports.Items.GetFirstNode; //kt //codex 11/17/26
+                          tvReportsClick(Self); //kt //codex 11/17/26
+                        end; //kt //codex 11/17/26
                       end;
     CC_NOTIFICATION:  ProcessNotifications;
 
@@ -796,7 +893,8 @@ begin
         end;
       end;  }
   end;
-  if (tvReports.Selected = nil) and (tvReports.Items.Count > 0) then begin  //kt added block 4/1/21
+  //kt //codex original --> if (tvReports.Selected = nil) and (tvReports.Items.Count > 0) then begin  //kt added block 4/1/21
+  if (not FImagingMode) and (tvReports.Selected = nil) and (tvReports.Items.Count > 0) then begin //kt //codex 11/17/26
     tvReports.Selected := tvReports.Items.GetFirstNode;
     tvReportsClick(self);
   end;
@@ -938,7 +1036,8 @@ begin
   if frmFrame.Height <> frmFrame.frmFrameHeight then
   begin
     pnlRight.Height := pnlRightHeight;
-    frmReports.Height := frmReportsHeight;
+    //kt //codex original --> frmReports.Height := frmReportsHeight;
+    Height := frmReportsHeight; //kt //codex 11/17/26
     frmFrame.Height := frmFrame.frmFrameHeight;
   end;
 end;
@@ -1382,7 +1481,8 @@ begin
       LineCount := Memo1.Lines.Count + 1
     Else
       LineCount := 5;
-    Memo1.Height := LineCount * frmReports.Canvas.TextHeight(memText.SelText);
+    //kt //codex original --> Memo1.Height := LineCount * frmReports.Canvas.TextHeight(memText.SelText);
+    Memo1.Height := LineCount * Canvas.TextHeight(memText.SelText); //kt //codex 11/17/26
     Current := SendMessage(memText.handle, EM_GETFIRSTVISIBLELINE, 0, 0);
     Desired := SendMessage(memText.handle, EM_LINEFROMCHAR,
                memText.SelStart + memText.SelLength ,0);
@@ -2135,7 +2235,11 @@ begin
   uColumns.Free;
   uTreeStrings.Free;
   uEmptyImageList.Free;
-  uECSReport.Free;
+  //kt //codex original --> uECSReport.Free;
+  if Self = frmReports then begin //kt //codex 11/17/26
+    uECSReport.Free; //kt //codex 11/17/26
+    uECSReport := nil; //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   if GraphForm <> nil then GraphForm.Release;
 end;
 
@@ -2304,8 +2408,12 @@ begin
   if csDestroying in ComponentState then Exit; //kt  //codex 8/18/26
   ReportObj := PReportTreeObject(tvReports.Selected.Data); //kt  //codex 8/18/26
   if not Assigned(ReportObj) then Exit; //kt  //codex 8/18/26
-  uTMGOptions.WriteString(TMG_LAST_REPORT_KEY,tvReports.Selected.Text); //kt 4/1/21
-  uTMGOptions.WriteString(TMG_LAST_REPORT_ID_KEY, ReportNodeID(tvReports.Selected)); //kt  //codex 8/18/26
+  //kt //codex original --> uTMGOptions.WriteString(TMG_LAST_REPORT_KEY,tvReports.Selected.Text); //kt 4/1/21
+  //kt //codex original --> uTMGOptions.WriteString(TMG_LAST_REPORT_ID_KEY, ReportNodeID(tvReports.Selected)); //kt  //codex 8/18/26
+  if not FImagingMode then begin //kt //codex 11/17/26
+    uTMGOptions.WriteString(TMG_LAST_REPORT_KEY,tvReports.Selected.Text); //kt //codex 11/17/26
+    uTMGOptions.WriteString(TMG_LAST_REPORT_ID_KEY, ReportNodeID(tvReports.Selected)); //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   lvReports.Hint := 'To sort, click on column headers|';
   tvReports.TopItem := tvReports.Selected;
   uRemoteCount := 0;
@@ -2491,7 +2599,8 @@ begin
           end;
           uHTMLDoc := '';
           if WebBrowser1.Visible = true then BlankWeb;
-          ExecuteAdhoc1;  //Calls Adhoc form
+          //kt //codex original --> ExecuteAdhoc1;  //Calls Adhoc form
+          ExecuteAdhoc1(Self); //kt //codex 11/17/26
           if uLocalReportData.Count < 1 then begin
             uReportInstruction := '<No Report Available>'
           end else begin
@@ -3577,7 +3686,8 @@ var
 begin
   inherited;
   TableHTML := '';
-  TableHTML := frmReports.GetCurrentReportHTMLTable;
+  //kt //codex original --> TableHTML := frmReports.GetCurrentReportHTMLTable;
+  TableHTML := GetCurrentReportHTMLTable; //kt //codex 11/17/26
   TableHTML := StringReplace(TableHTML, #$D#$A,'<BR>', [rfReplaceAll]);
   TableHTML := StringReplace(TableHTML, '<pre>','', [rfReplaceAll]);
   TableHTML := StringReplace(TableHTML, '</pre>','', [rfReplaceAll]);
@@ -3590,7 +3700,8 @@ procedure TfrmReports.mnuCreateResultNoteClick(Sender: TObject);
 //kt added entire function 2/28/17
 begin
   inherited;
-  fSingleNote.CreateSingleNote(snmReport);
+  //kt //codex original --> fSingleNote.CreateSingleNote(snmReport);
+  fSingleNote.CreateSingleNote(snmReport, False, '', Self); //kt //codex 11/17/26
 end;
 
 
@@ -3636,7 +3747,8 @@ end;
 procedure TfrmReports.mnuNotifyOKClick(Sender: TObject);
 begin
   inherited;
-  fSingleNote.CreateSingleNote(snmReport,True);
+  //kt //codex original --> fSingleNote.CreateSingleNote(snmReport,True);
+  fSingleNote.CreateSingleNote(snmReport, True, '', Self); //kt //codex 11/17/26
 end;
 
 function TfrmReports.GetCurrentReportString : string;

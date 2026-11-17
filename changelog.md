@@ -2,6 +2,28 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-17 — Dedicated Imaging tab
+
+- Added an Imaging tab between Labs and Reports using a second instance of the Reports form. It automatically selects local imaging and hides the report and procedure trees; the existing Imaging report remains available in Reports.
+- Moved report buffers, selection, display, and graph state into their form instance and routed printing and single-note actions through the originating form. Imaging lists still load independently on demand; shared caching is deferred.
+- The user compiled and confirmed the tab order, expected radiology and scanned TIU studies in both views, patient switching and return, and copying the Imaging selection into a new note when Reports has a different selection. Reports date-range selection, radiology printing, and graphing also worked. Printing from the new tab and side-by-side behavior still need verification.
+- Scanned TIU printing from Reports produced “No Exam identified.” Investigation and possible reuse of the Notes printing path are deferred in plans.md. The office does not use remote-site printing.
+
+## 2026-11-17 — Dashboard last tab and encounter diagnosis search
+
+- Changed last-tab tracking so the Dashboard is not recorded as the last chart tab. When the Dashboard is active, chart opening uses the remembered chart tab or the user's configured initial tab if no chart tab is remembered. Patient-control cleanup preserves the remembered tab.
+- Fixed the encounter **Search ICD** handler to accept `TButtonControl`: the Search ICD and Add Diagnosis controls are `TBitBtn` instances, which the previous `TButton` check rejected before opening the lookup.
+- The user compiled and tested both changes and reported that they worked.
+
+## 2026-11-16–17 — Patient transition cleanup and Topics diagnostics plan
+
+- Fixed the patient-selection conditional that could reopen the selector after a dashboard patient was chosen. Refactored patient closing and switching to share a clearing path: stop the old patient's timer and clear the old patient and encounter before assigning a different patient. Canceling the selector leaves the current patient's timer running.
+- Added frame and tab-owned cleanup for patient controls, including graphing, and separated cleanup from new-patient initialization. Expanded `TPatient.Clear` to reset additional cached patient fields. A cleanup flag avoids repeating control cleanup during the same transition.
+- Adjusted the transition display and tab selection to reduce flashes while preserving the user's initial-tab or last-tab preference. The user compiled and reported that an intermediate version worked; subsequent timer and tab changes need their own build and runtime verification.
+- Investigated timer resumption: the user observed the prior time return rounded to whole minutes and accepted that behavior. The previously reported crossed timer-log entries were not investigated or corrected.
+- Created and pushed checkpoint `ba4ddfd` on `delphi12`, then copied the compiled project-root `CPRSChart.exe` to `LiveVersion/CPRSChart.exe` and verified that the copies matched.
+- Removed the completed patient-switching plan and updated the handoff to record that `uMumpsData` compiles but has not yet had a practical use. Added a deferred plan to capture a diagnostic snapshot after a Topics current-note sync failure, using the established Topics command channel for server communication.
+
 ## 2026-11-05 — Windows messages and curated topic investigation
 
 - Fixed outgoing `WM_COPYDATA` replies to use an ANSI buffer and byte count for compatibility with the existing messenger. The user forced a Delphi rebuild and confirmed it works.

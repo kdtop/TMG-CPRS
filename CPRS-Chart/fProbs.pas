@@ -2082,7 +2082,8 @@ begin
       InfoBox(TX_INVALID_PATIENT, TC_NO_PATIENT, MB_OK or MB_ICONWARNING);
       Exit;
     end;
-  uReportType := '';
+  //kt //codex original --> uReportType := '';
+  frmReports.uReportType := ''; //kt //codex 11/17/26
   PrintReports(IntToStr(RPT_PROBLIST), 'Problem List')
 end;
 

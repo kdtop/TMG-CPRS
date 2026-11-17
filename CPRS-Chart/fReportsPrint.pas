@@ -5,7 +5,9 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, fAutoSz, ORCtrls, ORNet, Mask, ComCtrls, rECS,
-  fBase508Form, VA508AccessibilityManager;
+  //kt //codex original --> fBase508Form, VA508AccessibilityManager;
+  //kt //codex original --> fBase508Form, VA508AccessibilityManager, fReports; //kt //codex 11/17/26
+  fBase508Form, VA508AccessibilityManager, fReports, uReports; //kt //codex 11/17/26
 
 type
   TfrmReportPrt = class(TfrmBase508Form)
@@ -31,7 +33,27 @@ type
   private
     { Private declarations }
     FReports: string;
+    FSource: TfrmReports; //kt //codex 11/17/26
+    FLegacyRemoteType: Boolean; //kt //codex 11/17/26
     FReportText: TRichEdit;
+    function GetHSComponents: TStringList; //kt //codex 11/17/26
+    function GetRemoteType: string; //kt //codex 11/17/26
+    function GetColumns: TStringList; //kt //codex 11/17/26
+    function GetHState: string; //kt //codex 11/17/26
+    function GetQualifier: string; //kt //codex 11/17/26
+    function GetReportType: string; //kt //codex 11/17/26
+    function GetQualifierType: Integer; //kt //codex 11/17/26
+    function GetRowObjects: TRowObject; //kt //codex 11/17/26
+    property uHSComponents: TStringList read GetHSComponents; //kt //codex 11/17/26
+    property uRemoteType: string read GetRemoteType; //kt //codex 11/17/26
+    property uColumns: TStringList read GetColumns; //kt //codex 11/17/26
+    property uHState: string read GetHState; //kt //codex 11/17/26
+    property uQualifier: string read GetQualifier; //kt //codex 11/17/26
+    property uReportType: string read GetReportType; //kt //codex 11/17/26
+    property uQualifierType: Integer read GetQualifierType; //kt //codex 11/17/26
+    property RowObjects: TRowObject read GetRowObjects; //kt //codex 11/17/26
+    // Route existing print code to the form that requested printing. //kt //codex 11/17/26
+    property frmReports: TfrmReports read FSource; //kt //codex 11/17/26
     procedure DisplaySelectDevice;
 
   public
@@ -41,7 +63,8 @@ type
 var
   frmReportPrt: TfrmReportPrt;
 
-procedure PrintReports(AReports: string; const AReportsTitle: string);
+//kt //codex original --> procedure PrintReports(AReports: string; const AReportsTitle: string);
+procedure PrintReports(AReports: string; const AReportsTitle: string; ASource: TfrmReports = nil); //kt //codex 11/17/26
 function StringPad(aString: string; aStringCount, aPadCount: integer): String;
 function DeleteLineBreaks(const S: string): string;
 
@@ -49,7 +72,9 @@ implementation
 
 {$R *.DFM}
 
-uses ORFn, rCore, uCore, fReports, rReports, uReports, Printers, fFrame,
+//kt //codex original --> uses ORFn, rCore, uCore, fReports, rReports, uReports, Printers, fFrame,
+//kt //codex original --> uses ORFn, rCore, uCore, rReports, uReports, Printers, fFrame, //kt //codex 11/17/26
+uses ORFn, rCore, uCore, rReports, Printers, fFrame, //kt //codex 11/17/26
   VAUtils;
 
 const
@@ -67,19 +92,28 @@ const
   QT_HSCOMPONENT   = 5;
   QT_HSWPCOMPONENT = 6;
 
-procedure PrintReports(AReports: string; const AReportsTitle: string);
+//kt //codex original --> procedure PrintReports(AReports: string; const AReportsTitle: string);
+procedure PrintReports(AReports: string; const AReportsTitle: string; ASource: TfrmReports); //kt //codex 11/17/26
 { displays a form that prompts for a device and then prints the report }
 var
   frmReportPrt: TfrmReportPrt;
   DefPrt: string;
 begin
   frmReportPrt := TfrmReportPrt.Create(Application);
+  frmReportPrt.FLegacyRemoteType := ASource = nil; //kt //codex 11/17/26
+  if ASource = nil then begin //kt //codex 11/17/26
+    ASource := frmReports; //kt //codex 11/17/26
+  end; //kt //codex 11/17/26
   try
     ResizeAnchoredFormToFont(TForm(frmReportPrt));
     with frmReportPrt do
     begin
       lblReportsTitle.Text := AReportsTitle;
       FReports := AReports;
+      FSource := ASource; //kt //codex 11/17/26
+      //kt //codex original --> if FSource = nil then begin //kt //codex 11/17/26
+      //kt //codex original -->   FSource := fReports.frmReports; //kt //codex 11/17/26
+      //kt //codex original --> end; //kt //codex 11/17/26
       DefPrt := GetDefaultPrinter(User.Duz, Encounter.Location);
       if User.CurrentPrinter = '' then User.CurrentPrinter := DefPrt;
       with cboDevice do
@@ -106,6 +140,58 @@ begin
   finally
     frmReportPrt.Release;
   end;
+end;
+
+function TfrmReportPrt.GetHSComponents: TStringList;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uHSComponents;
+end;
+
+function TfrmReportPrt.GetRemoteType: string;
+//kt //codex added entire function 11/17/26
+begin
+  if FLegacyRemoteType then begin
+    Result := fFrame.uRemoteType;
+  end else begin
+    Result := FSource.uRemoteType;
+  end;
+end;
+
+function TfrmReportPrt.GetColumns: TStringList;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uColumns;
+end;
+
+function TfrmReportPrt.GetHState: string;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uHState;
+end;
+
+function TfrmReportPrt.GetQualifier: string;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uQualifier;
+end;
+
+function TfrmReportPrt.GetReportType: string;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uReportType;
+end;
+
+function TfrmReportPrt.GetQualifierType: Integer;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.uQualifierType;
+end;
+
+function TfrmReportPrt.GetRowObjects: TRowObject;
+//kt //codex added entire function 11/17/26
+begin
+  Result := FSource.RowObjects;
 end;
 
 procedure TfrmReportPrt.FindVType;

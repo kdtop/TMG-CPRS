@@ -98,6 +98,7 @@ type
     procedure LoadList(const StsTxt: string; ListCtrl: TObject;
       ARpc: String; ACase, AInvert: Boolean; ADatePiece: integer; ADateFormat, AParam1, AID, ADetail: String; Reminders: boolean = FALSE);
   public
+    procedure StopBackgroundLoad; //kt //codex 11/16/26
     procedure ClearPtData; override;
     procedure DisplayPage; override;
     procedure SetFontSize(NewFontSize: Integer); override;
@@ -151,12 +152,23 @@ var
   uIPAddress: string;
   uARTCoverSheetParams: string;
 
+procedure TfrmCover.StopBackgroundLoad;
+//kt //codex added entire procedure 11/16/26
+begin
+  timPoll.Enabled := False;
+  if Length(FLoadingForDFN) > 0 then begin
+    StopCoverSheet(FLoadingForDFN, uIPAddress, frmFrame.Handle);
+  end;
+  FLoadingForDFN := '';
+end;
+
 procedure TfrmCover.ClearPtData;
 { clears all lists displayed on the cover sheet }
 begin
-  timPoll.Enabled := False;
-  if Length(FLoadingForDFN) > 0 then StopCoverSheet(FLoadingForDFN, uIPAddress, frmFrame.Handle);  //*DFN*
-  FLoadingForDFN := '';  //*DFN*
+  //kt //codex original --> timPoll.Enabled := False;
+  //kt //codex original --> if Length(FLoadingForDFN) > 0 then StopCoverSheet(FLoadingForDFN, uIPAddress, frmFrame.Handle);  //*DFN*
+  //kt //codex original --> FLoadingForDFN := '';  //*DFN*
+  StopBackgroundLoad; //kt //codex 11/16/26
   inherited ClearPtData;
   lst_1.Clear;
   lst_2.Clear;
@@ -498,9 +510,10 @@ end;
 procedure TfrmCover.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   inherited;
-  timPoll.Enabled := False;
-  if Length(FLoadingForDFN) > 0 then StopCoverSheet(FLoadingForDFN, uIPAddress, frmFrame.Handle);  //*DFN*
-  FLoadingForDFN := '';  //*DFN*
+  //kt //codex original --> timPoll.Enabled := False;
+  //kt //codex original --> if Length(FLoadingForDFN) > 0 then StopCoverSheet(FLoadingForDFN, uIPAddress, frmFrame.Handle);  //*DFN*
+  //kt //codex original --> FLoadingForDFN := '';  //*DFN*
+  StopBackgroundLoad; //kt //codex 11/16/26
 end;
 
 procedure TfrmCover.timPollTimer(Sender: TObject);

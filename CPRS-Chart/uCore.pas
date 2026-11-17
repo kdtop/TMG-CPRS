@@ -969,9 +969,12 @@ procedure TPatient.Clear;
 { clears all fields in the Patient object }
 begin
   FDFN          := '';
+  FICN          := ''; //kt //codex 11/16/26   ADDED
   FName         := '';
   FSSN          := '';
   FDOB          := 0;
+  FDateDied     := 0; //kt //codex 11/16/26   ADDED
+  FDateDiedLoaded := False; //kt //codex 11/16/26   ADDED
   FAge          := 0;
   FSex          := 'U';
   FCWAD         := '';
@@ -988,8 +991,12 @@ begin
   FPrimTeam     := '';
   FPrimProv     := '';
   FAttending    := '';
+  FAssociate    := ''; //kt //codex 11/16/26  ADDED
+  FInProvider   := ''; //kt //codex 11/16/26
   FMHTC         := '';
   FDueInfo.Clear;  //kt 10/23/14
+  FDueHint := ''; //kt //codex 11/16/26
+  FMostRecentPhoto := ''; //kt //codex 11/16/26
   FDueColor := clInfoBK;    //kt 10/23/14
   if FSyncWebPages = True then frmFrame.SetWebTabsPerServer;  //kt 4/19/15
   FreeAndNil(FCombatVet);

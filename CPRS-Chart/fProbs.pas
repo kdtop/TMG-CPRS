@@ -327,6 +327,8 @@ procedure TfrmProblems.ClearPtData;
 begin
   inherited ClearPtData;
   ClearGrid;
+  FItemData.Clear; //kt //codex 11/16/26
+  FreeAndNil(PLPt); //kt //codex 11/16/26
   lblProbList.Caption := '';
   wgProbData.Caption := lblProbList.Caption;
   FWarningShown := False;

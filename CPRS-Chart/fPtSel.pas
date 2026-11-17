@@ -233,7 +233,7 @@ procedure SelectPatient(ShowNotif: Boolean; FontSize: Integer; var UserCancelled
 { displays patient selection dialog (with optional notifications), updates Patient object }
 var
   frmPtSel: TfrmPtSel;
-  ResetTimer:boolean;
+  //kt //codex original --> ResetTimer:boolean;
 begin
   DebugMsg('SelectPatient ENTER'); //kt //codex 9/9/26
   frmPtSel := TfrmPtSel.Create(Application);
@@ -262,8 +262,8 @@ begin
         RPLDisplay;                                  // Removes unnecessary components from view.
       FUserCancelled := FALSE;
       //ELH allow user to over ride this reset 5/14/20
-      ResetTimer := uTMGOptions.ReadBool('CPRS Reset Timer On New Chart',True);
-      if ResetTimer then frmFrame.btnTimerResetClick(nil);  //kt
+      //kt //codex original --> ResetTimer := uTMGOptions.ReadBool('CPRS Reset Timer On New Chart',True);
+      //kt //codex original --> if ResetTimer then frmFrame.btnTimerResetClick(nil);  //kt
       DebugMsg('SelectPatient before frmPtSel.ShowModal'); //kt //codex 9/9/26
       ShowModal;
       DebugMsg('SelectPatient after frmPtSel.ShowModal'); //kt //codex 9/9/26
@@ -773,6 +773,7 @@ begin
   //    selected twice in diff. Encounter locations, check was removed and following code runs
   //    no matter; in fFrame code then updates Encounter display if Encounter.Location has changed.
   // NOTE: Some pieces in RPC returned arrays are modified/rearranged by ListPtByDflt call in rCore!
+  frmFrame.PreparePatientChange(NewDFN); //kt //codex 11/16/26
   Patient.DFN := NewDFN;     // The patient object in uCore must have been created already!
   Encounter.Clear;
   Changes.Clear;             // An earlier call to ReviewChanges should have cleared this.

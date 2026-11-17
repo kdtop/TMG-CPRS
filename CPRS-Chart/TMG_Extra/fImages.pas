@@ -176,6 +176,7 @@ type
     function ThumbnailIndexForFName (FName : string) : integer;
     function AllowContextChange(var WhyNot: string): Boolean; override; //kt //codex 8/30/26
     procedure HandlePatientChanged();
+    procedure ClearPtData; override; //kt //codex 11/16/26
   published
   end;
 
@@ -799,6 +800,17 @@ begin
   finally
     TempBitmap.Free;
   end;
+end;
+
+procedure TfrmImages.ClearPtData;
+//kt //codex added entire procedure 11/16/26
+begin
+  inherited ClearPtData;
+  Clear;
+  CurrentImageMemo.Clear;
+  LastDisplayedTIUIEN := '';
+  btnOpenLinkedDoc.Enabled := False;
+  WebBrowser.Navigate(NullImageName);
 end;
 
 procedure TfrmImages.ReloadForPatient();

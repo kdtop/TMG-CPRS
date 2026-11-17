@@ -463,6 +463,8 @@ begin
   lstNotes.Clear;
   uChanging := False;
   memSurgery.Clear;
+  memPCEShow.Clear; //kt //codex 11/16/26
+  FLastNoteID := ''; //kt //codex 11/16/26
   uPCEShow.Clear;
   uPCEEdit.Clear;
   frmDrawers.ResetTemplates;

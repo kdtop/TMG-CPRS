@@ -36,6 +36,8 @@ type
   public
     procedure ClearGtsl;
     procedure ClearPtData;
+    procedure ClearPtDataForClose; //kt //codex 11/16/26
+    procedure InitializePatientData; //kt //codex 11/16/26
     procedure FreeGtsl;
     procedure MakeGtsl;
     procedure MakeUserSettings;
@@ -207,21 +209,48 @@ begin
   FastAddStrings(rpcGetViews(VIEW_LABS, User.DUZ), GtslAllViews);
 end;
 
+//kt //codex original --> procedure TfrmGraphData.ClearPtData;
+//kt //codex original --> var                                        // called when patient is selected
+//kt //codex original -->   faststatus, oldDFN: string;
+//kt //codex original --> begin
+//kt //codex original -->   inherited;
+//kt //codex original -->   if FGraphActivity.CurrentSetting = '' then
+//kt //codex original -->     exit;                                  // if graphing is turned off, don't process
+//kt //codex original -->   ClearMemos;
+//kt //codex original -->   ClearGtsl;
+//kt //codex original -->   pnlData.Hint := '';
+//kt //codex original -->   oldDFN := FGraphActivity.OldDFN;         // cleanup any previous patient cache
+//kt //codex original -->   FastAssign(rpcGetTypes(Patient.DFN, false), GtslTypes);
+//kt //codex original -->   faststatus := rpcFastTask(Patient.DFN, oldDFN);
+//kt //codex original -->   FGraphActivity.Cache := (faststatus = '1');
+//kt //codex original -->   FGraphActivity.OldDFN := Patient.DFN;
+//kt //codex original --> end;
 procedure TfrmGraphData.ClearPtData;
-var                                        // called when patient is selected
+begin
+  ClearPtDataForClose;
+end;
+
+procedure TfrmGraphData.InitializePatientData;
+//kt //codex added entire procedure 11/16/26
+var
   faststatus, oldDFN: string;
 begin
-  inherited;
-  if FGraphActivity.CurrentSetting = '' then
-    exit;                                  // if graphing is turned off, don't process
-  ClearMemos;
-  ClearGtsl;
-  pnlData.Hint := '';
-  oldDFN := FGraphActivity.OldDFN;         // cleanup any previous patient cache
+  if (FGraphActivity.CurrentSetting = '') or (Patient.DFN = '') then begin
+    Exit;
+  end;
+  oldDFN := FGraphActivity.OldDFN;
   FastAssign(rpcGetTypes(Patient.DFN, false), GtslTypes);
   faststatus := rpcFastTask(Patient.DFN, oldDFN);
   FGraphActivity.Cache := (faststatus = '1');
   FGraphActivity.OldDFN := Patient.DFN;
+end;
+
+procedure TfrmGraphData.ClearPtDataForClose;
+//kt //codex added entire procedure 11/16/26
+begin
+  ClearMemos;
+  ClearGtsl;
+  pnlData.Hint := '';
 end;
 
 procedure GraphDataOnPatient(var allitems, alldata: boolean);

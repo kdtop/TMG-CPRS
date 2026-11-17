@@ -470,6 +470,7 @@ type
     procedure lblNotesClick(Sender: TObject);                          //kt 5/14
     procedure tvNotesDblClick(Sender: TObject);                        //kt 4/15
   private
+    //kt //codex original --> FClearingForPatientClose: Boolean; //kt //codex 11/16/26
     FNavigatingTab : Boolean; //Currently Using tab to navigate
     FEditingIndex: Integer;                      // index of note being currently edited
     FChanged: Boolean;                           // true if any text has changed in the note
@@ -647,6 +648,8 @@ type
     function ActiveEditOf(AnIEN: Int64; ARequest: integer): Boolean;
     function AllowContextChange(var WhyNot: string): Boolean; override;
     procedure ClearPtData; override;
+    //kt //codex original --> procedure ClearPtDataForClose; //kt //codex 11/16/26
+    procedure InitializePatientData; //kt //codex 11/16/26
     procedure DisplayPage; override;
     procedure RequestPrint; override;
     procedure RequestMultiplePrint(AForm: TfrmPrintList);
@@ -939,8 +942,36 @@ begin
   uPCEShow.Clear;
   uPCEEdit.Clear;
   frmDrawers.ClearPtData;
+  //kt //codex original --> frmDrawers.ResetTemplates;
+  //kt //codex original --> NoteTotal := sCallV('ORCNOTE GET TOTAL', [Patient.DFN]);
+//kt //codex original -->   if FClearingForPatientClose then begin //kt //codex 11/16/26
+//kt //codex original -->     NoteTotal := ''; //kt //codex 11/16/26
+//kt //codex original -->   end else begin //kt //codex 11/16/26
+//kt //codex original -->     frmDrawers.ResetTemplates; //kt //codex 11/16/26
+//kt //codex original -->     NoteTotal := sCallV('ORCNOTE GET TOTAL', [Patient.DFN]); //kt //codex 11/16/26
+//kt //codex original -->   end; //kt //codex 11/16/26
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> procedure TfrmNotes.ClearPtDataForClose;
+//kt //codex original --> //kt //codex added entire procedure 11/16/26
+//kt //codex original --> begin
+//kt //codex original -->   FClearingForPatientClose := True;
+//kt //codex original -->   try
+//kt //codex original -->     ClearPtData;
+//kt //codex original -->   finally
+//kt //codex original -->     FClearingForPatientClose := False;
+//kt //codex original -->   end;
+//kt //codex original --> end;
+  NoteTotal := ''; //kt //codex 11/16/26
+end;
+
+procedure TfrmNotes.InitializePatientData;
+//kt //codex added entire procedure 11/16/26
+begin
   frmDrawers.ResetTemplates;
-  NoteTotal := sCallV('ORCNOTE GET TOTAL', [Patient.DFN]);
+  if Patient.DFN <> '' then begin
+    NoteTotal := sCallV('ORCNOTE GET TOTAL', [Patient.DFN]);
+  end;
 end;
 
 procedure TfrmNotes.DisplayPage;

@@ -640,6 +640,15 @@ begin
   end;
   Timer1.Enabled := False;
   memLab.Lines.Clear;
+  lblDate.Caption := ''; //kt //codex 11/16/26
+  lblDateFloat.Caption := ''; //kt //codex 11/16/26
+  lblSpecimen.Caption := ''; //kt //codex 11/16/26
+  LinkedNote := ''; //kt //codex 11/16/26
+  LinkedOrder := ''; //kt //codex 11/16/26
+  btnViewLinkedNote.Enabled := False; //kt //codex 11/16/26
+  btnViewLinkedOrder.Enabled := False; //kt //codex 11/16/26
+  lvReports.Items.Clear; //kt //codex 11/16/26
+  uHTMLPatient := ''; //kt //codex 11/16/26
   uMostRecent.Clear;
   uLabLocalReportData.Clear;
   uLabRemoteReportData.Clear;

@@ -283,6 +283,7 @@ type
     procedure splViewsTopMoved(Sender: TObject);
 
   private
+    FNeedsPatientInitialization: Boolean; //kt //codex 11/16/26
     FBSortAscending: boolean;
     FBSortCol: integer;
     FDate1: Double;
@@ -471,6 +472,8 @@ type
     procedure UpdateAccessibilityActions(var Actions: TAccessibilityActions); override;
   public
     TMGBackgroundMode : boolean; //kt
+    procedure ClearPatientDisplay; //kt //codex 11/16/26
+    property NeedsPatientInitialization: Boolean read FNeedsPatientInitialization; //kt //codex 11/16/26
     procedure SetDateRange(DateMode : integer; DateRanges : string; RelDatesMode : boolean=false);  //kt 8/5/21
     procedure CheckContext(var usecontext: boolean);
     procedure DateDefaults;
@@ -925,6 +928,7 @@ begin
       lvwItemsBottomClick(self);
     end;
   end;
+  FNeedsPatientInitialization := False; //kt //codex 11/16/26
 end;
 
 procedure TfrmGraphs.InitialRetain;
@@ -1461,6 +1465,32 @@ begin
 end;
 
 
+
+procedure TfrmGraphs.ClearPatientDisplay;
+//kt //codex added entire procedure 11/16/26
+begin
+  FNeedsPatientInitialization := True;
+  SearchDelayTimer.Enabled := False;
+  timHintPause.Enabled := False;
+  InactivateHint;
+  FActiveGraph := nil;
+  FGraphClick := nil;
+  FGraphSeries := nil;
+  while scrlTop.ControlCount > 0 do begin
+    scrlTop.Controls[0].Free;
+  end;
+  while scrlBottom.ControlCount > 0 do begin
+    scrlBottom.Controls[0].Free;
+  end;
+  chartDatelineTop.RemoveAllSeries;
+  chartDatelineBottom.RemoveAllSeries;
+  pnlDatelineTop.Visible := False;
+  pnlDatelineBottom.Visible := False;
+  memTop.Clear;
+  memBottom.Clear;
+  pnlFooter.Hint := '';
+  ClearLvwItems;
+end;
 
 procedure TfrmGraphs.ClearLvwItems;
 //kt added function

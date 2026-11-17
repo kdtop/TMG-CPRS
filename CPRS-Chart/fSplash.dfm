@@ -6,12 +6,10 @@ inherited frmSplash: TfrmSplash
   Caption = 'CPRS Splash Screen'
   ClientHeight = 473
   ClientWidth = 605
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   ExplicitWidth = 605
   ExplicitHeight = 473
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TPanel [0]
     Left = 0
@@ -1513,6 +1511,13 @@ inherited frmSplash: TfrmSplash
         Top = 52
         Width = 3
         Height = 13
+      end
+      object Label1: TLabel
+        Left = 0
+        Top = 6
+        Width = 104
+        Height = 13
+        Caption = 'Delphi12 CPRS v0.03'
       end
       object lblCopyright: TStaticText
         Left = 160

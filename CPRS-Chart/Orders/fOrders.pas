@@ -1114,6 +1114,7 @@ begin
   with lstSheets do for i := 0 to Items.Count - 1 do TOrderView(Items.Objects[i]).Free;
   lstSheets.Clear;
   FCurrentView := nil;
+  FOrderViewForActiveOrders := nil; //kt //codex 11/16/26
 end;
 
 procedure TfrmOrders.InitOrderSheets;

@@ -407,7 +407,11 @@ type
     FCCOWBusy: boolean;
     FCCOWError: boolean;
     FNoPatientSelected: boolean;
+    FPatientControlsCleared: Boolean; //kt //codex 11/16/26
+    FPatientTransitionInProgress: Boolean; //kt //codex 11/16/26
     FRefreshing: boolean;
+    FOpeningDirectPatient: Boolean; //kt //codex 11/16/26
+    //kt //codex original --> FDirectOpenToNotes: Boolean; //kt //codex 11/16/26
     FClosing: boolean;
     FContextChanging: Boolean;
     FChangeSource: Integer;
@@ -463,8 +467,15 @@ type
     procedure AppDeActivated(Sender: TObject);
     procedure AppException(Sender: TObject; E: Exception);
     function AllowContextChangeAll(var Reason: string):  Boolean;
+    function CanOpenPatientByDFN(const NewDFN: string): Boolean; //kt //codex 11/16/26
     procedure NotifyContextChangeCancelledAll;  //kt added
-    procedure ClearPatient;
+    //kt //codex original --> procedure ClearPatient;
+    procedure InitializePatientControls; //kt //codex 11/16/26
+    procedure ClearClosedPatientHeader; //kt //codex 11/16/26
+    procedure CleanupPatientControls; //kt //codex 11/16/26
+    //kt //codex original --> procedure ClearPatientContext; //kt //codex 11/16/26
+    procedure ClearPatientContext(ShowDashboard: Boolean = True); //kt //codex 11/16/26
+    procedure FinishPatientTransition; //kt //codex 11/16/26
     procedure ChangeFont(NewFontSize: Integer);
     procedure LoadTabColors(ColorsList : TStringList);  //kt 9/11
     procedure SaveTabColors(ColorsList : TStringList);  //kt 9/11
@@ -515,7 +526,8 @@ type
 {$IFDEF CCOWBROKER}
     procedure CheckForDifferentUser(aContextItemCollection: IDispatch; var UserChanged: boolean);
 {$ENDIF}
-    procedure HideEverything(AMessage: string = 'No patient is currently selected.');
+    //kt //codex original --> procedure HideEverything(AMessage: string = 'No patient is currently selected.');
+    procedure HideEverything(AMessage: string = 'No patient is currently selected.'; ShowDashboard: Boolean = True); //kt //codex 11/16/26
     procedure ShowEverything;
     //function FindBestCCOWDFN(var APatientName: string): string;
     function FindBestCCOWDFN: string;
@@ -554,6 +566,7 @@ type
     ProbTabClicked: boolean;               //kt-tabs 11/26/22
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;  //kt 4/15/14
     procedure SetBADxList;
+    procedure PreparePatientChange(const NewDFN: string); //kt //codex 11/16/26
     procedure SetActiveTab(PageID: TPageID);
     function  GetActiveTab: TPageID;                                             //kt added 6/15
     function  CheckForRPC(RPCName: string): boolean;                             //kt 9/11
@@ -785,6 +798,7 @@ begin
   tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[User.DUZ]);
   WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT);
   MessageArr.Free;
+  wbNoPatientSelected.Visible := True; //kt //codex 11/16/26
 end;
 
 function TfrmFrame.GetTimedOut: boolean;
@@ -992,69 +1006,279 @@ begin
   FContextChanging := False;
 end;
 
-procedure TfrmFrame.ClearPatient;
-{ call all pages to make sure patient related information is cleared (when switching patients) }
-var
-  ASide : TTabPageSide;  //kt-tabs 11/26/22
+//kt //codex original 11/16/26
+//kt //codex original --> procedure TfrmFrame.ClearPatient;
+//kt //codex original --> { call all pages to make sure patient related information is cleared (when switching patients) }
+//kt //codex original --> var
+//kt //codex original -->   ASide : TTabPageSide;  //kt-tabs 11/26/22
+//kt //codex original --> begin
+//kt //codex original -->   //if frmFrame.Timedout then Exit; // added to correct Access Violation when "Refresh Patient Information" selected
+//kt //codex original -->   lblPtName.Caption     := '';
+//kt //codex original -->   lblPtSSN.Caption      := '';
+//kt //codex original -->   lblPtAge.Caption      := '';
+//kt //codex original -->   pnlPatient.Caption    := '';
+//kt //codex original -->   PatientImage.Picture.Bitmap.Assign(NoPatientIDPhotoIcon);  //kt  4/15/14
+//kt //codex original -->   lblPtCWAD.Caption     := '';
+//kt //codex original -->   if DoNotChangeEncWindow = false then begin
+//kt //codex original -->     lblPtLocation.Caption := 'Visit Not Selected';
+//kt //codex original -->     //TMG changed "Current Provider" to "Current PCP" original line -> lblPtProvider.Caption := 'Current Provider Not Selected';
+//kt //codex original -->     lblPtProvider.Caption := 'Current PCP Not Selected';  //TMG 9/7/18
+//kt //codex original -->     pnlVisit.Caption      := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
+//kt //codex original -->   end;
+//kt //codex original -->   lblPtCare.Caption     := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'0']);  //Primary Care Team Unassigned
+//kt //codex original -->   lblPtAttending.Caption := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'1']);  //Primary Care Team Unassigned;
+//kt //codex original -->   lblPtMHTC.Caption := '';
+//kt //codex original -->   pnlPrimaryCare.Caption := lblPtCare.Caption + ' ' + lblPtAttending.Caption + ' ' + lblPtMHTC.Caption;
+//kt //codex original -->   pnlPrimaryCare.Hint := lblPtCare.Caption;
+//kt //codex original -->   frmCover.ClearPtData;
+//kt //codex original -->   frmProblems.ClearPtData;
+//kt //codex original -->   //kt //codex original --> frmMeds.ClearPtData;
+//kt //codex original -->   if Assigned(frmMeds) then frmMeds.ClearPtData;  //kt //codex 8/25/26
+//kt //codex original -->   frmOrders.ClearPtData;
+//kt //codex original -->   frmNotes.ClearPtData;
+//kt //codex original -->   frmConsults.ClearPtData;
+//kt //codex original -->   //kt //codex original --> frmDCSumm.ClearPtData;
+//kt //codex original -->   if Assigned(frmDCSumm) then frmDCSumm.ClearPtData;  //kt //codex 8/25/26
+//kt //codex original -->   if Assigned(frmSurgery) then frmSurgery.ClearPtData;
+//kt //codex original -->   frmLabs.ClearPtData;
+//kt //codex original -->   frmGraphData.ClearPtData;
+//kt //codex original -->   frmReports.ClearPtData;
+//kt //codex original -->   if Assigned(frmTopics) then frmTopics.ClearPtData;  //kt //codex 9/14/26
+//kt //codex original -->   if Assigned(frmRxHistory) then frmRxHistory.ClearPtData;  //kt //codex 11/2/26
+//kt //codex original -->   for ASide := tpsLeft to tpsRight do SelectChartTab(ASide, CT_NOPAGE);  // to make sure DisplayPage gets called  //kt-tabs
+//kt //codex original -->   //kt-tabs end mod
+//kt //codex original -->   ClearReminderData;
+//kt //codex original -->   SigItems.Clear;
+//kt //codex original -->   Changes.Clear;
+//kt //codex original -->   lstCIRNLocations.Clear;
+//kt //codex original -->   ClearFlag;
+//kt //codex original -->   if Assigned(FlagList) then FlagList.Clear;
+//kt //codex original -->   HasFlag := False;
+//kt //codex original -->   HidePatientSelectMessages;
+//kt //codex original -->   if (GraphFloat <> nil) and GraphFloatActive then
+//kt //codex original -->   with GraphFloat do begin
+//kt //codex original -->     Initialize;
+//kt //codex original -->     DisplayData('top');
+//kt //codex original -->     DisplayData('bottom');
+//kt //codex original -->     //GtslCheck.Clear;
+//kt //codex original -->     Caption := 'CPRS Graphing - Patient: ' + MixedCase(Patient.Name);
+//kt //codex original -->   end;
+//kt //codex original -->   if frmFrame.TimedOut then begin
+//kt //codex original -->     infoBox('CPRS has encountered a serious problem and is unable to display the selected patient''s data. '
+//kt //codex original -->             + 'To prevent patient safety issues, CPRS is shutting down. Shutting down and then restarting CPRS will correct the problem, and you may continue working in CPRS.'
+//kt //codex original -->              + CRLF + CRLF + 'Please report all occurrences of this problem by contacting your CPRS Help Desk.', 'CPRS Error', MB_OK);
+//kt //codex original -->     TMGShuttingDownDueToCrash := TRUE; //kt 2/17
+//kt //codex original -->     frmFrame.Close;
+//kt //codex original -->   end;
+//kt //codex original --> end;
+//kt //codex original -->
+procedure TfrmFrame.InitializePatientControls;
+//kt //codex added entire procedure 11/16/26
 begin
-  //if frmFrame.Timedout then Exit; // added to correct Access Violation when "Refresh Patient Information" selected
-  lblPtName.Caption     := '';
-  lblPtSSN.Caption      := '';
-  lblPtAge.Caption      := '';
-  pnlPatient.Caption    := '';
-  PatientImage.Picture.Bitmap.Assign(NoPatientIDPhotoIcon);  //kt  4/15/14
-  lblPtCWAD.Caption     := '';
-  if DoNotChangeEncWindow = false then begin
-    lblPtLocation.Caption := 'Visit Not Selected';
-    //TMG changed "Current Provider" to "Current PCP" original line -> lblPtProvider.Caption := 'Current Provider Not Selected';
-    lblPtProvider.Caption := 'Current PCP Not Selected';  //TMG 9/7/18
-    pnlVisit.Caption      := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
-  end;
-  lblPtCare.Caption     := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'0']);  //Primary Care Team Unassigned
-  lblPtAttending.Caption := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'1']);  //Primary Care Team Unassigned;
-  lblPtMHTC.Caption := '';
-  pnlPrimaryCare.Caption := lblPtCare.Caption + ' ' + lblPtAttending.Caption + ' ' + lblPtMHTC.Caption;
-  pnlPrimaryCare.Hint := lblPtCare.Caption;
-  frmCover.ClearPtData;
-  frmProblems.ClearPtData;
-  //kt //codex original --> frmMeds.ClearPtData;
-  if Assigned(frmMeds) then frmMeds.ClearPtData;  //kt //codex 8/25/26
-  frmOrders.ClearPtData;
-  frmNotes.ClearPtData;
-  frmConsults.ClearPtData;
-  //kt //codex original --> frmDCSumm.ClearPtData;
-  if Assigned(frmDCSumm) then frmDCSumm.ClearPtData;  //kt //codex 8/25/26
-  if Assigned(frmSurgery) then frmSurgery.ClearPtData;
-  frmLabs.ClearPtData;
-  frmGraphData.ClearPtData;
-  frmReports.ClearPtData;
-  if Assigned(frmTopics) then frmTopics.ClearPtData;  //kt //codex 9/14/26
-  if Assigned(frmRxHistory) then frmRxHistory.ClearPtData;  //kt //codex 11/2/26
-  for ASide := tpsLeft to tpsRight do SelectChartTab(ASide, CT_NOPAGE);  // to make sure DisplayPage gets called  //kt-tabs
-  //kt-tabs end mod
-  ClearReminderData;
-  SigItems.Clear;
-  Changes.Clear;
-  lstCIRNLocations.Clear;
-  ClearFlag;
-  if Assigned(FlagList) then FlagList.Clear;
-  HasFlag := False;
-  HidePatientSelectMessages;
-  if (GraphFloat <> nil) and GraphFloatActive then
-  with GraphFloat do begin
-    Initialize;
-    DisplayData('top');
-    DisplayData('bottom');
-    //GtslCheck.Clear;
-    Caption := 'CPRS Graphing - Patient: ' + MixedCase(Patient.Name);
+  if Patient.DFN <> '' then begin
+    lblPtCare.Caption := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'0']);
+    lblPtAttending.Caption := sCallV('TMG CPRS GET NEXT APPOINTMENT',[Patient.DFN,'1']);
+    pnlPrimaryCare.Caption := lblPtCare.Caption + ' ' + lblPtAttending.Caption + ' ' + lblPtMHTC.Caption;
+    pnlPrimaryCare.Hint := lblPtCare.Caption;
+    if Assigned(frmNotes) then begin
+      frmNotes.InitializePatientData;
+    end;
+    if Assigned(frmGraphData) then begin
+      frmGraphData.InitializePatientData;
+    end;
   end;
   if frmFrame.TimedOut then begin
     infoBox('CPRS has encountered a serious problem and is unable to display the selected patient''s data. '
             + 'To prevent patient safety issues, CPRS is shutting down. Shutting down and then restarting CPRS will correct the problem, and you may continue working in CPRS.'
              + CRLF + CRLF + 'Please report all occurrences of this problem by contacting your CPRS Help Desk.', 'CPRS Error', MB_OK);
-    TMGShuttingDownDueToCrash := TRUE; //kt 2/17
+    TMGShuttingDownDueToCrash := TRUE;
     frmFrame.Close;
   end;
+end;
+
+procedure TfrmFrame.ClearClosedPatientHeader;
+//kt //codex added entire procedure 11/16/26
+begin
+  lblPtName.Caption := 'No Patient Selected';
+  lblPtSSN.Caption := '';
+  lblPtAge.Caption := '';
+  pnlPatient.Caption := '';
+  pnlPatient.Color := clInfoBk;
+  pnlPatient.Font.Color := clInfoBk;
+  PatientImage.Picture.Bitmap.Assign(NoPatientIDPhotoIcon);
+  lblPtLocation.Caption := 'Visit Not Selected';
+  lblPtProvider.Caption := 'Current PCP Not Selected';
+  pnlVisit.Caption := lblPtLocation.Caption + CRLF + lblPtProvider.Caption;
+  lblPtCare.Caption := '';
+  lblPtAttending.Caption := '';
+  lblPtMHTC.Caption := '';
+  pnlPrimaryCare.Caption := '';
+  pnlPrimaryCare.Hint := '';
+  lblPtCWAD.Caption := '';
+  lblPtPostings.Caption := 'No Postings';
+  pnlPostings.Caption := lblPtPostings.Caption;
+  btnCombatVet.Caption := '';
+  btnCombatVet.Visible := False;
+  pnlFlag.Enabled := False;
+  lblFlag.Enabled := False;
+  lblFlag.Font.Color := clBtnFace;
+  laVAA2.Caption := '';
+  laVAA2.Hint := '';
+  laMHV.Caption := '';
+  laMHV.Hint := '';
+  paVAA.Visible := False;
+  lstCIRNLocations.Visible := False;
+  pnlCIRN.Hint := '';
+  lblCIRN.Enabled := False;
+  pnlCIRN.TabStop := False;
+  //kt //codex original --> pnlTimer.Caption := '00:00';
+  //kt //codex original --> pnlTimer.Color := colorTimerOff;
+end;
+
+procedure TfrmFrame.CleanupPatientControls;
+//kt //codex added entire procedure 11/16/26
+var
+  ASide: TTabPageSide;
+begin
+  if FPatientControlsCleared then begin
+    Exit;
+  end;
+  ClearClosedPatientHeader;
+  if Assigned(frmPatientPhotoID) and Assigned(frmImages) then begin
+    frmPatientPhotoID.Hide;
+    frmPatientPhotoID.WebBrowser.Navigate(frmImages.NullImageName);
+  end;
+  if Assigned(frmCover) then begin
+    frmCover.ClearPtData;
+  end;
+  if Assigned(frmProblems) then begin
+    frmProblems.ClearPtData;
+  end;
+  if Assigned(frmMeds) then begin
+    frmMeds.ClearPtData;
+  end;
+  if Assigned(frmOrders) then begin
+    frmOrders.ClearPtData;
+  end;
+  if Assigned(frmNotes) then begin
+    //kt //codex original --> frmNotes.ClearPtDataForClose;
+    frmNotes.ClearPtData;
+  end;
+  if Assigned(frmConsults) then begin
+    frmConsults.ClearPtData;
+  end;
+  if Assigned(frmSurgery) then begin
+    frmSurgery.ClearPtData;
+  end;
+  if Assigned(frmDCSumm) then begin
+    frmDCSumm.ClearPtData;
+  end;
+  if Assigned(frmLabs) then begin
+    frmLabs.ClearPtData;
+  end;
+  if Assigned(frmReports) then begin
+    //kt //codex original --> frmReports.ClearPtDataForClose;
+    frmReports.ClearPtData;
+  end;
+  if Assigned(frmTopics) then begin
+    frmTopics.ClearPtData;
+  end;
+  if Assigned(frmRxHistory) then begin
+    frmRxHistory.ClearPtData;
+  end;
+  if Assigned(frmImages) then begin
+    frmImages.ClearPtData;
+  end;
+  if Assigned(GraphFloat) then begin
+    GraphFloat.Hide;
+    GraphFloatActive := False;
+    GraphFloat.ClearPatientDisplay;
+    GraphFloat.Caption := 'CPRS Graphing';
+  end;
+  if Assigned(frmGraphData) then begin
+    frmGraphData.ClearPtDataForClose;
+  end;
+  for ASide := tpsLeft to tpsRight do begin
+    FTabPages[ASide].TabIndex := -1;
+    LastTabPageID[ASide] := CT_NOPAGE;
+    SwitchToPage(ASide, nil);
+  end;
+  ClearReminderData;
+  SigItems.Clear;
+  Changes.Clear;
+  lstCIRNLocations.Clear;
+  ClearFlag;
+  if Assigned(FlagList) then begin
+    FlagList.Clear;
+  end;
+  HasFlag := False;
+  HidePatientSelectMessages;
+  FPatientControlsCleared := True;
+end;
+
+function TfrmFrame.CanOpenPatientByDFN(const NewDFN: string): Boolean;
+//kt //codex added entire function 11/16/26
+var
+  AccessStatus: Integer;
+  DateDied: TFMDateTime;
+begin
+  Result := False;
+  if StrToInt64Def(NewDFN, 0) <= 0 then begin
+    Exit;
+  end;
+  if not AllowAccessToSensitivePatient(NewDFN, AccessStatus) then begin
+    Exit;
+  end;
+  DateDied := DateOfDeath(NewDFN);
+  if (DateDied > 0) and (InfoBox('This patient died ' + FormatFMDateTime('mmm dd,yyyy hh:nn', DateDied) + CRLF +
+     'Do you wish to continue?', 'Deceased Patient', MB_YESNO or MB_DEFBUTTON2) = ID_NO) then begin
+    Exit;
+  end;
+  Result := True;
+end;
+
+procedure TfrmFrame.PreparePatientChange(const NewDFN: string);
+//kt //codex added entire procedure 11/16/26
+begin
+  if (NewDFN = '') or (Patient.DFN = '') or (NewDFN = Patient.DFN) then begin
+    Exit;
+  end;
+  //kt //codex original --> if bTimerOn then begin
+  //kt //codex original -->   btnTimerResetClick(nil);
+  //kt //codex original --> end;
+  //kt //codex original --> if Assigned(frmNotes) then begin
+  //kt //codex original -->   frmNotes.CheckForLock;
+  //kt //codex original --> end;
+  //kt //codex original --> HideEverything;
+  //kt //codex original --> CleanupPatientControls;
+  //kt //codex original --> Patient.Clear;
+  //kt //codex original --> Encounter.Clear;
+  //kt //codex original --> ClearPatientContext;
+  ClearPatientContext(False); //kt //codex 11/16/26
+end;
+
+//kt //codex original --> procedure TfrmFrame.ClearPatientContext;
+procedure TfrmFrame.ClearPatientContext(ShowDashboard: Boolean);
+//kt //codex added entire procedure 11/16/26
+begin
+  if Assigned(frmCover) then begin
+    frmCover.StopBackgroundLoad;
+  end;
+  if Assigned(frmNotes) then begin
+    frmNotes.CheckForLock;  //kt actually does unlock on selected IEN.  If no sel IEN, does nothing
+  end;
+  if bTimerOn then begin
+    btnTimerResetClick(nil);
+  end else begin
+    pnlTimer.Caption := '00:00';
+    pnlTimer.Color := colorTimerOff;
+  end;
+  //kt //codex original --> HideEverything;
+  HideEverything('Opening patient...', ShowDashboard);
+  CleanupPatientControls;
+  Patient.Clear;
+  Encounter.Clear;
+  FPrevInPatient := False;
 end;
 
 procedure TfrmFrame.mnuClosePatientClick(Sender: TObject);
@@ -1067,16 +1291,24 @@ begin
     messagedlg('Cannot close patient'+#13#10+Reason,mtError,[mbOk],0);
     exit;
   end;
-  SetActiveTab(0); //12/28/20
-  frmNotes.CheckForLock;    //kt  11/11/21
-  if bTimerOn then btnTimerResetClick(nil);    //3/21/22
-    HideEverything();
-    Patient.DFN := '';   //4/19/24
-    Encounter.Clear;  //8/4/26
-  if assigned(frmPatientPhotoID) then begin
-    frmPatientPhotoID.WebBrowser.Navigate(string(frmImages.NullImageName));  //Make sure previous image isn't shown  6/7/22
-    Application.Processmessages;
-  end;
+  //kt //codex original --> if Assigned(frmCover) then begin //kt //codex 11/16/26
+  //kt //codex original --> frmCover.StopBackgroundLoad; //kt //codex 11/16/26
+  //kt //codex original --> end; //kt //codex 11/16/26
+  //kt //codex original --> SetActiveTab(0); //12/28/20
+  //kt //codex original --> frmNotes.CheckForLock;    //kt  11/11/21
+  //kt //codex original --> if bTimerOn then btnTimerResetClick(nil);    //3/21/22
+  //kt //codex original --> HideEverything();
+  //kt //codex original --> //kt //codex original --> ClearClosedPatientHeader; //kt //codex 11/16/26
+  //kt //codex original --> CleanupPatientControls; //kt //codex 11/16/26
+  //kt //codex original --> //kt //codex original --> Patient.DFN := '';   //4/19/24
+  //kt //codex original --> Patient.Clear; //kt //codex 11/10/26
+  //kt //codex original --> Encounter.Clear;  //8/4/26
+  //kt //codex original --> FPrevInPatient := False; //kt //codex 11/16/26
+  //kt //codex original --> if assigned(frmPatientPhotoID) then begin
+  //kt //codex original --> frmPatientPhotoID.WebBrowser.Navigate(string(frmImages.NullImageName));  //Make sure previous image isn't shown  6/7/22
+  //kt //codex original --> Application.Processmessages;
+  //kt //codex original --> end;
+  ClearPatientContext; //kt //codex 11/16/26
   FContextChanging := False;  //5/2/22, ELH added because this got set to TRUE and Consults wouldn't load afterwards
 end;
 
@@ -2514,9 +2746,21 @@ end;
 procedure TfrmFrame.SetupPatient(AFlaggedList : TStringList);
 var
   AMsg, SelectMsg: string;
+  PriorLocation, PriorProvider, PriorVisitCaption: string; //kt //codex 11/16/26
 begin
+  PriorLocation := lblPtLocation.Caption; //kt //codex 11/16/26
+  PriorProvider := lblPtProvider.Caption; //kt //codex 11/16/26
+  PriorVisitCaption := pnlVisit.Caption; //kt //codex 11/16/26
   with Patient do begin
-    ClearPatient;  // must be called to avoid leaving previous patient's information visible!
+    //kt //codex original --> ClearPatient;  // must be called to avoid leaving previous patient's information visible!
+    CleanupPatientControls; //kt //codex 11/16/26
+    if DoNotChangeEncWindow then begin //kt //codex 11/16/26
+      lblPtLocation.Caption := PriorLocation; //kt //codex 11/16/26
+      lblPtProvider.Caption := PriorProvider; //kt //codex 11/16/26
+      pnlVisit.Caption := PriorVisitCaption; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
+    FPatientControlsCleared := False; //kt //codex 11/16/26
+    InitializePatientControls; //kt //codex 11/16/26
     btnCombatVet.Caption := 'CV '+ CombatVet.ExpirationDate;
     btnCombatVet.Visible := Patient.CombatVet.IsEligible;
     Visible := True;
@@ -2595,6 +2839,21 @@ var
   Reason: string;
   CCOWResponse: UserResponse;
   AccessStatus: integer;
+  SavedLocation: Integer; //kt //codex 11/16/26
+  SavedProvider: Int64; //kt //codex 11/16/26
+  SavedDateTime: TFMDateTime; //kt //codex 11/16/26
+  SavedLocationName, SavedLocationText: string; //kt //codex 11/16/26
+  SavedVisitCategory: Char; //kt //codex 11/16/26
+  SavedInpatient, SavedStandAlone: Boolean; //kt //codex 11/16/26
+
+  procedure RestorePriorEncounter;
+  //kt //codex added entire procedure 11/16/26
+  begin
+    Encounter.Inpatient := SavedInpatient;
+    Encounter.EncounterSwitch(SavedLocation, SavedLocationName, SavedLocationText, SavedDateTime, SavedVisitCategory);
+    Encounter.Provider := SavedProvider;
+    Encounter.StandAlone := SavedStandAlone;
+  end;
 
   procedure UpdatePatientInfoForAlert;
   begin
@@ -2606,6 +2865,8 @@ var
     end;
     if User.IsProvider then Encounter.Provider := User.DUZ;  //TMG commented out for code below  11/1/18  Added back 7/7/23
     //Reverting back    7/7/23 Encounter.Provider := strtoint(sCallV('TMG CPRS GET CURRENT PROVIDER',[Patient.DFN,inttostr(User.DUZ)]));
+    FPrevInPatient := Patient.Inpatient; //kt //codex 11/16/26
+    ShowEverything; //kt //codex 11/16/26
     SetupPatient(FlaggedPTList);
     if (FlaggedPTList.IndexOf(Patient.DFN) < 0) then
       FlaggedPTList.Add(Patient.DFN);
@@ -2616,6 +2877,14 @@ begin
   OrderPrintForm := False;
   mnuFile.Tag := 0;
   SaveDFN := Patient.DFN;
+  SavedLocation := Encounter.Location; //kt //codex 11/16/26
+  SavedProvider := Encounter.Provider; //kt //codex 11/16/26
+  SavedDateTime := Encounter.DateTime; //kt //codex 11/16/26
+  SavedLocationName := Encounter.LocationName; //kt //codex 11/16/26
+  SavedLocationText := Encounter.LocationText; //kt //codex 11/16/26
+  SavedVisitCategory := Encounter.VisitCategory; //kt //codex 11/16/26
+  SavedInpatient := Encounter.Inpatient; //kt //codex 11/16/26
+  SavedStandAlone := Encounter.StandAlone; //kt //codex 11/16/26
   Notifications.Next;
   if Notifications.Active then begin
     NewDFN := Notifications.DFN;
@@ -2627,6 +2896,10 @@ begin
           and AllowAccessToSensitivePatient(NewDFN, AccessStatus) then
       begin
         RemindersStarted := FALSE;
+        //kt //codex original --> if bTimerOn then begin //kt //codex 11/10/26
+        //kt //codex original -->   btnTimerResetClick(nil); //kt //codex 11/10/26
+        //kt //codex original --> end; //kt //codex 11/10/26
+        PreparePatientChange(NewDFN); //kt //codex 11/16/26
         Patient.DFN := NewDFN;
         Encounter.Clear;
         Changes.Clear;
@@ -2641,14 +2914,44 @@ begin
           else begin
             case CCOWResponse of
               urCancel: begin
-                Patient.DFN := SaveDFN;
+                //kt //codex original --> Patient.DFN := SaveDFN;
+                if SaveDFN <> '' then begin //kt //codex 11/16/26
+                  Patient.DFN := SaveDFN; //kt //codex 11/16/26
+                  RestorePriorEncounter; //kt //codex 11/16/26
+                  FPrevInPatient := Patient.Inpatient; //kt //codex 11/16/26
+                  ShowEverything; //kt //codex 11/16/26
+                  SetupPatient; //kt //codex 11/16/26
+                  SelectChartTab(tpsLeft, CT_COVER); //kt //codex 11/16/26
+                  FinishPatientTransition; //kt //codex 11/16/26
+                end else begin //kt //codex 11/16/26
+                  //kt //codex original --> HideEverything; CleanupPatientControls; Patient.Clear; Encounter.Clear; FPrevInPatient := False;
+                  ClearPatientContext; //kt //codex 11/16/26
+                end; //kt //codex 11/16/26
                 Notifications.Prior;
                 Exit;
               end;
               urBreak: begin
                 // do not revert to old DFN if context was manually broken by user - v26 (RV)
-                if (ctxContextor.State = csParticipating) then Patient.DFN := SaveDFN;
-                UpdatePatientInfoForAlert;
+                //kt //codex original --> if (ctxContextor.State = csParticipating) then Patient.DFN := SaveDFN;
+                //kt //codex original --> UpdatePatientInfoForAlert;
+                if ctxContextor.State = csParticipating then begin //kt //codex 11/16/26
+                  if SaveDFN <> '' then begin //kt //codex 11/16/26
+                    Patient.DFN := SaveDFN; //kt //codex 11/16/26
+                    RestorePriorEncounter; //kt //codex 11/16/26
+                    FPrevInPatient := Patient.Inpatient; //kt //codex 11/16/26
+                    ShowEverything; //kt //codex 11/16/26
+                    SetupPatient; //kt //codex 11/16/26
+                    SelectChartTab(tpsLeft, CT_COVER); //kt //codex 11/16/26
+                    FinishPatientTransition; //kt //codex 11/16/26
+                  end else begin //kt //codex 11/16/26
+                    //kt //codex original --> HideEverything; CleanupPatientControls; Patient.Clear; Encounter.Clear; FPrevInPatient := False;
+                    ClearPatientContext; //kt //codex 11/16/26
+                  end; //kt //codex 11/16/26
+                  Notifications.Prior; //kt //codex 11/16/26
+                  Exit; //kt //codex 11/16/26
+                end else begin //kt //codex 11/16/26
+                  UpdatePatientInfoForAlert; //kt //codex 11/16/26
+                end; //kt //codex 11/16/26
               end;
               else
                 UpdatePatientInfoForAlert;
@@ -2774,6 +3077,7 @@ begin
       else InfoBox(TX_UNK_NOTIF, TC_UNK_NOTIF, MB_OK);
     end;  //case
     SelectChartTab(tpsLeft, NextPage);
+    FinishPatientTransition; //kt //codex 11/16/26
   end else mnuFileOpenClick(mnuFileNext);
 end;
 
@@ -2819,7 +3123,10 @@ begin
   else PTSwitchRefresh := False;  //part of a change to CQ #11529
   PtSelCancelled := FALSE;
   if not FRefreshing then mnuFile.Tag := 0 else mnuFile.Tag := 1;
-  DetermineNextTab(tpsLeft);  //kt-mod
+  //kt //codex original --> DetermineNextTab(tpsLeft);  //kt-mod
+  if not FOpeningDirectPatient then begin //kt //codex 11/16/26
+    DetermineNextTab(tpsLeft); //kt //codex 11/16/26
+  end; //kt //codex 11/16/26
 
 (*  if (FRefreshing or User.UseLastTab) and (not FFirstLoad) then
     NextTab := TabToPageID(tabPage.TabIndex)
@@ -2862,13 +3169,20 @@ begin
   else
     SaveDFN := Patient.DFN;
 
-  if bTimerOn then btnTimerResetClick(nil);    //10/29/20
+  //kt //codex original --> if bTimerOn then btnTimerResetClick(nil);    //10/29/20
 
   OldRemindersStarted := RemindersStarted;
   RemindersStarted := FALSE;
   try
     if FRefreshing then begin
-      UpdatePtInfoOnRefresh;
+      //kt //codex original --> UpdatePtInfoOnRefresh;
+      if FOpeningDirectPatient then begin //kt //codex 11/16/26
+        FPrevInPatient := Patient.Inpatient; //kt //codex 11/16/26
+        DisplayEncounterText; //kt //codex 11/16/26
+      end else begin //kt //codex 11/16/26
+        UpdatePtInfoOnRefresh; //kt //codex 11/16/26
+      end; //kt //codex 11/16/26
+      ShowEverything; //kt //codex 11/10/26
       ok := TRUE;
     end else begin
       ok := FALSE;
@@ -2885,9 +3199,11 @@ begin
           pnlCCOW.Hint := TX_CCOW_BROKEN;
           imgCCOW.Picture.BitMap.LoadFromResourceName(hInstance, FCCOWIconName);
         end;
-        if (Patient.DFN = '') or (Sender = mnuFileOpen) or (Sender = mnuFileNext) or (Sender = mnuViewDemo) then
+        //kt //codex original --> if (Patient.DFN = '') or (Sender = mnuFileOpen) or (Sender = mnuFileNext) or (Sender = mnuViewDemo) then
+        if (Patient.DFN = '') or (Sender = mnuFileOpen) or (Sender = mnuFileNext) or (Sender = mnuViewDemo) then begin //kt //codex 11/10/26
           DebugMsg('In fFrame, starting PatientSelection()');
           SelectPatient(SHOW_NOTIFICATIONS, Font.Size, PtSelCancelled);
+        end; //kt //codex 11/10/26
         //kt original --> if PtSelCancelled then exit;
         if PtSelCancelled then begin
           //This was causing CPRS to crash. Commented out for the time being. -> If (Patient.DFN <> '') then NotifyContextChangeCancelledAll;  //kt added
@@ -2925,6 +3241,13 @@ begin
         ok := TRUE;
       end;
     end;
+    //kt //codex original --> if ok and (PageIDToTabIndex(tpsLeft, CT_NOTES) >= 0) and
+    //kt //codex original -->   ((FOpeningDirectPatient and FDirectOpenToNotes) or
+    //kt //codex original -->    (fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '')) then begin
+    if ok and (PageIDToTabIndex(tpsLeft, CT_NOTES) >= 0) and //kt //codex 11/16/26
+       (fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '') then begin //kt //codex 11/16/26
+      NextTabs[tpsLeft] := CT_NOTES; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
     if ok then begin
       if FCCOWInstalled and (ctxContextor.State = csParticipating) and (not FRefreshing) then begin
         if (AllowCCOWContextChange(CCOWResponse, Patient.DFN)) then begin
@@ -2950,6 +3273,18 @@ begin
         SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
       end;
     end;
+    //kt //codex original --> if FOpeningDirectPatient and FDirectOpenToNotes then begin
+    //kt //codex original -->   SelectChartTab(tpsLeft, CT_NOTES);
+    //kt //codex original --> end;
+    if fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '' then begin //kt //codex 11/16/26
+      //kt //codex original --> SelectChartTab(tpsLeft, CT_NOTES);
+      if TabPageID(tpsLeft) <> CT_NOTES then begin //kt //codex 11/16/26
+        SelectChartTab(tpsLeft, CT_NOTES); //kt //codex 11/16/26
+      end; //kt //codex 11/16/26
+      Application.ProcessMessages; //kt //codex 11/16/26
+      frmNotes.ChangeToNote(fSearchResults.TMGSearchResultsLastSelectedTIUIEN); //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
+    FinishPatientTransition; //kt //codex 11/16/26
   finally
     if (not FRefreshing) and (Patient.DFN = SaveDFN) then
       RemindersStarted := OldRemindersStarted;
@@ -2976,6 +3311,7 @@ begin
   end;
  frmOrders.TMGLoadColors;   //12/14/17
  frmImages.HandlePatientChanged();  //11/29/20
+ if not bTimerOn then begin //kt //codex 11/16/26
  OkToStartTimer := CheckForOpenEvent('',0);   //TMG  11/2/20
  InitialTime := sCallV('TMG CPRS GET CURRENT PAT TIME',[Patient.DFN]);
  if InitialTime<>'0' then pnlTimer.Caption := InitialTime+':00';
@@ -2985,7 +3321,12 @@ begin
    if StartTimer=1 then begin
      if OkToStartTimer then btnTimerClick(nil);
    end else if StartTimer=0 then begin
-     if ConfirmTimerStart(StartTimer)=True then btnTimerClick(nil);
+     //kt //codex original --> if ConfirmTimerStart(StartTimer)=True then btnTimerClick(nil);
+     if OkToStartTimer then begin //kt //codex 11/16/26
+       if ConfirmTimerStart(StartTimer)=True then begin //kt //codex 11/16/26
+         btnTimerClick(nil); //kt //codex 11/16/26
+       end; //kt //codex 11/16/26
+     end; //kt //codex 11/16/26
    end else begin
      //Do nothing here for now
    end;
@@ -3002,12 +3343,13 @@ begin
      btnTimerClick(nil);       //TMG  11/2/20
    end;}
  end;
- if fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '' then begin
-   //SwitchToPage(tpsLeft, frmNotes); //kt-tabs mod
-   SelectChartTab(tpsLeft, CT_NOTES);
-   Application.ProcessMessages;
-   frmNotes.ChangeToNote(fSearchResults.TMGSearchResultsLastSelectedTIUIEN);
- end;
+ end; //kt //codex 11/16/26
+ //kt //codex original --> if fSearchResults.TMGSearchResultsLastSelectedTIUIEN <> '' then begin
+ //kt //codex original --> //SwitchToPage(tpsLeft, frmNotes); //kt-tabs mod
+ //kt //codex original --> SelectChartTab(tpsLeft, CT_NOTES);
+ //kt //codex original --> Application.ProcessMessages;
+ //kt //codex original --> frmNotes.ChangeToNote(fSearchResults.TMGSearchResultsLastSelectedTIUIEN);
+ //kt //codex original --> end;
  //kt  END MOD 11/1/13 -----------------------------------------------------------
 end;
 
@@ -5550,7 +5892,13 @@ begin
   if StrToInt64Def(PtDFN, 0) > 0 then begin
     // Select new patient based on context value
     if Patient.DFN = PtDFN then exit;
+    //kt //codex original --> if bTimerOn then begin //kt //codex 11/10/26
+    //kt //codex original -->   btnTimerResetClick(nil); //kt //codex 11/10/26
+    //kt //codex original --> end; //kt //codex 11/10/26
+    DetermineNextTab(tpsLeft); //kt //codex 11/16/26
+    PreparePatientChange(PtDFN); //kt //codex 11/16/26
     Patient.DFN := PtDFN;
+    FPrevInPatient := Patient.Inpatient; //kt //codex 11/16/26
     //if (Patient.Name = '-1') or (PtName <> Piece(Patient.Name, ',', 1) + U + Piece(Patient.Name, ',', 2) + '^^^^') then
     if (Patient.Name = '-1') then begin
       HideEverything;
@@ -5568,8 +5916,9 @@ begin
     if not FFirstLoad then SetupPatient;
     frmCover.UpdateVAAButton; //VAA
     //kt-mod    
-    DetermineNextTab(tpsLeft);
+    //kt //codex original --> DetermineNextTab(tpsLeft);
     SelectChartTab(tpsLeft, NextTabs[tpsLeft]);
+    FinishPatientTransition; //kt //codex 11/16/26
   end else
     HideEverything;
 end;
@@ -5718,15 +6067,29 @@ begin
   end;
 end;
 
-procedure TfrmFrame.HideEverything(AMessage: string = 'No patient is currently selected.');
+//kt //codex original --> procedure TfrmFrame.HideEverything(AMessage: string = 'No patient is currently selected.');
+procedure TfrmFrame.HideEverything(AMessage: string; ShowDashboard: Boolean); //kt //codex 11/16/26
 var MessageArr:TStringList;
 begin
+  FPatientTransitionInProgress := not ShowDashboard; //kt //codex 11/16/26
   FNoPatientSelected := TRUE;
-  //pnlNoPatientSelected.Caption := AMessage;
-  MessageArr := TStringList.Create();
-  tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[User.DUZ]);
-  WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT);
-  MessageArr.Free;
+  //kt //codex original --> //pnlNoPatientSelected.Caption := AMessage;
+  //kt //codex original --> MessageArr := TStringList.Create();
+  //kt //codex original --> tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[User.DUZ]);
+  //kt //codex original --> WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT);
+  //kt //codex original --> MessageArr.Free;
+  wbNoPatientSelected.Visible := False; //kt //codex 11/16/26
+  pnlNoPatientSelected.Caption := AMessage; //kt //codex 11/16/26
+  if ShowDashboard then begin //kt //codex 11/16/26
+    MessageArr := TStringList.Create(); //kt //codex 11/16/26
+    try //kt //codex 11/16/26
+      tCallV(MessageArr,'TMG CPRS NO PATIENT SELECTED',[User.DUZ]); //kt //codex 11/16/26
+      WBLoadHTML(wbNoPatientSelected, MessageArr.TEXT); //kt //codex 11/16/26
+    finally //kt //codex 11/16/26
+      MessageArr.Free; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
+    wbNoPatientSelected.Visible := True; //kt //codex 11/16/26
+  end; //kt //codex 11/16/26
   pnlNoPatientSelected.Visible := True;
   pnlNoPatientSelected.BringToFront;
   mnuFileReview.Enabled := False;
@@ -5754,12 +6117,30 @@ begin
   timUpdateNoPat.Enabled := True;
 end;
 
-procedure TfrmFrame.ShowEverything;
+procedure TfrmFrame.FinishPatientTransition;
+//kt //codex added entire procedure 11/16/26
 begin
-  FNoPatientSelected := FALSE;
+  if (not FPatientTransitionInProgress) or FNoPatientSelected then begin
+    Exit;
+  end;
+  FPatientTransitionInProgress := False;
   pnlNoPatientSelected.Caption := '';
   pnlNoPatientSelected.Visible := False;
   pnlNoPatientSelected.SendToBack;
+  timUpdateNoPat.Enabled := False;
+end;
+
+procedure TfrmFrame.ShowEverything;
+begin
+  FNoPatientSelected := FALSE;
+  //kt //codex original --> pnlNoPatientSelected.Caption := '';
+  //kt //codex original --> pnlNoPatientSelected.Visible := False;
+  //kt //codex original --> pnlNoPatientSelected.SendToBack;
+  if not FPatientTransitionInProgress then begin //kt //codex 11/16/26
+    pnlNoPatientSelected.Caption := ''; //kt //codex 11/16/26
+    pnlNoPatientSelected.Visible := False; //kt //codex 11/16/26
+    pnlNoPatientSelected.SendToBack; //kt //codex 11/16/26
+  end; //kt //codex 11/16/26
   mnuFileReview.Enabled := True;
   mnuFilePrint.Enabled := True;
   mnuFileEncounter.Enabled := True;
@@ -6061,14 +6442,16 @@ begin
     if GraphFloat.btnClose.Tag = 1 then begin
       Screen.Cursor := crDefault;
       exit;
-    end else if GraphFloatActive and (frmGraphData.pnlData.Hint = Patient.DFN) then begin
+    //kt //codex original --> end else if GraphFloatActive and (frmGraphData.pnlData.Hint = Patient.DFN) then begin
+    end else if GraphFloatActive and (not GraphFloat.NeedsPatientInitialization) and (frmGraphData.pnlData.Hint = Patient.DFN) then begin //kt //codex 11/16/26
       if length(GraphFloat.pnlFooter.Hint) > 1 then begin
         GraphFloat.Close;
         GraphFloatActive := true;
         GraphFloat.Show;
       end;
       GraphFloat.BringToFront;             // graph is active, same patient
-    end else if frmGraphData.pnlData.Hint = Patient.DFN then begin
+    //kt //codex original --> end else if frmGraphData.pnlData.Hint = Patient.DFN then begin
+    end else if (not GraphFloat.NeedsPatientInitialization) and (frmGraphData.pnlData.Hint = Patient.DFN) then begin //kt //codex 11/16/26
       // graph is not active, same patient
       // context sensitive
       GraphFloat.Show;
@@ -6247,21 +6630,22 @@ begin
   end else if pos('DFN-',URL)>0 then begin
     DFN := piece2(URL,'DFN-',2);
     //Patient.DFN := '0';
-    pnlNoPatientSelected.Visible := False;
-    pnlNoPatientSelected.SendToBack;
+    //kt //codex original --> pnlNoPatientSelected.Visible := False;
+    //kt //codex original --> pnlNoPatientSelected.SendToBack;
     //ShowEverything;
-    Patient.DFN := DFN;     // The patient object in uCore must have been created already!
-    try
+    //kt //codex original --> Patient.DFN := DFN;     // The patient object in uCore must have been created already!
+    //kt //codex original --> try
       //Encounter.Clear;
       //Changes.Clear;
       //frmFrame.UpdatePtInfoOnRefresh;
       //if Patient.Inpatient then Encounter.VisitCategory := 'H';
 
-      mnuFileOpenClick(Self);
+      //kt //codex original --> mnuFileOpenClick(Self);
+      OpenAPatient(DFN); //kt //codex 11/10/26
       //DisplayEncounterText;
-    finally
+    //kt //codex original --> finally
       //OrderPrintForm := FALSE;
-    end;
+    //kt //codex original --> end;
     Cancel := True;
   end;
 
@@ -6686,18 +7070,44 @@ begin
 end;
 
 procedure TfrmFrame.OpenChartByDFN(NewDFN:string)  ;  //TMG added entire function 6/11/18
+var Reason: string; //kt //codex 11/10/26
 begin
   if NewDFN=Patient.DFN then exit;
+  if not CanOpenPatientByDFN(NewDFN) then begin //kt //codex 11/16/26
+    Exit; //kt //codex 11/16/26
+  end; //kt //codex 11/16/26
+  if frmNotes.NonModalEncounterDialogActive() then begin //kt //codex 11/10/26
+    Exit; //kt //codex 11/10/26
+  end; //kt //codex 11/10/26
+  if not AllowContextChangeAll(Reason) then begin //kt //codex 11/10/26
+    Exit; //kt //codex 11/10/26
+  end; //kt //codex 11/10/26
+  //kt //codex original --> if bTimerOn then begin //kt //codex 11/10/26
+  //kt //codex original -->   btnTimerResetClick(nil); //kt //codex 11/10/26
+  //kt //codex original --> end; //kt //codex 11/10/26
+  DetermineNextTab(tpsLeft); //kt //codex 11/16/26
+  PreparePatientChange(NewDFN); //kt //codex 11/16/26
   Patient.DFN := NewDFN;     // The patient object in uCore must have been created already!
   FRefreshing := TRUE;
+  FOpeningDirectPatient := True; //kt //codex 11/16/26
   try
     Encounter.Clear;
     Changes.Clear;
     //frmFrame.UpdatePtInfoOnRefresh;
-    if Patient.Inpatient then Encounter.VisitCategory := 'H';
+    //kt //codex original --> if Patient.Inpatient then Encounter.VisitCategory := 'H';
+    if Patient.Inpatient then begin //kt //codex 11/16/26
+      Encounter.Inpatient := True; //kt //codex 11/16/26
+      Encounter.Location := Patient.Location; //kt //codex 11/16/26
+      Encounter.DateTime := Patient.AdmitTime; //kt //codex 11/16/26
+      Encounter.VisitCategory := 'H'; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
+    if User.IsProvider then begin //kt //codex 11/16/26
+      Encounter.Provider := User.DUZ; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
     mnuFileOpenClick(Self);
     //DisplayEncounterText;
   finally
+    FOpeningDirectPatient := False; //kt //codex 11/16/26
     FRefreshing := FALSE;
     OrderPrintForm := FALSE;
   end;
@@ -6723,20 +7133,48 @@ begin
 end;
 
 procedure TfrmFrame.OpenAPatient(NewDFN:string);  //TMG added 1/24/22
+var Reason: string; //kt //codex 11/10/26
 begin
   if NewDFN=Patient.DFN then exit;
+  if not CanOpenPatientByDFN(NewDFN) then begin //kt //codex 11/16/26
+    Exit; //kt //codex 11/16/26
+  end; //kt //codex 11/16/26
+  if frmNotes.NonModalEncounterDialogActive() then begin //kt //codex 11/10/26
+    Exit; //kt //codex 11/10/26
+  end; //kt //codex 11/10/26
+  if not AllowContextChangeAll(Reason) then begin //kt //codex 11/10/26
+    Exit; //kt //codex 11/10/26
+  end; //kt //codex 11/10/26
+  //kt //codex original --> if bTimerOn then begin //kt //codex 11/10/26
+  //kt //codex original -->   btnTimerResetClick(nil); //kt //codex 11/10/26
+  //kt //codex original --> end; //kt //codex 11/10/26
+  DetermineNextTab(tpsLeft); //kt //codex 11/16/26
+  PreparePatientChange(NewDFN); //kt //codex 11/16/26
   Patient.DFN := NewDFN;     // The patient object in uCore must have been created already!
   FRefreshing := TRUE;
+  FOpeningDirectPatient := True; //kt //codex 11/16/26
+  //kt //codex original --> FDirectOpenToNotes := True; //kt //codex 11/16/26
   try
     Encounter.Clear;
     Changes.Clear;
     //frmFrame.UpdatePtInfoOnRefresh;
-    if Patient.Inpatient then Encounter.VisitCategory := 'H';
+    //kt //codex original --> if Patient.Inpatient then Encounter.VisitCategory := 'H';
+    if Patient.Inpatient then begin //kt //codex 11/16/26
+      Encounter.Inpatient := True; //kt //codex 11/16/26
+      Encounter.Location := Patient.Location; //kt //codex 11/16/26
+      Encounter.DateTime := Patient.AdmitTime; //kt //codex 11/16/26
+      Encounter.VisitCategory := 'H'; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
+    if User.IsProvider then begin //kt //codex 11/16/26
+      Encounter.Provider := User.DUZ; //kt //codex 11/16/26
+    end; //kt //codex 11/16/26
 
     mnuFileOpenClick(Self);
     //DisplayEncounterText;
-    SelectChartTab(tpsLeft, CT_NOTES);
+    //kt //codex original --> SelectChartTab(tpsLeft, CT_NOTES);
   finally
+    //kt //codex original --> FDirectOpenToNotes := False; //kt //codex 11/16/26
+    FOpeningDirectPatient := False; //kt //codex 11/16/26
     FRefreshing := FALSE;
     OrderPrintForm := FALSE;
   end;

@@ -183,6 +183,7 @@ type
     procedure btnWBNormalZoomClick(Sender: TObject); //kt //codex 10/1/26
 
   private
+    //kt //codex original --> FClearingForPatientClose: Boolean; //kt //codex 11/16/26
     FReportDisplayMode: TReportDisplayMode; //kt //codex 8/21/26
     FWebBrowserZoom: Integer; //kt //codex 10/1/26
     SortIdx1, SortIdx2, SortIdx3: Integer;
@@ -202,6 +203,7 @@ type
     function SelectUserDefaultReport: boolean; //kt added 3/17/21
   public
     procedure ClearPtData; override;
+    procedure ClearPtDataForClose; //kt //codex 11/16/26
     function AllowContextChange(var WhyNot: string): Boolean; override;
     procedure DisplayPage; override;
     procedure SetFontSize(NewFontSize: Integer); override;
@@ -326,18 +328,49 @@ begin
     WebBrowser1.Navigate('about:blank');
   end;
   lstDateRange.Tag := 0; // used to reset date default on graph
-  if (GraphForm <> nil) and GraphFormActive then
-  with GraphForm do
+  //kt //codex original --> if (GraphForm <> nil) and GraphFormActive then
+  //kt //codex original --> with GraphForm do
+  //kt //codex original --> begin
+  //kt //codex original -->   GraphForm.SendToBack;
+  //kt //codex original -->   Initialize;
+  //kt //codex original -->   DisplayData('top');
+  //kt //codex original -->   DisplayData('bottom');
+  //kt //codex original -->   //GtslCheck.Clear;
+  //kt //codex original -->   GraphFormActive := false;
+  //kt //codex original --> end;
+//kt //codex original -->   //kt //codex original --> if (GraphForm <> nil) and GraphFormActive then begin
+//kt //codex original -->   if GraphForm <> nil then begin //kt //codex 11/16/26
+//kt //codex original -->     if FClearingForPatientClose then begin //kt //codex 11/16/26
+//kt //codex original -->       GraphForm.SendToBack; //kt //codex 11/16/26
+//kt //codex original -->       GraphForm.ClearPatientDisplay; //kt //codex 11/16/26
+//kt //codex original -->       GraphFormActive := False; //kt //codex 11/16/26
+//kt //codex original -->     end else if GraphFormActive then begin //kt //codex 11/16/26
+//kt //codex original -->       GraphForm.SendToBack; //kt //codex 11/16/26
+//kt //codex original -->       GraphForm.Initialize; //kt //codex 11/16/26
+//kt //codex original -->       GraphForm.DisplayData('top'); //kt //codex 11/16/26
+//kt //codex original -->       GraphForm.DisplayData('bottom'); //kt //codex 11/16/26
+//kt //codex original -->       GraphFormActive := False; //kt //codex 11/16/26
+//kt //codex original -->     end; //kt //codex 11/16/26
+//kt //codex original -->   end; //kt //codex 11/16/26
+  if GraphForm <> nil then begin //kt //codex 11/16/26
+    GraphForm.SendToBack; //kt //codex 11/16/26
+    GraphForm.ClearPatientDisplay; //kt //codex 11/16/26
+    GraphFormActive := False; //kt //codex 11/16/26
+  end; //kt //codex 11/16/26
   begin
-    GraphForm.SendToBack;
-    Initialize;
-    DisplayData('top');
-    DisplayData('bottom');
-    //GtslCheck.Clear;
-    GraphFormActive := false;
   end;
-  begin
-  end;
+end;
+
+procedure TfrmReports.ClearPtDataForClose;
+//kt //codex added entire procedure 11/16/26
+begin
+//kt //codex original -->   FClearingForPatientClose := True;
+//kt //codex original -->   try
+//kt //codex original -->     ClearPtData;
+//kt //codex original -->   finally
+//kt //codex original -->     FClearingForPatientClose := False;
+//kt //codex original -->   end;
+  ClearPtData; //kt //codex 11/16/26
 end;
 
 procedure TfrmReports.Graph(reportien: integer);
@@ -376,7 +409,8 @@ begin
   end
   else if GraphForm.btnClose.Tag = 1 then
     Exit
-  else if frmGraphData.pnlData.Hint = Patient.DFN then begin   // displaying same patient
+  //kt //codex original --> else if frmGraphData.pnlData.Hint = Patient.DFN then begin   // displaying same patient
+  else if (not GraphForm.NeedsPatientInitialization) and (frmGraphData.pnlData.Hint = Patient.DFN) then begin //kt //codex 11/16/26
     if Tag <> reportien then   // different report
     with GraphForm do begin  // new report
       SendToBack;

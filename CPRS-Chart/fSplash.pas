@@ -54,6 +54,7 @@ type
     lblTMGCustVer: TLabel;
     pnlBottom: TPanel;
     lblMessage: TLabel;
+    Label1: TLabel;
     //pnl508Disclaimer: TPanel;  //kt <-- missing for some reason...
     //Memo1: TMemo;              //kt <-- missing for some reason...
     procedure FormCreate(Sender: TObject);

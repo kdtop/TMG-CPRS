@@ -2,6 +2,15 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-19 — Imaging, note signing, tab order, and Topics carry-forward
+
+- Updated Imaging report selection for the renamed report. The user built and confirmed the tab displays studies.
+- Swapped the shared Reports/Imaging browser zoom buttons. Routed normal, abnormal, and amended imaging-result alerts and radiology STAT alerts to Imaging using the existing study-selection handler. These changes need runtime verification.
+- Added a Notes signing speed button for unsigned-group and Alerted Note document nodes, using the existing signing action and checks. The user confirmed both cases work.
+- Moved Rx History after Orders and Topics before Pics; this needs a fresh Delphi build and runtime check.
+- Changed Topics new-note carry-forward to prefix selected topics with cached curated text, with selected curated edits taking precedence. Retrieval failures stop before note creation and leave changes pending. Cached table blocks are omitted as in the curated pane; selected table edits are inserted separately. This needs a Delphi build and runtime verification, including downstream note-template parsing.
+- Retained the existing uMumpsData generics-unit import change. The Delphi-compatible signature glyph is embedded in the Notes form.
+
 ## 2026-11-17 — Dedicated Imaging tab
 
 - Added an Imaging tab between Labs and Reports using a second instance of the Reports form. It automatically selects local imaging and hides the report and procedure trees; the existing Imaging report remains available in Reports.

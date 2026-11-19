@@ -257,7 +257,7 @@ type
     function FindTopicDataTable(const TableName: string): TTopicDataTable;
     function FindTopicDataTableByIEN(const TableIEN: string): TTopicDataTable;
     function HasPendingPushSync: Boolean;
-    function BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings): string;
+    function BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): string;
     function SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): Boolean;
     function CurrentPushSyncMode: TPushSyncMode;
     function TopicEntryPushKey(const PropertyID, EntryFMDate: string): string;
@@ -642,24 +642,28 @@ begin
   end;
 end;
 
-function TfrmTopics.BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings): string;
+function RemoveCuratedNoteTables(const HTML: string): string; forward;
+
+function TfrmTopics.BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): string;
 var
   EntryDate: TFMDateTime;
-  EntryDateText, PropertyID, TopicName, Content, MergedEntries: string;
-  EntryIndex, NextIndex, GroupIndex: Integer;
+  EntryDateText, PropertyID, TopicName, Content, MergedEntries, Status: string;
+  EntryIndex, NextIndex, GroupIndex, CuratedIndex: Integer;
   EntryList: TList<TTopicEntryPushData>;
-  HTMLLines, GroupIDs, GroupNames: TStringList;
-  Modified, UseAsteriskStyle, HasFollowingText: Boolean;
+  HTMLLines, GroupIDs, GroupNames, CuratedData: TStringList;
+  Modified, UseAsteriskStyle, HasFollowingText, HasCuratedHistory: Boolean;
   Pair: TPair<string, TTopicEntryPushData>;
   TablePair: TPair<string, TTopicDataTable>;
   TempEntry: TTopicEntryPushData;
   TopicData: TTopicListItemData;
 begin
   Result := '';
+  ErrorText := '';
   EntryList := TList<TTopicEntryPushData>.Create;
   HTMLLines := TStringList.Create;
   GroupIDs := TStringList.Create;
   GroupNames := TStringList.Create;
+  CuratedData := TStringList.Create;
   try
     for Pair in FPendingTopicEntries do begin
       if SelectedKeys.IndexOf(Pair.Key) >= 0 then begin
@@ -693,6 +697,7 @@ begin
       if GroupIDs.IndexOf(PropertyID) < 0 then begin
         TopicData := FindTopicListItemData(PropertyID);
         if not Assigned(TopicData) then begin
+          ErrorText := 'A selected curated topic is no longer available.';
           Exit;
         end;
         GroupIDs.Add(PropertyID);
@@ -711,13 +716,39 @@ begin
       TopicName := GroupNames[GroupIndex];
       Modified := False;
       Content := '';
+      MergedEntries := '';
+      HasCuratedHistory := False;
       if SelectedCuratedIDs.IndexOf(PropertyID) >= 0 then begin
         if not FCuratedEdits.TryGetValue(Patient.DFN + '^' + PropertyID, Content) then begin
-          Result := '';
+          ErrorText := 'The curated edit for "' + TopicName + '" is no longer available.';
           Exit;
         end;
+        HasCuratedHistory := True;
+      end else begin
+        CuratedData.Clear;
+        Status := GetCuratedTopic(CuratedData, PropertyID);
+        if Piece(Status, '^', 1) <> '1' then begin
+          ErrorText := 'Unable to retrieve curated text for "' + TopicName + '". ' + Piece(Status, '^', 2);
+          Exit;
+        end;
+        for CuratedIndex := 0 to CuratedData.Count - 1 do begin
+          if Piece(CuratedData[CuratedIndex], '^', 1) = '2' then begin
+            if HasCuratedHistory then begin
+              Content := Content + ' ';
+            end;
+            Content := Content + Copy(CuratedData[CuratedIndex], 3, MaxInt);
+            HasCuratedHistory := True;
+          end;
+        end;
+        Content := RemoveCuratedNoteTables(Content);
+        HasCuratedHistory := Trim(Content) <> '';
+      end;
+      if HasCuratedHistory then begin
         MergedEntries := '';
-        HasFollowingText := FCuratedMergedEntries.TryGetValue(Patient.DFN + '^' + PropertyID, MergedEntries);
+        HasFollowingText := False;
+        if SelectedCuratedIDs.IndexOf(PropertyID) >= 0 then begin
+          HasFollowingText := FCuratedMergedEntries.TryGetValue(Patient.DFN + '^' + PropertyID, MergedEntries);
+        end;
         if not HasFollowingText then begin
           for EntryIndex := 0 to EntryList.Count - 1 do begin
             if EntryList[EntryIndex].PropertyID = PropertyID then begin
@@ -745,7 +776,7 @@ begin
           EntryDateText := EntryList[EntryIndex].EntryFMDate;
         end;
         if Content <> '' then begin
-          if SelectedCuratedIDs.IndexOf(PropertyID) >= 0 then begin
+          if HasCuratedHistory then begin
             Content := PrepareHTMLForInlineJoin(Content) + '&nbsp;';
           end else begin
             Content := Content + '<BR>';
@@ -773,6 +804,7 @@ begin
     end;
     Result := HTMLLines.Text;
   finally
+    CuratedData.Free;
     GroupNames.Free;
     GroupIDs.Free;
     HTMLLines.Free;
@@ -1594,8 +1626,12 @@ begin
     end;
     case FPushSyncMode of
       psmNewNote: begin
-        TopicHTML := BuildPendingTopicEntryHTML(SelectedKeys, SelectedTableKeys, SelectedCuratedIDs);
+        TopicHTML := BuildPendingTopicEntryHTML(SelectedKeys, SelectedTableKeys, SelectedCuratedIDs, ErrorText);
         if TopicHTML = '' then begin
+          if ErrorText <> '' then begin
+            MessageDlg(ErrorText, mtError, [mbOK], 0);
+            Exit;
+          end;
           MessageDlg('There are no selected changes to push to a new note.', mtInformation, [mbOK], 0);
           Exit;
         end;

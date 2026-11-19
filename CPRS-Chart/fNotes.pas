@@ -311,6 +311,7 @@ type
     timRunMDM: TTimer;
     btnOpenEnc: TBitBtn;
     MultiLooseDocHandler: TMenuItem;
+    btnSignDocument: TSpeedButton;
     procedure sptVertMoved(Sender: TObject);
     procedure btnOpenEncClick(Sender: TObject);
     procedure memPCEShowResizeRequest(Sender: TObject; Rect: TRect);
@@ -923,6 +924,7 @@ procedure TfrmNotes.ClearPtData;
 { clear all controls that contain patient specific information }
 begin
   inherited ClearPtData;
+  btnSignDocument.Visible := False; //kt //codex 11/19/26
   ClearEditControls;
   uChanging := True;
   tvNotes.Items.BeginUpdate;
@@ -5507,6 +5509,7 @@ begin
   tmpList := TStringList.Create;
   try
     FLoadingNotes := True;  //ELH  6/9/26
+    btnSignDocument.Visible := False; //kt //codex 11/19/26
 
     HiddenCount := 0;
     FDocList.Clear;
@@ -5977,6 +5980,19 @@ var
 begin
   SetActiveTIUIENGetterForImages(GetCurrentNoteID);
   if uChanging then Exit;
+  btnSignDocument.Visible := False; //kt //codex 11/19/26
+  if Assigned(Node) and not IsNonSelectableGroupNode(Node) then begin //kt //codex 11/19/26
+    //kt //codex original --> UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U); //kt //codex 11/19/26
+    UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), 1, U, nil); //kt //codex 11/19/26
+    btnSignDocument.Visible := (PieceAsIntDef(TORTreeNode(Node).StringData, U, 1, 0) > 0) and //kt //codex 11/19/26
+                               (ChildDepth(UnsignedDocsNode, TORTreeNode(Node)) > 0); //kt //codex 11/19/26
+    if Assigned(Node.Parent) then begin //kt //codex 11/19/26
+      if (Piece(TORTreeNode(Node.Parent).StringData, U, 1) = 'ALERT') and //kt //codex 11/19/26
+         (PieceAsIntDef(TORTreeNode(Node).StringData, U, 1, 0) > 0) then begin //kt //codex 11/19/26
+        btnSignDocument.Visible := True; //kt //codex 11/19/26
+      end; //kt //codex 11/19/26
+    end; //kt //codex 11/19/26
+  end; //kt //codex 11/19/26
   //This gives the change a chance to occur when keyboarding, so that WindowEyes
   //doesn't use the old value.
   //kt begin mod block 5/15/15-------

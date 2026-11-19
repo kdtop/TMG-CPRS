@@ -461,7 +461,7 @@ inherited frmReports: TfrmReports
           TabOrder = 1
           ExplicitWidth = 551
           object btnWBZoomOut: TSpeedButton
-            Left = 40
+            Left = 0
             Top = 0
             Width = 18
             Height = 18
@@ -555,7 +555,7 @@ inherited frmReports: TfrmReports
             OnClick = btnWBNormalZoomClick
           end
           object btnWBZoomIn: TSpeedButton
-            Left = 0
+            Left = 40
             Top = 0
             Width = 18
             Height = 18

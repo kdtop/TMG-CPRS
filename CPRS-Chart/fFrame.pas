@@ -1606,6 +1606,7 @@ begin
   CreateTab(tpsLeft, CT_MEDS,     'Meds');
   }
   CreateTab(tpsLeft, CT_ORDERS,   'Orders');
+  CreateTab(tpsLeft, CT_RXHISTORY, 'Rx History'); //kt //codex 11/19/26
   CreateTab(tpsLeft, CT_NOTES,    'Notes');
   CreateTab(tpsLeft, CT_CONSULTS, 'Consults');
   CreateTab(tpsLeft, CT_SURGERY,  'Surgery');
@@ -1617,13 +1618,14 @@ begin
   //kt //codex original --> CreateTab(tpsLeft, CT_IMAGING, 'Imaging'); //kt //codex 11/17/26
   CreateTab(tpsLeft, CT_IMAGING, 'Imaging'); //kt //codex 11/17/26
   CreateTab(tpsLeft, CT_REPORTS,  'Reports'); //kt //codex 11/17/26
+  CreateTab(tpsLeft, CT_TOPICS,   'Topics'); //kt //codex 11/19/26
   CreateTab(tpsLeft, CT_IMAGES,   'Pics', ImagesEnabled);  //kt 9/11  //kt changed 'Images' -> 'Pics' 8/24/26
   { //kt removing 8/26/26 since we don't use
   CreateTab(tpsLeft, CT_MAILBOX,  'Mailbox');  //kt 9/11
   }
   CreateTab(tpsLeft, CT_POPHEALTH,'Pop. Health');  //kt 9/11
-  CreateTab(tpsLeft, CT_TOPICS,   'Topics');       //kt //codex 9/14/26
-  CreateTab(tpsLeft, CT_RXHISTORY, 'Rx History');  //kt //codex 11/2/26
+  //kt //codex original --> CreateTab(tpsLeft, CT_TOPICS,   'Topics');       //kt //codex 9/14/26
+  //kt //codex original --> CreateTab(tpsLeft, CT_RXHISTORY, 'Rx History');  //kt //codex 11/2/26
 
   { //kt removing 8/24/26 since we don't use
   for APageID := CT_WEBTAB1 to CT_LAST_WEBTAB do begin                   //kt 9/11
@@ -3030,9 +3032,11 @@ begin
       NF_FLAGGED_ORDERS                : NextPage := CT_ORDERS;
       NF_ORDER_REQUIRES_ELEC_SIGNATURE : NextPage := CT_ORDERS;
       NF_ABNORMAL_LAB_RESULTS          : NextPage := CT_LABS;
-      NF_IMAGING_RESULTS               : NextPage := CT_REPORTS;
+      //kt //codex original --> NF_IMAGING_RESULTS               : NextPage := CT_REPORTS;
+      NF_IMAGING_RESULTS               : NextPage := CT_IMAGING; //kt //codex 11/19/26
       NF_CONSULT_REQUEST_RESOLUTION    : NextPage := CT_CONSULTS;
-      NF_ABNORMAL_IMAGING_RESULTS      : NextPage := CT_REPORTS;
+      //kt //codex original --> NF_ABNORMAL_IMAGING_RESULTS      : NextPage := CT_REPORTS;
+      NF_ABNORMAL_IMAGING_RESULTS      : NextPage := CT_IMAGING; //kt //codex 11/19/26
       NF_IMAGING_REQUEST_CANCEL_HELD   : NextPage := CT_ORDERS;
       NF_NEW_SERVICE_CONSULT_REQUEST   : NextPage := CT_CONSULTS;
       NF_CONSULT_REQUEST_CANCEL_HOLD   : NextPage := CT_CONSULTS;
@@ -3045,14 +3049,18 @@ begin
           NextPage := CT_LABS
         else if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'GMRC' then
           NextPage := CT_CONSULTS
-        else if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'RA' then
-          NextPage := CT_REPORTS;
+        //kt //codex original --> else if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'RA' then
+        else if Piece(Piece(Notifications.AlertData, '|', 2), '@', 2) = 'RA' then begin //kt //codex 11/19/26
+          //kt //codex original --> NextPage := CT_REPORTS;
+          NextPage := CT_IMAGING; //kt //codex 11/19/26
+        end; //kt //codex 11/19/26
       NF_DNR_EXPIRING                  : NextPage := CT_ORDERS;
       NF_MEDICATIONS_EXPIRING_INPT     : NextPage := CT_ORDERS;
       NF_MEDICATIONS_EXPIRING_OUTPT    : NextPage := CT_ORDERS;
       NF_UNVERIFIED_MEDICATION_ORDER   : NextPage := CT_ORDERS;
       NF_NEW_ORDER                     : NextPage := CT_ORDERS;
-      NF_IMAGING_RESULTS_AMENDED       : NextPage := CT_REPORTS;
+      //kt //codex original --> NF_IMAGING_RESULTS_AMENDED       : NextPage := CT_REPORTS;
+      NF_IMAGING_RESULTS_AMENDED       : NextPage := CT_IMAGING; //kt //codex 11/19/26
       NF_CRITICAL_LAB_RESULTS          : NextPage := CT_LABS;
       NF_UNVERIFIED_ORDER              : NextPage := CT_ORDERS;
       NF_FLAGGED_OI_RESULTS            : NextPage := CT_ORDERS;

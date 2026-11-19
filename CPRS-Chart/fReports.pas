@@ -372,8 +372,11 @@ begin
   tvReports.Selected := nil;
   for I := 0 to tvReports.Items.Count - 1 do begin
     Node := tvReports.Items[I];
-    if SameText(ReportNodeID(Node), 'OR_R18:IMAGING') or
-       ((ReportNodeID(Node) <> '') and SameText(Node.Text, 'Imaging (local only)')) then begin
+    //kt //codex original --> if SameText(ReportNodeID(Node), 'OR_R18:IMAGING') or
+    //kt //codex original -->    ((ReportNodeID(Node) <> '') and SameText(Node.Text, 'Imaging (local only)')) then begin
+    if SameText(ReportNodeID(Node), 'OR_R18:IMAGING') or //kt //codex 11/19/26
+       ((ReportNodeID(Node) <> '') and SameText(Node.Text, 'Imaging (local only)')) or //kt //codex 11/19/26
+       (SameText(Node.Text, 'Imaging') and TVNodeIsQual(Node, QT_IMAGING)) then begin //kt //codex 11/19/26
       tvReports.Selected := Node;
       Result := True;
       Exit;

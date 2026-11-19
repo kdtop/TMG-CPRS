@@ -173,7 +173,7 @@ unit uMumpsData;
 interface
 
 uses
-  System.SysUtils, System.JSON;
+  System.SysUtils, System.JSON, System.Generics.Collections;
 
 const
   MUMPS_DATA_VALUE_PROPERTY = '$value';

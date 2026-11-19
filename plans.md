@@ -153,25 +153,16 @@ merely the single FMDT entry added during this visit.
 
 ## Current implementation and its limitation
 
-- `fTopics` records pending new FMDT topic entries and edited associated
-  tables.  Its action button says **Push to New Note** when no note is being
-  edited and **Sync to Current Note** otherwise.
-- The new-note branch opens `frmSingleNote`, uses its Carry Forward action,
-  and fills the region delimited by `TAG_CARRY_FORWARD_START` and
-  `TAG_CARRY_FORWARD_END`.
-- The temporary payload contains only the newly created topic entry, using the
-  provider's bullet style.  It was runtime-tested and works mechanically, but
-  it is not the desired carry-forward behavior: the next visit needs the
-  curated threaded discussion from a relevant earlier note as well.
-- Do not extend or treat this single-entry HTML builder as the finished
-  carry-forward solution.  Pending table changes remain pending; they are not
-  yet inserted into either kind of note.
+- The new-note branch uses frmSingleNote and its Carry Forward tags. It accepts reviewed entries, curated edits, and edited tables.
+- As of November 19, the builder prefixes each selected topic with its cached curated narrative, or the selected curated edit. A retrieval failure stops the push before note creation and preserves pending changes. Embedded cached table blocks are omitted as in the curated pane; selected table changes are inserted separately.
+- This latest change needs a Windows build and runtime testing with multiple topics, no cached text, retrieval failure, curated edits, tables, and the next normal note template. Confirm historical narrative survives parsing and pending state is correct.
+- The broader PastHPI integration below remains a possible future approach for carrying forward relevant topics and tables beyond the selected changes; it has not been implemented.
 
-## First next step: retrieve PastHPI data on the server
+## Deferred: evaluate PastHPI data on the server
 
 Reuse or expose the existing PastHPI process so the client can request the
 curated topic content from the relevant past note before creating a
-carry-forward note.  This is deferred until the next work session.
+carry-forward note if the broader carry-forward behavior is requested.
 
 1. Inspect the existing PastHPI server entry points and their callers. Identify
    the authoritative choice of prior note and all required request context

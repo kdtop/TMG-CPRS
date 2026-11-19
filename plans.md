@@ -1,3 +1,95 @@
+# Development plans
+
+## Planned: open a note snapshot in a separate right-side tab
+
+### User goal and agreed behavior
+
+From the Notes tab, add **Open in Separate Tab** to the note's right-click
+menu. Capture the currently displayed note as a disposable, read-only HTML
+snapshot, open the right pane automatically, add a new tab there, and select it.
+The ordinary Notes page remains on the left so the user can select or work with
+another note while viewing the snapshot on the right.
+
+The snapshot is raw HTML held independently in memory, like the existing
+external-browser view. It has no live link to the source note and does not need
+note or patient identifiers for its own operation. Later selection or editing
+of a note must not alter a snapshot. Support multiple snapshots; use a simple
+label such as **Note 1**, **Note 2**, with a unique internal tab/page identity
+only as needed by CPRS navigation. Do not build a note synchronization or
+persistent snapshot system.
+
+Each snapshot page has an embedded read-only browser aligned to fill the page
+and a separate **bottom-aligned panel** containing a **Close** button. The
+button closes its own tab and releases the browser and snapshot. If the active
+tab is closed, select a sensible remaining tab; closing an inactive tab must
+not disturb the active one. A right-click Close tab action or an X on the tab is
+optional; the bottom-panel button is the agreed close mechanism.
+
+Close and free all snapshot tabs when a patient is closed or changed, and when
+CPRS exits. Use the existing patient-change and unsaved-work checks; a canceled
+patient change must leave the current patient's snapshots intact. Do not leave a
+previous patient's snapshot visible or selectable in the next patient's chart.
+
+### Existing code and design constraints
+
+- In `CPRS-Chart/fNotes.pas`, `popNoteViewInBrowserClick` obtains
+  `HtmlViewer.GetFullHTMLText`, writes a temporary HTML file, and opens an
+  external browser. Its menu item is in `fNotes.dfm`. Add a separate action;
+  use the displayed HTML directly in memory rather than creating a file.
+- The existing external action strips `CacheDir` from paths before saving.
+  Investigate image and other relative-resource paths and browser base URL
+  behavior before copying that transformation. Embedded snapshots must retain
+  the images and formatting visible in the original. Avoid unnecessary changes
+  to shared cache files or Broker encoding.
+- The Notes popup distinguishes HTML notes from scanned/PDF content. Begin
+  with the currently displayed HTML note. Determine the proper enable/visible
+  condition, including when no note is selected or the note editor is active;
+  do not accidentally snapshot stale `HtmlViewer` content. Scanned documents
+  use a separate path and are outside the initial scope unless the user asks.
+- Main navigation uses `tabPageL` and `tabPageR`, `FTabList`, page IDs,
+  `tabPagesChange`, and `SwitchToPage` in `CPRS-Chart/fFrame.pas`, rather than
+  independent browser-style tab pages. Inspect `CreateTab`,
+  `SetATabVisibility`, tab index mappings, selection handling, and form
+  ownership before implementing dynamically created snapshot pages. Register
+  each snapshot without confusing fixed page IDs or existing left/right page
+  selection; remove its entries and repair indices on close.
+- Use a lightweight independent `TfrmPage` or equivalent compatible with the
+  frame's page-switching lifecycle. Initialize and parent the embedded browser
+  in the correct order; `CreateTab` notes that ActiveX browser attachment
+  depends on parent assignment. Keep each snapshot's browser instance
+  independent so multiple tabs and the Notes viewer can coexist.
+- Reuse the existing right-pane open/resize controls and navigation rather than
+  creating another window. Preserve the other pane's state and existing
+  context-change checks. Consider what should happen if the right pane already
+  displays a different page; opening the snapshot selects its new tab, while
+  preserving the existing page for later selection.
+- Clean up all frame references and active-page pointers before destroying a
+  snapshot form, including when either pane's selection changes. Handle repeated
+  opening and closing without duplicate component names, stale references, or
+  browser callbacks touching a freed page. Follow the normal Pascal change
+  markers, encoding, and formatting rules in `HANDOFF.md`.
+
+### Verification for implementation
+
+1. Open a displayed HTML note in a separate tab while the right pane is closed;
+   verify the pane opens, Notes stays on the left, and the snapshot appears on
+   the right. Repeat with the right pane already open on another page.
+2. Select another note in Notes; confirm the snapshot remains unchanged and
+   both notes can be viewed simultaneously. Open several snapshots and switch
+   between them; verify each retains its own content and scroll position.
+3. Verify the bottom panel and Close button remain accessible while resizing.
+   Close active and inactive snapshots in different orders, then open another;
+   check tab labels, selection, and navigation on both panes.
+4. Change and close patients, including a canceled context change caused by
+   unsaved work; verify snapshot cleanup occurs only after a successful change
+   and no prior-patient HTML remains accessible. Verify exit cleanup.
+5. Check representative HTML with images, formatting, links and long content;
+   confirm paths, encoding and embedded browser behavior. Test no selection,
+   an editing note, and a scanned document against the chosen menu behavior.
+6. Build in the licensed Windows Delphi IDE, then runtime-test the workflows
+   above, including opening a snapshot while an edit is in progress without
+   losing unsaved work.
+
 # Topics push and carry-forward plan
 
 ## Deferred: capture diagnostics when current-note sync fails

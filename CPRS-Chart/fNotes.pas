@@ -291,6 +291,7 @@ type
     mnuLooseDocToScanned: TMenuItem;
     mnuLooseDocToTIUNote: TMenuItem;
     popNoteViewInBrowser: TMenuItem;
+    popNoteOpenSnapshot: TMenuItem; //kt //codex 11/20/26
     mnuMoveToLoose: TMenuItem;
     popNoteViewInBrowser2: TMenuItem;
     mnuViewThisScanInBrowser: TMenuItem;
@@ -332,6 +333,7 @@ type
     procedure popNoteViewInBrowser2Click(Sender: TObject);
     procedure mnuMoveToLooseClick(Sender: TObject);
     procedure popNoteViewInBrowserClick(Sender: TObject);
+    procedure popNoteOpenSnapshotClick(Sender: TObject); //kt //codex 11/20/26
     procedure mnuLooseInChartMoveTIUClick(Sender: TObject);
     procedure mnuLooseInChartMoveScannedClick(Sender: TObject);
     procedure mnuActClick(Sender: TObject);
@@ -4749,6 +4751,8 @@ begin
   popNoteMemoEncounter.enabled := not DisplayingPDF;
   popNoteViewInBrowser2.Visible := DisplayingPDF;
   popNoteViewInBrowser.Visible := not DisplayingPDF; //ContainsText(tvNotes.Selected.Parent.Text,'Signed'))or(ContainsText(tvNotes.Selected.Parent.Text,'Alert'));
+  popNoteOpenSnapshot.Visible := not DisplayingPDF; //kt //codex 11/20/26
+  popNoteOpenSnapshot.Enabled := (vmHTML in FViewMode) and (((SelectedNoteIEN > 0) and (vmView in FViewMode) and pnlHTMLViewer.Visible) or ((vmEdit in FViewMode) and pnlHTMLEdit.Visible)); //kt //codex 11/20/26
   //end tmg addition
 
   if pnlWrite.Visible then begin
@@ -4940,6 +4944,19 @@ begin
   inherited;
   FileString := 'http://192.168.3.99:9080'+Piece(TORTreeNode(tvNotes.Selected).StringData, U, 18);
   ShellExecute(Handle, 'open',PChar(FileString),PChar(''),'', SW_SHOWNORMAL) ;
+end;
+
+procedure TfrmNotes.popNoteOpenSnapshotClick(Sender: TObject);
+//kt //codex added entire procedure 11/20/26
+begin
+  if not (vmHTML in FViewMode) then begin
+    Exit;
+  end;
+  if (SelectedNoteIEN > 0) and (vmView in FViewMode) and pnlHTMLViewer.Visible then begin
+    frmFrame.OpenNoteSnapshot(HtmlViewer.GetFullHTMLText);
+  end else if (vmEdit in FViewMode) and pnlHTMLEdit.Visible then begin
+    frmFrame.OpenNoteSnapshot(HtmlEditor.GetFullHTMLText);
+  end;
 end;
 
 procedure TfrmNotes.popNoteViewInBrowserClick(Sender: TObject);

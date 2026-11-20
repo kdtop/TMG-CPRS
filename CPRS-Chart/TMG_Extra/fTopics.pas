@@ -258,7 +258,7 @@ type
     function FindTopicDataTableByIEN(const TableIEN: string): TTopicDataTable;
     function HasPendingPushSync: Boolean;
     function BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): string;
-    function SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): Boolean;
+    function SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string; ForceDiagnostic: Boolean): Boolean;
     function CurrentPushSyncMode: TPushSyncMode;
     function TopicEntryPushKey(const PropertyID, EntryFMDate: string): string;
     function TopicTablePushKey(const TopicTable: TTopicDataTable): string;
@@ -337,7 +337,7 @@ type
     function AllowContextChange(var WhyNot: string): Boolean; override;
     procedure ClearPtData; override;
     procedure DisplayPage; override;
-    procedure HandlePushSync;
+    procedure HandlePushSync(ForceDiagnostic: Boolean);
     procedure RefreshTopicList;
   end;
 
@@ -350,7 +350,7 @@ implementation
 
 uses
   fFrame, fNotes, fSingleNote, fEncnt, uConst, uCore, uHTMLTools, uPCE,
-  uTMGOptions, fTopicTablePicker, fTopicTableEdit, fTopicSyncReview, uHTMLNoteAnalysis, System.JSON;
+  uTMGOptions, fTopicTablePicker, fTopicTableEdit, fTopicSyncReview, uHTMLNoteAnalysis, System.JSON, ORSystem;
 
 const
   TOPICS_PANE_ANIMATION_STEPS = 3;
@@ -812,7 +812,7 @@ begin
   end;
 end;
 
-function TfrmTopics.SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): Boolean;
+function TfrmTopics.SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string; ForceDiagnostic: Boolean): Boolean;
 var
   Analysis: TJSONObject;
   DateAnalysis: TJSONObject;
@@ -841,6 +841,8 @@ var
   CuratedHTML, MergedEntries, EntryPrefix: string;
   CuratedTopicData: TTopicListItemData;
   Modified: Boolean;
+  CaptureFailure: Boolean;
+  AttemptTime: TDateTime;
 
   function JSONText(AObject: TJSONObject; const Name: string): string;
   var
@@ -951,9 +953,130 @@ var
     end;
   end;
 
+  procedure OfferDiagnosticSnapshot;
+  var
+    Diagnostic: TStringList;
+    Entry: TTopicEntryPushData;
+    TopicData: TTopicListItemData;
+    Value, SnapshotID, Status, Prefix: string;
+    I: Integer;
+
+    procedure AddSection(const Name, Content: string);
+    var
+      Index: Integer;
+      Ch: string;
+      ByteText: AnsiString;
+      Line: string;
+    begin
+      // A FIELD line starts each section; + lines continue its value. Backslash,
+      // CR/LF and characters unavailable in the Windows code page are escaped.
+      Diagnostic.Add('FIELD ' + Name);
+      Line := '+';
+      for Index := 1 to Length(Content) do begin
+        Ch := Content[Index];
+        case Ord(Content[Index]) of
+          92: Ch := '\\';
+          13: Ch := '\r';
+          10: Ch := '\n';
+          0..9, 11..12, 14..31, 127: Ch := '\u' + IntToHex(Ord(Content[Index]), 4);
+        else
+          ByteText := AnsiString(Ch);
+          if (Length(ByteText) <> 1) or (string(ByteText) <> Ch) then begin
+            Ch := '\u' + IntToHex(Ord(Content[Index]), 4);
+          end else begin
+            Ch := string(ByteText);
+          end;
+        end;
+        if Length(Line) + Length(Ch) > 200 then begin
+          Diagnostic.Add(Line);
+          Line := '+';
+        end;
+        Line := Line + Ch;
+      end;
+      Diagnostic.Add(Line);
+    end;
+
+  begin
+    Diagnostic := TStringList.Create;
+    try
+      Diagnostic.Add('TOPIC SYNC DIAGNOSTIC TEXT-SECTIONS-V1');
+      Diagnostic.Add('FORMAT: FIELD header, + continuation; escapes: \\, \r, \n, \uXXXX');
+      AddSection('attemptLocalTime', FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', AttemptTime));
+      AddSection('failureLocalTime', FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
+      AddSection('patientDFN', Patient.DFN);
+      AddSection('userDUZ', IntToStr(User.DUZ));
+      AddSection('noteIEN', IntToStr(frmNotes.ActiveEditIEN));
+      AddSection('noteFMDateTime', FloatToStr(NoteDate));
+      AddSection('executable', Application.ExeName);
+      AddSection('clientVersion', ClientVersion(Application.ExeName));
+      AddSection('error', ErrorText);
+      AddSection('preAttemptEditorHTML', NoteHTML);
+      HPI := Analysis.GetValue('hpi') as TJSONObject;
+      AddSection('hpiFound', JSONText(HPI, 'found'));
+      AddSection('recognizedTopicNames', RecognizedTopicNames(Analysis));
+      for I := 0 to SelectedKeys.Count - 1 do begin
+        Prefix := 'entry.' + IntToStr(I + 1) + '.';
+        Entry := nil;
+        if not FModifiedTopicEntries.TryGetValue(SelectedKeys[I], Entry) then begin
+          FPendingTopicEntries.TryGetValue(SelectedKeys[I], Entry);
+        end;
+        AddSection(Prefix + 'key', SelectedKeys[I]);
+        if Assigned(Entry) then begin
+          AddSection(Prefix + 'propertyID', Entry.PropertyID);
+          AddSection(Prefix + 'topicName', Entry.TopicName);
+          AddSection(Prefix + 'entryFMDate', Entry.EntryFMDate);
+          AddSection(Prefix + 'html', Entry.HTMLText);
+          AddSection(Prefix + 'sequence', IntToStr(Entry.Sequence));
+        end;
+      end;
+      for I := 0 to SelectedCuratedIDs.Count - 1 do begin
+        Prefix := 'curated.' + IntToStr(I + 1) + '.';
+        AddSection(Prefix + 'propertyID', SelectedCuratedIDs[I]);
+        TopicData := FindTopicListItemData(SelectedCuratedIDs[I]);
+        if Assigned(TopicData) then begin
+          AddSection(Prefix + 'topicName', TopicData.TopicName);
+        end;
+        if FCuratedEdits.TryGetValue(Patient.DFN + '^' + SelectedCuratedIDs[I], Value) then begin
+          AddSection(Prefix + 'html', Value);
+        end;
+        if FCuratedMergedEntries.TryGetValue(Patient.DFN + '^' + SelectedCuratedIDs[I], Value) then begin
+          AddSection(Prefix + 'mergedEntriesHTML', Value);
+        end;
+      end;
+      for I := 0 to PatchList.Count - 1 do begin
+        Prefix := 'patch.' + IntToStr(I + 1) + '.';
+        AddSection(Prefix + 'propertyID', PatchList[I].PropertyID);
+        AddSection(Prefix + 'topicName', PatchList[I].TopicName);
+        AddSection(Prefix + 'html', PatchList[I].HTML);
+        AddSection(Prefix + 'replaceNarrative', BoolToStr(PatchList[I].ReplaceNarrative, True));
+      end;
+      if MessageDlg(ErrorText + sLineBreak + sLineBreak +
+        'Save a diagnostic snapshot containing the current note and selected topic changes on the server?',
+        mtError, [mbYes, mbNo], 0) <> mrYes then begin
+        Exit;
+      end;
+      try
+        Status := SaveTopicDiagnostic(Diagnostic, SnapshotID);
+        if Status = '1^OK' then begin
+          MessageDlg('Diagnostic snapshot saved. Identifier: ' + SnapshotID, mtInformation, [mbOK], 0);
+        end else begin
+          MessageDlg('The diagnostic snapshot could not be saved: ' + Status, mtError, [mbOK], 0);
+        end;
+      except
+        on E: Exception do begin
+          MessageDlg('The diagnostic snapshot could not be saved: ' + E.Message, mtError, [mbOK], 0);
+        end;
+      end;
+    finally
+      Diagnostic.Free;
+    end;
+  end;
+
 begin
   Result := False;
   ErrorText := '';
+  CaptureFailure := False;
+  AttemptTime := Now;
   if (SelectedKeys.Count = 0) and (SelectedCuratedIDs.Count = 0) then begin
     ErrorText := 'There are no selected topic changes to sync to the current note.';
     Exit;
@@ -977,12 +1100,14 @@ begin
   try
     HPI := Analysis.GetValue('hpi') as TJSONObject;
     if not SameText(JSONText(HPI, 'found'), 'true') then begin
+      CaptureFailure := True;
       ErrorText := 'The current note does not contain an HPI topic insertion target.' +
         sLineBreak + 'Add or load the HPI topic list before syncing.';
       Exit;
     end;
     Topics := Analysis.GetValue('topics') as TJSONArray;
     if (not Assigned(Topics)) or (Topics.Count = 0) then begin
+      CaptureFailure := True;
       ErrorText := 'The current note contains no HPI topic insertion targets.' +
         sLineBreak + 'Add or load the HPI topic list before syncing.';
       Exit;
@@ -996,6 +1121,7 @@ begin
       end;
       Topic := FindTopic(Analysis, CuratedTopicData.TopicName);
       if not Assigned(Topic) then begin
+        CaptureFailure := True;
         ErrorText := 'The topic "' + CuratedTopicData.TopicName +
           '" was not recognized in the HPI of the current note.' + sLineBreak +
           'Recognized HPI topics: ' + RecognizedTopicNames(Analysis);
@@ -1051,6 +1177,7 @@ begin
       if not Assigned(Patch) then begin
         Topic := FindTopic(Analysis, EntryList[EntryIndex].TopicName);
         if not Assigned(Topic) then begin
+          CaptureFailure := True;
           ErrorText := 'The topic "' + EntryList[EntryIndex].TopicName +
             '" was not recognized in the HPI of the current note.' + sLineBreak +
             'Recognized HPI topics: ' + RecognizedTopicNames(Analysis);
@@ -1123,7 +1250,19 @@ begin
         ReplaceFlags.Add(BoolToStr(PatchList[Index].ReplaceNarrative, True));
       end;
       if not frmNotes.InsertHTMLAtTopicEnds(TopicNames, HTMLFragments, ReplaceFlags, ErrorText) then begin
+        CaptureFailure := True;
         Exit;
+      end;
+      if ForceDiagnostic then begin
+        ErrorText := 'The selected topic text was inserted successfully. Diagnostic capture was requested.';
+        try
+          OfferDiagnosticSnapshot;
+        except
+          on E: Exception do begin
+            MessageDlg('The diagnostic snapshot could not be prepared: ' + E.Message, mtError, [mbOK], 0);
+          end;
+        end;
+        ErrorText := '';
       end;
       for Index := 0 to EntryList.Count - 1 do begin
         MergePushedEntryIntoPendingCurated(EntryList[Index], SelectedCuratedIDs);
@@ -1147,6 +1286,16 @@ begin
       TopicNames.Free;
     end;
   finally
+    if CaptureFailure then begin
+      try
+        OfferDiagnosticSnapshot;
+        ErrorText := '';
+      except
+        on E: Exception do begin
+          MessageDlg('The diagnostic snapshot could not be prepared: ' + E.Message, mtError, [mbOK], 0);
+        end;
+      end;
+    end;
     PatchList.Free;
     EntryList.Free;
     Analysis.Free;
@@ -1467,7 +1616,10 @@ begin
 end;
 
 procedure TfrmTopics.btnPushSyncClick(Sender: TObject);
+var
+  ForceDiagnostic: Boolean;
 begin
+  ForceDiagnostic := (GetKeyState(VK_CONTROL) < 0);
   if TopicEditorActive then begin
     if MessageDlg('Save the current editor text before continuing to sync?' + sLineBreak + sLineBreak +
       'Choose No to return to the editor without syncing.', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
@@ -1477,10 +1629,10 @@ begin
       Exit;
     end;
   end;
-  HandlePushSync;
+  HandlePushSync(ForceDiagnostic);
 end;
 
-procedure TfrmTopics.HandlePushSync;
+procedure TfrmTopics.HandlePushSync(ForceDiagnostic: Boolean);
 var
   ErrorText, TopicHTML, Preview, Key, PropertyID, EntryDateText: string;
   Pair: TPair<string, TTopicEntryPushData>;
@@ -1525,6 +1677,10 @@ var
 
 begin
   UpdatePushSyncButton;
+  if ForceDiagnostic and (FPushSyncMode <> psmCurrentNote) then begin
+    MessageDlg('Diagnostic testing requires a current note open for syncing.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
   Names := TStringList.Create;
   Previews := TStringList.Create;
   Keys := TStringList.Create;
@@ -1604,6 +1760,10 @@ begin
         SelectedTableKeys.Add(Copy(Key, 3, MaxInt));
       end;
     end;
+    if ForceDiagnostic and (SelectedKeys.Count = 0) and (SelectedCuratedIDs.Count = 0) then begin
+      MessageDlg('Select at least one topic entry or curated edit for the diagnostic test.', mtInformation, [mbOK], 0);
+      Exit;
+    end;
     for Index := 0 to SelectedTableKeys.Count - 1 do begin
       if not FPendingTopicTables.TryGetValue(SelectedTableKeys[Index], Table) then begin
         MessageDlg('An edited table is no longer available. Please review the changes again.', mtError, [mbOK], 0);
@@ -1667,8 +1827,10 @@ begin
       psmCurrentNote: begin
         TextPushed := False;
         if (SelectedKeys.Count > 0) or (SelectedCuratedIDs.Count > 0) then begin
-          if not SyncPendingTopicEntriesToCurrentNote(SelectedKeys, SelectedCuratedIDs, ErrorText) then begin
-            MessageDlg(ErrorText, mtError, [mbOK], 0);
+          if not SyncPendingTopicEntriesToCurrentNote(SelectedKeys, SelectedCuratedIDs, ErrorText, ForceDiagnostic) then begin
+            if ErrorText <> '' then begin
+              MessageDlg(ErrorText, mtError, [mbOK], 0);
+            end;
             Exit;
           end;
           TextPushed := True;

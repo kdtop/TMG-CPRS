@@ -30,6 +30,7 @@ type
 function TopicList(Dest: TStrings; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
 function Get1Topic(Dest : TStrings; SubIEN : String; SDT: TFMDateTime = 0; EDT: TFMDateTime=9999999) : string;
 function GetCuratedTopic(Dest: TStrings; SubIEN: string): string; //kt //codex 10/25/26
+function SaveTopicDiagnostic(Diagnostic: TStrings; out SnapshotID: string): string; //kt //codex 11/19/26
 function ListTopicTables(Dest: TStrings): string; //kt //codex 9/28/26
 function GetTopicTablesAsData(Dest: TStrings; const TableNames: string): string; //kt //codex 9/28/26
 function SetTopicTableData(const TableIEN: string; Text: TStrings): string; //kt //codex 10/11/26
@@ -354,6 +355,37 @@ function GetCuratedTopic(Dest: TStrings; SubIEN: string): string;
 //kt //codex added entire function 10/25/26
 begin
   Result := TopicCommand(Dest, Patient.DFN, 'GET CURATED', SubIEN);
+end;
+
+function SaveTopicDiagnostic(Diagnostic: TStrings; out SnapshotID: string): string;
+//kt //codex added entire function 11/19/26
+// DATA is an ordered list of labeled sections with single-byte text lines.
+// The server must return 1^OK and the snapshot identifier in its first data node.
+var
+  Reply, Payload: TStringList;
+begin
+  SnapshotID := '';
+  if not Assigned(Diagnostic) or (Diagnostic.Count = 0) then begin
+    Result := '-1^No diagnostic information was supplied.';
+    Exit;
+  end;
+  Reply := TStringList.Create;
+  Payload := TStringList.Create;
+  try
+    Payload.Assign(Diagnostic);
+    Result := TopicCommand(Reply, Patient.DFN, 'SAVE DIAGNOSTIC', 'TEXT-SECTIONS-V1', Payload);
+    if Result = '1^OK' then begin
+      if Reply.Count > 0 then begin
+        SnapshotID := Trim(Reply[0]);
+      end;
+      if SnapshotID = '' then begin
+        Result := '-1^The server did not return a diagnostic snapshot identifier.';
+      end;
+    end;
+  finally
+    Payload.Free;
+    Reply.Free;
+  end;
 end;
 
 function SetTopicUserData(SubIEN : String; UserData : TTopicDataString) : string;

@@ -1171,6 +1171,7 @@ inherited frmFrame: TfrmFrame
           TabOrder = 1
           TabPosition = tpBottom
           OnChange = tabPageChange
+          OnChanging = tabPageLChanging
           OnDrawTab = tabPageDrawTab
           OnMouseUp = tabPageMouseUp
         end

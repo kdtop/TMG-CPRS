@@ -1,20 +1,21 @@
 # Development plans
 
-## Planned: open a note snapshot in a separate right-side tab
+## In progress: open a note snapshot in a separate tab
 
 ### User goal and agreed behavior
 
 From the Notes tab, add **Open in Separate Tab** to the note's right-click
 menu. Capture the currently displayed note as a disposable, read-only HTML
-snapshot, open the right pane automatically, add a new tab there, and select it.
-The ordinary Notes page remains on the left so the user can select or work with
-another note while viewing the snapshot on the right.
+snapshot, open the opposite pane automatically, add a new tab there, and select
+it. If Notes is on the left, open the snapshot on the right; if Notes is on the
+right, open the snapshot on the left. Notes remains in its current pane so the
+user can select or work with another note while viewing the snapshot.
 
 The snapshot is raw HTML held independently in memory, like the existing
 external-browser view. It has no live link to the source note and does not need
 note or patient identifiers for its own operation. Later selection or editing
 of a note must not alter a snapshot. Support multiple snapshots; use a simple
-label such as **Note 1**, **Note 2**, with a unique internal tab/page identity
+label such as **Snapshot 1**, **Snapshot 2**, with a unique internal tab/page identity
 only as needed by CPRS navigation. Do not build a note synchronization or
 persistent snapshot system.
 
@@ -24,6 +25,11 @@ button closes its own tab and releases the browser and snapshot. If the active
 tab is closed, select a sensible remaining tab; closing an inactive tab must
 not disturb the active one. A right-click Close tab action or an X on the tab is
 optional; the bottom-panel button is the agreed close mechanism.
+
+If a snapshot opens the previously closed right pane, close that pane when the
+last snapshot is closed, unless the user selected a non-snapshot page there.
+Switching between snapshots retains this state. Verify both pane states and
+multiple snapshots.
 
 Close and free all snapshot tabs when a patient is closed or changed, and when
 CPRS exits. Use the existing patient-change and unsaved-work checks; a canceled
@@ -36,11 +42,9 @@ previous patient's snapshot visible or selectable in the next patient's chart.
   `HtmlViewer.GetFullHTMLText`, writes a temporary HTML file, and opens an
   external browser. Its menu item is in `fNotes.dfm`. Add a separate action;
   use the displayed HTML directly in memory rather than creating a file.
-- The existing external action strips `CacheDir` from paths before saving.
-  Investigate image and other relative-resource paths and browser base URL
-  behavior before copying that transformation. Embedded snapshots must retain
-  the images and formatting visible in the original. Avoid unnecessary changes
-  to shared cache files or Broker encoding.
+- Images are downloaded to the cache and the displayed HTML points to the cache.
+  Keep those paths intact in the snapshot and verify representative images
+  during runtime testing. Avoid changes to shared cache files or Broker encoding.
 - The Notes popup distinguishes HTML notes from scanned/PDF content. Begin
   with the currently displayed HTML note. Determine the proper enable/visible
   condition, including when no note is selected or the note editor is active;
@@ -53,27 +57,40 @@ previous patient's snapshot visible or selectable in the next patient's chart.
   ownership before implementing dynamically created snapshot pages. Register
   each snapshot without confusing fixed page IDs or existing left/right page
   selection; remove its entries and repair indices on close.
+- Notes was previously excluded from the right-side tab list. The navigation
+  change adds it there and handles a page selected on both sides symmetrically.
+- Owner-drawn tabs currently look up colors by tab index in `TabColorsList`;
+  dynamic snapshot tabs must not access beyond that list, including after
+  tabs are removed or on the shorter right-side tab list.
 - Use a lightweight independent `TfrmPage` or equivalent compatible with the
   frame's page-switching lifecycle. Initialize and parent the embedded browser
   in the correct order; `CreateTab` notes that ActiveX browser attachment
   depends on parent assignment. Keep each snapshot's browser instance
   independent so multiple tabs and the Notes viewer can coexist.
-- Reuse the existing right-pane open/resize controls and navigation rather than
-  creating another window. Preserve the other pane's state and existing
-  context-change checks. Consider what should happen if the right pane already
-  displays a different page; opening the snapshot selects its new tab, while
-  preserving the existing page for later selection.
+- Reuse the existing pane open/resize controls and navigation rather than
+  creating another window. Determine the pane currently showing Notes and open
+  the snapshot in the opposite pane. Preserve existing context-change checks;
+  selecting the snapshot should leave the destination's other pages available
+  for later selection.
 - Clean up all frame references and active-page pointers before destroying a
   snapshot form, including when either pane's selection changes. Handle repeated
   opening and closing without duplicate component names, stale references, or
   browser callbacks touching a freed page. Follow the normal Pascal change
   markers, encoding, and formatting rules in `HANDOFF.md`.
+- A patient change can be tentatively applied and then canceled through CCOW.
+  The frame keeps snapshots through that transition and prevents displaying
+  them under a different patient; accepted setup, patient close, and exit clear
+  them. Verify ordinary and CCOW cancellation and successful transitions.
+
+The implementation is in `fFrame`, `fNotes`, and the designer-backed `TMG_Extra/fSnapshotTab` form. The user built and tried the separate form and reports the behavior seems to work as expected. It includes snapshots of
+the live HTML editor as well as the viewer. The user confirmed it compiles, runs, and appears to work as desired after restoring the project-unit order. The checks below remain useful for edge cases.
 
 ### Verification for implementation
 
-1. Open a displayed HTML note in a separate tab while the right pane is closed;
-   verify the pane opens, Notes stays on the left, and the snapshot appears on
-   the right. Repeat with the right pane already open on another page.
+1. With Notes on the left, open a displayed HTML note in a separate tab while
+   the right pane is closed; verify it opens and shows the snapshot. Repeat with
+   the right pane already open on another page. Place Notes on the right and
+   verify a snapshot opens on the left while Notes remains on the right.
 2. Select another note in Notes; confirm the snapshot remains unchanged and
    both notes can be viewed simultaneously. Open several snapshots and switch
    between them; verify each retains its own content and scroll position.
@@ -198,8 +215,9 @@ Once that data is available, the new-note flow is:
 
 Topic text sync is implemented using the live MSHTML DOM rather than replacing
 the editor's entire HTML source. Kevin-style insertion was runtime-tested;
-see `HANDOFF.md` and the current source for details. Table changes are not yet
-synchronized. When revisiting this work, preserve existing narrative/table
+see `HANDOFF.md` and the current source for details. Selected table changes can
+also be synchronized; insertion and replacement edge cases still need testing.
+When revisiting this work, preserve existing narrative/table
 separators, selection and scroll behavior, and pending state on failures.
 
 ## Verification when work resumes
@@ -295,7 +313,7 @@ The first client implementation compiles, and the user confirmed the Imaging tab
 - Two `TfrmReports` instances now keep report buffers, selection state, and graph state separately. Printing and single-note actions receive their source form. Continue reviewing shared state and direct references as remaining workflows are tested.
 - In imaging mode, select the existing Imaging (local only) report automatically. Hide both the single-item report tree and the lower-left procedures tree, which duplicates the study list in the main display. Keep the main study list and viewer available.
 - Leave Imaging (local only) available in the existing Reports tab, with its current layout and behavior, so users can continue finding it in the familiar location.
-- The distinct Imaging page is registered in `CPRS-Chart/fFrame.pas` and the page-ID definitions. Continue verifying split-screen placement, printing, font and layout updates, notification routing, selection preferences, and form destruction. Existing imaging notifications continue to route to Reports; the office does not use remote-site printing.
+- The distinct Imaging page is registered in `CPRS-Chart/fFrame.pas` and the page-ID definitions. Continue verifying split-screen placement, printing, font and layout updates, imaging-result alert routing to Imaging, selection preferences, and form destruction. The office does not use remote-site printing.
 - Reports load selected content on demand; two tabs do not require preloading every report twice. If both tabs need the same imaging list, use a shared patient-scoped cache or data service, rather than sharing the current mutable `uLocalReportData` scratch buffer. Cache keys must reflect parameters and context affecting results. Define explicit invalidation for patient changes, refresh, and operations that add, edit, or delete studies; avoid displaying stale data. Keep presentation and selection state separate for the two instances.
 - Initial inspection did not identify a need for a new server RPC. Confirm the existing contracts during implementation.
 

@@ -1219,6 +1219,10 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="TMG_Extra\HTMLEdit\MSHTMLEvents.pas"/>
+        <DCCReference Include="TMG_Extra\fSnapshotTab.pas">
+            <Form>frmSnapshotTab</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

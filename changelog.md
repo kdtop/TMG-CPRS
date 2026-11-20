@@ -2,6 +2,29 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-20 — Open tabs in the other pane
+
+- Added a tab right-click action to open the clicked page in the opposite pane, including snapshots, and registered ordinary pages in both tab controls. Moving an active page selects a fallback on the original side; page switching also restores a hidden or reparented page. The user reported the behavior seems to work as expected after building and trying it.
+- The user also reported intermittent crashes while switching panes. The cause and relationship to recent changes are unknown; the user will look for a reproducible pattern before investigation.
+
+## 2026-11-20 — Note snapshot tabs
+
+- Moved the snapshot page into the designer-backed `TMG_Extra/fSnapshotTab.pas` and `.dfm` as `TfrmSnapshotTab`; the Close button is a `TBitBtn` for designer glyph editing. The user built and tried the refactored form and reported that the behavior seems to work as expected.
+
+- Added automatic right-pane closure when the last snapshot is closed, if a snapshot opened the pane and the user did not switch to another right-side page. Switching between snapshots retains the auto-close state. The user reported that the snapshot and pane behavior seems to work as expected.
+
+- Added a persistent "SNAPSHOT - VIEW ONLY" banner and an SVG background watermark. The user found the banner effective but could not see the SVG watermark in the embedded browser.
+
+- Added Open in Separate Tab for the displayed HTML note or editor, creating an independent browser in the pane opposite Notes. Multiple tabs have individual Close buttons. Notes is now available on the right; patient transition handling retains snapshots on canceled changes and clears them for a different patient, patient close, or exit.
+- The user confirmed the restored project order compiles, runs, and appears to work as desired. Additional edge-case checks include both pane directions, unsaved editor content, cached images, tab closing, and patient change and CCOW cancellation.
+
+## 2026-11-19 — Topics sync diagnostic snapshots
+
+- Added an optional diagnostic snapshot when current-note Topic matching or insertion fails. It captures the pre-attempt editor HTML, error, note and patient identifiers, selected entries and curated edits, recognized HPI topics, and generated patches before temporary data is released. Dismissing the prompt sends nothing, and a failed sync retains pending changes.
+- Added `SaveTopicDiagnostic` in `rTopics` and the `SAVE DIAGNOSTIC` command in `TMGTOPIC`. The client sends ordered, labeled single-byte text sections through the existing Topics RPC; the server writes one uniquely named text file using `ARR2HFS^TMGIOUT3` under `/opt/worldvista/EHR/tmp/topics_diagnostics` and returns its filename. The directory was restricted to its owner. The existing Topics RPC debug global still retains the most recent request and is overwritten by subsequent calls.
+- Added a forced diagnostic option using Ctrl-click on Sync. It attempts the normal insertion, then offers to save a snapshot even when insertion succeeds. Guacamole did not deliver Ctrl-click for the user, who instead set `ForceDiagnostic` to `True` in the debugger. The user built CPRS, tested a successful DM-2 insertion, and confirmed that the server wrote the snapshot; the saved file was reviewed and contained the expected pre-attempt note and selected patch. Testing a real failure in the office remains outstanding.
+- Fixed a Delphi build error in the diagnostic RPC wrapper by copying `TStrings` input into a `TStringList` before calling `TopicCommand`. The user subsequently compiled successfully. The snapshots do not yet include detailed live DOM matching decisions or post-insertion HTML.
+
 ## 2026-11-19 — Imaging, note signing, tab order, and Topics carry-forward
 
 - Updated Imaging report selection for the renamed report. The user built and confirmed the tab displays studies.

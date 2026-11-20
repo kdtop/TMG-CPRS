@@ -2386,6 +2386,10 @@ inherited frmNotes: TfrmNotes
       Caption = 'View This Note In Browser'
       OnClick = popNoteViewInBrowserClick
     end
+    object popNoteOpenSnapshot: TMenuItem
+      Caption = 'Open snapshot in separate tab'
+      OnClick = popNoteOpenSnapshotClick
+    end
     object popNoteViewInBrowser2: TMenuItem
       Caption = 'View This Scan In Browser'
       OnClick = popNoteViewInBrowser2Click

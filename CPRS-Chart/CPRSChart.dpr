@@ -23,7 +23,7 @@ uses
   fPtDemo in 'fPtDemo.pas' {frmPtDemo},
   rTIU in 'rTIU.pas',
   rTopics in 'rTopics.pas',
-  rRxHistory in 'rRxHistory.pas',  //kt //codex 11/2/26
+  rRxHistory in 'rRxHistory.pas',
   fxBroker in 'fxBroker.pas' {frmBroker},
   fNoteBA in 'fNoteBA.pas' {frmNotesByAuthor},
   fNoteBD in 'fNoteBD.pas' {frmNotesByDate},
@@ -444,7 +444,7 @@ uses
   fTopics in 'TMG_Extra\fTopics.pas' {frmTopics},
   fTopicTablePicker in 'TMG_Extra\fTopicTablePicker.pas' {frmTopicTablePicker},
   fTopicTableEdit in 'TMG_Extra\fTopicTableEdit.pas' {frmTopicTableEdit},
-  fTopicSyncReview in 'TMG_Extra\fTopicSyncReview.pas', //kt //codex 11/3/26
+  fTopicSyncReview in 'TMG_Extra\fTopicSyncReview.pas',
   fChangeLog in 'TMG_Extra\fChangeLog.pas' {frmChangeLog},
   fConsultantOffices in 'TMG_Extra\fConsultantOffices.pas' {frmConsultantOffices},
   fConsultants in 'TMG_Extra\fConsultants.pas' {frmConsultants},
@@ -456,7 +456,8 @@ uses
   uHTMLNoteAnalysis in 'TMG_Extra\uHTMLNoteAnalysis.pas',
   fRxHistory in 'TMG_Extra\fRxHistory.pas' {frmRxHistory},
   fMessageDemo in 'TMG_Extra\fMessageDemo.pas' {frmMessageDemo},
-  MSHTMLEvents in 'TMG_Extra\HTMLEdit\MSHTMLEvents.pas';
+  MSHTMLEvents in 'TMG_Extra\HTMLEdit\MSHTMLEvents.pas',
+  fSnapshotTab in 'TMG_Extra\fSnapshotTab.pas' {frmSnapshotTab};
 
 {$R *.TLB}
 
@@ -492,6 +493,7 @@ begin
   Application.CreateForm(TdmodShared, dmodShared);
   Application.CreateForm(TfrmFrame, frmFrame);
   Application.CreateForm(TfrmPatientPhotoID, frmPatientPhotoID);
+  Application.CreateForm(TfrmSnapshotTab, frmSnapshotTab);
   //kt //codex original --> Application.CreateForm(TfrmRxHistory, frmRxHistory);
   Application.CreateForm(TfrmMessageDemo, frmMessageDemo);
   if assigned(frmSplash) then frmSplash.Free;   // close & free splash screen

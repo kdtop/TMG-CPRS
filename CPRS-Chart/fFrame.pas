@@ -59,13 +59,24 @@ uses
   System.UITypes,
   System.Contnrs,  //kt 7/30/26
   uDebugTools,  //kt 9/9/26
-  System.ImageList;
+  //kt //codex original --> System.ImageList;
+  System.ImageList, fSnapshotTab; //kt //codex 11/20/26
 
 type
   TControlCracker = class(TControl);                  //kt-tabs 11/26/22
   TTabPageSide = (tpsUnspecified, tpsLeft, tpsRight); //kt-tabs 11/26/22
   TTabPageOpenMode = (tpoOpen=0, tpoClosed=1);        //kt-tabs 11/26/22
   TPageID = integer;                                  //kt-tabs 11/26/22  //NOTE: integer values defined to be same as CT_COVER, CT_PROBLEMS, etc., defined in uConst.pas
+  //kt //codex original -->   TfrmNoteSnapshot = class(TfrmPage) //kt //codex 11/20/26
+  //kt //codex original -->   private //kt //codex 11/20/26
+  //kt //codex original -->     FBrowser: TWebBrowser; //kt //codex 11/20/26
+  //kt //codex original -->     FPendingHTML: string; //kt //codex 11/20/26
+  //kt //codex original -->     FHasPendingHTML: Boolean; //kt //codex 11/20/26
+  //kt //codex original -->     procedure BrowserDocumentComplete(ASender: TObject; const pDisp: IDispatch; const URL: OleVariant); //kt //codex 11/20/26
+  //kt //codex original -->   public //kt //codex 11/20/26
+  //kt //codex original -->     constructor CreateSnapshot(AOwner: TComponent; AParent: TWinControl; const HTML: string; OnCloseClick: TNotifyEvent); //kt //codex 11/20/26
+  //kt //codex original -->     procedure LoadSnapshot; //kt //codex 11/20/26
+  //kt //codex original -->   end; //kt //codex 11/20/26
   TfrmFrame = class(TfrmBase508Form)
     pnlToolbar: TPanel;
     stsArea: TStatusBar;
@@ -419,6 +430,13 @@ type
     FEditCtrl: TCustomEdit;
     //kt FLastPage: TfrmPage;
     FLastPageL, FLastPageR: TfrmPage;  //kt-tabs 11/26/22
+    FNoteSnapshots: TStringList; //kt //codex 11/20/26
+    FSnapshotPatientDFN: string; //kt //codex 11/20/26
+    FNextNoteSnapshot: Integer; //kt //codex 11/20/26
+    FRightPanelNeedsAutoClosure: Boolean; //kt //codex 11/20/26
+    FTabContextMenu: TPopupMenu; //kt //codex 11/20/26
+    FTabContextSide: TTabPageSide; //kt //codex 11/20/26
+    FTabContextPageID: Integer; //kt //codex 11/20/26
     FNextButtonL: Integer;
     FNextButtonR: Integer;
     FNextButtonActive: Boolean;
@@ -458,6 +476,11 @@ type
     FNextTabL, FLastTabL, FChangingTabL: Integer;         //kt-tabs 11/26/22
     FNextTabR, FLastTabR, FChangingTabR: Integer;         //kt-tabs 11/26/22
     FTabPageOpenMode : TTabPageOpenMode;                  //kt-tabs 11/26/22
+    procedure TabMoveOtherPaneClick(Sender: TObject); //kt //codex 11/20/26
+    procedure CloseNoteSnapshot(Sender: TObject); //kt //codex 11/20/26
+//kt //codex original -->     procedure RemoveNoteSnapshot(Page: TfrmNoteSnapshot; SelectReplacement: Boolean); //kt //codex 11/20/26
+    procedure RemoveNoteSnapshot(Page: TfrmSnapshotTab; SelectReplacement: Boolean); //kt //codex 11/20/26
+    procedure ClearNoteSnapshots; //kt //codex 11/20/26
     procedure frameLRSplitterMouseEnter(Sender: TObject); //kt-tabs 11/26/22
     procedure frameLRSplitterMouseLeave(Sender: TObject); //kt-tabs 11/26/22
     procedure PanelWindowProc(var Msg: TMessage);         //kt   4/16/14
@@ -544,7 +567,8 @@ type
     procedure OpenChartByDFN(NewDFN:string);  //TMG 6/11/18
     procedure WMCopyData(var Msg : TWMCopyData) ; message WM_COPYDATA;  //TMG added 7/9/18
     function  MainSideTabWidthTarget(Mode: TTabPageOpenMode) : integer;           //kt-tabs
-    procedure SetTabOpenMode(Mode: TTabPageOpenMode);                   //kt-tabs 7/25/21
+    //kt //codex original --> procedure SetTabOpenMode(Mode: TTabPageOpenMode);                   //kt-tabs 7/25/21
+    procedure SetTabOpenMode(Mode: TTabPageOpenMode; SelectDefault: Boolean = True); //kt //codex 11/20/26
     procedure PositionSplitterHandle;                                   //kt-tabs  7/25/21
     function  ToggleTabPageOpenMode(Mode: TTabPageOpenMode) : TTabpageOpenMode; //kt-tabs  7/25/21
     procedure ResizeTabs(AutoFixSideTab: boolean = true);                       //kt-tabs 7/25/21
@@ -567,6 +591,7 @@ type
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;  //kt 4/15/14
     procedure SetBADxList;
     procedure PreparePatientChange(const NewDFN: string); //kt //codex 11/16/26
+    procedure OpenNoteSnapshot(const HTML: string); //kt //codex 11/20/26
     procedure SetActiveTab(PageID: TPageID);
     function  GetActiveTab: TPageID;                                             //kt added 6/15
     function  CheckForRPC(RPCName: string): boolean;                             //kt 9/11
@@ -639,6 +664,7 @@ implementation
 {$R sRemSrch}
 
 uses
+  //kt //codex original --> MSHTML, ActiveX, //kt //codex 11/20/26
   ORNet, rCore, fPtSelMsg, fPtSel, fCover, fProbs, fMeds, fOrders, rOrders, fNotes, fConsults, fDCSumm,
   rMisc, Clipbrd, fLabs, fReports, rReports, fPtDemo, fEncnt, fPtCWAD, uCore, fAbout, fReview, fxBroker,
   fxLists, fxServer, ORSystem, fRptBox, fSplash, rODAllergy, uInit, fLabTests, fLabInfo,
@@ -1138,6 +1164,239 @@ begin
   //kt //codex original --> pnlTimer.Color := colorTimerOff;
 end;
 
+//kt //codex original --> constructor TfrmNoteSnapshot.CreateSnapshot(AOwner: TComponent; AParent: TWinControl; const HTML: string; OnCloseClick: TNotifyEvent);
+//kt //codex original --> //kt //codex added entire procedure 11/20/26
+//kt //codex original --> var
+//kt //codex original -->   //kt //codex original --> BottomPanel: TPanel;
+//kt //codex original -->   BottomPanel, SnapshotBanner: TPanel; //kt //codex 11/20/26
+//kt //codex original -->   CloseButton: TButton;
+//kt //codex original --> begin
+//kt //codex original -->   inherited CreateNew(AOwner);
+//kt //codex original -->   BorderStyle := bsNone;
+//kt //codex original -->   Parent := AParent;
+//kt //codex original -->   Align := alClient;
+//kt //codex original -->   Visible := False;
+//kt //codex original -->   FPendingHTML := HTML;
+//kt //codex original -->   FHasPendingHTML := True;
+//kt //codex original -->   SnapshotBanner := TPanel.Create(Self); //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Parent := Self; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Align := alTop; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Height := 32; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.ParentBackground := False; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Color := $00D7EDFF; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Font.Color := clMaroon; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Font.Style := [fsBold]; //kt //codex 11/20/26
+//kt //codex original -->   SnapshotBanner.Caption := 'SNAPSHOT - VIEW ONLY'; //kt //codex 11/20/26
+//kt //codex original -->   BottomPanel := TPanel.Create(Self);
+//kt //codex original -->   BottomPanel.Parent := Self;
+//kt //codex original -->   BottomPanel.Align := alBottom;
+//kt //codex original -->   BottomPanel.Height := 40;
+//kt //codex original -->   CloseButton := TButton.Create(Self);
+//kt //codex original -->   CloseButton.Parent := BottomPanel;
+//kt //codex original -->   CloseButton.Caption := 'Close';
+//kt //codex original -->   CloseButton.SetBounds(8, 7, 90, 26);
+//kt //codex original -->   CloseButton.OnClick := OnCloseClick;
+//kt //codex original -->   FBrowser := TWebBrowser.Create(Self);
+//kt //codex original -->   TWinControl(FBrowser).Parent := Self;
+//kt //codex original -->   FBrowser.Align := alClient;
+//kt //codex original -->   FBrowser.OnDocumentComplete := BrowserDocumentComplete;
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> procedure TfrmNoteSnapshot.LoadSnapshot;
+//kt //codex original --> //kt //codex added entire procedure 11/20/26
+//kt //codex original --> begin
+//kt //codex original -->   FBrowser.Navigate('about:blank');
+//kt //codex original --> end;
+//kt //codex original -->
+//kt //codex original --> procedure TfrmNoteSnapshot.BrowserDocumentComplete(ASender: TObject; const pDisp: IDispatch; const URL: OleVariant);
+//kt //codex original --> //kt //codex added entire procedure 11/20/26
+//kt //codex original --> var
+//kt //codex original -->   WebDoc: IHTMLDocument2;
+//kt //codex original -->   Content: OleVariant;
+//kt //codex original -->   HTML: string;
+//kt //codex original --> begin
+//kt //codex original -->   if not FHasPendingHTML or not Assigned(FBrowser.Document) then begin
+//kt //codex original -->     Exit;
+//kt //codex original -->   end;
+//kt //codex original -->   FHasPendingHTML := False;
+//kt //codex original -->   HTML := FPendingHTML;
+//kt //codex original -->   FPendingHTML := '';
+//kt //codex original -->   WebDoc := FBrowser.Document as IHTMLDocument2;
+//kt //codex original -->   Content := VarArrayCreate([0, 0], varVariant);
+//kt //codex original -->   Content[0] := HTML;
+//kt //codex original -->   WebDoc.write(PSafeArray(TVarData(Content).VArray));
+//kt //codex original -->   WebDoc.close;
+//kt //codex original -->   if Assigned(WebDoc.body) then begin
+//kt //codex original -->     WebDoc.body.setAttribute('contentEditable', 'false', 0);
+//kt //codex original -->     WebDoc.body.style.cssText := WebDoc.body.style.cssText + //kt //codex 11/20/26
+//kt //codex original -->       ';background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5MDAgNTAwIj48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMjUgNDUwIDI1MCkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzkwMzAyMCIgZmlsbC1vcGFjaXR5PSIwLjEyIj48dGV4dCB4PSI0NTAiIHk9IjI1MCIgZm9udC1zaXplPSIxMTAiPlNOQVBTSE9UPC90ZXh0Pjx0ZXh0IHg9IjQ1MCIgeT0iMzI1IiBmb250LXNpemU9IjUwIj5WSUVXIE9OTFk8L3RleHQ+PC9nPjwvc3ZnPg==);' + //kt //codex 11/20/26
+//kt //codex original -->       'background-repeat:no-repeat;background-position:center center;' + //kt //codex 11/20/26
+//kt //codex original -->       'background-attachment:fixed;background-size:80% auto;'; //kt //codex 11/20/26
+//kt //codex original -->   end;
+//kt //codex original --> end;
+//kt //codex original -->
+
+procedure TfrmFrame.OpenNoteSnapshot(const HTML: string);
+//kt //codex added entire procedure 11/20/26
+var
+  SourceSide, DestSide: TTabPageSide;
+//kt //codex original -->   Page: TfrmNoteSnapshot;
+  Page: TfrmSnapshotTab; //kt //codex 11/20/26
+  ID, Index: Integer;
+begin
+  if not Assigned(FNoteSnapshots) or (Patient.DFN = '') then begin
+    Exit;
+  end;
+  if (FNoteSnapshots.Count > 0) and (FSnapshotPatientDFN <> Patient.DFN) then begin
+    ClearNoteSnapshots;
+  end;
+  FSnapshotPatientDFN := Patient.DFN;
+  if FLastPages[tpsLeft] = frmNotes then begin
+    SourceSide := tpsLeft;
+  end else if FLastPages[tpsRight] = frmNotes then begin
+    SourceSide := tpsRight;
+  end else begin
+    Exit;
+  end;
+  DestSide := OtherPageSide(SourceSide);
+  if (DestSide = tpsRight) and (FTabPageOpenMode = tpoClosed) then begin
+    SetTabOpenMode(tpoOpen);
+    ResizeTabs(False);
+    FRightPanelNeedsAutoClosure := True; //kt //codex 11/20/26
+  end;
+  Inc(FNextNoteSnapshot);
+  ID := FNextNoteSnapshot;
+//kt //codex original -->   Page := TfrmNoteSnapshot.CreateSnapshot(Self, PnlPages[DestSide], HTML, CloseNoteSnapshot);
+  Page := TfrmSnapshotTab.CreateSnapshot(Self, PnlPages[DestSide], HTML, CloseNoteSnapshot); //kt //codex 11/20/26
+  Page.PageID := ID;
+  try
+    FNoteSnapshots.AddObject(IntToStr(ID), Page);
+    Index := FTabPages[DestSide].Tabs.Count;
+    FTabList[DestSide].AddObject(IntToStr(ID), Pointer(Index));
+    FTabPages[DestSide].Tabs.Add('Snapshot ' + IntToStr(ID - 10000));
+    Page.LoadSnapshot;
+    SelectChartTab(DestSide, ID);
+  except
+    RemoveNoteSnapshot(Page, True);
+    raise;
+  end;
+end;
+
+procedure TfrmFrame.CloseNoteSnapshot(Sender: TObject);
+//kt //codex added entire procedure 11/20/26
+var
+//kt //codex original -->   Page: TfrmNoteSnapshot;
+  Page: TfrmSnapshotTab; //kt //codex 11/20/26
+  CloseRightPanel: Boolean; //kt //codex 11/20/26
+begin
+//kt //codex original -->   if not (Sender is TControl) or not (TControl(Sender).Owner is TfrmNoteSnapshot) then begin
+  if not (Sender is TControl) or not (TControl(Sender).Owner is TfrmSnapshotTab) then begin //kt //codex 11/20/26
+    Exit;
+  end;
+//kt //codex original -->   Page := TfrmNoteSnapshot(TControl(Sender).Owner);
+  Page := TfrmSnapshotTab(TControl(Sender).Owner); //kt //codex 11/20/26
+  CloseRightPanel := FRightPanelNeedsAutoClosure and Assigned(FNoteSnapshots) and (FNoteSnapshots.Count = 1); //kt //codex 11/20/26
+  if CloseRightPanel then begin //kt //codex 11/20/26
+    FRightPanelNeedsAutoClosure := False; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
+  //kt //codex original --> RemoveNoteSnapshot(Page, True);
+  RemoveNoteSnapshot(Page, not CloseRightPanel); //kt //codex 11/20/26
+  if CloseRightPanel and (FTabPageOpenMode = tpoOpen) then begin //kt //codex 11/20/26
+    SetTabOpenMode(tpoClosed); //kt //codex 11/20/26
+    ResizeTabs(False); //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
+end;
+
+//kt //codex original --> procedure TfrmFrame.RemoveNoteSnapshot(Page: TfrmNoteSnapshot; SelectReplacement: Boolean);
+procedure TfrmFrame.RemoveNoteSnapshot(Page: TfrmSnapshotTab; SelectReplacement: Boolean); //kt //codex 11/20/26
+//kt //codex added entire procedure 11/20/26
+var
+  Side: TTabPageSide;
+  Index, I, OldIndex, Replacement, SelectedID: Integer;
+  WasActive: Boolean;
+begin
+  if not Assigned(Page) or not Assigned(FNoteSnapshots) then begin
+    Exit;
+  end;
+  for Side := tpsLeft to tpsRight do begin
+    Index := PageIDToTabIndex(Side, Page.PageID);
+    if Index < 0 then begin
+      Continue;
+    end;
+    SelectedID := TabPageID(Side);
+    WasActive := FLastPages[Side] = Page;
+    if WasActive then begin
+      SwitchToPage(Side, nil);
+    end;
+    if Index < FTabPages[Side].Tabs.Count then begin
+      FTabPages[Side].Tabs.Delete(Index);
+    end;
+    I := 0;
+    while I < FTabList[Side].Count do begin
+      OldIndex := Integer(FTabList[Side].Objects[I]);
+      if FTabList[Side].Strings[I] = IntToStr(Page.PageID) then begin
+        FTabList[Side].Delete(I);
+        Continue;
+      end;
+      if OldIndex > Index then begin
+        FTabList[Side].Objects[I] := Pointer(OldIndex - 1);
+      end;
+      Inc(I);
+    end;
+    if LastTabPageID[Side] = Page.PageID then begin
+      LastTabPageID[Side] := CT_NOPAGE;
+    end;
+    if NextTabs[Side] = Page.PageID then begin
+      NextTabs[Side] := CT_NOPAGE;
+    end;
+    if ChangingTabs[Side] = Page.PageID then begin
+      ChangingTabs[Side] := CT_NOPAGE;
+    end;
+    if not WasActive then begin
+      FTabPages[Side].TabIndex := PageIDToTabIndex(Side, SelectedID);
+    end else if not SelectReplacement then begin
+      FTabPages[Side].TabIndex := -1;
+    end;
+    if WasActive and SelectReplacement then begin
+      //kt //codex original --> Replacement := CT_COVER;
+      Replacement := CT_NOPAGE; //kt //codex 11/20/26
+      for I := FNoteSnapshots.Count - 1 downto 0 do begin //kt //codex 11/20/26
+        if (FNoteSnapshots.Objects[I] <> Page) and //kt //codex 11/20/26
+           (PageIDToTabIndex(Side, StrToIntDef(FNoteSnapshots[I], CT_NOPAGE)) >= 0) then begin //kt //codex 11/20/26
+          Replacement := StrToIntDef(FNoteSnapshots[I], CT_NOPAGE); //kt //codex 11/20/26
+          Break; //kt //codex 11/20/26
+        end; //kt //codex 11/20/26
+      end; //kt //codex 11/20/26
+      if Replacement = CT_NOPAGE then begin //kt //codex 11/20/26
+        Replacement := CT_COVER;
+        if TabPageID(OtherPageSide(Side)) = Replacement then begin
+          Replacement := CT_ORDERS;
+        end;
+      end; //kt //codex 11/20/26
+      SelectChartTab(Side, Replacement);
+    end;
+  end;
+  Index := FNoteSnapshots.IndexOfObject(Page);
+  if Index >= 0 then begin
+    FNoteSnapshots.Delete(Index);
+  end;
+  Page.Free;
+end;
+
+procedure TfrmFrame.ClearNoteSnapshots;
+//kt //codex added entire procedure 11/20/26
+begin
+  if not Assigned(FNoteSnapshots) then begin
+    Exit;
+  end;
+  while FNoteSnapshots.Count > 0 do begin
+//kt //codex original -->     RemoveNoteSnapshot(TfrmNoteSnapshot(FNoteSnapshots.Objects[FNoteSnapshots.Count - 1]), False);
+    RemoveNoteSnapshot(TfrmSnapshotTab(FNoteSnapshots.Objects[FNoteSnapshots.Count - 1]), False); //kt //codex 11/20/26
+  end;
+  FSnapshotPatientDFN := '';
+  FRightPanelNeedsAutoClosure := False; //kt //codex 11/20/26
+end;
+
 procedure TfrmFrame.CleanupPatientControls;
 //kt //codex added entire procedure 11/16/26
 var
@@ -1267,6 +1526,9 @@ end;
 procedure TfrmFrame.ClearPatientContext(ShowDashboard: Boolean);
 //kt //codex added entire procedure 11/16/26
 begin
+  if ShowDashboard then begin //kt //codex 11/20/26
+    ClearNoteSnapshots; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
   if Assigned(frmCover) then begin
     frmCover.StopBackgroundLoad;
   end;
@@ -1581,6 +1843,8 @@ begin
   RemoteSites := TRemoteSiteList.Create;
   RemoteReports := TRemoteReportList.Create;
   for ASide := tpsLeft to tpsRight do FTabList[ASide] := TStringList.Create;
+  FNoteSnapshots := TStringList.Create; //kt //codex 11/20/26
+  FNextNoteSnapshot := 10000; //kt //codex 11/20/26
   TabColorsList := TStringList.Create; //kt added 9/11
   FlaggedPTList := TStringList.Create;
   HasFlag  := False;
@@ -1961,6 +2225,8 @@ procedure TfrmFrame.FormDestroy(Sender: TObject);
 var
   ASide : TTabPageSide;
 begin
+  ClearNoteSnapshots; //kt //codex 11/20/26
+  FreeAndNil(FNoteSnapshots); //kt //codex 11/20/26
   Application.OnActivate := FOldActivate;
   Screen.OnActiveFormChange := FOldActiveFormChange;
   FNextButtonBitmap.Free;
@@ -2322,11 +2588,23 @@ begin
   APnlPage := PnlPages[ASide];
   PriorForm := FLastPages[ASide];
   if PriorForm = NewForm then begin
-    if Notifications.Active and Assigned(NewForm) then PostMessage(Handle, UM_SHOWPAGE, 0, 0);
+    if Assigned(NewForm) and ((NewForm.Parent <> APnlPage) or not NewForm.Visible) then begin //kt //codex 11/20/26
+      NewForm.Parent := APnlPage; //kt //codex 11/20/26
+      NewForm.Align := alClient; //kt //codex 11/20/26
+      NewForm.Show; //kt //codex 11/20/26
+      NewForm.BringToFront; //kt //codex 11/20/26
+      PostMessage(Handle, UM_SHOWPAGE, 0, 0); //kt //codex 11/20/26
+    end else if Notifications.Active and Assigned(NewForm) then begin //kt //codex 11/20/26
+      //kt //codex original --> if Notifications.Active and Assigned(NewForm) then PostMessage(Handle, UM_SHOWPAGE, 0, 0);
+      PostMessage(Handle, UM_SHOWPAGE, 0, 0); //kt //codex 11/20/26
+    end; //kt //codex 11/20/26
     Exit;
   end;
   if Assigned(PriorForm) then begin
-    mnuFrame.Unmerge(FLastPages[ASide].Menu);
+    //kt //codex original --> mnuFrame.Unmerge(FLastPages[ASide].Menu);
+    if Assigned(FLastPages[ASide].Menu) then begin //kt //codex 11/20/26
+      mnuFrame.Unmerge(FLastPages[ASide].Menu); //kt //codex 11/20/26
+    end; //kt //codex 11/20/26
     PriorForm.Align := alNone;
     PriorForm.Hide;
   end;
@@ -2338,7 +2616,10 @@ begin
         Exit;
     end;}
     NewForm.Parent := APnlPage;  //kt-tabs.  This will set it to appear on right vs left side
-    mnuFrame.Merge(NewForm.Menu);
+    //kt //codex original --> mnuFrame.Merge(NewForm.Menu);
+    if Assigned(NewForm.Menu) then begin //kt //codex 11/20/26
+      mnuFrame.Merge(NewForm.Menu); //kt //codex 11/20/26
+    end; //kt //codex 11/20/26
     NewForm.Align := alClient; //kt-tabs
     NewForm.Show;
   end;
@@ -2429,8 +2710,12 @@ begin
   Result  := Floor(pnlMain.Width * LPct);
 end;
 
-procedure TfrmFrame.SetTabOpenMode(Mode: TTabPageOpenMode); //kt-tabs
+//kt //codex original --> procedure TfrmFrame.SetTabOpenMode(Mode: TTabPageOpenMode); //kt-tabs
+procedure TfrmFrame.SetTabOpenMode(Mode: TTabPageOpenMode; SelectDefault: Boolean); //kt //codex 11/20/26
 begin
+  if Mode = tpoClosed then begin //kt //codex 11/20/26
+    FRightPanelNeedsAutoClosure := False; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
   FTabPageOpenMode := Mode;
   case Mode of
     tpoClosed : begin
@@ -2438,7 +2723,10 @@ begin
                   frameLRSplitter.Color := clBtnFace;
                 end;
     tpoOpen :   begin
-                  SelectChartTab(tpsRight, CT_ORDERS); //change to default page ....  ? set by param?
+                  //kt //codex original --> SelectChartTab(tpsRight, CT_ORDERS); //change to default page ....  ? set by param?
+                  if SelectDefault then begin //kt //codex 11/20/26
+                    SelectChartTab(tpsRight, CT_ORDERS); //kt //codex 11/20/26
+                  end; //kt //codex 11/20/26
                   frameLRSplitter.Color := clSkyBlue; //clBtnHighlight;
                 end;
   end; //case
@@ -2595,6 +2883,17 @@ begin
   OtherSide := OtherPageSide(ASide);
   OtherTabPage := TabPage(OtherSide);
   PageID := TabIndexToPageID(ASide, ATabPage.TabIndex);
+  if (ASide = tpsRight) and FRightPanelNeedsAutoClosure and //kt //codex 11/20/26
+     (PageID <> CT_NOPAGE) and Assigned(FNoteSnapshots) and //kt //codex 11/20/26
+     (FNoteSnapshots.IndexOf(IntToStr(PageID)) < 0) then begin //kt //codex 11/20/26
+    FRightPanelNeedsAutoClosure := False; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
+  if Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0) and //kt //codex 11/20/26
+     (FSnapshotPatientDFN <> Patient.DFN) then begin //kt //codex 11/20/26
+    ATabPage.TabIndex := -1; //kt //codex 11/20/26
+    SwitchToPage(ASide, nil); //kt //codex 11/20/26
+    Exit; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
   {    6/9/26
   if PageID = CT_Notes then begin  //6/9/26 ELH added
     if frmNotes.FLoadingNotes then begin
@@ -2616,7 +2915,8 @@ begin
   if (PageID = OtherPageID) and (PageID <> CT_NOPAGE) then begin   //kt-tabs
     if User.IsReportsOnly then begin
       OtherPageID := CT_NOPAGE;
-    end else if OtherSide = tpsLeft then begin
+    //kt //codex original --> end else if OtherSide = tpsLeft then begin
+    end else begin //kt //codex 11/20/26
       if PageID <> CT_COVER then begin
         OtherPageID := CT_COVER;
       end else begin
@@ -2633,7 +2933,12 @@ begin
       //Do Nothing
     end;
   end;
-  case PageID of
+  //kt //codex original --> case PageID of
+  if Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0) then begin //kt //codex 11/20/26
+//kt //codex original -->     SwitchToPage(ASide, TfrmNoteSnapshot(FNoteSnapshots.Objects[FNoteSnapshots.IndexOf(IntToStr(PageID))])); //kt //codex 11/20/26
+    SwitchToPage(ASide, TfrmSnapshotTab(FNoteSnapshots.Objects[FNoteSnapshots.IndexOf(IntToStr(PageID))])); //kt //codex 11/20/26
+  end else begin //kt //codex 11/20/26
+  case PageID of //kt //codex 11/20/26
     CT_NOPAGE:    SwitchToPage(Aside,nil);
     CT_COVER:     SwitchToPage(Aside,frmCover);
     CT_PROBLEMS:  SwitchToPage(Aside,frmProblems);
@@ -2654,6 +2959,7 @@ begin
     CT_RXHISTORY: SwitchToPage(Aside,frmRxHistory);  //kt //codex 11/2/26
     //kt 8/24/26 CT_WEBTAB1..CT_LAST_WEBTAB:  SwitchToPage(Aside,TfrmPage(WebTabsList[PageID-CT_WEBTAB1]));  //kt 9/11
   end; {case}
+  end; //kt //codex 11/20/26
   if ScreenReaderSystemActive and FCtrlTabUsed then
     SpeakPatient;
   ChangingTabs[ASide] := PageID;
@@ -2768,6 +3074,9 @@ var
   AMsg, SelectMsg: string;
   PriorLocation, PriorProvider, PriorVisitCaption: string; //kt //codex 11/16/26
 begin
+  if Assigned(FNoteSnapshots) and (FNoteSnapshots.Count > 0) and (FSnapshotPatientDFN <> Patient.DFN) then begin //kt //codex 11/20/26
+    ClearNoteSnapshots; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
   PriorLocation := lblPtLocation.Caption; //kt //codex 11/16/26
   PriorProvider := lblPtProvider.Caption; //kt //codex 11/16/26
   PriorVisitCaption := pnlVisit.Caption; //kt //codex 11/16/26
@@ -5232,21 +5541,22 @@ begin
   end; {case}
 
   if Visible then for APageSide := tpsLeft to tpsRight do begin  //insert all tabs into both tab controllers.       //kt-tabs
-    //only allow specified tabs to be on right side.
-    if (APageSide = tpsRight )and not (APageID in [CT_DASHBOARD,
-                                                   CT_COVER,
-                                                   CT_PROBLEMS,
-                                                   //CT_MEDS,
-                                                   CT_ORDERS,
-                                                   CT_LABS,
-                                                   CT_REPORTS,   //kt //codex 9/14/26
-                                                   CT_IMAGING,   //kt //codex 11/17/26
-                                                   CT_TOPICS,    //kt //codex 9/14/26
-                                                   CT_RXHISTORY  //kt //codex 11/2/26
-                                                   //CT_WEBTAB1,
-                                                   //CT_WEBTAB2,
-                                                   //CT_WEBTAB3]
-                                                   ])  then continue;
+    //kt //codex original -->     //only allow specified tabs to be on right side.
+    //kt //codex original -->     if (APageSide = tpsRight )and not (APageID in [CT_DASHBOARD,
+    //kt //codex original -->                                                    CT_COVER,
+    //kt //codex original -->                                                    CT_PROBLEMS,
+    //kt //codex original -->                                                    //CT_MEDS,
+    //kt //codex original -->                                                    CT_ORDERS,
+    //kt //codex original -->                                                    CT_NOTES, //kt //codex 11/20/26
+    //kt //codex original -->                                                    CT_LABS,
+    //kt //codex original -->                                                    CT_REPORTS,   //kt //codex 9/14/26
+    //kt //codex original -->                                                    CT_IMAGING,   //kt //codex 11/17/26
+    //kt //codex original -->                                                    CT_TOPICS,    //kt //codex 9/14/26
+    //kt //codex original -->                                                    CT_RXHISTORY  //kt //codex 11/2/26
+    //kt //codex original -->                                                    //CT_WEBTAB1,
+    //kt //codex original -->                                                    //CT_WEBTAB2,
+    //kt //codex original -->                                                    //CT_WEBTAB3]
+    //kt //codex original -->                                                    ])  then continue;
     ATabPage := FTabPages[APageSide];
     FTabList[APageSide].AddObject(IntToStr(APageID), pointer(ATabPage.Tabs.Count)); //   .Add(IntToStr(ATabID));
     ATabPage.Tabs.Add(ALabel);
@@ -6361,10 +6671,91 @@ begin
   pnlFlag.BevelOuter := bvRaised;
 end;
 
+procedure TfrmFrame.TabMoveOtherPaneClick(Sender: TObject);
+//kt //codex added entire procedure 11/20/26
+var
+  SourceSide, DestSide: TTabPageSide;
+  PageID, SourceIndex, DestIndex, SelectedID, FallbackID, I, OldIndex: Integer;
+  IsSnapshot: Boolean;
+  TabLabel: string;
+begin
+  if not Assigned(frmNotes) or frmNotes.FLoadingNotes then begin
+    Exit;
+  end;
+  SourceSide := FTabContextSide;
+  if not (SourceSide in [tpsLeft, tpsRight]) then begin
+    Exit;
+  end;
+  DestSide := OtherPageSide(SourceSide);
+  PageID := FTabContextPageID;
+  SourceIndex := PageIDToTabIndex(SourceSide, PageID);
+  if (SourceIndex < 0) or (SourceIndex >= FTabPages[SourceSide].Tabs.Count) then begin
+    Exit;
+  end;
+  IsSnapshot := Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0);
+  if IsSnapshot and (FSnapshotPatientDFN <> Patient.DFN) then begin
+    Exit;
+  end;
+  DestIndex := PageIDToTabIndex(DestSide, PageID);
+  if (DestIndex < 0) and not IsSnapshot then begin
+    Exit;
+  end;
+  if IsSnapshot and (DestIndex < 0) then begin
+    TabLabel := FTabPages[SourceSide].Tabs[SourceIndex];
+    DestIndex := FTabPages[DestSide].Tabs.Count;
+    FTabList[DestSide].AddObject(IntToStr(PageID), Pointer(DestIndex));
+    FTabPages[DestSide].Tabs.Add(TabLabel);
+  end;
+  if (DestSide = tpsRight) and (FTabPageOpenMode = tpoClosed) then begin
+    SetTabOpenMode(tpoOpen, False);
+    ResizeTabs(False);
+  end;
+  if TabPageID(SourceSide) = PageID then begin
+    FallbackID := CT_COVER;
+    if (FallbackID = PageID) or (FallbackID = TabPageID(DestSide)) then begin
+      FallbackID := CT_ORDERS;
+    end;
+    if (FallbackID = PageID) or (FallbackID = TabPageID(DestSide)) then begin
+      FallbackID := CT_NOTES;
+    end;
+    SelectChartTab(SourceSide, FallbackID);
+  end;
+  if IsSnapshot then begin
+    SelectedID := TabPageID(SourceSide);
+    FTabPages[SourceSide].Tabs.Delete(SourceIndex);
+    I := 0;
+    while I < FTabList[SourceSide].Count do begin
+      OldIndex := Integer(FTabList[SourceSide].Objects[I]);
+      if FTabList[SourceSide].Strings[I] = IntToStr(PageID) then begin
+        FTabList[SourceSide].Delete(I);
+        Continue;
+      end;
+      if OldIndex > SourceIndex then begin
+        FTabList[SourceSide].Objects[I] := Pointer(OldIndex - 1);
+      end;
+      Inc(I);
+    end;
+    FTabPages[SourceSide].TabIndex := PageIDToTabIndex(SourceSide, SelectedID);
+    if LastTabPageID[SourceSide] = PageID then begin
+      LastTabPageID[SourceSide] := SelectedID;
+    end;
+    if NextTabs[SourceSide] = PageID then begin
+      NextTabs[SourceSide] := SelectedID;
+    end;
+    if ChangingTabs[SourceSide] = PageID then begin
+      ChangingTabs[SourceSide] := SelectedID;
+    end;
+  end;
+  SelectChartTab(DestSide, PageID);
+end;
+
 procedure TfrmFrame.tabPageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   ATabPage : TTabControl;
   ASide : TTabPageSide;
+  I: Integer; //kt //codex 11/20/26
+  Position: TPoint; //kt //codex 11/20/26
+  MoveItem: TMenuItem; //kt //codex 11/20/26
 begin
   if not (sender is TTabControl) then exit;
   ATabPage := TTabControl(sender);
@@ -6372,6 +6763,27 @@ begin
   LastTabPageID[ASide] := TabIndexToPageID(ASide, ATabPage.TabIndex);
   TabCtrlClicked := True;  //used in fProbs.
   TabCtrlClickedSide := ASide; //used in fProbs.
+  if Button = mbRight then begin //kt //codex 11/20/26
+    for I := 0 to ATabPage.Tabs.Count - 1 do begin //kt //codex 11/20/26
+      if PtInRect(ATabPage.TabRect(I), Point(X, Y)) then begin //kt //codex 11/20/26
+        FTabContextSide := ASide; //kt //codex 11/20/26
+        FTabContextPageID := TabIndexToPageID(ASide, I); //kt //codex 11/20/26
+        if (FTabContextPageID = CT_NOPAGE) or User.IsReportsOnly then begin //kt //codex 11/20/26
+          Exit; //kt //codex 11/20/26
+        end; //kt //codex 11/20/26
+        if not Assigned(FTabContextMenu) then begin //kt //codex 11/20/26
+          FTabContextMenu := TPopupMenu.Create(Self); //kt //codex 11/20/26
+          MoveItem := TMenuItem.Create(FTabContextMenu); //kt //codex 11/20/26
+          MoveItem.Caption := 'Open in other pane'; //kt //codex 11/20/26
+          MoveItem.OnClick := TabMoveOtherPaneClick; //kt //codex 11/20/26
+          FTabContextMenu.Items.Add(MoveItem); //kt //codex 11/20/26
+        end; //kt //codex 11/20/26
+        Position := ATabPage.ClientToScreen(Point(X, Y)); //kt //codex 11/20/26
+        FTabContextMenu.Popup(Position.X, Position.Y); //kt //codex 11/20/26
+        Break; //kt //codex 11/20/26
+      end; //kt //codex 11/20/26
+    end; //kt //codex 11/20/26
+  end; //kt //codex 11/20/26
 end;
 
 procedure TfrmFrame.tabPageLChanging(Sender: TObject; var AllowChange: Boolean);  //ELH added 6/9/26
@@ -6869,7 +7281,14 @@ var ALabel : string;
 begin
   if TabColorsEnabled then begin
     ALabel := TTabControl(Control).Tabs[TabIndex];
-    color := TColor(TabColorsList.Objects[TabIndex]);
+    //kt //codex original --> color := TColor(TabColorsList.Objects[TabIndex]);
+    if Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(TabIndexToPageID(TabSide(TTabControl(Control)), TabIndex))) >= 0) then begin //kt //codex 11/20/26
+      color := clNavy; //kt //codex 11/20/26
+    end else if TabIndex < TabColorsList.Count then begin //kt //codex 11/20/26
+      color := TColor(TabColorsList.Objects[TabIndex]); //kt //codex 11/20/26
+    end else begin //kt //codex 11/20/26
+      color := clNavy; //kt //codex 11/20/26
+    end; //kt //codex 11/20/26
     DrawTab(Control,TabIndex,Rect,color,Active);
   end else begin
     //this isn't working... This is not what I want.  Fix later...

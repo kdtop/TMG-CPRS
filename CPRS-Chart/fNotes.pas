@@ -313,6 +313,11 @@ type
     btnOpenEnc: TBitBtn;
     MultiLooseDocHandler: TMenuItem;
     btnSignDocument: TSpeedButton;
+    btnDelDocument: TSpeedButton;
+    btnSaveDocument: TSpeedButton;
+    btnAddendDocument: TSpeedButton;
+    btnEditDocument: TSpeedButton;
+    btnAddSigner: TSpeedButton; //kt //codex 11/21/26
     procedure sptVertMoved(Sender: TObject);
     procedure btnOpenEncClick(Sender: TObject);
     procedure memPCEShowResizeRequest(Sender: TObject; Rect: TRect);
@@ -368,6 +373,7 @@ type
     procedure mnuActNewClick(Sender: TObject);
     procedure mnuActAddIDEntryClick(Sender: TObject);
     procedure mnuActSaveClick(Sender: TObject);
+    procedure NoteToolbarActionClick(Sender: TObject); //kt //codex 11/21/26
     procedure mnuViewClick(Sender: TObject);
     procedure mnuActAddendClick(Sender: TObject);
     procedure mnuActDetachFromIDParentClick(Sender: TObject);
@@ -926,7 +932,7 @@ procedure TfrmNotes.ClearPtData;
 { clear all controls that contain patient specific information }
 begin
   inherited ClearPtData;
-  btnSignDocument.Visible := False; //kt //codex 11/19/26
+  //kt //codex original --> btnSignDocument.Visible := False; //kt //codex 11/19/26
   ClearEditControls;
   uChanging := True;
   tvNotes.Items.BeginUpdate;
@@ -1917,7 +1923,19 @@ var
   SelectedNoteIENVal: Int64;
   Mode : TViewModeSet; //kt 9/11
   ChangesMode : integer;  //kt 4/15
+  SavedViewScroll, SavedViewLine, EditLine, CaretIndex: Integer; //kt //codex 11/21/26
+  RestoreHTMLPosition, RestoreTextPosition: Boolean; //kt //codex 11/21/26
+  CaretPoint: TPoint; //kt //codex 11/21/26
 begin
+  SavedViewScroll := 0; //kt //codex 11/21/26
+  SavedViewLine := 0; //kt //codex 11/21/26
+  RestoreHTMLPosition := (vmView in FViewMode) and (vmHTML in FViewMode) and Assigned(HtmlViewer.DOC) and Assigned(HtmlViewer.DOC.body); //kt //codex 11/21/26
+  RestoreTextPosition := (vmView in FViewMode) and not (vmHTML in FViewMode); //kt //codex 11/21/26
+  if RestoreHTMLPosition then begin //kt //codex 11/21/26
+    SavedViewScroll := HtmlViewer.GetScrollLocation; //kt //codex 11/21/26
+  end else if RestoreTextPosition then begin //kt //codex 11/21/26
+    SavedViewLine := SendMessage(memNote.Handle, EM_GETFIRSTVISIBLELINE, 0, 0); //kt //codex 11/21/26
+  end; //kt //codex 11/21/26
   ClearEditControls;
   SelectedNoteIENVal := SelectedNoteIEN;
   SelectedNoteIDStr := SelectedNoteID;
@@ -1984,6 +2002,24 @@ begin
   DisplaySelectedNote;  //kt //codex 8/17/26
   if timAutoSave.Interval <> 0 then timAutoSave.Enabled := True;
   SetEditorFocus;    //kt memNewNote.SetFocus;  //kt 9/11
+  if RestoreHTMLPosition and (vmHTML in FViewMode) and Assigned(HtmlEditor.DOC) and Assigned(HtmlEditor.DOC.body) then begin //kt //codex 11/21/26
+    try //kt //codex 11/21/26
+      (HtmlEditor.DOC.body as IHTMLElement2).ScrollTop := SavedViewScroll; //kt //codex 11/21/26
+      CaretPoint := HtmlEditor.ClientToScreen(Point(HtmlEditor.ClientWidth div 2, HtmlEditor.ClientHeight div 2)); //kt //codex 11/21/26
+      HtmlEditor.MoveCaretToPos(CaretPoint); //kt //codex 11/21/26
+      (HtmlEditor.DOC.body as IHTMLElement2).ScrollTop := SavedViewScroll; //kt //codex 11/21/26
+    except //kt //codex 11/21/26
+      // The document may not yet have a usable layout; editing can still proceed. //kt //codex 11/21/26
+    end; //kt //codex 11/21/26
+  end else if RestoreTextPosition and not (vmHTML in FViewMode) then begin //kt //codex 11/21/26
+    CaretIndex := SendMessage(memNewNote.Handle, EM_LINEINDEX, SavedViewLine, 0); //kt //codex 11/21/26
+    if CaretIndex >= 0 then begin //kt //codex 11/21/26
+      memNewNote.SelStart := CaretIndex; //kt //codex 11/21/26
+      memNewNote.SelLength := 0; //kt //codex 11/21/26
+      EditLine := SendMessage(memNewNote.Handle, EM_GETFIRSTVISIBLELINE, 0, 0); //kt //codex 11/21/26
+      SendMessage(memNewNote.Handle, EM_LINESCROLL, 0, SavedViewLine - EditLine); //kt //codex 11/21/26
+    end; //kt //codex 11/21/26
+  end; //kt //codex 11/21/26
   TMGLoadingForEdit := false;
 end;
 
@@ -4440,6 +4476,42 @@ begin
   end;
 end;
 
+procedure TfrmNotes.NoteToolbarActionClick(Sender: TObject);
+//kt //codex added entire procedure 11/21/26
+var
+  ParentText: string;
+begin
+  if not Assigned(tvNotes.Selected) or IsNonSelectableGroupNode(tvNotes.Selected) or (SelectedNoteIEN <= 0) then begin
+    InfoBox('Please select a progress note first.', 'Note action', MB_OK or MB_ICONWARNING);
+    Exit;
+  end;
+  ParentText := '';
+  if Assigned(tvNotes.Selected.Parent) then begin
+    ParentText := tvNotes.Selected.Parent.Text;
+  end;
+  if ContainsText(ParentText, 'Loose documents') or ContainsText(ParentText, 'Scanned records') then begin
+    InfoBox('This action is not available for the selected document.', 'Note action', MB_OK or MB_ICONWARNING);
+    Exit;
+  end;
+  if (Sender = btnSignDocument) and ContainsText(ParentText, 'Loose notes') then begin
+    InfoBox('This action is not available for a loose note.', 'Note action', MB_OK or MB_ICONWARNING);
+    Exit;
+  end;
+  if Sender = btnDelDocument then begin
+    mnuActDeleteClick(Sender);
+  end else if Sender = btnSaveDocument then begin
+    mnuActSaveClick(Sender);
+  end else if Sender = btnAddendDocument then begin
+    mnuActAddendClick(Sender);
+  end else if Sender = btnEditDocument then begin
+    mnuActEditClick(Sender);
+  end else if Sender = btnAddSigner then begin
+    mnuActIdentifyAddlSignersClick(Sender);
+  end else if Sender = btnSignDocument then begin
+    mnuActSignClick(Sender);
+  end;
+end;
+
 procedure TfrmNotes.mnuActSaveClick(Sender: TObject);
 { saves the note that is currently being edited }
 var
@@ -4451,11 +4523,18 @@ begin
     SavedDocID := NoteIDAt(EditingIndex);
     FLastNoteID := SavedDocID;
     SaveCurrentNote(Saved);
+    if not Saved then begin //kt //codex 11/21/26
+      Exit; //kt //codex 11/21/26
+    end; //kt //codex 11/21/26
     if Saved and (not EditingNoteActive) and (not FDeleted) then begin  //kt
       LoadNotes;
       SelectTreeNodeByID(SavedDocID);  //kt //codex 8/17/26
     end;
-  end else InfoBox(TX_NO_NOTE, TX_SAVE_NOTE, MB_OK or MB_ICONWARNING);
+  //kt //codex original -->   end else InfoBox(TX_NO_NOTE, TX_SAVE_NOTE, MB_OK or MB_ICONWARNING);
+  end else begin //kt //codex 11/21/26
+    InfoBox(TX_NO_NOTE, TX_SAVE_NOTE, MB_OK or MB_ICONWARNING); //kt //codex 11/21/26
+    Exit; //kt //codex 11/21/26
+  end; //kt //codex 11/21/26
   //EDDIE.... this is a test below... do NOT push out until tested
   if not Changes.Exist(CH_DOC, SavedDocID) then UnlockDocument(StrToInt(SavedDocID));
   Changes.Remove(CH_DOC, SavedDocID);
@@ -5526,7 +5605,7 @@ begin
   tmpList := TStringList.Create;
   try
     FLoadingNotes := True;  //ELH  6/9/26
-    btnSignDocument.Visible := False; //kt //codex 11/19/26
+    //kt //codex original --> btnSignDocument.Visible := False; //kt //codex 11/19/26
 
     HiddenCount := 0;
     FDocList.Clear;
@@ -5997,19 +6076,19 @@ var
 begin
   SetActiveTIUIENGetterForImages(GetCurrentNoteID);
   if uChanging then Exit;
-  btnSignDocument.Visible := False; //kt //codex 11/19/26
-  if Assigned(Node) and not IsNonSelectableGroupNode(Node) then begin //kt //codex 11/19/26
-    //kt //codex original --> UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U); //kt //codex 11/19/26
-    UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), 1, U, nil); //kt //codex 11/19/26
-    btnSignDocument.Visible := (PieceAsIntDef(TORTreeNode(Node).StringData, U, 1, 0) > 0) and //kt //codex 11/19/26
-                               (ChildDepth(UnsignedDocsNode, TORTreeNode(Node)) > 0); //kt //codex 11/19/26
-    if Assigned(Node.Parent) then begin //kt //codex 11/19/26
-      if (Piece(TORTreeNode(Node.Parent).StringData, U, 1) = 'ALERT') and //kt //codex 11/19/26
-         (PieceAsIntDef(TORTreeNode(Node).StringData, U, 1, 0) > 0) then begin //kt //codex 11/19/26
-        btnSignDocument.Visible := True; //kt //codex 11/19/26
-      end; //kt //codex 11/19/26
-    end; //kt //codex 11/19/26
-  end; //kt //codex 11/19/26
+  //kt //codex original --> btnSignDocument.Visible := False; //kt //codex 11/19/26
+  //kt //codex original --> if Assigned(Node) and not IsNonSelectableGroupNode(Node) then begin //kt //codex 11/19/26
+  //kt //codex original --> //kt //codex original --> UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), U); //kt //codex 11/19/26
+  //kt //codex original --> UnsignedDocsNode := tvNotes.FindPieceNode(IntToStr(NC_UNSIGNED), 1, U, nil); //kt //codex 11/19/26
+  //kt //codex original --> btnSignDocument.Visible := (PieceAsIntDef(TORTreeNode(Node).StringData, U, 1, 0) > 0) and //kt //codex 11/19/26
+  //kt //codex original --> (ChildDepth(UnsignedDocsNode, TORTreeNode(Node)) > 0); //kt //codex 11/19/26
+  //kt //codex original --> if Assigned(Node.Parent) then begin //kt //codex 11/19/26
+  //kt //codex original --> if (Piece(TORTreeNode(Node.Parent).StringData, U, 1) = 'ALERT') and //kt //codex 11/19/26
+  //kt //codex original --> (PieceAsIntDef(TORTreeNode(Node).StringData, U, 1, 0) > 0) then begin //kt //codex 11/19/26
+  //kt //codex original --> btnSignDocument.Visible := True; //kt //codex 11/19/26
+  //kt //codex original --> end; //kt //codex 11/19/26
+  //kt //codex original --> end; //kt //codex 11/19/26
+  //kt //codex original --> end; //kt //codex 11/19/26
   //This gives the change a chance to occur when keyboarding, so that WindowEyes
   //doesn't use the old value.
   //kt begin mod block 5/15/15-------

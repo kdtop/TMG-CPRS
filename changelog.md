@@ -2,6 +2,12 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-21 — Note editing position and toolbar
+
+- Preserve the approximate scroll position when switching a note from viewing to editing, and place the HTML editor caret near the visible area. Plain-text notes restore the first visible line. The user compiled and reported that the scroll change works.
+- Added note-view toolbar buttons for delete, addendum, edit, additional signers, and sign, using the existing action handlers with selection and document-category checks. Signing remains visible and is checked when clicked. The user supplied the icons and was satisfied with the toolbar.
+- Retained the save button and its icon at the right end of the toolbar but hid it because saving applies to an edited document. Fixed the save action to stop when no note is being edited or the save fails.
+
 ## 2026-11-20 — Open tabs in the other pane
 
 - Added a tab right-click action to open the clicked page in the opposite pane, including snapshots, and registered ordinary pages in both tab controls. Moving an active page selects a fallback on the original side; page switching also restores a hidden or reparented page. The user reported the behavior seems to work as expected after building and trying it.

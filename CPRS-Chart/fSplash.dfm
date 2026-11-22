@@ -1517,7 +1517,7 @@ inherited frmSplash: TfrmSplash
         Top = 6
         Width = 104
         Height = 13
-        Caption = 'Delphi12 CPRS v0.04'
+        Caption = 'Delphi12 CPRS v0.10'
       end
       object lblCopyright: TStaticText
         Left = 160

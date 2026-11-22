@@ -1722,6 +1722,29 @@ begin
         lstDates.ItemIndex := -1;
     end;
   end;
+  if (Piece(uRptID,':',1) = '606') and (uQualifierType = QT_DATERANGE) then begin //kt //codex 11/22/26
+    if lstDates.ItemIndex < 0 then begin //kt //codex 11/22/26
+      Screen.Cursor := crDefault; //kt //codex 11/22/26
+      Exit; //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
+    if lstDates.ItemIEN = 50000 then begin //kt //codex 11/22/26
+      date2 := 2222222; //kt //codex 11/22/26
+      date1 := FMToday; //kt //codex 11/22/26
+    end else if lstDates.ItemIEN > 0 then begin //kt //codex 11/22/26
+      today := FMToDateTime(FloatToStr(FMToday)); //kt //codex 11/22/26
+      date1 := FMToday; //kt //codex 11/22/26
+      date2 := DateTimeToFMDateTime(today - (lstDates.ItemIEN - 1)); //kt //codex 11/22/26
+    end else begin //kt //codex 11/22/26
+      date2 := StrToFMDateTime(Piece(lstDates.ItemID, ';', 1)); //kt //codex 11/22/26
+      date1 := StrToFMDateTime(Piece(lstDates.ItemID, ';', 2)); //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
+    if (date1 <= 0) or (date2 <= 0) or (date1 < date2) then begin //kt //codex 11/22/26
+      Screen.Cursor := crDefault; //kt //codex 11/22/26
+      InfoBox('Invalid date range. Please select a valid start and end date.', 'Invalid Date Range', MB_OK); //kt //codex 11/22/26
+      Exit; //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
+    date1 := Trunc(date1) + 0.235959; //kt //codex 11/22/26
+  end else begin //kt //codex 11/22/26
   today := FMToDateTime(floattostr(FMToday));
   if lstDates.ItemIEN > 0 then
     begin
@@ -1735,6 +1758,7 @@ begin
   else
     BeginEndDates(date1,date2,daysback);
   date1 := date1 + 0.2359;
+  end; //kt //codex 11/22/26
   uHTMLDoc := '';
   BlankWeb;
   aID := piece(uRptID,':',1);
@@ -1901,7 +1925,12 @@ begin
       //WebBrowser1.Navigate('http://www.yahoo.com');
       HTMLReport := TStringList.create();
       //tCallV(HTMLReport,'TMG CPRS LAB GET HTML REPORT',[Patient.DFN,lstTests.Items]);
-      tCallV(HTMLReport,'TMG CPRS LAB HTML DATE REPORT',[Patient.DFN,9999999,2222222]);
+      //kt //codex original --> tCallV(HTMLReport,'TMG CPRS LAB HTML DATE REPORT',[Patient.DFN,9999999,2222222]);
+      if uQualifierType = QT_DATERANGE then begin //kt //codex 11/22/26
+        tCallV(HTMLReport,'TMG CPRS LAB HTML DATE REPORT',[Patient.DFN,date1,date2]); //kt //codex 11/22/26
+      end else begin //kt //codex 11/22/26
+        tCallV(HTMLReport,'TMG CPRS LAB HTML DATE REPORT',[Patient.DFN,9999999,2222222]); //kt //codex 11/22/26
+      end; //kt //codex 11/22/26
       uLabLocalReportData.Text := HTMLReport.Text;
 
       HTMLReport.free;
@@ -4377,6 +4406,17 @@ begin
         QT_DATERANGE:
           begin      //      = 2
 
+            if (aReportType = 'H') and (Piece(aID,':',1) = '606') then begin //kt //codex 11/22/26
+              CommonComponentVisible(false,false,false,true,true,false,false,false,false,false,false,false); //kt //codex 11/22/26
+              x := aStartTime + ';' + aStopTime + '^' + aStartTime + ' to ' + aStopTime; //kt //codex 11/22/26
+              i := lstDates.Items.IndexOf(x); //kt //codex 11/22/26
+              if i < 0 then begin //kt //codex 11/22/26
+                i := lstDates.Items.Add(x); //kt //codex 11/22/26
+              end; //kt //codex 11/22/26
+              lstDates.ItemIndex := i; //kt //codex 11/22/26
+              lstDatesClick(self); //kt //codex 11/22/26
+              uPrevReportNode := tvReports.Selected; //kt //codex 11/22/26
+            end else begin //kt //codex 11/22/26
             ListReportDateRanges(lstQualifier.Items);
               if lstQualifier.ItemID = '' then
                 begin
@@ -4392,6 +4432,7 @@ begin
             pnlLeftBottom.Visible := true;
             splitter1.Visible := true;
             uPrevReportNode := tvReports.Selected;
+            end; //kt //codex 11/22/26
           end;
         QT_HSCOMPONENT:
           begin      //      = 5
@@ -4648,9 +4689,14 @@ begin
       lstHeaders.Visible := false;
       lblHeaders.Visible := false;
       lstHeaders.TabStop := false;
-      pnlLefTop.Height := frmLabs.Height;
-      pnlLeftBottom.Visible := false;
-      Splitter1.Visible := false;
+      //kt //codex original --> pnlLefTop.Height := frmLabs.Height;
+      //kt //codex original --> pnlLeftBottom.Visible := false;
+      //kt //codex original --> Splitter1.Visible := false;
+      if uQualifierType <> QT_DATERANGE then begin //kt //codex 11/22/26
+        pnlLefTop.Height := frmLabs.Height; //kt //codex 11/22/26
+        pnlLeftBottom.Visible := false; //kt //codex 11/22/26
+        Splitter1.Visible := false; //kt //codex 11/22/26
+      end; //kt //codex 11/22/26
     end
   else
     begin

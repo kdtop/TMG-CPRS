@@ -3,9 +3,13 @@ unit fRxHistory;
 interface
 
 uses
-  Windows, Classes, Controls, Graphics, ExtCtrls, Buttons, Forms, OleCtrls, SHDocVw,
+  //kt //codex original --> Windows, Classes, Controls, Graphics, ExtCtrls, Buttons, Forms, OleCtrls, SHDocVw,
+  Windows, Messages, Classes, Controls, Graphics, ExtCtrls, Buttons, Forms, OleCtrls, SHDocVw, //kt //codex 11/22/26
   System.ImageList, Vcl.ImgList, Vcl.BaseImageCollection, Vcl.ImageCollection,
   fPage, uPngGlyphButton, Vcl.ComCtrls, Vcl.StdCtrls, VA508AccessibilityManager, Vcl.Tabs, Vcl.DockTabSet;
+
+const
+  UM_RXHX_SELECT_FIRST = WM_APP + 271; //kt //codex 11/22/26
 
 type
   TRxHxControlAccess = class(TControl);
@@ -71,6 +75,11 @@ type
     //kt //codex original --> FRxHxNoteBar: TPanel;
     FRxHxNoteBrowser: TWebBrowser; //kt //codex 11/3/26
     FRxHxSelectionSerial: Integer; //kt //codex 11/3/26
+    FRxHxRebuilding: Boolean; //kt //codex 11/22/26
+    FRxHxTreeGeneration: Integer; //kt //codex 11/22/26
+    FRxHxDateTree: TTreeView; //kt //codex 11/22/26
+    FRxHxDisplayedNoteIEN: string; //kt //codex 11/22/26
+    FRxHxDisplayedHighlight: string; //kt //codex 11/22/26
     FRxHxZoom: Integer; //kt //codex 11/3/26
     btnRxHxLeftHandle, btnRxHxRightHandle, btnRxHxLeftPin: TPngGlyphButton;
     FRxHxLeftOpen, FRxHxLeftPinned, FRxHxLeftAnimating: Boolean;
@@ -80,6 +89,8 @@ type
     FRxHxRightOpenWidth, FRxHxRightClosedWidth: Integer;
     FRxHxRightAnimationStartWidth, FRxHxRightAnimationTargetWidth, FRxHxRightAnimationStep: Integer;
     procedure RxHxTreeChange(Sender: TObject; Node: TTreeNode); //kt //codex 11/3/26
+    procedure RxHxTreeExpanded(Sender: TObject; Node: TTreeNode); //kt //codex 11/22/26
+    procedure UMRxHxSelectFirst(var Message: TMessage); message UM_RXHX_SELECT_FIRST; //kt //codex 11/22/26
     procedure RxHxViewChange(Sender: TObject); //kt //codex 11/3/26
     procedure RebuildRxHxDateTree; //kt //codex 11/3/26
     procedure RxHxTreeMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); //kt //codex 11/3/26
@@ -138,8 +149,20 @@ begin
   TWinControl(FRxHxNoteBrowser).Parent := pnlRxHxCenter; //kt //codex 11/3/26
   FRxHxNoteBrowser.Align := alClient; //kt //codex 11/3/26
   tvRxHx.OnChange := RxHxTreeChange; //kt //codex 11/3/26
+  tvRxHx.OnExpanded := RxHxTreeExpanded; //kt //codex 11/22/26
   tcRxHxView.OnChange := RxHxViewChange; //kt //codex 11/3/26
   tvRxHx.OnMouseDown := RxHxTreeMouseDown; //kt //codex 11/3/26
+  FRxHxDateTree := TTreeView.Create(Self); //kt //codex 11/22/26
+  FRxHxDateTree.Parent := pnlRxHxLeft; //kt //codex 11/22/26
+  FRxHxDateTree.Visible := False; //kt //codex 11/22/26
+  FRxHxDateTree.Align := alClient; //kt //codex 11/22/26
+  FRxHxDateTree.Indent := tvRxHx.Indent; //kt //codex 11/22/26
+  FRxHxDateTree.ReadOnly := True; //kt //codex 11/22/26
+  FRxHxDateTree.ShowLines := False; //kt //codex 11/22/26
+  FRxHxDateTree.OnChange := RxHxTreeChange; //kt //codex 11/22/26
+  FRxHxDateTree.OnMouseDown := RxHxTreeMouseDown; //kt //codex 11/22/26
+  TRxHxControlAccess(FRxHxDateTree).OnMouseEnter := pnlRxHxLeftMouseEnter; //kt //codex 11/22/26
+  TRxHxControlAccess(FRxHxDateTree).OnMouseLeave := pnlRxHxLeftMouseLeave; //kt //codex 11/22/26
   btnRxHxLeftHandle := TPngGlyphButton.Create(Self);
   btnRxHxLeftHandle.Name := 'btnRxHxLeftHandle';
   btnRxHxLeftHandle.Parent := Self;
@@ -210,7 +233,17 @@ begin
   if Assigned(FRxHxSummary) then begin
     FRxHxSummary.Clear;
   end;
-  tvRxHx.Items.Clear;
+  //kt //codex original --> tvRxHx.Items.Clear;
+  Inc(FRxHxTreeGeneration); //kt //codex 11/22/26
+  FRxHxRebuilding := True; //kt //codex 11/22/26
+  try //kt //codex 11/22/26
+    tvRxHx.Items.Clear; //kt //codex 11/22/26
+    FRxHxDateTree.Items.Clear; //kt //codex 11/22/26
+    FRxHxDisplayedNoteIEN := ''; //kt //codex 11/22/26
+    FRxHxDisplayedHighlight := ''; //kt //codex 11/22/26
+  finally //kt //codex 11/22/26
+    FRxHxRebuilding := False; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
   FRxHxNoteBrowser.Navigate('about:blank'); //kt //codex 11/3/26
   wbRxHxData.Navigate('about:blank'); //kt //codex 11/3/26
 end;
@@ -232,13 +265,65 @@ begin
   end;
 end;
 
+function RxHxSelectedMedText(Node: TTreeNode; Lines: TStrings): string;
+//kt //codex added entire function 11/22/26
+var
+  Index: Integer;
+  LineType: string;
+begin
+  Result := '';
+  if not Assigned(Node) or not Assigned(Node.Parent) or not Assigned(Node.Parent.Parent) or
+     not Assigned(Node.Data) or not Assigned(Lines) then begin
+    Exit;
+  end;
+  Index := NativeInt(Node.Data) - 2;
+  if (Index < 0) or (Index >= Lines.Count) then begin
+    Exit;
+  end;
+  while Index >= 0 do begin
+    LineType := Piece(Lines[Index], '^', 1);
+    if LineType = '1' then begin
+      Result := Piece(Lines[Index], '^', 2);
+      Exit;
+    end;
+    if LineType = '0' then begin
+      Exit;
+    end;
+    Dec(Index);
+  end;
+end;
+
 procedure TfrmRxHistory.RxHxViewChange(Sender: TObject);
 //kt //codex added entire procedure 11/3/26
+var
+  ActiveTree: TTreeView; //kt //codex 11/22/26
+  NoteIndex: Integer; //kt //codex 11/22/26
 begin
-  if FRxHxLoaded and FRxHxSummaryLoaded then begin
-    Inc(FRxHxSelectionSerial);
-    RebuildRxHxTree;
-  end;
+  if not FRxHxLoaded or FRxHxRebuilding then begin //kt //codex 11/22/26
+    Exit; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
+  Inc(FRxHxSelectionSerial); //kt //codex 11/22/26
+  Inc(FRxHxTreeGeneration); //kt //codex 11/22/26
+  FRxHxRebuilding := True; //kt //codex 11/22/26
+  try //kt //codex 11/22/26
+    tvRxHx.Visible := tcRxHxView.TabIndex <> 1; //kt //codex 11/22/26
+    FRxHxDateTree.Visible := tcRxHxView.TabIndex = 1; //kt //codex 11/22/26
+  finally //kt //codex 11/22/26
+    FRxHxRebuilding := False; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
+  if FRxHxDateTree.Visible then begin //kt //codex 11/22/26
+    ActiveTree := FRxHxDateTree; //kt //codex 11/22/26
+  end else begin //kt //codex 11/22/26
+    ActiveTree := tvRxHx; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
+  if Assigned(ActiveTree.Selected) and Assigned(ActiveTree.Selected.Data) then begin //kt //codex 11/22/26
+    NoteIndex := NativeInt(ActiveTree.Selected.Data) - 1; //kt //codex 11/22/26
+    if (NoteIndex >= 0) and (NoteIndex < FRxHxSummary.Count) and //kt //codex 11/22/26
+       ((Piece(FRxHxSummary[NoteIndex], '^', 2) <> FRxHxDisplayedNoteIEN) or //kt //codex 11/22/26
+        (RxHxSelectedMedText(ActiveTree.Selected, FRxHxSummary) <> FRxHxDisplayedHighlight)) then begin //kt //codex 11/22/26
+      RxHxTreeChange(ActiveTree, ActiveTree.Selected); //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
 end;
 
 procedure TfrmRxHistory.LoadRxHxSummary;
@@ -249,7 +334,17 @@ begin
   FRxHxSummaryLoaded := False;
   Inc(FRxHxSelectionSerial); //kt //codex 11/3/26
   FRxHxSummary.Clear;
-  tvRxHx.Items.Clear;
+  //kt //codex original --> tvRxHx.Items.Clear;
+  Inc(FRxHxTreeGeneration); //kt //codex 11/22/26
+  FRxHxRebuilding := True; //kt //codex 11/22/26
+  try //kt //codex 11/22/26
+    tvRxHx.Items.Clear; //kt //codex 11/22/26
+    FRxHxDateTree.Items.Clear; //kt //codex 11/22/26
+    FRxHxDisplayedNoteIEN := ''; //kt //codex 11/22/26
+    FRxHxDisplayedHighlight := ''; //kt //codex 11/22/26
+  finally //kt //codex 11/22/26
+    FRxHxRebuilding := False; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
   FRxHxNoteBrowser.Navigate('about:blank'); //kt //codex 11/3/26
   wbRxHxData.Navigate('about:blank'); //kt //codex 11/3/26
   if Patient.DFN = '' then begin
@@ -299,8 +394,9 @@ procedure TfrmRxHistory.RebuildRxHxDateTree;
 var
   Seen, SortedNotes: TStringList;
   Index, I, NoteIndex: Integer;
-  Line, TIUIEN, NoteDate, YearText, CurrentYear: string;
-  YearNode: TTreeNode;
+  //kt //codex original --> Line, TIUIEN, NoteDate, YearText, CurrentYear: string;
+  //kt //codex original --> YearNode: TTreeNode;
+  Line, TIUIEN, NoteDate: string; //kt //codex 11/22/26
 begin
   Seen := TStringList.Create;
   SortedNotes := TStringList.Create;
@@ -321,26 +417,31 @@ begin
       SortedNotes.Add(Copy(Piece(NoteDate, '.', 1) + '0000000', 1, 7) + '.' +
         Copy(Piece(NoteDate, '.', 2) + '000000', 1, 6) + '^' + Format('%.10d', [Index]));
     end;
-    CurrentYear := '';
-    YearNode := nil;
-    tvRxHx.Items.BeginUpdate;
+    //kt //codex original --> CurrentYear := '';
+    //kt //codex original --> YearNode := nil;
+    //kt //codex original --> tvRxHx.Items.BeginUpdate;
+    FRxHxDateTree.Items.BeginUpdate; //kt //codex 11/22/26
     try
-      tvRxHx.Items.Clear;
+    //kt //codex original --> tvRxHx.Items.Clear;
+      FRxHxDateTree.Items.Clear; //kt //codex 11/22/26
       for I := SortedNotes.Count - 1 downto 0 do begin
         NoteIndex := StrToInt(Piece(SortedNotes[I], '^', 2));
         Line := FRxHxSummary[NoteIndex];
-        YearText := FormatFMDateTimeStr('yyyy', Piece(Line, '^', 4));
-        if YearText = '' then begin
-          YearText := 'Unknown year';
-        end;
-        if (not Assigned(YearNode)) or (YearText <> CurrentYear) then begin
-          CurrentYear := YearText;
-          YearNode := tvRxHx.Items.Add(nil, YearText);
-        end;
-        tvRxHx.Items.AddChildObject(YearNode, RxHxNoteLabel(Line), Pointer(NativeInt(NoteIndex + 1)));
+        //kt //codex original --> YearText := FormatFMDateTimeStr('yyyy', Piece(Line, '^', 4));
+        //kt //codex original --> if YearText = '' then begin
+        //kt //codex original --> YearText := 'Unknown year';
+        //kt //codex original --> end;
+        //kt //codex original --> if (not Assigned(YearNode)) or (YearText <> CurrentYear) then begin
+        //kt //codex original --> CurrentYear := YearText;
+        //kt //codex original --> YearNode := tvRxHx.Items.Add(nil, YearText);
+        //kt //codex original --> end;
+        //kt //codex original --> tvRxHx.Items.AddChildObject(YearNode, RxHxNoteLabel(Line), Pointer(NativeInt(NoteIndex + 1)));
+    //kt //codex original --> tvRxHx.Items.AddObject(nil, RxHxNoteLabel(Line), Pointer(NativeInt(NoteIndex + 1))); //kt //codex 11/22/26
+        FRxHxDateTree.Items.AddObject(nil, RxHxNoteLabel(Line), Pointer(NativeInt(NoteIndex + 1))); //kt //codex 11/22/26
       end;
     finally
-      tvRxHx.Items.EndUpdate;
+    //kt //codex original --> tvRxHx.Items.EndUpdate;
+      FRxHxDateTree.Items.EndUpdate; //kt //codex 11/22/26
     end;
   finally
     SortedNotes.Free;
@@ -398,10 +499,17 @@ var
   end;
 
 begin
-  if tcRxHxView.TabIndex = 1 then begin //kt //codex 11/3/26
-    RebuildRxHxDateTree; //kt //codex 11/3/26
-    Exit; //kt //codex 11/3/26
-  end; //kt //codex 11/3/26
+  if FRxHxRebuilding then begin //kt //codex 11/22/26
+    Exit; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
+  Inc(FRxHxTreeGeneration); //kt //codex 11/22/26
+  FRxHxRebuilding := True; //kt //codex 11/22/26
+  try //kt //codex 11/22/26
+  //kt //codex original --> if tcRxHxView.TabIndex = 1 then begin
+  //kt //codex original -->   RebuildRxHxDateTree;
+  //kt //codex original -->   Exit;
+  //kt //codex original --> end;
+  RebuildRxHxDateTree; //kt //codex 11/22/26
   GroupNode := nil;
   //kt //codex original --> Info1Node := nil;
   //kt //codex original --> Info2Node := nil;
@@ -448,26 +556,62 @@ begin
     tvRxHx.Items.EndUpdate;
     SortedEntries.Free;  //kt //codex 11/2/26
   end;
+  finally //kt //codex 11/22/26
+    FRxHxRebuilding := False; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
 end;
 
-function RxHxTableHTML(Lines: TStrings): string;
+//kt //codex original --> function RxHxTableHTML(Lines: TStrings): string;
+function RxHxTableHTML(Lines: TStrings; const HighlightText: string; UseParsed: Boolean): string; //kt //codex 11/22/26
 //kt //codex added entire function 11/3/26
 var
   HTML: TStringList;
-  TableType, LineType, LineText: string;
+  //kt //codex original --> TableType, LineType, LineText: string;
+  TableType, LineType, LineText, MatchText: string; //kt //codex 11/22/26
   I, Kind, Count: Integer;
   Modified: Boolean;
 begin
   HTML := TStringList.Create;
   try
     HTML.Add('<!DOCTYPE html><html><head><style>');
-    HTML.Add('body {font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px;}');
-    HTML.Add('.container {margin: 0 0 8px 0; overflow-x: auto; overflow-y: hidden;}');
+    //kt //codex original --> HTML.Add('body {font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 8px;}');
+    HTML.Add('body {font-family: Segoe UI, Tahoma, Arial, sans-serif; margin: 0; padding: 4px;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('.container {margin: 0 0 8px 0; overflow-x: auto; overflow-y: hidden;}');
+    HTML.Add('.container {margin: 0 0 4px 0; overflow-x: auto; overflow-y: hidden;}'); //kt //codex 11/22/26
     HTML.Add('table {border: 1px solid #9fbad0; border-collapse: separate; border-spacing: 0; min-width: 100%;}');
-    HTML.Add('th {background: #2f75b5; color: white; text-align: left; padding: 5px 8px;}');
-    HTML.Add('td {font-family: Consolas, Courier New, monospace; white-space: pre; padding: 1px 8px;}');
-    HTML.Add('.empty {color: #666; font-style: italic;} .spacer td {height: 14px; padding: 0;}');
-    HTML.Add('</style></head><body>');
+    //kt //codex original --> HTML.Add('th {background: #2f75b5; color: white; text-align: left; padding: 5px 8px;}');
+    HTML.Add('th {background: #2f75b5; color: white; text-align: left; font-size: 12px; padding: 2px 6px;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('td {font-family: Consolas, Courier New, monospace; white-space: pre; padding: 1px 8px;}');
+    //kt //codex original --> HTML.Add('td {font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 14px; white-space: pre; padding: 0 6px;}');
+    HTML.Add('td {font-family: Consolas, Courier New, monospace; font-size: 12px; line-height: 10px; white-space: pre; padding: 0 6px;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('.empty {color: #666; font-style: italic;} .spacer td {height: 14px; padding: 0;}');
+    HTML.Add('.empty {color: #666; font-style: italic;}'); //kt //codex 11/22/26
+    HTML.Add('td.match {background: #fff2a8; color: #222; font-weight: bold;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('.zoom-controls {float: right; white-space: nowrap;} .zoom-controls a {color: white; text-decoration: none; padding: 0 4px; font-weight: bold;}');
+    HTML.Add('.zoom-controls {display: inline-block; margin-left: 14px; white-space: nowrap; vertical-align: middle;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('.zoom-controls a {display: inline-block; width: 17px; height: 16px; margin-left: 3px; border: 1px solid #bad6ec; border-radius: 3px; background: #205c92; color: white; text-align: center; text-decoration: none; font: bold 13px/16px Arial, sans-serif;}');
+    //kt //codex original --> HTML.Add('.zoom-controls a {display: inline-block; width: 12px; height: 11px; margin-left: 3px; border: 1px solid #bad6ec; border-radius: 3px; background: #205c92; color: white; text-align: center; text-decoration: none; vertical-align: middle; font: bold 13px/11px Arial, sans-serif;}');
+    //kt //codex original --> HTML.Add('.zoom-controls a:hover {background: #174872; border-color: white;}');
+    HTML.Add('.zoom-controls a {position: relative; display: inline-block; width: 17px; height: 16px; margin-left: 3px; border: 1px solid transparent; color: white; text-align: center; text-decoration: none; font: bold 13px/16px Arial, sans-serif;}'); //kt //codex 11/22/26
+    HTML.Add('.zoom-box {position: absolute; left: 2px; top: 2px; width: 11px; height: 10px; border: 1px solid #bad6ec; border-radius: 3px; background: #205c92;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('.zoom-symbol {position: relative;} .zoom-controls a:hover .zoom-box {background: #174872; border-color: white;}');
+    HTML.Add('.zoom-symbol {position: relative; top: -1px;} .zoom-symbol.reset {top: -2px;} .zoom-controls a:hover .zoom-box {background: #174872; border-color: white;}'); //kt //codex 11/22/26
+    //kt //codex original --> HTML.Add('</style></head><body>');
+    HTML.Add('</style><script type="text/javascript">'); //kt //codex 11/22/26
+    HTML.Add('var rxSizes = [0, 12, 12];'); //kt //codex 11/22/26
+    HTML.Add('function rxZoom(tableNo, change) {'); //kt //codex 11/22/26
+    HTML.Add('  var size = change === 0 ? 12 : rxSizes[tableNo] + change;'); //kt //codex 11/22/26
+    HTML.Add('  if (size < 9) size = 9; if (size > 24) size = 24;'); //kt //codex 11/22/26
+    HTML.Add('  rxSizes[tableNo] = size;'); //kt //codex 11/22/26
+    HTML.Add('  var table = document.getElementById("rx-table-" + tableNo);'); //kt //codex 11/22/26
+    HTML.Add('  if (table) { var cells = table.getElementsByTagName("td");'); //kt //codex 11/22/26
+    HTML.Add('    for (var i = 0; i < cells.length; i++) {'); //kt //codex 11/22/26
+    HTML.Add('      cells[i].style.fontSize = size + "px";'); //kt //codex 11/22/26
+    HTML.Add('      cells[i].style.lineHeight = Math.round(size * 10 / 12) + "px";'); //kt //codex 11/22/26
+    HTML.Add('    }'); //kt //codex 11/22/26
+    HTML.Add('  } return false;'); //kt //codex 11/22/26
+    HTML.Add('}'); //kt //codex 11/22/26
+    HTML.Add('</script></head><body>'); //kt //codex 11/22/26
     for Kind := 1 to 2 do begin
       TableType := IntToStr(Kind);
       if Kind = 1 then begin
@@ -475,20 +619,47 @@ begin
       end else begin
         LineText := 'Final medications';
       end;
-      HTML.Add('<div class="container"><table><thead><tr><th>' + LineText + '</th></tr></thead><tbody>');
+      //kt //codex original --> HTML.Add('<div class="container"><table><thead><tr><th>' + LineText + '</th></tr></thead><tbody>');
+      //kt //codex original --> HTML.Add('<div class="container"><table id="rx-table-' + TableType + '"><thead><tr><th>' +
+      //kt //codex original -->   '<span class="zoom-controls">' +
+      //kt //codex original -->   '<a href="#" title="Decrease text size" onclick="return rxZoom(' + TableType + ',-1)">(-)</a>' +
+      //kt //codex original -->   '<a href="#" title="Reset text size" onclick="return rxZoom(' + TableType + ',0)">(*)</a>' +
+      //kt //codex original -->   '<a href="#" title="Increase text size" onclick="return rxZoom(' + TableType + ',1)">(+)</a>' +
+      //kt //codex original -->   '</span>' + LineText + '</th></tr></thead><tbody>');
+      HTML.Add('<div class="container"><table id="rx-table-' + TableType + '"><thead><tr><th>' + LineText + //kt //codex 11/22/26
+        '<span class="zoom-controls">' + //kt //codex 11/22/26
+        //kt //codex original --> '<a href="#" title="Decrease text size" onclick="return rxZoom(' + TableType + ',-1)">&#8722;</a>' +
+        '<a href="#" title="Decrease text size" onclick="return rxZoom(' + TableType + ',-1)"><span class="zoom-box"></span><span class="zoom-symbol">&#8722;</span></a>' + //kt //codex 11/22/26
+        //kt //codex original --> '<a href="#" title="Reset text size" onclick="return rxZoom(' + TableType + ',0)">&#8634;</a>' +
+        //kt //codex original --> '<a href="#" title="Reset text size" onclick="return rxZoom(' + TableType + ',0)">&#9679;</a>' +
+        //kt //codex original --> '<a href="#" title="Reset text size" onclick="return rxZoom(' + TableType + ',0)"><span class="zoom-box"></span><span class="zoom-symbol">&#9679;</span></a>' +
+        '<a href="#" title="Reset text size" onclick="return rxZoom(' + TableType + ',0)"><span class="zoom-box"></span><span class="zoom-symbol reset">&#9679;</span></a>' + //kt //codex 11/22/26
+        //kt //codex original --> '<a href="#" title="Increase text size" onclick="return rxZoom(' + TableType + ',1)">+</a>' +
+        '<a href="#" title="Increase text size" onclick="return rxZoom(' + TableType + ',1)"><span class="zoom-box"></span><span class="zoom-symbol">+</span></a>' + //kt //codex 11/22/26
+        '</span></th></tr></thead><tbody>'); //kt //codex 11/22/26
       Count := 0;
       for I := 0 to Lines.Count - 1 do begin
         LineType := Piece(Lines[I], '^', 1);
         if LineType = TableType then begin
           LineText := Piece(Lines[I], '^', 2);
-          HTML.Add('<tr><td>' + HTMLEncode(LineText, Modified) + '</td></tr>');
+          //kt //codex original --> HTML.Add('<tr><td>' + HTMLEncode(LineText, Modified) + '</td></tr>');
+          MatchText := LineText; //kt //codex 11/22/26
+          if UseParsed and (Trim(Piece(Lines[I], '^', 3)) <> '') then begin //kt //codex 11/22/26
+            MatchText := Piece(Lines[I], '^', 3); //kt //codex 11/22/26
+          end; //kt //codex 11/22/26
+          if (HighlightText <> '') and (Trim(MatchText) = HighlightText) then begin //kt //codex 11/22/26
+            HTML.Add('<tr><td class="match">' + HTMLEncode(LineText, Modified) + '</td></tr>'); //kt //codex 11/22/26
+          end else begin //kt //codex 11/22/26
+            HTML.Add('<tr><td>' + HTMLEncode(LineText, Modified) + '</td></tr>'); //kt //codex 11/22/26
+          end; //kt //codex 11/22/26
           Inc(Count);
         end;
       end;
       if Count = 0 then begin
         HTML.Add('<tr><td class="empty">No medication entries found.</td></tr>');
       end;
-      HTML.Add('<tr class="spacer"><td>&nbsp;</td></tr></tbody></table></div>');
+    //kt //codex original --> HTML.Add('<tr class="spacer"><td>&nbsp;</td></tr></tbody></table></div>');
+      HTML.Add('</tbody></table></div>'); //kt //codex 11/22/26
     end;
     HTML.Add('</body></html>');
     Result := HTML.Text;
@@ -497,20 +668,59 @@ begin
   end;
 end;
 
+procedure TfrmRxHistory.RxHxTreeExpanded(Sender: TObject; Node: TTreeNode);
+//kt //codex added entire procedure 11/22/26
+begin
+  if FRxHxRebuilding or (Sender <> tvRxHx) or not Assigned(Node) then begin
+    Exit;
+  end;
+  if (Node.Level = 1) and Node.HasChildren then begin
+    PostMessage(Handle, UM_RXHX_SELECT_FIRST, WPARAM(FRxHxTreeGeneration), LPARAM(Node));
+  end;
+end;
+
+procedure TfrmRxHistory.UMRxHxSelectFirst(var Message: TMessage);
+//kt //codex added entire procedure 11/22/26
+var
+  I: Integer;
+  Node: TTreeNode;
+begin
+  if FRxHxRebuilding or (tcRxHxView.TabIndex <> 0) or
+     (Message.WParam <> WPARAM(FRxHxTreeGeneration)) then begin
+    Exit;
+  end;
+  for I := 0 to tvRxHx.Items.Count - 1 do begin
+    Node := tvRxHx.Items[I];
+    if LPARAM(Node) = Message.LParam then begin
+      if (Node.Level = 1) and Node.Expanded and Node.HasChildren then begin
+        tvRxHx.Selected := Node.getFirstChild;
+      end;
+      Exit;
+    end;
+  end;
+end;
+
 procedure TfrmRxHistory.RxHxTreeMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 //kt //codex added entire procedure 11/3/26
 var
   Node: TTreeNode;
   Hit: THitTests;
+  Tree: TTreeView; //kt //codex 11/22/26
 begin
+  if not (Sender is TTreeView) then begin //kt //codex 11/22/26
+    Exit; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
+  Tree := TTreeView(Sender); //kt //codex 11/22/26
   if (Button <> mbLeft) or (ssDouble in Shift) then begin
     Exit;
   end;
-  Hit := tvRxHx.GetHitTestInfoAt(X, Y);
+  //kt //codex original --> Hit := tvRxHx.GetHitTestInfoAt(X, Y);
+  Hit := Tree.GetHitTestInfoAt(X, Y); //kt //codex 11/22/26
   if not (htOnLabel in Hit) then begin
     Exit;
   end;
-  Node := tvRxHx.GetNodeAt(X, Y);
+  //kt //codex original --> Node := tvRxHx.GetNodeAt(X, Y);
+  Node := Tree.GetNodeAt(X, Y); //kt //codex 11/22/26
   //kt //codex original --> if Assigned(Node) and (Node.Level = 1) and Node.HasChildren then begin
   if Assigned(Node) and not Assigned(Node.Data) and Node.HasChildren then begin //kt //codex 11/3/26
     if Node.Expanded then begin
@@ -560,8 +770,13 @@ var
   NoteIndex, TIUIEN, SelectionSerial: Integer;
   IsHTML: Boolean;
   NoteLines, TableLines: TStringList;
-  Status, HTML: string;
+  //kt //codex original --> Status, HTML: string;
+  Status, HTML, HighlightText: string; //kt //codex 11/22/26
+  UseParsed: Boolean; //kt //codex 11/22/26
 begin
+  if FRxHxRebuilding then begin //kt //codex 11/22/26
+    Exit; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
   Inc(FRxHxSelectionSerial);
   SelectionSerial := FRxHxSelectionSerial;
   if not Assigned(Node) or not Assigned(Node.Data) then begin
@@ -578,9 +793,13 @@ begin
   if TIUIEN <= 0 then begin
     Exit;
   end;
+  HighlightText := RxHxSelectedMedText(Node, FRxHxSummary); //kt //codex 11/22/26
+  UseParsed := cbRxHxParsed.Checked; //kt //codex 11/22/26
   NoteLines := TStringList.Create;
   TableLines := TStringList.Create;
   try
+    FRxHxDisplayedNoteIEN := ''; //kt //codex 11/22/26
+    FRxHxDisplayedHighlight := ''; //kt //codex 11/22/26
     FRxHxNoteBrowser.Navigate('about:blank');
     wbRxHxData.Navigate('about:blank');
     LoadDocumentText(NoteLines, TIUIEN, IsHTML);
@@ -603,7 +822,12 @@ begin
       ShowMessage('Could not load medication tables: ' + Status);
       Exit;
     end;
-    WBLoadHTML(wbRxHxData, RxHxTableHTML(TableLines));
+    //kt //codex original --> WBLoadHTML(wbRxHxData, RxHxTableHTML(TableLines));
+    WBLoadHTML(wbRxHxData, RxHxTableHTML(TableLines, HighlightText, UseParsed)); //kt //codex 11/22/26
+    if SelectionSerial = FRxHxSelectionSerial then begin //kt //codex 11/22/26
+      FRxHxDisplayedNoteIEN := IntToStr(TIUIEN); //kt //codex 11/22/26
+      FRxHxDisplayedHighlight := HighlightText; //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
   finally
     TableLines.Free;
     NoteLines.Free;

@@ -65,6 +65,7 @@ end;
 procedure TfrmSnapshotTab.LoadSnapshot;
 //kt //codex added entire procedure 11/20/26
 begin
+  FHasPendingHTML := True; //kt //codex 11/22/26
   FBrowser.Navigate('about:blank');
 end;
 
@@ -80,7 +81,8 @@ begin
   end;
   FHasPendingHTML := False;
   HTML := FPendingHTML;
-  FPendingHTML := '';
+  //kt //codex original --> FPendingHTML := '';
+  // Keep the captured HTML so the browser can be restored after moving panes. //kt //codex 11/22/26
   WebDoc := FBrowser.Document as IHTMLDocument2;
   Content := VarArrayCreate([0, 0], varVariant);
   Content[0] := HTML;

@@ -1239,7 +1239,8 @@ end;
 procedure TfrmFrame.OpenNoteSnapshot(const HTML: string);
 //kt //codex added entire procedure 11/20/26
 var
-  SourceSide, DestSide: TTabPageSide;
+  //kt //codex original --> SourceSide, DestSide: TTabPageSide;
+  SourceSide, DestSide, Side: TTabPageSide; //kt //codex 11/22/26
 //kt //codex original -->   Page: TfrmNoteSnapshot;
   Page: TfrmSnapshotTab; //kt //codex 11/20/26
   ID, Index: Integer;
@@ -1271,9 +1272,14 @@ begin
   Page.PageID := ID;
   try
     FNoteSnapshots.AddObject(IntToStr(ID), Page);
-    Index := FTabPages[DestSide].Tabs.Count;
-    FTabList[DestSide].AddObject(IntToStr(ID), Pointer(Index));
-    FTabPages[DestSide].Tabs.Add('Snapshot ' + IntToStr(ID - 10000));
+    //kt //codex original --> Index := FTabPages[DestSide].Tabs.Count;
+    //kt //codex original --> FTabList[DestSide].AddObject(IntToStr(ID), Pointer(Index));
+    //kt //codex original --> FTabPages[DestSide].Tabs.Add('Snapshot ' + IntToStr(ID - 10000));
+    for Side := tpsLeft to tpsRight do begin //kt //codex 11/22/26
+      Index := FTabPages[Side].Tabs.Count; //kt //codex 11/22/26
+      FTabList[Side].AddObject(IntToStr(ID), Pointer(Index)); //kt //codex 11/22/26
+      FTabPages[Side].Tabs.Add('Snapshot ' + IntToStr(ID - 10000)); //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
     Page.LoadSnapshot;
     SelectChartTab(DestSide, ID);
   except
@@ -1300,7 +1306,8 @@ begin
     FRightPanelNeedsAutoClosure := False; //kt //codex 11/20/26
   end; //kt //codex 11/20/26
   //kt //codex original --> RemoveNoteSnapshot(Page, True);
-  RemoveNoteSnapshot(Page, not CloseRightPanel); //kt //codex 11/20/26
+  //kt //codex original --> RemoveNoteSnapshot(Page, not CloseRightPanel); //kt //codex 11/20/26
+  RemoveNoteSnapshot(Page, not CloseRightPanel or (FLastPages[tpsLeft] = Page)); //kt //codex 11/22/26
   if CloseRightPanel and (FTabPageOpenMode = tpoOpen) then begin //kt //codex 11/20/26
     SetTabOpenMode(tpoClosed); //kt //codex 11/20/26
     ResizeTabs(False); //kt //codex 11/20/26
@@ -1362,6 +1369,7 @@ begin
       Replacement := CT_NOPAGE; //kt //codex 11/20/26
       for I := FNoteSnapshots.Count - 1 downto 0 do begin //kt //codex 11/20/26
         if (FNoteSnapshots.Objects[I] <> Page) and //kt //codex 11/20/26
+           (TabPageID(OtherPageSide(Side)) <> StrToIntDef(FNoteSnapshots[I], CT_NOPAGE)) and //kt //codex 11/22/26
            (PageIDToTabIndex(Side, StrToIntDef(FNoteSnapshots[I], CT_NOPAGE)) >= 0) then begin //kt //codex 11/20/26
           Replacement := StrToIntDef(FNoteSnapshots[I], CT_NOPAGE); //kt //codex 11/20/26
           Break; //kt //codex 11/20/26
@@ -2567,10 +2575,23 @@ end;
 
 procedure TfrmFrame.UMShowPage(var Message: TMessage);
 { shows a page when the UM_SHOWPAGE message is received }
+var
+  ShowSide: TTabPageSide; //kt //codex 11/22/26
 begin
+  if (Message.WParam = Ord(tpsLeft)) or (Message.WParam = Ord(tpsRight)) then begin //kt //codex 11/22/26
+    ShowSide := TTabPageSide(Message.WParam); //kt //codex 11/22/26
+    if not Assigned(FLastPages[ShowSide]) or (FLastPages[ShowSide].PageID <> Message.LParam) then begin //kt //codex 11/22/26
+      Exit; //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
+  end else begin //kt //codex 11/22/26
+    ShowSide := TabCtrlClickedSide; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
   if FCCOWDrivedChange then FCCOWDrivedChange := False;
   //kt-tabs mod
-  if Assigned(FLastPages[TabCtrlClickedSide]) then FLastPages[TabCtrlClickedSide].DisplayPage;
+  //kt //codex original --> if Assigned(FLastPages[TabCtrlClickedSide]) then FLastPages[TabCtrlClickedSide].DisplayPage;
+  if Assigned(FLastPages[ShowSide]) then begin //kt //codex 11/22/26
+    FLastPages[ShowSide].DisplayPage; //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
 
   FChangeSource := CC_CLICK;  // reset to click so we're only dealing with exceptions to click
   if assigned(FTabChanged) then
@@ -2584,8 +2605,11 @@ procedure TfrmFrame.SwitchToPage(ASide: TTabPageSide; NewForm: TfrmPage);
 var
   APnlPage : TPanel;
   PriorForm : TfrmPage;
+  SnapshotMoved: Boolean; //kt //codex 11/22/26
+  ShowPageID: TPageID; //kt //codex 11/22/26
 begin
   APnlPage := PnlPages[ASide];
+  SnapshotMoved := Assigned(NewForm) and (NewForm is TfrmSnapshotTab) and (NewForm.Parent <> APnlPage); //kt //codex 11/22/26
   PriorForm := FLastPages[ASide];
   if PriorForm = NewForm then begin
     if Assigned(NewForm) and ((NewForm.Parent <> APnlPage) or not NewForm.Visible) then begin //kt //codex 11/20/26
@@ -2593,10 +2617,15 @@ begin
       NewForm.Align := alClient; //kt //codex 11/20/26
       NewForm.Show; //kt //codex 11/20/26
       NewForm.BringToFront; //kt //codex 11/20/26
-      PostMessage(Handle, UM_SHOWPAGE, 0, 0); //kt //codex 11/20/26
+      if SnapshotMoved then begin //kt //codex 11/22/26
+        TfrmSnapshotTab(NewForm).LoadSnapshot; //kt //codex 11/22/26
+      end; //kt //codex 11/22/26
+      //kt //codex original --> PostMessage(Handle, UM_SHOWPAGE, 0, 0); //kt //codex 11/20/26
+      PostMessage(Handle, UM_SHOWPAGE, Ord(ASide), NewForm.PageID); //kt //codex 11/22/26
     end else if Notifications.Active and Assigned(NewForm) then begin //kt //codex 11/20/26
       //kt //codex original --> if Notifications.Active and Assigned(NewForm) then PostMessage(Handle, UM_SHOWPAGE, 0, 0);
-      PostMessage(Handle, UM_SHOWPAGE, 0, 0); //kt //codex 11/20/26
+      //kt //codex original --> PostMessage(Handle, UM_SHOWPAGE, 0, 0); //kt //codex 11/20/26
+      PostMessage(Handle, UM_SHOWPAGE, Ord(ASide), NewForm.PageID); //kt //codex 11/22/26
     end; //kt //codex 11/20/26
     Exit;
   end;
@@ -2622,6 +2651,9 @@ begin
     end; //kt //codex 11/20/26
     NewForm.Align := alClient; //kt-tabs
     NewForm.Show;
+    if SnapshotMoved then begin //kt //codex 11/22/26
+      TfrmSnapshotTab(NewForm).LoadSnapshot; //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
   end;
   lstCIRNLocations.Visible := False;
   pnlCIRN.BevelOuter := bvRaised;
@@ -2676,8 +2708,10 @@ begin
   //kt 9/11 -- end addition
   NewForm.BringToFront;                    // to cause tab switch to happen immediately
 //CQ12232 NewForm.FocusFirstControl;
+  ShowPageID := NewForm.PageID; //kt //codex 11/22/26
   Application.ProcessMessages;
-  PostMessage(Handle, UM_SHOWPAGE, 0, 0);  // this calls DisplayPage for the form
+  //kt //codex original --> PostMessage(Handle, UM_SHOWPAGE, 0, 0);  // this calls DisplayPage for the form
+  PostMessage(Handle, UM_SHOWPAGE, Ord(ASide), ShowPageID); //kt //codex 11/22/26
 end;
 
 procedure TfrmFrame.mnuChangeESClick(Sender: TObject);
@@ -2912,6 +2946,11 @@ begin
   end else begin
     OtherPageID := TabIndexToPageID(Otherside, OtherTabPage.TabIndex);
   end;
+  if (OtherSide = tpsRight) and (FTabPageOpenMode = tpoClosed) and //kt //codex 11/22/26
+     Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0) and //kt //codex 11/22/26
+     Assigned(FLastPages[OtherSide]) and (FLastPages[OtherSide].PageID = PageID) then begin //kt //codex 11/22/26
+    SelectChartTab(OtherSide, CT_NOPAGE); //kt //codex 11/22/26
+  end; //kt //codex 11/22/26
   if (PageID = OtherPageID) and (PageID <> CT_NOPAGE) then begin   //kt-tabs
     if User.IsReportsOnly then begin
       OtherPageID := CT_NOPAGE;
@@ -2923,6 +2962,10 @@ begin
         OtherPageID := CT_NOTES;
       end;
     end;
+    if Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0) and //kt //codex 11/22/26
+       Assigned(FLastPages[ASide]) and (FLastPages[ASide].PageID = OtherPageID) then begin //kt //codex 11/22/26
+      SwitchToPage(ASide, nil); //kt //codex 11/22/26
+    end; //kt //codex 11/22/26
     SelectChartTab(OtherSide, OtherPageID);
   end;
   TabCtrlClickedSide := ASide;  //Should be done AFTER other side is changed.
@@ -6675,7 +6718,8 @@ procedure TfrmFrame.TabMoveOtherPaneClick(Sender: TObject);
 //kt //codex added entire procedure 11/20/26
 var
   SourceSide, DestSide: TTabPageSide;
-  PageID, SourceIndex, DestIndex, SelectedID, FallbackID, I, OldIndex: Integer;
+  //kt //codex original --> PageID, SourceIndex, DestIndex, SelectedID, FallbackID, I, OldIndex: Integer;
+  PageID, SourceIndex, DestIndex, FallbackID: Integer; //kt //codex 11/22/26
   IsSnapshot: Boolean;
   TabLabel: string;
 begin
@@ -6720,32 +6764,32 @@ begin
     end;
     SelectChartTab(SourceSide, FallbackID);
   end;
-  if IsSnapshot then begin
-    SelectedID := TabPageID(SourceSide);
-    FTabPages[SourceSide].Tabs.Delete(SourceIndex);
-    I := 0;
-    while I < FTabList[SourceSide].Count do begin
-      OldIndex := Integer(FTabList[SourceSide].Objects[I]);
-      if FTabList[SourceSide].Strings[I] = IntToStr(PageID) then begin
-        FTabList[SourceSide].Delete(I);
-        Continue;
-      end;
-      if OldIndex > SourceIndex then begin
-        FTabList[SourceSide].Objects[I] := Pointer(OldIndex - 1);
-      end;
-      Inc(I);
-    end;
-    FTabPages[SourceSide].TabIndex := PageIDToTabIndex(SourceSide, SelectedID);
-    if LastTabPageID[SourceSide] = PageID then begin
-      LastTabPageID[SourceSide] := SelectedID;
-    end;
-    if NextTabs[SourceSide] = PageID then begin
-      NextTabs[SourceSide] := SelectedID;
-    end;
-    if ChangingTabs[SourceSide] = PageID then begin
-      ChangingTabs[SourceSide] := SelectedID;
-    end;
-  end;
+  //kt //codex original --> if IsSnapshot then begin
+  //kt //codex original --> SelectedID := TabPageID(SourceSide);
+  //kt //codex original --> FTabPages[SourceSide].Tabs.Delete(SourceIndex);
+  //kt //codex original --> I := 0;
+  //kt //codex original --> while I < FTabList[SourceSide].Count do begin
+  //kt //codex original --> OldIndex := Integer(FTabList[SourceSide].Objects[I]);
+  //kt //codex original --> if FTabList[SourceSide].Strings[I] = IntToStr(PageID) then begin
+  //kt //codex original --> FTabList[SourceSide].Delete(I);
+  //kt //codex original --> Continue;
+  //kt //codex original --> end;
+  //kt //codex original --> if OldIndex > SourceIndex then begin
+  //kt //codex original --> FTabList[SourceSide].Objects[I] := Pointer(OldIndex - 1);
+  //kt //codex original --> end;
+  //kt //codex original --> Inc(I);
+  //kt //codex original --> end;
+  //kt //codex original --> FTabPages[SourceSide].TabIndex := PageIDToTabIndex(SourceSide, SelectedID);
+  //kt //codex original --> if LastTabPageID[SourceSide] = PageID then begin
+  //kt //codex original --> LastTabPageID[SourceSide] := SelectedID;
+  //kt //codex original --> end;
+  //kt //codex original --> if NextTabs[SourceSide] = PageID then begin
+  //kt //codex original --> NextTabs[SourceSide] := SelectedID;
+  //kt //codex original --> end;
+  //kt //codex original --> if ChangingTabs[SourceSide] = PageID then begin
+  //kt //codex original --> ChangingTabs[SourceSide] := SelectedID;
+  //kt //codex original --> end;
+  //kt //codex original --> end;
   SelectChartTab(DestSide, PageID);
 end;
 

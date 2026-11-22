@@ -2,6 +2,15 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-22 — Labs, snapshots, and Rx History
+
+- Made the Labs HTML report honor a DateTime report qualifier, showing the date selector and passing its range to the HTML report RPC. The user retained the original unqualified report for older CPRS clients and configured a separate date-qualified record; the new client’s date selection works, while the original report remains usable in the old client.
+- Wrapped HTML lab report comments in preformatted text to preserve text-drawn tables, then set the fixed-width notes font to 13 pixels. The user compiled the server routine and confirmed the result works and is readable.
+- Added snapshot tab labels to both panes while retaining a single snapshot form. Reloaded its captured HTML after moving between panes and fixed the cover-sheet handoff when moving a snapshot back; the user rebuilt and confirmed the reported problems were resolved.
+- Made the Rx History medication tables more compact and added independent text-size controls to their banners. The user confirmed the compact layout and zoom controls work and accepted the revised icon alignment.
+- Flattened By Date into a newest-first note list and gave By Date and By Name separate selector controls to avoid rebuilding the tree when switching views. Added medication-row highlighting for a selected By Name note and automatic selection of the first note when a medication-text entry is expanded. These latest selection and highlighting changes need runtime verification.
+- Added a project-root `AGENTS.md` instructing new Codex sessions to read `HANDOFF.md`, follow its directives, and acknowledge that they have done so. The splash-screen version was updated to 0.10.
+
 ## 2026-11-21 — Note editing position and toolbar
 
 - Preserve the approximate scroll position when switching a note from viewing to editing, and place the HTML editor caret near the visible area. Plain-text notes restore the first visible line. The user compiled and reported that the scroll change works.

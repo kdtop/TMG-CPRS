@@ -310,7 +310,8 @@ type
     btnOpenTOC: TSpeedButton;
     btnOpenTOC2: TSpeedButton;
     timRunMDM: TTimer;
-    btnOpenEnc: TBitBtn;
+//kt //codex original -->     btnOpenEnc: TSpeedButton; //kt //codex 11/23/26
+    btnOpenEnc: TBitBtn; //kt //codex 11/23/26
     MultiLooseDocHandler: TMenuItem;
     btnSignDocument: TSpeedButton;
     btnDelDocument: TSpeedButton;
@@ -1130,6 +1131,7 @@ end;
 procedure TfrmNotes.AdjustEncButton;
 begin
     btnOpenEnc.Top := memPCEShow.Top+2;
+    btnOpenEnc.Left := memPCEShow.Left + memPCEShow.Width - btnOpenEnc.Width - 15; //kt //codex 11/23/26
 end;
 
 function TfrmNotes.IsMemoEncTooShort:boolean;
@@ -1150,7 +1152,9 @@ begin
   Bitmap := TBitmap.create;
   try
     TOCImages.GetBitmap(ImageIndex, Bitmap);
+//kt //codex original -->     Bitmap.SaveToFile('P:\vista\TMGCPRS_v30A_Delphi12\killthis-extracted.bmp');  //remove later!
     btnOpenEnc.Glyph.Assign(Bitmap);
+//kt //codex original -->     btnOpenEnc.Glyph.SaveToFile('P:\vista\TMGCPRS_v30A_Delphi12\killthis-extracted-glyph.bmp');  //remove later!
   finally
     Bitmap.free;
   end;
@@ -1201,6 +1205,7 @@ begin
     if(NoPCE and memPCEShow.Visible) then
       memPCEShow.Lines.Insert(0, TX_NOPCE);
     memPCEShow.SelStart := 0;
+    SendMessage(memPCEShow.Handle, EM_LINESCROLL, 0, -SendMessage(memPCEShow.Handle, EM_GETFIRSTVISIBLELINE, 0, 0)); //kt //codex 11/23/26
 
     if(InteractiveRemindersActive) then begin
       if(GetReminderStatus = rsNone) then begin
@@ -1245,6 +1250,7 @@ begin
       if(NoPCE and memPCEShow.Visible) then
         memPCEShow.Lines.Insert(0, TX_NOPCE);
       memPCEShow.SelStart := 0;
+      SendMessage(memPCEShow.Handle, EM_LINESCROLL, 0, -SendMessage(memPCEShow.Handle, EM_GETFIRSTVISIBLELINE, 0, 0)); //kt //codex 11/23/26
       StatusText('');
     end else begin
       ShowPCEControls(FALSE);
@@ -3328,6 +3334,9 @@ procedure TfrmNotes.pnlRightResize(Sender: TObject);
 begin
   inherited;
   pnlRight.Refresh;
+  if Assigned(btnOpenEnc) and Assigned(memPCEShow) then begin //kt //codex 11/23/26
+    AdjustEncButton; //kt //codex 11/23/26
+  end; //kt //codex 11/23/26
   if (vmHTML in FViewMode) then begin //kt 9/11
     HTMLViewer.Repaint;               //kt 9/11
   end else begin                      //kt 9/11

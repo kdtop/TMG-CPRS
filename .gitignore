@@ -1,4 +1,6 @@
 *.lnk
+# Local scratch files
+/tmp/
 # Delphi compiled unit artifacts
 *.dcu
 *.DCU

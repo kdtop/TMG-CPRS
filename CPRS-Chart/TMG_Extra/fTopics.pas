@@ -258,7 +258,7 @@ type
     function FindTopicDataTableByIEN(const TableIEN: string): TTopicDataTable;
     function HasPendingPushSync: Boolean;
     function BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): string;
-    function SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string; ForceDiagnostic: Boolean): Boolean;
+    function SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs, SelectedSavedKeys: TStrings; SavedEntries: TObjectDictionary<string, TTopicEntryPushData>; out ErrorText: string; ForceDiagnostic: Boolean): Boolean;
     function CurrentPushSyncMode: TPushSyncMode;
     function TopicEntryPushKey(const PropertyID, EntryFMDate: string): string;
     function TopicTablePushKey(const TopicTable: TTopicDataTable): string;
@@ -647,7 +647,7 @@ function RemoveCuratedNoteTables(const HTML: string): string; forward;
 function TfrmTopics.BuildPendingTopicEntryHTML(const SelectedKeys, SelectedTableKeys, SelectedCuratedIDs: TStrings; out ErrorText: string): string;
 var
   EntryDate: TFMDateTime;
-  EntryDateText, PropertyID, TopicName, Content, MergedEntries, Status: string;
+  EntryDateText, PropertyID, TopicName, Content, MergedEntries, Status, LinkedHTML: string;
   EntryIndex, NextIndex, GroupIndex, CuratedIndex: Integer;
   EntryList: TList<TTopicEntryPushData>;
   HTMLLines, GroupIDs, GroupNames, CuratedData: TStringList;
@@ -656,6 +656,114 @@ var
   TablePair: TPair<string, TTopicDataTable>;
   TempEntry: TTopicEntryPushData;
   TopicData: TTopicListItemData;
+
+  function LinkedTableHTML(const APropertyID, ATopicName: string; out TableHTML: string): Boolean;
+  var
+    TopicInfo, TableInfo, LinkedNames: TStringList;
+    TopicIndex, PieceIndex, LineIndex: Integer;
+    Name, TableID, TableSpec, TableStatus: string;
+    CurrentTable, SelectedTable: TTopicDataTable;
+    PendingPair: TPair<string, TTopicDataTable>;
+    FoundHeader, FoundTopic: Boolean;
+  begin
+    Result := False;
+    TableHTML := '';
+    TopicInfo := TStringList.Create;
+    TableInfo := TStringList.Create;
+    LinkedNames := TStringList.Create;
+    try
+      LinkedNames.CaseSensitive := False;
+      TableStatus := Get1Topic(TopicInfo, APropertyID, 9999999, 9999999);
+      if Piece(TableStatus, '^', 1) <> '1' then begin
+        ErrorText := 'Unable to retrieve linked tables for "' + ATopicName + '". ' + Piece(TableStatus, '^', 2);
+        Exit;
+      end;
+      FoundTopic := False;
+      for TopicIndex := 0 to TopicInfo.Count - 1 do begin
+        if Piece(TopicInfo[TopicIndex], '^', 1) = '0' then begin
+          FoundTopic := True;
+        end;
+      end;
+      if not FoundTopic then begin
+        ErrorText := 'Topic information was not returned for "' + ATopicName + '".';
+        Exit;
+      end;
+      for TopicIndex := 0 to TopicInfo.Count - 1 do begin
+        if Piece(TopicInfo[TopicIndex], '^', 1) <> '0.5' then begin
+          Continue;
+        end;
+        for PieceIndex := 2 to NumPieces(TopicInfo[TopicIndex], '^') do begin
+          TableSpec := Piece(TopicInfo[TopicIndex], '^', PieceIndex);
+          TableID := Piece(TableSpec, ';', 1);
+          Name := Piece(TableSpec, ';', 2);
+          if (StrToIntDef(TableID, 0) <= 0) or (Name = '') then begin
+            ErrorText := 'Invalid linked table information for "' + ATopicName + '".';
+            Exit;
+          end;
+          if LinkedNames.IndexOf(Name) >= 0 then begin
+            Continue;
+          end;
+          LinkedNames.Add(Name);
+          SelectedTable := nil;
+          for PendingPair in FPendingTopicTables do begin
+            if (SelectedTableKeys.IndexOf(PendingPair.Key) >= 0) and
+               (PendingPair.Value.TopicPropertyID = APropertyID) and
+               ((PendingPair.Value.TableIEN = TableID) or SameText(PendingPair.Value.TableName, Name)) then begin
+              SelectedTable := PendingPair.Value;
+              Break;
+            end;
+          end;
+          CurrentTable := TTopicDataTable.Create(Name, TableID);
+          try
+            if Assigned(SelectedTable) then begin
+              CurrentTable.Lines.Assign(SelectedTable.Lines);
+            end else begin
+              TableInfo.Clear;
+              TableStatus := GetTopicTablesAsData(TableInfo, Name);
+              if Piece(TableStatus, '^', 1) <> '1' then begin
+                ErrorText := 'Unable to retrieve table "' + Name + '". ' + Piece(TableStatus, '^', 2);
+                Exit;
+              end;
+              FoundHeader := False;
+              for LineIndex := 0 to TableInfo.Count - 1 do begin
+                if Piece(TableInfo[LineIndex], '^', 1) = '1' then begin
+                  FoundHeader := SameText(Copy(TableInfo[LineIndex], 3, MaxInt), Name);
+                end else if FoundHeader and (Piece(TableInfo[LineIndex], '^', 1) = '2') then begin
+                  CurrentTable.Lines.Add(Copy(TableInfo[LineIndex], 3, MaxInt));
+                end;
+              end;
+              if not FoundHeader then begin
+                ErrorText := 'Table "' + Name + '" was not returned by the server.';
+                Exit;
+              end;
+            end;
+            for LineIndex := 0 to CurrentTable.Lines.Count - 1 do begin
+              if Trim(HTMLDecode(CurrentTable.Lines[LineIndex])) = '' then begin
+                ErrorText := 'Table "' + Name + '" contains a blank line. Remove blank lines before pushing because they mark the end of a note table.';
+                Exit;
+              end;
+            end;
+            TableHTML := TableHTML + '<BR><BR>' + TopicTableHTML(CurrentTable);
+          finally
+            CurrentTable.Free;
+          end;
+        end;
+      end;
+      for PendingPair in FPendingTopicTables do begin
+        if (SelectedTableKeys.IndexOf(PendingPair.Key) >= 0) and
+           (PendingPair.Value.TopicPropertyID = APropertyID) and
+           (LinkedNames.IndexOf(PendingPair.Value.TableName) < 0) then begin
+          TableHTML := TableHTML + '<BR><BR>' + TopicTableHTML(PendingPair.Value);
+        end;
+      end;
+      Result := True;
+    finally
+      LinkedNames.Free;
+      TableInfo.Free;
+      TopicInfo.Free;
+    end;
+  end;
+
 begin
   Result := '';
   ErrorText := '';
@@ -785,12 +893,10 @@ begin
         Content := Content + '<span style="font-style:normal">' + EntryDateText + ': ' +
           EntryList[EntryIndex].HTMLText + '</span>';
       end;
-      for TablePair in FPendingTopicTables do begin
-        if (SelectedTableKeys.IndexOf(TablePair.Key) >= 0) and
-           (TablePair.Value.TopicPropertyID = PropertyID) then begin
-          Content := Content + '<BR><BR>' + TopicTableHTML(TablePair.Value);
-        end;
+      if not LinkedTableHTML(PropertyID, TopicName, LinkedHTML) then begin
+        Exit;
       end;
+      Content := Content + LinkedHTML;
       if UseAsteriskStyle then begin
         HTMLLines.Add('<P>&nbsp;&nbsp;&nbsp;&nbsp;* <U>' + HTMLEncode(TopicName, Modified) +
           '</U>: ' + Content + '<BR></P>');
@@ -812,7 +918,7 @@ begin
   end;
 end;
 
-function TfrmTopics.SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs: TStrings; out ErrorText: string; ForceDiagnostic: Boolean): Boolean;
+function TfrmTopics.SyncPendingTopicEntriesToCurrentNote(const SelectedKeys, SelectedCuratedIDs, SelectedSavedKeys: TStrings; SavedEntries: TObjectDictionary<string, TTopicEntryPushData>; out ErrorText: string; ForceDiagnostic: Boolean): Boolean;
 var
   Analysis: TJSONObject;
   DateAnalysis: TJSONObject;
@@ -1029,6 +1135,18 @@ var
           AddSection(Prefix + 'sequence', IntToStr(Entry.Sequence));
         end;
       end;
+      for I := 0 to SelectedSavedKeys.Count - 1 do begin
+        Prefix := 'savedEntry.' + IntToStr(I + 1) + '.';
+        Entry := nil;
+        SavedEntries.TryGetValue(SelectedSavedKeys[I], Entry);
+        AddSection(Prefix + 'key', SelectedSavedKeys[I]);
+        if Assigned(Entry) then begin
+          AddSection(Prefix + 'propertyID', Entry.PropertyID);
+          AddSection(Prefix + 'topicName', Entry.TopicName);
+          AddSection(Prefix + 'entryFMDate', Entry.EntryFMDate);
+          AddSection(Prefix + 'html', Entry.HTMLText);
+        end;
+      end;
       for I := 0 to SelectedCuratedIDs.Count - 1 do begin
         Prefix := 'curated.' + IntToStr(I + 1) + '.';
         AddSection(Prefix + 'propertyID', SelectedCuratedIDs[I]);
@@ -1077,7 +1195,8 @@ begin
   ErrorText := '';
   CaptureFailure := False;
   AttemptTime := Now;
-  if (SelectedKeys.Count = 0) and (SelectedCuratedIDs.Count = 0) then begin
+  if (SelectedKeys.Count = 0) and (SelectedSavedKeys.Count = 0) and
+     (SelectedCuratedIDs.Count = 0) then begin
     ErrorText := 'There are no selected topic changes to sync to the current note.';
     Exit;
   end;
@@ -1146,6 +1265,11 @@ begin
       EntryDate := MakeFMDateTime(Pair.Value.EntryFMDate);
       if (SelectedKeys.IndexOf(Pair.Key) >= 0) and (EntryDate > 0) and
         (Trunc(FMDateTimeToDateTime(EntryDate)) = Trunc(FMDateTimeToDateTime(NoteDate))) then begin
+        AddOrReplaceEntry(Pair.Value);
+      end;
+    end;
+    for Pair in SavedEntries do begin
+      if SelectedSavedKeys.IndexOf(Pair.Key) >= 0 then begin
         AddOrReplaceEntry(Pair.Value);
       end;
     end;
@@ -1319,7 +1443,7 @@ begin
     psmNewNote: btnPushSync.Caption := 'Push to New Note';
     psmCurrentNote: btnPushSync.Caption := 'Sync to Current Note';
   end;
-  btnPushSync.Enabled := HasPendingPushSync or TopicEditorActive;
+  btnPushSync.Enabled := True;
 end;
 
 procedure TfrmTopics.TrackTopicTableChange(TopicTable: TTopicDataTable);
@@ -1647,6 +1771,12 @@ var
   CuratedHTML: string;
   Index, RowIndex, LineIndex: Integer;
   TextPushed: Boolean;
+  SavedEntries: TObjectDictionary<string, TTopicEntryPushData>;
+  SavedKeys, UncheckedRows, TopicLines, EntryLines: TStringList;
+  TopicIndex, DataIndex, Sequence: Integer;
+  SavedKey, Status: string;
+  SameEntry: Boolean;
+  SavedEntry: TTopicEntryPushData;
 
   procedure AddEntryRow(const EntryKey: string; AEntry: TTopicEntryPushData);
   var
@@ -1691,7 +1821,82 @@ begin
   TableTopics := TStringList.Create;
   TableNames := TStringList.Create;
   TableHTML := TStringList.Create;
+  SavedEntries := TObjectDictionary<string, TTopicEntryPushData>.Create([doOwnsValues]);
+  SavedKeys := TStringList.Create;
+  UncheckedRows := TStringList.Create;
+  TopicLines := TStringList.Create;
+  EntryLines := TStringList.Create;
   try
+    if FPushSyncMode = psmCurrentNote then begin
+      NoteDate := frmNotes.ActiveEditDateTime;
+      if NoteDate <= 0 then begin
+        MessageDlg('The active note does not have a valid date and time.', mtError, [mbOK], 0);
+        Exit;
+      end;
+      Sequence := FNextPendingTopicEntrySequence;
+      for TopicIndex := 0 to FTopicListModel.Count - 1 do begin
+        TopicData := TTopicListItemData(FTopicListModel.Objects[TopicIndex]);
+        TopicLines.Clear;
+        Status := Get1Topic(TopicLines, TopicData.PropertyID, Trunc(NoteDate), Trunc(NoteDate) + 0.99999999);
+        if Piece(Status, '^', 1) <> '1' then begin
+          MessageDlg('Could not retrieve saved entries for "' + TopicData.TopicName + '".' + sLineBreak + Piece(Status, '^', 2), mtError, [mbOK], 0);
+          Exit;
+        end;
+        DataIndex := 0;
+        while DataIndex < TopicLines.Count do begin
+          if Piece(TopicLines[DataIndex], '^', 1) <> '1' then begin
+            Inc(DataIndex);
+            Continue;
+          end;
+          EntryDateText := Piece(TopicLines[DataIndex], '^', 2);
+          EntryDate := MakeFMDateTime(EntryDateText);
+          EntryLines.Clear;
+          Inc(DataIndex);
+          while (DataIndex < TopicLines.Count) and (Piece(TopicLines[DataIndex], '^', 1) = '2') do begin
+            EntryLines.Add(Copy(TopicLines[DataIndex], 3, MaxInt));
+            Inc(DataIndex);
+          end;
+          if (EntryDate <= 0) or (Trunc(EntryDate) <> Trunc(NoteDate)) then begin
+            Continue;
+          end;
+          SameEntry := False;
+          for Pair in FPendingTopicEntries do begin
+            if (Pair.Value.PropertyID = TopicData.PropertyID) and
+               (MakeFMDateTime(Pair.Value.EntryFMDate) = EntryDate) then begin
+              SameEntry := True;
+              Break;
+            end;
+          end;
+          for Pair in FModifiedTopicEntries do begin
+            if (Pair.Value.PropertyID = TopicData.PropertyID) and
+               (MakeFMDateTime(Pair.Value.EntryFMDate) = EntryDate) then begin
+              SameEntry := True;
+              Break;
+            end;
+          end;
+          if SameEntry then begin
+            Continue;
+          end;
+          SavedKey := TopicEntryPushKey(TopicData.PropertyID, EntryDateText);
+          if SavedEntries.ContainsKey(SavedKey) then begin
+            MessageDlg('Multiple saved entries have the same topic and exact date/time. They cannot be distinguished for syncing.', mtError, [mbOK], 0);
+            Exit;
+          end;
+          SavedEntry := TTopicEntryPushData.Create;
+          SavedEntry.PropertyID := TopicData.PropertyID;
+          SavedEntry.TopicName := TopicData.TopicName;
+          SavedEntry.EntryFMDate := EntryDateText;
+          SavedEntry.Sequence := Sequence;
+          Inc(Sequence);
+          if IsHTML(EntryLines) then begin
+            SavedEntry.HTMLText := EntryLines.Text;
+          end else begin
+            SavedEntry.HTMLText := Text2HTML(EntryLines);
+          end;
+          SavedEntries.Add(SavedKey, SavedEntry);
+        end;
+      end;
+    end;
     for Pair in FPendingTopicEntries do begin
       AddEntryRow(Pair.Key, Pair.Value);
     end;
@@ -1704,6 +1909,18 @@ begin
           AddEntryRow(Pair.Key, Pair.Value);
         end;
       end;
+    end;
+    for Pair in SavedEntries do begin
+      Keys.Add('S:' + Pair.Key);
+      Names.Add(Pair.Value.TopicName);
+      Preview := Trim(StripHTMLTags(Pair.Value.HTMLText));
+      Preview := StringReplace(Preview, #13, ' ', [rfReplaceAll]);
+      Preview := StringReplace(Preview, #10, ' ', [rfReplaceAll]);
+      if Length(Preview) > 140 then begin
+        Preview := Copy(Preview, 1, 137) + '...';
+      end;
+      Previews.Add(Preview);
+      UncheckedRows.Add(IntToStr(Keys.Count - 1));
     end;
     for CuratedPair in FPendingTopicNoteChanges do begin
       if ptncCurated in CuratedPair.Value then begin
@@ -1743,7 +1960,7 @@ begin
       MessageDlg('There are no eligible topic entries or edited tables to push.', mtInformation, [mbOK], 0);
       Exit;
     end;
-    if not ReviewTopicSyncChanges(Self, Names, Previews, SelectedIndices) then begin
+    if not ReviewTopicSyncChanges(Self, Names, Previews, SelectedIndices, UncheckedRows) then begin
       Exit;
     end;
     for Index := 0 to SelectedIndices.Count - 1 do begin
@@ -1754,13 +1971,15 @@ begin
       Key := Keys[RowIndex];
       if Copy(Key, 1, 2) = 'E:' then begin
         SelectedKeys.Add(Copy(Key, 3, MaxInt));
+      end else if Copy(Key, 1, 2) = 'S:' then begin
+        SavedKeys.Add(Copy(Key, 3, MaxInt));
       end else if Copy(Key, 1, 2) = 'C:' then begin
         SelectedCuratedIDs.Add(Copy(Key, 3, MaxInt));
       end else if Copy(Key, 1, 2) = 'T:' then begin
         SelectedTableKeys.Add(Copy(Key, 3, MaxInt));
       end;
     end;
-    if ForceDiagnostic and (SelectedKeys.Count = 0) and (SelectedCuratedIDs.Count = 0) then begin
+    if ForceDiagnostic and (SelectedKeys.Count = 0) and (SavedKeys.Count = 0) and (SelectedCuratedIDs.Count = 0) then begin
       MessageDlg('Select at least one topic entry or curated edit for the diagnostic test.', mtInformation, [mbOK], 0);
       Exit;
     end;
@@ -1826,8 +2045,8 @@ begin
       end;
       psmCurrentNote: begin
         TextPushed := False;
-        if (SelectedKeys.Count > 0) or (SelectedCuratedIDs.Count > 0) then begin
-          if not SyncPendingTopicEntriesToCurrentNote(SelectedKeys, SelectedCuratedIDs, ErrorText, ForceDiagnostic) then begin
+        if (SelectedKeys.Count > 0) or (SavedKeys.Count > 0) or (SelectedCuratedIDs.Count > 0) then begin
+          if not SyncPendingTopicEntriesToCurrentNote(SelectedKeys, SelectedCuratedIDs, SavedKeys, SavedEntries, ErrorText, ForceDiagnostic) then begin
             if ErrorText <> '' then begin
               MessageDlg(ErrorText, mtError, [mbOK], 0);
             end;
@@ -1849,6 +2068,11 @@ begin
       end;
     end;
   finally
+    EntryLines.Free;
+    TopicLines.Free;
+    UncheckedRows.Free;
+    SavedKeys.Free;
+    SavedEntries.Free;
     TableHTML.Free;
     TableNames.Free;
     TableTopics.Free;
@@ -4809,12 +5033,6 @@ begin
   if (TargetIndex < 0) or (TargetIndex >= lvTopics.Items.Count) then begin
     Exit;
   end;
-  if TopicEditorActive then begin
-    if MessageDlg('Discard the current editor changes?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
-      Exit;
-    end;
-    ClearTopicEntryEditor;
-  end;
   TargetItem := lvTopics.Items[TargetIndex];
   for Index := 0 to lvTopics.Items.Count - 1 do begin
     lvTopics.Items[Index].Selected := False;
@@ -4830,7 +5048,7 @@ var
   RestoreIndex: Integer;
   ErrorText: string;
   ListItem: TListItem;
-  Status: string;
+  Status, TargetPropertyID, PreviousPropertyID: string;
   TopicData: TTopicListItemData;
   Modified: Boolean;
 begin
@@ -4843,16 +5061,35 @@ begin
        (TTopicListItemData(ListItem.Data).PropertyID = FCurrentTopicPropertyID) then begin
       Exit;
     end;
-    if MessageDlg('Discard the current editor changes?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
-      ListItem.Selected := False;
-      for RestoreIndex := 0 to lvTopics.Items.Count - 1 do begin
-        if (lvTopics.Items[RestoreIndex].Data <> nil) and
-           (TTopicListItemData(lvTopics.Items[RestoreIndex].Data).PropertyID = FCurrentTopicPropertyID) then begin
-          lvTopics.Items[RestoreIndex].Selected := True;
-          lvTopics.Items[RestoreIndex].Focused := True;
-          Break;
-        end;
+    TargetPropertyID := TTopicListItemData(ListItem.Data).PropertyID;
+    PreviousPropertyID := FCurrentTopicPropertyID;
+    ListItem.Selected := False;
+    for RestoreIndex := 0 to lvTopics.Items.Count - 1 do begin
+      if (lvTopics.Items[RestoreIndex].Data <> nil) and
+         (TTopicListItemData(lvTopics.Items[RestoreIndex].Data).PropertyID = PreviousPropertyID) then begin
+        lvTopics.Items[RestoreIndex].Selected := True;
+        lvTopics.Items[RestoreIndex].Focused := True;
+        Break;
       end;
+    end;
+    if MessageDlg('Save the current editor text and change topics?' + sLineBreak + sLineBreak +
+      'Choose No to keep editing the current topic.', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin
+      Exit;
+    end;
+    if not SaveTopicEntry(False) then begin
+      Exit;
+    end;
+    ListItem := nil;
+    for RestoreIndex := 0 to lvTopics.Items.Count - 1 do begin
+      if (lvTopics.Items[RestoreIndex].Data <> nil) and
+         (TTopicListItemData(lvTopics.Items[RestoreIndex].Data).PropertyID = TargetPropertyID) then begin
+        ListItem := lvTopics.Items[RestoreIndex];
+        ListItem.Selected := True;
+        ListItem.Focused := True;
+        Break;
+      end;
+    end;
+    if not Assigned(ListItem) then begin
       Exit;
     end;
   end;

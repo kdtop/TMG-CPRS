@@ -2038,6 +2038,9 @@ var //index : integer;
 
 begin
   for ASide := tpsLeft to tpsRight do begin
+    if (ASide = tpsRight) and (APageID = CT_NOTES) then begin //kt //codex 11/24/26
+      Continue; //kt //codex 11/24/26
+    end; //kt //codex 11/24/26
     ATabPage := FTabPages[ASide];
     TabIndex := PageIDToTabIndex(ASide, APageID);
     if Visible = true then begin
@@ -2629,10 +2632,13 @@ begin
     end; //kt //codex 11/20/26
     Exit;
   end;
-  if Assigned(PriorForm) then begin
+//kt //codex original -->   if Assigned(PriorForm) then begin
+  if Assigned(PriorForm) and (PriorForm.Parent = APnlPage) then begin //kt //codex 11/24/26
     //kt //codex original --> mnuFrame.Unmerge(FLastPages[ASide].Menu);
-    if Assigned(FLastPages[ASide].Menu) then begin //kt //codex 11/20/26
-      mnuFrame.Unmerge(FLastPages[ASide].Menu); //kt //codex 11/20/26
+//kt //codex original -->     if Assigned(FLastPages[ASide].Menu) then begin //kt //codex 11/20/26
+    if Assigned(PriorForm.Menu) then begin //kt //codex 11/24/26
+//kt //codex original -->       mnuFrame.Unmerge(FLastPages[ASide].Menu); //kt //codex 11/20/26
+      mnuFrame.Unmerge(PriorForm.Menu); //kt //codex 11/24/26
     end; //kt //codex 11/20/26
     PriorForm.Align := alNone;
     PriorForm.Hide;
@@ -2779,6 +2785,9 @@ var
   ATabPage : TTabControl;
   ATabIndex: Integer;  //kt //codex 8/25/26
 begin
+  if (ASide = tpsRight) and (PageID = CT_NOTES) then begin //kt //codex 11/24/26
+    Exit; //kt //codex 11/24/26
+  end; //kt //codex 11/24/26
   ATabPage := FTabPages[ASide];
   if PageID = CT_NOPAGE then begin
     ATabPage.TabIndex := -1;  //kt //codex 8/25/26
@@ -2959,11 +2968,18 @@ begin
       if PageID <> CT_COVER then begin
         OtherPageID := CT_COVER;
       end else begin
-        OtherPageID := CT_NOTES;
+//kt //codex original -->         OtherPageID := CT_NOTES;
+        if OtherSide = tpsRight then begin //kt //codex 11/24/26
+          OtherPageID := CT_ORDERS; //kt //codex 11/24/26
+        end else begin //kt //codex 11/24/26
+          OtherPageID := CT_NOTES; //kt //codex 11/24/26
+        end; //kt //codex 11/24/26
       end;
     end;
-    if Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0) and //kt //codex 11/22/26
-       Assigned(FLastPages[ASide]) and (FLastPages[ASide].PageID = OtherPageID) then begin //kt //codex 11/22/26
+//kt //codex original -->     if Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(PageID)) >= 0) and //kt //codex 11/22/26
+//kt //codex original -->        Assigned(FLastPages[ASide]) and (FLastPages[ASide].PageID = OtherPageID) then begin //kt //codex 11/22/26
+    if (OtherPageID <> CT_NOPAGE) and Assigned(FLastPages[ASide]) and //kt //codex 11/24/26
+       (FLastPages[ASide].PageID = OtherPageID) then begin //kt //codex 11/24/26
       SwitchToPage(ASide, nil); //kt //codex 11/22/26
     end; //kt //codex 11/22/26
     SelectChartTab(OtherSide, OtherPageID);
@@ -5600,6 +5616,19 @@ begin
     //kt //codex original -->                                                    //CT_WEBTAB2,
     //kt //codex original -->                                                    //CT_WEBTAB3]
     //kt //codex original -->                                                    ])  then continue;
+    if (APageSide = tpsRight) and (APageID = CT_NOTES) then begin //kt //codex 11/24/26
+      {NOTE: We spent a long time debugging to find the following:
+           When frmNotes is changed from left to right side, it changes the .Parent from one tabsheet to the other
+           In the background, when a parent is changed, it is initially removed, then the new value is set.
+           When the parent is set to nil, then all the controls are deleted by Delphi code.
+           Then, with the new parent, it attempts to recreate them.
+           The problem is that the original TTreeView is a TORTreeView, filled with TORTreeNodes.  But after
+           Delphi "automagically" recreates it, it instantiates only a plain TTreeView with plain TTreeNodes,
+           and the .datastring and other data gets lost and it doesn't work.  Why it does this is annoying
+           and mysterious.  But to avoid the problem, I will just prevent frmNotes from switching sides.
+      }
+      Continue; //kt //codex 11/24/26
+    end; //kt //codex 11/24/26
     ATabPage := FTabPages[APageSide];
     FTabList[APageSide].AddObject(IntToStr(APageID), pointer(ATabPage.Tabs.Count)); //   .Add(IntToStr(ATabID));
     ATabPage.Tabs.Add(ALabel);
@@ -6760,8 +6789,17 @@ begin
       FallbackID := CT_ORDERS;
     end;
     if (FallbackID = PageID) or (FallbackID = TabPageID(DestSide)) then begin
-      FallbackID := CT_NOTES;
+//kt //codex original -->       FallbackID := CT_NOTES;
+      if SourceSide = tpsRight then begin //kt //codex 11/24/26
+        FallbackID := CT_LABS; //kt //codex 11/24/26
+      end else begin //kt //codex 11/24/26
+        FallbackID := CT_NOTES; //kt //codex 11/24/26
+      end; //kt //codex 11/24/26
     end;
+    if (FallbackID = PageID) or (FallbackID = TabPageID(DestSide)) or //kt //codex 11/24/26
+       (PageIDToTabIndex(SourceSide, FallbackID) < 0) then begin //kt //codex 11/24/26
+      FallbackID := CT_NOPAGE; //kt //codex 11/24/26
+    end; //kt //codex 11/24/26
     SelectChartTab(SourceSide, FallbackID);
   end;
   //kt //codex original --> if IsSnapshot then begin
@@ -6822,6 +6860,9 @@ begin
           MoveItem.OnClick := TabMoveOtherPaneClick; //kt //codex 11/20/26
           FTabContextMenu.Items.Add(MoveItem); //kt //codex 11/20/26
         end; //kt //codex 11/20/26
+        FTabContextMenu.Items[0].Enabled := //kt //codex 11/24/26
+          (PageIDToTabIndex(OtherPageSide(ASide), FTabContextPageID) >= 0) or //kt //codex 11/24/26
+          (Assigned(FNoteSnapshots) and (FNoteSnapshots.IndexOf(IntToStr(FTabContextPageID)) >= 0)); //kt //codex 11/24/26
         Position := ATabPage.ClientToScreen(Point(X, Y)); //kt //codex 11/20/26
         FTabContextMenu.Popup(Position.X, Position.Y); //kt //codex 11/20/26
         Break; //kt //codex 11/20/26

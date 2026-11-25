@@ -2,6 +2,22 @@
 
 Dated status updates, milestones, compile history, and local checkpoints belong here. Keep [HANDOFF.md](HANDOFF.md) focused on current context and standing instructions. Add new dated entries above the archived history.
 
+## 2026-11-24 — Topic navigation
+
+- Changed topic selection and Previous/Next navigation to offer to save the active editor before switching, retaining the current topic if saving fails or the user declines. Needs a Delphi build and runtime verification.
+- The push button stays enabled. Current-note sync loads saved entries on the note date for every topic, includes them separately in the review dialog, and leaves those saved entries unchecked because they may already be in the note. It avoids duplicate rows for entries already tracked as pending. This needs a Delphi build and runtime verification, including two entries on the same day, reopening a chart, and retrieval failures.
+- New-note carry-forward retrieves and includes each pushed topic's linked tables, using selected pending table edits where applicable. The user confirmed the tables appeared in the pushed note. Retrieval failures stop before creating the note; verify that links survive later note parsing.
+
+## 2026-11-24 — Pane handoff
+
+- Clear a pane's reference before moving its current form to the opposite pane as a fallback, and avoid hiding a prior form parented to another pane. This addresses the reported blank cover sheet after moving Labs from right to left. Needs a Delphi build and testing in both directions; the Notes tree crash remains under investigation.
+- The user confirmed the blank cover-sheet fix works. Restrict Notes to the left pane as a workaround for the crash when moving it between panes; disable its right-click move action and use another right-side fallback. Debugging showed VCL tree restoration falls back to `TTreeNode` because `TORTreeNode` is unregistered, and does not save custom node fields. The user deferred a restoration fix and rebuilt after turning off debug DCUs; runtime verification of the restriction remains.
+
+## 2026-11-23 — Notes encounter display
+
+- Scrolled the Notes encounter information to the first line after loading, and positioned the expand button relative to the encounter display when it is shown or the pane is resized. The user built and reported the button positioning worked; the debugger confirmed the scroll command reached the top.
+- Investigated garbled 12 × 12 arrow glyphs: the extracted image-list bitmap and assigned glyph retained the original image pixels. A TSpeedButton experiment was reverted because the button was hidden behind the rich edit. The user returned to 16 × 16 icons and reported that they work.
+
 ## 2026-11-22 — Labs, snapshots, and Rx History
 
 - Made the Labs HTML report honor a DateTime report qualifier, showing the date selector and passing its range to the HTML report RPC. The user retained the original unqualified report for older CPRS clients and configured a separate date-qualified record; the new client’s date selection works, while the original report remains usable in the old client.

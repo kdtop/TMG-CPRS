@@ -429,12 +429,13 @@ inherited frmLabs: TfrmLabs
           object lblGraphInfo: TLabel
             Left = 0
             Top = 47
-            Width = 367
+            Width = 939
             Height = 13
             Align = alBottom
             Caption = 
               'To Zoom, hold down the mouse button while dragging an area to be' +
               ' enlarged.'
+            ExplicitWidth = 367
           end
           object chkGraph3D: TCheckBox
             Left = 162
@@ -477,7 +478,7 @@ inherited frmLabs: TfrmLabs
             60)
           object lblOld: TOROffsetLabel
             Left = 4
-            Top = 6
+            Top = 12
             Width = 41
             Height = 15
             Caption = 'Oldest'
@@ -488,7 +489,7 @@ inherited frmLabs: TfrmLabs
           end
           object lblPrev: TOROffsetLabel
             Left = 48
-            Top = 6
+            Top = 12
             Width = 49
             Height = 15
             Caption = 'Previous'
@@ -500,7 +501,7 @@ inherited frmLabs: TfrmLabs
           end
           object lblNext: TOROffsetLabel
             Left = 246
-            Top = 6
+            Top = 12
             Width = 31
             Height = 15
             Caption = 'Next'
@@ -512,7 +513,7 @@ inherited frmLabs: TfrmLabs
           end
           object lblRecent: TOROffsetLabel
             Left = 287
-            Top = 6
+            Top = 12
             Width = 46
             Height = 15
             Caption = 'Newest'
@@ -533,6 +534,7 @@ inherited frmLabs: TfrmLabs
             Font.Name = 'MS Sans Serif'
             Font.Style = [fsBold]
             ParentFont = False
+            Visible = False
           end
           object lblSample: TLabel
             Left = 1
